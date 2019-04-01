@@ -51,6 +51,12 @@ void Game::loadPlugin(const std::string& path)
             m_stateStack.clearStates();
             m_stateStack.pushState(reqState);
         }
+        else
+        {
+            xy::Logger::log("Entry and exit point not found in " + path, xy::Logger::Type::Error);
+            FreeLibrary(m_pluginHandle);
+            m_pluginHandle = nullptr;
+        }
     }
     else
     {
@@ -78,17 +84,61 @@ void Game::unloadPlugin()
 }
 
 #else
+#include <dlfcn.h>
 
 void Game::loadPlugin(const std::string& path)
 {
+    if (m_pluginHandle)
+    {
+        unloadPlugin();
+    }
 
+    std::string fullPath = path;
+#ifdef __APPLE__
+    fullPath += "/osgc.dylib";
+#else
+    fullPath += "/osgc.so";
+#endif
+
+    m_pluginHandle = dlopen(fullPath.c_str(), RTLD_LAZY);
+
+    if (m_pluginHandle)
+    {
+        int(*entryPoint)(xy::StateStack*);
+        void(*exitPoint)(xy::StateStack*);
+
+        *(int**)(&entryPoint) = dlsym(m_pluginHandle, "begin");
+        *(void**)(&exitPoint) = dlsym(m_pluginHandle, "end");
+
+        if (entryPoint && exitPoint)
+        {
+            auto reqState = entryPoint(&m_stateStack);
+            m_stateStack.clearStack();
+            m_stateStack.pushState(reqState);
+        }
+        else
+        {
+            xy::Logger::log("Entry and exit point not found in " + path, xy::Logger::Type::Error);
+            dlclose(m_pluginHandle);
+            m_pluginHandle = nullptr;
+        }
+    }
+    else
+    {
+        xy::Logger::log("Unable to open plugin at " + path, xy::Logger::Error);
+    }
 }
 
 void Game::unloadPlugin()
 {
     if (m_pluginHandle)
     {
+        void(*exitPoint)(xy::StateStack*);
+        *(void**)(&exitPoint) = dlsym(m_pluginHandle, "end");
+        exitPoint(&m_stateStack);
 
+        dlclose(m_pluginHandle);
+        m_pluginHandle = nullptr;
     }
 }
 

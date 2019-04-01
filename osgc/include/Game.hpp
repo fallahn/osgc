@@ -66,6 +66,6 @@ private:
 #ifdef _WIN32
     HINSTANCE m_pluginHandle = nullptr;
 #else
-
+    void* m_pluginHandle = nullptr;
 #endif //_win32
 };
