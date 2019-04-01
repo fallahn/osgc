@@ -1,0 +1,71 @@
+/*********************************************************************
+(c) Matt Marchant 2019
+http://trederia.blogspot.com
+
+osgc - Open Source Game Collection - License TBD
+
+
+*********************************************************************/
+
+#pragma once
+
+#if defined(_WIN32)
+
+//windows compilers need specific (and different) keywords for export
+#define OSGC_EXPORT_API __declspec(dllexport)
+
+//for vc compilers we also need to turn off this annoying C4251 warning
+#ifdef _MSC_VER
+#pragma warning(disable: 4251)
+#endif //_MSC_VER
+
+#else //linux, FreeBSD, Mac OS X
+
+#if __GNUC__ >= 4
+
+//gcc 4 has special keywords for showing/hiding symbols,
+//the same keyword is used for both importing and exporting
+#define OSGC_EXPORT_API __attribute__ ((__visibility__ ("default")))
+#else
+
+//gcc < 4 has no mechanism to explicitly hide symbols, everything's exported
+#define OSGC_EXPORT_API
+#endif //__GNUC__
+
+#endif //_WIN32
+
+namespace xy
+{
+    class StateStack;
+}
+
+#ifdef __cplusplus
+extern "C" 
+{
+
+#endif
+
+    /*!
+    \brief Entry point for game plugins
+    Use this function to register your game states with
+    the state stack passed via the pointer.
+    \param stateStack Pointer to the state stack instance with which
+    to register your game states
+    \returns The state ID which should be pushed onto the stack when it is launched
+    */
+    OSGC_EXPORT_API int __cdecl begin(xy::StateStack* stateStack);
+
+    
+    /*!
+    \brief Called by OSGC when a plugin is unloaded.
+    At the very least this needs to unregister ALL states which
+    were registered with the state stack during begin
+    
+    stateStack->unregisterState(StateID::MainMenu);
+
+    */
+    OSGC_EXPORT_API void __cdecl end(xy::StateStack* stateStack);
+
+#ifdef __cplusplus
+}
+#endif

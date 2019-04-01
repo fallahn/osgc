@@ -2,7 +2,7 @@
 (c) Matt Marchant 2019
 http://trederia.blogspot.com
 
-osgc - Open Source Games Collection - Zlib license.
+osgc - Open Source Game Collection - Zlib license.
 
 This software is provided 'as-is', without any express or
 implied warranty. In no event will the authors be held
@@ -38,9 +38,22 @@ Game::Game()
 
 }
 
+Game::~Game()
+{
+    unloadPlugin();
+}
+
 //private
 void Game::handleEvent(const sf::Event& evt)
 {    
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        if (evt.key.code == sf::Keyboard::Space)
+        {
+            loadPlugin("plugins/shooter");
+        }
+    }
+
     m_stateStack.handleEvent(evt);
 }
 

@@ -2,7 +2,7 @@
 (c) Matt Marchant 2019
 http://trederia.blogspot.com
 
-osgc - Open Source Games Collection - Zlib license.
+osgc - Open Source Game Collection - Zlib license.
 
 This software is provided 'as-is', without any express or
 implied warranty. In no event will the authors be held

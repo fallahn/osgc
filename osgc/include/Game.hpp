@@ -2,7 +2,7 @@
 (c) Matt Marchant 2019
 http://trederia.blogspot.com
 
-osgc - Open Source Games Collection - Zlib license.
+osgc - Open Source Game Collection - Zlib license.
 
 This software is provided 'as-is', without any express or
 implied warranty. In no event will the authors be held
@@ -30,11 +30,18 @@ source distribution.
 #include "States.hpp"
 #include <xyginext/core/App.hpp>
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#else
+
+#endif
+
 class Game final : public xy::App
 {
 public:
     Game();
-    ~Game() = default;
+    ~Game();
     Game(const Game&) = delete;
     Game& operator = (const Game&) = delete;
 
@@ -52,4 +59,13 @@ private:
 
     bool initialise() override;
     void finalise() override;
+
+    void loadPlugin(const std::string&);
+    void unloadPlugin();
+
+#ifdef _WIN32
+    HINSTANCE m_pluginHandle = nullptr;
+#else
+
+#endif //_win32
 };
