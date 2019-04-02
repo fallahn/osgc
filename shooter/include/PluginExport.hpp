@@ -19,7 +19,7 @@ osgc - Open Source Game Collection - License TBD
 #pragma warning(disable: 4251)
 #endif //_MSC_VER
 
-#else //linux, FreeBSD, Mac OS X
+#else //linux, FreeBSD, macOS
 
 #if __GNUC__ >= 4
 
@@ -37,6 +37,15 @@ osgc - Open Source Game Collection - License TBD
 namespace xy
 {
     class StateStack;
+}
+
+#include <limits>
+#include <cstdint>
+namespace StateID
+{
+    //push this state to the stack to return to the front-end
+    //REMEMBER TO CLEAR THE STACK FIRST!
+    static constexpr std::int32_t ParentState = std::numeric_limits<std::int32_t>::max();
 }
 
 #include <any>

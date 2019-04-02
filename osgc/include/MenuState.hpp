@@ -29,12 +29,14 @@ source distribution.
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
 
+class Game;
 
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context);
+    MenuState(xy::StateStack&, xy::State::Context, Game&);
 
     bool handleEvent(const sf::Event &evt) override;
     
@@ -44,10 +46,13 @@ public:
     
     void draw() override;
 
-private:    
     xy::StateID stateID() const override;
-    
+
+private:
+    Game& m_gameInstance;
+
     xy::Scene m_scene;
+    xy::ResourceHandler m_resources;
 
     void createScene();
 };

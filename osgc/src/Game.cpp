@@ -33,8 +33,10 @@ source distribution.
 
 Game::Game()
     : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
-    m_stateStack({ *getRenderWindow(), *this })
+    m_stateStack({ *getRenderWindow(), *this }),
+    m_rootPath(std::filesystem::current_path())
 {
+
 }
 
 Game::~Game()
@@ -45,14 +47,6 @@ Game::~Game()
 //private
 void Game::handleEvent(const sf::Event& evt)
 {    
-    if (evt.type == sf::Event::KeyReleased)
-    {
-        if (evt.key.code == sf::Keyboard::Space)
-        {
-            loadPlugin("plugins/shooter");
-        }
-    }
-
     m_stateStack.handleEvent(evt);
 }
 
@@ -75,8 +69,6 @@ bool Game::initialise()
 {
     setApplicationName("osgc");
     
-    //FontID::handles[FontID::MenuFont] = m_sharedData.resources.load<sf::Font>("ProggyClean.ttf");
-
     registerStates();
     m_stateStack.pushState(States::MenuState);
 
@@ -94,5 +86,5 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-    m_stateStack.registerState<MenuState>(States::MenuState);
+    m_stateStack.registerState<MenuState>(States::MenuState, *this);
 }

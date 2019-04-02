@@ -30,6 +30,7 @@ source distribution.
 #include "States.hpp"
 #include <xyginext/core/App.hpp>
 #include <any>
+#include <filesystem>
 
 using SharedStateData = std::any;
 
@@ -48,10 +49,15 @@ public:
     Game(const Game&) = delete;
     Game& operator = (const Game&) = delete;
 
+    void loadPlugin(const std::string&);
+    void unloadPlugin();
+
 private:
 
     xy::StateStack m_stateStack;
     SharedStateData m_sharedData;
+
+    std::filesystem::path m_rootPath;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
@@ -62,9 +68,6 @@ private:
 
     bool initialise() override;
     void finalise() override;
-
-    void loadPlugin(const std::string&);
-    void unloadPlugin();
 
 #ifdef _WIN32
     HINSTANCE m_pluginHandle = nullptr;

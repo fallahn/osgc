@@ -28,6 +28,7 @@ source distribution.
 #include "MenuState.hpp"
 #include "States.hpp"
 #include "ResourceIDs.hpp"
+#include "Game.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -39,10 +40,17 @@ source distribution.
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 
-MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
-    : xy::State (ss,ctx),
-    m_scene     (ctx.appInstance.getMessageBus())
+#include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Font.hpp>
+
+MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
+    : xy::State     (ss,ctx),
+    m_gameInstance  (game),
+    m_scene         (ctx.appInstance.getMessageBus())
 {
+    //make sure to unload any active plugin so our asset directory is correct
+    game.unloadPlugin();
+    
     createScene();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
@@ -53,6 +61,14 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
 
 bool MenuState::handleEvent(const sf::Event& evt)
 {
+    /*if (evt.type == sf::Event::KeyReleased)
+    {
+        if (evt.key.code == sf::Keyboard::Space)
+        {
+            m_gameInstance.loadPlugin("plugins/shooter");
+        }
+    }*/
+
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
     return true;
@@ -87,6 +103,37 @@ void MenuState::createScene()
     m_scene.addSystem<xy::TextSystem>(messageBus);
     m_scene.addSystem<xy::UISystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
+
+    //load resources
+    FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+
+    sf::Vector2f currentPos(20.f, 120.f);
+    auto& menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
+
+    auto pluginList = xy::FileSystem::listDirectories("plugins");
+    for (const auto& dir : pluginList)
+    {
+        //TODO search for plugin info file and only load if can be validated
+        auto entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(currentPos);
+        entity.addComponent<xy::Text>(menuFont).setString(dir);
+        entity.getComponent<xy::Text>().setCharacterSize(30);
+        entity.addComponent<xy::Drawable>();
+
+        auto textBounds = xy::Text::getLocalBounds(entity);
+        entity.addComponent<xy::UIHitBox>().area = textBounds;
+        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+                [&, dir](xy::Entity e, sf::Uint64 flags)
+        {
+            if (flags & xy::UISystem::LeftMouse)
+            {
+                m_gameInstance.loadPlugin("plugins/" + dir);
+            }
+        });
+
+        currentPos.y += textBounds.height * 1.1f;
+    }
 }
 
 
