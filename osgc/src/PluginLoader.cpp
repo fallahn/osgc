@@ -134,7 +134,7 @@ void Game::loadPlugin(const std::string& path)
             currPath += "/" + path;
             xy::FileSystem::setCurrentDirectory(currPath);
 
-            auto reqState = entryPoint(&m_stateStack, &m_sharedStateData);
+            auto reqState = entryPoint(&m_stateStack, &m_sharedData);
             m_stateStack.clearStates();
             m_stateStack.pushState(reqState);
         }
