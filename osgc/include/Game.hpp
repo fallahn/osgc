@@ -30,7 +30,6 @@ source distribution.
 #include "States.hpp"
 #include <xyginext/core/App.hpp>
 #include <any>
-#include <filesystem>
 
 using SharedStateData = std::any;
 
@@ -57,7 +56,7 @@ private:
     xy::StateStack m_stateStack;
     SharedStateData m_sharedData;
 
-    std::filesystem::path m_rootPath;
+    std::string m_rootPath;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

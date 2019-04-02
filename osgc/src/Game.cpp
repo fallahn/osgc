@@ -29,12 +29,14 @@ source distribution.
 #include "MenuState.hpp"
 #include "ResourceIDs.hpp"
 
+#include <xyginext/core/FileSystem.hpp>
+
 #include <SFML/Window/Event.hpp>
 
 Game::Game()
     : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
     m_stateStack({ *getRenderWindow(), *this }),
-    m_rootPath(std::filesystem::current_path())
+    m_rootPath  (xy::FileSystem::getCurrentDirectory())
 {
 
 }

@@ -27,12 +27,16 @@ source distribution.
 
 #include "Game.hpp"
 
+#include <xyginext/core/FileSystem.hpp>
+
 #ifdef _WIN32
 typedef int(__cdecl *Entry)(xy::StateStack*, SharedStateData*);
 typedef void(__cdecl *Exit)(xy::StateStack*);
 
 void Game::loadPlugin(const std::string& path)
 {
+    LOG("Check to see if we have a preceeding / !", xy::Logger::Type::Info);
+
     if (m_pluginHandle)
     {
         unloadPlugin();
@@ -50,8 +54,8 @@ void Game::loadPlugin(const std::string& path)
         {
             //update current directory for resources
             auto currPath = m_rootPath;
-            currPath /= path;
-            std::filesystem::current_path(currPath);
+            currPath += + "/" + path;
+            xy::FileSystem::setCurrentDirectory(currPath);
 
 
             int reqState = entry(&m_stateStack, &m_sharedData);
@@ -82,7 +86,7 @@ void Game::unloadPlugin()
         m_sharedData.reset();
 
         //set current directory to default
-        std::filesystem::current_path(m_rootPath);
+        xy::FileSystem::setCurrentDirectory(m_rootPath);
 
         auto result = FreeLibrary(m_pluginHandle);
         if (!result)
@@ -127,8 +131,8 @@ void Game::loadPlugin(const std::string& path)
         {
             //update current directory for resources
             auto currPath = m_rootPath;
-            currPath /= path;
-            std::filesystem::current_path(currPath);
+            currPath += "/" + path;
+            xy::FileSystem::setCurrentDirectory(currPath);
 
             auto reqState = entryPoint(&m_stateStack, &m_sharedStateData);
             m_stateStack.clearStates();
@@ -157,7 +161,7 @@ void Game::unloadPlugin()
         m_sharedData.reset();
 
         //set current directory to default
-        std::filesystem::current_path(m_rootPath);
+        xy::FileSystem::setCurrentDirectory(m_rootPath);
 
         dlclose(m_pluginHandle);
         m_pluginHandle = nullptr;
