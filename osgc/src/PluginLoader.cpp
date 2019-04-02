@@ -98,9 +98,9 @@ void Game::loadPlugin(const std::string& path)
 
     std::string fullPath = path;
 #ifdef __APPLE__
-    fullPath += "/osgc.dylib";
+    fullPath += "/libosgc.dylib";
 #else
-    fullPath += "/osgc.so";
+    fullPath += "/libosgc.so";
 #endif
 
     m_pluginHandle = dlopen(fullPath.c_str(), RTLD_LAZY);
@@ -110,7 +110,7 @@ void Game::loadPlugin(const std::string& path)
         int(*entryPoint)(xy::StateStack*, SharedStateData*);
         void(*exitPoint)(xy::StateStack*);
 
-        *(int**)(&entryPoint) = dlsym(m_pluginHandle, "begin");
+        *(int**)(&entryPoint) = (int*)dlsym(m_pluginHandle, "begin");
         *(void**)(&exitPoint) = dlsym(m_pluginHandle, "end");
 
         if (entryPoint && exitPoint)
@@ -118,7 +118,7 @@ void Game::loadPlugin(const std::string& path)
             m_sharedStateData = {};
 
             auto reqState = entryPoint(&m_stateStack, &m_sharedStateData);
-            m_stateStack.clearStack();
+            m_stateStack.clearStates();
             m_stateStack.pushState(reqState);
         }
         else
@@ -130,7 +130,7 @@ void Game::loadPlugin(const std::string& path)
     }
     else
     {
-        xy::Logger::log("Unable to open plugin at " + path, xy::Logger::Error);
+        xy::Logger::log("Unable to open plugin at " + path, xy::Logger::Type::Error);
     }
 }
 

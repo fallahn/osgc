@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 # Rename this variable to change the project name
-SET(PROJECT_NAME osgc)
+SET(PROJECT_NAME osgc-frontend)
 
 # Set up the project
 project(${PROJECT_NAME})

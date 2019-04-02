@@ -45,25 +45,28 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   add_definitions(-DXY_DEBUG)
 endif()
 
-# Create the actual executable (PROJECT_SRC variable is set inside previous steps)
-add_library("osgc" ${PROJECT_SRC})
+# Create the actual binary (PROJECT_SRC variable is set inside previous steps)
+SET(BINARY_NAME osgc)
+add_library(${BINARY_NAME} SHARED ${PROJECT_SRC})
 
 # Linker settings
-target_link_libraries(${PROJECT_NAME} xyginext)
+target_link_libraries(${BINARY_NAME} xyginext)
 
 # Additional include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${BINARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
   target_link_libraries(${PROJECT_NAME}
     ${X11_LIBRARIES})
 endif()
 
+message(warning "this file needs to be updated to correctly install plugins to plugin folder")
+
 # Install executable
 #TODO this needs to copy the binary to osgc's 'plugins/${PROJECT_NAME}' directory
-install(TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION .)
+#install(TARGETS ${PROJECT_NAME}
+#  RUNTIME DESTINATION .)
 
 # Install assets folder
-install(DIRECTORY assets
-  DESTINATION .)
+#install(DIRECTORY assets
+#  DESTINATION .)
