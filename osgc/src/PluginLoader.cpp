@@ -48,8 +48,6 @@ void Game::loadPlugin(const std::string& path)
         auto exit = (Exit)GetProcAddress(m_pluginHandle, "end");
         if (entry && exit)
         {
-            m_sharedData = {};
-
             int reqState = entry(&m_stateStack, &m_sharedData);
             m_stateStack.clearStates();
             m_stateStack.pushState(reqState);
@@ -73,6 +71,8 @@ void Game::unloadPlugin()
     {
         auto exit = (Exit)GetProcAddress(m_pluginHandle, "end");
         exit(&m_stateStack);
+
+        m_sharedData.reset();
 
         auto result = FreeLibrary(m_pluginHandle);
         if (!result)
@@ -115,8 +115,6 @@ void Game::loadPlugin(const std::string& path)
 
         if (entryPoint && exitPoint)
         {
-            m_sharedStateData = {};
-
             auto reqState = entryPoint(&m_stateStack, &m_sharedStateData);
             m_stateStack.clearStates();
             m_stateStack.pushState(reqState);
@@ -141,6 +139,7 @@ void Game::unloadPlugin()
         void(*exitPoint)(xy::StateStack*);
         *(void**)(&exitPoint) = dlsym(m_pluginHandle, "end");
         exitPoint(&m_stateStack);
+        m_sharedData.reset();
 
         dlclose(m_pluginHandle);
         m_pluginHandle = nullptr;

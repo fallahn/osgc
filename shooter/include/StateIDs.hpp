@@ -9,6 +9,8 @@ osgc - Open Source Game Collection - License TBD
 
 #pragma once
 
+#include <xyginext/resources/ResourceHandler.hpp>
+
 namespace StateID
 {
     enum
@@ -16,3 +18,8 @@ namespace StateID
         MainMenu
     };
 }
+
+struct SharedData final
+{
+    xy::ResourceHandler resources;
+};
