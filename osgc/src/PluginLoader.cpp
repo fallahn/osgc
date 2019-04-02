@@ -28,7 +28,8 @@ source distribution.
 #include "Game.hpp"
 
 #ifdef _WIN32
-typedef int(__cdecl *Entry)(xy::StateStack*);
+typedef int(__cdecl *Entry)(xy::StateStack*, SharedStateData*);
+typedef void(__cdecl *Exit)(xy::StateStack*);
 
 void Game::loadPlugin(const std::string& path)
 {
@@ -44,10 +45,12 @@ void Game::loadPlugin(const std::string& path)
     if (m_pluginHandle)
     {
         auto entry = (Entry)GetProcAddress(m_pluginHandle, "begin");
-        auto exit = (Entry)GetProcAddress(m_pluginHandle, "end");
+        auto exit = (Exit)GetProcAddress(m_pluginHandle, "end");
         if (entry && exit)
         {
-            int reqState = entry(&m_stateStack);
+            m_sharedData = {};
+
+            int reqState = entry(&m_stateStack, &m_sharedData);
             m_stateStack.clearStates();
             m_stateStack.pushState(reqState);
         }
@@ -68,7 +71,7 @@ void Game::unloadPlugin()
 {
     if (m_pluginHandle)
     {
-        auto exit = (Entry)GetProcAddress(m_pluginHandle, "end");
+        auto exit = (Exit)GetProcAddress(m_pluginHandle, "end");
         exit(&m_stateStack);
 
         auto result = FreeLibrary(m_pluginHandle);
@@ -104,7 +107,7 @@ void Game::loadPlugin(const std::string& path)
 
     if (m_pluginHandle)
     {
-        int(*entryPoint)(xy::StateStack*);
+        int(*entryPoint)(xy::StateStack*, SharedStateData*);
         void(*exitPoint)(xy::StateStack*);
 
         *(int**)(&entryPoint) = dlsym(m_pluginHandle, "begin");
@@ -112,7 +115,9 @@ void Game::loadPlugin(const std::string& path)
 
         if (entryPoint && exitPoint)
         {
-            auto reqState = entryPoint(&m_stateStack);
+            m_sharedStateData = {};
+
+            auto reqState = entryPoint(&m_stateStack, &m_sharedStateData);
             m_stateStack.clearStack();
             m_stateStack.pushState(reqState);
         }

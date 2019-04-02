@@ -39,10 +39,9 @@ source distribution.
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 
-MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedStateData& sd)
+MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State (ss,ctx),
-    m_scene     (ctx.appInstance.getMessageBus()),
-    m_sharedData(sd)
+    m_scene     (ctx.appInstance.getMessageBus())
 {
     createScene();
 

@@ -39,8 +39,3 @@ namespace States
         MenuState = std::numeric_limits<std::int32_t>::max()
     };
 }
-
-struct SharedStateData final
-{
-    xy::ResourceHandler resources;
-};

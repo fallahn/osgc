@@ -1,0 +1,2 @@
+OSGC Plugin Project Template
+----------------------------

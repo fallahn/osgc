@@ -29,6 +29,9 @@ source distribution.
 
 #include "States.hpp"
 #include <xyginext/core/App.hpp>
+#include <any>
+
+using SharedStateData = std::any;
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN

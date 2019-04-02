@@ -30,11 +30,11 @@ source distribution.
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 
-struct SharedStateData;
+
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedStateData&);
+    MenuState(xy::StateStack&, xy::State::Context);
 
     bool handleEvent(const sf::Event &evt) override;
     
@@ -48,7 +48,6 @@ private:
     xy::StateID stateID() const override;
     
     xy::Scene m_scene;
-    SharedStateData& m_sharedData;
 
     void createScene();
 };

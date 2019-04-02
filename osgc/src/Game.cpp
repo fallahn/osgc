@@ -35,7 +35,6 @@ Game::Game()
     : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
     m_stateStack({ *getRenderWindow(), *this })
 {
-
 }
 
 Game::~Game()
@@ -74,6 +73,8 @@ void Game::draw()
 
 bool Game::initialise()
 {
+    setApplicationName("osgc");
+    
     //FontID::handles[FontID::MenuFont] = m_sharedData.resources.load<sf::Font>("ProggyClean.ttf");
 
     registerStates();
@@ -93,5 +94,5 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-    m_stateStack.registerState<MenuState>(States::MenuState, m_sharedData);
+    m_stateStack.registerState<MenuState>(States::MenuState);
 }
