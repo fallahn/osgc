@@ -156,7 +156,7 @@ void Game::unloadPlugin()
         m_sharedData.reset();
 
         //set current directory to default
-        xy::FileSystem::setCurrentDirectory("");
+        xy::FileSystem::setResourceDirectory("");
 
         dlclose(m_pluginHandle);
         m_pluginHandle = nullptr;
