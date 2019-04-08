@@ -74,7 +74,7 @@ extern "C"
 
     \returns The state ID which should be pushed onto the stack when it is launched
     */
-    OSGC_EXPORT_API int __cdecl begin(xy::StateStack* stateStack, SharedStateData* sharedData);
+    OSGC_EXPORT_API int begin(xy::StateStack* stateStack, SharedStateData* sharedData);
 
     
     /*!
@@ -85,7 +85,7 @@ extern "C"
     stateStack->unregisterState(StateID::MainMenu);
 
     */
-    OSGC_EXPORT_API void __cdecl end(xy::StateStack* stateStack);
+    OSGC_EXPORT_API void end(xy::StateStack* stateStack);
 
 #ifdef __cplusplus
 }

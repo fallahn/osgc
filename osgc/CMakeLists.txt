@@ -56,7 +56,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
   target_link_libraries(${PROJECT_NAME}
-    ${X11_LIBRARIES})
+    ${X11_LIBRARIES}
+    ${CMAKE_DL_LIBS})
 endif()
 
 # Install executable

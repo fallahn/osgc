@@ -56,11 +56,11 @@ target_link_libraries(${BINARY_NAME} xyginext)
 target_include_directories(${BINARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
-  target_link_libraries(${PROJECT_NAME}
+  target_link_libraries(${BINARY_NAME}
     ${X11_LIBRARIES})
 endif()
 
-message(warning "this file needs to be updated to correctly install plugins to plugin folder")
+message(warning " this file needs to be updated to correctly install plugins to plugin folder")
 
 # Install executable
 #TODO this needs to copy the binary to osgc's 'plugins/${PROJECT_NAME}' directory
