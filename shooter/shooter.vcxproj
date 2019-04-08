@@ -71,12 +71,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.dll</TargetExt>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\Plugins\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\</OutDir>
     <TargetName>osgc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.dll</TargetExt>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\Plugins\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\</OutDir>
     <TargetName>osgc</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -93,6 +93,9 @@
       <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/xygine/Debug;../extlibs/bin/msvc_x64/sfml/Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;xyginext-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>mklink /D "$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\assets" "$(ProjectDir)assets"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -133,6 +136,9 @@
       <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/xygine/Release;../extlibs/bin/msvc_x64/sfml/Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;xyginext.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>mklink /D "$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\assets" "$(ProjectDir)assets"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\MenuState.hpp" />

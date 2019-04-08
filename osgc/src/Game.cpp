@@ -35,8 +35,7 @@ source distribution.
 
 Game::Game()
     : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
-    m_stateStack({ *getRenderWindow(), *this }),
-    m_rootPath  (xy::FileSystem::getCurrentDirectory())
+    m_stateStack({ *getRenderWindow(), *this })
 {
 
 }

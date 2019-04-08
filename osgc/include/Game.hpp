@@ -56,8 +56,6 @@ private:
     xy::StateStack m_stateStack;
     SharedStateData m_sharedData;
 
-    std::string m_rootPath;
-
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
 

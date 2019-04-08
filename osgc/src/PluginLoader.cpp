@@ -53,10 +53,7 @@ void Game::loadPlugin(const std::string& path)
         if (entry && exit)
         {
             //update current directory for resources
-            auto currPath = m_rootPath;
-            currPath += + "/" + path;
-            xy::FileSystem::setCurrentDirectory(currPath);
-
+			xy::FileSystem::setResourceDirectory(path);
 
             int reqState = entry(&m_stateStack, &m_sharedData);
             m_stateStack.clearStates();
@@ -86,7 +83,7 @@ void Game::unloadPlugin()
         m_sharedData.reset();
 
         //set current directory to default
-        xy::FileSystem::setCurrentDirectory(m_rootPath);
+		xy::FileSystem::setResourceDirectory("");
 
         auto result = FreeLibrary(m_pluginHandle);
         if (!result)
@@ -130,9 +127,7 @@ void Game::loadPlugin(const std::string& path)
         if (entryPoint && exitPoint)
         {
             //update current directory for resources
-            auto currPath = m_rootPath;
-            currPath += "/" + path;
-            xy::FileSystem::setCurrentDirectory(currPath);
+            xy::FileSystem::setResourceDirectory(path);
 
             auto reqState = entryPoint(&m_stateStack, &m_sharedData);
             m_stateStack.clearStates();
@@ -161,7 +156,7 @@ void Game::unloadPlugin()
         m_sharedData.reset();
 
         //set current directory to default
-        xy::FileSystem::setCurrentDirectory(m_rootPath);
+        xy::FileSystem::setCurrentDirectory("");
 
         dlclose(m_pluginHandle);
         m_pluginHandle = nullptr;
