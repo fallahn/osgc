@@ -10,3 +10,23 @@ All games are open source, and come with the caveat that, well, most of them pro
 
 
 ###### Getting Started
+
+
+###### Directory Structure
+To correctly load plugins and their assets, the directory structure must follow this layout:
+
+    osgc
+      |
+      |____osgc-frontend
+      |____assets
+      |       |____assets used by the front end
+      |
+      |____plugins
+              |____directory named for plugin
+              |               |________________osgc.dll/so/dylib
+              |               |________________assets
+              |                                   |______assets used by plugin
+              |
+              |____directory named for plugin
+                              |________________as above
+
