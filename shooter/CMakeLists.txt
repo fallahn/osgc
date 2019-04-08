@@ -37,6 +37,7 @@ if(X11_FOUND)
 endif()
 
 # Project source files
+include_directories(include)
 add_subdirectory(include)
 add_subdirectory(src)
 
