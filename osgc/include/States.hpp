@@ -36,6 +36,6 @@ namespace States
 {
     enum State
     {
-        MenuState = std::numeric_limits<std::int32_t>::max()
+        BrowserState = std::numeric_limits<std::int32_t>::max()
     };
 }

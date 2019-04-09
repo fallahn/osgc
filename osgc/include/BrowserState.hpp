@@ -33,10 +33,10 @@ source distribution.
 
 class Game;
 
-class MenuState final : public xy::State
+class BrowserState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, Game&);
+    BrowserState(xy::StateStack&, xy::State::Context, Game&);
 
     bool handleEvent(const sf::Event &evt) override;
     

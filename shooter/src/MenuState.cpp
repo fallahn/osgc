@@ -106,7 +106,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::UIHitBox>().area = textBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::LeftMouse)
         {

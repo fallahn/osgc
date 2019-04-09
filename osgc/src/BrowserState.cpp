@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include "MenuState.hpp"
+#include "BrowserState.hpp"
 #include "States.hpp"
 #include "ResourceIDs.hpp"
 #include "Game.hpp"
@@ -43,7 +43,7 @@ source distribution.
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
 
-MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
+BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
     : xy::State     (ss,ctx),
     m_gameInstance  (game),
     m_scene         (ctx.appInstance.getMessageBus())
@@ -59,7 +59,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
     ctx.appInstance.setMouseCursorVisible(true);
 }
 
-bool MenuState::handleEvent(const sf::Event& evt)
+bool BrowserState::handleEvent(const sf::Event& evt)
 {
     /*if (evt.type == sf::Event::KeyReleased)
     {
@@ -74,29 +74,29 @@ bool MenuState::handleEvent(const sf::Event& evt)
     return true;
 }
 
-void MenuState::handleMessage(const xy::Message& msg)
+void BrowserState::handleMessage(const xy::Message& msg)
 {
     m_scene.forwardMessage(msg);
 }
 
-bool MenuState::update(float dt)
+bool BrowserState::update(float dt)
 {
     m_scene.update(dt);
     return true;
 }
 
-void MenuState::draw()
+void BrowserState::draw()
 {
     auto rw = getContext().appInstance.getRenderWindow();
     rw->draw(m_scene);
 }
 
-xy::StateID MenuState::stateID() const
+xy::StateID BrowserState::stateID() const
 {
-    return States::MenuState;
+    return States::BrowserState;
 }
 
-void MenuState::createScene()
+void BrowserState::createScene()
 {
     //add the systems
     auto& messageBus = getContext().appInstance.getMessageBus();
@@ -124,7 +124,7 @@ void MenuState::createScene()
         entity.addComponent<xy::UIHitBox>().area = textBounds;
         entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
             m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-                [&, dir](xy::Entity e, sf::Uint64 flags)
+                [&, dir](xy::Entity, sf::Uint64 flags)
         {
             if (flags & xy::UISystem::LeftMouse)
             {

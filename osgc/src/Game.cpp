@@ -26,7 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include "Game.hpp"
-#include "MenuState.hpp"
+#include "BrowserState.hpp"
 #include "ResourceIDs.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
@@ -71,7 +71,7 @@ bool Game::initialise()
     setApplicationName("osgc");
     
     registerStates();
-    m_stateStack.pushState(States::MenuState);
+    m_stateStack.pushState(States::BrowserState);
 
     getRenderWindow()->setKeyRepeatEnabled(false);
     getRenderWindow()->setView(m_stateStack.updateView());
@@ -87,5 +87,5 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-    m_stateStack.registerState<MenuState>(States::MenuState, *this);
+    m_stateStack.registerState<BrowserState>(States::BrowserState, *this);
 }
