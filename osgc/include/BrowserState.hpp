@@ -54,5 +54,7 @@ private:
     xy::Scene m_scene;
     xy::ResourceHandler m_resources;
 
-    void createScene();
+    void initScene();
+	void loadResources();
+	void buildMenu();
 };

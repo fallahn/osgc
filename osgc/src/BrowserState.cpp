@@ -50,15 +50,21 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_gameInstance  (game),
     m_scene         (ctx.appInstance.getMessageBus())
 {
-    //make sure to unload any active plugin so our asset directory is correct
+	launchLoadingScreen();
+	
+	//make sure to unload any active plugin so our asset directory is correct
     game.unloadPlugin();
     
-    createScene();
+    initScene();
+	loadResources();
+	buildMenu();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     ctx.appInstance.setMouseCursorVisible(true);
+
+	quitLoadingScreen();
 }
 
 bool BrowserState::handleEvent(const sf::Event& evt)
@@ -90,7 +96,7 @@ xy::StateID BrowserState::stateID() const
     return States::BrowserState;
 }
 
-void BrowserState::createScene()
+void BrowserState::initScene()
 {
     //add the systems
     auto& messageBus = getContext().appInstance.getMessageBus();
@@ -98,59 +104,56 @@ void BrowserState::createScene()
     m_scene.addSystem<xy::UISystem>(messageBus);
 	m_scene.addSystem<xy::SpriteSystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
+}
 
-    
+void BrowserState::loadResources()
+{
 	//load resources
-    FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+	FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
 	TextureID::handles[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
+}
 
-
+void BrowserState::buildMenu()
+{
 	//build menu
 	auto entity = m_scene.createEntity();
 	entity.addComponent<xy::Transform>();
 	entity.addComponent<xy::Drawable>().setDepth(-20);
 	entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Background]));
 
-	auto& menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
+	auto & menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
 	entity = m_scene.createEntity();
 	entity.addComponent<xy::Transform>().setPosition(20.f, 20.f);
 	entity.addComponent<xy::Text>(menuFont).setString("OSGC");
 	entity.getComponent<xy::Text>().setCharacterSize(80);
 	entity.addComponent<xy::Drawable>();
-    
+
 
 	sf::Vector2f currentPos(20.f, 220.f);
-    auto pluginList = xy::FileSystem::listDirectories("plugins");
-    for (const auto& dir : pluginList)
-    {
-        //TODO search for plugin info file and only load if can be validated
-        entity = m_scene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(currentPos);
-        entity.addComponent<xy::Text>(menuFont).setString(dir);
-        entity.getComponent<xy::Text>().setCharacterSize(40);
-        entity.addComponent<xy::Drawable>();
+	auto pluginList = xy::FileSystem::listDirectories("plugins");
+	for (const auto& dir : pluginList)
+	{
+		//TODO search for plugin info file and only load if can be validated
+		entity = m_scene.createEntity();
+		entity.addComponent<xy::Transform>().setPosition(currentPos);
+		entity.addComponent<xy::Text>(menuFont).setString(dir);
+		entity.getComponent<xy::Text>().setCharacterSize(40);
+		entity.addComponent<xy::Drawable>();
 
-        auto textBounds = xy::Text::getLocalBounds(entity);
-        entity.addComponent<xy::UIHitBox>().area = textBounds;
-        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-            m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-                [&, dir](xy::Entity, sf::Uint64 flags)
-        {
-            if (flags & xy::UISystem::LeftMouse)
-            {
-                m_gameInstance.loadPlugin("plugins/" + dir);
-            }
-        });
+		auto textBounds = xy::Text::getLocalBounds(entity);
+		entity.addComponent<xy::UIHitBox>().area = textBounds;
+		entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+			m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+				[&, dir](xy::Entity, sf::Uint64 flags)
+				{
+					if (flags & xy::UISystem::LeftMouse)
+					{
+						m_gameInstance.loadPlugin("plugins/" + dir);
+					}
+				});
 
-        currentPos.y += textBounds.height * 1.1f;
-    }
+		currentPos.y += textBounds.height * 1.1f;
+	}
+
+	//TODO add one extra item to quit the browser
 }
-
-
-
-
-
-
-
-
-

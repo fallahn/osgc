@@ -40,14 +40,6 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool MenuState::handleEvent(const sf::Event& evt)
 {
-    if (evt.type == sf::Event::KeyReleased)
-    {
-        if (evt.key.code == sf::Keyboard::Escape)
-        {
-            xy::App::quit();
-        }
-    }
-
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
     return true;
