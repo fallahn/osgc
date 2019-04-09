@@ -30,7 +30,7 @@
     <ClInclude Include="include\MessageIDs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\MenuState.hpp">
+    <ClInclude Include="include\BrowserState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,10 +41,10 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MenuState.cpp">
+    <ClCompile Include="src\PluginLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PluginLoader.cpp">
+    <ClCompile Include="src\BrowserState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

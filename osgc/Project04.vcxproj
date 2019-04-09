@@ -19,17 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\BrowserState.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
-    <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\States.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BrowserState.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\PluginLoader.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
