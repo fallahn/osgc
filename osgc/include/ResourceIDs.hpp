@@ -31,11 +31,21 @@ source distribution.
 
 #include <xyginext/ecs/components/Sprite.hpp>
 
+namespace TextureID
+{
+	enum
+	{
+		Background,
+		Count
+	};
+
+	static std::array<std::size_t, TextureID::Count> handles = {};
+}
+
 namespace SpriteID
 {
     enum
     {
-
         Count
     };
 

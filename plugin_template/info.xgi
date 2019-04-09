@@ -1,0 +1,6 @@
+game_info
+{
+    thumb = "src/to/thumb.png"
+    title = "My Fancy Game"
+    version = "1.0.0"
+}

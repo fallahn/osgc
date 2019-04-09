@@ -32,11 +32,13 @@ source distribution.
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/UIHitBox.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 
@@ -61,14 +63,6 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
 
 bool BrowserState::handleEvent(const sf::Event& evt)
 {
-    /*if (evt.type == sf::Event::KeyReleased)
-    {
-        if (evt.key.code == sf::Keyboard::Space)
-        {
-            m_gameInstance.loadPlugin("plugins/shooter");
-        }
-    }*/
-
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
     return true;
@@ -102,22 +96,38 @@ void BrowserState::createScene()
     auto& messageBus = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::TextSystem>(messageBus);
     m_scene.addSystem<xy::UISystem>(messageBus);
+	m_scene.addSystem<xy::SpriteSystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
 
-    //load resources
+    
+	//load resources
     FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+	TextureID::handles[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
 
-    sf::Vector2f currentPos(20.f, 120.f);
-    auto& menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
 
+	//build menu
+	auto entity = m_scene.createEntity();
+	entity.addComponent<xy::Transform>();
+	entity.addComponent<xy::Drawable>().setDepth(-20);
+	entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Background]));
+
+	auto& menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
+	entity = m_scene.createEntity();
+	entity.addComponent<xy::Transform>().setPosition(20.f, 20.f);
+	entity.addComponent<xy::Text>(menuFont).setString("OSGC");
+	entity.getComponent<xy::Text>().setCharacterSize(80);
+	entity.addComponent<xy::Drawable>();
+    
+
+	sf::Vector2f currentPos(20.f, 220.f);
     auto pluginList = xy::FileSystem::listDirectories("plugins");
     for (const auto& dir : pluginList)
     {
         //TODO search for plugin info file and only load if can be validated
-        auto entity = m_scene.createEntity();
+        entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(currentPos);
         entity.addComponent<xy::Text>(menuFont).setString(dir);
-        entity.getComponent<xy::Text>().setCharacterSize(30);
+        entity.getComponent<xy::Text>().setCharacterSize(40);
         entity.addComponent<xy::Drawable>();
 
         auto textBounds = xy::Text::getLocalBounds(entity);

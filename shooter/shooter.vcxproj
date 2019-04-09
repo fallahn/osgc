@@ -90,8 +90,8 @@
       <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/xygine/Debug;../extlibs/bin/msvc_x64/sfml/Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;xyginext-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/tmxlite;../extlibs/bin/msvc_x64/xygine/Debug;../extlibs/bin/msvc_x64/sfml/Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;xyginext-d.lib;libtmxlite-s-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -134,8 +134,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/xygine/Release;../extlibs/bin/msvc_x64/sfml/Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;xyginext.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/tmxlite;../extlibs/bin/msvc_x64/xygine/Release;../extlibs/bin/msvc_x64/sfml/Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;xyginext.lib;libtmxlite-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>

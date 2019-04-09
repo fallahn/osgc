@@ -26,6 +26,7 @@ find_package(SFML ${SFML_MIN_VERSION} REQUIRED graphics window audio system netw
 
 # Find xyginext
 find_package(XYGINEXT REQUIRED)
+find_package(TMXLITE REQUIRED)
 
 # X11 is required on unices
 if(UNIX AND NOT APPLE)
@@ -37,7 +38,7 @@ if(X11_FOUND)
 endif()
 
 # Project source files
-include_directories(include)
+include_directories(include ${TMXLITE_INCLUDE_DIR})
 add_subdirectory(include)
 add_subdirectory(src)
 
@@ -51,7 +52,7 @@ SET(BINARY_NAME osgc)
 add_library(${BINARY_NAME} SHARED ${PROJECT_SRC})
 
 # Linker settings
-target_link_libraries(${BINARY_NAME} xyginext)
+target_link_libraries(${BINARY_NAME} xyginext ${TMXLITE_LIBRARIES})
 
 # Additional include directories
 target_include_directories(${BINARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
