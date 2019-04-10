@@ -35,7 +35,10 @@ namespace TextureID
 {
 	enum
 	{
+		Fallback,
 		Background,
+		DefaultThumb,
+		Arrow,
 		Count
 	};
 

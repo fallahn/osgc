@@ -31,7 +31,7 @@ To correctly load plugins and their assets, the directory structure must follow 
               |____directory named for plugin
                               |________________as above
 
-Plugin directories should have a unique name describing the game as this will be used by the front end as the display title if the info.xgi file is missing. The info.xgi file is a text file written in the xygine ConfigFile format. It's properties are used to display information on the browser screen of the front end.
+Plugin directories should have a unique name describing the game as this will be used by the front end as the display title if the info.xgi file is missing. The info.xgi file is a text file written in the xygine ConfigFile format. Its properties are used to display information on the browser screen of the front end.
 
     game_info
     {
