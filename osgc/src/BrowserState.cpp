@@ -50,7 +50,7 @@ source distribution.
 namespace
 {
 #if defined(__APPLE__)
-	const std::string pluginFile("/osgc.dylib");
+	const std::string pluginFile("/libosgc.dylib");
 	const std::string pluginFolder("plugins/");
 	const std::string infoFile("/info.xgi");
 #elif defined(_WIN32)
@@ -58,7 +58,7 @@ namespace
 	const std::string pluginFolder("plugins\\");
 	const std::string infoFile("\\info.xgi");
 #else
-	const std::string pluginFile("/osgc.so");
+	const std::string pluginFile("/libosgc.so");
 	const std::string pluginFolder("plugins/");
 	const std::string infoFile("/info.xgi");
 #endif
@@ -262,6 +262,8 @@ void BrowserState::buildMenu()
 		//check plugin exists
 		if (!xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + pluginFolder + dir + pluginFile))
 		{
+			LOG(xy::FileSystem::getResourcePath() + pluginFolder + dir + pluginFile, xy::Logger::Type::Error);
+			LOG("plugin file not found", xy::Logger::Type::Error);
 			continue;
 		}
 
