@@ -415,6 +415,7 @@ void BrowserState::buildMenu()
         entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
         entity.addComponent<xy::Text>(menuFont).setString(info.name);
+        entity.getComponent<xy::Text>().setCharacterSize(24);
         entity.addComponent<xy::Drawable>().setDepth(TextDepth);
         parentTx.addChild(entity.getComponent<xy::Transform>());
 
@@ -423,6 +424,7 @@ void BrowserState::buildMenu()
             entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Version: " + info.version);
+            entity.getComponent<xy::Text>().setCharacterSize(24);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
             auto bounds = xy::Text::getLocalBounds(entity);
@@ -436,6 +438,7 @@ void BrowserState::buildMenu()
             entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Author: " + info.author);
+            entity.getComponent<xy::Text>().setCharacterSize(24);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
             auto bounds = xy::Text::getLocalBounds(entity);
@@ -479,7 +482,7 @@ void BrowserState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ThumbnailSize / 2.f);
     entity.addComponent<xy::Text>(menuFont).setString("Quit");
-    entity.getComponent<xy::Text>().setCharacterSize(60);
+    entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
     parentTx.addChild(entity.getComponent<xy::Transform>());
@@ -490,7 +493,7 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 320.f);
     entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setCharacterSize(100);
+    entity.getComponent<xy::Text>().setCharacterSize(128);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 }
