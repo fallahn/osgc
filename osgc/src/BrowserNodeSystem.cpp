@@ -29,6 +29,7 @@ source distribution.
 
 #include <xyginext/ecs/components/Transform.hpp>
 
+#include <cmath>
 
 namespace
 {

@@ -109,6 +109,7 @@ void Game::loadPlugin(const std::string& path)
 
     std::string fullPath = path;
 #ifdef __APPLE__
+    fullPath = xy::FileSystem::getResourcePath() + fullPath;
     fullPath += "/libosgc.dylib";
 #else
     fullPath += "/libosgc.so";

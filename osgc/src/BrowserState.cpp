@@ -376,7 +376,7 @@ void BrowserState::buildMenu()
         auto thumbID = TextureID::handles[TextureID::DefaultThumb];
         if (!info.thumbnail.empty())
         {
-            thumbID = m_resources.load<sf::Texture>(xy::FileSystem::getResourcePath() + pluginFolder + dir + "/" + info.thumbnail);
+            thumbID = m_resources.load<sf::Texture>(pluginFolder + dir + "/" + info.thumbnail);
 
             if (thumbID == TextureID::handles[TextureID::Fallback])
             {
@@ -385,7 +385,7 @@ void BrowserState::buildMenu()
         }
 
         //create entity
-        auto loadPath = xy::FileSystem::getResourcePath() + pluginFolder + dir;
+        auto loadPath = pluginFolder + dir;
 
         entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(nodePosition);
