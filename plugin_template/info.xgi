@@ -1,6 +1,7 @@
 game_info
 {
-    thumb = "src/to/thumb.png"
+    thumb = "path/to/thumb.png"
     title = "My Fancy Game"
     version = "1.0.0"
+    author = "Buns McFarlane"
 }

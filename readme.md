@@ -42,3 +42,9 @@ Plugin directories should have a unique name describing the game as this will be
     }
 
 Note that these are all string properties and can in theory contain anything they like, with the exception of `thumb` which should be a relative path to a thumbanil image 960x540px in size. All properties are optional.
+
+
+License
+-------
+
+The frontend project and OSGC plugin template source files are licensed under the zlib license. Further OSGC plugin source, such as the top down shooter game, may be licensed differently. See individual project directories for more information.

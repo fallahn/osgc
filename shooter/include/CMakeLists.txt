@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
-  ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/MenuConsts.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp 

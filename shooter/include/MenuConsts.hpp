@@ -18,29 +18,16 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
+#include <SFML/System/Vector2.hpp>
 
-struct SharedData;
-class MenuState final : public xy::State
+#include <cstdint>
+
+namespace Menu
 {
-public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    static const sf::Vector2f TitlePosition(120.f, 80.f);
+    static const std::uint32_t TitleCharSize = 120;
 
-    bool handleEvent(const sf::Event&) override;
-
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_scene;
-
-    void initScene();
-    void buildMenu();
-};
+    static const sf::Vector2f ItemFirstPosition(120.f, 500.f);
+    static const float ItemVerticalSpacing = 80.f;
+    static const std::uint32_t ItemCharSize = 80;
+}
