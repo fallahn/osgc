@@ -47,13 +47,13 @@ void BrowserNodeSystem::handleMessage(const xy::Message&)
 
 }
 
-void BrowserNodeSystem::process(float dt)
+void BrowserNodeSystem::process(float)
 {
     auto& entities = getEntities();
 
     for (auto entity : entities)
     {
-        auto& node = entity.getComponent<BrowserNode>();
+        //auto& node = entity.getComponent<BrowserNode>();
         //if (node.enabled)
         {
             auto& tx = entity.getComponent<xy::Transform>();
