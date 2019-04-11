@@ -27,20 +27,27 @@ source distribution.
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
+#include <xyginext/ecs/System.hpp>
 
-namespace MessageID
-{
-    enum
-    {
-        SliderMessage = xy::Message::Count, //IMPORTANT!! First ID must always start at xy::Message::Count
-    };
-}
+#include <string>
 
-struct SliderEvent final
+struct BrowserNode final
 {
-    enum
-    {
-        Finished
-    }action = Finished;
+    std::size_t index = 0;
+    std::string title;
+    bool enabled = false;
+};
+
+class BrowserNodeSystem final : public xy::System
+{
+public:
+    explicit BrowserNodeSystem(xy::MessageBus&);
+
+    void handleMessage(const xy::Message&) override;
+
+    void process(float) override;
+
+private:
+
+
 };

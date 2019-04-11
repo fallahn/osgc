@@ -25,22 +25,45 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#pragma once
+#include "BrowserNodeSystem.hpp"
 
-#include <xyginext/core/Message.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
 
-namespace MessageID
+#include <xyginext/util/Vector.hpp>
+
+namespace
 {
-    enum
-    {
-        SliderMessage = xy::Message::Count, //IMPORTANT!! First ID must always start at xy::Message::Count
-    };
+    const float MaxDist = xy::DefaultSceneSize.x * 3.4f;
+    const float MaxDistSqr = MaxDist * MaxDist;
 }
 
-struct SliderEvent final
+BrowserNodeSystem::BrowserNodeSystem(xy::MessageBus& mb)
+    : xy::System(mb, typeid(BrowserNodeSystem))
 {
-    enum
+    requireComponent<BrowserNode>();
+    requireComponent<xy::Transform>();
+}
+
+void BrowserNodeSystem::handleMessage(const xy::Message&)
+{
+
+}
+
+void BrowserNodeSystem::process(float dt)
+{
+    auto& entities = getEntities();
+    for (auto entity : entities)
     {
-        Finished
-    }action = Finished;
-};
+        auto& node = entity.getComponent<BrowserNode>();
+        //if (node.enabled)
+        {
+            auto& tx = entity.getComponent<xy::Transform>();
+            auto worldPos = tx.getWorldPosition();
+
+            auto distance = xy::Util::Vector::lengthSquared(worldPos - (xy::DefaultSceneSize / 2.f));
+            auto ratio = 1.f - (distance / MaxDistSqr);
+
+            tx.setScale(ratio, ratio);
+        }
+    }
+}

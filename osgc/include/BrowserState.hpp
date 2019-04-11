@@ -54,7 +54,10 @@ private:
     xy::Scene m_scene;
     xy::ResourceHandler m_resources;
 
+    std::size_t m_browserTargetIndex;
+    std::vector<sf::Vector2f> m_browserTargets;
+
     void initScene();
-	void loadResources();
-	void buildMenu();
+    void loadResources();
+    void buildMenu();
 };

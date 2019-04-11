@@ -49,13 +49,13 @@ Game::~Game()
 void Game::handleEvent(const sf::Event& evt)
 {    
 #ifdef XY_DEBUG
-	if (evt.type == sf::Event::KeyReleased)
-	{
-		if (evt.key.code == sf::Keyboard::Escape)
-		{
-			xy::App::quit();
-		}
-	}
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        if (evt.key.code == sf::Keyboard::Escape)
+        {
+            xy::App::quit();
+        }
+    }
 #endif 
 
     m_stateStack.handleEvent(evt);
@@ -80,9 +80,9 @@ bool Game::initialise()
 {
     setApplicationName("osgc");
 #ifdef XY_DEBUG
-	setWindowTitle("OSGC - The Open Source Game Collection (Debug build) - Press F1 for Console");
+    setWindowTitle("OSGC - The Open Source Game Collection (Debug build) - Press F1 for Console");
 #else
-	setWindowTitle("OSGC - The Open Source Game Collection - Press F1 for Console");
+    setWindowTitle("OSGC - The Open Source Game Collection - Press F1 for Console");
 #endif
     
     registerStates();

@@ -31,6 +31,8 @@ namespace CommandID
 {
     enum
     {
-
+        BrowserNode = 0x1,
+        TitleText = 0x2,
+        RootNode = 0x4
     };
 }

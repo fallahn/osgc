@@ -53,7 +53,7 @@ void Game::loadPlugin(const std::string& path)
         if (entry && exit)
         {
             //update current directory for resources
-			xy::FileSystem::setResourceDirectory(path);
+            xy::FileSystem::setResourceDirectory(path);
 
             int reqState = entry(&m_stateStack, &m_sharedData);
             m_stateStack.clearStates();
@@ -83,7 +83,7 @@ void Game::unloadPlugin()
         m_sharedData.reset();
 
         //set current directory to default
-		xy::FileSystem::setResourceDirectory("");
+        xy::FileSystem::setResourceDirectory("");
 
         auto result = FreeLibrary(m_pluginHandle);
         if (!result)

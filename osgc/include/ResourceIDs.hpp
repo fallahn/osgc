@@ -33,16 +33,16 @@ source distribution.
 
 namespace TextureID
 {
-	enum
-	{
-		Fallback,
-		Background,
-		DefaultThumb,
-		Arrow,
-		Count
-	};
+    enum
+    {
+        Fallback,
+        Background,
+        DefaultThumb,
+        Arrow,
+        Count
+    };
 
-	static std::array<std::size_t, TextureID::Count> handles = {};
+    static std::array<std::size_t, TextureID::Count> handles = {};
 }
 
 namespace SpriteID
