@@ -1,6 +1,6 @@
 game_info
 {
-    thumb = "assets/thumb.png"
+    thumb = "assets/images/thumb.png"
     title = "Top Down Shooter"
     version = "0.0.1"
     author = "fallahn"

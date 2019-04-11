@@ -30,12 +30,14 @@ source distribution.
 #include <xyginext/ecs/System.hpp>
 
 #include <string>
+#include <functional>
 
 struct BrowserNode final
 {
     std::size_t index = 0;
     std::string title;
     bool enabled = false;
+    std::function<void()> action;
 };
 
 class BrowserNodeSystem final : public xy::System

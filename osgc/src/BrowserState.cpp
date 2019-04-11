@@ -49,6 +49,7 @@ source distribution.
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/core/ConfigFile.hpp>
+#include <xyginext/core/Console.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -111,6 +112,49 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
 
 bool BrowserState::handleEvent(const sf::Event& evt)
 {
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::Left:
+            prevItem();
+            break;
+        case sf::Keyboard::Right:
+            nextItem();
+            break;
+        case sf::Keyboard::Space:
+        case sf::Keyboard::Enter:
+        //case sf::Keyboard::Return:
+            execItem();
+            break;
+        case sf::Keyboard::Escape:
+            xy::Console::show();
+            break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickButtonReleased)
+    {
+        //TODO controller mappings.
+        switch (evt.joystickButton.button)
+        {
+        default: break;
+        case 0:
+            execItem();
+            break;
+        case 7:
+            xy::Console::show();
+            break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickMoved)
+    {
+        if (evt.joystickMove.axis == sf::Joystick::PovX)
+        {
+            //TODO this. When we have a controller.
+        }
+    }
+
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
     return true;
@@ -270,23 +314,7 @@ void BrowserState::buildMenu()
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    m_browserTargetIndex = std::min(m_browserTargetIndex + 1, m_browserTargets.size() - 1);
-
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::RootNode;
-                    cmd.action = [&](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::BrowserNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<BrowserNode>().enabled = false;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                    nextItem();
                 }
             });
 
@@ -304,23 +332,7 @@ void BrowserState::buildMenu()
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    m_browserTargetIndex = m_browserTargetIndex > 0 ? m_browserTargetIndex - 1 : 0;
-
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::RootNode;
-                    cmd.action = [&](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::BrowserNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<BrowserNode>().enabled = false;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                    prevItem();
                 }
             });
 
@@ -333,7 +345,7 @@ void BrowserState::buildMenu()
 
     //game plugin nodes
     sf::Vector2f nodePosition = xy::DefaultSceneSize / 2.f;
-    nodePosition.y += ThumbnailSize.y / 2.f;
+    nodePosition.y += (ThumbnailSize.y * 0.6f) / 2.f;
     const sf::Vector2f basePosition = nodePosition;
     m_browserTargets.emplace_back();
 
@@ -373,16 +385,18 @@ void BrowserState::buildMenu()
         }
 
         //create entity
+        auto loadPath = xy::FileSystem::getResourcePath() + pluginFolder + dir;
+
         entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(nodePosition);
-        entity.getComponent<xy::Transform>().setOrigin(ThumbnailSize.x / 2.f, ThumbnailSize.y);
+        entity.getComponent<xy::Transform>().setOrigin(ThumbnailSize.x / 2.f, ThumbnailSize.y * 0.8f);
         entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(thumbID));
         applyVertices(entity.getComponent<xy::Drawable>());
         entity.addComponent<BrowserNode>().index = i++;
         entity.getComponent<BrowserNode>().title = info.name;
+        entity.getComponent<BrowserNode>().action = [&, loadPath]() {m_gameInstance.loadPlugin(loadPath); };
         entity.addComponent<xy::CommandTarget>().ID = CommandID::BrowserNode;
 
-        auto loadPath = xy::FileSystem::getResourcePath() + pluginFolder + dir;
         entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
         entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
             m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -391,7 +405,8 @@ void BrowserState::buildMenu()
                     if (flags & xy::UISystem::LeftMouse
                         && e.getComponent<BrowserNode>().enabled)
                     {
-                        m_gameInstance.loadPlugin(loadPath);
+                        e.getComponent<BrowserNode>().action();
+                        LOG("Refactor this into single callback ID!", xy::Logger::Type::Info);
                     }
                 });
 
@@ -439,11 +454,12 @@ void BrowserState::buildMenu()
     //add one extra item to quit the browser
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(nodePosition);
-    entity.getComponent<xy::Transform>().setOrigin(ThumbnailSize.x / 2.f, ThumbnailSize.y);
+    entity.getComponent<xy::Transform>().setOrigin(ThumbnailSize.x / 2.f, ThumbnailSize.y * 0.8f);
     entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(TextureID::handles[TextureID::DefaultThumb]));
     applyVertices(entity.getComponent<xy::Drawable>());
     entity.addComponent<BrowserNode>().index = i;
     entity.getComponent<BrowserNode>().title = "Quit";
+    entity.getComponent<BrowserNode>().action = []() {xy::App::quit(); };
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BrowserNode;
 
     entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
@@ -454,7 +470,7 @@ void BrowserState::buildMenu()
                 if (flags & xy::UISystem::LeftMouse
                     && e.getComponent<BrowserNode>().enabled)
                 {
-                    xy::App::quit();
+                    e.getComponent<BrowserNode>().action();
                 }
             });
 
@@ -477,4 +493,66 @@ void BrowserState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(100);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+}
+
+void BrowserState::nextItem()
+{
+    m_browserTargetIndex = std::min(m_browserTargetIndex + 1, m_browserTargets.size() - 1);
+
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::RootNode;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
+        e.getComponent<Slider>().active = true;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::BrowserNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<BrowserNode>().enabled = false;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    LOG("Play sound here!", xy::Logger::Type::Info);
+}
+
+void BrowserState::prevItem()
+{
+    m_browserTargetIndex = m_browserTargetIndex > 0 ? m_browserTargetIndex - 1 : 0;
+
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::RootNode;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
+        e.getComponent<Slider>().active = true;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::BrowserNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<BrowserNode>().enabled = false;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    LOG("Play sound here!", xy::Logger::Type::Info);
+}
+
+void BrowserState::execItem()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::BrowserNode;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        auto& node = e.getComponent<BrowserNode>();
+        if (node.index == m_browserTargetIndex
+            && node.enabled)
+        {
+            node.action();
+        }
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }

@@ -60,4 +60,8 @@ private:
     void initScene();
     void loadResources();
     void buildMenu();
+
+    void nextItem();
+    void prevItem();
+    void execItem();
 };

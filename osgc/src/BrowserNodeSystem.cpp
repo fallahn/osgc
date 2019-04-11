@@ -29,12 +29,10 @@ source distribution.
 
 #include <xyginext/ecs/components/Transform.hpp>
 
-#include <xyginext/util/Vector.hpp>
 
 namespace
 {
-    const float MaxDist = xy::DefaultSceneSize.x * 3.4f;
-    const float MaxDistSqr = MaxDist * MaxDist;
+    const float MaxDist = xy::DefaultSceneSize.x * 4.f;
 }
 
 BrowserNodeSystem::BrowserNodeSystem(xy::MessageBus& mb)
@@ -52,16 +50,17 @@ void BrowserNodeSystem::handleMessage(const xy::Message&)
 void BrowserNodeSystem::process(float dt)
 {
     auto& entities = getEntities();
+
     for (auto entity : entities)
     {
         auto& node = entity.getComponent<BrowserNode>();
         //if (node.enabled)
         {
             auto& tx = entity.getComponent<xy::Transform>();
-            auto worldPos = tx.getWorldPosition();
+            auto worldPos = tx.getWorldPosition() + tx.getOrigin();
 
-            auto distance = xy::Util::Vector::lengthSquared(worldPos - (xy::DefaultSceneSize / 2.f));
-            auto ratio = 1.f - (distance / MaxDistSqr);
+            auto distance = std::abs(worldPos.x - (xy::DefaultSceneSize.x / 2.f));
+            auto ratio = 1.f - (distance / MaxDist);
 
             tx.setScale(ratio, ratio);
         }
