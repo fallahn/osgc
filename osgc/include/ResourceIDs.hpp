@@ -37,6 +37,7 @@ namespace TextureID
     {
         Fallback,
         Background,
+        BackgroundShine,
         DefaultThumb,
         Arrow,
         Count

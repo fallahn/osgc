@@ -31,6 +31,8 @@ source distribution.
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
+#include <SFML/Graphics/Shader.hpp>
+
 class Game;
 
 class BrowserState final : public xy::State
@@ -57,9 +59,14 @@ private:
     std::size_t m_browserTargetIndex;
     std::vector<sf::Vector2f> m_browserTargets;
 
+    std::vector<std::unique_ptr<sf::Texture>> m_slideshowTextures;
+    std::size_t m_slideshowIndex;
+    sf::Shader m_shader;
+
     void initScene();
     void loadResources();
     void buildMenu();
+    void buildSlideshow();
 
     void nextItem();
     void prevItem();

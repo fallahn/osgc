@@ -41,12 +41,14 @@ source distribution.
 #include <xyginext/ecs/components/UIHitBox.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/core/Console.hpp>
@@ -85,13 +87,35 @@ namespace
     }
     
     const float ItemPadding = 20.f;
+
+    const int BackgroundDepth = -20;
+    const int ArrowDepth = -10;
+    const int TextDepth = 1;
+
+    const std::string SlideshowFrag = 
+        R"(
+            #version 120
+
+            uniform sampler2D u_texA;
+            uniform sampler2D u_texB;
+            uniform float u_mix;
+
+            void main()
+            {
+                vec4 imgA = texture2D(u_texA, gl_TexCoord[0].xy);
+                vec4 imgB = texture2D(u_texB, gl_TexCoord[0].xy);
+    
+                gl_FragColor = mix(imgA, imgB, u_mix);
+            }
+          )";
 }
 
 BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
     : xy::State         (ss, ctx),
     m_gameInstance      (game),
     m_scene             (ctx.appInstance.getMessageBus()),
-    m_browserTargetIndex(0)
+    m_browserTargetIndex(0),
+    m_slideshowIndex    (0)
 {
     launchLoadingScreen();
     
@@ -218,6 +242,7 @@ void BrowserState::initScene()
     m_scene.addSystem<xy::CommandSystem>(messageBus);
     m_scene.addSystem<BrowserNodeSystem>(messageBus);
     m_scene.addSystem<SliderSystem>(messageBus);
+    m_scene.addSystem<xy::CallbackSystem>(messageBus);
     m_scene.addSystem<xy::TextSystem>(messageBus);
     m_scene.addSystem<xy::UISystem>(messageBus);
     m_scene.addSystem<xy::SpriteSystem>(messageBus);
@@ -231,6 +256,7 @@ void BrowserState::loadResources()
     
     TextureID::handles[TextureID::Fallback] = m_resources.load<sf::Texture>("fallback");
     TextureID::handles[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
+    TextureID::handles[TextureID::BackgroundShine] = m_resources.load<sf::Texture>("assets/images/shine.png");
     TextureID::handles[TextureID::DefaultThumb] = m_resources.load<sf::Texture>("assets/images/default_thumb.png");
     TextureID::handles[TextureID::Arrow] = m_resources.load<sf::Texture>("assets/images/navigation.png");
 }
@@ -283,15 +309,21 @@ void BrowserState::buildMenu()
         drawable.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
     };
 
-    static const int BackgroundDepth = -20;
-    static const int ArrowDepth = -10;
-    static const int TextDepth = 1;
-
     //background
+    buildSlideshow();
+
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(BackgroundDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Background]));
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y * 0.6f);
+    entity.addComponent<xy::Drawable>().setDepth(BackgroundDepth + 2);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::BackgroundShine]));
+    auto shineWidth = entity.getComponent<xy::Sprite>().getTextureBounds().width;
+    auto scale = xy::DefaultSceneSize.x / shineWidth;
+    entity.getComponent<xy::Transform>().setScale(scale, 1.f);
 
     auto & menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
     entity = m_scene.createEntity();
@@ -496,6 +528,97 @@ void BrowserState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(128);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+}
+
+void BrowserState::buildSlideshow()
+{
+    //easing function
+    auto IOQuad = [](float t)->float
+    {
+        return (t < 0.5f) ? 2.f * t * t : t * (4.f - 2.f * t) - 1.f;
+    };
+
+    const auto backgroundDir = xy::FileSystem::getResourcePath() + "assets/images/backgrounds/";
+    auto imageList = xy::FileSystem::listFiles(backgroundDir);
+    std::sort(imageList.begin(), imageList.end());
+
+    for (const auto& img : imageList)
+    {
+        auto tex = std::make_unique<sf::Texture>();
+        if (tex->loadFromFile(backgroundDir + img))
+        {
+            tex->setRepeated(true);
+            m_slideshowTextures.push_back(std::move(tex));
+        }
+    }
+
+    if (!m_slideshowTextures.empty()
+        && m_shader.loadFromMemory(SlideshowFrag, sf::Shader::Fragment))
+    {
+        auto entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().setDepth(BackgroundDepth + 1);
+        entity.addComponent<xy::Sprite>(*m_slideshowTextures[0]).setTextureRect({ sf::Vector2f(), xy::DefaultSceneSize });
+
+        m_shader.setUniform("u_texA", *m_slideshowTextures[m_slideshowIndex]);
+        m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
+        m_shader.setUniform("u_texB", *m_slideshowTextures[m_slideshowIndex]);
+        m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
+
+        entity.getComponent<xy::Drawable>().setShader(&m_shader);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [&](xy::Entity e, float dt)
+        {
+            static int state = 0;
+            static float currTime = 0.f;
+
+            if (state == 0)
+            {
+                currTime += dt;
+                if (currTime > 1)
+                {
+                    currTime = 1.f;
+                    state = 1;
+
+                    e.getComponent<xy::Drawable>().getShader()->setUniform("u_texA", *m_slideshowTextures[m_slideshowIndex]);
+                    m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
+                }
+
+                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", currTime);
+            }
+            else if (state == 1)
+            {
+                static float pauseTime = 0.f;
+                pauseTime += dt;
+
+                if (pauseTime > 15.f)
+                {
+                    pauseTime = 0.f;
+
+                    state = (currTime == 0) ? 0 : 2;
+                }
+            }
+            else if (state == 2)
+            {
+                currTime -= dt;
+                if (currTime < 0)
+                {
+                    currTime = 0.f;
+                    state = 1;
+
+                    e.getComponent<xy::Drawable>().getShader()->setUniform("u_texB", *m_slideshowTextures[m_slideshowIndex]);
+                    m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
+                }
+
+                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", currTime);
+            }
+        };
+    }
+    else
+    {
+        m_slideshowTextures.clear();
+    }
 }
 
 void BrowserState::nextItem()
