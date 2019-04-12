@@ -111,7 +111,7 @@ namespace
                 vec4 imgA = texture2D(u_texA, gl_TexCoord[0].xy);
                 vec4 imgB = texture2D(u_texB, gl_TexCoord[0].xy);
     
-                gl_FragColor = mix(imgA, imgB, u_mix);
+                gl_FragColor = mix(imgA, imgB, u_mix) * gl_Color;
             }
           )";
 
@@ -119,11 +119,12 @@ namespace
     {
         enum
         {
-            In, Hold, Out
-        }state = In;
+            In, Hold, Out, Show, Hide
+        }state = Show;
         bool pendingActiveChange = false;
         float easeTime = 0.f;
         float delayTime = 0.f;
+        float alpha = 0.f;
         static constexpr float HoldTime = 15.f;
     };
 }
@@ -158,13 +159,14 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
                 cmd.targetFlags = CommandID::Slideshow;
                 cmd.action = [oldSlideshow](xy::Entity e, float)
                 {
+                    auto& data = std::any_cast<SlideshowState&>(e.getComponent<xy::Callback>().userData);
                     if (oldSlideshow)
                     {
-                        auto& data = std::any_cast<SlideshowState&>(e.getComponent<xy::Callback>().userData);
                         data.pendingActiveChange = true;
                     }
                     else
                     {
+                        data.state = SlideshowState::Show;
                         e.getComponent<xy::Callback>().active = true;
                     }
                 };
@@ -676,6 +678,7 @@ void BrowserState::buildSlideshow()
         entity.addComponent<xy::CommandTarget>().ID = CommandID::Slideshow;
         entity.addComponent<xy::Drawable>().setDepth(BackgroundDepth + 1);
         entity.addComponent<xy::Sprite>(*m_slideshowTextures[0]).setTextureRect({ sf::Vector2f(), xy::DefaultSceneSize });
+        entity.getComponent<xy::Sprite>().setColour({ 255,255,255,0 });
 
         m_shader.setUniform("u_texA", *m_slideshowTextures[m_slideshowIndex]);
         m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
@@ -689,8 +692,10 @@ void BrowserState::buildSlideshow()
             [&](xy::Entity e, float dt)
         {
             auto& state = std::any_cast<SlideshowState&>(e.getComponent<xy::Callback>().userData);
-            
-            if (state.state == SlideshowState::In)
+            switch (state.state)
+            {
+            default: break;
+            case SlideshowState::In:
             {
                 state.easeTime += dt;
                 if (state.easeTime > 1)
@@ -704,24 +709,28 @@ void BrowserState::buildSlideshow()
 
                 e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", state.easeTime);
             }
-            else if (state.state == SlideshowState::Hold)
+                break;
+            case SlideshowState::Hold:
             {
                 if (state.pendingActiveChange)
                 {
                     state.pendingActiveChange = false;
-                    e.getComponent<xy::Callback>().active = false;
+                    state.state = SlideshowState::Hide;
                 }
-
-                state.delayTime += dt;
-
-                if (state.delayTime > SlideshowState::HoldTime)
+                else
                 {
-                    state.delayTime = 0.f;
+                    state.delayTime += dt;
 
-                    state.state = (state.easeTime == 0) ? SlideshowState::In : SlideshowState::Out;
+                    if (state.delayTime > SlideshowState::HoldTime)
+                    {
+                        state.delayTime = 0.f;
+
+                        state.state = (state.easeTime == 0) ? SlideshowState::In : SlideshowState::Out;
+                    }
                 }
             }
-            else if (state.state == SlideshowState::Out)
+                break;
+            case SlideshowState::Out:
             {
                 state.easeTime -= dt;
                 if (state.easeTime < 0)
@@ -734,6 +743,29 @@ void BrowserState::buildSlideshow()
                 }
 
                 e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", state.easeTime);
+            }
+                break;
+            case SlideshowState::Show:
+                state.alpha += dt;
+                if (state.alpha > 1.f)
+                {
+                    state.alpha = 1.f;
+                    state.state = SlideshowState::Hold;
+                }
+
+                e.getComponent<xy::Sprite>().setColour({ 255, 255, 255, static_cast<sf::Uint8>(state.alpha * 255.f) });
+                break;
+            case SlideshowState::Hide:
+                state.alpha -= dt;
+                if (state.alpha < 0.f)
+                {
+                    state.alpha = 0.f;
+                    state.state = SlideshowState::Hold;
+                    e.getComponent<xy::Callback>().active = false;
+                }
+
+                e.getComponent<xy::Sprite>().setColour({ 255, 255, 255, static_cast<sf::Uint8>(state.alpha * 255.f) });
+                break;
             }
         };
     }
