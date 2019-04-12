@@ -40,6 +40,7 @@ namespace TextureID
         BackgroundShine,
         DefaultThumb,
         Arrow,
+        Options,
         Count
     };
 

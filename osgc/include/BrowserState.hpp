@@ -28,6 +28,7 @@ source distribution.
 #pragma once
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
@@ -35,10 +36,11 @@ source distribution.
 
 class Game;
 
-class BrowserState final : public xy::State
+class BrowserState final : public xy::State, public xy::GuiClient
 {
 public:
     BrowserState(xy::StateStack&, xy::State::Context, Game&);
+    ~BrowserState();
 
     bool handleEvent(const sf::Event &evt) override;
     
@@ -62,6 +64,13 @@ private:
     std::vector<std::unique_ptr<sf::Texture>> m_slideshowTextures;
     std::size_t m_slideshowIndex;
     sf::Shader m_shader;
+
+    struct Settings final
+    {
+        bool useSlideshow = false;
+    }m_settings;
+    void loadSettings();
+    void saveSettings();
 
     void initScene();
     void loadResources();

@@ -52,9 +52,13 @@ source distribution.
 
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/core/Console.hpp>
+#include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
+
+#include <fstream>
+#include <cstring>
 
 namespace
 {
@@ -71,6 +75,8 @@ namespace
     const std::string pluginFolder("plugins/");
     const std::string infoFile("/info.xgi");
 #endif
+
+    const std::string settingsFile("browser.cfg");
 
     struct PluginInfo final
     {
@@ -108,6 +114,18 @@ namespace
                 gl_FragColor = mix(imgA, imgB, u_mix);
             }
           )";
+
+    struct SlideshowState final
+    {
+        enum
+        {
+            In, Hold, Out
+        }state = In;
+        bool pendingActiveChange = false;
+        float easeTime = 0.f;
+        float delayTime = 0.f;
+        static constexpr float HoldTime = 15.f;
+    };
 }
 
 BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
@@ -122,9 +140,39 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     //make sure to unload any active plugin so our asset directory is correct
     game.unloadPlugin();
     
+    loadSettings();
+
     initScene();
     loadResources();
     buildMenu();
+
+    registerConsoleTab("Options",
+        [&]() 
+        {
+            auto oldSlideshow = m_settings.useSlideshow;
+            xy::Nim::checkbox("Slideshow Background", &m_settings.useSlideshow);
+            xy::Nim::sameLine(); xy::Nim::showToolTip("Displays images stored in the /images/backgrounds/ directory as a slideshow instead of the selected game background.");
+            if (oldSlideshow != m_settings.useSlideshow)
+            {
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::Slideshow;
+                cmd.action = [oldSlideshow](xy::Entity e, float)
+                {
+                    if (oldSlideshow)
+                    {
+                        auto& data = std::any_cast<SlideshowState&>(e.getComponent<xy::Callback>().userData);
+                        data.pendingActiveChange = true;
+                    }
+                    else
+                    {
+                        e.getComponent<xy::Callback>().active = true;
+                    }
+                };
+                m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                saveSettings();
+            };
+        });
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -132,6 +180,11 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     ctx.appInstance.setMouseCursorVisible(true);
 
     quitLoadingScreen();
+}
+
+BrowserState::~BrowserState()
+{
+    saveSettings();
 }
 
 bool BrowserState::handleEvent(const sf::Event& evt)
@@ -235,6 +288,54 @@ xy::StateID BrowserState::stateID() const
     return States::BrowserState;
 }
 
+//private
+void BrowserState::loadSettings()
+{
+    auto path = xy::FileSystem::getConfigDirectory(getContext().appInstance.getApplicationName()) + settingsFile;
+    std::ifstream file(path, std::ios::binary);
+    if (file.is_open() && file.good())
+    {
+        file.seekg(0, file.end);
+        auto fileSize = file.tellg();
+        if (fileSize < sizeof(Settings))
+        {
+            xy::Logger::log(path + " invalid file size.", xy::Logger::Type::Error);
+            return;
+        }
+        file.seekg(file.beg);
+
+        std::vector<char> buffer(fileSize);
+        file.read(buffer.data(), fileSize);
+        file.close();
+
+        std::memcpy(&m_settings, buffer.data(), buffer.size());
+    }
+    else
+    {
+        file.close();
+        xy::Logger::log("failed opening " + path + " for reading - does it not yet exist?", xy::Logger::Type::Error);
+    }
+}
+
+void BrowserState::saveSettings()
+{
+    std::vector<char> buffer(sizeof(Settings));
+    std::memcpy(buffer.data(), &m_settings, sizeof(Settings));
+
+    auto path = xy::FileSystem::getConfigDirectory(getContext().appInstance.getApplicationName()) + settingsFile;
+    std::ofstream file(path, std::ios::binary);
+    if (file.is_open() && file.good())
+    {
+        file.write(buffer.data(), buffer.size());
+        file.close();
+    }
+    else
+    {
+        file.close();
+        xy::Logger::log("failed opening " + path + " for writing - does it not yet exist?", xy::Logger::Type::Error);
+    }
+}
+
 void BrowserState::initScene()
 {
     //add the systems
@@ -259,6 +360,7 @@ void BrowserState::loadResources()
     TextureID::handles[TextureID::BackgroundShine] = m_resources.load<sf::Texture>("assets/images/shine.png");
     TextureID::handles[TextureID::DefaultThumb] = m_resources.load<sf::Texture>("assets/images/default_thumb.png");
     TextureID::handles[TextureID::Arrow] = m_resources.load<sf::Texture>("assets/images/navigation.png");
+    TextureID::handles[TextureID::Options] = m_resources.load<sf::Texture>("assets/images/options.png");
 }
 
 void BrowserState::buildMenu()
@@ -331,6 +433,20 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Text>(menuFont).setString("OSGC");
     entity.getComponent<xy::Text>().setCharacterSize(80);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Options]));
+    auto optionBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - (optionBounds.width + ItemPadding), ItemPadding);
+    entity.addComponent<xy::UIHitBox>().area = optionBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [](xy::Entity, sf::Uint64 flags) 
+            {
+                xy::Console::show();
+            });
 
     //navigation arrows
     entity = m_scene.createEntity();    
@@ -557,6 +673,7 @@ void BrowserState::buildSlideshow()
     {
         auto entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::Slideshow;
         entity.addComponent<xy::Drawable>().setDepth(BackgroundDepth + 1);
         entity.addComponent<xy::Sprite>(*m_slideshowTextures[0]).setTextureRect({ sf::Vector2f(), xy::DefaultSceneSize });
 
@@ -566,52 +683,57 @@ void BrowserState::buildSlideshow()
         m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
 
         entity.getComponent<xy::Drawable>().setShader(&m_shader);
-        entity.addComponent<xy::Callback>().active = true;
+        entity.addComponent<xy::Callback>().active = m_settings.useSlideshow;
+        entity.getComponent<xy::Callback>().userData = std::make_any<SlideshowState>();
         entity.getComponent<xy::Callback>().function =
             [&](xy::Entity e, float dt)
         {
-            static int state = 0;
-            static float currTime = 0.f;
-
-            if (state == 0)
+            auto& state = std::any_cast<SlideshowState&>(e.getComponent<xy::Callback>().userData);
+            
+            if (state.state == SlideshowState::In)
             {
-                currTime += dt;
-                if (currTime > 1)
+                state.easeTime += dt;
+                if (state.easeTime > 1)
                 {
-                    currTime = 1.f;
-                    state = 1;
+                    state.easeTime = 1.f;
+                    state.state = SlideshowState::Hold;
 
                     e.getComponent<xy::Drawable>().getShader()->setUniform("u_texA", *m_slideshowTextures[m_slideshowIndex]);
                     m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
                 }
 
-                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", currTime);
+                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", state.easeTime);
             }
-            else if (state == 1)
+            else if (state.state == SlideshowState::Hold)
             {
-                static float pauseTime = 0.f;
-                pauseTime += dt;
-
-                if (pauseTime > 15.f)
+                if (state.pendingActiveChange)
                 {
-                    pauseTime = 0.f;
+                    state.pendingActiveChange = false;
+                    e.getComponent<xy::Callback>().active = false;
+                }
 
-                    state = (currTime == 0) ? 0 : 2;
+                state.delayTime += dt;
+
+                if (state.delayTime > SlideshowState::HoldTime)
+                {
+                    state.delayTime = 0.f;
+
+                    state.state = (state.easeTime == 0) ? SlideshowState::In : SlideshowState::Out;
                 }
             }
-            else if (state == 2)
+            else if (state.state == SlideshowState::Out)
             {
-                currTime -= dt;
-                if (currTime < 0)
+                state.easeTime -= dt;
+                if (state.easeTime < 0)
                 {
-                    currTime = 0.f;
-                    state = 1;
+                    state.easeTime = 0.f;
+                    state.state = SlideshowState::Hold;
 
                     e.getComponent<xy::Drawable>().getShader()->setUniform("u_texB", *m_slideshowTextures[m_slideshowIndex]);
                     m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
                 }
 
-                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", currTime);
+                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", state.easeTime);
             }
         };
     }

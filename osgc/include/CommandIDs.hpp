@@ -33,6 +33,7 @@ namespace CommandID
     {
         BrowserNode = 0x1,
         TitleText = 0x2,
-        RootNode = 0x4
+        RootNode = 0x4,
+        Slideshow = 0x8
     };
 }
