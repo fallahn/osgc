@@ -447,7 +447,10 @@ void BrowserState::buildMenu()
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
             [](xy::Entity, sf::Uint64 flags) 
             {
-                xy::Console::show();
+                if(flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Console::show();
+                }
             });
 
     //navigation arrows
