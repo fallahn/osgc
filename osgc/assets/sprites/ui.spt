@@ -1,0 +1,20 @@
+spritesheet ui
+{
+	src="assets/images/ui.png"
+	blend = alpha
+
+	sprite nav_arrow
+	{
+		bounds = 0,0,64,192
+	}
+
+	sprite options
+	{
+		bounds = 64,0,64,64
+	}
+
+	sprite close
+	{
+		bounds = 64,64,64,64
+	}
+}

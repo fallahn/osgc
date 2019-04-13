@@ -53,6 +53,7 @@ source distribution.
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/core/Console.hpp>
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -217,7 +218,7 @@ bool BrowserState::handleEvent(const sf::Event& evt)
             break;
         }
     }
-    else if (evt.type == sf::Event::JoystickButtonReleased)
+    else if (evt.type == sf::Event::JoystickButtonPressed)
     {
         //TODO controller mappings.
         switch (evt.joystickButton.button)
@@ -226,16 +227,30 @@ bool BrowserState::handleEvent(const sf::Event& evt)
         case 0:
             execItem();
             break;
+        case 4:
+            prevItem();
+            break;
+        case 5:
+            nextItem();
+            break;
         case 7:
             xy::Console::show();
             break;
         }
+        std::cout << evt.joystickButton.button << "\n";
     }
     else if (evt.type == sf::Event::JoystickMoved)
     {
         if (evt.joystickMove.axis == sf::Joystick::PovX)
         {
-            //TODO this. When we have a controller.
+            if (evt.joystickMove.position < -50)
+            {
+                prevItem();
+            }
+            else if(evt.joystickMove.position > 50)
+            {
+                nextItem();
+            }
         }
     }
 
@@ -352,7 +367,7 @@ void BrowserState::initScene()
     m_scene.addSystem<SliderSystem>(messageBus);
     m_scene.addSystem<xy::CallbackSystem>(messageBus);
     m_scene.addSystem<xy::TextSystem>(messageBus);
-    m_scene.addSystem<xy::UISystem>(messageBus);
+    m_scene.addSystem<xy::UISystem>(messageBus).setJoypadCursorActive(false);
     m_scene.addSystem<xy::SpriteSystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
 }
@@ -366,8 +381,12 @@ void BrowserState::loadResources()
     TextureID::handles[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
     TextureID::handles[TextureID::BackgroundShine] = m_resources.load<sf::Texture>("assets/images/shine.png");
     TextureID::handles[TextureID::DefaultThumb] = m_resources.load<sf::Texture>("assets/images/default_thumb.png");
-    TextureID::handles[TextureID::Arrow] = m_resources.load<sf::Texture>("assets/images/navigation.png");
-    TextureID::handles[TextureID::Options] = m_resources.load<sf::Texture>("assets/images/options.png");
+
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/ui.spt", m_resources);
+    SpriteID::sprites[SpriteID::Arrow] = spriteSheet.getSprite("nav_arrow");
+    SpriteID::sprites[SpriteID::Options] = spriteSheet.getSprite("options");
+    SpriteID::sprites[SpriteID::Quit] = spriteSheet.getSprite("close");
 }
 
 void BrowserState::buildMenu()
@@ -445,9 +464,9 @@ void BrowserState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Options]));
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Options];
     auto optionBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - (optionBounds.width + ItemPadding), ItemPadding);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - ((optionBounds.width + ItemPadding) * 2.f), ItemPadding);
     entity.addComponent<xy::UIHitBox>().area = optionBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -459,10 +478,29 @@ void BrowserState::buildMenu()
                 }
             });
 
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Quit];
+    auto quitBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - (optionBounds.width + ItemPadding), ItemPadding);
+    entity.addComponent<xy::UIHitBox>().area = optionBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    LOG("Show confirmation dialog!", xy::Logger::Type::Info);
+                    xy::App::quit();
+                }
+            });
+
     //navigation arrows
     entity = m_scene.createEntity();    
     entity.addComponent<xy::Drawable>().setDepth(ArrowDepth);
-    auto arrowBounds = entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Arrow])).getTextureBounds();
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Arrow];
+    auto arrowBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::Transform>().setOrigin(arrowBounds.width / 2.f, arrowBounds.height / 2.f);
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(ThumbnailSize.x * 0.6f, 0.f);
@@ -479,7 +517,7 @@ void BrowserState::buildMenu()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Drawable>().setDepth(ArrowDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Arrow]));
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Arrow];
     entity.addComponent<xy::Transform>().setOrigin(arrowBounds.width / 2.f, arrowBounds.height / 2.f);
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(-ThumbnailSize.x * 0.6f, 0.f);

@@ -37,7 +37,7 @@ Game::Game()
     : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
     m_stateStack({ *getRenderWindow(), *this })
 {
-
+    setApplicationName("osgc");
 }
 
 Game::~Game()
@@ -78,7 +78,6 @@ void Game::draw()
 
 bool Game::initialise()
 {
-    setApplicationName("osgc");
 #ifdef XY_DEBUG
     setWindowTitle("OSGC - The Open Source Game Collection (Debug build) - Press F1 for Console");
 #else

@@ -39,8 +39,7 @@ namespace TextureID
         Background,
         BackgroundShine,
         DefaultThumb,
-        Arrow,
-        Options,
+
         Count
     };
 
@@ -51,6 +50,10 @@ namespace SpriteID
 {
     enum
     {
+        Arrow,
+        Options,
+        Quit,
+
         Count
     };
 
