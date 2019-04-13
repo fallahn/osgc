@@ -29,6 +29,7 @@ source distribution.
 #include "StateIDs.hpp"
 
 #include <xyginext/core/Log.hpp>
+#include <xyginext/gui/Gui.hpp>
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State(ss, ctx)
@@ -39,6 +40,12 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
 //public
 bool MenuState::handleEvent(const sf::Event&)
 {
+	//prevents events being forwarded if the console wishes to consume them
+	if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     return true;
 }
 

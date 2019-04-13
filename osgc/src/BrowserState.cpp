@@ -191,6 +191,11 @@ BrowserState::~BrowserState()
 
 bool BrowserState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+    
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)
@@ -434,6 +439,7 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
     entity.addComponent<xy::Text>(menuFont).setString("OSGC");
     entity.getComponent<xy::Text>().setCharacterSize(80);
+    //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
     entity = m_scene.createEntity();
@@ -565,23 +571,26 @@ void BrowserState::buildMenu()
 
         auto& parentTx = entity.getComponent<xy::Transform>();
 
-        entity = m_scene.createEntity();
+        std::uint32_t textSize = 24;
+        /*entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
         entity.addComponent<xy::Text>(menuFont).setString(info.name);
-        entity.getComponent<xy::Text>().setCharacterSize(24);
+        entity.getComponent<xy::Text>().setCharacterSize(textSize);
+        entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
         entity.addComponent<xy::Drawable>().setDepth(TextDepth);
-        parentTx.addChild(entity.getComponent<xy::Transform>());
+        parentTx.addChild(entity.getComponent<xy::Transform>());*/
 
         if (!info.version.empty())
         {
             entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Version: " + info.version);
-            entity.getComponent<xy::Text>().setCharacterSize(24);
+            entity.getComponent<xy::Text>().setCharacterSize(textSize);
+            //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
             auto bounds = xy::Text::getLocalBounds(entity);
-            entity.getComponent<xy::Transform>().setPosition(ThumbnailSize.x - (bounds.width + ItemPadding), ItemPadding);
+            entity.getComponent<xy::Transform>().setPosition(ThumbnailSize.x - (bounds.width + ItemPadding), ThumbnailSize.y - (bounds.height + ItemPadding));
 
             parentTx.addChild(entity.getComponent<xy::Transform>());
         }
@@ -591,7 +600,8 @@ void BrowserState::buildMenu()
             entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Author: " + info.author);
-            entity.getComponent<xy::Text>().setCharacterSize(24);
+            entity.getComponent<xy::Text>().setCharacterSize(textSize);
+            //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
             auto bounds = xy::Text::getLocalBounds(entity);
@@ -647,18 +657,13 @@ void BrowserState::buildMenu()
     entity.getComponent<xy::Transform>().move(0.f, 320.f);
     entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(128);
+    //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 }
 
 void BrowserState::buildSlideshow()
 {
-    //easing function
-    auto IOQuad = [](float t)->float
-    {
-        return (t < 0.5f) ? 2.f * t * t : t * (4.f - 2.f * t) - 1.f;
-    };
-
     const auto backgroundDir = xy::FileSystem::getResourcePath() + "assets/images/backgrounds/";
     auto imageList = xy::FileSystem::listFiles(backgroundDir);
     std::sort(imageList.begin(), imageList.end());
@@ -694,6 +699,12 @@ void BrowserState::buildSlideshow()
         entity.getComponent<xy::Callback>().function =
             [&](xy::Entity e, float dt)
         {
+            //easing function
+            auto IOQuad = [](float t)->float
+            {
+                return (t < 0.5f) ? 2.f * t * t : t * (4.f - 2.f * t) - 1.f;
+            };
+            
             auto& state = std::any_cast<SlideshowState&>(e.getComponent<xy::Callback>().userData);
             switch (state.state)
             {
@@ -710,7 +721,7 @@ void BrowserState::buildSlideshow()
                     m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
                 }
 
-                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", state.easeTime);
+                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", IOQuad(state.easeTime));
             }
                 break;
             case SlideshowState::Hold:
@@ -745,7 +756,7 @@ void BrowserState::buildSlideshow()
                     m_slideshowIndex = (m_slideshowIndex + 1) % m_slideshowTextures.size();
                 }
 
-                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", state.easeTime);
+                e.getComponent<xy::Drawable>().getShader()->setUniform("u_mix", IOQuad(state.easeTime));
             }
                 break;
             case SlideshowState::Show:

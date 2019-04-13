@@ -32,6 +32,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 
+#include <xyginext/gui/Gui.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 
@@ -54,6 +56,11 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool MenuState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
     return true;
