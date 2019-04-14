@@ -5,7 +5,8 @@ spritesheet ui
 
 	sprite nav_arrow
 	{
-		bounds = 0,0,64,192
+		//bounds = 0,0,64,192
+		bounds = 64,128, 64, 64
 	}
 
 	sprite options

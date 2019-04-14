@@ -39,6 +39,7 @@ namespace TextureID
         Background,
         BackgroundShine,
         DefaultThumb,
+        Quit,
 
         Count
     };

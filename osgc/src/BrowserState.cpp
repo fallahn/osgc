@@ -391,12 +391,13 @@ void BrowserState::initScene()
 void BrowserState::loadResources()
 {
     //load resources
-    FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+    FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/Jellee-Roman.otf");
     
     TextureID::handles[TextureID::Fallback] = m_resources.load<sf::Texture>("fallback");
     TextureID::handles[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
     TextureID::handles[TextureID::BackgroundShine] = m_resources.load<sf::Texture>("assets/images/shine.png");
     TextureID::handles[TextureID::DefaultThumb] = m_resources.load<sf::Texture>("assets/images/default_thumb.png");
+    TextureID::handles[TextureID::Quit] = m_resources.load<sf::Texture>("assets/images/quit.png");
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/ui.spt", m_resources);
@@ -476,7 +477,9 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
     entity.addComponent<xy::Text>(menuFont).setString("OSGC");
     entity.getComponent<xy::Text>().setCharacterSize(80);
-    //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
     entity = m_scene.createEntity();
@@ -649,7 +652,7 @@ void BrowserState::buildMenu()
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
             auto bounds = xy::Text::getLocalBounds(entity);
-            entity.getComponent<xy::Transform>().setPosition(ThumbnailSize.x - (bounds.width + ItemPadding), ThumbnailSize.y - (bounds.height + ItemPadding));
+            entity.getComponent<xy::Transform>().setPosition(ThumbnailSize.x - (bounds.width + (ItemPadding * 4.f)), ThumbnailSize.y - (bounds.height + ItemPadding));
 
             parentTx.addChild(entity.getComponent<xy::Transform>());
         }
@@ -664,7 +667,7 @@ void BrowserState::buildMenu()
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
             auto bounds = xy::Text::getLocalBounds(entity);
-            entity.getComponent<xy::Transform>().setPosition(ItemPadding, ThumbnailSize.y - (bounds.height + ItemPadding));
+            entity.getComponent<xy::Transform>().setPosition(ItemPadding * 4.f, ThumbnailSize.y - (bounds.height + ItemPadding));
 
             parentTx.addChild(entity.getComponent<xy::Transform>());
         }
@@ -680,7 +683,7 @@ void BrowserState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(nodePosition);
     entity.getComponent<xy::Transform>().setOrigin(ThumbnailSize.x / 2.f, ThumbnailSize.y * 0.8f);
-    entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(TextureID::handles[TextureID::DefaultThumb]));
+    entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(TextureID::handles[TextureID::Quit]));
     applyVertices(entity.getComponent<xy::Drawable>());
     entity.addComponent<BrowserNode>().index = i;
     entity.getComponent<BrowserNode>().title = "Quit";
@@ -701,13 +704,13 @@ void BrowserState::buildMenu()
 
     auto& parentTx = entity.getComponent<xy::Transform>();
 
-    entity = m_scene.createEntity();
+    /*entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ThumbnailSize / 2.f);
     entity.addComponent<xy::Text>(menuFont).setString("Quit");
     entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
-    parentTx.addChild(entity.getComponent<xy::Transform>());
+    parentTx.addChild(entity.getComponent<xy::Transform>());*/
     rootNode.addChild(parentTx);
 
     //title text at the bottom
@@ -716,7 +719,9 @@ void BrowserState::buildMenu()
     entity.getComponent<xy::Transform>().move(0.f, 320.f);
     entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(128);
-    //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 

@@ -5,7 +5,17 @@ audioscape ui
 		path = "assets/sound/nav.wav"
 		looped = false
 		streaming = false
-		volume = 0.5
+		volume = 0.8
+		attenuation = 0
+		falloff = 0
+	}
+
+	emitter options
+	{
+		path = "assets/sound/options.wav"
+		looped = false
+		streaming = false
+		volume = 0.8
 		attenuation = 0
 		falloff = 0
 	}
