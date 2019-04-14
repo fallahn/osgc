@@ -31,6 +31,8 @@ source distribution.
 #include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/Resource.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 
@@ -64,6 +66,9 @@ private:
     std::vector<std::unique_ptr<sf::Texture>> m_slideshowTextures;
     std::size_t m_slideshowIndex;
     sf::Shader m_shader;
+
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_audioScape;
 
     struct Settings final
     {

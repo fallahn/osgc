@@ -1,0 +1,12 @@
+audioscape ui
+{
+	emitter navigate
+	{
+		path = "assets/sound/nav.wav"
+		looped = false
+		streaming = false
+		volume = 0.5
+		attenuation = 0
+		falloff = 0
+	}
+}

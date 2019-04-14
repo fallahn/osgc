@@ -40,6 +40,11 @@ struct BrowserNode final
     std::function<void()> action;
 };
 
+struct RootNode final
+{
+    bool enabled = false;
+};
+
 class BrowserNodeSystem final : public xy::System
 {
 public:

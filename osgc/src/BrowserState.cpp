@@ -42,6 +42,7 @@ source distribution.
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
@@ -49,11 +50,13 @@ source distribution.
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/core/Console.hpp>
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/audio/Mixer.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -116,6 +119,8 @@ namespace
             }
           )";
 
+    const float FadeInDuration = 2.f;
+
     struct SlideshowState final
     {
         enum
@@ -135,7 +140,8 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_gameInstance      (game),
     m_scene             (ctx.appInstance.getMessageBus()),
     m_browserTargetIndex(0),
-    m_slideshowIndex    (0)
+    m_slideshowIndex    (0),
+    m_audioScape        (m_audioResource)
 {
     launchLoadingScreen();
     
@@ -370,6 +376,16 @@ void BrowserState::initScene()
     m_scene.addSystem<xy::UISystem>(messageBus).setJoypadCursorActive(false);
     m_scene.addSystem<xy::SpriteSystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
+    m_scene.addSystem<xy::AudioSystem>(messageBus);
+
+    //set up the mixer channels - these may have been altered by plugins
+    xy::AudioMixer::setLabel("Music", AudioChannel::Music);
+    xy::AudioMixer::setLabel("Effects", AudioChannel::Effects);
+
+    for (int i = AudioChannel::Count; i < xy::AudioMixer::MaxChannels; ++i)
+    {
+        xy::AudioMixer::setLabel("Channel " + std::to_string(i), i);
+    }
 }
 
 void BrowserState::loadResources()
@@ -387,6 +403,8 @@ void BrowserState::loadResources()
     SpriteID::sprites[SpriteID::Arrow] = spriteSheet.getSprite("nav_arrow");
     SpriteID::sprites[SpriteID::Options] = spriteSheet.getSprite("options");
     SpriteID::sprites[SpriteID::Quit] = spriteSheet.getSprite("close");
+
+    m_audioScape.loadFromFile("assets/sound/ui.xas");
 }
 
 void BrowserState::buildMenu()
@@ -537,8 +555,11 @@ void BrowserState::buildMenu()
     entity = m_scene.createEntity();
     auto& rootNode = entity.addComponent<xy::Transform>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::RootNode;
+    entity.addComponent<RootNode>();
     entity.addComponent<Slider>().speed = 15.f;
-    entity.getComponent<Slider>().active = true; //ensures first node is selected.
+    //entity.getComponent<Slider>().active = true; //ensures first node is selected. Now done by fade out callback, below
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("navigate");
+    entity.getComponent<xy::AudioEmitter>().setChannel(AudioChannel::Effects);
 
     //game plugin nodes
     sf::Vector2f nodePosition = xy::DefaultSceneSize / 2.f;
@@ -698,6 +719,56 @@ void BrowserState::buildMenu()
     //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+
+
+    //create a fade in which also plays the intro sound
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(1000);
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    verts.resize(4);
+    verts[0].color = sf::Color::Black;
+    verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Black };
+    verts[2] = { xy::DefaultSceneSize, sf::Color::Black };
+    verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color::Black };
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Quads);
+
+    entity.addComponent<xy::AudioEmitter>().setSource("assets/sound/startup.wav");
+    entity.getComponent<xy::AudioEmitter>().setChannel(AudioChannel::Effects);
+    entity.getComponent<xy::AudioEmitter>().play();
+
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<float>(FadeInDuration);
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        float& amount = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        auto oldAmount = amount;
+        amount = std::max(0.f, amount - dt);
+
+        sf::Uint8 alpha = static_cast<sf::Uint8>(255.f * (amount / FadeInDuration));
+        auto& verts = e.getComponent<xy::Drawable>().getVertices();
+        for (auto& v : verts) v.color = { 0,0,0,alpha };
+
+        if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Stopped)
+        {
+            m_scene.destroyEntity(e);
+        }
+
+        //enable root node once alpha is zero to enable menu
+        if (amount == 0 && amount < oldAmount)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::RootNode;
+            cmd.action = [](xy::Entity f, float)
+            {
+                f.getComponent<Slider>().active = true;
+                f.getComponent<RootNode>().enabled = true;
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+    };
 }
 
 void BrowserState::buildSlideshow()
@@ -829,48 +900,62 @@ void BrowserState::buildSlideshow()
 
 void BrowserState::nextItem()
 {
+    auto oldIdx = m_browserTargetIndex;
     m_browserTargetIndex = std::min(m_browserTargetIndex + 1, m_browserTargets.size() - 1);
 
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::RootNode;
-    cmd.action = [&](xy::Entity e, float)
+    if (oldIdx != m_browserTargetIndex)
     {
-        e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
-        e.getComponent<Slider>().active = true;
-    };
-    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::RootNode;
+        cmd.action = [&](xy::Entity e, float)
+        {
+            if (e.getComponent<RootNode>().enabled)
+            {
+                e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
+                e.getComponent<Slider>().active = true;
+                //e.getComponent<xy::AudioEmitter>().stop();
+                e.getComponent<xy::AudioEmitter>().play();
+            }
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-    cmd.targetFlags = CommandID::BrowserNode;
-    cmd.action = [](xy::Entity e, float)
-    {
-        e.getComponent<BrowserNode>().enabled = false;
-    };
-    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-    LOG("Play sound here!", xy::Logger::Type::Info);
+        cmd.targetFlags = CommandID::BrowserNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<BrowserNode>().enabled = false;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void BrowserState::prevItem()
 {
+    auto oldIdx = m_browserTargetIndex;
     m_browserTargetIndex = m_browserTargetIndex > 0 ? m_browserTargetIndex - 1 : 0;
 
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::RootNode;
-    cmd.action = [&](xy::Entity e, float)
+    if (oldIdx != m_browserTargetIndex)
     {
-        e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
-        e.getComponent<Slider>().active = true;
-    };
-    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::RootNode;
+        cmd.action = [&](xy::Entity e, float)
+        {
+            if (e.getComponent<RootNode>().enabled)
+            {
+                e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
+                e.getComponent<Slider>().active = true;
+                //e.getComponent<xy::AudioEmitter>().stop();
+                e.getComponent<xy::AudioEmitter>().play();
+            }
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-    cmd.targetFlags = CommandID::BrowserNode;
-    cmd.action = [](xy::Entity e, float)
-    {
-        e.getComponent<BrowserNode>().enabled = false;
-    };
-    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-    LOG("Play sound here!", xy::Logger::Type::Info);
+        cmd.targetFlags = CommandID::BrowserNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<BrowserNode>().enabled = false;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void BrowserState::execItem()

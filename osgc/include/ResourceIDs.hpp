@@ -70,3 +70,14 @@ namespace FontID
 
     static std::array<std::size_t, Count> handles = {};
 }
+
+namespace AudioChannel
+{
+    enum
+    {
+        Music = 0,
+        Effects,
+
+        Count
+    };
+}
