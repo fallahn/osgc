@@ -33,6 +33,7 @@ source distribution.
 #include "CommandIDs.hpp"
 #include "MessageIDs.hpp"
 #include "BrowserNodeSystem.hpp"
+#include "LoadingScreen.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -135,9 +136,10 @@ namespace
     };
 }
 
-BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game)
+BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game, LoadingScreen& ls)
     : xy::State         (ss, ctx),
     m_gameInstance      (game),
+    m_loadingScreen     (ls),
     m_scene             (ctx.appInstance.getMessageBus()),
     m_browserTargetIndex(0),
     m_slideshowIndex    (0),
@@ -291,8 +293,6 @@ void BrowserState::handleMessage(const xy::Message& msg)
                 }
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            //TODO update title text
         }
     }
 
@@ -382,7 +382,7 @@ void BrowserState::initScene()
     xy::AudioMixer::setLabel("Music", AudioChannel::Music);
     xy::AudioMixer::setLabel("Effects", AudioChannel::Effects);
 
-    for (std::size_t i = AudioChannel::Count; i < xy::AudioMixer::MaxChannels; ++i)
+    for (std::uint8_t i = AudioChannel::Count; i < xy::AudioMixer::MaxChannels; ++i)
     {
         xy::AudioMixer::setLabel("Channel " + std::to_string(i), i);
     }
@@ -977,4 +977,10 @@ void BrowserState::execItem()
         }
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void BrowserState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_loadingScreen.update(dt);
+    rw.draw(m_loadingScreen);
 }

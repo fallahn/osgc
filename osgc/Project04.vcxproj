@@ -23,6 +23,7 @@
     <ClInclude Include="include\BrowserState.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\LoadingScreen.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\SliderSystem.hpp" />
@@ -32,6 +33,7 @@
     <ClCompile Include="src\BrowserNodeSystem.cpp" />
     <ClCompile Include="src\BrowserState.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\LoadingScreen.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\PluginLoader.cpp" />
     <ClCompile Include="src\SliderSystem.cpp" />

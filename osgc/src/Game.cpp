@@ -101,5 +101,5 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-    m_stateStack.registerState<BrowserState>(States::BrowserState, *this);
+    m_stateStack.registerState<BrowserState>(States::BrowserState, *this, m_loadingScreen);
 }

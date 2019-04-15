@@ -37,11 +37,12 @@ source distribution.
 #include <SFML/Graphics/Shader.hpp>
 
 class Game;
+class LoadingScreen;
 
 class BrowserState final : public xy::State, public xy::GuiClient
 {
 public:
-    BrowserState(xy::StateStack&, xy::State::Context, Game&);
+    BrowserState(xy::StateStack&, xy::State::Context, Game&, LoadingScreen&);
     ~BrowserState();
 
     bool handleEvent(const sf::Event &evt) override;
@@ -56,6 +57,7 @@ public:
 
 private:
     Game& m_gameInstance;
+    LoadingScreen& m_loadingScreen;
 
     xy::Scene m_scene;
     xy::ResourceHandler m_resources;
@@ -85,4 +87,6 @@ private:
     void nextItem();
     void prevItem();
     void execItem();
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

@@ -27,51 +27,26 @@ source distribution.
 
 #pragma once
 
-#include "States.hpp"
-#include "LoadingScreen.hpp"
-#include <xyginext/core/App.hpp>
-#include <any>
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
-using SharedStateData = std::any;
+#include <array>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#else
-
-#endif
-
-class Game final : public xy::App
+class LoadingScreen final : public sf::Drawable
 {
 public:
-    Game();
-    ~Game();
-    Game(const Game&) = delete;
-    Game& operator = (const Game&) = delete;
+    LoadingScreen();
 
-    void loadPlugin(const std::string&);
-    void unloadPlugin();
+    void update(float);
 
 private:
 
-    xy::StateStack m_stateStack;
-    SharedStateData m_sharedData;
+    sf::Texture m_texture;
+    sf::Sprite m_sprite;
 
-    LoadingScreen m_loadingScreen;
+    float m_currentFrameTime;
+    std::size_t m_frameIndex;
 
-    void handleEvent(const sf::Event&) override;
-    void handleMessage(const xy::Message&) override;
-
-    void registerStates() override;
-    void updateApp(float dt) override;
-    void draw() override;
-
-    bool initialise() override;
-    void finalise() override;
-
-#ifdef _WIN32
-    HINSTANCE m_pluginHandle = nullptr;
-#else
-    void* m_pluginHandle = nullptr;
-#endif //_win32
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

@@ -4,6 +4,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/BrowserState.hpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Game.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
