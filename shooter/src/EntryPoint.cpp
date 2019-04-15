@@ -29,6 +29,7 @@ source distribution.
 #include "StateIDs.hpp"
 #include "ResourceIDs.hpp"
 #include "MenuState.hpp"
+#include "GameState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -43,10 +44,18 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     FontID::handles[FontID::HandDrawn] = data.resources.load<sf::Font>("assets/fonts/HandDrawnShapes.ttf");
     
     ss->registerState<MenuState>(StateID::MainMenu, data);
+    ss->registerState<GameState>(StateID::Game, data);
+
+#ifdef XY_DEBUG
+    return StateID::Game;
+    //return StateID::MainMenu;
+#else
     return StateID::MainMenu;
+#endif
 }
 
 void end(xy::StateStack* ss)
 {
     ss->unregisterState(StateID::MainMenu);
+    ss->unregisterState(StateID::Game);
 }

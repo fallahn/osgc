@@ -143,6 +143,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\GameState.hpp" />
     <ClInclude Include="include\MenuConsts.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
@@ -151,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

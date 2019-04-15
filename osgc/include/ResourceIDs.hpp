@@ -67,6 +67,7 @@ namespace FontID
 {
     enum
     {
+        TitleFont,
         MenuFont,
         Count
     };

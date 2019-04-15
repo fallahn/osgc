@@ -245,7 +245,6 @@ bool BrowserState::handleEvent(const sf::Event& evt)
             xy::Console::show();
             break;
         }
-        std::cout << evt.joystickButton.button << "\n";
     }
     else if (evt.type == sf::Event::JoystickMoved)
     {
@@ -392,6 +391,7 @@ void BrowserState::loadResources()
 {
     //load resources
     FontID::handles[FontID::MenuFont] = m_resources.load<sf::Font>("assets/fonts/Jellee-Roman.otf");
+    FontID::handles[FontID::TitleFont] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     
     TextureID::handles[TextureID::Fallback] = m_resources.load<sf::Texture>("fallback");
     TextureID::handles[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
@@ -477,11 +477,11 @@ void BrowserState::buildMenu()
     auto & menuFont = m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
-    entity.addComponent<xy::Text>(menuFont).setString("OSGC");
-    entity.getComponent<xy::Text>().setCharacterSize(80);
-    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
-    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::Text>(m_resources.get<sf::Font>(FontID::handles[FontID::TitleFont])).setString("OSGC");
+    entity.getComponent<xy::Text>().setCharacterSize(48);
+    //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    //entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
+    //entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
     entity = m_scene.createEntity();
@@ -577,6 +577,18 @@ void BrowserState::buildMenu()
     const sf::Vector2f basePosition = nodePosition;
     m_browserTargets.emplace_back();
 
+    //callback when clicking node
+    auto nodeCallback = m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+        [](xy::Entity e, sf::Uint64 flags)
+        {
+            if (flags & xy::UISystem::LeftMouse
+                && e.getComponent<BrowserNode>().enabled)
+            {
+                e.getComponent<BrowserNode>().action();
+            }
+        });
+
+
     std::size_t i = 0;
 
     auto pluginList = xy::FileSystem::listDirectories(xy::FileSystem::getResourcePath() + pluginFolder);
@@ -626,17 +638,7 @@ void BrowserState::buildMenu()
         entity.addComponent<xy::CommandTarget>().ID = CommandID::BrowserNode;
 
         entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
-        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-            m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-                [&, loadPath](xy::Entity e, sf::Uint64 flags)
-                {
-                    if (flags & xy::UISystem::LeftMouse
-                        && e.getComponent<BrowserNode>().enabled)
-                    {
-                        e.getComponent<BrowserNode>().action();
-                        LOG("Refactor this into single callback ID!", xy::Logger::Type::Info);
-                    }
-                });
+        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] = nodeCallback;            
 
         auto& parentTx = entity.getComponent<xy::Transform>();
 

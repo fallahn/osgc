@@ -127,7 +127,8 @@ void MenuState::buildMenu()
     {
         if (flags & xy::UISystem::LeftMouse)
         {
-            LOG("Start the game!", xy::Logger::Type::Info);
+            requestStackClear();
+            requestStackPush(StateID::Game);
         }
     });
     itemPos.y += Menu::ItemVerticalSpacing;
