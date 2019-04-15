@@ -54,6 +54,8 @@ namespace SpriteID
         Arrow,
         Options,
         Quit,
+        Yes,
+        No,
 
         Count
     };

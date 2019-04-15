@@ -404,6 +404,8 @@ void BrowserState::loadResources()
     SpriteID::sprites[SpriteID::Arrow] = spriteSheet.getSprite("nav_arrow");
     SpriteID::sprites[SpriteID::Options] = spriteSheet.getSprite("options");
     SpriteID::sprites[SpriteID::Quit] = spriteSheet.getSprite("close");
+    SpriteID::sprites[SpriteID::Yes] = spriteSheet.getSprite("yes");
+    SpriteID::sprites[SpriteID::No] = spriteSheet.getSprite("no");
 
     m_audioScape.loadFromFile("assets/sound/ui.xas");
 }
@@ -488,12 +490,15 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Options];
     auto optionBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - ((optionBounds.width + ItemPadding) * 2.f), ItemPadding);
+    entity.addComponent<UINode>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UINode;
     entity.addComponent<xy::UIHitBox>().area = optionBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [](xy::Entity, sf::Uint64 flags) 
+            [](xy::Entity e, sf::Uint64 flags) 
             {
-                if(flags & xy::UISystem::LeftMouse)
+                if(flags & xy::UISystem::LeftMouse
+                    && e.getComponent<UINode>().enabled)
                 {
                     xy::Console::show();
                 }
@@ -505,15 +510,17 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Quit];
     auto quitBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - (optionBounds.width + ItemPadding), ItemPadding);
+    entity.addComponent<UINode>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UINode;
     entity.addComponent<xy::UIHitBox>().area = quitBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
             {
-                if (flags & xy::UISystem::LeftMouse)
+                if (flags & xy::UISystem::LeftMouse
+                    && e.getComponent<UINode>().enabled)
                 {
-                    LOG("Show confirmation dialog!", xy::Logger::Type::Info);
-                    xy::App::quit();
+                    showQuit();
                 }
             });
 
@@ -687,7 +694,7 @@ void BrowserState::buildMenu()
     applyVertices(entity.getComponent<xy::Drawable>());
     entity.addComponent<BrowserNode>().index = i;
     entity.getComponent<BrowserNode>().title = "Quit";
-    entity.getComponent<BrowserNode>().action = []() {xy::App::quit(); };
+    entity.getComponent<BrowserNode>().action = [&]() { showQuit(); };
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BrowserNode;
 
     entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
@@ -977,6 +984,133 @@ void BrowserState::execItem()
         }
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void BrowserState::showQuit()
+{
+    //disable all input
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::RootNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<RootNode>().enabled = false;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::BrowserNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<BrowserNode>().enabled = false;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::UINode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<UINode>().enabled = false;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    std::vector<xy::Entity> confirmationEntities; //collect these so we can destroy them when closing the confirmation
+
+    //show confirmation
+    int renderDepth = 1000;
+    auto entity = m_scene.createEntity();
+    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(renderDepth);
+
+    sf::Color c(0, 0, 0, 220);
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    verts.resize(4);
+    verts[0].color = c;
+    verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), c };
+    verts[2] = { xy::DefaultSceneSize, c };
+    verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y), c };
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    entity = m_scene.createEntity();
+    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -80.f);
+    entity.addComponent<xy::Drawable>().setDepth(renderDepth + 1);
+    entity.addComponent<xy::Text>(m_resources.get<sf::Font>(FontID::handles[FontID::MenuFont]));
+    entity.getComponent<xy::Text>().setString("Really Quit?");
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(120);
+
+    entity = m_scene.createEntity();
+    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(renderDepth + 1);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Yes];
+    auto spriteBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(spriteBounds.width / 2.f, spriteBounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(-spriteBounds.width * 2.f, spriteBounds.height * 2.f);
+    entity.addComponent<xy::UIHitBox>().area = spriteBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [](xy::Entity, sf::Uint64 flags) 
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::App::quit();
+                }
+            });
+
+    entity = m_scene.createEntity();
+    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(renderDepth + 1);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::No];
+    spriteBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(spriteBounds.width / 2.f, spriteBounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(spriteBounds.width * 2.f, spriteBounds.height * 2.f);
+    entity.addComponent<xy::UIHitBox>().area = spriteBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&, confirmationEntities](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    //reenable UI
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<RootNode>().enabled = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::BrowserNode;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        if (e.getComponent<BrowserNode>().index == m_browserTargetIndex)
+                        {
+                            e.getComponent<BrowserNode>().enabled = true;
+                        }
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::UINode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<UINode>().enabled = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    //destroy the confirmation entities
+                    for (auto ent : confirmationEntities)
+                    {
+                        m_scene.destroyEntity(ent);
+                    }
+                }
+            });
 }
 
 void BrowserState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

@@ -18,4 +18,14 @@ spritesheet ui
 	{
 		bounds = 64,64,64,64
 	}
+
+	sprite yes
+	{
+		bounds = 128,0,64,64
+	}
+
+	sprite no
+	{
+		bounds = 128,64,64,64
+	}
 }

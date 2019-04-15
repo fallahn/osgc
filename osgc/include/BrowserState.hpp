@@ -88,5 +88,7 @@ private:
     void prevItem();
     void execItem();
 
+    void showQuit();
+
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

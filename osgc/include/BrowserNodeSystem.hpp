@@ -45,6 +45,11 @@ struct RootNode final
     bool enabled = false;
 };
 
+struct UINode final
+{
+    bool enabled = true;
+};
+
 class BrowserNodeSystem final : public xy::System
 {
 public:
