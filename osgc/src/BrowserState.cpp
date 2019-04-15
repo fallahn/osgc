@@ -382,7 +382,7 @@ void BrowserState::initScene()
     xy::AudioMixer::setLabel("Music", AudioChannel::Music);
     xy::AudioMixer::setLabel("Effects", AudioChannel::Effects);
 
-    for (int i = AudioChannel::Count; i < xy::AudioMixer::MaxChannels; ++i)
+    for (std::size_t i = AudioChannel::Count; i < xy::AudioMixer::MaxChannels; ++i)
     {
         xy::AudioMixer::setLabel("Channel " + std::to_string(i), i);
     }
@@ -505,7 +505,7 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Quit];
     auto quitBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - (optionBounds.width + ItemPadding), ItemPadding);
-    entity.addComponent<xy::UIHitBox>().area = optionBounds;
+    entity.addComponent<xy::UIHitBox>().area = quitBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
             [](xy::Entity, sf::Uint64 flags)
