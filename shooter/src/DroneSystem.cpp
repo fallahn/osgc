@@ -70,7 +70,7 @@ void DroneSystem::process(float dt)
         if (float len2 = xy::Util::Vector::lengthSquared(velocity); len2 > 1)
         {
             float len = std::sqrt(len2);
-            velocity /= len2;
+            velocity /= len;
         }
         drone.velocity += velocity * Acceleration;
 
