@@ -18,38 +18,22 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
-#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/ecs/System.hpp>
 
-struct SharedData;
-class GameState final : public xy::State
+#include <SFML/System/Vector2.hpp>
+
+#include <cstdint>
+
+struct Drone final
+{
+    sf::Vector2f velocity;
+    std::int32_t health = 100;
+};
+
+class DroneSystem final : public xy::System
 {
 public:
-    GameState(xy::StateStack&, xy::State::Context, SharedData&);
+    explicit DroneSystem(xy::MessageBus&);
 
-    bool handleEvent(const sf::Event&) override;
-
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_gameScene;
-
-    xy::Entity m_sideCamera;
-    xy::Entity m_topCamera;
-
-    xy::ResourceHolder m_resources;
-
-    void initScene();
-    void loadAssets();
-    void loadWorld();
-
-    void recalcSmallView();
+    void process(float) override;
 };

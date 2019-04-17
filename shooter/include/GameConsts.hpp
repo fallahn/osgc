@@ -18,38 +18,18 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
-#include <xyginext/resources/ResourceHandler.hpp>
+#include <SFML/Graphics/Rect.hpp>
 
-struct SharedData;
-class GameState final : public xy::State
+#include <cstdint>
+
+namespace ConstVal
 {
-public:
-    GameState(xy::StateStack&, xy::State::Context, SharedData&);
+    static const std::int32_t BackgroundDepth = -100;
+    static const sf::Vector2f BackgroundPosition(xy::DefaultSceneSize.x* 2.f, 0.f);
+    static const float DroneHeight = 100.f;
 
-    bool handleEvent(const sf::Event&) override;
+    static const sf::FloatRect SmallViewPort(0.f, 0.3f, 1.f, 0.7f); //this should be relative to active large viewport
+    static const sf::Vector2f SmallViewSize(1920.f, xy::DefaultSceneSize.y * SmallViewPort.height);
 
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_gameScene;
-
-    xy::Entity m_sideCamera;
-    xy::Entity m_topCamera;
-
-    xy::ResourceHolder m_resources;
-
-    void initScene();
-    void loadAssets();
-    void loadWorld();
-
-    void recalcSmallView();
-};
+    static const sf::FloatRect MapArea(0.f, 0.f, 2880.f, 3840.f);
+}

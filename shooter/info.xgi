@@ -1,7 +1,7 @@
 game_info
 {
     thumb = "assets/images/thumb.png"
-    title = "Top Down Shooter"
+    title = "Drone Drop"
     version = "0.0.1"
     author = "fallahn"
 }

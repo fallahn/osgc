@@ -18,38 +18,11 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
-#include <xyginext/resources/ResourceHandler.hpp>
-
-struct SharedData;
-class GameState final : public xy::State
+namespace CommandID
 {
-public:
-    GameState(xy::StateStack&, xy::State::Context, SharedData&);
-
-    bool handleEvent(const sf::Event&) override;
-
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_gameScene;
-
-    xy::Entity m_sideCamera;
-    xy::Entity m_topCamera;
-
-    xy::ResourceHolder m_resources;
-
-    void initScene();
-    void loadAssets();
-    void loadWorld();
-
-    void recalcSmallView();
-};
+    enum
+    {
+        PlayerTop = 0x1,
+        PlayerSide = 0x2
+    };
+}

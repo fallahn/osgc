@@ -18,6 +18,11 @@ Copyright 2019 Matt Marchant
 
 #include "GameState.hpp"
 #include "StateIDs.hpp"
+#include "GameConsts.hpp"
+#include "ResourceIDs.hpp"
+#include "CommandIDs.hpp"
+#include "PlayerDirector.hpp"
+#include "Drone.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -68,6 +73,14 @@ bool GameState::handleEvent(const sf::Event& evt)
 
 void GameState::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == xy::Message::WindowMessage) 
+    {
+        const auto& data = msg.getData<xy::Message::WindowEvent>();
+        if (data.type == xy::Message::WindowEvent::Resized)
+        {
+            recalcSmallView();
+        }
+    }
     m_gameScene.forwardMessage(msg);
 }
 
@@ -82,6 +95,11 @@ void GameState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
+
+    m_gameScene.setActiveCamera(m_topCamera);
+    rw.draw(m_gameScene);
+
+    m_gameScene.setActiveCamera(m_sideCamera);
 }
 
 xy::StateID GameState::stateID() const
@@ -96,18 +114,89 @@ void GameState::initScene()
     
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
+    m_gameScene.addSystem<DroneSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+
+    m_gameScene.addDirector<PlayerDirector>();
+
+    m_sideCamera = m_gameScene.createEntity();
+    m_sideCamera.addComponent<xy::Transform>();
+    m_sideCamera.addComponent<xy::Camera>();
+    m_gameScene.setActiveCamera(m_sideCamera);
+    //view properties will be set in ctor now this is active
+
+    m_topCamera = m_gameScene.createEntity();
+    m_topCamera.addComponent<xy::Transform>();
+    m_topCamera.addComponent<xy::Camera>().setView(ConstVal::SmallViewSize);
+    m_topCamera.getComponent<xy::Camera>().setBounds(ConstVal::MapArea);
+    recalcSmallView();
 }
 
 void GameState::loadAssets()
 {
-
+    TextureID::handles[TextureID::TopView] = m_resources.load<sf::Texture>("assets/images/test_view.png");
+    TextureID::handles[TextureID::CrossHair] = m_resources.load<sf::Texture>("assets/images/crosshair.png");
 }
 
 void GameState::loadWorld()
 {
+    //the background is static so let's put that off to one side along with the camera
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    verts.resize(4);
+    verts[0].color = sf::Color::Magenta;
+    verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Magenta };
+    verts[2] = { xy::DefaultSceneSize, sf::Color::Magenta };
+    verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color::Magenta };
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
 
+    m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));
+
+    //then put top view relative to 0,0 as we'll be flying around over it
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::TopView]));
+
+    //create a crosshair for the drone and have the camera follow it
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::MapArea.width / 2.f, ConstVal::SmallViewSize.y / 2.f);
+    entity.addComponent<xy::Drawable>();
+    auto bounds = entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::CrossHair])).getTextureBounds();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerTop;
+    entity.addComponent<Drone>();
+    entity.getComponent<xy::Transform>().addChild(m_topCamera.getComponent<xy::Transform>());
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+
+    //this is our side-view drone
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x, ConstVal::DroneHeight);
+    entity.addComponent<xy::Drawable>();
+    auto& verts2 = entity.getComponent<xy::Drawable>().getVertices();
+    verts2.resize(4);
+    verts2[0] = { sf::Vector2f(-16.f, -16.f), sf::Color::Blue };
+    verts2[1] = { sf::Vector2f(16.f, -16.f), sf::Color::Blue };
+    verts2[2] = { sf::Vector2f(16.f, 16.f), sf::Color::Blue };
+    verts2[3] = { sf::Vector2f(-16.f, 16.f), sf::Color::Blue };
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerSide;
+}
+
+void GameState::recalcSmallView()
+{
+    sf::FloatRect newView;
+    sf::FloatRect largeView = getContext().defaultView.getViewport();
+
+    newView.left = largeView.left + (ConstVal::SmallViewPort.left * largeView.width);
+    newView.top = largeView.top + (ConstVal::SmallViewPort.top * largeView.height);
+    newView.width = largeView.width * ConstVal::SmallViewPort.width;
+    newView.height = largeView.height * ConstVal::SmallViewPort.height;
+
+    m_topCamera.getComponent<xy::Camera>().setViewport(newView);
 }

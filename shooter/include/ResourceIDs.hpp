@@ -30,3 +30,16 @@ namespace FontID
 
     static std::array<std::size_t, FontID::Count> handles;
 }
+
+namespace TextureID
+{
+    enum
+    {
+        TopView,
+        CrossHair,
+
+        Count
+    };
+
+    static std::array<std::size_t, TextureID::Count> handles;
+}
