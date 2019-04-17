@@ -27,7 +27,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float Acceleration = 60.f;
+
 }
 
 PlayerDirector::PlayerDirector()
@@ -47,19 +47,19 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
         default: break;
         case sf::Keyboard::Up:
         case sf::Keyboard::W:
-            m_inputFlags |= Flags::Up;
+            m_inputFlags |= Drone::Up;
             break;
         case sf::Keyboard::Down:
         case sf::Keyboard::S:
-            m_inputFlags |= Flags::Down;
+            m_inputFlags |= Drone::Down;
             break;
         case sf::Keyboard::Left:
         case sf::Keyboard::A:
-            m_inputFlags |= Flags::Left;
+            m_inputFlags |= Drone::Left;
             break;
         case sf::Keyboard::Right:
         case sf::Keyboard::D:
-            m_inputFlags |= Flags::Right;
+            m_inputFlags |= Drone::Right;
             break;
         }
     }
@@ -70,19 +70,23 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
         default: break;
         case sf::Keyboard::Up:
         case sf::Keyboard::W:
-            m_inputFlags &= ~Flags::Up;
+            m_inputFlags &= ~Drone::Up;
             break;
         case sf::Keyboard::Down:
         case sf::Keyboard::S:
-            m_inputFlags &= ~Flags::Down;
+            m_inputFlags &= ~Drone::Down;
             break;
         case sf::Keyboard::Left:
         case sf::Keyboard::A:
-            m_inputFlags &= ~Flags::Left;
+            m_inputFlags &= ~Drone::Left;
             break;
         case sf::Keyboard::Right:
         case sf::Keyboard::D:
-            m_inputFlags &= ~Flags::Right;
+            m_inputFlags &= ~Drone::Right;
+            break;
+        case sf::Keyboard::Space:
+            //only fire when button released
+            m_inputFlags |= Drone::Fire;
             break;
         }
     }
@@ -95,35 +99,16 @@ void PlayerDirector::handleMessage(const xy::Message&)
 
 void PlayerDirector::process(float)
 {
-    sf::Vector2f velocity;
-    if (m_inputFlags & Flags::Up)
-    {
-        velocity.y -= 1.f;
-    }
-    if (m_inputFlags & Flags::Down)
-    {
-        velocity.y += 1.f;
-    }
-    if (m_inputFlags & Flags::Left)
-    {
-        velocity.x -= 1.f;
-    }
-    if (m_inputFlags & Flags::Right)
-    {
-        velocity.x += 1.f;
-    }
-
-    if (float len2 = xy::Util::Vector::lengthSquared(velocity); len2 > 1)
-    {
-        float len = std::sqrt(len2);
-        velocity /= len2;
-    }
+    auto flags = m_inputFlags;
 
     xy::Command cmd;
     cmd.targetFlags = CommandID::PlayerTop;
-    cmd.action = [velocity](xy::Entity entity, float)
+    cmd.action = [flags](xy::Entity entity, float)
     {
-        entity.getComponent<Drone>().velocity += velocity * Acceleration;
+        entity.getComponent<Drone>().inputFlags = flags;
     };
     sendCommand(cmd);
+
+    //make sure to reset fire button
+    m_inputFlags &= ~Drone::Fire;
 }

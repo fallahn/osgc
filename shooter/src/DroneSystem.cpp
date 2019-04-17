@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
+    const float Acceleration = 60.f;
     const float MaxVelocity = 800.f;
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 }
@@ -47,13 +48,39 @@ void DroneSystem::process(float dt)
     {
         auto& drone = entity.getComponent<Drone>();
 
+        //calc new velocity from input
+        sf::Vector2f velocity;
+        if (drone.inputFlags & Drone::Up)
+        {
+            velocity.y -= 1.f;
+        }
+        if (drone.inputFlags & Drone::Down)
+        {
+            velocity.y += 1.f;
+        }
+        if (drone.inputFlags & Drone::Left)
+        {
+            velocity.x -= 1.f;
+        }
+        if (drone.inputFlags & Drone::Right)
+        {
+            velocity.x += 1.f;
+        }
+
+        if (float len2 = xy::Util::Vector::lengthSquared(velocity); len2 > 1)
+        {
+            float len = std::sqrt(len2);
+            velocity /= len2;
+        }
+        drone.velocity += velocity * Acceleration;
+
         //clamp to max velocity
-        auto len2 = xy::Util::Vector::lengthSquared(drone.velocity);
-        if (len2 > MaxVelocitySqr)
+        if (float len2 = xy::Util::Vector::lengthSquared(drone.velocity); len2 > MaxVelocitySqr)
         {
             drone.velocity *= (MaxVelocitySqr / len2);
         }
 
+        //set position and update side view drone
         auto& tx = entity.getComponent<xy::Transform>();
         auto pos = tx.getPosition();
         pos += drone.velocity * dt;
@@ -75,5 +102,12 @@ void DroneSystem::process(float dt)
             tx.setPosition(pos);
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        //check is fire button pressed and rest input ready for next frame
+        if (drone.inputFlags & Drone::Fire)
+        {
+            //TODO spawn at location
+        }
+        drone.inputFlags = 0;
     }
 }

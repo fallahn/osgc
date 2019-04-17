@@ -51,5 +51,5 @@ private:
     void loadAssets();
     void loadWorld();
 
-    void recalcSmallView();
+    void recalcViews();
 };

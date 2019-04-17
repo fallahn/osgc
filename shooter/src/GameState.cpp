@@ -78,7 +78,7 @@ void GameState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<xy::Message::WindowEvent>();
         if (data.type == xy::Message::WindowEvent::Resized)
         {
-            recalcSmallView();
+            recalcViews();
         }
     }
     m_gameScene.forwardMessage(msg);
@@ -132,7 +132,7 @@ void GameState::initScene()
     m_topCamera.addComponent<xy::Transform>();
     m_topCamera.addComponent<xy::Camera>().setView(ConstVal::SmallViewSize);
     m_topCamera.getComponent<xy::Camera>().setBounds(ConstVal::MapArea);
-    recalcSmallView();
+    recalcViews();
 }
 
 void GameState::loadAssets()
@@ -188,10 +188,12 @@ void GameState::loadWorld()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerSide;
 }
 
-void GameState::recalcSmallView()
+void GameState::recalcViews()
 {
     sf::FloatRect newView;
     sf::FloatRect largeView = getContext().defaultView.getViewport();
+
+    m_sideCamera.getComponent<xy::Camera>().setViewport(largeView);
 
     newView.left = largeView.left + (ConstVal::SmallViewPort.left * largeView.width);
     newView.top = largeView.top + (ConstVal::SmallViewPort.top * largeView.height);

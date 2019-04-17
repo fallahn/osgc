@@ -28,6 +28,16 @@ struct Drone final
 {
     sf::Vector2f velocity;
     std::int32_t health = 100;
+
+    enum InputFlags
+    {
+        Up = 0x1,
+        Down = 0x2,
+        Left = 0x4,
+        Right = 0x8,
+        Fire = 0x10
+    };
+    std::uint16_t inputFlags = 0;
 };
 
 class DroneSystem final : public xy::System

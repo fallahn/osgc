@@ -32,12 +32,6 @@ public:
     void process(float) override;
 
 private:
-    enum Flags
-    {
-        Up = 0x1,
-        Down = 0x2,
-        Left = 0x4,
-        Right = 0x8
-    };
+
     std::uint16_t m_inputFlags;
 };
