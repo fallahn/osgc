@@ -53,6 +53,5 @@ namespace SpriteID
 
         Count
     };
-
-    static std::array<xy::Sprite, SpriteID::Count> sprites;
 }
+using SpriteArray = std::array<xy::Sprite, SpriteID::Count>;

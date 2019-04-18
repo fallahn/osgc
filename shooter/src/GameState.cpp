@@ -19,10 +19,10 @@ Copyright 2019 Matt Marchant
 #include "GameState.hpp"
 #include "StateIDs.hpp"
 #include "GameConsts.hpp"
-#include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
 #include "MessageIDs.hpp"
 #include "PlayerDirector.hpp"
+#include "SpawnDirector.hpp"
 #include "Drone.hpp"
 #include "Bomb.hpp"
 
@@ -41,6 +41,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
@@ -86,32 +87,7 @@ void GameState::handleMessage(const xy::Message& msg)
             recalcViews();
         }
     }
-    else if (msg.id == MessageID::BombMessage)
-    {
-        const auto& data = msg.getData<BombEvent>();
-        if (data.type == BombEvent::Exploded)
-        {
-            auto entity = m_gameScene.createEntity();
-            entity.addComponent<xy::Transform>().setPosition(data.position);
-            entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
-            entity.addComponent<xy::Drawable>();
-            entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Explosion];
-            entity.addComponent<xy::SpriteAnimation>().play(0);
 
-            auto bounds = SpriteID::sprites[SpriteID::Explosion].getTextureBounds();
-            entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-
-            entity.addComponent<xy::Callback>().active = true;
-            entity.getComponent<xy::Callback>().function =
-                [&](xy::Entity e, float)
-            {
-                if (e.getComponent<xy::SpriteAnimation>().stopped())
-                {
-                    m_gameScene.destroyEntity(e);
-                }
-            };
-        }
-    }
     m_gameScene.forwardMessage(msg);
 }
 
@@ -154,6 +130,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::RenderSystem>(mb);
 
     m_gameScene.addDirector<PlayerDirector>();
+    m_gameScene.addDirector<SpawnDirector>(m_sprites);
 
     m_sideCamera = m_gameScene.createEntity();
     m_sideCamera.addComponent<xy::Transform>();
@@ -178,7 +155,7 @@ void GameState::loadAssets()
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
 
-    SpriteID::sprites[SpriteID::Explosion] = spriteSheet.getSprite("explosion");
+    m_sprites[SpriteID::Explosion] = spriteSheet.getSprite("explosion");
 }
 
 void GameState::loadWorld()
@@ -189,10 +166,10 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts.resize(4);
-    verts[0].color = sf::Color::Magenta;
-    verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Magenta };
-    verts[2] = { xy::DefaultSceneSize, sf::Color::Magenta };
-    verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color::Magenta };
+    verts[0].color = sf::Color::Cyan;
+    verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Cyan };
+    verts[2] = { sf::Vector2f(xy::DefaultSceneSize.x, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Cyan };
+    verts[3] = { sf::Vector2f(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Cyan };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));

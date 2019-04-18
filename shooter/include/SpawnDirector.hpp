@@ -18,44 +18,21 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include "MapLoader.hpp"
 #include "ResourceIDs.hpp"
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
-#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/ecs/Director.hpp>
 
-struct SharedData;
-class GameState final : public xy::State
+class SpawnDirector final : public xy::Director
 {
 public:
-    GameState(xy::StateStack&, xy::State::Context, SharedData&);
+    explicit SpawnDirector(SpriteArray&);
 
-    bool handleEvent(const sf::Event&) override;
-
+    void handleEvent(const sf::Event&) override {}
     void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
+    void process(float) override;
 
 private:
-    SharedData& m_sharedData;
-    xy::Scene m_gameScene;
 
-    xy::Entity m_sideCamera;
-    xy::Entity m_topCamera;
-
-    xy::ResourceHolder m_resources;
-    SpriteArray m_sprites;
-
-    MapLoader m_mapLoader;
-
-    void initScene();
-    void loadAssets();
-    void loadWorld();
-
-    void recalcViews();
+    SpriteArray& m_sprites;
+    void spawnExplosion(sf::Vector2f);
 };

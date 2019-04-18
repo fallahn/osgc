@@ -7,4 +7,5 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MapSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerDirector.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SpawnDirector.cpp
   PARENT_SCOPE)
