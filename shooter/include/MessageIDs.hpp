@@ -18,36 +18,21 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/System.hpp>
+#include <xyginext/core/Message.hpp>
 
-#include <SFML/System/Vector2.hpp>
-
-#include <cstdint>
-
-struct Drone final
+namespace MessageID
 {
-    sf::Vector2f velocity;
-    std::int32_t health = 100;
-
-    enum InputFlags
+    enum
     {
-        Up = 0x1,
-        Down = 0x2,
-        Left = 0x4,
-        Right = 0x8,
-        Fire = 0x10
+        BombMessage = xy::Message::Count
     };
-    std::uint16_t inputFlags = 0;
-};
+}
 
-class DroneSystem final : public xy::System
+struct BombEvent final
 {
-public:
-    explicit DroneSystem(xy::MessageBus&);
-
-    void process(float) override;
-
-private:
-
-    void spawnBomb(sf::Vector2f position, sf::Vector2f veclocity);
+    enum
+    {
+        Exploded
+    }type;
+    sf::Vector2f position; //top down coordinates
 };

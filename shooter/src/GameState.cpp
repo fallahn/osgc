@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "PlayerDirector.hpp"
 #include "Drone.hpp"
+#include "Bomb.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -115,6 +116,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<DroneSystem>(mb);
+    m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);

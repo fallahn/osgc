@@ -20,34 +20,27 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/System.hpp>
 
-#include <SFML/System/Vector2.hpp>
-
-#include <cstdint>
-
-struct Drone final
+struct Bomb final
 {
-    sf::Vector2f velocity;
-    std::int32_t health = 100;
-
-    enum InputFlags
+    enum
     {
-        Up = 0x1,
-        Down = 0x2,
-        Left = 0x4,
-        Right = 0x8,
-        Fire = 0x10
-    };
-    std::uint16_t inputFlags = 0;
+        Side, Top
+    }type = Side;
+
+    sf::Vector2f velocity;
+    sf::Vector2f position; //this is gameplay position from the top view, not literal entity position
+    float gravity = 0.f;
+    float height = 0.f; //pseudo height used to track when to destroy top down bombs
 };
 
-class DroneSystem final : public xy::System
+class BombSystem final : public xy::System
 {
 public:
-    explicit DroneSystem(xy::MessageBus&);
+    explicit BombSystem(xy::MessageBus&);
 
     void process(float) override;
 
 private:
-
-    void spawnBomb(sf::Vector2f position, sf::Vector2f veclocity);
+    void updateSide(xy::Entity, float);
+    void updateTop(xy::Entity, float);
 };

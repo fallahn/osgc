@@ -143,6 +143,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Bomb.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\Drone.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BombSystem.cpp" />
     <ClCompile Include="src\DroneSystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\GameState.cpp" />

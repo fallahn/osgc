@@ -19,9 +19,11 @@ Copyright 2019 Matt Marchant
 #include "Drone.hpp"
 #include "CommandIDs.hpp"
 #include "GameConsts.hpp"
+#include "Bomb.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
@@ -106,8 +108,42 @@ void DroneSystem::process(float dt)
         //check is fire button pressed and rest input ready for next frame
         if (drone.inputFlags & Drone::Fire)
         {
-            //TODO spawn at location
+            spawnBomb(pos, drone.velocity);
         }
         drone.inputFlags = 0;
     }
+}
+
+//private
+void DroneSystem::spawnBomb(sf::Vector2f position, sf::Vector2f velocity)
+{
+    //side bomb
+    auto entity = getScene()->createEntity();
+    entity.addComponent<xy::Transform>().setPosition((position.y) / 2.f + ConstVal::BackgroundPosition.x, ConstVal::DroneHeight);
+    entity.addComponent<xy::Drawable>();
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    verts.resize(4);
+    verts[0] = { sf::Vector2f(-6.f, -6.f), sf::Color::Blue };
+    verts[1] = { sf::Vector2f(6.f, -6.f), sf::Color::Blue };
+    verts[2] = { sf::Vector2f(6.f, 6.f), sf::Color::Blue };
+    verts[3] = { sf::Vector2f(-6.f, 6.f), sf::Color::Blue };
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<Bomb>().position = position;
+    entity.addComponent<Bomb>().velocity = velocity;
+
+    //top view bomb
+    entity = getScene()->createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.addComponent<xy::Drawable>();
+    auto& verts2 = entity.getComponent<xy::Drawable>().getVertices();
+    verts2.resize(4);
+    verts2[0] = { sf::Vector2f(-16.f, -16.f), sf::Color::Blue };
+    verts2[1] = { sf::Vector2f(16.f, -16.f), sf::Color::Blue };
+    verts2[2] = { sf::Vector2f(16.f, 16.f), sf::Color::Blue };
+    verts2[3] = { sf::Vector2f(-16.f, 16.f), sf::Color::Blue };
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<Bomb>().position = position;
+    entity.getComponent<Bomb>().velocity = velocity;
+    entity.getComponent<Bomb>().height = ConstVal::DroneHeight;
+    entity.getComponent<Bomb>().type = Bomb::Top;
 }
