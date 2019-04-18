@@ -129,7 +129,7 @@ void DroneSystem::spawnBomb(sf::Vector2f position, sf::Vector2f velocity)
     verts[3] = { sf::Vector2f(-6.f, 6.f), sf::Color::Blue };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
     entity.addComponent<Bomb>().position = position;
-    entity.addComponent<Bomb>().velocity = velocity;
+    entity.getComponent<Bomb>().velocity = velocity;
 
     //top view bomb
     entity = getScene()->createEntity();

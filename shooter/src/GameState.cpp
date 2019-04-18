@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
+#include "MessageIDs.hpp"
 #include "PlayerDirector.hpp"
 #include "Drone.hpp"
 #include "Bomb.hpp"
@@ -29,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
@@ -36,11 +38,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
@@ -82,6 +86,32 @@ void GameState::handleMessage(const xy::Message& msg)
             recalcViews();
         }
     }
+    else if (msg.id == MessageID::BombMessage)
+    {
+        const auto& data = msg.getData<BombEvent>();
+        if (data.type == BombEvent::Exploded)
+        {
+            auto entity = m_gameScene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(data.position);
+            entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+            entity.addComponent<xy::Drawable>();
+            entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Explosion];
+            entity.addComponent<xy::SpriteAnimation>().play(0);
+
+            auto bounds = SpriteID::sprites[SpriteID::Explosion].getTextureBounds();
+            entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+            entity.addComponent<xy::Callback>().active = true;
+            entity.getComponent<xy::Callback>().function =
+                [&](xy::Entity e, float)
+            {
+                if (e.getComponent<xy::SpriteAnimation>().stopped())
+                {
+                    m_gameScene.destroyEntity(e);
+                }
+            };
+        }
+    }
     m_gameScene.forwardMessage(msg);
 }
 
@@ -119,6 +149,7 @@ void GameState::initScene()
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
+    m_gameScene.addSystem<xy::SpriteAnimator>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
 
@@ -139,8 +170,15 @@ void GameState::initScene()
 
 void GameState::loadAssets()
 {
-    TextureID::handles[TextureID::TopView] = m_resources.load<sf::Texture>("assets/images/test_view.png");
+    m_mapLoader.load("assets/maps/01.tmx");
+
+    //TextureID::handles[TextureID::TopView] = m_resources.load<sf::Texture>("assets/images/test_view.png");
     TextureID::handles[TextureID::CrossHair] = m_resources.load<sf::Texture>("assets/images/crosshair.png");
+
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
+
+    SpriteID::sprites[SpriteID::Explosion] = spriteSheet.getSprite("explosion");
 }
 
 void GameState::loadWorld()
@@ -163,7 +201,7 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::TopView]));
+    entity.addComponent<xy::Sprite>(m_mapLoader.getTopDownTexture());
 
     //create a crosshair for the drone and have the camera follow it
     entity = m_gameScene.createEntity();

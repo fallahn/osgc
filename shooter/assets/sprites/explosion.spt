@@ -1,0 +1,23 @@
+spritesheet explosion
+{
+    src="assets/images/explosion.png"
+    blend = alpha
+
+    sprite explosion
+    {
+        bounds = 0,0,32,32
+
+        animation idle
+        {
+            frame = 0,0,32,32
+            frame = 32,0,32,32
+            frame = 64,0,32,32
+            frame = 96,0,32,32
+            frame = 128,0,32,32
+            frame = 160,0,32,32
+
+            loop=false
+            frame_rate = 12
+        }
+    }
+}

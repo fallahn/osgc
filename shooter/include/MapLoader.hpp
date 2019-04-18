@@ -18,21 +18,23 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 
-namespace MessageID
-{
-    enum
-    {
-        BombMessage = xy::Message::Count
-    };
-}
+#include <string>
 
-struct BombEvent final
+class MapLoader final
 {
-    enum
-    {
-        Exploded
-    }type = Exploded;
-    sf::Vector2f position; //top down coordinates
+public:
+    MapLoader();
+
+    bool load(const std::string&);
+
+    const sf::Texture& getTopDownTexture() const;
+
+    const sf::Texture& getSideTexture() const;
+
+private:
+
+    sf::RenderTexture m_topTexture;
+    sf::RenderTexture m_sideTexture;
 };

@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "MapLoader.hpp"
+
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
@@ -46,6 +48,8 @@ private:
     xy::Entity m_topCamera;
 
     xy::ResourceHolder m_resources;
+
+    MapLoader m_mapLoader;
 
     void initScene();
     void loadAssets();

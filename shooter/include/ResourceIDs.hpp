@@ -43,3 +43,16 @@ namespace TextureID
 
     static std::array<std::size_t, TextureID::Count> handles;
 }
+
+#include <xyginext/ecs/components/Sprite.hpp>
+namespace SpriteID
+{
+    enum
+    {
+        Explosion,
+
+        Count
+    };
+
+    static std::array<xy::Sprite, SpriteID::Count> sprites;
+}
