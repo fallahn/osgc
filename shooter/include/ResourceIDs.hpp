@@ -35,7 +35,6 @@ namespace TextureID
 {
     enum
     {
-        TopView,
         CrossHair,
 
         Count
@@ -50,6 +49,16 @@ namespace SpriteID
     enum
     {
         Explosion,
+        TankIcon,
+        HillLeftWide,
+        HillLeftNarrow,
+        HillCentre,
+        HillRightNarrow,
+        HillRightWide,
+        TreeIcon,
+        BuildingLeft,
+        BuildingCentre,
+        BuildingRight,
 
         Count
     };

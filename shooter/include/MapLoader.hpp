@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "ResourceIDs.hpp"
+
 #include <SFML/Graphics/RenderTexture.hpp>
 
 #include <string>
@@ -27,7 +29,7 @@ class MapLoader final
 public:
     MapLoader();
 
-    bool load(const std::string&);
+    bool load(const std::string&, const SpriteArray&);
 
     const sf::Texture& getTopDownTexture() const;
 

@@ -147,15 +147,25 @@ void GameState::initScene()
 
 void GameState::loadAssets()
 {
-    m_mapLoader.load("assets/maps/01.tmx");
-
-    //TextureID::handles[TextureID::TopView] = m_resources.load<sf::Texture>("assets/images/test_view.png");
     TextureID::handles[TextureID::CrossHair] = m_resources.load<sf::Texture>("assets/images/crosshair.png");
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
-
     m_sprites[SpriteID::Explosion] = spriteSheet.getSprite("explosion");
+
+    spriteSheet.loadFromFile("assets/sprites/radar.spt", m_resources);
+    m_sprites[SpriteID::BuildingLeft] = spriteSheet.getSprite("building_left");
+    m_sprites[SpriteID::BuildingCentre] = spriteSheet.getSprite("building_centre");
+    m_sprites[SpriteID::BuildingRight] = spriteSheet.getSprite("building_right");
+    m_sprites[SpriteID::HillLeftWide] = spriteSheet.getSprite("hill_left_wide");
+    m_sprites[SpriteID::HillLeftNarrow] = spriteSheet.getSprite("hill_left_narrow");
+    m_sprites[SpriteID::HillCentre] = spriteSheet.getSprite("hill_centre");
+    m_sprites[SpriteID::HillRightNarrow] = spriteSheet.getSprite("hill_right_narrow");
+    m_sprites[SpriteID::HillRightWide] = spriteSheet.getSprite("hill_right_wide");
+    m_sprites[SpriteID::TankIcon] = spriteSheet.getSprite("tank");
+    m_sprites[SpriteID::TreeIcon] = spriteSheet.getSprite("tree");
+
+    m_mapLoader.load("assets/maps/01.tmx", m_sprites);
 }
 
 void GameState::loadWorld()
@@ -163,14 +173,9 @@ void GameState::loadWorld()
     //the background is static so let's put that off to one side along with the camera
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
-    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-    verts.resize(4);
-    verts[0].color = sf::Color::Cyan;
-    verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Cyan };
-    verts[2] = { sf::Vector2f(xy::DefaultSceneSize.x, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Cyan };
-    verts[3] = { sf::Vector2f(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Cyan };
-    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::Sprite>(m_mapLoader.getSideTexture());
 
     m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));
 

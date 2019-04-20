@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "MapLoader.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
 #include <xyginext/core/Log.hpp>
@@ -32,15 +33,18 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const sf::Vector2u TopMapSize(720, 960);
-    const sf::Vector2u SideMapSize(0,0);
+    const sf::Vector2u SideMapSize(480,81);
+    const float SandThickness = 16.f; //height of sand in side view
+    const float SandThicknessScaled = SandThickness / 4.f;
 }
 
 MapLoader::MapLoader()
 {
     m_topTexture.create(TopMapSize.x, TopMapSize.y);
+    m_sideTexture.create(SideMapSize.x, SideMapSize.y);
 }
 
-bool MapLoader::load(const std::string& path)
+bool MapLoader::load(const std::string& path, const SpriteArray& sprites)
 {
     tmx::Map map;
     if (map.load(xy::FileSystem::getResourcePath() + path))
@@ -66,6 +70,8 @@ bool MapLoader::load(const std::string& path)
         //render layers
         sf::IntRect textureRect(0, 0, (map.getTileSize().x), (map.getTileSize().y));
         sf::Sprite tileSprite;
+
+        tmx::ObjectGroup* objectLayer = nullptr;
 
         m_topTexture.clear();
 
@@ -115,18 +121,133 @@ bool MapLoader::load(const std::string& path)
             }
             else if (layer->getType() == tmx::Layer::Type::Object)
             {
-                const auto& objects = layer->getLayerAs<tmx::ObjectGroup>().getObjects();
-                for (const auto& obj : objects)
-                {
-                    sf::Vector2f position(obj.getPosition().x, obj.getPosition().y);
-                    position *= 4.f; //scale up to world coords
-
-                    //TODO objet data
-                }
+                objectLayer = &layer->getLayerAs<tmx::ObjectGroup>();
             }
         }
 
         m_topTexture.display();
+
+
+        //draw the side map if we found object data
+        if (objectLayer)
+        {
+            m_sideTexture.clear();            
+            
+            std::vector<sf::Vertex> verts(12);
+            verts[0].color = sf::Color::Cyan;
+            verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Cyan };
+            verts[2] = { sf::Vector2f(xy::DefaultSceneSize.x, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Cyan };
+            verts[3] = { sf::Vector2f(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Cyan };
+
+            verts[4] = { sf::Vector2f(0.f, (ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y) - SandThickness), sf::Color::Yellow };
+            verts[5] = { sf::Vector2f(xy::DefaultSceneSize.x, (ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y) - SandThickness), sf::Color::Yellow };
+            verts[6] = { sf::Vector2f(xy::DefaultSceneSize.x, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Yellow };
+            verts[7] = { sf::Vector2f(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Yellow };
+            
+            verts[8] = { sf::Vector2f(0.f, (ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y) - 4.f), sf::Color::Black };
+            verts[9] = { sf::Vector2f(xy::DefaultSceneSize.x, (ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y) - 4.f), sf::Color::Black };
+            verts[10] = { sf::Vector2f(xy::DefaultSceneSize.x, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Black };
+            verts[11] = { sf::Vector2f(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y), sf::Color::Black };
+            
+            for (auto& v : verts) v.position /= 4.f;
+
+            m_sideTexture.draw(verts.data(), verts.size(), sf::Quads);
+
+            auto objects = objectLayer->getObjects();
+            //sort by x pos so drawn in correct order
+            std::sort(objects.begin(), objects.end(), [](const tmx::Object& objA, const tmx::Object& objB) {return objA.getPosition().x > objB.getPosition().x; });
+
+            for (const auto& obj : objects)
+            {
+                sf::Vector2f position(obj.getPosition().x, obj.getPosition().y);
+                position /= 2.f; //side map is half map scale, then texture upscaled (boy this is complicated)
+
+                auto objBounds = obj.getAABB();
+                objBounds.left /= 2.f;
+                objBounds.top /= 2.f;
+                objBounds.width /= 2.f;
+                objBounds.height /= 2.f;
+
+                const auto type = obj.getType();
+                if (type == "building")
+                {
+                    auto leftBounds = sprites[SpriteID::BuildingLeft].getTextureRect();
+                    auto rightBounds = sprites[SpriteID::BuildingRight].getTextureRect();
+                    verts.resize(12);
+                    verts[0] = { sf::Vector2f(0.f, 0.f), sf::Vector2f(leftBounds.left, leftBounds.top) };
+                    verts[1] = { sf::Vector2f(leftBounds.width, 0.f), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top) };
+                    verts[2] = { sf::Vector2f(leftBounds.width, leftBounds.height), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top + leftBounds.height) };
+                    verts[3] = { sf::Vector2f(0.f, leftBounds.height), sf::Vector2f(leftBounds.left, leftBounds.top + leftBounds.height) };
+
+                    auto bounds = sprites[SpriteID::BuildingCentre].getTextureRect();
+                    verts[4] = { sf::Vector2f(leftBounds.width, 0.f), sf::Vector2f(bounds.left, bounds.top) };
+                    verts[5] = { sf::Vector2f(objBounds.height - rightBounds.width, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
+                    verts[6] = { sf::Vector2f(objBounds.height - rightBounds.width, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
+                    verts[7] = { sf::Vector2f(leftBounds.width, bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
+                    
+                    verts[8] = { sf::Vector2f(objBounds.height - rightBounds.width, 0.f), sf::Vector2f(rightBounds.left, rightBounds.top) };
+                    verts[9] = { sf::Vector2f(objBounds.height, 0.f), sf::Vector2f(rightBounds.left + rightBounds.width, rightBounds.top) };
+                    verts[10] = { sf::Vector2f(objBounds.height, rightBounds.height), sf::Vector2f(rightBounds.left + rightBounds.width, rightBounds.top + rightBounds.height) };
+                    verts[11] = { sf::Vector2f(objBounds.height - rightBounds.width, rightBounds.height), sf::Vector2f(rightBounds.left, rightBounds.top + rightBounds.height) };
+
+                    sf::RenderStates states;
+                    states.transform.translate(position.y, SideMapSize.y - (bounds.height + SandThicknessScaled));
+                    states.texture = sprites[SpriteID::BuildingLeft].getTexture();
+
+                    m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+                }
+                else if (type == "barrier")
+                {
+                    auto leftBounds = sprites[SpriteID::HillLeftWide].getTextureRect();
+                    auto rightBounds = sprites[SpriteID::HillRightWide].getTextureRect();
+                    verts.resize(12);
+                    verts[0] = { sf::Vector2f(0.f, 0.f), sf::Vector2f(leftBounds.left, leftBounds.top) };
+                    verts[1] = { sf::Vector2f(leftBounds.width, 0.f), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top) };
+                    verts[2] = { sf::Vector2f(leftBounds.width, leftBounds.height), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top + leftBounds.height) };
+                    verts[3] = { sf::Vector2f(0.f, leftBounds.height), sf::Vector2f(leftBounds.left, leftBounds.top + leftBounds.height) };
+
+                    auto bounds = sprites[SpriteID::HillCentre].getTextureRect();
+                    verts[4] = { sf::Vector2f(leftBounds.width, (leftBounds.height - bounds.height)), sf::Vector2f(bounds.left, bounds.top) };
+                    verts[5] = { sf::Vector2f(objBounds.height - rightBounds.width, (leftBounds.height - bounds.height)), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
+                    verts[6] = { sf::Vector2f(objBounds.height - rightBounds.width, leftBounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
+                    verts[7] = { sf::Vector2f(leftBounds.width, leftBounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
+
+                    verts[8] = { sf::Vector2f(objBounds.height - rightBounds.width, 0.f), sf::Vector2f(rightBounds.left, rightBounds.top) };
+                    verts[9] = { sf::Vector2f(objBounds.height, 0.f), sf::Vector2f(rightBounds.left + rightBounds.width, rightBounds.top) };
+                    verts[10] = { sf::Vector2f(objBounds.height, rightBounds.height), sf::Vector2f(rightBounds.left + rightBounds.width, rightBounds.top + rightBounds.height) };
+                    verts[11] = { sf::Vector2f(objBounds.height - rightBounds.width, rightBounds.height), sf::Vector2f(rightBounds.left, rightBounds.top + rightBounds.height) };
+
+                    sf::RenderStates states;
+                    states.transform.translate(position.y, SideMapSize.y - (leftBounds.height + SandThicknessScaled));
+                    states.texture = sprites[SpriteID::HillLeftWide].getTexture();
+
+                    m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+                }
+                else if (type == "tree")
+                {
+                    //trees are fixed size so draw sprite directly
+                    auto bounds = sprites[SpriteID::TreeIcon].getTextureRect();
+                    verts.resize(4);
+                    verts[0] = { sf::Vector2f(-bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left, bounds.top) };
+                    verts[1] = { sf::Vector2f(bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
+                    verts[2] = { sf::Vector2f(bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
+                    verts[3] = { sf::Vector2f(-bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
+
+                    sf::RenderStates states;
+                    states.transform.translate(position.y + (bounds. height / 2.f), SideMapSize.y - (bounds.height + SandThicknessScaled));
+                    states.texture = sprites[SpriteID::TreeIcon].getTexture();
+
+                    m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+
+                }
+            }
+            m_sideTexture.display();
+        }
+        else
+        {
+            xy::Logger::log("Missing object layer");
+            return false;
+        }
 
         return true;
     }

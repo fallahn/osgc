@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objecttypes>
+ <objecttype name="barrier" color="#808000"/>
+ <objecttype name="building" color="#aa0000"/>
+ <objecttype name="tree" color="#005500"/>
+</objecttypes>

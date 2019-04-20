@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/Config.hpp>
+
 #include <SFML/Graphics/Rect.hpp>
 
 #include <cstdint>
@@ -25,7 +27,7 @@ Copyright 2019 Matt Marchant
 namespace ConstVal
 {
     static const std::int32_t BackgroundDepth = -100;
-    static const sf::Vector2f BackgroundPosition(xy::DefaultSceneSize.x* 2.f, 0.f);
+    static const sf::Vector2f BackgroundPosition(xy::DefaultSceneSize.x * 2.f, 0.f);
     static const float DroneHeight = 100.f;
 
     static const sf::FloatRect SmallViewPort(0.1f, 0.3f, 0.8f, 0.7f); //this should be relative to active large viewport

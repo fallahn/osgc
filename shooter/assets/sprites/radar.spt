@@ -1,0 +1,55 @@
+spritesheet radar
+{
+	src="assets/images/radar.png"
+	blend = alpha
+
+	sprite tank
+	{
+		bounds = 0,7,16,9
+	}
+
+	sprite hill_left_wide
+	{
+		bounds = 16, 12, 8, 4
+	}
+
+	sprite hill_left_narrow
+	{
+		bounds = 24, 10, 4, 6
+	}
+
+	sprite hill_centre
+	{
+		bounds = 31, 10, 1, 6
+	}
+
+	sprite hill_right_narrow
+	{
+		bounds = 16, 26, 4, 6
+	}
+
+	sprite hill_right_wide
+	{
+		bounds = 20, 28, 8, 4
+	}
+
+	sprite tree
+	{
+		bounds = 0,16,16,16
+	}
+
+	sprite building_left
+	{
+		bounds = 32,19,8,13
+	}
+
+	sprite building_right
+	{
+		bounds = 40,19,8,13
+	}
+
+	sprite building_centre
+	{
+		bounds = 31,19,1,13
+	}
+}
