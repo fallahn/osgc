@@ -90,6 +90,103 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
             break;
         }
     }
+    else if (evt.type == sf::Event::JoystickButtonPressed
+        && evt.joystickButton.joystickId == 0)
+    {
+        //TODO controller mappings.
+        switch (evt.joystickButton.button)
+        {
+        default: break;
+        case 0:
+            m_inputFlags |= Drone::Fire;
+            break;
+        case 1:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+
+            break;
+        case 7:
+
+            break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickMoved
+        && evt.joystickMove.joystickId == 0)
+    {
+        if (evt.joystickMove.axis == sf::Joystick::PovX
+            || evt.joystickMove.axis == sf::Joystick::X)
+        {
+            if (evt.joystickMove.position > 40.f)
+            {
+                m_inputFlags |= Drone::Right;
+                m_inputFlags &= ~Drone::Left;
+            }
+            else if (evt.joystickMove.position < -40.f)
+            {
+                m_inputFlags |= Drone::Left;
+                m_inputFlags &= ~Drone::Right;
+            }
+            else
+            {
+                m_inputFlags &= ~(Drone::Left | Drone::Right);
+            }
+        }
+        else if (evt.joystickMove.axis == sf::Joystick::PovY)
+        {
+#ifdef WIN32 //this axis is inverted on win32
+            if (evt.joystickMove.position > 40.f)
+            {
+                m_inputFlags |= Drone::Up;
+                m_inputFlags &= ~Drone::Down;
+            }
+            else if (evt.joystickMove.position < -40.f)
+            {
+                m_inputFlags |= Drone::Down;
+                m_inputFlags &= ~Drone::Up;
+            }
+            else
+            {
+                m_inputFlags &= ~(Drone::Down | Drone::Up);
+            }
+#else
+            if (evt.joystickMove.position > 40.f)
+            {
+                m_inputFlags |= Drone::Down;
+                m_inputFlags &= ~Drone::Up;
+            }
+            else if (evt.joystickMove.position < -40.f)
+            {
+                m_inputFlags |= Drone::Up;
+                m_inputFlags &= ~Drone::Down;
+            }
+            else
+            {
+                m_inputFlags &= ~(Drone::Down | Drone::Up);
+            }
+#endif
+        }
+        else if (evt.joystickMove.axis == sf::Joystick::Y)
+        {
+            if (evt.joystickMove.position > 40.f)
+            {
+                m_inputFlags |= Drone::Down;
+                m_inputFlags &= ~Drone::Up;
+            }
+            else if (evt.joystickMove.position < -40.f)
+            {
+                m_inputFlags |= Drone::Up;
+                m_inputFlags &= ~Drone::Down;
+            }
+            else
+            {
+                m_inputFlags &= ~(Drone::Down | Drone::Up);
+            }
+        }
+    }
 }
 
 void PlayerDirector::handleMessage(const xy::Message&)
@@ -99,6 +196,8 @@ void PlayerDirector::handleMessage(const xy::Message&)
 
 void PlayerDirector::process(float)
 {
+    //parseController();
+
     auto flags = m_inputFlags;
 
     xy::Command cmd;
@@ -111,4 +210,58 @@ void PlayerDirector::process(float)
 
     //make sure to reset fire button
     m_inputFlags &= ~Drone::Fire;
+}
+
+void PlayerDirector::parseController()
+{
+    //TODO this is all wrong - ignore it!!
+
+    if (m_inputFlags == 0)
+    {
+        std::uint16_t flags = 0;
+        auto x = sf::Joystick::getAxisPosition(0, sf::Joystick::PovX);
+        if (x > 40.f)
+        {
+            flags |= Drone::Right;
+            flags &= ~Drone::Left;
+        }
+        else if (x < -40.f)
+        {
+            flags |= Drone::Left;
+            flags &= ~Drone::Right;
+        }
+        else
+        {
+            flags &= ~(Drone::Left | Drone::Right);
+        }
+
+        x = sf::Joystick::getAxisPosition(0, sf::Joystick::PovY);
+#ifdef WIN32
+        //these are inverted on windows...
+        if (x > 40.f)
+        {
+            flags |= Drone::Up;
+        }
+        else if (x < -40.f)
+        {
+            flags |= Drone::Down;
+        }
+#else
+        if (x > 40.f)
+        {
+            flags |= Drone::Down;
+        }
+        else if (x < -40.f)
+        {
+            flags |= Drone::Up;
+        }
+#endif
+
+        if (flags == 0)
+        {
+            //check analogue stick
+            
+        }
+        m_inputFlags = flags | (m_inputFlags & Drone::Fire);
+    }
 }

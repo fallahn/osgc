@@ -52,4 +52,9 @@ spritesheet radar
 	{
 		bounds = 31,19,1,13
 	}
+
+	sprite drone
+	{
+		bounds = 40, 0, 8, 8
+	}
 }

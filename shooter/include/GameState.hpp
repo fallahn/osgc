@@ -25,6 +25,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
+#include <SFML/Graphics/Shader.hpp>
+
 struct SharedData;
 class GameState final : public xy::State
 {
@@ -52,6 +54,8 @@ private:
     SpriteArray m_sprites;
 
     MapLoader m_mapLoader;
+
+    sf::Shader m_cloudShader;
 
     void initScene();
     void loadAssets();

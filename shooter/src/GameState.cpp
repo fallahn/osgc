@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "SpawnDirector.hpp"
 #include "Drone.hpp"
 #include "Bomb.hpp"
+#include "SoundEffectsDirector.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -34,6 +35,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/AudioListener.hpp>
 
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
@@ -43,9 +45,28 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
+
+namespace
+{
+    const std::string cloudFrag = R"(
+        #version 120
+
+        uniform sampler2D u_texture;
+        uniform float u_time;
+
+        void main()
+        {
+            vec2 coord = gl_TexCoord[0].xy;
+            coord.x += u_time;
+
+            gl_FragColor = texture2D(u_texture, coord);
+
+        })";
+}
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
@@ -93,6 +114,10 @@ void GameState::handleMessage(const xy::Message& msg)
 
 bool GameState::update(float dt)
 {
+    static float shaderTime = 0.f;
+    shaderTime += dt * 0.001f;
+    m_cloudShader.setUniform("u_time", shaderTime);
+
     m_gameScene.update(dt);
 
     return false;
@@ -128,9 +153,11 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+    m_gameScene.addSystem<xy::AudioSystem>(mb);
 
     m_gameScene.addDirector<PlayerDirector>();
     m_gameScene.addDirector<SpawnDirector>(m_sprites);
+    m_gameScene.addDirector<SFXDirector>(m_resources);
 
     m_sideCamera = m_gameScene.createEntity();
     m_sideCamera.addComponent<xy::Transform>();
@@ -142,12 +169,20 @@ void GameState::initScene()
     m_topCamera.addComponent<xy::Transform>();
     m_topCamera.addComponent<xy::Camera>().setView(ConstVal::SmallViewSize);
     m_topCamera.getComponent<xy::Camera>().setBounds(ConstVal::MapArea);
+    m_topCamera.addComponent<xy::AudioListener>();
     recalcViews();
+
+    m_gameScene.setActiveListener(m_topCamera);
 }
 
 void GameState::loadAssets()
 {
+    m_cloudShader.loadFromMemory(cloudFrag, sf::Shader::Fragment);
+
     TextureID::handles[TextureID::CrossHair] = m_resources.load<sf::Texture>("assets/images/crosshair.png");
+    TextureID::handles[TextureID::Sidebar] = m_resources.load<sf::Texture>("assets/images/sidebar.png");
+    TextureID::handles[TextureID::Clouds] = m_resources.load<sf::Texture>("assets/images/clouds.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]).setRepeated(true);
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
@@ -164,6 +199,7 @@ void GameState::loadAssets()
     m_sprites[SpriteID::HillRightWide] = spriteSheet.getSprite("hill_right_wide");
     m_sprites[SpriteID::TankIcon] = spriteSheet.getSprite("tank");
     m_sprites[SpriteID::TreeIcon] = spriteSheet.getSprite("tree");
+    m_sprites[SpriteID::Drone] = spriteSheet.getSprite("drone");
 
     m_mapLoader.load("assets/maps/01.tmx", m_sprites);
 }
@@ -176,6 +212,32 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
     entity.addComponent<xy::Sprite>(m_mapLoader.getSideTexture());
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 1);
+    entity.getComponent<xy::Drawable>().setShader(&m_cloudShader);
+    entity.getComponent<xy::Drawable>().bindUniform("u_texture", m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]));
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
+    entity.getComponent<xy::Transform>().move(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Sidebar]));
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
+    entity.getComponent<xy::Transform>().move(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Sidebar]));
+    float sidebarWidth = entity.getComponent<xy::Sprite>().getTextureBounds().width * 4.f;
+    sidebarWidth = xy::DefaultSceneSize.x - sidebarWidth;
+    entity.getComponent<xy::Transform>().move(sidebarWidth, 0.f);
+
 
     m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));
 
@@ -199,14 +261,10 @@ void GameState::loadWorld()
     //this is our side-view drone
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x, ConstVal::DroneHeight);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.getComponent<xy::Transform>().setOrigin(4.f, 4.f);
     entity.addComponent<xy::Drawable>();
-    auto& verts2 = entity.getComponent<xy::Drawable>().getVertices();
-    verts2.resize(4);
-    verts2[0] = { sf::Vector2f(-16.f, -16.f), sf::Color::Blue };
-    verts2[1] = { sf::Vector2f(16.f, -16.f), sf::Color::Blue };
-    verts2[2] = { sf::Vector2f(16.f, 16.f), sf::Color::Blue };
-    verts2[3] = { sf::Vector2f(-16.f, 16.f), sf::Color::Blue };
-    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Drone];
     entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerSide;
 }
 

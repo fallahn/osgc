@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "Drone.hpp"
 #include "CommandIDs.hpp"
+#include "MessageIDs.hpp"
 #include "GameConsts.hpp"
 #include "Bomb.hpp"
 
@@ -117,16 +118,18 @@ void DroneSystem::process(float dt)
 //private
 void DroneSystem::spawnBomb(sf::Vector2f position, sf::Vector2f velocity)
 {
+    sf::Color orange(255, 0, 128);
+
     //side bomb
     auto entity = getScene()->createEntity();
     entity.addComponent<xy::Transform>().setPosition((position.y) / 2.f + ConstVal::BackgroundPosition.x, ConstVal::DroneHeight);
     entity.addComponent<xy::Drawable>();
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts.resize(4);
-    verts[0] = { sf::Vector2f(-6.f, -6.f), sf::Color::Blue };
-    verts[1] = { sf::Vector2f(6.f, -6.f), sf::Color::Blue };
-    verts[2] = { sf::Vector2f(6.f, 6.f), sf::Color::Blue };
-    verts[3] = { sf::Vector2f(-6.f, 6.f), sf::Color::Blue };
+    verts[0] = { sf::Vector2f(-2.f, -8.f), orange };
+    verts[1] = { sf::Vector2f(2.f, -8.f), orange };
+    verts[2] = { sf::Vector2f(2.f, 8.f), orange };
+    verts[3] = { sf::Vector2f(-2.f, 8.f), orange };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
     entity.addComponent<Bomb>().position = position;
     entity.getComponent<Bomb>().velocity = velocity;
@@ -137,13 +140,17 @@ void DroneSystem::spawnBomb(sf::Vector2f position, sf::Vector2f velocity)
     entity.addComponent<xy::Drawable>();
     auto& verts2 = entity.getComponent<xy::Drawable>().getVertices();
     verts2.resize(4);
-    verts2[0] = { sf::Vector2f(-16.f, -16.f), sf::Color::Blue };
-    verts2[1] = { sf::Vector2f(16.f, -16.f), sf::Color::Blue };
-    verts2[2] = { sf::Vector2f(16.f, 16.f), sf::Color::Blue };
-    verts2[3] = { sf::Vector2f(-16.f, 16.f), sf::Color::Blue };
+    verts2[0] = { sf::Vector2f(-16.f, -16.f), orange };
+    verts2[1] = { sf::Vector2f(16.f, -16.f), orange };
+    verts2[2] = { sf::Vector2f(16.f, 16.f), orange };
+    verts2[3] = { sf::Vector2f(-16.f, 16.f), orange };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
     entity.addComponent<Bomb>().position = position;
     entity.getComponent<Bomb>().velocity = velocity;
     entity.getComponent<Bomb>().height = ConstVal::DroneHeight;
     entity.getComponent<Bomb>().type = Bomb::Top;
+
+    auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+    msg->type = BombEvent::Dropped;
+    msg->position = position;
 }

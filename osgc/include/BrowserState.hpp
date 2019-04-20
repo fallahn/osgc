@@ -72,6 +72,9 @@ private:
     xy::AudioResource m_audioResource;
     xy::AudioScape m_audioScape;
 
+    bool m_locked; //locks the browser until the intro is finished
+    bool m_quitShown;
+
     struct Settings final
     {
         bool useSlideshow = false;
@@ -89,6 +92,7 @@ private:
     void execItem();
 
     void showQuit();
+    void hideQuit();
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

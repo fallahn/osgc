@@ -155,6 +155,7 @@
     <ClInclude Include="include\PlayerDirector.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\SoundEffectsDirector.hpp" />
     <ClInclude Include="include\SpawnDirector.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
@@ -166,6 +167,7 @@
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\PlayerDirector.cpp" />
+    <ClCompile Include="src\SoundEffectsDirector.cpp" />
     <ClCompile Include="src\SpawnDirector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -143,7 +143,9 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_scene             (ctx.appInstance.getMessageBus()),
     m_browserTargetIndex(0),
     m_slideshowIndex    (0),
-    m_audioScape        (m_audioResource)
+    m_audioScape        (m_audioResource),
+    m_locked            (true),
+    m_quitShown         (false)
 {
     launchLoadingScreen();
     
@@ -219,10 +221,16 @@ bool BrowserState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Space:
         case sf::Keyboard::Enter:
         //case sf::Keyboard::Return:
-            execItem();
+            m_quitShown ? xy::App::quit() : execItem();
             break;
         case sf::Keyboard::Escape:
-            xy::Console::show();
+            m_quitShown ? hideQuit() : xy::Console::show();
+            break;
+        case sf::Keyboard::BackSpace:
+            if (m_quitShown)
+            {
+                hideQuit();
+            }
             break;
         }
     }
@@ -233,7 +241,13 @@ bool BrowserState::handleEvent(const sf::Event& evt)
         {
         default: break;
         case 0:
-            execItem();
+            m_quitShown ? xy::App::quit() : execItem();
+            break;
+        case 1: 
+            if (m_quitShown)
+            {
+                hideQuit();
+            }
             break;
         case 4:
             prevItem();
@@ -242,13 +256,14 @@ bool BrowserState::handleEvent(const sf::Event& evt)
             nextItem();
             break;
         case 7:
-            xy::Console::show();
+            m_quitShown ? hideQuit() : xy::Console::show();
             break;
         }
     }
     else if (evt.type == sf::Event::JoystickMoved)
     {
-        if (evt.joystickMove.axis == sf::Joystick::PovX)
+        if (evt.joystickMove.axis == sf::Joystick::PovX
+            || evt.joystickMove.axis == sf::Joystick::X)
         {
             if (evt.joystickMove.position < -50)
             {
@@ -781,6 +796,8 @@ void BrowserState::buildMenu()
                 f.getComponent<RootNode>().enabled = true;
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            m_locked = false;
         }
     };
 }
@@ -914,6 +931,11 @@ void BrowserState::buildSlideshow()
 
 void BrowserState::nextItem()
 {
+    if (m_locked)
+    {
+        return;
+    }
+
     auto oldIdx = m_browserTargetIndex;
     m_browserTargetIndex = std::min(m_browserTargetIndex + 1, m_browserTargets.size() - 1);
 
@@ -944,6 +966,11 @@ void BrowserState::nextItem()
 
 void BrowserState::prevItem()
 {
+    if (m_locked)
+    {
+        return;
+    }
+
     auto oldIdx = m_browserTargetIndex;
     m_browserTargetIndex = m_browserTargetIndex > 0 ? m_browserTargetIndex - 1 : 0;
 
@@ -974,6 +1001,11 @@ void BrowserState::prevItem()
 
 void BrowserState::execItem()
 {
+    if (m_locked)
+    {
+        return;
+    }
+
     xy::Command cmd;
     cmd.targetFlags = CommandID::BrowserNode;
     cmd.action = [&](xy::Entity e, float)
@@ -990,6 +1022,11 @@ void BrowserState::execItem()
 
 void BrowserState::showQuit()
 {
+    if (m_locked)
+    {
+        return;
+    }
+    
     //disable all input
     xy::Command cmd;
     cmd.targetFlags = CommandID::RootNode;
@@ -1013,12 +1050,10 @@ void BrowserState::showQuit()
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-    std::vector<xy::Entity> confirmationEntities; //collect these so we can destroy them when closing the confirmation
-
     //show confirmation
     int renderDepth = 1000;
     auto entity = m_scene.createEntity();
-    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(renderDepth);
 
@@ -1032,7 +1067,7 @@ void BrowserState::showQuit()
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     entity = m_scene.createEntity();
-    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -80.f);
     entity.addComponent<xy::Drawable>().setDepth(renderDepth + 1);
@@ -1045,7 +1080,7 @@ void BrowserState::showQuit()
     entity.getComponent<xy::Text>().setCharacterSize(120);
 
     entity = m_scene.createEntity();
-    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(renderDepth + 1);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Yes];
@@ -1065,7 +1100,7 @@ void BrowserState::showQuit()
             });
 
     entity = m_scene.createEntity();
-    confirmationEntities.push_back(entity);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(renderDepth + 1);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::No];
@@ -1076,43 +1111,54 @@ void BrowserState::showQuit()
     entity.addComponent<xy::UIHitBox>().area = spriteBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, confirmationEntities](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    //reenable UI
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::RootNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<RootNode>().enabled = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::BrowserNode;
-                    cmd.action = [&](xy::Entity e, float)
-                    {
-                        if (e.getComponent<BrowserNode>().index == m_browserTargetIndex)
-                        {
-                            e.getComponent<BrowserNode>().enabled = true;
-                        }
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::UINode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<UINode>().enabled = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    //destroy the confirmation entities
-                    for (auto ent : confirmationEntities)
-                    {
-                        m_scene.destroyEntity(ent);
-                    }
+                    hideQuit();
                 }
             });
+
+    m_quitShown = true;
+}
+
+void BrowserState::hideQuit()
+{
+    //reenable UI
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::RootNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<RootNode>().enabled = true;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::BrowserNode;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        if (e.getComponent<BrowserNode>().index == m_browserTargetIndex)
+        {
+            e.getComponent<BrowserNode>().enabled = true;
+        }
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::UINode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<UINode>().enabled = true;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    //destroy the confirmation entities
+    cmd.targetFlags = CommandID::ConfirmationEntity;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        m_scene.destroyEntity(e);
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    m_quitShown = false;
 }
 
 void BrowserState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
