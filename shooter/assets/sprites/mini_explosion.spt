@@ -1,0 +1,24 @@
+spritesheet mini_explosion
+{
+	src="asserts/images/mini_explosion.png"
+	blend=alpha
+
+	sprite explosion
+	{
+		bounds = 0,0,16,16
+
+		animation idle
+		{
+			frame=0,0,16,16
+			frame=16,0,16,16
+			frame=32,0,16,16
+			frame=48,0,16,16
+			frame=64,0,16,16
+			frame=80,0,16,16
+			frame=96,0,16,16
+
+			loop=false
+			frame_rate=12
+		}
+	}
+}

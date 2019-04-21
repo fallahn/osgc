@@ -104,7 +104,7 @@ void MenuState::buildMenu()
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
     entity.addComponent<xy::Text>(font);
-    entity.getComponent<xy::Text>().setString("Top Down Shooter!");
+    entity.getComponent<xy::Text>().setString("Drone Drop!");
     entity.getComponent<xy::Text>().setCharacterSize(120);
     entity.addComponent<xy::Drawable>();
 

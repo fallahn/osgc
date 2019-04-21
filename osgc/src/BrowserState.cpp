@@ -263,7 +263,7 @@ bool BrowserState::handleEvent(const sf::Event& evt)
     else if (evt.type == sf::Event::JoystickMoved)
     {
         if (evt.joystickMove.axis == sf::Joystick::PovX
-            || evt.joystickMove.axis == sf::Joystick::X)
+            /*|| evt.joystickMove.axis == sf::Joystick::X*/)
         {
             if (evt.joystickMove.position < -50)
             {

@@ -201,6 +201,9 @@ void GameState::loadAssets()
     m_sprites[SpriteID::TreeIcon] = spriteSheet.getSprite("tree");
     m_sprites[SpriteID::Drone] = spriteSheet.getSprite("drone");
 
+    spriteSheet.loadFromFile("assets/sprites/mini_explosion.spt", m_resources);
+    m_sprites[SpriteID::ExplosionIcon] = spriteSheet.getSprite("explosion");
+
     m_mapLoader.load("assets/maps/01.tmx", m_sprites);
 }
 

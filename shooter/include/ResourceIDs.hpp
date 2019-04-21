@@ -51,6 +51,7 @@ namespace SpriteID
     enum
     {
         Explosion,
+        ExplosionIcon,
         TankIcon,
         HillLeftWide,
         HillLeftNarrow,
