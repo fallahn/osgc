@@ -58,6 +58,7 @@ namespace SpriteID
         HillRightNarrow,
         HillRightWide,
         TreeIcon,
+        BushIcon,
         BuildingLeft,
         BuildingCentre,
         BuildingRight,
@@ -66,6 +67,11 @@ namespace SpriteID
         Crosshair,
         AmmoTop,
         BatteryTop,
+
+        Crater01,
+        Crater02,
+        Crater03,
+        Crater04,
 
         Count
     };

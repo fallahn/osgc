@@ -1,0 +1,30 @@
+spritesheet crater
+{
+	src="assets/images/craters.png"
+	blend=alpha
+
+	sprite crater_large
+	{
+		bounds=0,0,32,32
+	}
+
+	sprite crater_01
+	{
+		bounds = 32,0,16,16
+	}
+
+	sprite crater_02
+	{
+		bounds = 48,0,16,16
+	}
+
+	sprite crater_03
+	{
+		bounds = 32,16,16,16
+	}
+
+	sprite crater_04
+	{
+		bounds = 48,16,16,16
+	}	
+}

@@ -27,16 +27,21 @@ Copyright 2019 Matt Marchant
 class MapLoader final
 {
 public:
-    MapLoader();
+    explicit MapLoader(const SpriteArray&);
 
-    bool load(const std::string&, const SpriteArray&);
+    bool load(const std::string&);
 
     const sf::Texture& getTopDownTexture() const;
 
     const sf::Texture& getSideTexture() const;
 
+    void renderSprite(std::int32_t, sf::Vector2f);
+
 private:
 
+    const SpriteArray& m_sprites;
+
+    sf::RenderTexture m_topBuffer;
     sf::RenderTexture m_topTexture;
     sf::RenderTexture m_sideTexture;
 };

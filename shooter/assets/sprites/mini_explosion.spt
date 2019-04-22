@@ -18,7 +18,7 @@ spritesheet mini_explosion
 			frame=96,0,16,16
 
 			loop=false
-			frame_rate=12
+			framerate=16
 		}
 	}
 }

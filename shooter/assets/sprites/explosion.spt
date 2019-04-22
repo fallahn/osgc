@@ -17,7 +17,7 @@ spritesheet explosion
             frame = 160,0,32,32
 
             loop=false
-            frame_rate = 12
+            framerate = 12
         }
     }
 }

@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "SpawnDirector.hpp"
 #include "MessageIDs.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -43,6 +44,7 @@ void SpawnDirector::handleMessage(const xy::Message& msg)
         if (data.type == BombEvent::Exploded)
         {
             spawnExplosion(data.position);
+            spawnMiniExplosion(data.position);
         }
     }
 }
@@ -64,6 +66,29 @@ void SpawnDirector::spawnExplosion(sf::Vector2f position)
 
     auto bounds = m_sprites[SpriteID::Explosion].getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float)
+    {
+        if (e.getComponent<xy::SpriteAnimation>().stopped())
+        {
+            getScene().destroyEntity(e);
+        }
+    };
+}
+
+void SpawnDirector::spawnMiniExplosion(sf::Vector2f position)
+{
+    auto entity = getScene().createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x + (position.y / 2.f), 308.f);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::ExplosionIcon];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+
+    auto bounds = m_sprites[SpriteID::ExplosionIcon].getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
 
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =

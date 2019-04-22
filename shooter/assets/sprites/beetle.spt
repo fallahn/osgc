@@ -27,7 +27,7 @@ spritesheet beetle
 			frame=112,0,16,16
 
 			loop=true
-			frame_rate=12
+			framerate=12
 		}
 	}
 }

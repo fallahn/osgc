@@ -35,4 +35,5 @@ private:
 
     SpriteArray& m_sprites;
     void spawnExplosion(sf::Vector2f);
+    void spawnMiniExplosion(sf::Vector2f);
 };

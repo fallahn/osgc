@@ -49,6 +49,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/util/Random.hpp>
 
 namespace
 {
@@ -71,7 +72,8 @@ namespace
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
     m_sharedData(sd),
-    m_gameScene (ctx.appInstance.getMessageBus())
+    m_gameScene (ctx.appInstance.getMessageBus()),
+    m_mapLoader (m_sprites)
 {
     launchLoadingScreen();
 
@@ -106,6 +108,14 @@ void GameState::handleMessage(const xy::Message& msg)
         if (data.type == xy::Message::WindowEvent::Resized)
         {
             recalcViews();
+        }
+    }
+    else if (msg.id == MessageID::BombMessage)
+    {
+        const auto& data = msg.getData<BombEvent>();
+        if (data.type == BombEvent::Exploded)
+        {
+            m_mapLoader.renderSprite(xy::Util::Random::value(SpriteID::Crater01, SpriteID::Crater04), data.position);
         }
     }
 
@@ -198,6 +208,7 @@ void GameState::loadAssets()
     m_sprites[SpriteID::HillRightWide] = spriteSheet.getSprite("hill_right_wide");
     m_sprites[SpriteID::TankIcon] = spriteSheet.getSprite("tank");
     m_sprites[SpriteID::TreeIcon] = spriteSheet.getSprite("tree");
+    m_sprites[SpriteID::BushIcon] = spriteSheet.getSprite("bush");
     m_sprites[SpriteID::Drone] = spriteSheet.getSprite("drone");
 
     spriteSheet.loadFromFile("assets/sprites/ui.spt", m_resources);
@@ -205,10 +216,16 @@ void GameState::loadAssets()
     m_sprites[SpriteID::Crosshair] = spriteSheet.getSprite("crosshair");
     m_sprites[SpriteID::BatteryTop] = spriteSheet.getSprite("battery");
 
+    spriteSheet.loadFromFile("assets/sprites/craters.spt", m_resources);
+    m_sprites[SpriteID::Crater01] = spriteSheet.getSprite("crater_01");
+    m_sprites[SpriteID::Crater02] = spriteSheet.getSprite("crater_02");
+    m_sprites[SpriteID::Crater03] = spriteSheet.getSprite("crater_03");
+    m_sprites[SpriteID::Crater04] = spriteSheet.getSprite("crater_04");
+
     spriteSheet.loadFromFile("assets/sprites/mini_explosion.spt", m_resources);
     m_sprites[SpriteID::ExplosionIcon] = spriteSheet.getSprite("explosion");
 
-    m_mapLoader.load("assets/maps/01.tmx", m_sprites);
+    m_mapLoader.load("assets/maps/01.tmx");
 }
 
 void GameState::loadWorld()

@@ -38,13 +38,15 @@ namespace
     const float SandThicknessScaled = SandThickness / 4.f;
 }
 
-MapLoader::MapLoader()
+MapLoader::MapLoader(const SpriteArray& sprites)
+    : m_sprites(sprites)
 {
+    m_topBuffer.create(TopMapSize.x, TopMapSize.y);
     m_topTexture.create(TopMapSize.x, TopMapSize.y);
     m_sideTexture.create(SideMapSize.x, SideMapSize.y);
 }
 
-bool MapLoader::load(const std::string& path, const SpriteArray& sprites)
+bool MapLoader::load(const std::string& path)
 {
     tmx::Map map;
     if (map.load(xy::FileSystem::getResourcePath() + path))
@@ -171,15 +173,15 @@ bool MapLoader::load(const std::string& path, const SpriteArray& sprites)
                 const auto type = obj.getType();
                 if (type == "building")
                 {
-                    auto leftBounds = sprites[SpriteID::BuildingLeft].getTextureRect();
-                    auto rightBounds = sprites[SpriteID::BuildingRight].getTextureRect();
+                    auto leftBounds = m_sprites[SpriteID::BuildingLeft].getTextureRect();
+                    auto rightBounds = m_sprites[SpriteID::BuildingRight].getTextureRect();
                     verts.resize(12);
                     verts[0] = { sf::Vector2f(0.f, 0.f), sf::Vector2f(leftBounds.left, leftBounds.top) };
                     verts[1] = { sf::Vector2f(leftBounds.width, 0.f), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top) };
                     verts[2] = { sf::Vector2f(leftBounds.width, leftBounds.height), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top + leftBounds.height) };
                     verts[3] = { sf::Vector2f(0.f, leftBounds.height), sf::Vector2f(leftBounds.left, leftBounds.top + leftBounds.height) };
 
-                    auto bounds = sprites[SpriteID::BuildingCentre].getTextureRect();
+                    auto bounds = m_sprites[SpriteID::BuildingCentre].getTextureRect();
                     verts[4] = { sf::Vector2f(leftBounds.width, 0.f), sf::Vector2f(bounds.left, bounds.top) };
                     verts[5] = { sf::Vector2f(objBounds.height - rightBounds.width, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
                     verts[6] = { sf::Vector2f(objBounds.height - rightBounds.width, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
@@ -192,21 +194,21 @@ bool MapLoader::load(const std::string& path, const SpriteArray& sprites)
 
                     sf::RenderStates states;
                     states.transform.translate(position.y, SideMapSize.y - (bounds.height + SandThicknessScaled));
-                    states.texture = sprites[SpriteID::BuildingLeft].getTexture();
+                    states.texture = m_sprites[SpriteID::BuildingLeft].getTexture();
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
                 }
                 else if (type == "barrier")
                 {
-                    auto leftBounds = sprites[SpriteID::HillLeftWide].getTextureRect();
-                    auto rightBounds = sprites[SpriteID::HillRightWide].getTextureRect();
+                    auto leftBounds = m_sprites[SpriteID::HillLeftWide].getTextureRect();
+                    auto rightBounds = m_sprites[SpriteID::HillRightWide].getTextureRect();
                     verts.resize(12);
                     verts[0] = { sf::Vector2f(0.f, 0.f), sf::Vector2f(leftBounds.left, leftBounds.top) };
                     verts[1] = { sf::Vector2f(leftBounds.width, 0.f), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top) };
                     verts[2] = { sf::Vector2f(leftBounds.width, leftBounds.height), sf::Vector2f(leftBounds.left + leftBounds.width, leftBounds.top + leftBounds.height) };
                     verts[3] = { sf::Vector2f(0.f, leftBounds.height), sf::Vector2f(leftBounds.left, leftBounds.top + leftBounds.height) };
 
-                    auto bounds = sprites[SpriteID::HillCentre].getTextureRect();
+                    auto bounds = m_sprites[SpriteID::HillCentre].getTextureRect();
                     verts[4] = { sf::Vector2f(leftBounds.width, (leftBounds.height - bounds.height)), sf::Vector2f(bounds.left, bounds.top) };
                     verts[5] = { sf::Vector2f(objBounds.height - rightBounds.width, (leftBounds.height - bounds.height)), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
                     verts[6] = { sf::Vector2f(objBounds.height - rightBounds.width, leftBounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
@@ -219,14 +221,14 @@ bool MapLoader::load(const std::string& path, const SpriteArray& sprites)
 
                     sf::RenderStates states;
                     states.transform.translate(position.y, SideMapSize.y - (leftBounds.height + SandThicknessScaled));
-                    states.texture = sprites[SpriteID::HillLeftWide].getTexture();
+                    states.texture = m_sprites[SpriteID::HillLeftWide].getTexture();
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
                 }
                 else if (type == "tree")
                 {
                     //trees are fixed size so draw sprite directly
-                    auto bounds = sprites[SpriteID::TreeIcon].getTextureRect();
+                    auto bounds = m_sprites[SpriteID::TreeIcon].getTextureRect();
                     verts.resize(4);
                     verts[0] = { sf::Vector2f(-bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left, bounds.top) };
                     verts[1] = { sf::Vector2f(bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
@@ -235,7 +237,25 @@ bool MapLoader::load(const std::string& path, const SpriteArray& sprites)
 
                     sf::RenderStates states;
                     states.transform.translate(position.y + (bounds. height / 2.f), SideMapSize.y - (bounds.height + SandThicknessScaled));
-                    states.texture = sprites[SpriteID::TreeIcon].getTexture();
+                    states.texture = m_sprites[SpriteID::TreeIcon].getTexture();
+
+                    m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+
+                }
+                else if (type == "bush")
+                {
+                    //TODO refactor to share tree code, above
+                    //TODO use sf::Sprite / texture rect rather than vert array?
+                    auto bounds = m_sprites[SpriteID::BushIcon].getTextureRect();
+                    verts.resize(4);
+                    verts[0] = { sf::Vector2f(-bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left, bounds.top) };
+                    verts[1] = { sf::Vector2f(bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
+                    verts[2] = { sf::Vector2f(bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
+                    verts[3] = { sf::Vector2f(-bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
+
+                    sf::RenderStates states;
+                    states.transform.translate(position.y + (bounds.height / 2.f), SideMapSize.y - (bounds.height + SandThicknessScaled));
+                    states.texture = m_sprites[SpriteID::BushIcon].getTexture();
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
 
@@ -263,4 +283,28 @@ const sf::Texture& MapLoader::getTopDownTexture() const
 const sf::Texture& MapLoader::getSideTexture() const
 {
     return m_sideTexture.getTexture();
+}
+
+void MapLoader::renderSprite(std::int32_t spriteID, sf::Vector2f position)
+{
+    //TODO since SFML switched its sprite implementation to vertex buffers
+    //creating in-place sprites like this is probably just a good way to waste
+    //GPU memory.
+
+    auto bounds = m_sprites[spriteID].getTextureRect();
+    sf::Sprite spr(*m_sprites[spriteID].getTexture());
+    spr.setTextureRect(sf::IntRect(bounds));
+    spr.setPosition(position / 4.f);
+    //TODO this is a fudge as we're only drawinf craters
+    //would the sprite sheet format benefit from an origin property?
+    spr.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+    m_topBuffer.clear();
+    m_topBuffer.draw(sf::Sprite(m_topTexture.getTexture()));
+    m_topBuffer.draw(spr);
+    m_topBuffer.display();
+
+    m_topTexture.clear();
+    m_topTexture.draw(sf::Sprite(m_topBuffer.getTexture()));
+    m_topTexture.display();
 }
