@@ -1,13 +1,21 @@
-spritesheet mini_explosion
+spritesheet human
 {
-	src="assets/images/mini_explosion.png"
+	src="assets/images/human.png"
 	blend=alpha
 
-	sprite explosion
+	sprite human
 	{
 		bounds = 0,0,16,16
 
 		animation idle
+		{
+			frame=32,0,16,16
+
+			loop=true
+			frame_rate=12
+		}
+
+		animation run
 		{
 			frame=0,0,16,16
 			frame=16,0,16,16
@@ -15,9 +23,8 @@ spritesheet mini_explosion
 			frame=48,0,16,16
 			frame=64,0,16,16
 			frame=80,0,16,16
-			frame=96,0,16,16
 
-			loop=false
+			loop=true
 			frame_rate=12
 		}
 	}

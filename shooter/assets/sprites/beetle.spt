@@ -1,13 +1,21 @@
-spritesheet mini_explosion
+spritesheet beetle
 {
-	src="assets/images/mini_explosion.png"
+	src="assets/images/beetle.png"
 	blend=alpha
 
-	sprite explosion
+	sprite human
 	{
 		bounds = 0,0,16,16
 
 		animation idle
+		{
+			frame=0,0,16,16
+
+			loop=true
+			frame_rate=12
+		}
+
+		animation run
 		{
 			frame=0,0,16,16
 			frame=16,0,16,16
@@ -16,8 +24,9 @@ spritesheet mini_explosion
 			frame=64,0,16,16
 			frame=80,0,16,16
 			frame=96,0,16,16
+			frame=112,0,16,16
 
-			loop=false
+			loop=true
 			frame_rate=12
 		}
 	}

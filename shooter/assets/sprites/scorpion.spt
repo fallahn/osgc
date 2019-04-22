@@ -1,23 +1,28 @@
-spritesheet mini_explosion
+spritesheet scorpion
 {
-	src="assets/images/mini_explosion.png"
+	src="assets/images/scorpion.png"
 	blend=alpha
 
-	sprite explosion
+	sprite human
 	{
 		bounds = 0,0,16,16
 
 		animation idle
 		{
 			frame=0,0,16,16
+
+			loop=true
+			frame_rate=12
+		}
+
+		animation run
+		{
+			frame=0,0,16,16
 			frame=16,0,16,16
 			frame=32,0,16,16
 			frame=48,0,16,16
-			frame=64,0,16,16
-			frame=80,0,16,16
-			frame=96,0,16,16
 
-			loop=false
+			loop=true
 			frame_rate=12
 		}
 	}

@@ -179,7 +179,6 @@ void GameState::loadAssets()
 {
     m_cloudShader.loadFromMemory(cloudFrag, sf::Shader::Fragment);
 
-    TextureID::handles[TextureID::CrossHair] = m_resources.load<sf::Texture>("assets/images/crosshair.png");
     TextureID::handles[TextureID::Sidebar] = m_resources.load<sf::Texture>("assets/images/sidebar.png");
     TextureID::handles[TextureID::Clouds] = m_resources.load<sf::Texture>("assets/images/clouds.png");
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]).setRepeated(true);
@@ -200,6 +199,11 @@ void GameState::loadAssets()
     m_sprites[SpriteID::TankIcon] = spriteSheet.getSprite("tank");
     m_sprites[SpriteID::TreeIcon] = spriteSheet.getSprite("tree");
     m_sprites[SpriteID::Drone] = spriteSheet.getSprite("drone");
+
+    spriteSheet.loadFromFile("assets/sprites/ui.spt", m_resources);
+    m_sprites[SpriteID::AmmoTop] = spriteSheet.getSprite("ammo");
+    m_sprites[SpriteID::Crosshair] = spriteSheet.getSprite("crosshair");
+    m_sprites[SpriteID::BatteryTop] = spriteSheet.getSprite("battery");
 
     spriteSheet.loadFromFile("assets/sprites/mini_explosion.spt", m_resources);
     m_sprites[SpriteID::ExplosionIcon] = spriteSheet.getSprite("explosion");
@@ -254,11 +258,13 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::MapArea.width / 2.f, ConstVal::SmallViewSize.y / 2.f);
     entity.addComponent<xy::Drawable>();
-    auto bounds = entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::CrossHair])).getTextureBounds();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Crosshair];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerTop;
     entity.addComponent<Drone>();
     entity.getComponent<xy::Transform>().addChild(m_topCamera.getComponent<xy::Transform>());
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
 
 
     //this is our side-view drone

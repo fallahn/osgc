@@ -1,0 +1,20 @@
+spritesheet ui
+{
+	src="assets/images/crosshair.png"
+	blend=alpha
+
+	sprite crosshair
+	{
+		bounds=0,0,15,15
+	}
+
+	sprite battery
+	{
+		bounds=16,0,16,16
+	}
+
+	sprite ammo
+	{
+		bounds=32,0,16,16
+	}
+}

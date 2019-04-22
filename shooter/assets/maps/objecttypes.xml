@@ -2,5 +2,6 @@
 <objecttypes>
  <objecttype name="barrier" color="#808000"/>
  <objecttype name="building" color="#aa0000"/>
+ <objecttype name="bush" color="#00aa00"/>
  <objecttype name="tree" color="#005500"/>
 </objecttypes>

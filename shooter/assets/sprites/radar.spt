@@ -57,4 +57,29 @@ spritesheet radar
 	{
 		bounds = 40, 0, 8, 8
 	}
+
+	sprite scorpion
+	{
+		bounds = 39,8,9,8
+	}
+
+	sprite ammo
+	{
+		bounds = 50,12,4,4
+	}
+
+	sprite battery
+	{
+		bounds = 58,10,4,6
+	}
+
+	sprite bush
+	{
+		bounds=48,26,8,6
+	}
+
+	sprite beetle
+	{
+		bounds=52,28,8,4
+	}
 }

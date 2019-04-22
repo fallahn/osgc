@@ -35,7 +35,6 @@ namespace TextureID
 {
     enum
     {
-        CrossHair,
         Clouds,
         Sidebar,
 
@@ -63,6 +62,10 @@ namespace SpriteID
         BuildingCentre,
         BuildingRight,
         Drone,
+
+        Crosshair,
+        AmmoTop,
+        BatteryTop,
 
         Count
     };
