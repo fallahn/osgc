@@ -196,8 +196,6 @@ void PlayerDirector::handleMessage(const xy::Message&)
 
 void PlayerDirector::process(float)
 {
-    //parseController();
-
     auto flags = m_inputFlags;
 
     xy::Command cmd;
@@ -210,58 +208,4 @@ void PlayerDirector::process(float)
 
     //make sure to reset fire button
     m_inputFlags &= ~Drone::Fire;
-}
-
-void PlayerDirector::parseController()
-{
-    //TODO this is all wrong - ignore it!!
-
-    if (m_inputFlags == 0)
-    {
-        std::uint16_t flags = 0;
-        auto x = sf::Joystick::getAxisPosition(0, sf::Joystick::PovX);
-        if (x > 40.f)
-        {
-            flags |= Drone::Right;
-            flags &= ~Drone::Left;
-        }
-        else if (x < -40.f)
-        {
-            flags |= Drone::Left;
-            flags &= ~Drone::Right;
-        }
-        else
-        {
-            flags &= ~(Drone::Left | Drone::Right);
-        }
-
-        x = sf::Joystick::getAxisPosition(0, sf::Joystick::PovY);
-#ifdef WIN32
-        //these are inverted on windows...
-        if (x > 40.f)
-        {
-            flags |= Drone::Up;
-        }
-        else if (x < -40.f)
-        {
-            flags |= Drone::Down;
-        }
-#else
-        if (x > 40.f)
-        {
-            flags |= Drone::Down;
-        }
-        else if (x < -40.f)
-        {
-            flags |= Drone::Up;
-        }
-#endif
-
-        if (flags == 0)
-        {
-            //check analogue stick
-            
-        }
-        m_inputFlags = flags | (m_inputFlags & Drone::Fire);
-    }
 }

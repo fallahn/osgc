@@ -51,6 +51,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Random.hpp>
 
+#include <SFML/Window/Event.hpp>
+
 namespace
 {
     const std::string cloudFrag = R"(
@@ -93,6 +95,27 @@ bool GameState::handleEvent(const sf::Event& evt)
     if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
     {
         return false;
+    }
+
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::P:
+        case sf::Keyboard::Pause:
+        case sf::Keyboard::Escape:
+            requestStackPush(StateID::Pause);
+            break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickButtonPressed
+        && evt.joystickButton.joystickId == 0)
+    {
+        if (evt.joystickButton.button == 7)
+        {
+            requestStackPush(StateID::Pause);
+        }
     }
 
     m_gameScene.forwardEvent(evt);

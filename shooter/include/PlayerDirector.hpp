@@ -34,6 +34,4 @@ public:
 private:
 
     std::uint16_t m_inputFlags;
-
-    void parseController();
 };

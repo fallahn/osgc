@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "Bomb.hpp"
 #include "MessageIDs.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -64,7 +65,11 @@ void BombSystem::updateSide(xy::Entity entity, float dt)
 
     //update the gravity and use it to place the entity on screen
     bomb.gravity += Gravity;
-    tx.move(bomb.velocity.y * dt, bomb.gravity * dt);
+    
+    auto pos = tx.getPosition();
+    pos.x = ConstVal::BackgroundPosition.x + (bomb.position.y / 2.f);
+    pos.y += bomb.gravity * dt;
+    tx.setPosition(pos);
 
     //check Y pos - if more than ground position then destroy ent and
     //raise a message with position data to create an explosion

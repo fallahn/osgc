@@ -25,7 +25,8 @@ namespace StateID
     enum
     {
         MainMenu,
-        Game
+        Game,
+        Pause
     };
 }
 

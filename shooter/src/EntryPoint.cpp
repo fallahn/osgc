@@ -30,6 +30,7 @@ source distribution.
 #include "ResourceIDs.hpp"
 #include "MenuState.hpp"
 #include "GameState.hpp"
+#include "PauseState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -45,6 +46,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     
     ss->registerState<MenuState>(StateID::MainMenu, data);
     ss->registerState<GameState>(StateID::Game, data);
+    ss->registerState<PauseState>(StateID::Pause, data);
 
 #ifdef XY_DEBUG
     return StateID::Game;
@@ -58,4 +60,5 @@ void end(xy::StateStack* ss)
 {
     ss->unregisterState(StateID::MainMenu);
     ss->unregisterState(StateID::Game);
+    ss->unregisterState(StateID::Pause);
 }
