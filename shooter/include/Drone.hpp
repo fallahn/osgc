@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "GameConsts.hpp"
+
 #include <xyginext/ecs/System.hpp>
 
 #include <SFML/System/Vector2.hpp>
@@ -28,6 +30,17 @@ struct Drone final
 {
     sf::Vector2f velocity;
     std::int32_t health = 100;
+    float battery = 100.f;
+    std::int32_t ammo = 40;
+    std::int32_t lives = 5;
+    float height = ConstVal::DroneHeight;
+    float gravity = 0.f;
+    xy::Entity camera;
+
+    enum class State
+    {
+        Flying, PickingUp, Dying, Dead
+    }state = State::Flying;
 
     enum InputFlags
     {
@@ -48,6 +61,10 @@ public:
     void process(float) override;
 
 private:
+
+    void processFlying(xy::Entity, float);
+    void processPickingUp(xy::Entity, float);
+    void processDying(xy::Entity, float);
 
     void spawnBomb(sf::Vector2f position, sf::Vector2f veclocity);
 };

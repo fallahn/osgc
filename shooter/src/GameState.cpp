@@ -107,6 +107,15 @@ bool GameState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
             requestStackPush(StateID::Pause);
             break;
+        //case sf::Keyboard::Y:
+        //    m_topCamera.getComponent<xy::Camera>().zoom(1.1f);
+        //    break;
+        //case sf::Keyboard::U:
+        //    m_topCamera.getComponent<xy::Camera>().zoom(0.9f);
+        //    break;
+        //case sf::Keyboard::I:
+        //    m_topCamera.getComponent<xy::Camera>().setZoom(1.f);
+        //    break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed
@@ -268,6 +277,7 @@ void GameState::loadWorld()
     entity.getComponent<xy::Drawable>().bindUniform("u_texture", m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]));
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]));
 
+    //left side bar
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
     entity.getComponent<xy::Transform>().move(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y);
@@ -275,6 +285,15 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Sidebar]));
 
+    auto& sideTx = entity.getComponent<xy::Transform>();
+    //battery meter
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(5.f, 8.f); //.setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>().getVertices().resize(4);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::BatteryMeter;
+    sideTx.addChild(entity.getComponent<xy::Transform>());
+
+    //right side bar
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
     entity.getComponent<xy::Transform>().move(0.f, ConstVal::SmallViewPort.top * xy::DefaultSceneSize.y);
@@ -301,7 +320,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Crosshair];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerTop;
-    entity.addComponent<Drone>();
+    entity.addComponent<Drone>().camera = m_topCamera;
     entity.getComponent<xy::Transform>().addChild(m_topCamera.getComponent<xy::Transform>());
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
