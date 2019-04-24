@@ -75,17 +75,17 @@ namespace
         #version 120
 
         uniform float u_time;
+        uniform vec2 u_windowSize;
+        uniform vec2 u_viewSize;
 
         float rand(vec2 pos)
         {
-            float ret = dot(pos.xy, vec2(12.9898, 78.233));
-            ret = mod(ret, 3.14);
-            return fract(sin(ret + u_time) * 43758.5453);
+            return fract(sin(dot(pos, vec2(12.9898, 4.1414) + u_time)) * 43758.5453);
         }
 
         void main()
         {
-            gl_FragColor = vec4(vec3(rand(floor((gl_FragCoord.xy /*/ vec2(720.0, 960.0)*/) / 4.0))), 1.0);
+            gl_FragColor = vec4(vec3(rand(floor((gl_FragCoord.xy / u_windowSize) * (u_viewSize / 4.0)))), 1.0);
         })";
 }
 
@@ -105,6 +105,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    recalcViews();
 
     quitLoadingScreen();
 }
@@ -298,7 +300,6 @@ void GameState::initScene()
     m_topCamera.addComponent<xy::Camera>().setView(ConstVal::SmallViewSize);
     m_topCamera.getComponent<xy::Camera>().setBounds(ConstVal::MapArea);
     m_topCamera.addComponent<xy::AudioListener>();
-    recalcViews();
 
     m_gameScene.setActiveListener(m_topCamera);
 }
@@ -307,6 +308,8 @@ void GameState::loadAssets()
 {
     m_shaders.preload(ShaderID::Cloud, cloudFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Noise, noiseFrag, sf::Shader::Fragment);
+    m_shaders.get(ShaderID::Noise).setUniform("u_windowSize", sf::Vector2f(getContext().renderWindow.getSize()));
+    m_shaders.get(ShaderID::Noise).setUniform("u_viewSize", ConstVal::SmallViewSize);
 
     TextureID::handles[TextureID::Sidebar] = m_resources.load<sf::Texture>("assets/images/sidebar.png");
     TextureID::handles[TextureID::Clouds] = m_resources.load<sf::Texture>("assets/images/clouds.png");
@@ -391,7 +394,7 @@ void GameState::loadWorld()
 
     //ammo meter
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(13.f, 28.f);
+    entity.addComponent<xy::Transform>().setPosition(11.f, 28.f);
     entity.addComponent<xy::Drawable>().setTexture(m_sprites[SpriteID::AmmoIcon].getTexture());
     entity.addComponent<ItemBar>().xCount = 5;
     entity.getComponent<ItemBar>().itemCount = Drone::StartAmmo;
@@ -423,7 +426,7 @@ void GameState::loadWorld()
 
     //life bar
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(9.f, 28.f);
+    entity.addComponent<xy::Transform>().setPosition(8.f, 28.f);
     entity.addComponent<xy::Drawable>().setTexture(m_sprites[SpriteID::Drone].getTexture());
     entity.addComponent<ItemBar>().xCount = 4;
     entity.getComponent<ItemBar>().itemCount = Drone::StartLives;
@@ -437,6 +440,7 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
     entity.addComponent<xy::Sprite>(m_mapLoader.getTopDownTexture());
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BackgroundTop;
 
@@ -476,6 +480,8 @@ void GameState::recalcViews()
     newView.height = largeView.height * ConstVal::SmallViewPort.height;
 
     m_topCamera.getComponent<xy::Camera>().setViewport(newView);
+
+    m_shaders.get(ShaderID::Noise).setUniform("u_windowSize", sf::Vector2f(getContext().renderWindow.getSize()));
 }
 
 void GameState::showCrashMessage(bool gameOver)

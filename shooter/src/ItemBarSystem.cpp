@@ -55,7 +55,7 @@ void ItemBarSystem::process(float)
                 verts.emplace_back(sf::Vector2f(left, top), sf::Vector2f(rect.left, rect.top));
                 verts.emplace_back(sf::Vector2f(left + rect.width, top), sf::Vector2f(rect.left + rect.width, rect.top));
                 verts.emplace_back(sf::Vector2f(left + rect.width, top + rect.height), sf::Vector2f(rect.left + rect.width, rect.top + rect.height));
-                verts.emplace_back(sf::Vector2f(left, top + rect.height), sf::Vector2f(rect.left, rect.height));
+                verts.emplace_back(sf::Vector2f(left, top + rect.height), sf::Vector2f(rect.left, rect.top + rect.height));
             }
             remainTop += rect.height;
         }
@@ -69,7 +69,7 @@ void ItemBarSystem::process(float)
             verts.emplace_back(sf::Vector2f(left, remainTop), sf::Vector2f(rect.left, rect.top));
             verts.emplace_back(sf::Vector2f(left + rect.width, remainTop), sf::Vector2f(rect.left + rect.width, rect.top));
             verts.emplace_back(sf::Vector2f(left + rect.width, remainTop + rect.height), sf::Vector2f(rect.left + rect.width, rect.top + rect.height));
-            verts.emplace_back(sf::Vector2f(left, remainTop + rect.height), sf::Vector2f(rect.left, rect.height));
+            verts.emplace_back(sf::Vector2f(left, remainTop + rect.height), sf::Vector2f(rect.left, rect.top + rect.height));
         }
 
         drawable.updateLocalBounds();

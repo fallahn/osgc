@@ -65,7 +65,7 @@ spritesheet radar
 
 	sprite ammo
 	{
-		bounds = 50,12,4,4
+		bounds = 49,11,5,5
 	}
 
 	sprite battery
