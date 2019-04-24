@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "Drone.hpp"
 #include "Bomb.hpp"
 #include "SoundEffectsDirector.hpp"
+#include "ItemBar.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -106,6 +107,11 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     quitLoadingScreen();
+}
+
+GameState::~GameState()
+{
+    m_sharedData.shaders = nullptr;
 }
 
 //public
@@ -269,6 +275,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<DroneSystem>(mb);
     m_gameScene.addSystem<BombSystem>(mb);
+    m_gameScene.addSystem<ItemBarSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
@@ -322,11 +329,17 @@ void GameState::loadAssets()
     m_sprites[SpriteID::TreeIcon] = spriteSheet.getSprite("tree");
     m_sprites[SpriteID::BushIcon] = spriteSheet.getSprite("bush");
     m_sprites[SpriteID::Drone] = spriteSheet.getSprite("drone");
+    m_sprites[SpriteID::ScorpionIcon] = spriteSheet.getSprite("scorpion");
+    m_sprites[SpriteID::AmmoIcon] = spriteSheet.getSprite("ammo");
+    m_sprites[SpriteID::BatteryIcon] = spriteSheet.getSprite("battery");
+    m_sprites[SpriteID::BeetleIcon] = spriteSheet.getSprite("beetle");
 
     spriteSheet.loadFromFile("assets/sprites/ui.spt", m_resources);
     m_sprites[SpriteID::AmmoTop] = spriteSheet.getSprite("ammo");
     m_sprites[SpriteID::Crosshair] = spriteSheet.getSprite("crosshair");
     m_sprites[SpriteID::BatteryTop] = spriteSheet.getSprite("battery");
+    m_sprites[SpriteID::HealthBar] = spriteSheet.getSprite("health_bar");
+    m_sprites[SpriteID::BatteryBar] = spriteSheet.getSprite("battery_bar");
 
     spriteSheet.loadFromFile("assets/sprites/craters.spt", m_resources);
     m_sprites[SpriteID::Crater01] = spriteSheet.getSprite("crater_01");
@@ -369,8 +382,21 @@ void GameState::loadWorld()
     //battery meter
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(5.f, 8.f);
-    entity.addComponent<xy::Drawable>().getVertices().resize(4);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::BatteryBar];
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Green);
+    entity.addComponent<sf::FloatRect>() = m_sprites[SpriteID::BatteryBar].getTextureRect();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BatteryMeter;
+    sideTx.addChild(entity.getComponent<xy::Transform>());
+
+    //ammo meter
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(13.f, 28.f);
+    entity.addComponent<xy::Drawable>().setTexture(m_sprites[SpriteID::AmmoIcon].getTexture());
+    entity.addComponent<ItemBar>().xCount = 5;
+    entity.getComponent<ItemBar>().itemCount = Drone::StartAmmo;
+    entity.getComponent<ItemBar>().textureRect = m_sprites[SpriteID::AmmoIcon].getTextureRect();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::AmmoMeter;
     sideTx.addChild(entity.getComponent<xy::Transform>());
 
     //right side bar
@@ -384,6 +410,26 @@ void GameState::loadWorld()
     sidebarWidth = xy::DefaultSceneSize.x - sidebarWidth;
     entity.getComponent<xy::Transform>().move(sidebarWidth, 0.f);
 
+    //health meter
+    auto& otherSideTx = entity.getComponent<xy::Transform>();
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(5.f, 8.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::HealthBar];
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Green);
+    entity.addComponent<sf::FloatRect>() = m_sprites[SpriteID::HealthBar].getTextureRect();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::HealthMeter;
+    otherSideTx.addChild(entity.getComponent<xy::Transform>());
+
+    //life bar
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(9.f, 28.f);
+    entity.addComponent<xy::Drawable>().setTexture(m_sprites[SpriteID::Drone].getTexture());
+    entity.addComponent<ItemBar>().xCount = 4;
+    entity.getComponent<ItemBar>().itemCount = Drone::StartLives;
+    entity.getComponent<ItemBar>().textureRect = m_sprites[SpriteID::Drone].getTextureRect();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::LifeMeter;
+    otherSideTx.addChild(entity.getComponent<xy::Transform>());
 
     m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));
 
@@ -391,7 +437,6 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
-    //entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
     entity.addComponent<xy::Sprite>(m_mapLoader.getTopDownTexture());
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BackgroundTop;
 

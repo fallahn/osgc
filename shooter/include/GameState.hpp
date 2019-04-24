@@ -33,6 +33,7 @@ class GameState final : public xy::State
 {
 public:
     GameState(xy::StateStack&, xy::State::Context, SharedData&);
+    ~GameState();
 
     bool handleEvent(const sf::Event&) override;
 

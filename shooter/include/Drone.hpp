@@ -29,12 +29,15 @@ Copyright 2019 Matt Marchant
 
 struct Drone final
 {
+    static constexpr std::int32_t StartLives = 5;
+    static constexpr std::int32_t StartAmmo = 25;
+
     sf::Vector2f velocity;
     std::size_t wavetableIndex = 0;
-    std::int32_t health = 100;
+    float health = 100;
     float battery = 100.f;
-    std::int32_t ammo = 25;
-    std::int32_t lives = 5;
+    std::int32_t ammo = StartAmmo;
+    std::int32_t lives = StartLives;
     float height = ConstVal::DroneHeight;
     float gravity = 0.f;
     xy::Entity camera;

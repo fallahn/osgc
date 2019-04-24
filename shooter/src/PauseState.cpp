@@ -196,7 +196,7 @@ void PauseState::createContinue()
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -60.f);
-    entity.addComponent<xy::Text>(font).setString("YOU DIED");
+    entity.addComponent<xy::Text>(font).setString("DRONE LOST");
     entity.getComponent<xy::Text>().setCharacterSize(180);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();

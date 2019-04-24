@@ -18,16 +18,23 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace CommandID
+#include <xyginext/ecs/System.hpp>
+
+#include <SFML/Graphics/Rect.hpp>
+
+#include <cstdint>
+
+struct ItemBar final
 {
-    enum
-    {
-        PlayerTop = 0x1,
-        PlayerSide = 0x2,
-        BatteryMeter = 0x4,
-        HealthMeter = 0x8,
-        LifeMeter = 0x10,
-        AmmoMeter = 0x20,
-        BackgroundTop = 0x40
-    };
-}
+    sf::FloatRect textureRect;
+    std::int32_t xCount = 1; //number of items before startng a new line
+    std::int32_t itemCount = 0;
+};
+
+class ItemBarSystem final : public xy::System
+{
+public:
+    explicit ItemBarSystem(xy::MessageBus&);
+
+    void process(float) override;
+};

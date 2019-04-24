@@ -72,10 +72,16 @@ namespace SpriteID
         BuildingCentre,
         BuildingRight,
         Drone,
+        ScorpionIcon,
+        AmmoIcon,
+        BatteryIcon,
+        BeetleIcon,
 
         Crosshair,
         AmmoTop,
         BatteryTop,
+        HealthBar,
+        BatteryBar,
 
         Crater01,
         Crater02,

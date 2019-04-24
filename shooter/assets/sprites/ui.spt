@@ -17,4 +17,14 @@ spritesheet ui
 	{
 		bounds=32,0,16,16
 	}
+
+	sprite health_bar
+	{
+		bounds=0,16,38,9
+	}
+
+	sprite battery_bar
+	{
+		bounds = 0, 25,38,9
+	}
 }
