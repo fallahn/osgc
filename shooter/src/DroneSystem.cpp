@@ -252,7 +252,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
         //update side view
         xy::Command cmd;
         cmd.targetFlags = CommandID::PlayerSide;
-        cmd.action = [drone, sidePos](xy::Entity e, float dt)
+        cmd.action = [drone, sidePos](xy::Entity e, float)
         {
             auto& tx = e.getComponent<xy::Transform>();
             auto pos = tx.getPosition();
@@ -308,7 +308,7 @@ void DroneSystem::processDying(xy::Entity entity, float dt)
     //update side view
     xy::Command cmd;
     cmd.targetFlags = CommandID::PlayerSide;
-    cmd.action = [drone, sidePos](xy::Entity e, float dt)
+    cmd.action = [drone, sidePos](xy::Entity e, float)
     {
         auto& tx = e.getComponent<xy::Transform>();
         auto pos = tx.getPosition();
