@@ -47,6 +47,14 @@ void SpawnDirector::handleMessage(const xy::Message& msg)
             spawnMiniExplosion(data.position);
         }
     }
+    else if (msg.id == MessageID::DroneMessage)
+    {
+        const auto& data = msg.getData<DroneEvent>();
+        if (data.type == DroneEvent::Died)
+        {
+            spawnMiniExplosion(data.position);
+        }
+    }
 }
 
 void SpawnDirector::process(float)

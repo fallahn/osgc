@@ -38,6 +38,8 @@ source distribution.
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
+#include <xyginext/resources/ShaderResource.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 
@@ -64,25 +66,20 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     };
     entity.getComponent<xy::Drawable>().updateLocalBounds(); // this is required whenever vertex data is modified
 
-
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
-
-    //text entities
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -60.f);
-    entity.addComponent<xy::Text>(font).setString("PAUSED");
-    entity.getComponent<xy::Text>().setCharacterSize(180);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.addComponent<xy::Drawable>();
-
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 148.f);
-    entity.addComponent<xy::Text>(font).setString("Press Q to Quit or P to Continue");
-    entity.getComponent<xy::Text>().setCharacterSize(40);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.addComponent<xy::Drawable>();
+    switch (sd.pauseMessage)
+    {
+    default:
+        break;
+    case SharedData::Paused:
+        createPause();
+        break;
+    case SharedData::GameOver:
+        createGameover();
+        break;
+    case SharedData::Died:
+        createContinue();
+        break;
+    }
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -95,18 +92,30 @@ bool PauseState::handleEvent(const sf::Event& evt)
 {
     if (evt.type == sf::Event::KeyReleased)
     {
-        switch (evt.key.code)
+        if (m_sharedData.pauseMessage == SharedData::Paused)
         {
-        default: break;
-        case sf::Keyboard::P:
-        case sf::Keyboard::Escape:
-        case sf::Keyboard::Pause:
+            switch (evt.key.code)
+            {
+            default: break;
+            case sf::Keyboard::P:
+            case sf::Keyboard::Escape:
+            case sf::Keyboard::Pause:
+                requestStackPop();
+                break;
+            case sf::Keyboard::Q:
+                requestStackClear();
+                requestStackPush(StateID::MainMenu);
+                break;
+            }
+        }
+        else if (m_sharedData.pauseMessage == SharedData::Died)
+        {
             requestStackPop();
-            break;
-        case sf::Keyboard::Q:
+        }
+        else if (m_sharedData.pauseMessage == SharedData::GameOver)
+        {
             requestStackClear();
             requestStackPush(StateID::MainMenu);
-            break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed
@@ -117,7 +126,15 @@ bool PauseState::handleEvent(const sf::Event& evt)
         default: break;
         case 6:
         case 1:
-            requestStackPop();
+            if (m_sharedData.pauseMessage == SharedData::GameOver)
+            {
+                requestStackClear();
+                requestStackPush(StateID::MainMenu);
+            }
+            else
+            {
+                requestStackPop();
+            }
             break;
         }
     }
@@ -133,6 +150,11 @@ void PauseState::handleMessage(const xy::Message& msg)
 
 bool PauseState::update(float dt)
 {
+    static float shaderTime = 0.f;
+    shaderTime += dt * 0.001f;
+    m_sharedData.shaders->get(ShaderID::Cloud).setUniform("u_time", shaderTime);
+    m_sharedData.shaders->get(ShaderID::Noise).setUniform("u_time", shaderTime);
+
     m_scene.update(dt);
     return false;
 }
@@ -141,4 +163,71 @@ void PauseState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
+}
+
+//private
+void PauseState::createPause()
+{
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+
+    //text entities
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -60.f);
+    entity.addComponent<xy::Text>(font).setString("PAUSED");
+    entity.getComponent<xy::Text>().setCharacterSize(180);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 148.f);
+    entity.addComponent<xy::Text>(font).setString("Press Q to Quit or P to Continue");
+    entity.getComponent<xy::Text>().setCharacterSize(40);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+}
+
+void PauseState::createContinue()
+{
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+
+    //text entities
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -60.f);
+    entity.addComponent<xy::Text>(font).setString("YOU DIED");
+    entity.getComponent<xy::Text>().setCharacterSize(180);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 148.f);
+    entity.addComponent<xy::Text>(font).setString("Press Any Key To Continue");
+    entity.getComponent<xy::Text>().setCharacterSize(40);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+}
+
+void PauseState::createGameover()
+{
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+
+    //text entities
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -60.f);
+    entity.addComponent<xy::Text>(font).setString("GAME OVER");
+    entity.getComponent<xy::Text>().setCharacterSize(180);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 148.f);
+    entity.addComponent<xy::Text>(font).setString("Press Any Key");
+    entity.getComponent<xy::Text>().setCharacterSize(40);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
 }

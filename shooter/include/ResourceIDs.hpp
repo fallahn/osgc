@@ -44,6 +44,15 @@ namespace TextureID
     static std::array<std::size_t, TextureID::Count> handles;
 }
 
+namespace ShaderID
+{
+    enum
+    {
+        Cloud,
+        Noise
+    };
+}
+
 #include <xyginext/ecs/components/Sprite.hpp>
 namespace SpriteID
 {

@@ -24,7 +24,8 @@ namespace MessageID
 {
     enum
     {
-        BombMessage = xy::Message::Count
+        BombMessage = xy::Message::Count,
+        DroneMessage
     };
 }
 
@@ -36,4 +37,15 @@ struct BombEvent final
         Exploded
     }type = Exploded;
     sf::Vector2f position; //top down coordinates
+};
+
+struct DroneEvent final
+{
+    enum
+    {
+        Spawned,
+        Died
+    }type = Spawned;
+    std::int32_t lives = 0;
+    sf::Vector2f position;
 };

@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/resources/ResourceHandler.hpp>
 
+
 namespace StateID
 {
     enum
@@ -30,7 +31,20 @@ namespace StateID
     };
 }
 
+namespace xy
+{
+    class ShaderResource;
+}
+
 struct SharedData final
 {
     xy::ResourceHandler resources;
+    xy::ShaderResource* shaders = nullptr;
+    enum
+    {
+        None,
+        Paused,
+        Died,
+        GameOver
+    }pauseMessage = None;
 };

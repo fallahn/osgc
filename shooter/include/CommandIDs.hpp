@@ -24,6 +24,7 @@ namespace CommandID
     {
         PlayerTop = 0x1,
         PlayerSide = 0x2,
-        BatteryMeter = 0x4
+        BatteryMeter = 0x4,
+        BackgroundTop = 0x8
     };
 }

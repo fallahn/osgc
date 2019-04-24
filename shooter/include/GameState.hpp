@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 
@@ -51,15 +52,16 @@ private:
     xy::Entity m_topCamera;
 
     xy::ResourceHolder m_resources;
+    xy::ShaderResource m_shaders;
     SpriteArray m_sprites;
 
     MapLoader m_mapLoader;
-
-    sf::Shader m_cloudShader;
 
     void initScene();
     void loadAssets();
     void loadWorld();
 
     void recalcViews();
+
+    void showCrashMessage(bool);
 };

@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 
 #include <xyginext/ecs/System.hpp>
+#include <xyginext/ecs/components/Camera.hpp>
 
 #include <SFML/System/Vector2.hpp>
 
@@ -29,9 +30,10 @@ Copyright 2019 Matt Marchant
 struct Drone final
 {
     sf::Vector2f velocity;
+    std::size_t wavetableIndex = 0;
     std::int32_t health = 100;
     float battery = 100.f;
-    std::int32_t ammo = 40;
+    std::int32_t ammo = 25;
     std::int32_t lives = 5;
     float height = ConstVal::DroneHeight;
     float gravity = 0.f;
@@ -48,9 +50,20 @@ struct Drone final
         Down = 0x2,
         Left = 0x4,
         Right = 0x8,
-        Fire = 0x10
+        Fire = 0x10,
+        Pickup = 0x20
     };
     std::uint16_t inputFlags = 0;
+
+    void reset()
+    {
+        wavetableIndex = 0;
+        state = Drone::State::Flying;
+        height = ConstVal::DroneHeight;
+        gravity = 0.f;
+        //battery = 100.f; //do this manually
+        camera.getComponent<xy::Camera>().setZoom(1.f);
+    }
 };
 
 class DroneSystem final : public xy::System
@@ -58,9 +71,13 @@ class DroneSystem final : public xy::System
 public:
     explicit DroneSystem(xy::MessageBus&);
 
+    void handleMessage(const xy::Message&) override;
+
     void process(float) override;
 
 private:
+
+    std::vector<float> m_wavetable;
 
     void processFlying(xy::Entity, float);
     void processPickingUp(xy::Entity, float);

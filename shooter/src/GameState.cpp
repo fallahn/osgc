@@ -69,6 +69,23 @@ namespace
             gl_FragColor = texture2D(u_texture, coord);
 
         })";
+
+    const std::string noiseFrag = R"(
+        #version 120
+
+        uniform float u_time;
+
+        float rand(vec2 pos)
+        {
+            float ret = dot(pos.xy, vec2(12.9898, 78.233));
+            ret = mod(ret, 3.14);
+            return fract(sin(ret + u_time) * 43758.5453);
+        }
+
+        void main()
+        {
+            gl_FragColor = vec4(vec3(rand(floor((gl_FragCoord.xy /*/ vec2(720.0, 960.0)*/) / 4.0))), 1.0);
+        })";
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -78,6 +95,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_mapLoader (m_sprites)
 {
     launchLoadingScreen();
+
+    sd.shaders = &m_shaders;
 
     initScene();
     loadAssets();
@@ -105,17 +124,9 @@ bool GameState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
         case sf::Keyboard::Escape:
+            m_sharedData.pauseMessage = SharedData::Paused;
             requestStackPush(StateID::Pause);
             break;
-        //case sf::Keyboard::Y:
-        //    m_topCamera.getComponent<xy::Camera>().zoom(1.1f);
-        //    break;
-        //case sf::Keyboard::U:
-        //    m_topCamera.getComponent<xy::Camera>().zoom(0.9f);
-        //    break;
-        //case sf::Keyboard::I:
-        //    m_topCamera.getComponent<xy::Camera>().setZoom(1.f);
-        //    break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed
@@ -123,6 +134,7 @@ bool GameState::handleEvent(const sf::Event& evt)
     {
         if (evt.joystickButton.button == 7)
         {
+            m_sharedData.pauseMessage = SharedData::Paused;
             requestStackPush(StateID::Pause);
         }
     }
@@ -150,6 +162,72 @@ void GameState::handleMessage(const xy::Message& msg)
             m_mapLoader.renderSprite(xy::Util::Random::value(SpriteID::Crater01, SpriteID::Crater04), data.position);
         }
     }
+    else if (msg.id == MessageID::DroneMessage)
+    {
+        const auto& data = msg.getData<DroneEvent>();
+        if (data.type == DroneEvent::Died)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::BackgroundTop;
+            cmd.action = [&, data](xy::Entity e, float)
+            {
+                e.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
+                e.getComponent<xy::Drawable>().setDepth(-ConstVal::BackgroundDepth);
+
+                showCrashMessage(data.lives == 0); //has to be done here to ensure shader updated
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        else if (data.type == DroneEvent::Spawned)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::BackgroundTop;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<xy::Drawable>().setShader(nullptr);
+                e.getComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+    }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Popped
+            && data.id == StateID::Pause)
+        {
+            if (m_sharedData.pauseMessage == SharedData::Died)
+            {
+                //respawn the player
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::PlayerTop;
+                cmd.action = [&](xy::Entity e, float)
+                {
+                    auto& drone = e.getComponent<Drone>();
+                    drone.reset();
+                    drone.battery = 100.f;
+
+                    e.getComponent<xy::Sprite>().setColour(sf::Color::White);
+
+                    auto* msg = getContext().appInstance.getMessageBus().post<DroneEvent>(MessageID::DroneMessage);
+                    msg->type = DroneEvent::Spawned;
+                    msg->lives = drone.lives;
+                    msg->position = e.getComponent<xy::Transform>().getPosition();
+                };
+                m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                cmd.targetFlags = CommandID::PlayerSide;
+                cmd.action = [](xy::Entity e, float)
+                {
+                    auto& tx = e.getComponent<xy::Transform>();
+                    auto pos = tx.getPosition();
+                    pos.y = ConstVal::DroneHeight;
+                    tx.setPosition(pos);
+                };
+                m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
+        }
+    }
 
     m_gameScene.forwardMessage(msg);
 }
@@ -158,7 +236,8 @@ bool GameState::update(float dt)
 {
     static float shaderTime = 0.f;
     shaderTime += dt * 0.001f;
-    m_cloudShader.setUniform("u_time", shaderTime);
+    m_shaders.get(ShaderID::Cloud).setUniform("u_time", shaderTime);
+    m_shaders.get(ShaderID::Noise).setUniform("u_time", shaderTime);
 
     m_gameScene.update(dt);
 
@@ -219,7 +298,8 @@ void GameState::initScene()
 
 void GameState::loadAssets()
 {
-    m_cloudShader.loadFromMemory(cloudFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Cloud, cloudFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Noise, noiseFrag, sf::Shader::Fragment);
 
     TextureID::handles[TextureID::Sidebar] = m_resources.load<sf::Texture>("assets/images/sidebar.png");
     TextureID::handles[TextureID::Clouds] = m_resources.load<sf::Texture>("assets/images/clouds.png");
@@ -273,7 +353,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 1);
-    entity.getComponent<xy::Drawable>().setShader(&m_cloudShader);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Cloud));
     entity.getComponent<xy::Drawable>().bindUniform("u_texture", m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]));
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]));
 
@@ -288,7 +368,7 @@ void GameState::loadWorld()
     auto& sideTx = entity.getComponent<xy::Transform>();
     //battery meter
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(5.f, 8.f); //.setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Transform>().setPosition(5.f, 8.f);
     entity.addComponent<xy::Drawable>().getVertices().resize(4);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BatteryMeter;
     sideTx.addChild(entity.getComponent<xy::Transform>());
@@ -311,7 +391,9 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
+    //entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
     entity.addComponent<xy::Sprite>(m_mapLoader.getTopDownTexture());
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::BackgroundTop;
 
     //create a crosshair for the drone and have the camera follow it
     entity = m_gameScene.createEntity();
@@ -324,7 +406,7 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().addChild(m_topCamera.getComponent<xy::Transform>());
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
-
+    m_topCamera.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, bounds.height / 2.f);
 
     //this is our side-view drone
     entity = m_gameScene.createEntity();
@@ -349,4 +431,10 @@ void GameState::recalcViews()
     newView.height = largeView.height * ConstVal::SmallViewPort.height;
 
     m_topCamera.getComponent<xy::Camera>().setViewport(newView);
+}
+
+void GameState::showCrashMessage(bool gameOver)
+{
+    m_sharedData.pauseMessage = gameOver ? SharedData::GameOver : SharedData::Died;
+    requestStackPush(StateID::Pause);
 }

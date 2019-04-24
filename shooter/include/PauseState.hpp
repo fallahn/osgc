@@ -50,4 +50,8 @@ private:
 
     xy::Scene m_scene;
     SharedData& m_sharedData;
+
+    void createPause();
+    void createContinue();
+    void createGameover();
 };

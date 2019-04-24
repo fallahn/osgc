@@ -25,10 +25,11 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
-#include <xyginext/ecs/components/Camera.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
+#include <xyginext/util/Wavetable.hpp>
 
 namespace
 {
@@ -37,7 +38,7 @@ namespace
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 
     const float MaxDroneHeight = 300.f; //crash after this
-    const float DroneDipHeight = 280.f; //dips this low for pickups
+    const float DroneDipHeight = 290.f; //dips this low for pickups
     const float Gravity = 9.9f;
 }
 
@@ -46,9 +47,24 @@ DroneSystem::DroneSystem(xy::MessageBus& mb)
 {
     requireComponent<xy::Transform>();
     requireComponent<Drone>();
+
+    m_wavetable = xy::Util::Wavetable::sine(0.25f, (DroneDipHeight - ConstVal::DroneHeight));
+
 }
 
 //public
+void DroneSystem::handleMessage(const xy::Message& /*msg*/)
+{
+    //if (msg.id == MessageID::DroneMessage)
+    //{
+    //    const auto& data = msg.getData<DroneEvent>();
+    //    if (data.type == DroneEvent::Spawned)
+    //    {
+
+    //    }
+    //}
+}
+
 void DroneSystem::process(float dt)
 {
     auto& entities = getEntities();
@@ -140,9 +156,16 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
         drone.ammo--;
         spawnBomb(pos, drone.velocity);
     }
+
+    if (drone.inputFlags & Drone::Pickup)
+    {
+        drone.state = Drone::State::PickingUp;
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+    }
+
     drone.inputFlags = 0;
 
-    //slowly drain battery
+    //slowly drain battery - TODO also in pick up state?
     drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
     //send update to battery indicator
     cmd.targetFlags = CommandID::BatteryMeter;
@@ -176,12 +199,58 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     if (drone.battery == 0)
     {
         drone.state = Drone::State::Dying;
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
     }
 }
 
 void DroneSystem::processPickingUp(xy::Entity entity, float dt)
 {
+    auto& drone = entity.getComponent<Drone>();
+    if (drone.wavetableIndex < m_wavetable.size() / 2)
+    {
+        drone.height = m_wavetable[drone.wavetableIndex++] + ConstVal::DroneHeight;
 
+        //update top view
+        auto& tx = entity.getComponent<xy::Transform>();
+        tx.move(drone.velocity * dt);
+        auto sidePos = ConstVal::BackgroundPosition.x + (tx.getPosition().y / 2.f);
+        drone.camera.getComponent<xy::Camera>().setZoom(((drone.height - ConstVal::DroneHeight) * 0.5f) + 1.f);
+        drone.velocity *= 0.9f;
+
+        //update side view
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::PlayerSide;
+        cmd.action = [drone, sidePos](xy::Entity e, float dt)
+        {
+            auto& tx = e.getComponent<xy::Transform>();
+            auto pos = tx.getPosition();
+            pos.x = sidePos;
+            pos.y = drone.height;
+            tx.setPosition(pos);
+        };
+        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        //TODO check collision with collectible
+
+        //TODO check collision with buildings/trees
+    }
+    else
+    {
+        //reset drone
+        drone.reset();
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
+
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::PlayerSide;
+        cmd.action = [](xy::Entity e, float)
+        {
+            auto& tx = e.getComponent<xy::Transform>();
+            auto pos = tx.getPosition();
+            pos.y = ConstVal::DroneHeight;
+            tx.setPosition(pos);
+        };
+        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void DroneSystem::processDying(xy::Entity entity, float dt)
@@ -196,7 +265,7 @@ void DroneSystem::processDying(xy::Entity entity, float dt)
     auto& tx = entity.getComponent<xy::Transform>();
     tx.move(drone.velocity * dt);
     auto sidePos = ConstVal::BackgroundPosition.x + (tx.getPosition().y / 2.f);
-    drone.camera.getComponent<xy::Camera>().setZoom((drone.height - ConstVal::DroneHeight) + 1.f);
+    drone.camera.getComponent<xy::Camera>().setZoom(((drone.height - ConstVal::DroneHeight) * 0.5f) + 1.f);
     drone.velocity *= 0.9f;
 
     //update side view
@@ -216,23 +285,12 @@ void DroneSystem::processDying(xy::Entity entity, float dt)
     {
         //hit the ground!
         drone.lives--;
+        drone.state = Drone::State::Dead;
 
-
-        //temp reset for now
-        drone.state = Drone::State::Flying;
-        drone.height = ConstVal::DroneHeight;
-        drone.gravity = 0.f;
-        drone.battery = 100.f;
-        drone.camera.getComponent<xy::Camera>().setZoom(1.f);
-
-        cmd.action = [](xy::Entity e, float)
-        {
-            auto& tx = e.getComponent<xy::Transform>();
-            auto pos = tx.getPosition();
-            pos.y = ConstVal::DroneHeight;
-            tx.setPosition(pos);
-        };
-        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+        auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+        msg->type = DroneEvent::Died;
+        msg->position = tx.getPosition();
+        msg->lives = drone.lives;
     }
 }
 

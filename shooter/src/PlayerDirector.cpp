@@ -61,6 +61,10 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
         case sf::Keyboard::D:
             m_inputFlags |= Drone::Right;
             break;
+        case sf::Keyboard::LControl:
+        case sf::Keyboard::RControl:
+            m_inputFlags |= Drone::Pickup;
+            break;
         }
     }
     else if (evt.type == sf::Event::KeyReleased)
@@ -101,7 +105,7 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
             m_inputFlags |= Drone::Fire;
             break;
         case 1:
-
+            m_inputFlags |= Drone::Pickup;
             break;
         case 4:
 
@@ -206,6 +210,6 @@ void PlayerDirector::process(float)
     };
     sendCommand(cmd);
 
-    //make sure to reset fire button
-    m_inputFlags &= ~Drone::Fire;
+    //make sure to reset fire/pickup button
+    m_inputFlags &= ~(Drone::Fire | Drone::Pickup);
 }
