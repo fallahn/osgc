@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include "SoundEffectsDirector.hpp"
 #include "ItemBar.hpp"
 #include "CollisionTypes.hpp"
+#include "ScoreDirector.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -54,8 +55,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Font.hpp>
 
 namespace
 {
@@ -170,7 +173,7 @@ void GameState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<BombEvent>();
         if (data.type == BombEvent::Exploded)
         {
-            m_mapLoader.renderSprite(xy::Util::Random::value(SpriteID::Crater01, SpriteID::Crater04), data.position);
+            drawCrater(data.position);
         }
     }
     else if (msg.id == MessageID::DroneMessage)
@@ -293,6 +296,7 @@ void GameState::initScene()
     m_gameScene.addDirector<PlayerDirector>();
     m_gameScene.addDirector<SpawnDirector>(m_sprites);
     m_gameScene.addDirector<SFXDirector>(m_resources);
+    m_gameScene.addDirector<ScoreDirector>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]));
 
     m_sideCamera = m_gameScene.createEntity();
     m_sideCamera.addComponent<xy::Transform>();
@@ -407,6 +411,16 @@ void GameState::loadWorld()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::AmmoMeter;
     sideTx.addChild(entity.getComponent<xy::Transform>());
 
+    //score
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(11.f, 56.f);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Score:\n\n0");
+    entity.getComponent<xy::Text>().setCharacterSize(16);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreText;
+    sideTx.addChild(entity.getComponent<xy::Transform>());
+
     //right side bar
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition);
@@ -504,4 +518,21 @@ void GameState::showCrashMessage(bool gameOver)
 {
     m_sharedData.pauseMessage = gameOver ? SharedData::GameOver : SharedData::Died;
     requestStackPush(StateID::Pause);
+}
+
+void GameState::drawCrater(sf::Vector2f position)
+{
+    //check we're not in water first
+    sf::FloatRect query(position.x - 16.f, position.y - 16.f, 32.f, 32.f);
+    auto nearby = m_gameScene.getSystem<xy::DynamicTreeSystem>().query(query, CollisionBox::NoDecal);
+    for (auto e : nearby)
+    {
+        auto bounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+        if (bounds.contains(position))
+        {
+            return;
+        }
+    }
+
+    m_mapLoader.renderSprite(xy::Util::Random::value(SpriteID::Crater01, SpriteID::Crater04), position);
 }

@@ -42,7 +42,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     *sharedData = std::make_any<SharedData>();
 
     auto& data = std::any_cast<SharedData&>(*sharedData);
-    FontID::handles[FontID::HandDrawn] = data.resources.load<sf::Font>("assets/fonts/HandDrawnShapes.ttf");
+    FontID::handles[FontID::CGA] = data.resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
     
     ss->registerState<MenuState>(StateID::MainMenu, data);
     ss->registerState<GameState>(StateID::Game, data);

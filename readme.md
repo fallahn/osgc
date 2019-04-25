@@ -16,6 +16,8 @@ To create your own plugin copy the plugin_template directory and rename it to so
 
 Use the `begin()` and `end()` functions in the `EntryPoint.cpp` file to register and unregister any game states with the frontend. See the plugin example in the 'shooter' directory for further example. To learn more about creating a game with xygine follow the [xygine tutorial](https://github.com/fallahn/xygine/tree/master/tutorial) and refer to the [wiki](https://github.com/fallahn/xygine/wiki).
 
+Note that while OSGC is designed around xygine it is not strictly necessary to use xygine beyond implementing the plugin interface. Any game or software which will run within the evt/update/draw loop of a xygine state and can be drawn to an SFML render window is entirely feasible. For example my Gameboy emulator Speljongen [can be built as an OSGC plugin](https://github.com/fallahn/speljongen/tree/master/spel-osgc).
+
 ##### Directory Structure
 To correctly load plugins and their assets, the directory structure must follow this layout:
 

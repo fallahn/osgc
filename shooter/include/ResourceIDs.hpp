@@ -24,7 +24,7 @@ namespace FontID
 {
     enum
     {
-        HandDrawn,
+        CGA,
         Count
     };
 

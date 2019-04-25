@@ -35,4 +35,6 @@ namespace ConstVal
     static const sf::Vector2f SmallViewSize(xy::DefaultSceneSize.x * SmallViewPort.width, xy::DefaultSceneSize.y * SmallViewPort.height);
 
     static const sf::FloatRect MapArea(0.f, 0.f, 2880.f, 3840.f);
+
+    static const sf::FloatRect DamageRadius(-32.f, -32.f, 64.f, 64.f);
 }

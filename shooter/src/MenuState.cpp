@@ -100,7 +100,7 @@ void MenuState::initScene()
 void MenuState::buildMenu()
 {
     //title
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
     entity.addComponent<xy::Text>(font);

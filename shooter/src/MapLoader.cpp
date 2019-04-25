@@ -213,7 +213,7 @@ bool MapLoader::load(const std::string& path)
                     objBounds *= 8.f;
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
-                    cb.type = CollisionBox::Solid;
+                    cb.type = CollisionBox::Building;
                     m_collisionBoxes.push_back(cb);
 
                 }
@@ -247,7 +247,7 @@ bool MapLoader::load(const std::string& path)
                     objBounds *= 8.f;
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
-                    cb.type = CollisionBox::Solid;
+                    cb.type = CollisionBox::Structure;
                     m_collisionBoxes.push_back(cb);
                 }
                 else if (type == "tree")
@@ -269,7 +269,8 @@ bool MapLoader::load(const std::string& path)
                     objBounds *= 8.f;
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
-                    cb.type = CollisionBox::Solid;
+                    cb.type = CollisionBox::Structure;
+                    cb.filter = CollisionBox::NoDecal;
                     m_collisionBoxes.push_back(cb);
 
                 }
@@ -293,7 +294,7 @@ bool MapLoader::load(const std::string& path)
                     objBounds *= 8.f;
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
-                    cb.type = CollisionBox::Solid;
+                    cb.type = CollisionBox::Structure;
                     m_collisionBoxes.push_back(cb);
 
                 }

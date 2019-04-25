@@ -61,7 +61,6 @@ public:
 
     explicit SFXDirector(xy::ResourceHandler&);
 
-    void handleEvent(const sf::Event&) override {}
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 

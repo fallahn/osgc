@@ -168,12 +168,12 @@ void PauseState::draw()
 //private
 void PauseState::createPause()
 {
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
 
     //text entities
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -60.f);
+    entity.getComponent<xy::Transform>().move(0.f, -160.f);
     entity.addComponent<xy::Text>(font).setString("PAUSED");
     entity.getComponent<xy::Text>().setCharacterSize(180);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -190,12 +190,12 @@ void PauseState::createPause()
 
 void PauseState::createContinue()
 {
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
 
     //text entities
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -60.f);
+    entity.getComponent<xy::Transform>().move(0.f, -160.f);
     entity.addComponent<xy::Text>(font).setString("DRONE LOST");
     entity.getComponent<xy::Text>().setCharacterSize(180);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -212,12 +212,12 @@ void PauseState::createContinue()
 
 void PauseState::createGameover()
 {
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::HandDrawn]);
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
 
     //text entities
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -60.f);
+    entity.getComponent<xy::Transform>().move(0.f, -160.f);
     entity.addComponent<xy::Text>(font).setString("GAME OVER");
     entity.getComponent<xy::Text>().setCharacterSize(180);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);

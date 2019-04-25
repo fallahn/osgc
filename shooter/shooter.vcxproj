@@ -151,6 +151,7 @@
     <ClInclude Include="include\Drone.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\GameState.hpp" />
+    <ClInclude Include="include\ScoreDirector.hpp" />
     <ClInclude Include="include\ItemBar.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuConsts.hpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerDirector.cpp" />
+    <ClCompile Include="src\ScoreDirector.cpp" />
     <ClCompile Include="src\SoundEffectsDirector.cpp" />
     <ClCompile Include="src\SpawnDirector.cpp" />
   </ItemGroup>

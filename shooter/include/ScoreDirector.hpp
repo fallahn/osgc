@@ -18,27 +18,24 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <SFML/Graphics/Rect.hpp>
+#include <xyginext/ecs/Director.hpp>
 
-#include <limits>
-
-struct CollisionBox final
+namespace sf
 {
-    sf::FloatRect worldBounds;
-    enum
-    {
-        Building,
-        Structure,
-        NPC,
-        Water,
-        Ammo,
-        Battery
-    }type = Structure;
+    class Font;
+}
 
-    enum
-    {
-        None = 0x1,
-        NoDecal = 0x2
-    };
-    std::uint64_t filter = None;// std::numeric_limits<std::uint64_t>::max();
+class ScoreDirector final : public xy::Director
+{
+public:
+    explicit ScoreDirector(sf::Font&);
+
+    void handleMessage(const xy::Message&) override;
+
+private:
+
+    sf::Font& m_font;
+    std::int32_t m_score;
+
+    void spawnScoreItem(sf::Vector2f, std::int32_t);
 };

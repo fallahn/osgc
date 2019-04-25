@@ -36,7 +36,7 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const sf::Time AmmoRespawn = sf::seconds(12.f);
-    const sf::Time BatteryRespawn = sf::seconds(12.f);
+    const sf::Time BatteryRespawn = sf::seconds(18.f);
 
     const std::size_t MaxAmmo = 3;
     const std::size_t MaxBattery = 2;
@@ -231,7 +231,8 @@ sf::Vector2f SpawnDirector::getRandomPosition()
     static int depth = 1;
     static const int MaxDepth = 8;
 
-    sf::Vector2i randPos(xy::Util::Random::value(0, static_cast<std::int32_t>(ConstVal::MapArea.width)), xy::Util::Random::value(0, static_cast<std::int32_t>(ConstVal::MapArea.height)));
+    sf::Vector2i randPos(xy::Util::Random::value(64, static_cast<std::int32_t>(ConstVal::MapArea.width) - 128),
+                        xy::Util::Random::value(64, static_cast<std::int32_t>(ConstVal::MapArea.height) - 128));
     sf::Vector2f position(randPos);
 
     sf::FloatRect query(position.x - 12.f, position.y - 12.f, 24.f, 24.f);

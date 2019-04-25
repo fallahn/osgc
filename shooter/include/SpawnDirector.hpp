@@ -31,7 +31,6 @@ class SpawnDirector final : public xy::Director
 public:
     explicit SpawnDirector(SpriteArray&);
 
-    void handleEvent(const sf::Event&) override {}
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 

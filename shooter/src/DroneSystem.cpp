@@ -225,7 +225,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
 
         //check for collision
         bool collision = false;
-        std::int32_t collisionType = CollisionBox::Solid;
+        std::int32_t collisionType = CollisionBox::Structure;
         xy::Entity collider;
         if (newHeight > CollisionHeight)
         {
@@ -256,8 +256,10 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
             switch (collisionType)
             {
             default:
-            case CollisionBox::Solid:
+            case CollisionBox::Building:
+            case CollisionBox::Structure:
                 drone.health = std::max(0.f, drone.health - (dt * 50.f));
+                break;
             case CollisionBox::Ammo:
                 drone.height = newHeight;
                 getScene()->destroyEntity(collider);

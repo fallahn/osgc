@@ -65,4 +65,5 @@ private:
     void recalcViews();
 
     void showCrashMessage(bool);
+    void drawCrater(sf::Vector2f);
 };

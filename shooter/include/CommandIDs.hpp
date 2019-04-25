@@ -28,6 +28,7 @@ namespace CommandID
         HealthMeter = 0x8,
         LifeMeter = 0x10,
         AmmoMeter = 0x20,
-        BackgroundTop = 0x40
+        BackgroundTop = 0x40,
+        ScoreText = 0x80
     };
 }
