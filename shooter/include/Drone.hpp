@@ -44,6 +44,8 @@ struct Drone final
     float gravity = 0.f;
     xy::Entity camera;
 
+    bool colliding = false;
+
     enum class State
     {
         Flying, PickingUp, Dying, Dead

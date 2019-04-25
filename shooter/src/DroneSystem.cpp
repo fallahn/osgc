@@ -212,6 +212,10 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     {
         drone.state = Drone::State::Dying;
         entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+
+        auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+        msg->type = DroneEvent::BatteryFlat;
+        msg->position = tx.getPosition();
     }
 }
 
@@ -259,6 +263,15 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
             case CollisionBox::Building:
             case CollisionBox::Structure:
                 drone.health = std::max(0.f, drone.health - (dt * 50.f));
+
+                if (!drone.colliding)
+                {
+                    //collision just started
+                    auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+                    msg->type = DroneEvent::Collided;
+                    msg->position = tx.getPosition();
+                }
+
                 break;
             case CollisionBox::Ammo:
                 drone.height = newHeight;
@@ -284,6 +297,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
                 break;
             }
         }
+        drone.colliding = collision;
 
         //update top view
         tx.move(drone.velocity * dt);

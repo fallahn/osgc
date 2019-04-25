@@ -136,6 +136,12 @@ bool PauseState::handleEvent(const sf::Event& evt)
                 requestStackPop();
             }
             break;
+        case 0:
+            if (m_sharedData.pauseMessage == SharedData::Died)
+            {
+                requestStackPop();
+            }
+            break;
         }
     }
 

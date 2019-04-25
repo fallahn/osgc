@@ -42,7 +42,10 @@ namespace
     //IDs used to index paths below
     enum AudioID
     {
-        Explode, Drop,
+        Explode, BombDrop,
+        BatteryFlat, Noise,
+        Pickup, SpawnItem,
+        Damage,
 
         Count
     };
@@ -53,6 +56,11 @@ namespace
     {
         "assets/sound/explode.wav",
         "assets/sound/drop.wav",
+        "assets/sound/battery_flat.wav",
+        "assets/sound/noise.wav",
+        "assets/sound/pickup.wav",
+        "assets/sound/spawn_item.wav",
+        "assets/sound/damage.wav",
     };
 
     std::array<std::size_t, AudioID::Count> audioHandles;
@@ -79,11 +87,44 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<BombEvent>();
         if (data.type == BombEvent::Dropped)
         {
-            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Drop]), data.position);
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::BombDrop]), data.position);
         }
         else if (data.type == BombEvent::Exploded)
         {
             playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Explode]), data.position);
+        }
+    }
+    else if (msg.id == MessageID::DroneMessage)
+    {
+        const auto& data = msg.getData<DroneEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case DroneEvent::Died:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Explode]), data.position);
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Noise]), data.position);
+            break;
+        case DroneEvent::BatteryFlat:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::BatteryFlat]), data.position);
+            break;
+        case DroneEvent::GotAmmo:
+        case DroneEvent::GotBattery:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Pickup]), data.position).setVolume(0.1f);
+            break;
+        case DroneEvent::Collided:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Damage]), data.position);
+            break;
+        }
+    }
+    else if (msg.id == MessageID::SpawnMessage)
+    {
+        const auto& data = msg.getData<SpawnEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case SpawnEvent::Collectible:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::SpawnItem]), data.position);
+            break;
         }
     }
 }

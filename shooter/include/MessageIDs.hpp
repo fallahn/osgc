@@ -25,7 +25,8 @@ namespace MessageID
     enum
     {
         BombMessage = xy::Message::Count,
-        DroneMessage
+        DroneMessage,
+        SpawnMessage
     };
 }
 
@@ -46,8 +47,20 @@ struct DroneEvent final
         Spawned,
         Died,
         GotAmmo,
-        GotBattery
+        GotBattery,
+        BatteryFlat,
+        Collided
     }type = Spawned;
     std::int32_t lives = 0;
+    sf::Vector2f position;
+};
+
+struct SpawnEvent final
+{
+    enum
+    {
+        Collectible
+    }type = Collectible;
+
     sf::Vector2f position;
 };

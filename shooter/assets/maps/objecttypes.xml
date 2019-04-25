@@ -3,6 +3,7 @@
  <objecttype name="barrier" color="#808000"/>
  <objecttype name="building" color="#aa0000"/>
  <objecttype name="bush" color="#00aa00"/>
+ <objecttype name="sandbag" color="#ff5500"/>
  <objecttype name="tree" color="#005500"/>
  <objecttype name="water" color="#0000ff"/>
 </objecttypes>

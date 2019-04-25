@@ -99,7 +99,7 @@ void SpawnDirector::process(float)
     {
         m_itemClocks[Battery].restart();
 
-        if (m_activeItems[Battery] < MaxAmmo)
+        if (m_activeItems[Battery] < MaxBattery)
         {
             m_activeItems[Battery]++;
             spawnBattery(getRandomPosition());
@@ -188,6 +188,10 @@ void SpawnDirector::spawnAmmo(sf::Vector2f position)
             m_activeItems[Ammo]--;
         }
     };
+
+    auto* msg = postMessage<SpawnEvent>(MessageID::SpawnMessage);
+    msg->type = SpawnEvent::Collectible;
+    msg->position = position;
 }
 
 void SpawnDirector::spawnBattery(sf::Vector2f position)
@@ -224,6 +228,10 @@ void SpawnDirector::spawnBattery(sf::Vector2f position)
             m_activeItems[Battery]--;
         }
     };
+
+    auto* msg = postMessage<SpawnEvent>(MessageID::SpawnMessage);
+    msg->type = SpawnEvent::Collectible;
+    msg->position = position;
 }
 
 sf::Vector2f SpawnDirector::getRandomPosition()

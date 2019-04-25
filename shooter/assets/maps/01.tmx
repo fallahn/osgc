@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="50">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="59">
  <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="91" columns="13">
   <image source="../images/tileset.png" width="208" height="112"/>
  </tileset>
@@ -73,5 +73,14 @@
   <object id="47" type="water" x="16" y="344" width="48" height="32"/>
   <object id="48" type="water" x="324" y="296" width="92" height="64"/>
   <object id="49" type="water" x="480" y="296" width="232" height="64"/>
+  <object id="50" type="sandbag" x="548" y="36" width="136" height="8"/>
+  <object id="51" type="sandbag" x="676" y="44" width="8" height="88"/>
+  <object id="52" type="sandbag" x="548" y="132" width="136" height="8"/>
+  <object id="53" type="sandbag" x="180" y="612" width="136" height="8"/>
+  <object id="54" type="sandbag" x="212" y="500" width="104" height="8"/>
+  <object id="55" type="sandbag" x="308" y="508" width="8" height="104"/>
+  <object id="56" type="sandbag" x="180" y="528" width="8" height="84"/>
+  <object id="57" type="sandbag" x="660" y="516" width="8" height="224"/>
+  <object id="58" type="sandbag" x="404" y="740" width="264" height="8"/>
  </objectgroup>
 </map>

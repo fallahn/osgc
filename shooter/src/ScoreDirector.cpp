@@ -125,4 +125,5 @@ void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_font).setString(std::to_string(score));
     entity.getComponent<xy::Text>().setFillColour(textColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
 }
