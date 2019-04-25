@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "MapLoader.hpp"
 #include "GameConsts.hpp"
+#include "CollisionTypes.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
 #include <xyginext/core/Log.hpp>
@@ -36,6 +37,16 @@ namespace
     const sf::Vector2u SideMapSize(480,81);
     const float SandThickness = 16.f; //height of sand in side view
     const float SandThicknessScaled = SandThickness / 4.f;
+
+    template <typename T>
+    tmx::Rectangle<T>& operator *= (tmx::Rectangle<T>& l, T r)
+    {
+        l.left *= r;
+        l.top *= r;
+        l.width *= r;
+        l.height *= r;
+        return l;
+    }
 }
 
 MapLoader::MapLoader(const SpriteArray& sprites)
@@ -197,6 +208,14 @@ bool MapLoader::load(const std::string& path)
                     states.texture = m_sprites[SpriteID::BuildingLeft].getTexture();
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+
+                    //stash the collion box
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Solid;
+                    m_collisionBoxes.push_back(cb);
+
                 }
                 else if (type == "barrier")
                 {
@@ -224,6 +243,12 @@ bool MapLoader::load(const std::string& path)
                     states.texture = m_sprites[SpriteID::HillLeftWide].getTexture();
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Solid;
+                    m_collisionBoxes.push_back(cb);
                 }
                 else if (type == "tree")
                 {
@@ -240,6 +265,12 @@ bool MapLoader::load(const std::string& path)
                     states.texture = m_sprites[SpriteID::TreeIcon].getTexture();
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Solid;
+                    m_collisionBoxes.push_back(cb);
 
                 }
                 else if (type == "bush")
@@ -259,6 +290,21 @@ bool MapLoader::load(const std::string& path)
 
                     m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
 
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Solid;
+                    m_collisionBoxes.push_back(cb);
+
+                }
+                else if (type == "water")
+                {
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Water;
+                    cb.filter = CollisionBox::NoDecal;
+                    m_collisionBoxes.push_back(cb);
                 }
             }
             m_sideTexture.display();
@@ -307,4 +353,9 @@ void MapLoader::renderSprite(std::int32_t spriteID, sf::Vector2f position)
     m_topTexture.clear();
     m_topTexture.draw(sf::Sprite(m_topBuffer.getTexture()));
     m_topTexture.display();
+}
+
+const std::vector<CollisionBox>& MapLoader::getCollisionBoxes() const
+{
+    return m_collisionBoxes;
 }

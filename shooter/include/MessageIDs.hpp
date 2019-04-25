@@ -44,7 +44,9 @@ struct DroneEvent final
     enum
     {
         Spawned,
-        Died
+        Died,
+        GotAmmo,
+        GotBattery
     }type = Spawned;
     std::int32_t lives = 0;
     sf::Vector2f position;

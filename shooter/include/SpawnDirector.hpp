@@ -22,6 +22,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 
+#include <SFML/System/Clock.hpp>
+
+#include <array>
+
 class SpawnDirector final : public xy::Director
 {
 public:
@@ -34,6 +38,20 @@ public:
 private:
 
     SpriteArray& m_sprites;
+
+    enum ActiveItem
+    {
+        Ammo, Battery, 
+
+        Count
+    };
+    std::array<std::size_t, ActiveItem::Count> m_activeItems = {};
+    std::array<sf::Clock, ActiveItem::Count> m_itemClocks;
+
     void spawnExplosion(sf::Vector2f);
     void spawnMiniExplosion(sf::Vector2f);
+    void spawnAmmo(sf::Vector2f);
+    void spawnBattery(sf::Vector2f);
+
+    sf::Vector2f getRandomPosition();
 };

@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Bomb.hpp" />
+    <ClInclude Include="include\CollisionTypes.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\Drone.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />

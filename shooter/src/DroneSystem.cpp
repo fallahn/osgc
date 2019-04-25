@@ -22,11 +22,14 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "Bomb.hpp"
 #include "ItemBar.hpp"
+#include "CollisionTypes.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
@@ -38,8 +41,8 @@ namespace
     const float MaxVelocity = 800.f;
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 
-    const float MaxDroneHeight = 300.f; //crash after this
     const float DroneDipHeight = 290.f; //dips this low for pickups
+    const float CollisionHeight = ConstVal::MaxDroneHeight - 48.f;
     const float Gravity = 9.9f;
 }
 
@@ -85,7 +88,12 @@ void DroneSystem::process(float dt)
         case Drone::State::Dying:
             processDying(entity, dt);
             break;
-        case Drone::State::Dead: break;
+        case Drone::State::Dead: return;
+        }
+
+        if (drone.health == 0)
+        {
+            drone.state = Drone::State::Dying;
         }
 
         //update health meter
@@ -158,8 +166,8 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     auto & tx = entity.getComponent<xy::Transform>();
     auto pos = tx.getPosition();
     pos += drone.velocity * dt;
-    pos.x = xy::Util::Math::clamp(pos.x, ConstVal::MapArea.left, ConstVal::MapArea.width);
-    pos.y = xy::Util::Math::clamp(pos.y, ConstVal::MapArea.top, ConstVal::MapArea.height);
+    pos.x = xy::Util::Math::clamp(pos.x, 64.f, ConstVal::MapArea.width - 128.f);
+    pos.y = xy::Util::Math::clamp(pos.y, 64.f, ConstVal::MapArea.height - 128.f);
     tx.setPosition(pos);
 
     drone.velocity *= 0.9f;
@@ -184,12 +192,7 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
         drone.ammo--;
         spawnBomb(pos, drone.velocity);
 
-        cmd.targetFlags = CommandID::AmmoMeter;
-        cmd.action = [drone](xy::Entity e, float)
-        {
-            e.getComponent<ItemBar>().itemCount = drone.ammo;
-        };
-        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+        updateAmmoBar(drone);
     }
 
     if (drone.inputFlags & Drone::Pickup)
@@ -203,30 +206,7 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     //slowly drain battery - TODO also in pick up state?
     drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
     //send update to battery indicator
-    cmd.targetFlags = CommandID::BatteryMeter;
-    cmd.action = [drone](xy::Entity e, float)
-    {
-        sf::Color c;
-        if (drone.battery < 33)
-        {
-            c = sf::Color::Red;
-        }
-        else if (drone.battery < 66)
-        {
-            c = sf::Color::Yellow;
-        }
-        else
-        {
-            c = sf::Color::Green;
-        }
-
-        auto& sprite = e.getComponent<xy::Sprite>();
-        sprite.setColour(c);
-        auto bounds = e.getComponent<sf::FloatRect>();
-        bounds.width *= (drone.battery / 100.f);
-        sprite.setTextureRect(bounds);
-    };
-    getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+    updateBatteryBar(drone);
 
     if (drone.battery == 0)
     {
@@ -240,10 +220,70 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
     auto& drone = entity.getComponent<Drone>();
     if (drone.wavetableIndex < m_wavetable.size() / 2)
     {
-        drone.height = m_wavetable[drone.wavetableIndex++] + ConstVal::DroneHeight;
+        auto newHeight = m_wavetable[drone.wavetableIndex++] + ConstVal::DroneHeight;
+        auto& tx = entity.getComponent<xy::Transform>();
+
+        //check for collision
+        bool collision = false;
+        std::int32_t collisionType = CollisionBox::Solid;
+        xy::Entity collider;
+        if (newHeight > CollisionHeight)
+        {
+            auto& bp = getScene()->getSystem<xy::DynamicTreeSystem>();
+            auto position = tx.getPosition();
+            sf::FloatRect droneBounds = { position.x - 8.f, position.y - 8.f, 16.f, 16.f };
+
+            auto nearby = bp.query(droneBounds);
+            for (auto e : nearby)
+            {
+                auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+                if (otherBounds.intersects(droneBounds))
+                {
+                    collision = true;
+                    collisionType = e.getComponent<CollisionBox>().type;
+                    collider = e;
+                    break;
+                }
+            }
+        }
+
+        if (!collision)
+        {
+            drone.height = newHeight;
+        }
+        else
+        {
+            switch (collisionType)
+            {
+            default:
+            case CollisionBox::Solid:
+                drone.health = std::max(0.f, drone.health - (dt * 50.f));
+            case CollisionBox::Ammo:
+                drone.height = newHeight;
+                getScene()->destroyEntity(collider);
+                drone.ammo = Drone::StartAmmo;
+                updateAmmoBar(drone);
+                {
+                    auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+                    msg->position = entity.getComponent<xy::Transform>().getPosition();
+                    msg->type = DroneEvent::GotAmmo;
+                }
+                break;
+            case CollisionBox::Battery:
+                drone.height = newHeight;
+                getScene()->destroyEntity(collider);
+                drone.battery = Drone::StartBattery;
+                updateBatteryBar(drone);
+                {
+                    auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+                    msg->position = entity.getComponent<xy::Transform>().getPosition();
+                    msg->type = DroneEvent::GotBattery;
+                }
+                break;
+            }
+        }
 
         //update top view
-        auto& tx = entity.getComponent<xy::Transform>();
         tx.move(drone.velocity * dt);
         auto sidePos = ConstVal::BackgroundPosition.x + (tx.getPosition().y / 2.f);
         drone.camera.getComponent<xy::Camera>().setZoom(((drone.height - ConstVal::DroneHeight) * 0.15f) + 1.f);
@@ -260,13 +300,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
             pos.y = drone.height;
             tx.setPosition(pos);
         };
-        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-        //TODO check collision with collectible
-
-        //TODO check collision with buildings/trees
-
-        
+        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);  
     }
     else
     {
@@ -318,11 +352,12 @@ void DroneSystem::processDying(xy::Entity entity, float dt)
     };
     getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-    if (drone.height > MaxDroneHeight)
+    if (drone.height > ConstVal::MaxDroneHeight)
     {
         //hit the ground!
         drone.lives--;
         drone.state = Drone::State::Dead;
+        drone.health = 1.f; //prevents immediately dying again when respawning with no health
 
         auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
         msg->type = DroneEvent::Died;
@@ -375,4 +410,44 @@ void DroneSystem::spawnBomb(sf::Vector2f position, sf::Vector2f velocity)
     auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
     msg->type = BombEvent::Dropped;
     msg->position = position;
+}
+
+void DroneSystem::updateAmmoBar(Drone drone)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::AmmoMeter;
+    cmd.action = [drone](xy::Entity e, float)
+    {
+        e.getComponent<ItemBar>().itemCount = drone.ammo;
+    };
+    getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void DroneSystem::updateBatteryBar(Drone drone)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::BatteryMeter;
+    cmd.action = [drone](xy::Entity e, float)
+    {
+        sf::Color c;
+        if (drone.battery < 33)
+        {
+            c = sf::Color::Red;
+        }
+        else if (drone.battery < 66)
+        {
+            c = sf::Color::Yellow;
+        }
+        else
+        {
+            c = sf::Color::Green;
+        }
+
+        auto& sprite = e.getComponent<xy::Sprite>();
+        sprite.setColour(c);
+        auto bounds = e.getComponent<sf::FloatRect>();
+        bounds.width *= (drone.battery / 100.f);
+        sprite.setTextureRect(bounds);
+    };
+    getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 }

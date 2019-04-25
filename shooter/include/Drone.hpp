@@ -31,10 +31,12 @@ struct Drone final
 {
     static constexpr std::int32_t StartLives = 5;
     static constexpr std::int32_t StartAmmo = 25;
+    static constexpr float StartHealth = 100.f;
+    static constexpr float StartBattery = 100.f;
 
     sf::Vector2f velocity;
     std::size_t wavetableIndex = 0;
-    float health = 100;
+    float health = StartHealth;
     float battery = 100.f;
     std::int32_t ammo = StartAmmo;
     std::int32_t lives = StartLives;
@@ -87,4 +89,7 @@ private:
     void processDying(xy::Entity, float);
 
     void spawnBomb(sf::Vector2f position, sf::Vector2f veclocity);
+
+    void updateAmmoBar(Drone);
+    void updateBatteryBar(Drone);
 };

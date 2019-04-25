@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include "Bomb.hpp"
 #include "SoundEffectsDirector.hpp"
 #include "ItemBar.hpp"
+#include "CollisionTypes.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -37,6 +38,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
@@ -47,6 +49,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
@@ -213,7 +216,8 @@ void GameState::handleMessage(const xy::Message& msg)
                 {
                     auto& drone = e.getComponent<Drone>();
                     drone.reset();
-                    drone.battery = 100.f;
+                    drone.battery = Drone::StartBattery;
+                    drone.health = Drone::StartHealth;
 
                     e.getComponent<xy::Sprite>().setColour(sf::Color::White);
 
@@ -275,6 +279,7 @@ void GameState::initScene()
     
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
+    m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<DroneSystem>(mb);
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<ItemBarSystem>(mb);
@@ -440,7 +445,7 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
-    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
+    //entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
     entity.addComponent<xy::Sprite>(m_mapLoader.getTopDownTexture());
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BackgroundTop;
 
@@ -465,6 +470,17 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Drone];
     entity.addComponent<xy::CommandTarget>().ID = CommandID::PlayerSide;
+
+    //load up any collision objects
+    const auto& boxes = m_mapLoader.getCollisionBoxes();
+    for (const auto& b : boxes)
+    {
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(b.worldBounds.left, b.worldBounds.top);
+        entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, b.worldBounds.width, b.worldBounds.height });
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(b.filter);
+        entity.addComponent<CollisionBox>() = b;
+    }
 }
 
 void GameState::recalcViews()

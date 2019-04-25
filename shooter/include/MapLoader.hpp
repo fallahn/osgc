@@ -23,7 +23,9 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/RenderTexture.hpp>
 
 #include <string>
+#include <vector>
 
+struct CollisionBox;
 class MapLoader final
 {
 public:
@@ -37,6 +39,8 @@ public:
 
     void renderSprite(std::int32_t, sf::Vector2f);
 
+    const std::vector<CollisionBox>& getCollisionBoxes() const;
+
 private:
 
     const SpriteArray& m_sprites;
@@ -44,4 +48,6 @@ private:
     sf::RenderTexture m_topBuffer;
     sf::RenderTexture m_topTexture;
     sf::RenderTexture m_sideTexture;
+
+    std::vector<CollisionBox> m_collisionBoxes;
 };
