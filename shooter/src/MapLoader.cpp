@@ -91,6 +91,7 @@ bool MapLoader::load(const std::string& path)
         sf::Sprite tileSprite;
 
         tmx::ObjectGroup* objectLayer = nullptr;
+        tmx::ObjectGroup* navigationLayer = nullptr;
 
         m_topTexture.clear();
 
@@ -140,12 +141,18 @@ bool MapLoader::load(const std::string& path)
             }
             else if (layer->getType() == tmx::Layer::Type::Object)
             {
-                objectLayer = &layer->getLayerAs<tmx::ObjectGroup>();
+                if (layer->getName() == "navigation")
+                {
+                    navigationLayer = &layer->getLayerAs<tmx::ObjectGroup>();
+                }
+                else if (layer->getName() == "objects")
+                {
+                    objectLayer = &layer->getLayerAs<tmx::ObjectGroup>();
+                }
             }
         }
 
         m_topTexture.display();
-
 
         //draw the side map if we found object data
         if (objectLayer)
@@ -283,7 +290,7 @@ bool MapLoader::load(const std::string& path)
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Structure;
-                    cb.filter = CollisionBox::NoDecal;
+                    cb.filter = CollisionBox::NoDecal | CollisionBox::Solid;
                     cb.height = TreeHeight;
                     m_collisionBoxes.push_back(cb);
 
@@ -306,7 +313,7 @@ bool MapLoader::load(const std::string& path)
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Water;
-                    cb.filter = CollisionBox::NoDecal;
+                    cb.filter = CollisionBox::NoDecal | CollisionBox::Solid;
                     m_collisionBoxes.push_back(cb);
                 }
                 else if (type == "sandbag")
@@ -315,7 +322,7 @@ bool MapLoader::load(const std::string& path)
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Structure;
-                    cb.filter = CollisionBox::NoDecal;
+                    cb.filter = CollisionBox::NoDecal | CollisionBox::Solid;
                     cb.height = SandbagHeight;
                     m_collisionBoxes.push_back(cb);
                 }
@@ -325,6 +332,25 @@ bool MapLoader::load(const std::string& path)
         else
         {
             xy::Logger::log("Missing object layer");
+            return false;
+        }
+
+        if (navigationLayer)
+        {
+            const auto& objs = navigationLayer->getObjects();
+            for (const auto& obj : objs)
+            {
+                if (obj.getShape() == tmx::Object::Shape::Point)
+                {
+                    sf::Vector2f position(obj.getPosition().x, obj.getPosition().y);
+
+                    m_navigationNodes.push_back(position * 4.f);
+                }
+            }
+        }
+        else
+        {
+            xy::Logger::log("Missing navigation layer");
             return false;
         }
 
@@ -371,4 +397,9 @@ void MapLoader::renderSprite(std::int32_t spriteID, sf::Vector2f position)
 const std::vector<CollisionBox>& MapLoader::getCollisionBoxes() const
 {
     return m_collisionBoxes;
+}
+
+const std::vector<sf::Vector2f>& MapLoader::getNavigationNodes() const
+{
+    return m_navigationNodes;
 }

@@ -30,6 +30,9 @@ Copyright 2019 Matt Marchant
 #include "CollisionTypes.hpp"
 #include "ScoreDirector.hpp"
 #include "BobAnimator.hpp"
+#include "Navigation.hpp"
+#include "Alien.hpp"
+#include "Human.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -285,6 +288,8 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<DroneSystem>(mb);
+    m_gameScene.addSystem<AlienSystem>(mb);
+    m_gameScene.addSystem<HumanSystem>(mb);
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<ItemBarSystem>(mb);
     m_gameScene.addSystem<BobSystem>(mb);
@@ -363,6 +368,15 @@ void GameState::loadAssets()
 
     spriteSheet.loadFromFile("assets/sprites/mini_explosion.spt", m_resources);
     m_sprites[SpriteID::ExplosionIcon] = spriteSheet.getSprite("explosion");
+
+    spriteSheet.loadFromFile("assets/sprites/human.spt", m_resources);
+    m_sprites[SpriteID::Human] = spriteSheet.getSprite("human");
+
+    spriteSheet.loadFromFile("assets/sprites/scorpion.spt", m_resources);
+    m_sprites[SpriteID::Scorpion] = spriteSheet.getSprite("scorpion");
+
+    spriteSheet.loadFromFile("assets/sprites/beetle.spt", m_resources);
+    m_sprites[SpriteID::Beetle] = spriteSheet.getSprite("beetle");
 
     m_mapLoader.load("assets/maps/01.tmx");
 }
@@ -497,6 +511,18 @@ void GameState::loadWorld()
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(b.filter);
         entity.addComponent<CollisionBox>() = b;
     }
+
+    //and navigation nodes
+    std::uint32_t nodeID = 1;
+    const auto& nodes = m_mapLoader.getNavigationNodes();
+    for (const auto& n : nodes)
+    {
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(n);
+        entity.addComponent<Node>().ID = nodeID++;
+        entity.addComponent<xy::BroadphaseComponent>().setArea({ Node::Bounds[0], Node::Bounds[1], Node::Bounds[2], Node::Bounds[3] });
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Navigation);
+    }
 }
 
 void GameState::recalcViews()
@@ -537,4 +563,10 @@ void GameState::drawCrater(sf::Vector2f position)
     }
 
     m_mapLoader.renderSprite(xy::Util::Random::value(SpriteID::Crater01, SpriteID::Crater04), position);
+}
+
+void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
 }

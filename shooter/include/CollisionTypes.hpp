@@ -20,8 +20,6 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Graphics/Rect.hpp>
 
-#include <limits>
-
 struct CollisionBox final
 {
     sf::FloatRect worldBounds;
@@ -38,10 +36,11 @@ struct CollisionBox final
 
     enum
     {
-        None = 0x1,
-        NoDecal = 0x2
+        Solid = 0x1,
+        NoDecal = 0x2,
+        Navigation = 0x4
     };
-    std::uint64_t filter = None;// std::numeric_limits<std::uint64_t>::max();
+    std::uint64_t filter = Solid;
 
     float height = 0.f; //subtracted from drop depth to decide if drone collides
 };

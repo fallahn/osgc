@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Alien.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Bomb.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BobAnimator.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CollisionTypes.hpp
@@ -7,10 +8,13 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Drone.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Human.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ItemBar.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Navigation.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp

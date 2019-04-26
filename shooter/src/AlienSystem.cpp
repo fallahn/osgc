@@ -16,33 +16,29 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#pragma once
+#include "Alien.hpp"
+#include "Navigation.hpp"
 
-#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+
 #include <xyginext/ecs/Scene.hpp>
 
-struct SharedData;
-class MenuState final : public xy::State
+AlienSystem::AlienSystem(xy::MessageBus& mb)
+    : xy::System(mb, typeid(AlienSystem))
 {
-public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    requireComponent<xy::Transform>();
+    requireComponent<Alien>();
+    requireComponent<Navigator>();
+}
 
-    bool handleEvent(const sf::Event&) override;
+//public
+void AlienSystem::process(float dt)
+{
+    auto& entities = getEntities();
+    for (auto entity : entities)
+    {
 
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_scene;
-
-    void initScene();
-    void buildMenu();
-
-    void updateLoadingScreen(float, sf::RenderWindow&) override;
-};
+    }
+}

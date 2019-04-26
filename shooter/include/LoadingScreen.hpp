@@ -18,31 +18,28 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
-struct SharedData;
-class MenuState final : public xy::State
+#include <array>
+
+class LoadingScreen final : public sf::Drawable
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    LoadingScreen();
 
-    bool handleEvent(const sf::Event&) override;
-
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
+    void update(float);
 
 private:
-    SharedData& m_sharedData;
-    xy::Scene m_scene;
 
-    void initScene();
-    void buildMenu();
+    std::array<sf::Uint8, 132> m_imageData;
+    std::array<sf::Vertex, 4u> m_vertices;
 
-    void updateLoadingScreen(float, sf::RenderWindow&) override;
+    sf::Texture m_texture;
+    sf::Sprite m_sprite;
+
+    float m_currentFrameTime;
+
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

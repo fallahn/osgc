@@ -1,10 +1,13 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlienSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BombSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DroneSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/HumanSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ItemBarSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp

@@ -18,31 +18,25 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/System.hpp>
 
-struct SharedData;
-class MenuState final : public xy::State
+struct Alien final
+{
+    enum class Type
+    {
+        Beetle, Scorpion
+    }type = Type::Beetle;
+
+    enum class State
+    {
+        Searching, Attacking
+    }state = State::Searching;
+};
+
+class AlienSystem final : public xy::System
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    explicit AlienSystem(xy::MessageBus&);
 
-    bool handleEvent(const sf::Event&) override;
-
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_scene;
-
-    void initScene();
-    void buildMenu();
-
-    void updateLoadingScreen(float, sf::RenderWindow&) override;
+    void process(float) override;
 };

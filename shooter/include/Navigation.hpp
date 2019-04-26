@@ -18,31 +18,19 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
-#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
-struct SharedData;
-class MenuState final : public xy::State
+#include <array>
+#include <cstdint>
+
+struct Node final
 {
-public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    std::uint32_t ID = 0u;
+    static constexpr std::array<float, 4u> Bounds = { -12.f, -12.f, 24.f, 24.f }; //supposed to be FloatRect but idk wtf
+};
 
-    bool handleEvent(const sf::Event&) override;
-
-    void handleMessage(const xy::Message&) override;
-
-    bool update(float) override;
-
-    void draw() override;
-
-    xy::StateID stateID() const override;
-
-private:
-    SharedData& m_sharedData;
-    xy::Scene m_scene;
-
-    void initScene();
-    void buildMenu();
-
-    void updateLoadingScreen(float, sf::RenderWindow&) override;
+struct Navigator final
+{
+    xy::Entity target;
+    std::uint32_t previousNode;
 };

@@ -41,6 +41,8 @@ public:
 
     const std::vector<CollisionBox>& getCollisionBoxes() const;
 
+    const std::vector<sf::Vector2f>& getNavigationNodes() const;
+
 private:
 
     const SpriteArray& m_sprites;
@@ -50,4 +52,5 @@ private:
     sf::RenderTexture m_sideTexture;
 
     std::vector<CollisionBox> m_collisionBoxes;
+    std::vector<sf::Vector2f> m_navigationNodes;
 };

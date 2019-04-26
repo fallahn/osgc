@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "LoadingScreen.hpp"
 #include <xyginext/resources/ResourceHandler.hpp>
 
 
@@ -47,4 +48,6 @@ struct SharedData final
         Died,
         GameOver
     }pauseMessage = None;
+
+    LoadingScreen loadingScreen;
 };

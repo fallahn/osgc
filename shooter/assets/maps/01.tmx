@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="59">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="93">
  <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="91" columns="13">
   <image source="../images/tileset.png" width="208" height="112"/>
  </tileset>
@@ -82,5 +82,109 @@
   <object id="56" type="sandbag" x="180" y="528" width="8" height="84"/>
   <object id="57" type="sandbag" x="660" y="516" width="8" height="224"/>
   <object id="58" type="sandbag" x="404" y="740" width="264" height="8"/>
+ </objectgroup>
+ <objectgroup id="7" name="navigation">
+  <object id="59" x="296" y="600">
+   <point/>
+  </object>
+  <object id="60" x="296" y="520">
+   <point/>
+  </object>
+  <object id="61" x="200" y="600">
+   <point/>
+  </object>
+  <object id="62" x="248" y="560">
+   <point/>
+  </object>
+  <object id="63" x="200" y="520">
+   <point/>
+  </object>
+  <object id="64" x="192" y="424">
+   <point/>
+  </object>
+  <object id="65" x="192" y="260">
+   <point/>
+  </object>
+  <object id="66" x="192" y="176">
+   <point/>
+  </object>
+  <object id="67" x="136" y="172">
+   <point/>
+  </object>
+  <object id="68" x="84" y="172">
+   <point/>
+  </object>
+  <object id="69" x="80" y="268">
+   <point/>
+  </object>
+  <object id="70" x="80" y="352">
+   <point/>
+  </object>
+  <object id="71" x="80" y="448">
+   <point/>
+  </object>
+  <object id="72" x="252" y="172">
+   <point/>
+  </object>
+  <object id="73" x="316" y="172">
+   <point/>
+  </object>
+  <object id="74" x="380" y="172">
+   <point/>
+  </object>
+  <object id="75" x="448" y="172">
+   <point/>
+  </object>
+  <object id="76" x="448" y="80">
+   <point/>
+  </object>
+  <object id="77" x="448" y="244">
+   <point/>
+  </object>
+  <object id="78" x="448" y="320">
+   <point/>
+  </object>
+  <object id="79" x="448" y="400">
+   <point/>
+  </object>
+  <object id="80" x="448" y="476">
+   <point/>
+  </object>
+  <object id="81" x="424" y="548">
+   <point/>
+  </object>
+  <object id="82" x="472" y="548">
+   <point/>
+  </object>
+  <object id="83" x="52" y="480">
+   <point/>
+  </object>
+  <object id="84" x="108" y="480">
+   <point/>
+  </object>
+  <object id="85" x="500" y="76">
+   <point/>
+  </object>
+  <object id="86" x="536" y="48">
+   <point/>
+  </object>
+  <object id="87" x="536" y="116">
+   <point/>
+  </object>
+  <object id="88" x="384" y="80">
+   <point/>
+  </object>
+  <object id="89" x="324" y="80">
+   <point/>
+  </object>
+  <object id="90" x="280" y="56">
+   <point/>
+  </object>
+  <object id="91" x="280" y="108">
+   <point/>
+  </object>
+  <object id="92" x="192" y="344">
+   <point/>
+  </object>
  </objectgroup>
 </map>

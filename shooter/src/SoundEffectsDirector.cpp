@@ -164,7 +164,7 @@ void SFXDirector::resizeEntities(std::size_t size)
     {
         m_entities[i] = getScene().createEntity();
         m_entities[i].addComponent<xy::Transform>();
-        m_entities[i].addComponent<xy::AudioEmitter>();// .setSource(m_audioResource.get("placeholder"));
+        m_entities[i].addComponent<xy::AudioEmitter>().setChannel(1);// .setSource(m_audioResource.get("placeholder"));
     }
 }
 

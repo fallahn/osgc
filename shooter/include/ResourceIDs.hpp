@@ -88,6 +88,10 @@ namespace SpriteID
         Crater03,
         Crater04,
 
+        Human,
+        Beetle,
+        Scorpion,
+
         Count
     };
 }

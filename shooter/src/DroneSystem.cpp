@@ -42,7 +42,6 @@ namespace
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 
     const float DroneDipHeight = 290.f; //dips this low for pickups
-    //const float CollisionHeight = ConstVal::MaxDroneHeight - 48.f;
     const float Gravity = 9.9f;
 }
 
@@ -231,26 +230,23 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
         bool collision = false;
         std::int32_t collisionType = CollisionBox::Structure;
         xy::Entity collider;
-        //if (newHeight > CollisionHeight)
-        {
-            auto& bp = getScene()->getSystem<xy::DynamicTreeSystem>();
-            auto position = tx.getPosition();
-            sf::FloatRect droneBounds = { position.x - 8.f, position.y - 8.f, 16.f, 16.f };
 
-            auto nearby = bp.query(droneBounds);
-            for (auto e : nearby)
+        auto& bp = getScene()->getSystem<xy::DynamicTreeSystem>();
+        auto position = tx.getPosition();
+        sf::FloatRect droneBounds = { position.x - 8.f, position.y - 8.f, 16.f, 16.f };
+
+        auto nearby = bp.query(droneBounds, CollisionBox::Solid);
+        for (auto e : nearby)
+        {
+            auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+            if (otherBounds.intersects(droneBounds)
+                && newHeight > (ConstVal::MaxDroneHeight - e.getComponent<CollisionBox>().height))
             {
-                auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
-                if (otherBounds.intersects(droneBounds)
-                    && newHeight > (ConstVal::MaxDroneHeight - e.getComponent<CollisionBox>().height))
-                {
-                    collision = true;
-                    collisionType = e.getComponent<CollisionBox>().type;
-                    collider = e;
-                    break;
-                }
+                collision = true;
+                collisionType = e.getComponent<CollisionBox>().type;
+                collider = e;
+                break;
             }
-            DPRINT("Count", std::to_string(nearby.size()));
         }
 
         if (!collision)
