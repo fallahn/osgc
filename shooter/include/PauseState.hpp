@@ -54,4 +54,5 @@ private:
     void createPause();
     void createContinue();
     void createGameover();
+    void createError();
 };

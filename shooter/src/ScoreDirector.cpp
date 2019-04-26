@@ -81,7 +81,7 @@ void ScoreDirector::handleMessage(const xy::Message& msg)
             query.left += data.position.x;
             query.top += data.position.y;
 
-            auto nearby = getScene().getSystem<xy::DynamicTreeSystem>().query(query);
+            auto nearby = getScene().getSystem<xy::DynamicTreeSystem>().query(query, CollisionBox::Solid);
             for (auto e : nearby)
             {
                 auto bounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());

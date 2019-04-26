@@ -46,8 +46,10 @@ struct SharedData final
         None,
         Paused,
         Died,
-        GameOver
+        GameOver,
+        Error
     }pauseMessage = None;
+    std::string messageString;
 
     LoadingScreen loadingScreen;
 };

@@ -102,7 +102,7 @@ namespace
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
     m_sharedData(sd),
-    m_gameScene (ctx.appInstance.getMessageBus()),
+    m_gameScene (ctx.appInstance.getMessageBus(), 1024),
     m_mapLoader (m_sprites)
 {
     launchLoadingScreen();
@@ -283,7 +283,7 @@ xy::StateID GameState::stateID() const
 void GameState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
-    
+
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
@@ -378,7 +378,12 @@ void GameState::loadAssets()
     spriteSheet.loadFromFile("assets/sprites/beetle.spt", m_resources);
     m_sprites[SpriteID::Beetle] = spriteSheet.getSprite("beetle");
 
-    m_mapLoader.load("assets/maps/01.tmx");
+    if(!m_mapLoader.load("assets/maps/01.tmx"))
+    {
+        m_sharedData.messageString = "Failed To Load Map";
+        m_sharedData.pauseMessage = SharedData::Error;
+        requestStackPush(StateID::Pause);
+    }
 }
 
 void GameState::loadWorld()

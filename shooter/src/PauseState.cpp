@@ -79,6 +79,9 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     case SharedData::Died:
         createContinue();
         break;
+    case SharedData::Error:
+        createError();
+        break;
     }
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
@@ -112,7 +115,8 @@ bool PauseState::handleEvent(const sf::Event& evt)
         {
             requestStackPop();
         }
-        else if (m_sharedData.pauseMessage == SharedData::GameOver)
+        else if (m_sharedData.pauseMessage == SharedData::GameOver
+            || m_sharedData.pauseMessage == SharedData::Error)
         {
             requestStackClear();
             requestStackPush(StateID::MainMenu);
@@ -126,7 +130,8 @@ bool PauseState::handleEvent(const sf::Event& evt)
         default: break;
         case 6:
         case 1:
-            if (m_sharedData.pauseMessage == SharedData::GameOver)
+            if (m_sharedData.pauseMessage == SharedData::GameOver
+                || m_sharedData.pauseMessage == SharedData::Error)
             {
                 requestStackClear();
                 requestStackPush(StateID::MainMenu);
@@ -233,6 +238,28 @@ void PauseState::createGameover()
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 148.f);
     entity.addComponent<xy::Text>(font).setString("Press Any Key");
+    entity.getComponent<xy::Text>().setCharacterSize(40);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+}
+
+void PauseState::createError()
+{
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
+
+    //text entities
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -160.f);
+    entity.addComponent<xy::Text>(font).setString("Error");
+    entity.getComponent<xy::Text>().setCharacterSize(180);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>();
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 148.f);
+    entity.addComponent<xy::Text>(font).setString(m_sharedData.messageString);
     entity.getComponent<xy::Text>().setCharacterSize(40);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
