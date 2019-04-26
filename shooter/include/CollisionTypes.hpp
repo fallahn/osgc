@@ -30,6 +30,7 @@ struct CollisionBox final
         Building,
         Structure,
         NPC,
+        Fire,
         Water,
         Ammo,
         Battery
@@ -41,4 +42,6 @@ struct CollisionBox final
         NoDecal = 0x2
     };
     std::uint64_t filter = None;// std::numeric_limits<std::uint64_t>::max();
+
+    float height = 0.f; //subtracted from drop depth to decide if drone collides
 };

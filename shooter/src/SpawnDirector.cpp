@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "GameConsts.hpp"
 #include "CollisionTypes.hpp"
+#include "BobAnimator.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -129,6 +130,14 @@ void SpawnDirector::spawnExplosion(sf::Vector2f position)
             getScene().destroyEntity(e);
         }
     };
+
+    //add a collision box to it and the drone can take damage if too close..
+    CollisionBox cb;
+    cb.type = CollisionBox::Fire;
+    cb.height = 28.f;
+    cb.worldBounds = { position.x - (bounds.width), position.y - (bounds.height), bounds.width * 2.f, bounds.height * 2.f };
+    entity.addComponent<CollisionBox>() = cb;
+    entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
 }
 
 void SpawnDirector::spawnMiniExplosion(sf::Vector2f position)
@@ -169,6 +178,7 @@ void SpawnDirector::spawnAmmo(sf::Vector2f position)
     bounds *= 4.f;
     entity.addComponent<CollisionBox>().worldBounds = { -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height };
     entity.getComponent<CollisionBox>().type = CollisionBox::Ammo;
+    entity.getComponent<CollisionBox>().height = 16.f;
 
     //radar view
     auto sideEnt = getScene().createEntity();
@@ -178,6 +188,7 @@ void SpawnDirector::spawnAmmo(sf::Vector2f position)
     sideEnt.getComponent<xy::Transform>().setScale(4.f, 4.f);
     sideEnt.addComponent<xy::Drawable>();
     sideEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::AmmoIcon];
+    sideEnt.addComponent<Bob>();
     sideEnt.addComponent<xy::Callback>().active = true;
     sideEnt.getComponent<xy::Callback>().function =
         [&, entity](xy::Entity e, float)
@@ -209,6 +220,7 @@ void SpawnDirector::spawnBattery(sf::Vector2f position)
     bounds *= 4.f;
     entity.addComponent<CollisionBox>().worldBounds = { -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height };
     entity.getComponent<CollisionBox>().type = CollisionBox::Battery;
+    entity.getComponent<CollisionBox>().height = 16.f;
 
     //radar view
     auto sideEnt = getScene().createEntity();
@@ -218,6 +230,7 @@ void SpawnDirector::spawnBattery(sf::Vector2f position)
     sideEnt.getComponent<xy::Transform>().setScale(4.f, 4.f);
     sideEnt.addComponent<xy::Drawable>();
     sideEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::BatteryIcon];
+    sideEnt.addComponent<Bob>();
     sideEnt.addComponent<xy::Callback>().active = true;
     sideEnt.getComponent<xy::Callback>().function =
         [&, entity](xy::Entity e, float)

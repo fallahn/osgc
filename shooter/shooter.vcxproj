@@ -145,6 +145,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\BobAnimator.hpp" />
     <ClInclude Include="include\Bomb.hpp" />
     <ClInclude Include="include\CollisionTypes.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />

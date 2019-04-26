@@ -72,6 +72,9 @@
     <ClInclude Include="include\ScoreDirector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BobAnimator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">

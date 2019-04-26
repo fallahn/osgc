@@ -38,6 +38,12 @@ namespace
     const float SandThickness = 16.f; //height of sand in side view
     const float SandThicknessScaled = SandThickness / 4.f;
 
+    const float BuildingHeight = 46.f;
+    const float TreeHeight = 58.f;
+    const float BushHeight = 24.f;
+    const float BarrierHeight = 18.f;
+    const float SandbagHeight = 12.f;
+
     template <typename T>
     tmx::Rectangle<T>& operator *= (tmx::Rectangle<T>& l, T r)
     {
@@ -170,6 +176,22 @@ bool MapLoader::load(const std::string& path)
             //sort by x pos so drawn in correct order
             std::sort(objects.begin(), objects.end(), [](const tmx::Object& objA, const tmx::Object& objB) {return objA.getPosition().x > objB.getPosition().x; });
 
+            auto drawSprite = [&](const xy::Sprite& spr, sf::Vector2f position)
+            {
+                auto bounds = spr.getTextureRect();
+                verts.resize(4);
+                verts[0] = { sf::Vector2f(-bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left, bounds.top) };
+                verts[1] = { sf::Vector2f(bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
+                verts[2] = { sf::Vector2f(bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
+                verts[3] = { sf::Vector2f(-bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
+
+                sf::RenderStates states;
+                states.transform.translate(position.y + (bounds.height / 2.f), SideMapSize.y - (bounds.height + SandThicknessScaled));
+                states.texture = spr.getTexture();
+
+                m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+            };
+
             for (const auto& obj : objects)
             {
                 sf::Vector2f position(obj.getPosition().x, obj.getPosition().y);
@@ -214,6 +236,7 @@ bool MapLoader::load(const std::string& path)
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Building;
+                    cb.height = BuildingHeight;
                     m_collisionBoxes.push_back(cb);
 
                 }
@@ -248,53 +271,32 @@ bool MapLoader::load(const std::string& path)
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Structure;
+                    cb.height = BarrierHeight;
                     m_collisionBoxes.push_back(cb);
                 }
                 else if (type == "tree")
                 {
                     //trees are fixed size so draw sprite directly
-                    auto bounds = m_sprites[SpriteID::TreeIcon].getTextureRect();
-                    verts.resize(4);
-                    verts[0] = { sf::Vector2f(-bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left, bounds.top) };
-                    verts[1] = { sf::Vector2f(bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
-                    verts[2] = { sf::Vector2f(bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
-                    verts[3] = { sf::Vector2f(-bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
-
-                    sf::RenderStates states;
-                    states.transform.translate(position.y + (bounds. height / 2.f), SideMapSize.y - (bounds.height + SandThicknessScaled));
-                    states.texture = m_sprites[SpriteID::TreeIcon].getTexture();
-
-                    m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+                    drawSprite(m_sprites[SpriteID::TreeIcon], position);
 
                     objBounds *= 8.f;
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Structure;
                     cb.filter = CollisionBox::NoDecal;
+                    cb.height = TreeHeight;
                     m_collisionBoxes.push_back(cb);
 
                 }
                 else if (type == "bush")
                 {
-                    //TODO refactor to share tree code, above
-                    //TODO use sf::Sprite / texture rect rather than vert array?
-                    auto bounds = m_sprites[SpriteID::BushIcon].getTextureRect();
-                    verts.resize(4);
-                    verts[0] = { sf::Vector2f(-bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left, bounds.top) };
-                    verts[1] = { sf::Vector2f(bounds.width / 2.f, 0.f), sf::Vector2f(bounds.left + bounds.width, bounds.top) };
-                    verts[2] = { sf::Vector2f(bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height) };
-                    verts[3] = { sf::Vector2f(-bounds.width / 2.f, bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height) };
-
-                    sf::RenderStates states;
-                    states.transform.translate(position.y + (bounds.height / 2.f), SideMapSize.y - (bounds.height + SandThicknessScaled));
-                    states.texture = m_sprites[SpriteID::BushIcon].getTexture();
-
-                    m_sideTexture.draw(verts.data(), verts.size(), sf::Quads, states);
+                    drawSprite(m_sprites[SpriteID::BushIcon], position);
 
                     objBounds *= 8.f;
                     CollisionBox cb;
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Structure;
+                    cb.height = BushHeight;
                     m_collisionBoxes.push_back(cb);
 
                 }
@@ -305,6 +307,16 @@ bool MapLoader::load(const std::string& path)
                     cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
                     cb.type = CollisionBox::Water;
                     cb.filter = CollisionBox::NoDecal;
+                    m_collisionBoxes.push_back(cb);
+                }
+                else if (type == "sandbag")
+                {
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Structure;
+                    cb.filter = CollisionBox::NoDecal;
+                    cb.height = SandbagHeight;
                     m_collisionBoxes.push_back(cb);
                 }
             }

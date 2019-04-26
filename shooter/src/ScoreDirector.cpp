@@ -25,7 +25,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
-#include<xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -126,4 +127,28 @@ void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
     entity.addComponent<xy::Text>(m_font).setString(std::to_string(score));
     entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<float>(2.f);
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        static const float MaxTime = 2.f;
+
+        float& currentTime = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        currentTime = std::max(0.f, currentTime - dt);
+
+        sf::Uint8 alpha = static_cast<sf::Uint8>(255.f * (currentTime / MaxTime));
+        auto colour = e.getComponent<xy::Text>().getFillColour();
+        colour.a = alpha;
+        e.getComponent<xy::Text>().setFillColour(colour);
+        e.getComponent<xy::Text>().setOutlineColour({ 0,0,0,alpha });
+
+        e.getComponent<xy::Transform>().move(0.f, -160.f * dt);
+
+        if (alpha == 0)
+        {
+            getScene().destroyEntity(e);
+        }
+    };
 }

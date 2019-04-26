@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include "ItemBar.hpp"
 #include "CollisionTypes.hpp"
 #include "ScoreDirector.hpp"
+#include "BobAnimator.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -286,6 +287,7 @@ void GameState::initScene()
     m_gameScene.addSystem<DroneSystem>(mb);
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<ItemBarSystem>(mb);
+    m_gameScene.addSystem<BobSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
