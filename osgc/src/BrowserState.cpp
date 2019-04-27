@@ -672,6 +672,7 @@ void BrowserState::buildMenu()
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Version: " + info.version);
             entity.getComponent<xy::Text>().setCharacterSize(textSize);
+            entity.getComponent<xy::Text>().setOutlineThickness(1.f);
             //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
@@ -687,6 +688,7 @@ void BrowserState::buildMenu()
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Author: " + info.author);
             entity.getComponent<xy::Text>().setCharacterSize(textSize);
+            entity.getComponent<xy::Text>().setOutlineThickness(1.f);
             //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
@@ -1057,7 +1059,7 @@ void BrowserState::showQuit()
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(renderDepth);
 
-    sf::Color c(0, 0, 0, 220);
+    sf::Color c(0, 0, 0, 0);
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts.resize(4);
     verts[0].color = c;
@@ -1065,6 +1067,28 @@ void BrowserState::showQuit()
     verts[2] = { xy::DefaultSceneSize, c };
     verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y), c };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<std::pair<float, float>>(std::make_pair(0.f, 200.f));
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        auto& [current, maxVal] = std::any_cast<std::pair<float, float>&>(e.getComponent<xy::Callback>().userData);
+
+        current = std::min(1.f, current + (dt * 8.f));
+        sf::Uint8 alpha = static_cast<sf::Uint8>(maxVal * current);
+
+        auto& verts = e.getComponent<xy::Drawable>().getVertices();
+        for (auto& v : verts)
+        {
+            v.color.a = alpha;
+        }
+
+        if (current == 1)
+        {
+            e.getComponent<xy::Callback>().active = false;
+        }
+    };
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
@@ -1154,7 +1178,33 @@ void BrowserState::hideQuit()
     cmd.targetFlags = CommandID::ConfirmationEntity;
     cmd.action = [&](xy::Entity e, float)
     {
-        m_scene.destroyEntity(e);
+        if (e.hasComponent<xy::Callback>())
+        {
+            e.getComponent<xy::Callback>().function =
+                [&](xy::Entity ent, float dt)
+            {
+                auto& [current, maxVal] = std::any_cast<std::pair<float, float>&>(ent.getComponent<xy::Callback>().userData);
+
+                current = std::max(0.f, current - (dt * 8.f));
+                sf::Uint8 alpha = static_cast<sf::Uint8>(maxVal * current);
+
+                auto & verts = ent.getComponent<xy::Drawable>().getVertices();
+                for (auto& v : verts)
+                {
+                    v.color.a = alpha;
+                }
+
+                if (current == 0)
+                {
+                    m_scene.destroyEntity(ent);
+                }
+            };
+            e.getComponent<xy::Callback>().active = true;
+        }
+        else
+        {
+            m_scene.destroyEntity(e);
+        }
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 

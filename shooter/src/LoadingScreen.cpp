@@ -79,12 +79,14 @@ LoadingScreen::LoadingScreen()
     m_sprite.setTexture(m_texture, true);
     m_sprite.setScale(xy::DefaultSceneSize.x, xy::DefaultSceneSize.y / 32.f);
 
+    sf::Color c(0, 0, 128, 255);
+
     m_vertices =
     {
-        sf::Vertex(sf::Vector2f(262.f, 94.f), sf::Color::Black),
-        {sf::Vector2f(xy::DefaultSceneSize.x - 262.f, 94.f), sf::Color::Black},
-        {sf::Vector2f(xy::DefaultSceneSize.x - 262.f, xy::DefaultSceneSize.y - 94.f), sf::Color::Black},
-        {sf::Vector2f(262.f, xy::DefaultSceneSize.y - 94.f), sf::Color::Black}
+        sf::Vertex(sf::Vector2f(262.f, 94.f), c),
+        {sf::Vector2f(xy::DefaultSceneSize.x - 262.f, 94.f), c},
+        {sf::Vector2f(xy::DefaultSceneSize.x - 262.f, xy::DefaultSceneSize.y - 94.f), c},
+        {sf::Vector2f(262.f, xy::DefaultSceneSize.y - 94.f), c}
     };
 }
 
