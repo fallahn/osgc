@@ -49,6 +49,7 @@ namespace
     };
 }
 
+using namespace fe;
 LoadingScreen::LoadingScreen()
     : m_currentFrameTime(0.f),
     m_frameIndex        (0)

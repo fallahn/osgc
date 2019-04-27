@@ -57,7 +57,7 @@ private:
     xy::StateStack m_stateStack;
     SharedStateData m_sharedData;
 
-    LoadingScreen m_loadingScreen;
+    fe::LoadingScreen m_loadingScreen;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

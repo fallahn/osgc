@@ -31,6 +31,8 @@ source distribution.
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/util/Vector.hpp>
 
+using namespace fe;
+
 SliderSystem::SliderSystem(xy::MessageBus& mb)
     :xy::System(mb, typeid(SliderSystem))
 {

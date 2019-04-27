@@ -33,20 +33,23 @@ source distribution.
 
 #include <array>
 
-class LoadingScreen final : public sf::Drawable
+namespace fe
 {
-public:
-    LoadingScreen();
+    class LoadingScreen final : public sf::Drawable
+    {
+    public:
+        LoadingScreen();
 
-    void update(float);
+        void update(float);
 
-private:
+    private:
 
-    sf::Texture m_texture;
-    sf::Sprite m_sprite;
+        sf::Texture m_texture;
+        sf::Sprite m_sprite;
 
-    float m_currentFrameTime;
-    std::size_t m_frameIndex;
+        float m_currentFrameTime;
+        std::size_t m_frameIndex;
 
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
-};
+        void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    };
+}

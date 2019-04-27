@@ -40,36 +40,38 @@ Add SliderSystem.cpp to your project and use it as any other
 xygine system.
 */
 
-
-/*
-Slider component. Add this to an entity which is to be
-animated. To use it set the target point in world coordinates
-and set the active property to true. This will automatically
-be set to false once the entity reaches its destination.
-The speed property is a multiplier which should always be
-positive. Negative numbers will cause backward motion and
-the entity will never reach its target...
-*/
-struct Slider final
+namespace fe
 {
-    sf::Vector2f target;
-    bool active = false;
-    float speed = 2.f;
-};
+    /*
+    Slider component. Add this to an entity which is to be
+    animated. To use it set the target point in world coordinates
+    and set the active property to true. This will automatically
+    be set to false once the entity reaches its destination.
+    The speed property is a multiplier which should always be
+    positive. Negative numbers will cause backward motion and
+    the entity will never reach its target...
+    */
+    struct Slider final
+    {
+        sf::Vector2f target;
+        bool active = false;
+        float speed = 2.f;
+    };
 
-/*
-Slider system. Include Slider.hpp (this file) in the
-file used to set up your Scene and then add this system
-as any other. Requires an entity to have a Slider component
-and a xy::Transform component.
-*/
-class SliderSystem final : public xy::System
-{
-public:
-    explicit SliderSystem(xy::MessageBus&);
+    /*
+    Slider system. Include Slider.hpp (this file) in the
+    file used to set up your Scene and then add this system
+    as any other. Requires an entity to have a Slider component
+    and a xy::Transform component.
+    */
+    class SliderSystem final : public xy::System
+    {
+    public:
+        explicit SliderSystem(xy::MessageBus&);
 
-    void process(float) override;
+        void process(float) override;
 
-private:
+    private:
 
-};
+    };
+}

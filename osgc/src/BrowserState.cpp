@@ -136,7 +136,7 @@ namespace
     };
 }
 
-BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game, LoadingScreen& ls)
+BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& game, fe::LoadingScreen& ls)
     : xy::State         (ss, ctx),
     m_gameInstance      (game),
     m_loadingScreen     (ls),
@@ -384,7 +384,7 @@ void BrowserState::initScene()
     auto& messageBus = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(messageBus);
     m_scene.addSystem<BrowserNodeSystem>(messageBus);
-    m_scene.addSystem<SliderSystem>(messageBus);
+    m_scene.addSystem<fe::SliderSystem>(messageBus);
     m_scene.addSystem<xy::CallbackSystem>(messageBus);
     m_scene.addSystem<xy::TextSystem>(messageBus);
     m_scene.addSystem<xy::UISystem>(messageBus).setJoypadCursorActive(false);
@@ -581,7 +581,7 @@ void BrowserState::buildMenu()
     auto& rootNode = entity.addComponent<xy::Transform>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::RootNode;
     entity.addComponent<RootNode>();
-    entity.addComponent<Slider>().speed = 15.f;
+    entity.addComponent<fe::Slider>().speed = 15.f;
     //entity.getComponent<Slider>().active = true; //ensures first node is selected. Now done by fade out callback, below
     entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("navigate");
     entity.getComponent<xy::AudioEmitter>().setChannel(AudioChannel::Effects);
@@ -794,7 +794,7 @@ void BrowserState::buildMenu()
             cmd.targetFlags = CommandID::RootNode;
             cmd.action = [](xy::Entity f, float)
             {
-                f.getComponent<Slider>().active = true;
+                f.getComponent<fe::Slider>().active = true;
                 f.getComponent<RootNode>().enabled = true;
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -949,8 +949,8 @@ void BrowserState::nextItem()
         {
             if (e.getComponent<RootNode>().enabled)
             {
-                e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
-                e.getComponent<Slider>().active = true;
+                e.getComponent<fe::Slider>().target = m_browserTargets[m_browserTargetIndex];
+                e.getComponent<fe::Slider>().active = true;
                 //e.getComponent<xy::AudioEmitter>().stop();
                 e.getComponent<xy::AudioEmitter>().play();
             }
@@ -984,8 +984,8 @@ void BrowserState::prevItem()
         {
             if (e.getComponent<RootNode>().enabled)
             {
-                e.getComponent<Slider>().target = m_browserTargets[m_browserTargetIndex];
-                e.getComponent<Slider>().active = true;
+                e.getComponent<fe::Slider>().target = m_browserTargets[m_browserTargetIndex];
+                e.getComponent<fe::Slider>().active = true;
                 //e.getComponent<xy::AudioEmitter>().stop();
                 e.getComponent<xy::AudioEmitter>().play();
             }
