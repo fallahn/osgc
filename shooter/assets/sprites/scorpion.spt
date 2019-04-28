@@ -3,7 +3,7 @@ spritesheet scorpion
 	src="assets/images/scorpion.png"
 	blend=alpha
 
-	sprite human
+	sprite scorpion
 	{
 		bounds = 0,0,16,16
 

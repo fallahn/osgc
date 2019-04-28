@@ -37,6 +37,7 @@ namespace TextureID
     {
         Clouds,
         Sidebar,
+        MenuBackground,
 
         Count
     };

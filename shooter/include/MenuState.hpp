@@ -18,8 +18,13 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "TextCrawl.hpp"
+
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+
+#include <SFML/Graphics/Shader.hpp>
 
 struct SharedData;
 class MenuState final : public xy::State
@@ -40,9 +45,16 @@ public:
 private:
     SharedData& m_sharedData;
     xy::Scene m_scene;
+    TextCrawl m_textCrawl;
+    sf::Shader m_crawlShader;
+    xy::ResourceHandler m_resources;
+
+    bool m_menuActive;
 
     void initScene();
+    void loadAssets();
     void buildMenu();
+    void buildStarfield();
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

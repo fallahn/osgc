@@ -166,9 +166,11 @@
     <ClInclude Include="include\PlayerDirector.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\SliderSystem.hpp" />
     <ClInclude Include="include\SoundEffectsDirector.hpp" />
     <ClInclude Include="include\SpawnDirector.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\TextCrawl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AlienSystem.cpp" />
@@ -184,8 +186,10 @@
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerDirector.cpp" />
     <ClCompile Include="src\ScoreDirector.cpp" />
+    <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\SoundEffectsDirector.cpp" />
     <ClCompile Include="src\SpawnDirector.cpp" />
+    <ClCompile Include="src\TextCrawl.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <xyginext/core/Message.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
 namespace MessageID
 {
@@ -26,7 +27,8 @@ namespace MessageID
     {
         BombMessage = xy::Message::Count,
         DroneMessage,
-        SpawnMessage
+        SpawnMessage,
+        MenuMessage
     };
 }
 
@@ -49,6 +51,7 @@ struct DroneEvent final
         GotAmmo,
         GotBattery,
         BatteryFlat,
+        BatteryLow,
         Collided
     }type = Spawned;
     std::int32_t lives = 0;
@@ -63,4 +66,13 @@ struct SpawnEvent final
     }type = Collectible;
 
     sf::Vector2f position;
+};
+
+struct MenuEvent final
+{
+    enum
+    {
+        SlideFinished
+    }action = SlideFinished;
+    xy::Entity entity;
 };

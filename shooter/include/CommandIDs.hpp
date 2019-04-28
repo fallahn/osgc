@@ -31,4 +31,10 @@ namespace CommandID
         BackgroundTop = 0x40,
         ScoreText = 0x80
     };
+
+    enum Menu
+    {
+        RootNode = 0x1,
+        Starfield = 0x2
+    };
 }

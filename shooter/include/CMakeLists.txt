@@ -20,7 +20,9 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ScoreDirector.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SpawnDirector.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TextCrawl.hpp
   PARENT_SCOPE)

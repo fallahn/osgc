@@ -13,6 +13,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ScoreDirector.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SpawnDirector.cpp
   PARENT_SCOPE)

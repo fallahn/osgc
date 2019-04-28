@@ -18,17 +18,24 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 
-#include <cstdint>
-
-namespace Menu
+namespace sf
 {
-    static const sf::Vector2f TitlePosition(120.f, 80.f);
-    static const std::uint32_t TitleCharSize = 120;
-
-    static const sf::Vector2f ItemFirstPosition(120.f, 500.f);
-    static const float ItemVerticalSpacing = 80.f;
-    static const std::uint32_t ItemCharSize = 60;
-    static const sf::Color TextColour = sf::Color::Yellow;
+    class Font;
 }
+
+class TextCrawl final
+{
+public:
+    explicit TextCrawl(sf::Font&);
+
+    bool update(float);
+
+    const sf::Texture& getTexture() const { return m_texture.getTexture(); }
+
+private:
+    sf::Text m_text;
+    sf::RenderTexture m_texture;
+};

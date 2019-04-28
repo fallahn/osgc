@@ -3,7 +3,7 @@ spritesheet beetle
 	src="assets/images/beetle.png"
 	blend=alpha
 
-	sprite human
+	sprite beetle
 	{
 		bounds = 0,0,16,16
 
