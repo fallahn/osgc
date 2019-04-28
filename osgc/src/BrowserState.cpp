@@ -146,8 +146,8 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_slideshowIndex    (0),
     m_audioScape        (m_audioResource),
     m_locked            (true),
-    m_quitShown         (false),
-    m_lastSort          (true)
+    m_quitShown         (false)/*,
+    m_lastSort          (true)*/
 {
     launchLoadingScreen();
     
@@ -499,7 +499,7 @@ void BrowserState::buildMenu()
                 if(flags & xy::UISystem::LeftMouse
                     && e.getComponent<UINode>().enabled)
                 {
-                    sortNodes(!m_lastSort);
+                    sortNodes(!m_settings.lastSort);
                     enableItem();
                 }
             });
@@ -706,7 +706,7 @@ void BrowserState::buildMenu()
     }
 
     //sort nodes alphabetically. Quit node (below) is ignore so it is always last
-    sortNodes(true);
+    sortNodes(m_settings.lastSort);
 
     //add one extra item to quit the browser
     entity = m_scene.createEntity();
@@ -1255,7 +1255,7 @@ void BrowserState::sortNodes(bool asc)
                 return a.second > b.second;
             });
     }
-    m_lastSort = asc;
+    m_settings.lastSort = asc;
 
     auto nodePos = m_basePosition;
     auto stride = ThumbnailSize.x * 1.2f;

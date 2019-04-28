@@ -32,8 +32,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/UIHitBox.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
 
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
@@ -180,6 +182,7 @@ void MenuState::initScene()
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+    m_scene.addSystem<xy::AudioSystem>(mb);
 }
 
 void MenuState::loadAssets()
@@ -365,6 +368,11 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(-10);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::MenuBackground]));
+    entity.addComponent<xy::AudioEmitter>().setSource("assets/sound/menu.ogg");
+    entity.getComponent<xy::AudioEmitter>().setChannel(0);
+    entity.getComponent<xy::AudioEmitter>().setAttenuation(0.f);
+    entity.getComponent<xy::AudioEmitter>().setLooped(true);
+    entity.getComponent<xy::AudioEmitter>().play();
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
@@ -397,7 +405,7 @@ void MenuState::buildStarfield()
         verts.emplace_back(sf::Vector2f(position.x - (quadSize.x / 2.f), position.y + (quadSize.y / 2.f)));
     };
 
-    auto positions = xy::Util::Random::poissonDiscDistribution({ sf::Vector2f(), xy::DefaultSceneSize }, 200.f, 30);
+    auto positions = xy::Util::Random::poissonDiscDistribution({ sf::Vector2f(), xy::DefaultSceneSize }, 100.f, 50);
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
@@ -413,7 +421,7 @@ void MenuState::buildStarfield()
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     //nearer stars to give depth
-    positions = xy::Util::Random::poissonDiscDistribution({ sf::Vector2f(), sf::Vector2f(xy::DefaultSceneSize.x - 80.f, xy::DefaultSceneSize.y * 1.5f) }, 280.f, 20);
+    positions = xy::Util::Random::poissonDiscDistribution({ sf::Vector2f(), sf::Vector2f(xy::DefaultSceneSize.x - 80.f, xy::DefaultSceneSize.y * 1.5f) }, 100.f, 50);
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(40.f, 0.f);
@@ -431,7 +439,7 @@ void MenuState::buildStarfield()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Starfield;
 
     //nearest
-    positions = xy::Util::Random::poissonDiscDistribution({ sf::Vector2f(), sf::Vector2f(xy::DefaultSceneSize.x + 80.f, xy::DefaultSceneSize.y * 1.5f) }, 560.f, 20);
+    positions = xy::Util::Random::poissonDiscDistribution({ sf::Vector2f(), sf::Vector2f(xy::DefaultSceneSize.x + 80.f, xy::DefaultSceneSize.y * 1.5f) }, 160.f, 40);
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(-40.f, 0.f);

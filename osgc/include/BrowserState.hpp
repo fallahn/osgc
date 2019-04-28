@@ -80,11 +80,11 @@ private:
 
     std::vector<std::pair<xy::Entity, std::string>> m_nodeList;
     sf::Vector2f m_basePosition; //initial node position
-    bool m_lastSort;
-
+    
     struct Settings final
     {
         bool useSlideshow = false;
+        bool lastSort = true;
     }m_settings;
     void loadSettings();
     void saveSettings();
