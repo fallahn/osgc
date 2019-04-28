@@ -16,4 +16,5 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SpawnDirector.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TextCrawl.cpp
   PARENT_SCOPE)
