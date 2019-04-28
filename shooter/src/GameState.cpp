@@ -103,6 +103,23 @@ namespace
             gl_FragColor = mix(colour, noise, u_mix);
 
         })";
+
+    const std::string waterFrag = R"(
+        #version 120
+
+        uniform float u_time;
+        uniform sampler2D u_texture;
+
+        void main()
+        {
+            vec2 coord = gl_TexCoord[0].xy;
+            float c = texture2D(u_texture, coord * 0.9 + vec2(u_time * -10.0)).r;
+            c *= texture2D(u_texture, coord * 1.1 + vec2(u_time * 10.0)).g;
+            c = pow(c, 5.0);
+
+            gl_FragColor = vec4(vec3(c * 10.0), 1.0);
+
+        })";
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -284,6 +301,7 @@ bool GameState::update(float dt)
     shaderTime += dt * 0.001f;
     m_shaders.get(ShaderID::Cloud).setUniform("u_time", shaderTime);
     m_shaders.get(ShaderID::Noise).setUniform("u_time", shaderTime);
+    m_shaders.get(ShaderID::Water).setUniform("u_time", shaderTime);
 
     m_gameScene.update(dt);
 
@@ -350,11 +368,14 @@ void GameState::initScene()
 void GameState::loadAssets()
 {
     m_shaders.preload(ShaderID::Cloud, cloudFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Water, waterFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Noise, noiseFrag, sf::Shader::Fragment);
     m_shaders.get(ShaderID::Noise).setUniform("u_windowSize", sf::Vector2f(getContext().renderWindow.getSize()));
     m_shaders.get(ShaderID::Noise).setUniform("u_viewSize", ConstVal::SmallViewSize);
 
     TextureID::handles[TextureID::Sidebar] = m_resources.load<sf::Texture>("assets/images/sidebar.png");
+    TextureID::handles[TextureID::Noise] = m_resources.load<sf::Texture>("assets/images/noise.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::Noise]).setRepeated(true);
     TextureID::handles[TextureID::Clouds] = m_resources.load<sf::Texture>("assets/images/clouds.png");
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::Clouds]).setRepeated(true);
 
@@ -544,9 +565,30 @@ void GameState::loadWorld()
     {
         entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(b.worldBounds.left, b.worldBounds.top);
-        entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, b.worldBounds.width, b.worldBounds.height });
-        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(b.filter);
         entity.addComponent<CollisionBox>() = b;
+        //scale the objects so anything with a texture has correct pixel size
+        sf::Vector2f size(b.worldBounds.width / 4.f, b.worldBounds.height / 4.f);
+        entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+        entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, size.x, size.y });
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(b.filter);
+
+        if (b.type == CollisionBox::Water)
+        {
+            //add a sparkly water sprite
+            entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 1);
+            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            verts.resize(4);
+            verts[0] = { sf::Vector2f(), sf::Color::Magenta };
+            verts[1] = { sf::Vector2f(size.x, 0.f), sf::Color::Magenta, sf::Vector2f(size.x, 0.f) };
+            verts[2] = { size, sf::Color::Magenta, size };
+            verts[3] = { sf::Vector2f(0.f, size.y), sf::Color::Magenta, sf::Vector2f(0.f, size.y) };
+
+            entity.getComponent<xy::Drawable>().updateLocalBounds();
+            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Water));
+            entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+            entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(TextureID::handles[TextureID::Noise]));
+            entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+        }
     }
 
     //and navigation nodes

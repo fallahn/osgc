@@ -43,6 +43,12 @@ public:
 
     const std::vector<sf::Vector2f>& getNavigationNodes() const;
 
+    enum SpawnType
+    {
+        Human, Alien
+    };
+    const std::vector<std::pair<sf::Vector2f, std::int32_t>>& getSpawnPoints() const;
+
 private:
 
     const SpriteArray& m_sprites;
@@ -53,4 +59,5 @@ private:
 
     std::vector<CollisionBox> m_collisionBoxes;
     std::vector<sf::Vector2f> m_navigationNodes;
+    std::vector<std::pair<sf::Vector2f, std::int32_t>> m_spawnPoints;
 };

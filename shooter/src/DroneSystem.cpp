@@ -210,7 +210,7 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     updateBatteryBar(drone);
 
     //raise event on low battery
-    if (oldBatt > 18 && drone.battery < 18)
+    if (oldBatt > 28 && drone.battery < 28)
     {
         auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
         msg->type = DroneEvent::BatteryLow;

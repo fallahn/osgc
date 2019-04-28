@@ -37,6 +37,7 @@ namespace TextureID
     {
         Clouds,
         Sidebar,
+        Noise,
         MenuBackground,
 
         Count
@@ -50,7 +51,8 @@ namespace ShaderID
     enum
     {
         Cloud,
-        Noise
+        Noise,
+        Water
     };
 }
 

@@ -65,6 +65,10 @@ MapLoader::MapLoader(const SpriteArray& sprites)
 
 bool MapLoader::load(const std::string& path)
 {
+    m_collisionBoxes.clear();
+    m_navigationNodes.clear();
+    m_spawnPoints.clear();
+
     tmx::Map map;
     if (map.load(xy::FileSystem::getResourcePath() + path))
     {
@@ -92,6 +96,7 @@ bool MapLoader::load(const std::string& path)
 
         tmx::ObjectGroup* objectLayer = nullptr;
         tmx::ObjectGroup* navigationLayer = nullptr;
+        tmx::ObjectGroup* spawnLayer = nullptr;
 
         m_topTexture.clear();
 
@@ -148,6 +153,10 @@ bool MapLoader::load(const std::string& path)
                 else if (layer->getName() == "objects")
                 {
                     objectLayer = &layer->getLayerAs<tmx::ObjectGroup>();
+                }
+                else if (layer->getName() == "spawn")
+                {
+                    spawnLayer = &layer->getLayerAs<tmx::ObjectGroup>();
                 }
             }
         }
@@ -354,6 +363,45 @@ bool MapLoader::load(const std::string& path)
             return false;
         }
 
+        if (spawnLayer)
+        {
+            const auto& objs = spawnLayer->getObjects();
+            for (const auto& obj : objs)
+            {
+                if (obj.getShape() == tmx::Object::Shape::Point)
+                {
+                    sf::Vector2f position(obj.getPosition().x, obj.getPosition().y);
+                    position *= 4.f;
+
+                    std::int32_t type = -1;
+                    if (obj.getType() == "alien spawn")
+                    {
+                        type = SpawnType::Alien;
+                    }
+                    else if (obj.getType() == "human spawn")
+                    {
+                        type = SpawnType::Human;
+                    }
+                    
+                    if (type > -1)
+                    {
+                        m_spawnPoints.emplace_back(std::make_pair(position, type));
+                    }
+                }
+            }
+        }
+        else
+        {
+            xy::Logger::log("no spawn layer found", xy::Logger::Type::Error);
+            return false;
+        }
+
+        if (m_collisionBoxes.empty() || m_navigationNodes.empty() || m_spawnPoints.empty())
+        {
+            xy::Logger::log("missing some map data...", xy::Logger::Type::Error);
+            return false;
+        }
+
         return true;
     }
     LOG("Failed opening map " + path, xy::Logger::Type::Error);
@@ -402,4 +450,9 @@ const std::vector<CollisionBox>& MapLoader::getCollisionBoxes() const
 const std::vector<sf::Vector2f>& MapLoader::getNavigationNodes() const
 {
     return m_navigationNodes;
+}
+
+const std::vector<std::pair<sf::Vector2f, std::int32_t>>& MapLoader::getSpawnPoints() const
+{
+    return m_spawnPoints;
 }
