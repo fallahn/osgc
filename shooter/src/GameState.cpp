@@ -87,6 +87,8 @@ namespace
         uniform float u_time;
         uniform vec2 u_windowSize;
         uniform vec2 u_viewSize;
+        uniform sampler2D u_texture;
+        uniform float u_mix;
 
         float rand(vec2 pos)
         {
@@ -95,7 +97,11 @@ namespace
 
         void main()
         {
-            gl_FragColor = vec4(vec3(rand(floor((gl_FragCoord.xy / u_windowSize) * (u_viewSize / 4.0)))), 1.0);
+            vec4 colour = texture2D(u_texture, gl_TexCoord[0].xy);
+            vec4 noise = vec4(vec3(rand(floor((gl_FragCoord.xy / u_windowSize) * (u_viewSize / 4.0)))), 1.0);
+
+            gl_FragColor = mix(colour, noise, u_mix);
+
         })";
 }
 
@@ -103,6 +109,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
     m_sharedData(sd),
     m_gameScene (ctx.appInstance.getMessageBus(), 1024),
+    m_audioScape(m_audioResource),
     m_mapLoader (m_sprites)
 {
     launchLoadingScreen();
@@ -189,12 +196,14 @@ void GameState::handleMessage(const xy::Message& msg)
             cmd.targetFlags = CommandID::BackgroundTop;
             cmd.action = [&, data](xy::Entity e, float)
             {
-                e.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
+                //e.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
                 e.getComponent<xy::Drawable>().setDepth(-ConstVal::BackgroundDepth);
 
                 showCrashMessage(data.lives == 0); //has to be done here to ensure shader updated
             };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            m_shaders.get(ShaderID::Noise).setUniform("u_mix", 1.f);
         }
         else if (data.type == DroneEvent::Spawned)
         {
@@ -202,10 +211,28 @@ void GameState::handleMessage(const xy::Message& msg)
             cmd.targetFlags = CommandID::BackgroundTop;
             cmd.action = [&](xy::Entity e, float)
             {
-                e.getComponent<xy::Drawable>().setShader(nullptr);
+                //e.getComponent<xy::Drawable>().setShader(nullptr);
                 e.getComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
             };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            m_shaders.get(ShaderID::Noise).setUniform("u_mix", 0.f);
+        }
+        /*else if (data.type == DroneEvent::GotBattery)
+        {
+            m_shaders.get(ShaderID::Noise).setUniform("u_mix", 0.f);
+        }
+        else if (data.type == DroneEvent::BatteryLow)
+        {
+            m_shaders.get(ShaderID::Noise).setUniform("u_mix", 0.15f);
+        }*/
+        else if (data.type == DroneEvent::CollisionStart)
+        {
+            m_shaders.get(ShaderID::Noise).setUniform("u_mix", 0.5f);
+        }
+        else if (data.type == DroneEvent::CollisionEnd)
+        {
+            m_shaders.get(ShaderID::Noise).setUniform("u_mix", 0.f);
         }
     }
     else if (msg.id == xy::Message::StateMessage)
@@ -378,6 +405,8 @@ void GameState::loadAssets()
     spriteSheet.loadFromFile("assets/sprites/beetle.spt", m_resources);
     m_sprites[SpriteID::Beetle] = spriteSheet.getSprite("beetle");
 
+    m_audioScape.loadFromFile("assets/sound/game.xas");
+
     if(!m_mapLoader.load("assets/maps/01.tmx"))
     {
         m_sharedData.messageString = "Failed To Load Map";
@@ -480,7 +509,8 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
-    //entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<xy::Sprite>(m_mapLoader.getTopDownTexture());
     entity.addComponent<xy::CommandTarget>().ID = CommandID::BackgroundTop;
 
@@ -495,6 +525,8 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().addChild(m_topCamera.getComponent<xy::Transform>());
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("warning");
+    entity.getComponent<xy::AudioEmitter>().setChannel(1);
     m_topCamera.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, bounds.height / 2.f);
 
     //this is our side-view drone

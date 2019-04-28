@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
+ <objecttype name="alien spawn" color="#00ff00"/>
  <objecttype name="barrier" color="#808000"/>
  <objecttype name="building" color="#aa0000"/>
  <objecttype name="bush" color="#00aa00"/>
+ <objecttype name="human spawn" color="#ff00ff"/>
  <objecttype name="sandbag" color="#ff5500"/>
  <objecttype name="tree" color="#005500"/>
  <objecttype name="water" color="#0000ff"/>

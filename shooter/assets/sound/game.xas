@@ -1,0 +1,12 @@
+audioscape game
+{
+	emitter warning
+	{
+		path = "assets/sound/warning.wav"
+		looped = false
+		streaming = false
+		volume = 0.8
+		attenuation = 0
+		falloff = 0
+	}
+}

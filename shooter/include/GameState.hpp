@@ -25,6 +25,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/resources/Resource.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 
@@ -55,6 +57,9 @@ private:
     xy::ResourceHolder m_resources;
     xy::ShaderResource m_shaders;
     SpriteArray m_sprites;
+
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_audioScape;
 
     MapLoader m_mapLoader;
 

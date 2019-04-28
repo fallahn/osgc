@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -203,9 +204,20 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     drone.inputFlags = 0;
 
     //slowly drain battery - TODO also in pick up state?
+    auto oldBatt = drone.battery;
     drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
     //send update to battery indicator
     updateBatteryBar(drone);
+
+    //raise event on low battery
+    if (oldBatt > 18 && drone.battery < 18)
+    {
+        auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+        msg->type = DroneEvent::BatteryLow;
+        msg->position = tx.getPosition();
+
+        entity.getComponent<xy::AudioEmitter>().play();
+    }
 
     if (drone.battery == 0)
     {
@@ -252,6 +264,14 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
         if (!collision)
         {
             drone.height = newHeight;
+
+            if (drone.colliding)
+            {
+                //collision just ended
+                auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
+                msg->type = DroneEvent::CollisionEnd;
+                msg->position = tx.getPosition();
+            }
         }
         else
         {
@@ -268,7 +288,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
                 {
                     //collision just started
                     auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
-                    msg->type = DroneEvent::Collided;
+                    msg->type = DroneEvent::CollisionStart;
                     msg->position = tx.getPosition();
                 }
 

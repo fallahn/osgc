@@ -111,7 +111,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         case DroneEvent::GotBattery:
             playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Pickup]), data.position).setVolume(0.1f);
             break;
-        case DroneEvent::Collided:
+        case DroneEvent::CollisionStart:
             playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Damage]), data.position);
             break;
         }

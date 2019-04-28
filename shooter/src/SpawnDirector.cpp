@@ -39,8 +39,8 @@ namespace
     const sf::Time AmmoRespawn = sf::seconds(12.f);
     const sf::Time BatteryRespawn = sf::seconds(18.f);
 
-    const std::size_t MaxAmmo = 3;
-    const std::size_t MaxBattery = 2;
+    const std::size_t MaxAmmo = 2;
+    const std::size_t MaxBattery = 1;
 
     template <typename T>
     sf::Rect<T>& operator *= (sf::Rect<T>& l, T r)
@@ -77,6 +77,14 @@ void SpawnDirector::handleMessage(const xy::Message& msg)
         if (data.type == DroneEvent::Died)
         {
             spawnMiniExplosion(data.position);
+        }
+        else if (data.type == DroneEvent::GotAmmo)
+        {
+            m_itemClocks[Ammo].restart();
+        }
+        else if (data.type == DroneEvent::GotBattery)
+        {
+            m_itemClocks[Battery].restart();
         }
     }
 }
