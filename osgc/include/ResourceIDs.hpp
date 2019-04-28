@@ -56,6 +56,7 @@ namespace SpriteID
         Quit,
         Yes,
         No,
+        Sort,
 
         Count
     };

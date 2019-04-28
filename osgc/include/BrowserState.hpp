@@ -78,6 +78,10 @@ private:
     bool m_locked; //locks the browser until the intro is finished
     bool m_quitShown;
 
+    std::vector<std::pair<xy::Entity, std::string>> m_nodeList;
+    sf::Vector2f m_basePosition; //initial node position
+    bool m_lastSort;
+
     struct Settings final
     {
         bool useSlideshow = false;
@@ -93,9 +97,12 @@ private:
     void nextItem();
     void prevItem();
     void execItem();
+    void enableItem();
 
     void showQuit();
     void hideQuit();
+
+    void sortNodes(bool asc);
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

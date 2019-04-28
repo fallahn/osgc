@@ -82,6 +82,7 @@ namespace
 #endif
 
     const std::string settingsFile("browser.cfg");
+    const auto ThumbnailSize = xy::DefaultSceneSize / 2.f; //make sure to scale all sprites to correct size
 
     struct PluginInfo final
     {
@@ -145,7 +146,8 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_slideshowIndex    (0),
     m_audioScape        (m_audioResource),
     m_locked            (true),
-    m_quitShown         (false)
+    m_quitShown         (false),
+    m_lastSort          (true)
 {
     launchLoadingScreen();
     
@@ -288,25 +290,7 @@ void BrowserState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<SliderEvent>();
         if (data.action == SliderEvent::Finished)
         {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::BrowserNode;
-            cmd.action = [&](xy::Entity e, float)
-            {
-                auto& node = e.getComponent<BrowserNode>();
-                node.enabled = node.index == m_browserTargetIndex;
-
-                if (node.enabled)
-                {
-                    xy::Command cmd2;
-                    cmd2.targetFlags = CommandID::TitleText;
-                    cmd2.action = [&node](xy::Entity ee, float)
-                    {
-                        ee.getComponent<xy::Text>().setString(node.title);
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
-                }
-            };
-            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            enableItem();
         }
     }
 
@@ -421,6 +405,7 @@ void BrowserState::loadResources()
     SpriteID::sprites[SpriteID::Quit] = spriteSheet.getSprite("close");
     SpriteID::sprites[SpriteID::Yes] = spriteSheet.getSprite("yes");
     SpriteID::sprites[SpriteID::No] = spriteSheet.getSprite("no");
+    SpriteID::sprites[SpriteID::Sort] = spriteSheet.getSprite("sort");
 
     m_audioScape.loadFromFile("assets/sound/ui.xas");
 }
@@ -455,7 +440,6 @@ void BrowserState::buildMenu()
         }
     };
 
-    static const auto ThumbnailSize = xy::DefaultSceneSize / 2.f; //make sure to scale all sprites to correct size
     auto applyVertices = [](xy::Drawable & drawable)
     {
         auto& verts = drawable.getVertices();
@@ -502,6 +486,27 @@ void BrowserState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Sort];
+    auto sortBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - ((sortBounds.width + ItemPadding) * 3.f), ItemPadding);
+    entity.addComponent<UINode>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UINode;
+    entity.addComponent<xy::UIHitBox>().area = sortBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags) 
+            {
+                if(flags & xy::UISystem::LeftMouse
+                    && e.getComponent<UINode>().enabled)
+                {
+                    sortNodes(!m_lastSort);
+                    enableItem();
+                }
+            });
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Options];
     auto optionBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - ((optionBounds.width + ItemPadding) * 2.f), ItemPadding);
@@ -510,9 +515,9 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::UIHitBox>().area = optionBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [](xy::Entity e, sf::Uint64 flags) 
+            [](xy::Entity e, sf::Uint64 flags)
             {
-                if(flags & xy::UISystem::LeftMouse
+                if (flags & xy::UISystem::LeftMouse
                     && e.getComponent<UINode>().enabled)
                 {
                     xy::Console::show();
@@ -589,7 +594,7 @@ void BrowserState::buildMenu()
     //game plugin nodes
     sf::Vector2f nodePosition = xy::DefaultSceneSize / 2.f;
     nodePosition.y += (ThumbnailSize.y * 0.6f) / 2.f;
-    const sf::Vector2f basePosition = nodePosition;
+    m_basePosition = nodePosition;
     m_browserTargets.emplace_back();
 
     //callback when clicking node
@@ -607,7 +612,6 @@ void BrowserState::buildMenu()
     std::size_t i = 0;
 
     auto pluginList = xy::FileSystem::listDirectories(xy::FileSystem::getResourcePath() + pluginFolder);
-    std::sort(pluginList.begin(), pluginList.end()); //not all OSs list alphabetically
     for (const auto& dir : pluginList)
     {
         //check plugin exists
@@ -655,16 +659,12 @@ void BrowserState::buildMenu()
         entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
         entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] = nodeCallback;            
 
+        //store node entity so we can sort by name
+        m_nodeList.emplace_back(std::make_pair(entity, info.name));
+
         auto& parentTx = entity.getComponent<xy::Transform>();
 
         std::uint32_t textSize = 24;
-        /*entity = m_scene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
-        entity.addComponent<xy::Text>(menuFont).setString(info.name);
-        entity.getComponent<xy::Text>().setCharacterSize(textSize);
-        entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
-        entity.addComponent<xy::Drawable>().setDepth(TextDepth);
-        parentTx.addChild(entity.getComponent<xy::Transform>());*/
 
         if (!info.version.empty())
         {
@@ -701,9 +701,12 @@ void BrowserState::buildMenu()
         nodePosition.x += ThumbnailSize.x * 1.2f;
 
         rootNode.addChild(parentTx);
-        m_browserTargets.push_back(nodePosition - basePosition);
+        m_browserTargets.push_back(nodePosition - m_basePosition);
         m_browserTargets.back().x = -m_browserTargets.back().x;
     }
+
+    //sort nodes alphabetically. Quit node (below) is ignore so it is always last
+    sortNodes(true);
 
     //add one extra item to quit the browser
     entity = m_scene.createEntity();
@@ -1022,6 +1025,29 @@ void BrowserState::execItem()
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
+void BrowserState::enableItem()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::BrowserNode;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        auto& node = e.getComponent<BrowserNode>();
+        node.enabled = node.index == m_browserTargetIndex;
+
+        if (node.enabled)
+        {
+            xy::Command cmd2;
+            cmd2.targetFlags = CommandID::TitleText;
+            cmd2.action = [&node](xy::Entity ee, float)
+            {
+                ee.getComponent<xy::Text>().setString(node.title);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
+        }
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
 void BrowserState::showQuit()
 {
     if (m_locked)
@@ -1209,6 +1235,37 @@ void BrowserState::hideQuit()
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
     m_quitShown = false;
+}
+
+void BrowserState::sortNodes(bool asc)
+{
+    if (asc)
+    {
+        std::sort(m_nodeList.begin(), m_nodeList.end(),
+            [](const std::pair<xy::Entity, std::string>& a, const std::pair<xy::Entity, std::string>& b)
+            {
+                return a.second < b.second;
+            });
+    }
+    else
+    {
+        std::sort(m_nodeList.begin(), m_nodeList.end(),
+            [](const std::pair<xy::Entity, std::string> & a, const std::pair<xy::Entity, std::string> & b)
+            {
+                return a.second > b.second;
+            });
+    }
+    m_lastSort = asc;
+
+    auto nodePos = m_basePosition;
+    auto stride = ThumbnailSize.x * 1.2f;
+
+    for (auto i = 0u; i < m_nodeList.size(); ++i)
+    {
+        m_nodeList[i].first.getComponent<xy::Transform>().setPosition(nodePos);
+        m_nodeList[i].first.getComponent<BrowserNode>().index = i;
+        nodePos.x += stride;
+    }
 }
 
 void BrowserState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
