@@ -29,11 +29,6 @@ struct Alien final
     {
         Beetle, Scorpion
     }type = Type::Beetle;
-
-    //enum class State
-    //{
-    //    Searching, Attacking
-    //}state = State::Searching;
 };
 
 class AlienSystem final : public xy::System
@@ -56,9 +51,16 @@ private:
 
     void spawnAlien();
 
-    sf::Vector2f coalesce(xy::Entity);
-    sf::Vector2f separate(xy::Entity);
-    sf::Vector2f align(xy::Entity);
+    struct Results final
+    {
+        sf::Vector2f coalescence;
+        sf::Vector2f alignment;
+        sf::Vector2f separation;
+    }; //allows sharing particular tree queries but adding the results in the correct order.
+
+    void coalesceAndAlign(xy::Entity, Results&);
+    void separate(xy::Entity, Results&);
+
 
     //sf::Vector2f target(xy::Entity);
 
