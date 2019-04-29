@@ -37,7 +37,8 @@ struct BombEvent final
     enum
     {
         Dropped,
-        Exploded
+        Exploded,
+        DestroyedCollectible
     }type = Exploded;
     sf::Vector2f position; //top down coordinates
 };

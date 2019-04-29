@@ -42,6 +42,7 @@ namespace
     const std::int32_t AmmoScore = 20;
     const std::int32_t BatteryScore = 40;
     const std::int32_t DeathScore = -50;
+    const std::int32_t DestroyCollectibleScore = -10;
 }
 
 ScoreDirector::ScoreDirector(sf::Font& font)
@@ -100,6 +101,10 @@ void ScoreDirector::handleMessage(const xy::Message& msg)
                     }
                 }
             }
+        }
+        else if (data.type == BombEvent::DestroyedCollectible)
+        {
+            spawnScoreItem(data.position, DestroyCollectibleScore);
         }
     }
 }

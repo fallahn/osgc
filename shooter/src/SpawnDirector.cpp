@@ -69,6 +69,26 @@ void SpawnDirector::handleMessage(const xy::Message& msg)
         {
             spawnExplosion(data.position);
             spawnMiniExplosion(data.position);
+
+            //check for items and destroy any inside damge radius
+            auto damageArea = ConstVal::DamageRadius;
+            damageArea.left += data.position.x;
+            damageArea.top += data.position.y;
+
+            auto nearby = getScene().getSystem<xy::DynamicTreeSystem>().query(damageArea, CollisionBox::Collectible);
+            for (auto e : nearby)
+            {
+                auto eBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+                if (eBounds.intersects(damageArea))
+                {
+                    spawnExplosion(e.getComponent<xy::Transform>().getPosition());
+                    getScene().destroyEntity(e);
+
+                    auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                    msg->type = BombEvent::DestroyedCollectible;
+                    msg->position = e.getComponent<xy::Transform>().getPosition();
+                }
+            }
         }
     }
     else if (msg.id == MessageID::DroneMessage)
@@ -182,6 +202,7 @@ void SpawnDirector::spawnAmmo(sf::Vector2f position)
     auto bounds = m_sprites[SpriteID::AmmoTop].getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Collectible | CollisionBox::Solid);
     
     bounds *= 4.f;
     entity.addComponent<CollisionBox>().worldBounds = { -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height };
@@ -224,6 +245,7 @@ void SpawnDirector::spawnBattery(sf::Vector2f position)
     auto bounds = m_sprites[SpriteID::BatteryTop].getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Collectible | CollisionBox::Solid);
 
     bounds *= 4.f;
     entity.addComponent<CollisionBox>().worldBounds = { -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height };

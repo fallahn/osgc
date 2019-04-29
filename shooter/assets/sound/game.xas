@@ -8,5 +8,6 @@ audioscape game
 		volume = 0.8
 		attenuation = 0
 		falloff = 0
+        mixer_channel = 1
 	}
 }

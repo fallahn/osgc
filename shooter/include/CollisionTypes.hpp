@@ -38,7 +38,8 @@ struct CollisionBox final
     {
         Solid = 0x1,
         NoDecal = 0x2,
-        Navigation = 0x4
+        Navigation = 0x4,
+        Collectible = 0x8
     };
     std::uint64_t filter = Solid;
 
