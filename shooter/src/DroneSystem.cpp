@@ -205,7 +205,7 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
 
     //slowly drain battery - TODO also in pick up state?
     auto oldBatt = drone.battery;
-    drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
+    //drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
     //send update to battery indicator
     updateBatteryBar(drone);
 
@@ -247,7 +247,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
         auto position = tx.getPosition();
         sf::FloatRect droneBounds = { position.x - 8.f, position.y - 8.f, 16.f, 16.f };
 
-        auto nearby = bp.query(droneBounds, CollisionBox::Solid);
+        auto nearby = bp.query(droneBounds, CollisionBox::Solid | CollisionBox::Collectible);
         for (auto e : nearby)
         {
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());

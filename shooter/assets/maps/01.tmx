@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="131">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="135">
  <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="105" columns="15">
   <image source="../images/tileset.png" width="240" height="112"/>
  </tileset>
@@ -41,7 +41,7 @@
   <object id="15" type="tree" x="560" y="656" width="32" height="32"/>
   <object id="16" type="tree" x="432" y="656" width="32" height="32"/>
   <object id="17" type="tree" x="160" y="672" width="32" height="32"/>
-  <object id="18" type="barrier" x="0" y="624" width="352" height="48"/>
+  <object id="18" type="barrier" x="16" y="624" width="336" height="48"/>
   <object id="19" type="building" x="64" y="848" width="112" height="64"/>
   <object id="20" type="building" x="368" y="848" width="32" height="64"/>
   <object id="21" type="building" x="416" y="848" width="128" height="64"/>
@@ -82,6 +82,10 @@
   <object id="56" type="sandbag" x="180" y="528" width="8" height="84"/>
   <object id="57" type="sandbag" x="660" y="516" width="8" height="224"/>
   <object id="58" type="sandbag" x="404" y="740" width="264" height="8"/>
+  <object id="131" type="barrier" x="0" y="0" width="16" height="960"/>
+  <object id="132" type="barrier" x="704" y="0" width="16" height="960"/>
+  <object id="133" type="barrier" x="16" y="0" width="688" height="16"/>
+  <object id="134" type="barrier" x="16" y="944" width="688" height="16"/>
  </objectgroup>
  <objectgroup id="8" name="spawn">
   <object id="118" type="human spawn" x="120" y="840">

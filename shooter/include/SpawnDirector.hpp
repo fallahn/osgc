@@ -29,14 +29,14 @@ Copyright 2019 Matt Marchant
 class SpawnDirector final : public xy::Director
 {
 public:
-    explicit SpawnDirector(SpriteArray&);
+    explicit SpawnDirector(const SpriteArray&);
 
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
 private:
 
-    SpriteArray& m_sprites;
+    const SpriteArray& m_sprites;
 
     enum ActiveItem
     {

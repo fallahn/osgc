@@ -18,25 +18,51 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "ResourceIDs.hpp"
+
 #include <xyginext/ecs/System.hpp>
 
 struct Alien final
 {
+    sf::Vector2f velocity;
     enum class Type
     {
         Beetle, Scorpion
     }type = Type::Beetle;
 
-    enum class State
-    {
-        Searching, Attacking
-    }state = State::Searching;
+    //enum class State
+    //{
+    //    Searching, Attacking
+    //}state = State::Searching;
 };
 
 class AlienSystem final : public xy::System
 {
 public:
-    explicit AlienSystem(xy::MessageBus&);
+    AlienSystem(xy::MessageBus&, const SpriteArray&);
 
     void process(float) override;
+
+    void addSpawn(sf::Vector2f);
+    void clearSpawns() { m_spawnPoints.clear(); }
+
+private:
+    const SpriteArray& m_sprites;
+
+    std::vector<sf::Vector2f> m_spawnPoints;
+    std::size_t m_spawnIndex;
+    std::size_t m_spawnCount;
+    sf::Clock m_spawnClock;
+
+    void spawnAlien();
+
+    sf::Vector2f coalesce(xy::Entity);
+    sf::Vector2f separate(xy::Entity);
+    sf::Vector2f align(xy::Entity);
+
+    //sf::Vector2f target(xy::Entity);
+
+    sf::Vector2f getDistance(sf::Vector2f, sf::FloatRect);
+
+    xy::Entity m_debug;
 };

@@ -53,7 +53,7 @@ namespace
     }
 }
 
-SpawnDirector::SpawnDirector(SpriteArray& sa)
+SpawnDirector::SpawnDirector(const SpriteArray& sa)
     : m_sprites(sa)
 {
 
@@ -87,6 +87,7 @@ void SpawnDirector::handleMessage(const xy::Message& msg)
                     auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
                     msg->type = BombEvent::DestroyedCollectible;
                     msg->position = e.getComponent<xy::Transform>().getPosition();
+                    LOG("Fix explosions being returned by this query!", xy::Logger::Type::Info);
                 }
             }
         }
@@ -202,7 +203,7 @@ void SpawnDirector::spawnAmmo(sf::Vector2f position)
     auto bounds = m_sprites[SpriteID::AmmoTop].getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
-    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Collectible | CollisionBox::Solid);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Collectible);
     
     bounds *= 4.f;
     entity.addComponent<CollisionBox>().worldBounds = { -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height };
@@ -245,7 +246,7 @@ void SpawnDirector::spawnBattery(sf::Vector2f position)
     auto bounds = m_sprites[SpriteID::BatteryTop].getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
-    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Collectible | CollisionBox::Solid);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Collectible);
 
     bounds *= 4.f;
     entity.addComponent<CollisionBox>().worldBounds = { -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height };

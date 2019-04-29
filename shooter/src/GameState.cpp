@@ -333,7 +333,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<DroneSystem>(mb);
-    m_gameScene.addSystem<AlienSystem>(mb);
+    m_gameScene.addSystem<AlienSystem>(mb, m_sprites);
     m_gameScene.addSystem<HumanSystem>(mb);
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<ItemBarSystem>(mb);
@@ -601,6 +601,19 @@ void GameState::loadWorld()
         entity.addComponent<Node>().ID = nodeID++;
         entity.addComponent<xy::BroadphaseComponent>().setArea({ Node::Bounds[0], Node::Bounds[1], Node::Bounds[2], Node::Bounds[3] });
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Navigation);
+    }
+
+    //finally spawn points
+    auto& alienSystem = m_gameScene.getSystem<AlienSystem>();
+    alienSystem.clearSpawns();
+
+    const auto& spawns = m_mapLoader.getSpawnPoints();
+    for (const auto& [position, type] : spawns)
+    {
+        if (type == MapLoader::Alien)
+        {
+            alienSystem.addSpawn(position);
+        }
     }
 }
 
