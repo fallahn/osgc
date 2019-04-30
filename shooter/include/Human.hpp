@@ -18,21 +18,46 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "ResourceIDs.hpp"
+
 #include <xyginext/ecs/System.hpp>
+
+#include <SFML/System/Clock.hpp>
+
+#include <vector>
 
 struct Human final
 {
     enum class State
     {
         Normal,
-        Running
-    }state = State::Normal;
+        Seeking
+    }state = State::Seeking;
+
+    sf::Vector2f velocity;
+    float speed = 120.f;
 };
 
 class HumanSystem final : public xy::System
 {
 public:
-    explicit HumanSystem(xy::MessageBus&);
+    HumanSystem(xy::MessageBus&, const SpriteArray&);
 
     void process(float) override;
+
+    void addSpawn(sf::Vector2f v) { m_spawnPoints.push_back(v); }
+
+    void clearSpawns();
+
+private:
+    const SpriteArray& m_sprites;
+    std::vector<sf::Vector2f> m_spawnPoints;
+    std::size_t m_spawnIndex;
+    std::size_t m_spawnCount;
+
+    sf::Clock m_spawnClock;
+
+    void spawnHuman();
+    void updateNormal(xy::Entity, float);
+    void updateSeeking(xy::Entity, float);
 };

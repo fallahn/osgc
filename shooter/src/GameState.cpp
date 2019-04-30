@@ -335,7 +335,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<DroneSystem>(mb);
     m_gameScene.addSystem<AlienSystem>(mb, m_sprites);
-    m_gameScene.addSystem<HumanSystem>(mb);
+    m_gameScene.addSystem<HumanSystem>(mb, m_sprites);
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<ItemBarSystem>(mb);
     m_gameScene.addSystem<BobSystem>(mb);
@@ -609,12 +609,19 @@ void GameState::loadWorld()
     auto& alienSystem = m_gameScene.getSystem<AlienSystem>();
     alienSystem.clearSpawns();
 
+    auto& humanSystem = m_gameScene.getSystem<HumanSystem>();
+    humanSystem.clearSpawns();
+
     const auto& spawns = m_mapLoader.getSpawnPoints();
     for (const auto& [position, type] : spawns)
     {
         if (type == MapLoader::Alien)
         {
             alienSystem.addSpawn(position);
+        }
+        else if (type == MapLoader::Human)
+        {
+            humanSystem.addSpawn(position);
         }
     }
 }

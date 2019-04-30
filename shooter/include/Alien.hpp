@@ -39,7 +39,7 @@ public:
     void process(float) override;
 
     void addSpawn(sf::Vector2f);
-    void clearSpawns() { m_spawnPoints.clear(); }
+    void clearSpawns();
 
 private:
     const SpriteArray& m_sprites;

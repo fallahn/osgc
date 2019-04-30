@@ -71,7 +71,7 @@ void DroneSystem::handleMessage(const xy::Message& msg)
 
         if (data.type == BombEvent::Exploded)
         {
-            auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(damageArea, CollisionBox::Collectible | CollisionBox::Alien | CollisionBox::Solid);
+            auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(damageArea, CollisionBox::Collectible | CollisionBox::Alien | CollisionBox::Solid | CollisionBox::Human);
             for (auto e : nearby)
             {
                 auto eBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
@@ -79,27 +79,25 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                 {
                     getScene()->destroyEntity(e);
 
+                    auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                    msg->position = e.getComponent<xy::Transform>().getPosition();
+
                     switch (e.getComponent<CollisionBox>().type)
                     {
                     default: break;
                     case CollisionBox::Ammo:
                     case CollisionBox::Battery:
                     {
-                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
                         msg->type = BombEvent::DestroyedCollectible;
-                        msg->position = e.getComponent<xy::Transform>().getPosition();
                     }
                         break;
                     case CollisionBox::Building:
                     {
-                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
                         msg->type = BombEvent::DamagedBuilding;
-                        msg->position = e.getComponent<xy::Transform>().getPosition();
                     }
                         break;
                     case CollisionBox::NPC:
                     {
-                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
                         if (e.hasComponent<Alien>())
                         {
                             msg->type = e.getComponent<Alien>().type == Alien::Type::Beetle ? BombEvent::KilledBeetle : BombEvent::KilledScorpion;
@@ -108,10 +106,10 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                         {
                             msg->type = BombEvent::KilledHuman;
                         }
-                        msg->position = e.getComponent<xy::Transform>().getPosition();
                     }
                         break;
                     }
+                    
                 }
             }
         }

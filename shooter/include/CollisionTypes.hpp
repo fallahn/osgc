@@ -41,7 +41,8 @@ struct CollisionBox final
         Navigation = 0x4,
         Collectible = 0x8,
         Alien = 0x10,
-        Explosion = 0x20
+        Explosion = 0x20,
+        Human = 0x40
     };
     std::uint64_t filter = Solid;
 

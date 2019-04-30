@@ -145,6 +145,13 @@ void AlienSystem::addSpawn(sf::Vector2f position)
     m_spawnPoints.push_back(position);
 }
 
+void AlienSystem::clearSpawns()
+{
+    m_spawnPoints.clear();
+    m_spawnCount = 0;
+    m_spawnIndex = 0;
+}
+
 //private
 void AlienSystem::spawnAlien()
 {
@@ -284,35 +291,33 @@ void AlienSystem::solidCollision(xy::Entity entity)
 
             auto dir = otherPoint - tx.getPosition();
 
+            sf::FloatRect overlap;
+            if (boidBounds.intersects(otherBounds, overlap))
             {
-                sf::FloatRect overlap;
-                if (boidBounds.intersects(otherBounds, overlap))
+                if (overlap.width < overlap.height)
                 {
-                    if (overlap.width < overlap.height)
+                    if (dir.x < 0)
                     {
-                        if (dir.x < 0)
-                        {
-                            tx.move(overlap.width, 0.f);
-                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 1.f, 0.f });
-                        }
-                        else
-                        {
-                            tx.move(-overlap.width, 0.f);
-                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { -1.f, 0.f });
-                        }
+                        tx.move(overlap.width, 0.f);
+                        alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 1.f, 0.f });
                     }
                     else
                     {
-                        if (dir.y < 0)
-                        {
-                            tx.move(0.f, overlap.height);
-                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 0.f, 1.f });
-                        }
-                        else
-                        {
-                            tx.move(0.f, -overlap.height);
-                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 0.f, -1.f });
-                        }
+                        tx.move(-overlap.width, 0.f);
+                        alien.velocity = xy::Util::Vector::reflect(alien.velocity, { -1.f, 0.f });
+                    }
+                }
+                else
+                {
+                    if (dir.y < 0)
+                    {
+                        tx.move(0.f, overlap.height);
+                        alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 0.f, 1.f });
+                    }
+                    else
+                    {
+                        tx.move(0.f, -overlap.height);
+                        alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 0.f, -1.f });
                     }
                 }
             }
