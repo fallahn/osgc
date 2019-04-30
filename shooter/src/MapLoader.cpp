@@ -335,6 +335,16 @@ bool MapLoader::load(const std::string& path)
                     cb.height = SandbagHeight;
                     m_collisionBoxes.push_back(cb);
                 }
+                else if (type == "border")
+                {
+                    objBounds *= 8.f;
+                    CollisionBox cb;
+                    cb.worldBounds = { objBounds.left, objBounds.top, objBounds.width, objBounds.height };
+                    cb.type = CollisionBox::Structure;
+                    cb.filter = CollisionBox::NoDecal | CollisionBox::Solid;
+                    cb.height = SandbagHeight;
+                    m_collisionBoxes.push_back(cb);
+                }
             }
             m_sideTexture.display();
         }

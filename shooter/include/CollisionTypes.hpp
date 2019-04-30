@@ -23,7 +23,7 @@ Copyright 2019 Matt Marchant
 struct CollisionBox final
 {
     sf::FloatRect worldBounds;
-    enum
+    enum Type
     {
         Building,
         Structure,
@@ -34,7 +34,7 @@ struct CollisionBox final
         Battery
     }type = Structure;
 
-    enum
+    enum Filter
     {
         Solid = 0x1,
         NoDecal = 0x2,

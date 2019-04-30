@@ -82,10 +82,10 @@
   <object id="56" type="sandbag" x="180" y="528" width="8" height="84"/>
   <object id="57" type="sandbag" x="660" y="516" width="8" height="224"/>
   <object id="58" type="sandbag" x="404" y="740" width="264" height="8"/>
-  <object id="131" type="barrier" x="0" y="0" width="16" height="960"/>
-  <object id="132" type="barrier" x="704" y="0" width="16" height="960"/>
-  <object id="133" type="barrier" x="16" y="0" width="688" height="16"/>
-  <object id="134" type="barrier" x="16" y="944" width="688" height="16"/>
+  <object id="131" type="border" x="0" y="0" width="16" height="960"/>
+  <object id="132" type="border" x="704" y="0" width="16" height="960"/>
+  <object id="133" type="border" x="16" y="0" width="688" height="16"/>
+  <object id="134" type="border" x="16" y="944" width="688" height="16"/>
  </objectgroup>
  <objectgroup id="8" name="spawn">
   <object id="118" type="human spawn" x="120" y="840">

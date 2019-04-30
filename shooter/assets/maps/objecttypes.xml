@@ -8,4 +8,5 @@
  <objecttype name="sandbag" color="#ff5500"/>
  <objecttype name="tree" color="#005500"/>
  <objecttype name="water" color="#0000ff"/>
+ <objecttype name="border" color="#0080ff"/>
 </objecttypes>

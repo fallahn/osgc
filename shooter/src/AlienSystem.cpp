@@ -39,13 +39,13 @@ namespace
     const sf::Time SpawnTime = sf::seconds(3.f);
     const std::size_t SpawnPerIndex = 5; //this many spawned at a point before moving to next spawn point
     const std::size_t MaxSpawns = 10;
-    const float MaxVelocity = 300.f;
+    const float MaxVelocity = 280.f;
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 
-    const float MinDistance = 78.f;
+    const float MinDistance = 76.f;
     const float MinDistSqr = MinDistance * MinDistance;
 
-    const sf::Vector2f FlockSize(256.f, 256.f);
+    const sf::Vector2f FlockSize(360.f, 360.f);
 
     bool intersects(const std::pair<sf::Vector2f, sf::Vector2f>& segOne,
         const std::pair<sf::Vector2f, sf::Vector2f>& segTwo, sf::Vector2f& intersection)
@@ -98,12 +98,12 @@ void AlienSystem::process(float dt)
         alien.velocity += results.coalescence;
 
         //limit velocity
-        /*auto len2 = xy::Util::Vector::lengthSquared(alien.velocity);
+        auto len2 = xy::Util::Vector::lengthSquared(alien.velocity);
         if (len2 > MaxVelocitySqr)
         {
             alien.velocity /= std::sqrt(len2);
             alien.velocity *= MaxVelocity;
-        }*/
+        }
 
         auto& tx = entity.getComponent<xy::Transform>();
         tx.move(alien.velocity * dt);
@@ -166,7 +166,7 @@ void AlienSystem::spawnAlien()
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 2);
     entity.addComponent<xy::Sprite>() = alienType == 0 ? m_sprites[SpriteID::Beetle] : m_sprites[SpriteID::Scorpion];
     entity.addComponent<Alien>().type = alienType == 0 ? Alien::Type::Beetle : Alien::Type::Scorpion;
-    entity.getComponent<Alien>().velocity = spawnOffsets[xy::Util::Random::value(0, 3)] * 40.f;
+    entity.getComponent<Alien>().velocity = spawnOffsets[xy::Util::Random::value(0, 3)] * 10.f;
 
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
@@ -176,7 +176,7 @@ void AlienSystem::spawnAlien()
     entity.getComponent<CollisionBox>().height = 12.f;
     entity.addComponent<xy::SpriteAnimation>().play(1);
 
-    /*entity.addComponent<xy::Callback>().active = true;
+    entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =
         [&](xy::Entity e, float)
     {
@@ -184,14 +184,14 @@ void AlienSystem::spawnAlien()
         {
             getScene()->destroyEntity(e);
         }
-    };*/
+    };
     auto alienEntity = entity;
     
     //radar version
     entity = getScene()->createEntity();
-    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Transform>().setPosition(-100.f, -100.f);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
-    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 2);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 1);
     entity.addComponent<xy::Sprite>() = alienType == 0 ? m_sprites[SpriteID::BeetleIcon] : m_sprites[SpriteID::ScorpionIcon];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
@@ -210,15 +210,26 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
 
     sf::Vector2f centreOfMass;
     sf::Vector2f avgVelocity;
-
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Alien);
+    float avgCount = 0;
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Alien | CollisionBox::Filter::Solid);
     for (auto e : nearby)
     {
         if (e != entity)
         {
             auto otherPosition = e.getComponent<xy::Transform>().getPosition();
-            centreOfMass += otherPosition;
-            avgVelocity += e.getComponent<Alien>().velocity;
+
+            if (e.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionBox::Filter::Alien)
+            {
+                centreOfMass += otherPosition;
+                avgVelocity += e.getComponent<Alien>().velocity;
+                avgCount++;
+            }
+            else
+            {
+                auto bounds = e.getComponent<xy::BroadphaseComponent>().getArea();
+                bounds = e.getComponent<xy::Transform>().getTransform().transformRect(bounds);
+                otherPosition = { bounds.left + (bounds.width / 2.f), bounds.top + (bounds.height / 2.f) };
+            }
 
             auto dir = otherPosition - tx.getPosition();
             if (xy::Util::Vector::lengthSquared(dir) < MinDistSqr)
@@ -228,17 +239,18 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
         }
     }
 
-    if(!nearby.empty())
+    if(avgCount > 0)
     {
-        if (nearby.size() > 1)
+        //if (nearby.size() > 1)
         {
-            float count = static_cast<float>(nearby.size() - 1);
-            centreOfMass /= count;
-            avgVelocity /= count;
+            centreOfMass /= avgCount;
+            avgVelocity /= avgCount;
         }
         auto& alien = entity.getComponent<Alien>();
-        results.coalescence += ((centreOfMass - tx.getPosition()) / 80.f);
-        results.alignment += ((avgVelocity - alien.velocity) / 16.f);
+        //DPRINT("com", std::to_string(centreOfMass.x) + ", " + std::to_string(centreOfMass.y));
+        results.coalescence += ((centreOfMass - tx.getPosition()) / 50.f);
+        //DPRINT("align", std::to_string(avgVelocity.x) + ", " + std::to_string(avgVelocity.y));
+        results.alignment += ((avgVelocity - alien.velocity) / 4.f);
     }
 }
 
