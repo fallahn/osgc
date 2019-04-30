@@ -69,27 +69,10 @@ void SpawnDirector::handleMessage(const xy::Message& msg)
         {
             spawnExplosion(data.position);
             spawnMiniExplosion(data.position);
-
-            //check for items and destroy any inside damge radius
-            auto damageArea = ConstVal::DamageRadius;
-            damageArea.left += data.position.x;
-            damageArea.top += data.position.y;
-
-            auto nearby = getScene().getSystem<xy::DynamicTreeSystem>().query(damageArea, CollisionBox::Collectible);
-            for (auto e : nearby)
-            {
-                auto eBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
-                if (eBounds.intersects(damageArea))
-                {
-                    spawnExplosion(e.getComponent<xy::Transform>().getPosition());
-                    getScene().destroyEntity(e);
-
-                    auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
-                    msg->type = BombEvent::DestroyedCollectible;
-                    msg->position = e.getComponent<xy::Transform>().getPosition();
-                    LOG("Fix explosions being returned by this query!", xy::Logger::Type::Info);
-                }
-            }
+        }
+        else if (data.type == BombEvent::DestroyedCollectible)
+        {
+            spawnExplosion(data.position);
         }
     }
     else if (msg.id == MessageID::DroneMessage)

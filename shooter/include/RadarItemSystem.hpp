@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 struct RadarItem final
 {
     xy::Entity parent;
+    float updateTime = 1.f;
 };
 
 class RadarItemSystem final : public xy::System
@@ -39,7 +40,7 @@ public:
         requireComponent<RadarItem>();
     }
 
-    void process(float) override
+    void process(float dt) override
     {
         auto& entities = getEntities();
         for (auto& entity : entities)
@@ -52,9 +53,15 @@ public:
             }
             else
             {
-                auto otherPos = item.parent.getComponent<xy::Transform>().getPosition();
-                auto& tx = entity.getComponent<xy::Transform>();
-                tx.setPosition(ConstVal::BackgroundPosition.x + (otherPos.y / 2.f), ConstVal::MaxDroneHeight);
+                item.updateTime -= dt;
+
+                if (item.updateTime < 0)
+                {
+                    auto otherPos = item.parent.getComponent<xy::Transform>().getPosition();
+                    auto& tx = entity.getComponent<xy::Transform>();
+                    tx.setPosition(ConstVal::BackgroundPosition.x + (otherPos.y / 2.f), ConstVal::MaxDroneHeight);
+                    item.updateTime = 1.f;
+                }
             }
         }
     }

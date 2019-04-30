@@ -149,6 +149,7 @@ void AlienSystem::addSpawn(sf::Vector2f position)
 void AlienSystem::spawnAlien()
 {
     //TODO find a better way of deciding which type of alien to breed
+    //particularly as beetles are more valuable
     auto alienType = xy::Util::Random::value(0, 1);
 
     static const std::array<sf::Vector2f, 4u> spawnOffsets =
@@ -172,6 +173,7 @@ void AlienSystem::spawnAlien()
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Alien);
     entity.addComponent<CollisionBox>().type = CollisionBox::NPC;
+    entity.getComponent<CollisionBox>().height = 12.f;
     entity.addComponent<xy::SpriteAnimation>().play(1);
 
     /*entity.addComponent<xy::Callback>().active = true;

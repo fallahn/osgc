@@ -38,7 +38,11 @@ struct BombEvent final
     {
         Dropped,
         Exploded,
-        DestroyedCollectible
+        DestroyedCollectible,
+        DamagedBuilding,
+        KilledScorpion,
+        KilledBeetle,
+        KilledHuman
     }type = Exploded;
     sf::Vector2f position; //top down coordinates
 };

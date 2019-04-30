@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "Bomb.hpp"
 #include "ItemBar.hpp"
 #include "CollisionTypes.hpp"
+#include "Alien.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -57,16 +58,64 @@ DroneSystem::DroneSystem(xy::MessageBus& mb)
 }
 
 //public
-void DroneSystem::handleMessage(const xy::Message& /*msg*/)
+void DroneSystem::handleMessage(const xy::Message& msg)
 {
-    //if (msg.id == MessageID::DroneMessage)
-    //{
-    //    const auto& data = msg.getData<DroneEvent>();
-    //    if (data.type == DroneEvent::Spawned)
-    //    {
+    if (msg.id == MessageID::BombMessage)
+    {
+        const auto& data = msg.getData<BombEvent>();
 
-    //    }
-    //}
+        //might as well check to see what we damaged
+        auto damageArea = ConstVal::DamageRadius;
+        damageArea.left += data.position.x;
+        damageArea.top += data.position.y;
+
+        if (data.type == BombEvent::Exploded)
+        {
+            auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(damageArea, CollisionBox::Collectible | CollisionBox::Alien | CollisionBox::Solid);
+            for (auto e : nearby)
+            {
+                auto eBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+                if (eBounds.intersects(damageArea))
+                {
+                    getScene()->destroyEntity(e);
+
+                    switch (e.getComponent<CollisionBox>().type)
+                    {
+                    default: break;
+                    case CollisionBox::Ammo:
+                    case CollisionBox::Battery:
+                    {
+                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg->type = BombEvent::DestroyedCollectible;
+                        msg->position = e.getComponent<xy::Transform>().getPosition();
+                    }
+                        break;
+                    case CollisionBox::Building:
+                    {
+                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg->type = BombEvent::DamagedBuilding;
+                        msg->position = e.getComponent<xy::Transform>().getPosition();
+                    }
+                        break;
+                    case CollisionBox::NPC:
+                    {
+                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                        if (e.hasComponent<Alien>())
+                        {
+                            msg->type = e.getComponent<Alien>().type == Alien::Type::Beetle ? BombEvent::KilledBeetle : BombEvent::KilledScorpion;
+                        }
+                        else
+                        {
+                            msg->type = BombEvent::KilledHuman;
+                        }
+                        msg->position = e.getComponent<xy::Transform>().getPosition();
+                    }
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void DroneSystem::process(float dt)
@@ -247,7 +296,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
         auto position = tx.getPosition();
         sf::FloatRect droneBounds = { position.x - 8.f, position.y - 8.f, 16.f, 16.f };
 
-        auto nearby = bp.query(droneBounds, CollisionBox::Solid | CollisionBox::Collectible | CollisionBox::Explosion);
+        auto nearby = bp.query(droneBounds, CollisionBox::Solid | CollisionBox::Collectible | CollisionBox::Explosion | CollisionBox::Alien);
         for (auto e : nearby)
         {
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
@@ -278,6 +327,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
             switch (collisionType)
             {
             case CollisionBox::Fire:
+            case CollisionBox::NPC:
                 drone.height = newHeight;
             default:
             case CollisionBox::Building:

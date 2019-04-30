@@ -75,36 +75,26 @@ void ScoreDirector::handleMessage(const xy::Message& msg)
     else if (msg.id == MessageID::BombMessage)
     {
         const auto& data = msg.getData<BombEvent>();
-        if (data.type == BombEvent::Exploded)
+        switch (data.type)
         {
-            //search the area and find everything the bomb hit
-            auto query = ConstVal::DamageRadius;
-            query.left += data.position.x;
-            query.top += data.position.y;
-
-            auto nearby = getScene().getSystem<xy::DynamicTreeSystem>().query(query, CollisionBox::Solid);
-            for (auto e : nearby)
-            {
-                auto bounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
-                if (bounds.intersects(query))
-                {
-                    auto type = e.getComponent<CollisionBox>().type;
-                    switch (type)
-                    {
-                    default: break;
-                    case CollisionBox::Building:
-                        spawnScoreItem(data.position, BuildingScore);
-                        break;
-                    case CollisionBox::NPC:
-                        //TODO discover NPC type
-                        break;
-                    }
-                }
-            }
-        }
-        else if (data.type == BombEvent::DestroyedCollectible)
-        {
+        case BombEvent::Exploded:
+            break;
+        case BombEvent::DamagedBuilding:
+            spawnScoreItem(data.position, BuildingScore);
+            break;
+        case BombEvent::DestroyedCollectible:
             spawnScoreItem(data.position, DestroyCollectibleScore);
+            break;
+        case BombEvent::KilledBeetle:
+            spawnScoreItem(data.position, BeetleScore);
+            break;
+        case BombEvent::KilledScorpion:
+            spawnScoreItem(data.position, ScorpionScore);
+            break;
+        case BombEvent::KilledHuman:
+            spawnScoreItem(data.position, HumanScore);
+            break;
+        default: break;
         }
     }
 }
