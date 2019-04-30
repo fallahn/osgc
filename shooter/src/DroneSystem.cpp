@@ -247,7 +247,7 @@ void DroneSystem::processPickingUp(xy::Entity entity, float dt)
         auto position = tx.getPosition();
         sf::FloatRect droneBounds = { position.x - 8.f, position.y - 8.f, 16.f, 16.f };
 
-        auto nearby = bp.query(droneBounds, CollisionBox::Solid | CollisionBox::Collectible);
+        auto nearby = bp.query(droneBounds, CollisionBox::Solid | CollisionBox::Collectible | CollisionBox::Explosion);
         for (auto e : nearby)
         {
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());

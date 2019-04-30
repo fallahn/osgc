@@ -167,6 +167,7 @@ void SpawnDirector::spawnExplosion(sf::Vector2f position)
     cb.worldBounds = { position.x - (bounds.width), position.y - (bounds.height), bounds.width * 2.f, bounds.height * 2.f };
     entity.addComponent<CollisionBox>() = cb;
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Explosion);
 }
 
 void SpawnDirector::spawnMiniExplosion(sf::Vector2f position)

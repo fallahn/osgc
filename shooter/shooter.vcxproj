@@ -156,6 +156,7 @@
     <ClInclude Include="include\Human.hpp" />
     <ClInclude Include="include\LoadingScreen.hpp" />
     <ClInclude Include="include\Navigation.hpp" />
+    <ClInclude Include="include\RadarItemSystem.hpp" />
     <ClInclude Include="include\ScoreDirector.hpp" />
     <ClInclude Include="include\ItemBar.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />

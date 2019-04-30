@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "Alien.hpp"
 #include "GameConsts.hpp"
 #include "CollisionTypes.hpp"
+#include "RadarItemSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
@@ -37,9 +38,12 @@ namespace
 {
     const sf::Time SpawnTime = sf::seconds(3.f);
     const std::size_t SpawnPerIndex = 5; //this many spawned at a point before moving to next spawn point
-    const std::size_t MaxSpawns = 30;
+    const std::size_t MaxSpawns = 10;
     const float MaxVelocity = 300.f;
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
+
+    const float MinDistance = 78.f;
+    const float MinDistSqr = MinDistance * MinDistance;
 
     const sf::Vector2f FlockSize(256.f, 256.f);
 
@@ -86,13 +90,12 @@ void AlienSystem::process(float dt)
     for (auto entity : entities)
     {
         Results results;
-        coalesceAndAlign(entity, results);
-        separate(entity, results);
-
+        processBoid(entity, results);
+        
         auto& alien = entity.getComponent<Alien>();
-        alien.velocity += results.coalescence;
         alien.velocity += results.separation;
         alien.velocity += results.alignment;
+        alien.velocity += results.coalescence;
 
         //limit velocity
         /*auto len2 = xy::Util::Vector::lengthSquared(alien.velocity);
@@ -102,11 +105,11 @@ void AlienSystem::process(float dt)
             alien.velocity *= MaxVelocity;
         }*/
 
-        //TODO solid collision here
-
         auto& tx = entity.getComponent<xy::Transform>();
         tx.move(alien.velocity * dt);
         
+        solidCollision(entity);
+
         auto rotation = xy::Util::Vector::rotation(alien.velocity);
         tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), rotation) * 7.f * dt);
     }
@@ -171,12 +174,7 @@ void AlienSystem::spawnAlien()
     entity.addComponent<CollisionBox>().type = CollisionBox::NPC;
     entity.addComponent<xy::SpriteAnimation>().play(1);
 
-    LOG("Spawn radar icons for aliens", xy::Logger::Type::Info);
-    m_debug = getScene()->createEntity();
-    m_debug.addComponent<xy::Transform>();
-    m_debug.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 1);
-
-    entity.addComponent<xy::Callback>().active = true;
+    /*entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =
         [&](xy::Entity e, float)
     {
@@ -184,10 +182,26 @@ void AlienSystem::spawnAlien()
         {
             getScene()->destroyEntity(e);
         }
-    };
+    };*/
+    auto alienEntity = entity;
+    
+    //radar version
+    entity = getScene()->createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 2);
+    entity.addComponent<xy::Sprite>() = alienType == 0 ? m_sprites[SpriteID::BeetleIcon] : m_sprites[SpriteID::ScorpionIcon];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
+    entity.addComponent<RadarItem>().parent = alienEntity;
+
+    //FUTURE ME: we only want one of these per scene, not per alien
+    //m_debug = getScene()->createEntity();
+    //m_debug.addComponent<xy::Transform>();
+    //m_debug.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 1);
 }
 
-void AlienSystem::coalesceAndAlign(xy::Entity entity, Results& results)
+void AlienSystem::processBoid(xy::Entity entity, Results& results)
 {
     auto& tx = entity.getComponent<xy::Transform>();
     sf::FloatRect searchArea(tx.getPosition() - (FlockSize / 2.f), FlockSize);
@@ -200,8 +214,15 @@ void AlienSystem::coalesceAndAlign(xy::Entity entity, Results& results)
     {
         if (e != entity)
         {
-            centreOfMass += e.getComponent<xy::Transform>().getPosition();
+            auto otherPosition = e.getComponent<xy::Transform>().getPosition();
+            centreOfMass += otherPosition;
             avgVelocity += e.getComponent<Alien>().velocity;
+
+            auto dir = otherPosition - tx.getPosition();
+            if (xy::Util::Vector::lengthSquared(dir) < MinDistSqr)
+            {
+                results.separation -= dir;
+            }
         }
     }
 
@@ -214,17 +235,13 @@ void AlienSystem::coalesceAndAlign(xy::Entity entity, Results& results)
             avgVelocity /= count;
         }
         auto& alien = entity.getComponent<Alien>();
-        results.coalescence += ((centreOfMass - tx.getPosition()) / 100.f);
-        //this MUST be added after separation. so we'll calc here then add later
-        results.alignment += ((avgVelocity - alien.velocity) / 8.f);
+        results.coalescence += ((centreOfMass - tx.getPosition()) / 80.f);
+        results.alignment += ((avgVelocity - alien.velocity) / 16.f);
     }
 }
 
-void AlienSystem::separate(xy::Entity entity, Results& results)
+void AlienSystem::solidCollision(xy::Entity entity)
 {    
-    static const float MinDistance = 78.f;
-    static const float MinDistSqr = MinDistance * MinDistance;
-
     auto& tx = entity.getComponent<xy::Transform>();
     auto& alien = entity.getComponent<Alien>();
 
@@ -243,29 +260,16 @@ void AlienSystem::separate(xy::Entity entity, Results& results)
     verts.emplace_back(sf::Vector2f(boidBounds.left + boidBounds.width, boidBounds.top + boidBounds.height), sf::Color::Green);
     verts.emplace_back(sf::Vector2f(boidBounds.left, boidBounds.top + boidBounds.height), sf::Color::Green);*/
 
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Solid | CollisionBox::Alien);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Solid);
     for (auto e : nearby)
     {
         if (e != entity)
         {
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
-            auto otherPoint = (e.getComponent<CollisionBox>().type != CollisionBox::NPC) ? 
-                sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f)) :
-                e.getComponent<xy::Transform>().getPosition();
+            auto otherPoint = sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f));
 
             auto dir = otherPoint - tx.getPosition();
 
-            if (xy::Util::Vector::lengthSquared(dir) < MinDistSqr
-                && e.getComponent<CollisionBox>().type == CollisionBox::NPC)
-            {
-                results.separation -= dir;
-            }
-
-            //traditional collision handling with solid objects which overlap
-            //TODO move this to after all rules have been completed
-            //then separation can be done in same query as others
-            //if (e.getComponent<CollisionBox>().type != CollisionBox::NPC)
-            else
             {
                 sf::FloatRect overlap;
                 if (boidBounds.intersects(otherBounds, overlap))
@@ -275,12 +279,12 @@ void AlienSystem::separate(xy::Entity entity, Results& results)
                         if (dir.x < 0)
                         {
                             tx.move(overlap.width, 0.f);
-                            //alien.velocity -= dir;// = xy::Util::Vector::reflect(alien.velocity, { 1.f, 0.f });
+                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 1.f, 0.f });
                         }
                         else
                         {
                             tx.move(-overlap.width, 0.f);
-                            //alien.velocity -= dir;// = xy::Util::Vector::reflect(alien.velocity, { -1.f, 0.f });
+                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { -1.f, 0.f });
                         }
                     }
                     else
@@ -288,12 +292,12 @@ void AlienSystem::separate(xy::Entity entity, Results& results)
                         if (dir.y < 0)
                         {
                             tx.move(0.f, overlap.height);
-                            //alien.velocity -= dir;// = xy::Util::Vector::reflect(alien.velocity, { 0.f, 1.f });
+                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 0.f, 1.f });
                         }
                         else
                         {
                             tx.move(0.f, -overlap.height);
-                            //alien.velocity -= dir;// = xy::Util::Vector::reflect(alien.velocity, { 0.f, -1.f });
+                            alien.velocity = xy::Util::Vector::reflect(alien.velocity, { 0.f, -1.f });
                         }
                     }
                 }

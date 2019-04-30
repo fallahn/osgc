@@ -58,11 +58,9 @@ private:
         sf::Vector2f separation;
     }; //allows sharing particular tree queries but adding the results in the correct order.
 
-    void coalesceAndAlign(xy::Entity, Results&);
-    void separate(xy::Entity, Results&);
+    void processBoid(xy::Entity, Results&);
+    void solidCollision(xy::Entity);
 
-
-    //sf::Vector2f target(xy::Entity);
 
     sf::Vector2f getDistance(sf::Vector2f, sf::FloatRect);
 
