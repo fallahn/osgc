@@ -38,8 +38,8 @@ namespace
     const sf::Vector2f SeekSize(512.f, 512.f);
 
     const sf::Time SpawnTime = sf::seconds(2.8f);
-    const std::size_t SpawnsPerPoint = 4;
-    const std::size_t MaxSpawns = 24;
+    const std::size_t SpawnsPerPoint = 2;
+    const std::size_t MaxSpawns = 8;
 
     const float NodeDistanceSqr = (Node::Bounds[2] / 2.f) * (Node::Bounds[2] / 2.f);
 }

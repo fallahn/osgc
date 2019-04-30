@@ -428,6 +428,11 @@ void GameState::loadAssets()
     spriteSheet.loadFromFile("assets/sprites/beetle.spt", m_resources);
     m_sprites[SpriteID::Beetle] = spriteSheet.getSprite("beetle");
 
+    spriteSheet.loadFromFile("assets/sprites/bodies.spt", m_resources);
+    m_sprites[SpriteID::HumanBody] = spriteSheet.getSprite("human");
+    m_sprites[SpriteID::BeetleBody] = spriteSheet.getSprite("beetle");
+    m_sprites[SpriteID::ScorpionBody] = spriteSheet.getSprite("scorpion");
+
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
     if(!m_mapLoader.load("assets/maps/01.tmx"))

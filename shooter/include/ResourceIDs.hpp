@@ -95,6 +95,10 @@ namespace SpriteID
         Beetle,
         Scorpion,
 
+        HumanBody,
+        BeetleBody,
+        ScorpionBody,
+
         Count
     };
 }

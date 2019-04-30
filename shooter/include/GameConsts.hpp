@@ -30,6 +30,7 @@ namespace ConstVal
     static const sf::Vector2f BackgroundPosition(xy::DefaultSceneSize.x * 2.f, 0.f);
     static const float DroneHeight = 100.f;
     static const float MaxDroneHeight = 300.f; //crash after this
+    static const float RadarHeight = 308.f;
 
     static const sf::FloatRect SmallViewPort(0.1f, 0.3f, 0.8f, 0.7f); //this should be relative to active large viewport
     static const sf::Vector2f SmallViewSize(xy::DefaultSceneSize.x * SmallViewPort.width, xy::DefaultSceneSize.y * SmallViewPort.height);

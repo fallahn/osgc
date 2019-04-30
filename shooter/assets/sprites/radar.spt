@@ -80,6 +80,6 @@ spritesheet radar
 
 	sprite beetle
 	{
-		bounds=52,28,8,4
+		bounds=56,28,8,4
 	}
 }

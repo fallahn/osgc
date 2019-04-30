@@ -59,7 +59,7 @@ public:
                 {
                     auto otherPos = item.parent.getComponent<xy::Transform>().getPosition();
                     auto& tx = entity.getComponent<xy::Transform>();
-                    tx.setPosition(ConstVal::BackgroundPosition.x + (otherPos.y / 2.f), ConstVal::MaxDroneHeight);
+                    tx.setPosition(ConstVal::BackgroundPosition.x + (otherPos.y / 2.f), ConstVal::RadarHeight);
                     item.updateTime = 1.f;
                 }
             }

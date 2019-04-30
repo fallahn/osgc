@@ -1,0 +1,20 @@
+spritesheet bodies
+{
+	src="assets/images/bodies.png"
+	blend=alpha
+
+	sprite scorpion
+	{
+		bounds=0,0,16,16
+	}
+
+	sprite human
+	{
+		bounds=16,0,16,16
+	}
+
+	sprite beetle
+	{
+		bounds=32,0,16,16
+	}
+}
