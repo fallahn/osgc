@@ -34,6 +34,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
 
+#include <algorithm>
+
 namespace
 {
     const sf::Time SpawnTime = sf::seconds(3.f);
@@ -96,6 +98,7 @@ void AlienSystem::process(float dt)
         alien.velocity += results.separation;
         alien.velocity += results.alignment;
         alien.velocity += results.coalescence;
+        alien.velocity += results.humanAttraction;
 
         //limit velocity
         auto len2 = xy::Util::Vector::lengthSquared(alien.velocity);
@@ -143,6 +146,7 @@ void AlienSystem::process(float dt)
 void AlienSystem::addSpawn(sf::Vector2f position)
 {
     m_spawnPoints.push_back(position);
+    std::shuffle(m_spawnPoints.begin(), m_spawnPoints.end(), xy::Util::Random::rndEngine);
 }
 
 void AlienSystem::clearSpawns()
@@ -218,22 +222,32 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
     sf::Vector2f centreOfMass;
     sf::Vector2f avgVelocity;
     float avgCount = 0;
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Alien | CollisionBox::Filter::Solid);
+
+    sf::Vector2f humanTarget;
+    float humanCount = 0.f;
+
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Alien | CollisionBox::Filter::Solid | CollisionBox::Human);
     for (auto e : nearby)
     {
         if (e != entity)
         {
             auto otherPosition = e.getComponent<xy::Transform>().getPosition();
+            const auto& otherBroadphase = e.getComponent<xy::BroadphaseComponent>();
 
-            if (e.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionBox::Filter::Alien)
+            if (otherBroadphase.getFilterFlags() & CollisionBox::Filter::Alien)
             {
                 centreOfMass += otherPosition;
                 avgVelocity += e.getComponent<Alien>().velocity;
                 avgCount++;
             }
+            else if (otherBroadphase.getFilterFlags() & CollisionBox::Filter::Human)
+            {
+                humanTarget += otherPosition;
+                humanCount++;
+            }
             else
             {
-                auto bounds = e.getComponent<xy::BroadphaseComponent>().getArea();
+                auto bounds = otherBroadphase.getArea();
                 bounds = e.getComponent<xy::Transform>().getTransform().transformRect(bounds);
                 otherPosition = { bounds.left + (bounds.width / 2.f), bounds.top + (bounds.height / 2.f) };
             }
@@ -258,6 +272,12 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
         results.coalescence += ((centreOfMass - tx.getPosition()) / 50.f);
         //DPRINT("align", std::to_string(avgVelocity.x) + ", " + std::to_string(avgVelocity.y));
         results.alignment += ((avgVelocity - alien.velocity) / 4.f);
+    }
+
+    if (humanCount > 0)
+    {
+        humanTarget /= humanCount;
+        results.humanAttraction += ((humanTarget - tx.getPosition()) / 20.f);
     }
 }
 

@@ -28,7 +28,8 @@ namespace MessageID
         BombMessage = xy::Message::Count,
         DroneMessage,
         SpawnMessage,
-        MenuMessage
+        MenuMessage,
+        HumanMessage
     };
 }
 
@@ -82,4 +83,15 @@ struct MenuEvent final
         SlideFinished
     }action = SlideFinished;
     xy::Entity entity;
+};
+
+struct HumanEvent final
+{
+    enum
+    {
+        Spawned,
+        Died
+    }type = Spawned;
+    sf::Vector2f position;
+    float rotation = 0.f;
 };

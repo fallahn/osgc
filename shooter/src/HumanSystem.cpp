@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "Navigation.hpp"
 #include "CollisionTypes.hpp"
 #include "RadarItemSystem.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -109,6 +110,12 @@ void HumanSystem::process(float dt)
     }
 }
 
+void HumanSystem::addSpawn(sf::Vector2f v)
+{
+    m_spawnPoints.push_back(v);
+    std::shuffle(m_spawnPoints.begin(), m_spawnPoints.end(), xy::Util::Random::rndEngine);
+}
+
 void HumanSystem::clearSpawns()
 {
     m_spawnPoints.clear();
@@ -120,13 +127,14 @@ void HumanSystem::clearSpawns()
 void HumanSystem::spawnHuman()
 {
     auto entity = getScene()->createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_spawnPoints[m_spawnIndex]);
+    auto& tx = entity.addComponent<xy::Transform>();
+    tx.setPosition(m_spawnPoints[m_spawnIndex]);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth + 2);
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Human];
     entity.addComponent<xy::SpriteAnimation>().play(1);
     auto bounds = m_sprites[SpriteID::Human].getTextureBounds();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    tx.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    tx.setScale(4.f, 4.f);
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Filter::Human);
     entity.addComponent<CollisionBox>().type = CollisionBox::NPC;
@@ -149,6 +157,13 @@ void HumanSystem::spawnHuman()
         }
     };
 
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Red);
+
+    auto* msg = postMessage<HumanEvent>(MessageID::HumanMessage);
+    msg->type = HumanEvent::Spawned;
+    msg->position = tx.getPosition();
+    msg->rotation = tx.getRotation();
+
     //apparently there's no radar icon for humans...
     /*auto humanEntity = entity;
     entity = getScene()->createEntity();
@@ -159,8 +174,6 @@ void HumanSystem::spawnHuman()
 
 void HumanSystem::updateNormal(xy::Entity entity)
 {
-    //follow velocity until at new node
-    //TODO probably move this to beginning of process() func
     auto& tx = entity.getComponent<xy::Transform>();
     auto& human = entity.getComponent<Human>();
     
@@ -181,7 +194,18 @@ void HumanSystem::updateNormal(xy::Entity entity)
         }
     }
 
-    //TODO check for aliens and switch to scared state
+    //check for aliens and switch to scared state
+    sf::FloatRect searchArea(tx.getPosition(), SeekSize);
+    searchArea.left -= (SeekSize.x / 2.f);
+    searchArea.top -= (SeekSize.y / 2.f);
+
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien);
+    if (!nearby.empty())
+    {
+        human.state = Human::State::Scared;
+
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+    }
 }
 
 void HumanSystem::updateSeeking(xy::Entity entity)
@@ -198,7 +222,7 @@ void HumanSystem::updateSeeking(xy::Entity entity)
     std::shuffle(nearby.begin(), nearby.end(), xy::Util::Random::rndEngine); //increase chance of picking a different nearby node (as first always gets picked)
     for(auto e : nearby)
     {       
-        if (e != entity)
+        //if (e != entity) //probably don't need this check....
         {
             if (e.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionBox::Navigation)
             {
@@ -218,50 +242,18 @@ void HumanSystem::updateSeeking(xy::Entity entity)
                     human.velocity = xy::Util::Vector::normalise(human.velocity);
 
                     human.state = Human::State::Normal;
+
+                    entity.getComponent<xy::Sprite>().setColour(sf::Color::Green);
+
                     return;
                 }
             }
             else
             {
-                //TODO if alien in range set velocity to run away
-                //and state to scared
+                //must be aliens nearby, run away!
+                human.state = Human::State::Scared;
 
-                //TODO this probably wants to be done in main process() func after all updates complete
-                /*auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
-                auto otherPoint = sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f));
-
-                auto dir = otherPoint - tx.getPosition();
-
-                sf::FloatRect overlap;
-                if (bounds.intersects(otherBounds, overlap))
-                {
-                    if (overlap.width < overlap.height)
-                    {
-                        if (dir.x < 0)
-                        {
-                            tx.move(overlap.width, 0.f);
-                            human.velocity = xy::Util::Vector::reflect(human.velocity, { 1.f, 0.f });
-                        }
-                        else
-                        {
-                            tx.move(-overlap.width, 0.f);
-                            human.velocity = xy::Util::Vector::reflect(human.velocity, { -1.f, 0.f });
-                        }
-                    }
-                    else
-                    {
-                        if (dir.y < 0)
-                        {
-                            tx.move(0.f, overlap.height);
-                            human.velocity = xy::Util::Vector::reflect(human.velocity, { 0.f, 1.f });
-                        }
-                        else
-                        {
-                            tx.move(0.f, -overlap.height);
-                            human.velocity = xy::Util::Vector::reflect(human.velocity, { 0.f, -1.f });
-                        }
-                    }
-                }*/
+                entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
             }
         }
     }
@@ -272,6 +264,53 @@ void HumanSystem::updateScared(xy::Entity entity)
     //gather nearby aliens, average the center postion, add dir to velocity and normalise
     //run faster more aliens there are
     //switch to seeking if no aliens nearby
+
+    auto& tx = entity.getComponent<xy::Transform>();
+    sf::FloatRect searchArea(tx.getPosition(), SeekSize);
+    searchArea.left -= (SeekSize.x / 2.f);
+    searchArea.top -= (SeekSize.y / 2.f);
+
+    auto bounds = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
+
+    float count = 0.f;
+    sf::Vector2f centreOfMass;
+
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien);
+    for (auto e : nearby)
+    {
+        auto otherPosition = e.getComponent<xy::Transform>().getPosition();
+        centreOfMass += otherPosition;
+        count++;
+
+        //check for intersection and kill poor human :(
+        if (bounds.contains(otherPosition))
+        {
+            auto* msg = postMessage<HumanEvent>(MessageID::HumanMessage);
+            msg->type = HumanEvent::Died;
+            msg->position = tx.getPosition();
+            msg->rotation = tx.getRotation();
+
+            getScene()->destroyEntity(entity);
+            return;
+        }
+    }
+
+    auto& human = entity.getComponent<Human>();
+    if (count > 0)
+    {
+        centreOfMass /= count;
+        human.velocity += (tx.getPosition() - centreOfMass);
+        human.velocity = xy::Util::Vector::normalise(human.velocity);
+    }
+    else
+    {
+        human.state = Human::State::Seeking;
+
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::Red);
+    }
+    //run faster the more aliens there are?
+    //we want to make sure aliens can catch the humans....
+    human.speed = Human::DefaultSpeed + (count * 30.f);
 }
 
 void HumanSystem::updateCollision(xy::Entity entity)

@@ -36,7 +36,8 @@ struct Human final
     }state = State::Seeking;
 
     sf::Vector2f velocity;
-    float speed = 120.f;
+    static constexpr float DefaultSpeed = 130.f;
+    float speed = DefaultSpeed;
 };
 
 class HumanSystem final : public xy::System
@@ -46,7 +47,7 @@ public:
 
     void process(float) override;
 
-    void addSpawn(sf::Vector2f v) { m_spawnPoints.push_back(v); }
+    void addSpawn(sf::Vector2f);
 
     void clearSpawns();
 

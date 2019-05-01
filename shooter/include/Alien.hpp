@@ -56,6 +56,7 @@ private:
         sf::Vector2f coalescence;
         sf::Vector2f alignment;
         sf::Vector2f separation;
+        sf::Vector2f humanAttraction;
     }; //allows sharing particular tree queries but adding the results in the correct order.
 
     void processBoid(xy::Entity, Results&);

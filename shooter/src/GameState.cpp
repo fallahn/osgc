@@ -304,6 +304,14 @@ void GameState::handleMessage(const xy::Message& msg)
             }
         }
     }
+    else if (msg.id == MessageID::HumanMessage)
+    {
+        const auto& data = msg.getData<HumanEvent>();
+        if (data.type == HumanEvent::Died)
+        {
+            m_mapLoader.renderSprite(SpriteID::HumanBody, data.position, data.rotation);
+        }
+    }
 
     m_gameScene.forwardMessage(msg);
 }
