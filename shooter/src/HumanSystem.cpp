@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/ecs/Scene.hpp>
@@ -33,15 +34,17 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
 
+#include <algorithm>
+
 namespace
 {
-    const sf::Vector2f SeekSize(512.f, 512.f);
+    const sf::Vector2f SeekSize(192.f, 192.f);
 
     const sf::Time SpawnTime = sf::seconds(2.8f);
-    const std::size_t SpawnsPerPoint = 2;
-    const std::size_t MaxSpawns = 8;
+    const std::size_t SpawnsPerPoint = 1;
+    const std::size_t MaxSpawns = 10;
 
-    const float NodeDistanceSqr = (Node::Bounds[2] / 2.f) * (Node::Bounds[2] / 2.f);
+    const float NodeDistanceSqr = (Node::Bounds[2]) * (Node::Bounds[2]);
 }
 
 HumanSystem::HumanSystem(xy::MessageBus& mb, const SpriteArray& sprites)
@@ -61,17 +64,28 @@ void HumanSystem::process(float dt)
     auto& entities = getEntities();
     for (auto entity : entities)
     {
+        auto& tx = entity.getComponent<xy::Transform>();
         const auto& human = entity.getComponent<Human>();
+
+        //update movement
+        tx.move(human.velocity * human.speed * dt);
+        tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), xy::Util::Vector::rotation(human.velocity)) * 10.f * dt);
+
         switch (human.state)
         {
         default: break;
         case Human::State::Normal:
-            updateNormal(entity, dt);
+            updateNormal(entity);
             break;
         case Human::State::Seeking:
-            updateSeeking(entity, dt);
+            updateSeeking(entity);
+            break;
+        case Human::State::Scared:
+            updateScared(entity);
             break;
         }
+
+        updateCollision(entity);
     }
 
     //check if OK to spawn new human
@@ -124,6 +138,17 @@ void HumanSystem::spawnHuman()
     entity.addComponent<Human>().velocity = xy::Util::Vector::normalise(velocity);
     entity.addComponent<Navigator>();
 
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float)
+    {
+        if (!ConstVal::MapArea.contains(e.getComponent<xy::Transform>().getPosition()))
+        {
+            getScene()->destroyEntity(e);
+            xy::Logger::log("Destroyed human out of bounds", xy::Logger::Type::Info);
+        }
+    };
+
     //apparently there's no radar icon for humans...
     /*auto humanEntity = entity;
     entity = getScene()->createEntity();
@@ -132,49 +157,52 @@ void HumanSystem::spawnHuman()
     entity.addComponent<xy::Sprite>() = m_sprites[];*/
 }
 
-void HumanSystem::updateNormal(xy::Entity entity, float dt)
+void HumanSystem::updateNormal(xy::Entity entity)
 {
     //follow velocity until at new node
     //TODO probably move this to beginning of process() func
     auto& tx = entity.getComponent<xy::Transform>();
     auto& human = entity.getComponent<Human>();
-    tx.move(human.velocity * human.speed * dt);
-    tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), xy::Util::Vector::rotation(human.velocity)));
+    
+    auto& nav = entity.getComponent<Navigator>();
+    const auto& path = nav.target.getComponent<Node>().path;
 
-    const auto& nav = entity.getComponent<Navigator>();
-    auto dir = tx.getPosition() - nav.target.getComponent<xy::Transform>().getPosition();
+    auto dir = tx.getPosition() - path[nav.pathIndex];
     if (xy::Util::Vector::lengthSquared(dir) < NodeDistanceSqr)
     {
-        human.state = Human::State::Seeking;
+        nav.pathIndex++;
+        if (nav.pathIndex < path.size())
+        {
+            human.velocity = xy::Util::Vector::normalise(path[nav.pathIndex] - tx.getPosition());
+        }
+        else
+        {
+            human.state = Human::State::Seeking;
+        }
     }
 
-
-    //if wall collision then switch to seeking for new node?
-    //needs to prevent seeking through solid objects... see line intersection func in alien system
+    //TODO check for aliens and switch to scared state
 }
 
-void HumanSystem::updateSeeking(xy::Entity entity, float dt)
+void HumanSystem::updateSeeking(xy::Entity entity)
 {
     //walk randomly while bouncing off walls until finding a new node target
     auto& tx = entity.getComponent<xy::Transform>();
     auto& human = entity.getComponent<Human>();
-    tx.move(human.velocity * human.speed * dt);
-    tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), xy::Util::Vector::rotation(human.velocity)));
 
-    auto bounds = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
     sf::FloatRect searchArea(tx.getPosition(), SeekSize);
     searchArea.left -= (SeekSize.x / 2.f);
     searchArea.top -= (SeekSize.y / 2.f);
 
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Solid | CollisionBox::Filter::Navigation);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien | CollisionBox::Filter::Navigation);
+    std::shuffle(nearby.begin(), nearby.end(), xy::Util::Random::rndEngine); //increase chance of picking a different nearby node (as first always gets picked)
     for(auto e : nearby)
     {       
         if (e != entity)
         {
             if (e.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionBox::Navigation)
             {
-                //TODO cast ray to found node and check for solid collision
-                //TODO collect a list of candidates and choose which has the nearest direction to current velocity
+                //TODO cast ray to found node and check for solid collision?
 
                 //make sure this wasn't the previous node
                 auto& nav = entity.getComponent<Navigator>();
@@ -182,13 +210,11 @@ void HumanSystem::updateSeeking(xy::Entity entity, float dt)
 
                 if (nav.previousNode != node.ID)
                 {
-                    if (nav.target.isValid())
-                    {
-                        nav.previousNode = nav.target.getComponent<Node>().ID;
-                    }
+                    nav.previousNode = node.ID;
                     nav.target = e;
+                    nav.pathIndex = 0;
 
-                    human.velocity = e.getComponent<xy::Transform>().getPosition() - tx.getPosition();
+                    human.velocity = node.path[0] - tx.getPosition();
                     human.velocity = xy::Util::Vector::normalise(human.velocity);
 
                     human.state = Human::State::Normal;
@@ -197,8 +223,11 @@ void HumanSystem::updateSeeking(xy::Entity entity, float dt)
             }
             else
             {
+                //TODO if alien in range set velocity to run away
+                //and state to scared
+
                 //TODO this probably wants to be done in main process() func after all updates complete
-                auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+                /*auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
                 auto otherPoint = sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f));
 
                 auto dir = otherPoint - tx.getPosition();
@@ -231,6 +260,68 @@ void HumanSystem::updateSeeking(xy::Entity entity, float dt)
                             tx.move(0.f, -overlap.height);
                             human.velocity = xy::Util::Vector::reflect(human.velocity, { 0.f, -1.f });
                         }
+                    }
+                }*/
+            }
+        }
+    }
+}
+
+void HumanSystem::updateScared(xy::Entity entity)
+{
+    //gather nearby aliens, average the center postion, add dir to velocity and normalise
+    //run faster more aliens there are
+    //switch to seeking if no aliens nearby
+}
+
+void HumanSystem::updateCollision(xy::Entity entity)
+{
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto& human = entity.getComponent<Human>();
+
+    sf::FloatRect bounds = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
+
+    sf::FloatRect searchArea(tx.getPosition(), SeekSize);
+    searchArea.left -= (SeekSize.x / 2.f);
+    searchArea.top -= (SeekSize.y / 2.f);
+
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Solid);
+    for (auto e : nearby)
+    {
+        if (e != entity)
+        {
+            auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+            auto otherPoint = sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f));
+
+            auto dir = otherPoint - tx.getPosition();
+
+            sf::FloatRect overlap;
+            if (bounds.intersects(otherBounds, overlap))
+            {
+                if (overlap.width < overlap.height)
+                {
+                    if (dir.x < 0)
+                    {
+                        tx.move(overlap.width, 0.f);
+                        human.velocity = xy::Util::Vector::reflect(human.velocity, { 1.f, 0.f });
+                    }
+                    else
+                    {
+                        tx.move(-overlap.width, 0.f);
+                        human.velocity = xy::Util::Vector::reflect(human.velocity, { -1.f, 0.f });
+                    }
+                }
+                else
+                {
+                    if (dir.y < 0)
+                    {
+                        tx.move(0.f, overlap.height);
+                        human.velocity = xy::Util::Vector::reflect(human.velocity, { 0.f, 1.f });
+                    }
+                    else
+                    {
+                        tx.move(0.f, -overlap.height);
+                        human.velocity = xy::Util::Vector::reflect(human.velocity, { 0.f, -1.f });
                     }
                 }
             }

@@ -610,23 +610,44 @@ void GameState::loadWorld()
         }
     }
 
+    auto debugEnt = m_gameScene.createEntity();
+    debugEnt.addComponent<xy::Transform>();
+    debugEnt.addComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
+    auto& verts = debugEnt.getComponent<xy::Drawable>().getVertices();
+
     //and navigation nodes
     std::uint32_t nodeID = 1;
     const auto& nodes = m_mapLoader.getNavigationNodes();
     for (const auto& n : nodes)
     {
         entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(n);
-        entity.addComponent<Node>().ID = nodeID++;
+        entity.addComponent<xy::Transform>().setPosition(n.front());
+        entity.addComponent<Node>().ID = nodeID; //if we give the return path (below) the same ID we won't walk back along the same one
+        entity.getComponent<Node>().path = n;
         entity.addComponent<xy::BroadphaseComponent>().setArea({ Node::Bounds[0], Node::Bounds[1], Node::Bounds[2], Node::Bounds[3] });
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Navigation);
+
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(n.back());
+        entity.addComponent<Node>().ID = nodeID;
+        entity.getComponent<Node>().path = n;
+        std::reverse(entity.getComponent<Node>().path.begin(), entity.getComponent<Node>().path.end());
+        entity.addComponent<xy::BroadphaseComponent>().setArea({ Node::Bounds[0], Node::Bounds[1], Node::Bounds[2], Node::Bounds[3] });
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionBox::Navigation);
+
+        nodeID++;
+
+        verts.emplace_back(n.front(), sf::Color::Transparent);
+        for (auto p : n) verts.emplace_back(p, sf::Color::Red);
+        verts.emplace_back(n.back(), sf::Color::Transparent);
     }
+    debugEnt.getComponent<xy::Drawable>().updateLocalBounds();
 
     //finally spawn points
     auto& alienSystem = m_gameScene.getSystem<AlienSystem>();
-    alienSystem.clearSpawns();
-
     auto& humanSystem = m_gameScene.getSystem<HumanSystem>();
+
+    alienSystem.clearSpawns();
     humanSystem.clearSpawns();
 
     const auto& spawns = m_mapLoader.getSpawnPoints();
@@ -641,6 +662,9 @@ void GameState::loadWorld()
             humanSystem.addSpawn(position);
         }
     }
+    
+    //saves a bit of memory
+    m_mapLoader.clearObjectData();
 }
 
 void GameState::recalcViews()

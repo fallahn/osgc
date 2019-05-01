@@ -31,7 +31,8 @@ struct Human final
     enum class State
     {
         Normal,
-        Seeking
+        Seeking,
+        Scared
     }state = State::Seeking;
 
     sf::Vector2f velocity;
@@ -58,6 +59,9 @@ private:
     sf::Clock m_spawnClock;
 
     void spawnHuman();
-    void updateNormal(xy::Entity, float);
-    void updateSeeking(xy::Entity, float);
+    void updateNormal(xy::Entity);
+    void updateSeeking(xy::Entity);
+    void updateScared(xy::Entity);
+
+    void updateCollision(xy::Entity);
 };

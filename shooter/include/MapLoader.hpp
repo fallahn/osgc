@@ -41,13 +41,15 @@ public:
 
     const std::vector<CollisionBox>& getCollisionBoxes() const;
 
-    const std::vector<sf::Vector2f>& getNavigationNodes() const;
+    const std::vector<std::vector<sf::Vector2f>>& getNavigationNodes() const;
 
     enum SpawnType
     {
         Human, Alien
     };
     const std::vector<std::pair<sf::Vector2f, std::int32_t>>& getSpawnPoints() const;
+
+    void clearObjectData();
 
 private:
 
@@ -58,6 +60,6 @@ private:
     sf::RenderTexture m_sideTexture;
 
     std::vector<CollisionBox> m_collisionBoxes;
-    std::vector<sf::Vector2f> m_navigationNodes;
+    std::vector<std::vector<sf::Vector2f>> m_navigationNodes;
     std::vector<std::pair<sf::Vector2f, std::int32_t>> m_spawnPoints;
 };

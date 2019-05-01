@@ -26,11 +26,13 @@ Copyright 2019 Matt Marchant
 struct Node final
 {
     std::uint32_t ID = 0u;
+    std::vector<sf::Vector2f> path;
     static constexpr std::array<float, 4u> Bounds = { -12.f, -12.f, 24.f, 24.f }; //supposed to be FloatRect but idk wtf
 };
 
 struct Navigator final
 {
     xy::Entity target;
-    std::uint32_t previousNode;
+    std::size_t pathIndex = 0;
+    std::uint32_t previousNode = 0;
 };

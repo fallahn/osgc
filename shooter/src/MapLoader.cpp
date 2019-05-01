@@ -65,9 +65,7 @@ MapLoader::MapLoader(const SpriteArray& sprites)
 
 bool MapLoader::load(const std::string& path)
 {
-    m_collisionBoxes.clear();
-    m_navigationNodes.clear();
-    m_spawnPoints.clear();
+    clearObjectData();
 
     tmx::Map map;
     if (map.load(xy::FileSystem::getResourcePath() + path))
@@ -359,11 +357,20 @@ bool MapLoader::load(const std::string& path)
             const auto& objs = navigationLayer->getObjects();
             for (const auto& obj : objs)
             {
-                if (obj.getShape() == tmx::Object::Shape::Point)
+                if (obj.getShape() == tmx::Object::Shape::Polyline)
                 {
-                    sf::Vector2f position(obj.getPosition().x, obj.getPosition().y);
+                    const auto& points = obj.getPoints();
 
-                    m_navigationNodes.push_back(position * 4.f);
+                    if (points.size() > 1)
+                    {
+                        auto pos = obj.getPosition() * 4.f;
+                        std::vector<sf::Vector2f> path;
+                        for (const auto& p : points)
+                        {
+                            path.emplace_back(pos.x + (p.x * 4.f), pos.y + (p.y * 4.f));
+                        }
+                        m_navigationNodes.push_back(path);
+                    }
                 }
             }
         }
@@ -458,7 +465,7 @@ const std::vector<CollisionBox>& MapLoader::getCollisionBoxes() const
     return m_collisionBoxes;
 }
 
-const std::vector<sf::Vector2f>& MapLoader::getNavigationNodes() const
+const std::vector<std::vector<sf::Vector2f>>& MapLoader::getNavigationNodes() const
 {
     return m_navigationNodes;
 }
@@ -466,4 +473,11 @@ const std::vector<sf::Vector2f>& MapLoader::getNavigationNodes() const
 const std::vector<std::pair<sf::Vector2f, std::int32_t>>& MapLoader::getSpawnPoints() const
 {
     return m_spawnPoints;
+}
+
+void MapLoader::clearObjectData()
+{
+    m_collisionBoxes.clear();
+    m_navigationNodes.clear();
+    m_spawnPoints.clear();
 }
