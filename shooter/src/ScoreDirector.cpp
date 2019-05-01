@@ -36,8 +36,8 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const std::int32_t BuildingScore = -50;
-    const std::int32_t HumanScore = -150;
-    const std::int32_t HumanScoreByAlien = -10;
+    const std::int32_t HumanScore = -50;
+    const std::int32_t HumanScoreByAlien = -150;
     const std::int32_t ScorpionScore = 100;
     const std::int32_t BeetleScore = 120;
     const std::int32_t AmmoScore = 20;

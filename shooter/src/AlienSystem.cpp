@@ -41,11 +41,13 @@ namespace
     const sf::Time SpawnTime = sf::seconds(3.f);
     const std::size_t SpawnPerIndex = 5; //this many spawned at a point before moving to next spawn point
     const std::size_t MaxSpawns = 10;
-    const float MaxVelocity = 280.f;
+    const float MaxVelocity = 215.f;
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 
     const float MinDistance = 76.f;
     const float MinDistSqr = MinDistance * MinDistance;
+
+    const float MaxCoalescenceRadius = 96.f * 96.f;
 
     const sf::Vector2f FlockSize(360.f, 360.f);
 
@@ -226,7 +228,7 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
     sf::Vector2f humanTarget;
     float humanCount = 0.f;
 
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Alien | CollisionBox::Filter::Solid | CollisionBox::Human);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Alien | /*CollisionBox::Filter::Solid |*/ CollisionBox::Human);
     for (auto e : nearby)
     {
         if (e != entity)
@@ -269,15 +271,17 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
         }
         auto& alien = entity.getComponent<Alien>();
         //DPRINT("com", std::to_string(centreOfMass.x) + ", " + std::to_string(centreOfMass.y));
-        results.coalescence += ((centreOfMass - tx.getPosition()) / 50.f);
+        auto coalescenceDirection = centreOfMass - tx.getPosition();
+        auto coalescenceStrength = /*1.f - */xy::Util::Math::clamp(xy::Util::Vector::lengthSquared(coalescenceDirection) / MaxCoalescenceRadius, 0.f, 1.f);
+        results.coalescence = (coalescenceDirection/* * coalescenceStrength*/) / 100.f;
         //DPRINT("align", std::to_string(avgVelocity.x) + ", " + std::to_string(avgVelocity.y));
-        results.alignment += ((avgVelocity - alien.velocity) / 4.f);
+        results.alignment = ((avgVelocity - alien.velocity) / 16.f);
     }
 
     if (humanCount > 0)
     {
         humanTarget /= humanCount;
-        results.humanAttraction += ((humanTarget - tx.getPosition()) / 20.f);
+        results.humanAttraction = ((humanTarget - tx.getPosition()) / 4.f);
     }
 }
 
@@ -287,12 +291,12 @@ void AlienSystem::solidCollision(xy::Entity entity)
     auto& alien = entity.getComponent<Alien>();
 
     sf::FloatRect searchArea(tx.getPosition() - (FlockSize / 2.f), FlockSize);
-    sf::FloatRect boidBounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+    sf::FloatRect boidBounds(-16.f, -16.f, 32.f, 32.f);// = entity.getComponent<xy::BroadphaseComponent>().getArea();
     //we want to skip rotation here which might grow the AABB
-    boidBounds.left += tx.getPosition().x - (boidBounds.width * 2.f);
-    boidBounds.top += tx.getPosition().y - (boidBounds.height * 2.f);
-    boidBounds.width *= tx.getScale().x;
-    boidBounds.height *= tx.getScale().y;
+    boidBounds.left += tx.getPosition().x;// -(boidBounds.width * 2.f);
+    boidBounds.top += tx.getPosition().y;// -(boidBounds.height * 2.f);
+    //boidBounds.width *= tx.getScale().x;
+   // boidBounds.height *= tx.getScale().y;
     //boidBounds = tx.getTransform().transformRect(boidBounds);
 
     /*auto& verts = m_debug.getComponent<xy::Drawable>().getVertices();
@@ -304,7 +308,7 @@ void AlienSystem::solidCollision(xy::Entity entity)
     auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Solid);
     for (auto e : nearby)
     {
-        if (e != entity)
+        //if (e != entity)
         {
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
             auto otherPoint = sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f));

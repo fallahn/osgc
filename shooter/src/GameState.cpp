@@ -618,10 +618,10 @@ void GameState::loadWorld()
         }
     }
 
-    auto debugEnt = m_gameScene.createEntity();
+    /*auto debugEnt = m_gameScene.createEntity();
     debugEnt.addComponent<xy::Transform>();
     debugEnt.addComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
-    auto& verts = debugEnt.getComponent<xy::Drawable>().getVertices();
+    auto& verts = debugEnt.getComponent<xy::Drawable>().getVertices();*/
 
     //and navigation nodes
     std::uint32_t nodeID = 1;
@@ -645,11 +645,11 @@ void GameState::loadWorld()
 
         nodeID++;
 
-        verts.emplace_back(n.front(), sf::Color::Transparent);
+        /*verts.emplace_back(n.front(), sf::Color::Transparent);
         for (auto p : n) verts.emplace_back(p, sf::Color::Red);
-        verts.emplace_back(n.back(), sf::Color::Transparent);
+        verts.emplace_back(n.back(), sf::Color::Transparent);*/
     }
-    debugEnt.getComponent<xy::Drawable>().updateLocalBounds();
+    //debugEnt.getComponent<xy::Drawable>().updateLocalBounds();
 
     //finally spawn points
     auto& alienSystem = m_gameScene.getSystem<AlienSystem>();

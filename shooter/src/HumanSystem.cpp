@@ -87,6 +87,22 @@ void HumanSystem::process(float dt)
         }
 
         updateCollision(entity);
+
+#ifdef XY_DEBUG
+        switch (human.state)
+        {
+        default: break;
+        case Human::State::Seeking:
+            entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+            break;
+        case Human::State::Normal:
+            entity.getComponent<xy::Sprite>().setColour(sf::Color::Green);
+            break;
+        case Human::State::Scared:
+            entity.getComponent<xy::Sprite>().setColour(sf::Color::Red);
+            break;
+        }
+#endif
     }
 
     //check if OK to spawn new human
@@ -157,8 +173,6 @@ void HumanSystem::spawnHuman()
         }
     };
 
-    entity.getComponent<xy::Sprite>().setColour(sf::Color::Red);
-
     auto* msg = postMessage<HumanEvent>(MessageID::HumanMessage);
     msg->type = HumanEvent::Spawned;
     msg->position = tx.getPosition();
@@ -203,8 +217,6 @@ void HumanSystem::updateNormal(xy::Entity entity)
     if (!nearby.empty())
     {
         human.state = Human::State::Scared;
-
-        entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
     }
 }
 
@@ -243,8 +255,6 @@ void HumanSystem::updateSeeking(xy::Entity entity)
 
                     human.state = Human::State::Normal;
 
-                    entity.getComponent<xy::Sprite>().setColour(sf::Color::Green);
-
                     return;
                 }
             }
@@ -253,7 +263,7 @@ void HumanSystem::updateSeeking(xy::Entity entity)
                 //must be aliens nearby, run away!
                 human.state = Human::State::Scared;
 
-                entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+                return;
             }
         }
     }
@@ -282,8 +292,12 @@ void HumanSystem::updateScared(xy::Entity entity)
         centreOfMass += otherPosition;
         count++;
 
+        sf::FloatRect otherBounds(-16.f, -16.f, 32.f, 32.f);
+        otherBounds.left += otherPosition.x;
+        otherBounds.top += otherPosition.y;
+
         //check for intersection and kill poor human :(
-        if (bounds.contains(otherPosition))
+        if (bounds.intersects(otherBounds))
         {
             auto* msg = postMessage<HumanEvent>(MessageID::HumanMessage);
             msg->type = HumanEvent::Died;
@@ -305,12 +319,10 @@ void HumanSystem::updateScared(xy::Entity entity)
     else
     {
         human.state = Human::State::Seeking;
-
-        entity.getComponent<xy::Sprite>().setColour(sf::Color::Red);
     }
     //run faster the more aliens there are?
     //we want to make sure aliens can catch the humans....
-    human.speed = Human::DefaultSpeed + (count * 30.f);
+    human.speed = Human::DefaultSpeed + (count * 50.f);
 }
 
 void HumanSystem::updateCollision(xy::Entity entity)
@@ -318,7 +330,10 @@ void HumanSystem::updateCollision(xy::Entity entity)
     auto& tx = entity.getComponent<xy::Transform>();
     auto& human = entity.getComponent<Human>();
 
-    sf::FloatRect bounds = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
+    //sf::FloatRect bounds = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
+    sf::FloatRect bounds(-16.f, -16.f, 32.f, 32.f);
+    bounds.left += tx.getPosition().x;
+    bounds.top += tx.getPosition().y;
 
     sf::FloatRect searchArea(tx.getPosition(), SeekSize);
     searchArea.left -= (SeekSize.x / 2.f);
@@ -327,7 +342,7 @@ void HumanSystem::updateCollision(xy::Entity entity)
     auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Solid);
     for (auto e : nearby)
     {
-        if (e != entity)
+        //if (e != entity)
         {
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
             auto otherPoint = sf::Vector2f(otherBounds.left + (otherBounds.width / 2.f), otherBounds.top + (otherBounds.height / 2.f));
@@ -337,6 +352,12 @@ void HumanSystem::updateCollision(xy::Entity entity)
             sf::FloatRect overlap;
             if (bounds.intersects(otherBounds, overlap))
             {
+                if (human.state == Human::State::Normal)
+                {
+                    //we've probably strayed from the path
+                    human.state = Human::State::Seeking;
+                }
+
                 if (overlap.width < overlap.height)
                 {
                     if (dir.x < 0)

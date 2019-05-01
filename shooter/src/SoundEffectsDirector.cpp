@@ -47,6 +47,8 @@ namespace
         Pickup, SpawnItem,
         Damage,
 
+        Die01, Die02, Die03, Die04,
+
         Count
     };
 
@@ -61,6 +63,10 @@ namespace
         "assets/sound/pickup.wav",
         "assets/sound/spawn_item.wav",
         "assets/sound/damage.wav",
+        "assets/sound/die_01.wav",
+        "assets/sound/die_02.wav",
+        "assets/sound/die_03.wav",
+        "assets/sound/die_04.wav",
     };
 
     std::array<std::size_t, AudioID::Count> audioHandles;
@@ -124,6 +130,17 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         default: break;
         case SpawnEvent::Collectible:
             playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::SpawnItem]), data.position);
+            break;
+        }
+    }
+    else if (msg.id == MessageID::HumanMessage)
+    {
+        const auto& data = msg.getData<HumanEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case HumanEvent::Died:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[xy::Util::Random::value(AudioID::Die01, AudioID::Die04)]), data.position);
             break;
         }
     }
