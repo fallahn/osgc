@@ -77,7 +77,7 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                 auto eBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
                 if (eBounds.intersects(damageArea))
                 {
-                    getScene()->destroyEntity(e);
+                    auto rotation = e.getComponent<xy::Transform>().getRotation();
 
                     auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
                     msg->position = e.getComponent<xy::Transform>().getPosition();
@@ -106,10 +106,11 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                         {
                             msg->type = BombEvent::KilledHuman;
                         }
+                        msg->rotation = rotation;
                     }
                         break;
                     }
-                    
+                    getScene()->destroyEntity(e);
                 }
             }
         }

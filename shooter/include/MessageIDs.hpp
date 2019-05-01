@@ -45,6 +45,7 @@ struct BombEvent final
         KilledHuman
     }type = Exploded;
     sf::Vector2f position; //top down coordinates
+    float rotation = 0.f;
 };
 
 struct DroneEvent final

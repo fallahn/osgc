@@ -37,7 +37,7 @@ public:
 
     const sf::Texture& getSideTexture() const;
 
-    void renderSprite(std::int32_t, sf::Vector2f);
+    void renderSprite(std::int32_t, sf::Vector2f, float = 0.f);
 
     const std::vector<CollisionBox>& getCollisionBoxes() const;
 

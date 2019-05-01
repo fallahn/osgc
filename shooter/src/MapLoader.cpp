@@ -428,19 +428,20 @@ const sf::Texture& MapLoader::getSideTexture() const
     return m_sideTexture.getTexture();
 }
 
-void MapLoader::renderSprite(std::int32_t spriteID, sf::Vector2f position)
+void MapLoader::renderSprite(std::int32_t spriteID, sf::Vector2f position, float rotation)
 {
     //TODO since SFML switched its sprite implementation to vertex buffers
     //creating in-place sprites like this is probably just a good way to waste
     //GPU memory.
+    //maybe we could cache these?
 
     auto bounds = m_sprites[spriteID].getTextureRect();
     sf::Sprite spr(*m_sprites[spriteID].getTexture());
     spr.setTextureRect(sf::IntRect(bounds));
     spr.setPosition(position / 4.f);
-    //TODO this is a fudge as we're only drawinf craters
-    //would the sprite sheet format benefit from an origin property?
+    //TODO this is a fudge as we're assuming all sprites have a centre origin
     spr.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    spr.setRotation(rotation);
 
     m_topBuffer.clear();
     m_topBuffer.draw(sf::Sprite(m_topTexture.getTexture()));

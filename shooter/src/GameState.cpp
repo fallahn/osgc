@@ -200,9 +200,21 @@ void GameState::handleMessage(const xy::Message& msg)
     else if (msg.id == MessageID::BombMessage)
     {
         const auto& data = msg.getData<BombEvent>();
-        if (data.type == BombEvent::Exploded)
+        switch (data.type)
         {
+        default: break;
+        case BombEvent::Exploded:
             drawCrater(data.position);
+            break;
+        case BombEvent::KilledBeetle:
+            m_mapLoader.renderSprite(SpriteID::BeetleBody, data.position, data.rotation);
+            break;
+        case BombEvent::KilledHuman:
+            m_mapLoader.renderSprite(SpriteID::HumanBody, data.position, data.rotation);
+            break;
+        case BombEvent::KilledScorpion:
+            m_mapLoader.renderSprite(SpriteID::ScorpionBody, data.position, data.rotation);
+            break;
         }
     }
     else if (msg.id == MessageID::DroneMessage)
