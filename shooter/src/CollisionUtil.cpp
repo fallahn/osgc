@@ -20,30 +20,31 @@ bool intersects(const Segment& segOne, const Segment& segTwo, sf::Vector2f& inte
     return false;
 }
 
-std::pair<sf::Vector2f, sf::Vector2f> getDistance(sf::Vector2f point, sf::FloatRect target)
+IntersectionResult intersects(const Segment& firstSegment, sf::FloatRect target)
 {
     sf::Vector2f targetCentre(target.left + (target.width / 2.f), target.top + (target.height / 2.f));
+    auto point = firstSegment.first;
 
-    std::pair<sf::Vector2f, sf::Vector2f> firstSegment = std::make_pair(point, targetCentre);
+    //TODO this side detection isn't correct - need to look at firstSeg and check if
+    //it potentially intersects before doing actual intersection test...
 
-    sf::Vector2f retVal;
-    sf::Vector2f normal;
+    IntersectionResult result;
     if (targetCentre.x < point.x && targetCentre.y < point.y)
     {
         //up left
         std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
             std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
 
-        normal.y = 1.f;
+        result.normal.y = 1.f;
 
-        if (!intersects(firstSegment, secondSegment, retVal))
+        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
         {
             secondSegment =
                 std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
-            intersects(firstSegment, secondSegment, retVal);
+            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
 
-            normal.x = 1.f;
-            normal.y = 0.f;
+            result.normal.x = 1.f;
+            result.normal.y = 0.f;
         }
     }
     else if (targetCentre.x > point.x && targetCentre.y < point.y)
@@ -52,16 +53,16 @@ std::pair<sf::Vector2f, sf::Vector2f> getDistance(sf::Vector2f point, sf::FloatR
         std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
             std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
 
-        normal.y = 1.f;
+        result.normal.y = 1.f;
 
-        if (!intersects(firstSegment, secondSegment, retVal))
+        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
         {
             secondSegment =
                 std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
-            intersects(firstSegment, secondSegment, retVal);
+            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
 
-            normal.x = -1.f;
-            normal.y = 0.f;
+            result.normal.x = -1.f;
+            result.normal.y = 0.f;
         }
     }
     else if (targetCentre.x > point.x && targetCentre.y > point.y)
@@ -70,16 +71,16 @@ std::pair<sf::Vector2f, sf::Vector2f> getDistance(sf::Vector2f point, sf::FloatR
         std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
             std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
 
-        normal.y = -1.f;
+        result.normal.y = -1.f;
 
-        if (!intersects(firstSegment, secondSegment, retVal))
+        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
         {
             secondSegment =
                 std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
-            intersects(firstSegment, secondSegment, retVal);
+            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
 
-            normal.y = 0.f;
-            normal.x = -1.f;
+            result.normal.y = 0.f;
+            result.normal.x = -1.f;
         }
     }
     else if (targetCentre.x < point.x && targetCentre.y > point.y)
@@ -88,18 +89,18 @@ std::pair<sf::Vector2f, sf::Vector2f> getDistance(sf::Vector2f point, sf::FloatR
         std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
             std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
 
-        normal.y = -1.f;
+        result.normal.y = -1.f;
 
-        if (!intersects(firstSegment, secondSegment, retVal))
+        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
         {
             secondSegment =
                 std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
-            intersects(firstSegment, secondSegment, retVal);
+            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
 
-            normal.y = 0.f;
-            normal.x = 1.f;
+            result.normal.y = 0.f;
+            result.normal.x = 1.f;
         }
     }
 
-    return std::make_pair(retVal/* - point*/, normal);
+    return result;
 };

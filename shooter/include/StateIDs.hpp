@@ -51,5 +51,10 @@ struct SharedData final
     }pauseMessage = None;
     std::string messageString;
 
+    enum
+    {
+        Win, Lose
+    }gameoverType;
+
     LoadingScreen loadingScreen;
 };

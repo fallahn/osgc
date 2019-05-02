@@ -9,5 +9,11 @@ using Segment = std::pair<sf::Vector2f, sf::Vector2f>;
 
 bool intersects(const Segment& segOne, const Segment& segTwo, sf::Vector2f& intersection);
 
-//returns distance to intersect and normal vector of intersection
-std::pair<sf::Vector2f, sf::Vector2f> getDistance(sf::Vector2f point, sf::FloatRect target);
+struct IntersectionResult
+{
+    bool intersects = false;
+    sf::Vector2f normal;
+    sf::Vector2f intersectionPoint;
+};
+
+IntersectionResult intersects(const Segment&, sf::FloatRect target);

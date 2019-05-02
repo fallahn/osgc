@@ -234,6 +234,8 @@ void PauseState::createGameover()
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
 
+    //TODO print win/lose message (show a score summary / time?)
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 148.f);

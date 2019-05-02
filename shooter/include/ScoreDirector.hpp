@@ -37,5 +37,10 @@ private:
     sf::Font& m_font;
     std::int32_t m_score;
 
+    std::int32_t m_alienCount;
+    std::int32_t m_humanCount;
+
     void spawnScoreItem(sf::Vector2f, std::int32_t);
+    void updateAlienCount();
+    void updateHumanCount();
 };

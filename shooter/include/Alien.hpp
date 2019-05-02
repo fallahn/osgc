@@ -29,6 +29,8 @@ struct Alien final
     {
         Beetle, Scorpion
     }type = Type::Beetle;
+
+    static constexpr std::int32_t NumberPerRound = 100;
 };
 
 class AlienSystem final : public xy::System
@@ -48,6 +50,8 @@ private:
     std::size_t m_spawnIndex;
     std::size_t m_spawnCount;
     sf::Clock m_spawnClock;
+
+    std::int32_t m_alienCount;
 
     void spawnAlien();
 

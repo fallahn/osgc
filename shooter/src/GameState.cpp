@@ -312,6 +312,27 @@ void GameState::handleMessage(const xy::Message& msg)
             m_mapLoader.renderSprite(SpriteID::HumanBody, data.position, data.rotation);
         }
     }
+    else if (msg.id == MessageID::GameMessage)
+    {
+        const auto& data = msg.getData<GameEvent>();
+        if (data.type == GameEvent::StateChange)
+        {
+            switch (data.reason)
+            {
+            default: break;
+            case GameEvent::NoAliensLeft:
+                m_sharedData.pauseMessage = SharedData::GameOver;
+                m_sharedData.gameoverType = SharedData::Win;
+                requestStackPush(StateID::Pause);
+                break;
+            case GameEvent::NoHumansLeft:
+                m_sharedData.pauseMessage = SharedData::GameOver;
+                m_sharedData.gameoverType = SharedData::Lose;
+                requestStackPush(StateID::Pause);
+                break;
+            }
+        }
+    }
 
     m_gameScene.forwardMessage(msg);
 }
@@ -487,6 +508,7 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(ConstVal::BackgroundDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Sidebar]));
+    float sidebarTextureWidth = entity.getComponent<xy::Sprite>().getTextureBounds().width;
 
     auto& sideTx = entity.getComponent<xy::Transform>();
     //battery meter
@@ -511,12 +533,32 @@ void GameState::loadWorld()
 
     //score
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(11.f, 56.f);
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x + (xy::DefaultSceneSize.x / 2.f), 10.f);// (11.f, 56.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Score: 0");
+    entity.getComponent<xy::Text>().setCharacterSize(36);
+    entity.getComponent<xy::Text>().setFillColour({ 0,0,128 });
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreText;
+
+    //human count
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(sidebarTextureWidth / 2.f, 140.f);
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Score:\n\n0");
-    entity.getComponent<xy::Text>().setCharacterSize(16);
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreText;
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Humans");
+    entity.getComponent<xy::Text>().setCharacterSize(22);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    sideTx.addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(sidebarTextureWidth / 2.f, 167.f);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Human::NumberPerRound));
+    entity.getComponent<xy::Text>().setCharacterSize(28);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::HumanCount;
     sideTx.addChild(entity.getComponent<xy::Transform>());
 
     //right side bar
@@ -550,6 +592,27 @@ void GameState::loadWorld()
     entity.getComponent<ItemBar>().textureRect = m_sprites[SpriteID::Drone].getTextureRect();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::LifeMeter;
     otherSideTx.addChild(entity.getComponent<xy::Transform>());
+
+    //alien count
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(sidebarTextureWidth / 2.f, 140.f);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Aliens");
+    entity.getComponent<xy::Text>().setCharacterSize(22);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    otherSideTx.addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(sidebarTextureWidth / 2.f, 167.f);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Alien::NumberPerRound));
+    entity.getComponent<xy::Text>().setCharacterSize(28);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::AlienCount;
+    otherSideTx.addChild(entity.getComponent<xy::Transform>());
+
 
     m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));
 
@@ -694,7 +757,16 @@ void GameState::recalcViews()
 
 void GameState::showCrashMessage(bool gameOver)
 {
-    m_sharedData.pauseMessage = gameOver ? SharedData::GameOver : SharedData::Died;
+    if (gameOver)
+    {
+        m_sharedData.pauseMessage = SharedData::GameOver;
+        m_sharedData.gameoverType = SharedData::Lose;
+    }
+    else
+    {
+        m_sharedData.pauseMessage = SharedData::Died;
+    }
+
     requestStackPush(StateID::Pause);
 }
 

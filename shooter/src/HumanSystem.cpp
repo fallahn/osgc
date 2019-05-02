@@ -46,7 +46,7 @@ namespace
     const std::size_t SpawnsPerPoint = 1;
     const std::size_t MaxSpawns = 10;
 
-    const float MaxWallDistance = 64.f;
+    const float MaxWallDistance = 32.f;
     const float MaxWallDistSqr = MaxWallDistance * MaxWallDistance;
 
     const float NodeDistanceSqr = (Node::Bounds[2]) * (Node::Bounds[2]);
@@ -56,7 +56,8 @@ HumanSystem::HumanSystem(xy::MessageBus& mb, const SpriteArray& sprites)
     : xy::System(mb, typeid(HumanSystem)),
     m_sprites   (sprites),
     m_spawnIndex(0),
-    m_spawnCount(0)
+    m_spawnCount(0),
+    m_humanCount(Human::NumberPerRound)
 {
     requireComponent<xy::Transform>();
     requireComponent<Human>();
@@ -111,7 +112,8 @@ void HumanSystem::process(float dt)
     }
 
     //check if OK to spawn new human
-    if (entities.size() < MaxSpawns)
+    if (entities.size() < MaxSpawns
+        && m_humanCount > 0)
     {
         if (m_spawnClock.getElapsedTime() > SpawnTime)
         {
@@ -142,6 +144,7 @@ void HumanSystem::clearSpawns()
     m_spawnPoints.clear();
     m_spawnIndex = 0;
     m_spawnCount = 0;
+    m_humanCount = Human::NumberPerRound;
 }
 
 //private
@@ -182,6 +185,8 @@ void HumanSystem::spawnHuman()
     msg->type = HumanEvent::Spawned;
     msg->position = tx.getPosition();
     msg->rotation = tx.getRotation();
+
+    m_humanCount--;
 
     //apparently there's no radar icon for humans...
     /*auto humanEntity = entity;
@@ -280,6 +285,7 @@ void HumanSystem::updateScared(xy::Entity entity)
     //run faster more aliens there are
     //switch to seeking if no aliens nearby
 
+    auto& human = entity.getComponent<Human>();
     auto& tx = entity.getComponent<xy::Transform>();
     sf::FloatRect searchArea(tx.getPosition(), SeekSize);
     searchArea.left -= (SeekSize.x / 2.f);
@@ -320,13 +326,17 @@ void HumanSystem::updateScared(xy::Entity entity)
         {
             //steers human away from solid objects to stop them face planting walls
             auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
-            //TODO this should just cast a ray in the human velocity direction and only reflect if it hits something solid
-            auto result = getDistance(tx.getPosition(), otherBounds);
-            wallVector += xy::Util::Vector::reflect(result.first - tx.getPosition(), result.second);
+
+            auto ray = human.velocity * MaxWallDistance;
+
+            auto result = intersects(std::make_pair(tx.getPosition(), tx.getPosition() + ray), otherBounds);
+            if (result.intersects)
+            {
+                wallVector += xy::Util::Vector::reflect(human.velocity, result.normal);
+            }
         }
     }
 
-    auto& human = entity.getComponent<Human>();
     if (count > 0)
     {
         centreOfMass /= count;
@@ -340,7 +350,7 @@ void HumanSystem::updateScared(xy::Entity entity)
     }
     //run faster the more aliens there are?
     //we want to make sure aliens can catch the humans....
-    human.speed = Human::DefaultSpeed + (count * 50.f);
+    human.speed = Human::DefaultSpeed + (count * 60.f);
 }
 
 void HumanSystem::updateCollision(xy::Entity entity)

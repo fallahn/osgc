@@ -258,7 +258,10 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
 
     //slowly drain battery - TODO also in pick up state?
     auto oldBatt = drone.battery;
-    //drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
+#ifndef XY_DEBUG
+    drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
+#endif // !XY_DEBUG
+        
     //send update to battery indicator
     updateBatteryBar(drone);
 
@@ -460,6 +463,16 @@ void DroneSystem::processDying(xy::Entity entity, float dt)
             e.getComponent<ItemBar>().itemCount = drone.lives;
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+
+        //this is handled by GameState::showCrashMessage();
+        //if (drone.lives == 0)
+        //{
+        //    //end the game
+        //    auto* msg2 = postMessage<GameEvent>(MessageID::GameMessage);
+        //    msg2->type = GameEvent::StateChange;
+        //    msg2->reason = GameEvent::NoLivesLeft;
+        //}
     }
 }
 

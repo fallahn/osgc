@@ -38,6 +38,8 @@ struct Human final
     sf::Vector2f velocity;
     static constexpr float DefaultSpeed = 130.f;
     float speed = DefaultSpeed;
+
+    static constexpr std::int32_t NumberPerRound = 60;
 };
 
 class HumanSystem final : public xy::System
@@ -56,6 +58,7 @@ private:
     std::vector<sf::Vector2f> m_spawnPoints;
     std::size_t m_spawnIndex;
     std::size_t m_spawnCount;
+    std::int32_t m_humanCount;
 
     sf::Clock m_spawnClock;
 

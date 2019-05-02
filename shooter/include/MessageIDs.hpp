@@ -29,7 +29,8 @@ namespace MessageID
         DroneMessage,
         SpawnMessage,
         MenuMessage,
-        HumanMessage
+        HumanMessage,
+        GameMessage
     };
 }
 
@@ -94,4 +95,19 @@ struct HumanEvent final
     }type = Spawned;
     sf::Vector2f position;
     float rotation = 0.f;
+};
+
+struct GameEvent final
+{
+    enum
+    {
+        StateChange
+    }type = StateChange;
+
+    enum
+    {
+        NoLivesLeft,
+        NoHumansLeft,
+        NoAliensLeft
+    }reason = NoLivesLeft;
 };

@@ -29,7 +29,9 @@ namespace CommandID
         LifeMeter = 0x10,
         AmmoMeter = 0x20,
         BackgroundTop = 0x40,
-        ScoreText = 0x80
+        ScoreText = 0x80,
+        HumanCount = 0x100,
+        AlienCount = 0x200
     };
 
     enum Menu

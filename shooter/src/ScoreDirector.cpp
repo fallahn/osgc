@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "CollisionTypes.hpp"
 #include "GameConsts.hpp"
+#include "Alien.hpp"
+#include "Human.hpp"
 
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -47,8 +49,10 @@ namespace
 }
 
 ScoreDirector::ScoreDirector(sf::Font& font)
-    : m_font(font),
-    m_score (0)
+    : m_font        (font),
+    m_score         (0),
+    m_alienCount    (Alien::NumberPerRound),
+    m_humanCount    (Human::NumberPerRound)
 {
 
 }
@@ -88,12 +92,15 @@ void ScoreDirector::handleMessage(const xy::Message& msg)
             break;
         case BombEvent::KilledBeetle:
             spawnScoreItem(data.position, BeetleScore);
+            updateAlienCount();
             break;
         case BombEvent::KilledScorpion:
             spawnScoreItem(data.position, ScorpionScore);
+            updateAlienCount();
             break;
         case BombEvent::KilledHuman:
             spawnScoreItem(data.position, HumanScore);
+            updateHumanCount();
             break;
         default: break;
         }
@@ -104,6 +111,7 @@ void ScoreDirector::handleMessage(const xy::Message& msg)
         if (data.type == HumanEvent::Died)
         {
             spawnScoreItem(data.position, HumanScoreByAlien);
+            updateHumanCount();
         }
     }
 }
@@ -118,7 +126,7 @@ void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
     cmd.targetFlags = CommandID::ScoreText;
     cmd.action = [&](xy::Entity entity, float)
     {
-        entity.getComponent<xy::Text>().setString("Score:\n\n" + std::to_string(m_score));
+        entity.getComponent<xy::Text>().setString("Score: " + std::to_string(m_score));
     };
     sendCommand(cmd);
 
@@ -155,4 +163,48 @@ void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
             getScene().destroyEntity(e);
         }
     };
+}
+
+void ScoreDirector::updateAlienCount()
+{
+    m_alienCount--;
+
+    //send command to UI
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::AlienCount;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        e.getComponent<xy::Text>().setString(std::to_string(m_alienCount));
+    };
+    sendCommand(cmd);
+
+    if (m_alienCount == 0)
+    {
+        //end the game
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::StateChange;
+        msg->reason = GameEvent::NoAliensLeft;
+    }
+}
+
+void ScoreDirector::updateHumanCount()
+{
+    m_humanCount--;
+
+    //send command to UI
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::HumanCount;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        e.getComponent<xy::Text>().setString(std::to_string(m_humanCount));
+    };
+    sendCommand(cmd);
+
+    if (m_humanCount == 0)
+    {
+        //end the game
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::StateChange;
+        msg->reason = GameEvent::NoHumansLeft;
+    }
 }

@@ -41,7 +41,7 @@ namespace
     const sf::Time SpawnTime = sf::seconds(3.f);
     const std::size_t SpawnPerIndex = 5; //this many spawned at a point before moving to next spawn point
     const std::size_t MaxSpawns = 10;
-    const float MaxVelocity = 215.f;
+    const float MaxVelocity = 200.f;
     const float MaxVelocitySqr = MaxVelocity * MaxVelocity;
 
     const float MinDistance = 76.f;
@@ -56,7 +56,8 @@ AlienSystem::AlienSystem(xy::MessageBus& mb, const SpriteArray& sprites)
     : xy::System(mb, typeid(AlienSystem)),
     m_sprites   (sprites),
     m_spawnIndex(0),
-    m_spawnCount(0)
+    m_spawnCount(0),
+    m_alienCount(Alien::NumberPerRound)
 {
     requireComponent<xy::Transform>();
     requireComponent<Alien>();
@@ -66,10 +67,10 @@ AlienSystem::AlienSystem(xy::MessageBus& mb, const SpriteArray& sprites)
 //public
 void AlienSystem::process(float dt)
 {
-    if (m_debug.isValid())
-    {
-        m_debug.getComponent<xy::Drawable>().getVertices().clear();
-    }
+    //if (m_debug.isValid())
+    //{
+    //    m_debug.getComponent<xy::Drawable>().getVertices().clear();
+    //}
 
     auto& entities = getEntities();
     for (auto entity : entities)
@@ -100,7 +101,8 @@ void AlienSystem::process(float dt)
         tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), rotation) * 7.f * dt);
     }
 
-    if (entities.size() < MaxSpawns)
+    if (entities.size() < MaxSpawns
+        && m_alienCount > 0)
     {
         if (m_spawnClock.getElapsedTime() > SpawnTime)
         {
@@ -120,10 +122,10 @@ void AlienSystem::process(float dt)
         m_spawnClock.restart();
     }
 
-    if (m_debug.isValid())
-    {
-        m_debug.getComponent<xy::Drawable>().updateLocalBounds();
-    }
+    //if (m_debug.isValid())
+    //{
+    //    m_debug.getComponent<xy::Drawable>().updateLocalBounds();
+    //}
 }
 
 void AlienSystem::addSpawn(sf::Vector2f position)
@@ -137,6 +139,7 @@ void AlienSystem::clearSpawns()
     m_spawnPoints.clear();
     m_spawnCount = 0;
     m_spawnIndex = 0;
+    m_alienCount = Alien::NumberPerRound;
 }
 
 //private
@@ -190,6 +193,8 @@ void AlienSystem::spawnAlien()
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
     entity.addComponent<RadarItem>().parent = alienEntity;
+
+    m_alienCount--;
 
     //FUTURE ME: we only want one of these per scene, not per alien
     //m_debug = getScene()->createEntity();
