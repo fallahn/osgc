@@ -627,7 +627,7 @@ void GameState::loadWorld()
 
     //create a crosshair for the drone and have the camera follow it
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(ConstVal::MapArea.width / 2.f, ConstVal::SmallViewSize.y / 2.f);
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::MapArea.width / 2.f, ConstVal::MapArea.height / 2.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Crosshair];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();

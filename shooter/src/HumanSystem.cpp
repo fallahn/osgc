@@ -95,7 +95,7 @@ void HumanSystem::process(float dt)
         updateCollision(entity);
 
 #ifdef XY_DEBUG
-        switch (human.state)
+        /*switch (human.state)
         {
         default: break;
         case Human::State::Seeking:
@@ -107,7 +107,7 @@ void HumanSystem::process(float dt)
         case Human::State::Scared:
             entity.getComponent<xy::Sprite>().setColour(sf::Color::Red);
             break;
-        }
+        }*/
 #endif
     }
 
@@ -297,10 +297,11 @@ void HumanSystem::updateScared(xy::Entity entity)
     sf::Vector2f centreOfMass;
     sf::Vector2f wallVector;
 
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien | CollisionBox::Solid);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien | CollisionBox::Solid | CollisionBox::Filter::Navigation);
     for (auto e : nearby)
     {
-        if (e.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionBox::Alien)
+        auto flags = e.getComponent<xy::BroadphaseComponent>().getFilterFlags();
+        if (flags & CollisionBox::Alien)
         {
             auto otherPosition = e.getComponent<xy::Transform>().getPosition();
             centreOfMass += otherPosition;
@@ -321,6 +322,12 @@ void HumanSystem::updateScared(xy::Entity entity)
                 getScene()->destroyEntity(entity);
                 return;
             }
+        }
+        else if (flags & CollisionBox::Navigation)
+        {
+            //run towards these
+            //TODO don't want to get stuck though... perhaps need to 
+            //do something a bit clever combining 'normal' state and running away
         }
         else
         {
@@ -350,7 +357,7 @@ void HumanSystem::updateScared(xy::Entity entity)
     }
     //run faster the more aliens there are?
     //we want to make sure aliens can catch the humans....
-    human.speed = Human::DefaultSpeed + (count * 60.f);
+    human.speed = Human::DefaultSpeed + ((count * 3.f) * 20.f);
 }
 
 void HumanSystem::updateCollision(xy::Entity entity)

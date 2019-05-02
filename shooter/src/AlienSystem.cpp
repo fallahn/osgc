@@ -227,24 +227,24 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
                 centreOfMass += otherPosition;
                 avgVelocity += e.getComponent<Alien>().velocity;
                 avgCount++;
+
+                auto dir = otherPosition - tx.getPosition();
+                if (xy::Util::Vector::lengthSquared(dir) < MinDistSqr)
+                {
+                    results.separation -= dir;
+                }
             }
             else if (otherBroadphase.getFilterFlags() & CollisionBox::Filter::Human)
             {
                 humanTarget += otherPosition;
                 humanCount++;
             }
-            else
+            /*else
             {
                 auto bounds = otherBroadphase.getArea();
                 bounds = e.getComponent<xy::Transform>().getTransform().transformRect(bounds);
                 otherPosition = { bounds.left + (bounds.width / 2.f), bounds.top + (bounds.height / 2.f) };
-            }
-
-            auto dir = otherPosition - tx.getPosition();
-            if (xy::Util::Vector::lengthSquared(dir) < MinDistSqr)
-            {
-                results.separation -= dir;
-            }
+            }*/
         }
     }
 
