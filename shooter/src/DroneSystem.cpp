@@ -77,10 +77,7 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                 auto eBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
                 if (eBounds.intersects(damageArea))
                 {
-                    auto rotation = e.getComponent<xy::Transform>().getRotation();
-
-                    auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
-                    msg->position = e.getComponent<xy::Transform>().getPosition();
+                    //only raise messages in specific cases else we'll cause a feedback loop!
 
                     switch (e.getComponent<CollisionBox>().type)
                     {
@@ -88,16 +85,23 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                     case CollisionBox::Ammo:
                     case CollisionBox::Battery:
                     {
+                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg->position = e.getComponent<xy::Transform>().getPosition();
                         msg->type = BombEvent::DestroyedCollectible;
+                        getScene()->destroyEntity(e);
                     }
                         break;
                     case CollisionBox::Building:
                     {
+                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg->position = e.getComponent<xy::Transform>().getPosition();
                         msg->type = BombEvent::DamagedBuilding;
                     }
                         break;
                     case CollisionBox::NPC:
                     {
+                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg->position = e.getComponent<xy::Transform>().getPosition();
                         if (e.hasComponent<Alien>())
                         {
                             msg->type = e.getComponent<Alien>().type == Alien::Type::Beetle ? BombEvent::KilledBeetle : BombEvent::KilledScorpion;
@@ -106,11 +110,12 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                         {
                             msg->type = BombEvent::KilledHuman;
                         }
-                        msg->rotation = rotation;
+                        msg->rotation = e.getComponent<xy::Transform>().getRotation();
+
+                        getScene()->destroyEntity(e);
                     }
                         break;
                     }
-                    getScene()->destroyEntity(e);
                 }
             }
         }

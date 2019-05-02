@@ -149,6 +149,7 @@
     <ClInclude Include="include\BobAnimator.hpp" />
     <ClInclude Include="include\Bomb.hpp" />
     <ClInclude Include="include\CollisionTypes.hpp" />
+    <ClInclude Include="include\CollisionUtil.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\Drone.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClCompile Include="src\AlienSystem.cpp" />
     <ClCompile Include="src\BombSystem.cpp" />
+    <ClCompile Include="src\CollisionUtil.cpp" />
     <ClCompile Include="src\DroneSystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\GameState.cpp" />

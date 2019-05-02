@@ -2,6 +2,7 @@ set(PROJECT_SRC
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/AlienSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BombSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CollisionUtil.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DroneSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp

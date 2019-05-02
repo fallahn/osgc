@@ -4,6 +4,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Bomb.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BobAnimator.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CollisionTypes.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CollisionUtil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Drone.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp

@@ -62,8 +62,5 @@ private:
     void processBoid(xy::Entity, Results&);
     void solidCollision(xy::Entity);
 
-
-    sf::Vector2f getDistance(sf::Vector2f, sf::FloatRect);
-
     xy::Entity m_debug;
 };

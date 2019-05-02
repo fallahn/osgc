@@ -50,26 +50,6 @@ namespace
     const float MaxCoalescenceRadius = 96.f * 96.f;
 
     const sf::Vector2f FlockSize(360.f, 360.f);
-
-    bool intersects(const std::pair<sf::Vector2f, sf::Vector2f>& segOne,
-        const std::pair<sf::Vector2f, sf::Vector2f>& segTwo, sf::Vector2f& intersection)
-    {
-        sf::Vector2f dirOne = segOne.second - segOne.first;
-        sf::Vector2f dirTwo = segTwo.second - segTwo.first;
-
-        float s = (-dirOne.y * (segOne.first.x - segTwo.first.x) + dirOne.x * (segOne.first.y - segTwo.first.y)) / (-dirTwo.x * dirOne.y + dirOne.x * dirTwo.y);
-        float t = (dirTwo.x * (segOne.first.y - segTwo.first.y) - dirTwo.y * (segOne.first.x - segTwo.first.x)) / (-dirTwo.x * dirOne.y + dirOne.x * dirTwo.y);
-
-        if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-        {
-            //collision detected
-            intersection.x = segOne.first.x + (t * dirOne.x);
-            intersection.y = segOne.first.y + (t * dirOne.y);
-            return true;
-        }
-
-        return false;
-    }
 }
 
 AlienSystem::AlienSystem(xy::MessageBus& mb, const SpriteArray& sprites)
@@ -80,6 +60,7 @@ AlienSystem::AlienSystem(xy::MessageBus& mb, const SpriteArray& sprites)
 {
     requireComponent<xy::Transform>();
     requireComponent<Alien>();
+    requireComponent<xy::BroadphaseComponent>();
 }
 
 //public
@@ -360,66 +341,3 @@ void AlienSystem::solidCollision(xy::Entity entity)
         }
     }
 }
-
-sf::Vector2f AlienSystem::getDistance(sf::Vector2f point, sf::FloatRect target)
-{
-    sf::Vector2f targetCentre(target.left + (target.width / 2.f), target.top + (target.height / 2.f));
-
-    std::pair<sf::Vector2f, sf::Vector2f> firstSegment = std::make_pair(point, targetCentre);
-
-    sf::Vector2f retVal;
-    if (targetCentre.x < point.x && targetCentre.y < point.y)
-    {
-        //up left
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment = 
-            std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
-
-        if (!intersects(firstSegment, secondSegment, retVal))
-        {
-            secondSegment = 
-                std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
-            intersects(firstSegment, secondSegment, retVal);
-        }
-    }
-    else if (targetCentre.x > point.x && targetCentre.y < point.y)
-    {
-        //up right
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
-
-        if (!intersects(firstSegment, secondSegment, retVal))
-        {
-            secondSegment = 
-                std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
-            intersects(firstSegment, secondSegment, retVal);
-        }
-    }
-    else if (targetCentre.x > point.x && targetCentre.y > point.y)
-    {
-        //down right
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
-
-        if (!intersects(firstSegment, secondSegment, retVal))
-        {
-            secondSegment = 
-                std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
-            intersects(firstSegment, secondSegment, retVal);
-        }
-    }
-    else if (targetCentre.x < point.x && targetCentre.y > point.y)
-    {
-        //down left
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
-
-        if (!intersects(firstSegment, secondSegment, retVal))
-        {
-            secondSegment = 
-                std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
-            intersects(firstSegment, secondSegment, retVal);
-        }
-    }
-
-    return retVal;// -point;
-};

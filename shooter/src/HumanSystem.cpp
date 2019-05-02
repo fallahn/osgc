@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "CollisionTypes.hpp"
 #include "RadarItemSystem.hpp"
 #include "MessageIDs.hpp"
+#include "CollisionUtil.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -45,6 +46,9 @@ namespace
     const std::size_t SpawnsPerPoint = 1;
     const std::size_t MaxSpawns = 10;
 
+    const float MaxWallDistance = 64.f;
+    const float MaxWallDistSqr = MaxWallDistance * MaxWallDistance;
+
     const float NodeDistanceSqr = (Node::Bounds[2]) * (Node::Bounds[2]);
 }
 
@@ -57,6 +61,7 @@ HumanSystem::HumanSystem(xy::MessageBus& mb, const SpriteArray& sprites)
     requireComponent<xy::Transform>();
     requireComponent<Human>();
     requireComponent<Navigator>();
+    requireComponent<xy::BroadphaseComponent>();
 }
 
 //public
@@ -284,28 +289,40 @@ void HumanSystem::updateScared(xy::Entity entity)
 
     float count = 0.f;
     sf::Vector2f centreOfMass;
+    sf::Vector2f wallVector;
 
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien | CollisionBox::Solid);
     for (auto e : nearby)
     {
-        auto otherPosition = e.getComponent<xy::Transform>().getPosition();
-        centreOfMass += otherPosition;
-        count++;
-
-        sf::FloatRect otherBounds(-16.f, -16.f, 32.f, 32.f);
-        otherBounds.left += otherPosition.x;
-        otherBounds.top += otherPosition.y;
-
-        //check for intersection and kill poor human :(
-        if (bounds.intersects(otherBounds))
+        if (e.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionBox::Alien)
         {
-            auto* msg = postMessage<HumanEvent>(MessageID::HumanMessage);
-            msg->type = HumanEvent::Died;
-            msg->position = tx.getPosition();
-            msg->rotation = tx.getRotation();
+            auto otherPosition = e.getComponent<xy::Transform>().getPosition();
+            centreOfMass += otherPosition;
+            count++;
 
-            getScene()->destroyEntity(entity);
-            return;
+            sf::FloatRect otherBounds(-16.f, -16.f, 32.f, 32.f);
+            otherBounds.left += otherPosition.x;
+            otherBounds.top += otherPosition.y;
+
+            //check for intersection and kill poor human :(
+            if (bounds.intersects(otherBounds))
+            {
+                auto* msg = postMessage<HumanEvent>(MessageID::HumanMessage);
+                msg->type = HumanEvent::Died;
+                msg->position = tx.getPosition();
+                msg->rotation = tx.getRotation();
+
+                getScene()->destroyEntity(entity);
+                return;
+            }
+        }
+        else
+        {
+            //steers human away from solid objects to stop them face planting walls
+            auto otherBounds = e.getComponent<xy::Transform>().getTransform().transformRect(e.getComponent<xy::BroadphaseComponent>().getArea());
+            //TODO this should just cast a ray in the human velocity direction and only reflect if it hits something solid
+            auto result = getDistance(tx.getPosition(), otherBounds);
+            wallVector += xy::Util::Vector::reflect(result.first - tx.getPosition(), result.second);
         }
     }
 
@@ -314,6 +331,7 @@ void HumanSystem::updateScared(xy::Entity entity)
     {
         centreOfMass /= count;
         human.velocity += (tx.getPosition() - centreOfMass);
+        human.velocity += wallVector;
         human.velocity = xy::Util::Vector::normalise(human.velocity);
     }
     else
