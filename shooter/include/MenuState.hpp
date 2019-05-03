@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/gui/GuiClient.hpp>
+#include <xyginext/core/ConfigFile.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 
@@ -32,6 +33,7 @@ class MenuState final : public xy::State, public xy::GuiClient
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    ~MenuState();
 
     bool handleEvent(const sf::Event&) override;
 
@@ -52,10 +54,14 @@ private:
 
     bool m_menuActive;
 
+    xy::ConfigFile m_configSettings;
+
     void initScene();
     void loadAssets();
     void buildMenu();
     void buildStarfield();
+    void buildHelp();
+    void saveSettings();
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

@@ -44,6 +44,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/util/Random.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/core/FileSystem.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -64,6 +65,11 @@ namespace
 
         gl_FragColor = texture2D(u_texture, coord) * gl_Color;
     })";
+
+    const std::int32_t HelpDepth = 10;
+
+    const std::string AppName("drone_drop");
+    const std::string ConfigName("settings.cfg");
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -79,6 +85,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     loadAssets();
     buildMenu();
     buildStarfield();
+    buildHelp();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -88,10 +95,16 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
             static const std::array<std::int32_t, 3u> Difficulty = { 3,2,1 };
             static std::int32_t index = 2; //TODO remember this across sessions
             xy::Nim::simpleCombo("Difficulty", index, "Easy\0Medium\0Hard\0\0");
+
             m_sharedData.difficulty = Difficulty[index];
         });
 
     quitLoadingScreen();
+}
+
+MenuState::~MenuState()
+{
+    saveSettings();
 }
 
 //public
@@ -183,6 +196,33 @@ xy::StateID MenuState::stateID() const
 //private
 void MenuState::initScene()
 {
+    if (!m_configSettings.loadFromFile(xy::FileSystem::getConfigDirectory(AppName) + ConfigName))
+    {
+        m_configSettings.addProperty("up", std::to_string(m_sharedData.keymap.up));
+        m_configSettings.addProperty("down", std::to_string(m_sharedData.keymap.down));
+        m_configSettings.addProperty("left", std::to_string(m_sharedData.keymap.left));
+        m_configSettings.addProperty("right", std::to_string(m_sharedData.keymap.right));
+        m_configSettings.addProperty("fire", std::to_string(m_sharedData.keymap.fire));
+        m_configSettings.addProperty("pickup", std::to_string(m_sharedData.keymap.pickup));
+        m_configSettings.addProperty("joy_fire", std::to_string(m_sharedData.keymap.joyFire));
+        m_configSettings.addProperty("joy_pickup", std::to_string(m_sharedData.keymap.joyPickup));
+        m_configSettings.addProperty("difficulty", std::to_string(m_sharedData.difficulty));
+        m_configSettings.save(xy::FileSystem::getConfigDirectory(AppName) + ConfigName);
+    }
+
+    //TODO validate loaded settings incase someone dicked around with the file
+    LOG("MUST validate loaded settings file...", xy::Logger::Type::Warning);
+
+    m_sharedData.keymap.up = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("up")->getValue<std::int32_t>());
+    m_sharedData.keymap.down = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("down")->getValue<std::int32_t>());
+    m_sharedData.keymap.left = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("left")->getValue<std::int32_t>());
+    m_sharedData.keymap.right = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("right")->getValue<std::int32_t>());
+    m_sharedData.keymap.fire = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("fire")->getValue<std::int32_t>());
+    m_sharedData.keymap.pickup = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("pickup")->getValue<std::int32_t>());
+    m_sharedData.keymap.joyFire = m_configSettings.findProperty("joy_fire")->getValue<std::int32_t>();
+    m_sharedData.keymap.joyPickup = m_configSettings.findProperty("joy_pickup")->getValue<std::int32_t>();
+    m_sharedData.difficulty = m_configSettings.findProperty("difficulty")->getValue<std::int32_t>();
+
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<SliderSystem>(mb);
@@ -198,6 +238,7 @@ void MenuState::loadAssets()
     m_crawlShader.loadFromMemory(TextFrag, sf::Shader::Fragment);
 
     TextureID::handles[TextureID::MenuBackground] = m_resources.load<sf::Texture>("assets/images/menu_background.png");
+    TextureID::handles[TextureID::HowToPlay] = m_resources.load<sf::Texture>("assets/images/how_to_play.png");
 
 }
 
@@ -463,6 +504,91 @@ void MenuState::buildStarfield()
     entity.addComponent<Slider>().speed = 1.f;
     entity.getComponent<Slider>().target = { -40.f, -xy::DefaultSceneSize.y / 2.f };
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Starfield;
+}
+
+void MenuState::buildHelp()
+{
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(20.f, 20.f);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::HowToPlay]));
+    entity.addComponent<Slider>();
+
+    auto& parentTx = entity.getComponent<xy::Transform>();
+
+    sf::Vector2f textPos(324.f, 10.f);
+    const sf::Vector2f textScale(0.25f, 0.25f);
+    const float verticalSpacing = 26.f;
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Controls");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing * 2.f;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Up");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Down");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Left");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Right");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Drop\nBomb");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString("Collect\nItem");
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+}
+
+void MenuState::saveSettings()
+{
+    m_configSettings.findProperty("up")->setValue(m_sharedData.keymap.up);
+    m_configSettings.findProperty("down")->setValue(m_sharedData.keymap.down);
+    m_configSettings.findProperty("left")->setValue(m_sharedData.keymap.left);
+    m_configSettings.findProperty("right")->setValue(m_sharedData.keymap.right);
+    m_configSettings.findProperty("fire")->setValue(m_sharedData.keymap.fire);
+    m_configSettings.findProperty("pickup")->setValue(m_sharedData.keymap.pickup);
+    m_configSettings.findProperty("joy_fire")->setValue(m_sharedData.keymap.joyFire);
+    m_configSettings.findProperty("joy_pickup")->setValue(m_sharedData.keymap.joyPickup);
+    m_configSettings.findProperty("difficulty")->setValue(m_sharedData.difficulty);
+    m_configSettings.save(xy::FileSystem::getConfigDirectory(AppName) + ConfigName);
 }
 
 void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

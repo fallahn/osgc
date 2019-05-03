@@ -20,10 +20,12 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 
+struct KeyMap;
+
 class PlayerDirector final : public xy::Director
 {
 public:
-    PlayerDirector();
+    explicit PlayerDirector(const KeyMap&);
 
     void handleEvent(const sf::Event&) override;
 
@@ -32,6 +34,6 @@ public:
     void process(float) override;
 
 private:
-
+    const KeyMap& m_keymap;
     std::uint16_t m_inputFlags;
 };

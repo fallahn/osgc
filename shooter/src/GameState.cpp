@@ -398,7 +398,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::RenderSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
-    m_gameScene.addDirector<PlayerDirector>();
+    m_gameScene.addDirector<PlayerDirector>(m_sharedData.keymap);
     m_gameScene.addDirector<SpawnDirector>(m_sprites);
     m_gameScene.addDirector<SFXDirector>(m_resources);
     m_gameScene.addDirector<ScoreDirector>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]), m_sharedData.difficulty);

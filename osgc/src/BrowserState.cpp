@@ -189,6 +189,13 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
             };
         });
 
+    registerConsoleTab("About",
+        [&]()
+        {
+            xy::Nim::text("OSGC - Open Source Game Collection. Copyright 2019 Matt Marchant and contributors");
+            xy::Nim::text("For more information visit https://github.com/fallah/osgc");
+        });
+
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 

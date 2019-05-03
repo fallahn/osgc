@@ -20,7 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include "LoadingScreen.hpp"
 #include <xyginext/resources/ResourceHandler.hpp>
-
+#include <SFML/Window/Keyboard.hpp>
 
 namespace StateID
 {
@@ -36,6 +36,18 @@ namespace xy
 {
     class ShaderResource;
 }
+
+struct KeyMap final
+{
+    sf::Keyboard::Key up = sf::Keyboard::W;
+    sf::Keyboard::Key down = sf::Keyboard::S;
+    sf::Keyboard::Key left = sf::Keyboard::A;
+    sf::Keyboard::Key right = sf::Keyboard::D;
+    sf::Keyboard::Key fire = sf::Keyboard::Space;
+    sf::Keyboard::Key pickup = sf::Keyboard::LControl;
+    std::int32_t joyFire = 0;
+    std::int32_t joyPickup = 1;
+};
 
 struct SharedData final
 {
@@ -63,6 +75,8 @@ struct SharedData final
         Easy = 3
     };
     std::int32_t difficulty = Hard;
+
+    KeyMap keymap;
 
     LoadingScreen loadingScreen;
 };

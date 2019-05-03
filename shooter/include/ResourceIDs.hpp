@@ -39,6 +39,7 @@ namespace TextureID
         Sidebar,
         Noise,
         MenuBackground,
+        HowToPlay,
 
         Count
     };

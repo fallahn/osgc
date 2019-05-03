@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "PlayerDirector.hpp"
 #include "CommandIDs.hpp"
 #include "Drone.hpp"
+#include "StateIDs.hpp"
 
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -30,8 +31,9 @@ namespace
 
 }
 
-PlayerDirector::PlayerDirector()
-    : m_inputFlags(0)
+PlayerDirector::PlayerDirector(const KeyMap& keymap)
+    : m_keymap  (keymap),
+    m_inputFlags(0)
 {
 
 }
@@ -39,83 +41,66 @@ PlayerDirector::PlayerDirector()
 //public
 void PlayerDirector::handleEvent(const sf::Event& evt)
 {
-    //TODO input mappings
     if (evt.type == sf::Event::KeyPressed)
     {
-        switch (evt.key.code)
+        if (evt.key.code == m_keymap.up)
         {
-        default: break;
-        case sf::Keyboard::Up:
-        case sf::Keyboard::W:
             m_inputFlags |= Drone::Up;
-            break;
-        case sf::Keyboard::Down:
-        case sf::Keyboard::S:
+        }
+        else if (evt.key.code == m_keymap.down)
+        {
             m_inputFlags |= Drone::Down;
-            break;
-        case sf::Keyboard::Left:
-        case sf::Keyboard::A:
+        }
+        else if (evt.key.code == m_keymap.left)
+        {
             m_inputFlags |= Drone::Left;
-            break;
-        case sf::Keyboard::Right:
-        case sf::Keyboard::D:
+        }
+        else if (evt.key.code == m_keymap.right)
+        {
             m_inputFlags |= Drone::Right;
-            break;
-        case sf::Keyboard::LControl:
-        case sf::Keyboard::RControl:
+        }
+        else if (evt.key.code == m_keymap.pickup)
+        {
             m_inputFlags |= Drone::Pickup;
-            break;
         }
     }
     else if (evt.type == sf::Event::KeyReleased)
     {
-        switch (evt.key.code)
+        if (evt.key.code == m_keymap.up)
         {
-        default: break;
-        case sf::Keyboard::Up:
-        case sf::Keyboard::W:
             m_inputFlags &= ~Drone::Up;
-            break;
-        case sf::Keyboard::Down:
-        case sf::Keyboard::S:
+        }
+        else if (evt.key.code == m_keymap.down)
+        {
             m_inputFlags &= ~Drone::Down;
-            break;
-        case sf::Keyboard::Left:
-        case sf::Keyboard::A:
+        }
+        else if (evt.key.code == m_keymap.left)
+        {
             m_inputFlags &= ~Drone::Left;
-            break;
-        case sf::Keyboard::Right:
-        case sf::Keyboard::D:
+        }
+        else if (evt.key.code == m_keymap.right)
+        {
             m_inputFlags &= ~Drone::Right;
-            break;
-        case sf::Keyboard::Space:
-            //only fire when button released
+        }
+        else if (evt.key.code == m_keymap.pickup)
+        {
+            m_inputFlags &= ~Drone::Pickup;
+        }
+        else if (evt.key.code == m_keymap.fire)
+        {
             m_inputFlags |= Drone::Fire;
-            break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed
         && evt.joystickButton.joystickId == 0)
     {
-        //TODO controller mappings.
-        switch (evt.joystickButton.button)
+        if (evt.joystickButton.button == m_keymap.joyFire)
         {
-        default: break;
-        case 0:
             m_inputFlags |= Drone::Fire;
-            break;
-        case 1:
+        }
+        else if (evt.joystickButton.button == m_keymap.joyPickup)
+        {
             m_inputFlags |= Drone::Pickup;
-            break;
-        case 4:
-
-            break;
-        case 5:
-
-            break;
-        case 7:
-
-            break;
         }
     }
     else if (evt.type == sf::Event::JoystickMoved
