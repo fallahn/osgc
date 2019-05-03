@@ -170,6 +170,16 @@ bool GameState::handleEvent(const sf::Event& evt)
             m_sharedData.pauseMessage = SharedData::Paused;
             requestStackPush(StateID::Pause);
             break;
+        case sf::Keyboard::K:
+            m_sharedData.pauseMessage = SharedData::GameOver;
+            m_sharedData.gameoverType = SharedData::Lose;
+            requestStackPush(StateID::Pause);
+            break;
+        case sf::Keyboard::L:
+            m_sharedData.pauseMessage = SharedData::GameOver;
+            m_sharedData.gameoverType = SharedData::Win;
+            requestStackPush(StateID::Pause);
+            break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed

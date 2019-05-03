@@ -50,6 +50,7 @@ Plugin directories should have a unique name describing the game as this will be
 
 Note that these are all string properties and can in theory contain anything they like, with the exception of `thumb` which should be a relative path to a thumbnail image 960x540px in size, and `background` which should be a relative path to an image 1920x1080 in size. All properties are optional.
 
+See the [screens](/screens) directory for screenshots of OSGC in action
 
 License
 -------

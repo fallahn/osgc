@@ -34,6 +34,9 @@ source distribution.
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/String.hpp>
+
 class PauseState final : public xy::State 
 {
 public:
@@ -51,8 +54,16 @@ private:
     xy::Scene m_scene;
     SharedData& m_sharedData;
 
+    sf::Clock m_delayClock;
+    bool m_scoreShown;
+    sf::String m_initialsString;
+
+
     void createPause();
     void createContinue();
     void createGameover();
     void createError();
+    void showScoreInput();
+    void updateScoreString();
+    void submitScore();
 };
