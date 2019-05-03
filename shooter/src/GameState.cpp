@@ -170,16 +170,16 @@ bool GameState::handleEvent(const sf::Event& evt)
             m_sharedData.pauseMessage = SharedData::Paused;
             requestStackPush(StateID::Pause);
             break;
-        case sf::Keyboard::K:
-            m_sharedData.pauseMessage = SharedData::GameOver;
-            m_sharedData.gameoverType = SharedData::Lose;
-            requestStackPush(StateID::Pause);
-            break;
-        case sf::Keyboard::L:
-            m_sharedData.pauseMessage = SharedData::GameOver;
-            m_sharedData.gameoverType = SharedData::Win;
-            requestStackPush(StateID::Pause);
-            break;
+        //case sf::Keyboard::K:
+        //    m_sharedData.pauseMessage = SharedData::GameOver;
+        //    m_sharedData.gameoverType = SharedData::Lose;
+        //    requestStackPush(StateID::Pause);
+        //    break;
+        //case sf::Keyboard::L:
+        //    m_sharedData.pauseMessage = SharedData::GameOver;
+        //    m_sharedData.gameoverType = SharedData::Win;
+        //    requestStackPush(StateID::Pause);
+        //    break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed
@@ -384,9 +384,9 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
-    m_gameScene.addSystem<DroneSystem>(mb);
-    m_gameScene.addSystem<AlienSystem>(mb, m_sprites);
-    m_gameScene.addSystem<HumanSystem>(mb, m_sprites);
+    m_gameScene.addSystem<DroneSystem>(mb, m_sharedData.difficulty);
+    m_gameScene.addSystem<AlienSystem>(mb, m_sprites, m_sharedData.difficulty);
+    m_gameScene.addSystem<HumanSystem>(mb, m_sprites, m_sharedData.difficulty);
     m_gameScene.addSystem<BombSystem>(mb);
     m_gameScene.addSystem<ItemBarSystem>(mb);
     m_gameScene.addSystem<BobSystem>(mb);
@@ -401,7 +401,7 @@ void GameState::initScene()
     m_gameScene.addDirector<PlayerDirector>();
     m_gameScene.addDirector<SpawnDirector>(m_sprites);
     m_gameScene.addDirector<SFXDirector>(m_resources);
-    m_gameScene.addDirector<ScoreDirector>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]));
+    m_gameScene.addDirector<ScoreDirector>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]), m_sharedData.difficulty);
 
     m_sideCamera = m_gameScene.createEntity();
     m_sideCamera.addComponent<xy::Transform>();
@@ -565,7 +565,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Transform>().setPosition(sidebarTextureWidth / 2.f, 167.f);
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Human::NumberPerRound));
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Human::NumberPerRound / m_sharedData.difficulty));
     entity.getComponent<xy::Text>().setCharacterSize(28);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::HumanCount;
@@ -617,7 +617,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Transform>().setPosition(sidebarTextureWidth / 2.f, 167.f);
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Alien::NumberPerRound));
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Alien::NumberPerRound / m_sharedData.difficulty));
     entity.getComponent<xy::Text>().setCharacterSize(28);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::AlienCount;

@@ -36,7 +36,7 @@ struct Alien final
 class AlienSystem final : public xy::System
 {
 public:
-    AlienSystem(xy::MessageBus&, const SpriteArray&);
+    AlienSystem(xy::MessageBus&, const SpriteArray&, std::int32_t difficulty);
 
     void process(float) override;
 
@@ -52,6 +52,7 @@ private:
     sf::Clock m_spawnClock;
 
     std::int32_t m_alienCount;
+    std::int32_t m_difficulty;
 
     void spawnAlien();
 

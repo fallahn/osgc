@@ -47,8 +47,9 @@ namespace
     const float Gravity = 9.9f;
 }
 
-DroneSystem::DroneSystem(xy::MessageBus& mb)
-    : xy::System(mb, typeid(DroneSystem))
+DroneSystem::DroneSystem(xy::MessageBus& mb, std::int32_t difficulty)
+    : xy::System(mb, typeid(DroneSystem)),
+    m_difficulty(static_cast<float>(difficulty))
 {
     requireComponent<xy::Transform>();
     requireComponent<Drone>();
@@ -259,7 +260,7 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     //slowly drain battery - TODO also in pick up state?
     auto oldBatt = drone.battery;
 #ifndef XY_DEBUG
-    drone.battery = std::max(0.f, drone.battery - (dt * 3.33f)); //30 seconds(ish)
+    drone.battery = std::max(0.f, drone.battery - (dt * (3.33f / m_difficulty))); //30 seconds(ish)
 #endif // !XY_DEBUG
         
     //send update to battery indicator

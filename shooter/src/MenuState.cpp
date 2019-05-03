@@ -83,6 +83,14 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
+    registerConsoleTab("Options", [&]()
+        {
+            static const std::array<std::int32_t, 3u> Difficulty = { 3,2,1 };
+            static std::int32_t index = 2; //TODO remember this across sessions
+            xy::Nim::simpleCombo("Difficulty", index, "Easy\0Medium\0Hard\0\0");
+            m_sharedData.difficulty = Difficulty[index];
+        });
+
     quitLoadingScreen();
 }
 

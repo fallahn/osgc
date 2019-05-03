@@ -76,7 +76,7 @@ struct Drone final
 class DroneSystem final : public xy::System
 {
 public:
-    explicit DroneSystem(xy::MessageBus&);
+    DroneSystem(xy::MessageBus&, std::int32_t);
 
     void handleMessage(const xy::Message&) override;
 
@@ -85,6 +85,7 @@ public:
 private:
 
     std::vector<float> m_wavetable;
+    float m_difficulty;
 
     void processFlying(xy::Entity, float);
     void processPickingUp(xy::Entity, float);

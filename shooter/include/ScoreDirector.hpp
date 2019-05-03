@@ -28,7 +28,7 @@ namespace sf
 class ScoreDirector final : public xy::Director
 {
 public:
-    explicit ScoreDirector(sf::Font&);
+    ScoreDirector(sf::Font&, std::int32_t);
 
     void handleMessage(const xy::Message&) override;
 

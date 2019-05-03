@@ -48,13 +48,13 @@ namespace
     const std::int32_t DestroyCollectibleScore = -10;
 }
 
-ScoreDirector::ScoreDirector(sf::Font& font)
+ScoreDirector::ScoreDirector(sf::Font& font, std::int32_t difficulty)
     : m_font        (font),
     m_score         (0),
-    m_alienCount    (Alien::NumberPerRound),
-    m_humanCount    (Human::NumberPerRound)
+    m_alienCount    (Alien::NumberPerRound / difficulty),
+    m_humanCount    (Human::NumberPerRound / difficulty)
 {
-
+    LOG("Store difficulty in score director", xy::Logger::Type::Info);
 }
 
 //public

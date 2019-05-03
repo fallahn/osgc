@@ -45,7 +45,7 @@ struct Human final
 class HumanSystem final : public xy::System
 {
 public:
-    HumanSystem(xy::MessageBus&, const SpriteArray&);
+    HumanSystem(xy::MessageBus&, const SpriteArray&, std::int32_t);
 
     void process(float) override;
 
@@ -59,6 +59,7 @@ private:
     std::size_t m_spawnIndex;
     std::size_t m_spawnCount;
     std::int32_t m_humanCount;
+    std::int32_t m_difficulty;
 
     sf::Clock m_spawnClock;
 

@@ -52,12 +52,13 @@ namespace
     const sf::Vector2f FlockSize(360.f, 360.f);
 }
 
-AlienSystem::AlienSystem(xy::MessageBus& mb, const SpriteArray& sprites)
+AlienSystem::AlienSystem(xy::MessageBus& mb, const SpriteArray& sprites, std::int32_t difficulty)
     : xy::System(mb, typeid(AlienSystem)),
     m_sprites   (sprites),
     m_spawnIndex(0),
     m_spawnCount(0),
-    m_alienCount(Alien::NumberPerRound)
+    m_alienCount(Alien::NumberPerRound / difficulty),
+    m_difficulty(difficulty)
 {
     requireComponent<xy::Transform>();
     requireComponent<Alien>();
@@ -139,7 +140,7 @@ void AlienSystem::clearSpawns()
     m_spawnPoints.clear();
     m_spawnCount = 0;
     m_spawnIndex = 0;
-    m_alienCount = Alien::NumberPerRound;
+    m_alienCount = Alien::NumberPerRound / m_difficulty;
 }
 
 //private

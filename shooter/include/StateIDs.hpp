@@ -56,5 +56,13 @@ struct SharedData final
         Win, Lose
     }gameoverType;
 
+    enum
+    {
+        Hard = 1,
+        Medium = 2,
+        Easy = 3
+    };
+    std::int32_t difficulty = Hard;
+
     LoadingScreen loadingScreen;
 };

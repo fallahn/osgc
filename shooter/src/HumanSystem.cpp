@@ -52,12 +52,13 @@ namespace
     const float NodeDistanceSqr = (Node::Bounds[2]) * (Node::Bounds[2]);
 }
 
-HumanSystem::HumanSystem(xy::MessageBus& mb, const SpriteArray& sprites)
+HumanSystem::HumanSystem(xy::MessageBus& mb, const SpriteArray& sprites, std::int32_t difficulty)
     : xy::System(mb, typeid(HumanSystem)),
     m_sprites   (sprites),
     m_spawnIndex(0),
     m_spawnCount(0),
-    m_humanCount(Human::NumberPerRound)
+    m_humanCount(Human::NumberPerRound / difficulty),
+    m_difficulty(difficulty)
 {
     requireComponent<xy::Transform>();
     requireComponent<Human>();
@@ -144,7 +145,7 @@ void HumanSystem::clearSpawns()
     m_spawnPoints.clear();
     m_spawnIndex = 0;
     m_spawnCount = 0;
-    m_humanCount = Human::NumberPerRound;
+    m_humanCount = Human::NumberPerRound / m_difficulty;
 }
 
 //private
