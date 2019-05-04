@@ -384,7 +384,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
-    m_gameScene.addSystem<DroneSystem>(mb, m_sharedData.difficulty);
+    m_gameScene.addSystem<DroneSystem>(mb, m_sprites, m_sharedData.difficulty);
     m_gameScene.addSystem<AlienSystem>(mb, m_sprites, m_sharedData.difficulty);
     m_gameScene.addSystem<HumanSystem>(mb, m_sprites, m_sharedData.difficulty);
     m_gameScene.addSystem<BombSystem>(mb);
@@ -558,6 +558,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Humans");
     entity.getComponent<xy::Text>().setCharacterSize(22);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     sideTx.addChild(entity.getComponent<xy::Transform>());
 
@@ -567,6 +568,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Human::NumberPerRound / m_sharedData.difficulty));
     entity.getComponent<xy::Text>().setCharacterSize(28);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::HumanCount;
     sideTx.addChild(entity.getComponent<xy::Transform>());
@@ -610,6 +612,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Aliens");
     entity.getComponent<xy::Text>().setCharacterSize(22);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     otherSideTx.addChild(entity.getComponent<xy::Transform>());
 
@@ -619,6 +622,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Alien::NumberPerRound / m_sharedData.difficulty));
     entity.getComponent<xy::Text>().setCharacterSize(28);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::AlienCount;
     otherSideTx.addChild(entity.getComponent<xy::Transform>());
@@ -646,7 +650,7 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().addChild(m_topCamera.getComponent<xy::Transform>());
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
-    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("warning");
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("empty");
     entity.getComponent<xy::AudioEmitter>().setChannel(1);
     m_topCamera.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, bounds.height / 2.f);
 

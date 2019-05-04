@@ -399,6 +399,13 @@ void PauseState::updateScoreString()
 
 void PauseState::submitScore()
 {
+    /*
+    You know what? No. I'm not going to do this here.
+    It can wait until I make a proper score entry state
+    instead of trying to cram it into this misappropriated
+    pause state.
+    */
+
     if (m_initialsString.getSize() > MaxInitials)
     {
         //we have '>___' so replace it

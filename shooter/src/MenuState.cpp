@@ -33,8 +33,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
@@ -56,6 +58,7 @@ namespace
     #version 120
 
     uniform sampler2D u_texture;
+    uniform float u_alpha;
 
     void main()
     {
@@ -63,7 +66,7 @@ namespace
         coord.x *= (1.0 + coord.y);
         coord.x -= (0.5 * coord.y);
 
-        gl_FragColor = texture2D(u_texture, coord) * gl_Color;
+        gl_FragColor = texture2D(u_texture, coord) * gl_Color * u_alpha;
     })";
 
     const std::int32_t HelpDepth = 10;
@@ -90,14 +93,14 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
-    registerConsoleTab("Options", [&]()
-        {
-            static const std::array<std::int32_t, 3u> Difficulty = { 3,2,1 };
-            static std::int32_t index = 2; //TODO remember this across sessions
-            xy::Nim::simpleCombo("Difficulty", index, "Easy\0Medium\0Hard\0\0");
+    //registerConsoleTab("Options", [&]()
+    //    {
+    //        static const std::array<std::int32_t, 3u> Difficulty = { 3,2,1 };
+    //        static std::int32_t index = 2; //TODO remember this across sessions
+    //        xy::Nim::simpleCombo("Difficulty", index, "Easy\0Medium\0Hard\0\0");
 
-            m_sharedData.difficulty = Difficulty[index];
-        });
+    //        m_sharedData.difficulty = Difficulty[index];
+    //    });
 
     quitLoadingScreen();
 }
@@ -136,6 +139,14 @@ bool MenuState::handleEvent(const sf::Event& evt)
                     //slider.target = {}; //target was set on entity creation
                     slider.active = true;
                 }
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            cmd.targetFlags = CommandID::Menu::TextCrawl;
+            cmd.action =
+                [](xy::Entity entity, float)
+            {
+                entity.getComponent<xy::Callback>().active = true;
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -225,6 +236,7 @@ void MenuState::initScene()
 
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(mb);
+    m_scene.addSystem<xy::CallbackSystem>(mb);
     m_scene.addSystem<SliderSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
@@ -236,10 +248,10 @@ void MenuState::initScene()
 void MenuState::loadAssets()
 {
     m_crawlShader.loadFromMemory(TextFrag, sf::Shader::Fragment);
+    m_crawlShader.setUniform("u_alpha", 1.f);
 
     TextureID::handles[TextureID::MenuBackground] = m_resources.load<sf::Texture>("assets/images/menu_background.png");
     TextureID::handles[TextureID::HowToPlay] = m_resources.load<sf::Texture>("assets/images/how_to_play.png");
-
 }
 
 void MenuState::buildMenu()
@@ -314,7 +326,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPos);
     entity.addComponent<xy::Text>(font);
-    entity.getComponent<xy::Text>().setString("How To Play");
+    entity.getComponent<xy::Text>().setString("Help/Controls");
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.addComponent<xy::Drawable>();
@@ -327,7 +339,23 @@ void MenuState::buildMenu()
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    LOG("Show the help screen", xy::Logger::Type::Info);
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::Help;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = { 20.f, 20.f };
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::RootNode/* | CommandID::Menu::Starfield*/;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().speed = 4.f; //speed up to match help menu
+                        e.getComponent<Slider>().target.y = xy::DefaultSceneSize.y;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -390,6 +418,22 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::TextCrawl;
+    entity.addComponent<xy::Callback>().userData = std::make_any<float>(1.f);
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        auto& currTime = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        currTime = std::max(0.f, currTime - dt);
+
+        auto alpha = static_cast<sf::Uint8>(255.f * currTime);
+        e.getComponent<xy::Text>().setFillColour({ 255,255,0,alpha });
+
+        if (currTime == 0)
+        {
+            m_scene.destroyEntity(e);
+        }
+    };
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
@@ -409,6 +453,22 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Drawable>().setTexture(&m_textCrawl.getTexture());
     entity.getComponent<xy::Drawable>().setShader(&m_crawlShader);
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::TextCrawl;
+    entity.addComponent<xy::Callback>().userData = std::make_any<float>(1.f);
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        auto& currTime = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        currTime = std::max(0.f, currTime - dt);
+
+        m_crawlShader.setUniform("u_alpha", currTime);
+
+        if (currTime == 0)
+        {
+            m_scene.destroyEntity(e);
+        }
+    };
+
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
 
@@ -509,15 +569,46 @@ void MenuState::buildStarfield()
 void MenuState::buildHelp()
 {
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(20.f, 20.f);
+    entity.addComponent<xy::Transform>().setPosition(20.f, 1100.f);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::HowToPlay]));
-    entity.addComponent<Slider>();
+    entity.addComponent<Slider>().speed = 4.f;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Help;
 
     auto& parentTx = entity.getComponent<xy::Transform>();
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
 
-    sf::Vector2f textPos(324.f, 10.f);
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(256.f, 221.f);
+    entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 45.f, 25.f };
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags) 
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::Help;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = 1100.f;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = 0.f;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    /*sf::Vector2f textPos(330.f, 10.f);
     const sf::Vector2f textScale(0.25f, 0.25f);
     const float verticalSpacing = 26.f;
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
@@ -526,6 +617,7 @@ void MenuState::buildHelp()
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
     entity.addComponent<xy::Text>(font).setString("Controls");
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing * 2.f;
@@ -574,7 +666,7 @@ void MenuState::buildHelp()
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
     entity.addComponent<xy::Text>(font).setString("Collect\nItem");
-    parentTx.addChild(entity.getComponent<xy::Transform>());
+    parentTx.addChild(entity.getComponent<xy::Transform>());*/
 }
 
 void MenuState::saveSettings()

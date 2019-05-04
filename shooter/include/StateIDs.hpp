@@ -74,7 +74,7 @@ struct SharedData final
         Medium = 2,
         Easy = 3
     };
-    std::int32_t difficulty = Hard;
+    std::int32_t difficulty = Easy;
 
     KeyMap keymap;
 

@@ -10,4 +10,15 @@ audioscape game
 		falloff = 0
         mixer_channel = 1
 	}
+
+	emitter empty
+	{
+		path = "assets/sound/empty.wav"
+		looped = false
+		streaming = false
+		volume = 0.28
+		attenuation = 0
+		falloff = 0
+        mixer_channel = 1
+	}	
 }

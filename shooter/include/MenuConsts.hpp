@@ -25,10 +25,10 @@ Copyright 2019 Matt Marchant
 namespace Menu
 {
     static const sf::Vector2f TitlePosition(120.f, 80.f);
-    static const std::uint32_t TitleCharSize = 120;
+    static const std::uint32_t TitleCharSize = 128;
 
-    static const sf::Vector2f ItemFirstPosition(120.f, 500.f);
-    static const float ItemVerticalSpacing = 80.f;
-    static const std::uint32_t ItemCharSize = 60;
+    static const sf::Vector2f ItemFirstPosition(120.f, 480.f);
+    static const float ItemVerticalSpacing = 88.f;
+    static const std::uint32_t ItemCharSize = 64;
     static const sf::Color TextColour = sf::Color::Yellow;
 }

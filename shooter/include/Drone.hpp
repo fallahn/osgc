@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "GameConsts.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/System.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -76,7 +77,7 @@ struct Drone final
 class DroneSystem final : public xy::System
 {
 public:
-    DroneSystem(xy::MessageBus&, std::int32_t);
+    DroneSystem(xy::MessageBus&, const SpriteArray&, std::int32_t);
 
     void handleMessage(const xy::Message&) override;
 
@@ -85,6 +86,7 @@ public:
 private:
 
     std::vector<float> m_wavetable;
+    const SpriteArray& m_sprites;
     float m_difficulty;
 
     void processFlying(xy::Entity, float);

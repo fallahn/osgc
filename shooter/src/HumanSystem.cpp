@@ -40,7 +40,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const sf::Vector2f SeekSize(192.f, 192.f);
+    const sf::Vector2f SeekSize(256.f, 256.f);
 
     const sf::Time SpawnTime = sf::seconds(2.8f);
     const std::size_t SpawnsPerPoint = 1;

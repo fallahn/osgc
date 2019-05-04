@@ -47,15 +47,15 @@ namespace
     const float Gravity = 9.9f;
 }
 
-DroneSystem::DroneSystem(xy::MessageBus& mb, std::int32_t difficulty)
+DroneSystem::DroneSystem(xy::MessageBus& mb, const SpriteArray& sprites, std::int32_t difficulty)
     : xy::System(mb, typeid(DroneSystem)),
+    m_sprites   (sprites),
     m_difficulty(static_cast<float>(difficulty))
 {
     requireComponent<xy::Transform>();
     requireComponent<Drone>();
 
     m_wavetable = xy::Util::Wavetable::sine(0.25f, (DroneDipHeight - ConstVal::DroneHeight));
-
 }
 
 //public
@@ -94,9 +94,9 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                         break;
                     case CollisionBox::Building:
                     {
-                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
-                        msg->position = e.getComponent<xy::Transform>().getPosition();
-                        msg->type = BombEvent::DamagedBuilding;
+                        auto* msg2 = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg2->position = data.position;
+                        msg2->type = BombEvent::DamagedBuilding;
                     }
                         break;
                     case CollisionBox::NPC:
@@ -240,13 +240,19 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
     getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 
     //check is fire button pressed and rest input ready for next frame
-    if (drone.inputFlags & Drone::Fire
-        && drone.ammo > 0)
+    if (drone.inputFlags & Drone::Fire)
     {
-        drone.ammo--;
-        spawnBomb(pos, drone.velocity);
+        if (drone.ammo > 0)
+        {
+            drone.ammo--;
+            spawnBomb(pos, drone.velocity);
 
-        updateAmmoBar(drone);
+            updateAmmoBar(drone);
+        }
+        else
+        {
+            entity.getComponent<xy::AudioEmitter>().play();
+        }
     }
 
     if (drone.inputFlags & Drone::Pickup)
@@ -272,8 +278,6 @@ void DroneSystem::processFlying(xy::Entity entity, float dt)
         auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
         msg->type = DroneEvent::BatteryLow;
         msg->position = tx.getPosition();
-
-        entity.getComponent<xy::AudioEmitter>().play();
     }
 
     if (drone.battery == 0)
@@ -498,14 +502,11 @@ void DroneSystem::spawnBomb(sf::Vector2f position, sf::Vector2f velocity)
     //top view bomb
     entity = getScene()->createEntity();
     entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>();
-    auto& verts2 = entity.getComponent<xy::Drawable>().getVertices();
-    verts2.resize(4);
-    verts2[0] = { sf::Vector2f(-16.f, -16.f), orange };
-    verts2[1] = { sf::Vector2f(16.f, -16.f), orange };
-    verts2[2] = { sf::Vector2f(16.f, 16.f), orange };
-    verts2[3] = { sf::Vector2f(-16.f, 16.f), orange };
-    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::AmmoTop];
+    auto bounds = m_sprites[SpriteID::AmmoTop].getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<Bomb>().position = position;
     entity.getComponent<Bomb>().velocity = velocity;
     entity.getComponent<Bomb>().height = ConstVal::DroneHeight;

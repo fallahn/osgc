@@ -31,12 +31,14 @@ namespace CommandID
         BackgroundTop = 0x40,
         ScoreText = 0x80,
         HumanCount = 0x100,
-        AlienCount = 0x200
+        AlienCount = 0x200,
     };
 
     enum Menu
     {
         RootNode = 0x1,
-        Starfield = 0x2
+        Starfield = 0x2,
+        Help = 0x4,
+        TextCrawl = 0x8
     };
 }

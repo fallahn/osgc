@@ -45,7 +45,7 @@ namespace
         Explode, BombDrop,
         BatteryFlat, Noise,
         Pickup, SpawnItem,
-        Damage,
+        Damage, BatteryLow,
 
         Die01, Die02, Die03, Die04,
 
@@ -63,6 +63,7 @@ namespace
         "assets/sound/pickup.wav",
         "assets/sound/spawn_item.wav",
         "assets/sound/damage.wav",
+        "assets/sound/warning.wav",
         "assets/sound/die_01.wav",
         "assets/sound/die_02.wav",
         "assets/sound/die_03.wav",
@@ -119,6 +120,9 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             break;
         case DroneEvent::CollisionStart:
             playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::Damage]), data.position);
+            break;
+        case DroneEvent::BatteryLow:
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::BatteryLow]), data.position);
             break;
         }
     }
