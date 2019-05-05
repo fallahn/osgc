@@ -16,9 +16,20 @@ audioscape game
 		path = "assets/sound/empty.wav"
 		looped = false
 		streaming = false
-		volume = 0.28
+		volume = 0.3
 		attenuation = 0
 		falloff = 0
         mixer_channel = 1
-	}	
+	}
+
+	emitter music
+	{
+		path = "assets/sound/game.ogg"
+		looped = true
+		streaming = true
+		volume = 0.28
+		attenuation = 0
+		falloff = 0
+        mixer_channel = 0
+	}
 }

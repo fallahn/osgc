@@ -629,6 +629,8 @@ void GameState::loadWorld()
 
 
     m_sideCamera.getComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition + (xy::DefaultSceneSize / 2.f));
+    m_sideCamera.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("music");
+    m_sideCamera.getComponent<xy::AudioEmitter>().play();
 
     //then put top view relative to 0,0 as we'll be flying around over it
     entity = m_gameScene.createEntity();

@@ -503,6 +503,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::AudioEmitter>().setChannel(0);
     entity.getComponent<xy::AudioEmitter>().setAttenuation(0.f);
     entity.getComponent<xy::AudioEmitter>().setLooped(true);
+    entity.getComponent<xy::AudioEmitter>().setVolume(0.3f);
     entity.getComponent<xy::AudioEmitter>().play();
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
