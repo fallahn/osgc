@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/Config.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <cstdint>
@@ -31,4 +32,14 @@ namespace Menu
     static const float ItemVerticalSpacing = 88.f;
     static const std::uint32_t ItemCharSize = 64;
     static const sf::Color TextColour = sf::Color::Yellow;
+
+    static const sf::Vector2f DifficultyShownPosition(xy::DefaultSceneSize / 2.f);
+    static const float PlanetHiddenPosition = xy::DefaultSceneSize.y;
+    static const float StarfieldUpPosition = 0.f;
+    static const sf::Vector2f HelpShownPosition(20.f, 20.f);
+    static const float StarfieldDownPosition = -xy::DefaultSceneSize.y / 2.f;
+    static const float HelpHiddenPosition = 1100.f;
+    static const float PlanetShownPosition = 0.f;
+
+    static const std::int32_t TextRenderDepth = 1;
 }

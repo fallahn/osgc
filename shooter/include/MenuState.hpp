@@ -23,13 +23,12 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
-#include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/core/ConfigFile.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 
 struct SharedData;
-class MenuState final : public xy::State, public xy::GuiClient
+class MenuState final : public xy::State
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);
@@ -61,6 +60,7 @@ private:
     void buildMenu();
     void buildStarfield();
     void buildHelp();
+    void buildDifficultySelect();
     void saveSettings();
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;

@@ -89,18 +89,10 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     buildMenu();
     buildStarfield();
     buildHelp();
+    buildDifficultySelect();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
-
-    //registerConsoleTab("Options", [&]()
-    //    {
-    //        static const std::array<std::int32_t, 3u> Difficulty = { 3,2,1 };
-    //        static std::int32_t index = 2; //TODO remember this across sessions
-    //        xy::Nim::simpleCombo("Difficulty", index, "Easy\0Medium\0Hard\0\0");
-
-    //        m_sharedData.difficulty = Difficulty[index];
-    //    });
 
     quitLoadingScreen();
 }
@@ -252,13 +244,14 @@ void MenuState::loadAssets()
 
     TextureID::handles[TextureID::MenuBackground] = m_resources.load<sf::Texture>("assets/images/menu_background.png");
     TextureID::handles[TextureID::HowToPlay] = m_resources.load<sf::Texture>("assets/images/how_to_play.png");
+    TextureID::handles[TextureID::DifficultySelect] = m_resources.load<sf::Texture>("assets/images/difficulty_select.png");
 }
 
 void MenuState::buildMenu()
 {
     //root node for sliding
     auto rootNode = m_scene.createEntity();
-    rootNode.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y);
+    rootNode.addComponent<xy::Transform>().setPosition(0.f, Menu::PlanetHiddenPosition);
     rootNode.addComponent<Slider>().speed = 1.f;
     rootNode.addComponent<xy::CommandTarget>().ID = CommandID::Menu::RootNode;
     
@@ -292,8 +285,30 @@ void MenuState::buildMenu()
     {
         if (flags & xy::UISystem::LeftMouse)
         {
-            requestStackClear();
-            requestStackPush(StateID::Game);
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Menu::DifficultySelect;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<Slider>().target = Menu::DifficultyShownPosition;
+                e.getComponent<Slider>().active = true;
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            cmd.targetFlags = CommandID::Menu::RootNode;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
+                e.getComponent<Slider>().active = true;
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            cmd.targetFlags = CommandID::Menu::Starfield;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
+                e.getComponent<Slider>().active = true;
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
     });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -343,16 +358,23 @@ void MenuState::buildMenu()
                     cmd.targetFlags = CommandID::Menu::Help;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<Slider>().target = { 20.f, 20.f };
+                        e.getComponent<Slider>().target = Menu::HelpShownPosition;
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-                    cmd.targetFlags = CommandID::Menu::RootNode/* | CommandID::Menu::Starfield*/;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<Slider>().speed = 4.f; //speed up to match help menu
-                        e.getComponent<Slider>().target.y = xy::DefaultSceneSize.y;
+                        e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::Starfield;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -562,14 +584,14 @@ void MenuState::buildStarfield()
     }
     entity.getComponent<xy::Drawable>().updateLocalBounds();
     entity.addComponent<Slider>().speed = 1.f;
-    entity.getComponent<Slider>().target = { -40.f, -xy::DefaultSceneSize.y / 2.f };
+    entity.getComponent<Slider>().target = { -40.f, Menu::StarfieldDownPosition };
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Starfield;
 }
 
 void MenuState::buildHelp()
 {
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(20.f, 1100.f);
+    entity.addComponent<xy::Transform>().setPosition(20.f, Menu::HelpHiddenPosition);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::HowToPlay]));
@@ -592,7 +614,7 @@ void MenuState::buildHelp()
                     cmd.targetFlags = CommandID::Menu::Help;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<Slider>().target.y = 1100.f;
+                        e.getComponent<Slider>().target.y = Menu::HelpHiddenPosition;
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -600,7 +622,15 @@ void MenuState::buildHelp()
                     cmd.targetFlags = CommandID::Menu::RootNode;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<Slider>().target.y = 0.f;
+                        e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::Starfield;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -667,6 +697,128 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
     entity.addComponent<xy::Text>(font).setString("Collect\nItem");
     parentTx.addChild(entity.getComponent<xy::Transform>());*/
+}
+
+void MenuState::buildDifficultySelect()
+{
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::DifficultySelect]));
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y + (bounds.height * 2.f));
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::DifficultySelect;
+    entity.addComponent<Slider>().speed = 4.f;
+    entity.addComponent<xy::UIHitBox>().area = { 68.f, 85.f, 68.f, 17.f };
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&, bounds](xy::Entity, sf::Uint64 flags) 
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::DifficultySelect;
+                    cmd.action = [bounds](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = xy::DefaultSceneSize.y + (bounds.height * 2.f);
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::Starfield;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+
+
+    auto& parentTx = entity.getComponent<xy::Transform>();
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+
+    //add buttons
+    sf::Vector2f buttonPos(bounds.width / 2.f, 30.f);
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(buttonPos);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Novice");
+    bounds = xy::Text::getLocalBounds(entity);
+
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.difficulty = SharedData::Easy;
+                    requestStackClear();
+                    requestStackPush(StateID::Game);
+                }
+            });
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+    buttonPos.y += (bounds.height / 4.f) + 11.f;
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(buttonPos);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Seasoned");
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.difficulty = SharedData::Medium;
+                    requestStackClear();
+                    requestStackPush(StateID::Game);
+                }
+            });
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+    buttonPos.y += (bounds.height / 4.f) + 11.f;
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(buttonPos);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Pro");
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.difficulty = SharedData::Hard;
+                    requestStackClear();
+                    requestStackPush(StateID::Game);
+                }
+            });
+    parentTx.addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::saveSettings()

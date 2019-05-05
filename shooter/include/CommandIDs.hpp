@@ -39,6 +39,7 @@ namespace CommandID
         RootNode = 0x1,
         Starfield = 0x2,
         Help = 0x4,
-        TextCrawl = 0x8
+        TextCrawl = 0x8,
+        DifficultySelect = 0x10
     };
 }

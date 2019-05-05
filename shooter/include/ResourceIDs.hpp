@@ -40,6 +40,7 @@ namespace TextureID
         Noise,
         MenuBackground,
         HowToPlay,
+        DifficultySelect,
 
         Count
     };
