@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="180">
+ <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="105" columns="15">
+  <image source="../images/tileset.png" width="240" height="112"/>
+ </tileset>
+ <layer id="2" name="Tile Layer 1" width="45" height="60" locked="1">
+  <data encoding="base64" compression="zlib">
+   eJzFmVGO20gMRDsbLOZ3AyzyuxsEcwFZF7DmArLuf5i1ABXmuVRsWV4g+SDgeOjuanaxSHZ+ttb+/Y32424/T/p/v9v1btPdht9gf20YLk+a/Oe73bbvri/a8OLvhIHnmDpG/+pcN7MqXsLg/kcmDDz7gBg6FvrP2/eLxZ125s6P+OaYGY+0pz6TG8mWzVf3cubOde4jPlV8Jg7FcmmP3Jg3XOv3o/nrXqaDe342j1JO8ayMmeI2GOZr8BPuHtd7/Cc39N2E7/T3dNfCcLM4Ozf87yvmL3f7o7C39sjPil/zwTpf7/bnwT4Js2JJfqz2T6u1/z1gW7A2jeuctfcCs+7JMS9tr4tjyxr4qq57Tvr+R9zQb0bg8HwdN6POn9XknmnPsX1yrscNYna9kq9yYzTraerQHuNyVIumdpyDrD/CTL1wzOSM/BV7YqdGzG2P07Hq38Lstc65obUYN2Gijl6wBk2xd9zUwFSfGXvn9NX2Iw6P8dIe84w5mHhMTb+Zj3NG2MkP/W3G74hZmIhD53fMuptr2/OIPeAF+4i3qY4kHvM74nXN0F26bjiXU8/o+kTuKtY871E/OLRHHRK+xOWkGxVm+np8qTe6H+pJhVO5w/6LeNW/aF3HfMVvxUnipq9zlLxyTSF23o3rO++eWtLDrDvsxSbNE5VRTyZbO/GAmITZe5+Eg/mXdHT17fUyz9ibYReXPHfY1y7m59wgZubN+vlMn+P9lOwdsV/3+thMfPZeXHiWzW9sj9xg/un3SY96OeU9MfdM5jl427B5jIe2j7N+K8yv9Gzkl9d5xdY/e6+SYkwt9Xh4nuvuUl+RjHlFzF4rJny3hHWYe9Snj/aYg6m3THh6Rh6k+pr44NqoHp7zv7gifrjWpTWSLrmRV0kXJ/MjJ3yt3txNbrC3FTcTtorL7LlTnXdsqd6odxDGue3jnvoNaqVrgnTpzPyf5pAeds6VjqnCXPW+ngvKB9Zh1fy57XttziuKvWPXGv6ucoE/104+SaN9vq7MdaN6A/G4u1+a53tvOMm8L2SOpRz0szzz3rS0HJvR1k5vFJ5nxFzloHhCblR3w7nFMVc10+PsmDx3PH/TLJJmx4qvFbbET/ajFeb05uZ/9xmKe/L+jrifzuDzjzB/tMc6yN+mOc75zLcPv4ukGz3zfPKYpxxMd+b67NxxLsrnS/t8N3xrn3xhfZdGVlpSYfe+zrXBe3DnhjCTx6sP++z3dhxjagr54Li9r9M99/KswpzyUGdQ3eRMX2lv6m96+lxhJqdZS8UZnidpCdfrmdb1eUl8G9o+B2fbWxxSn8K3CmH2+Vg9CfF7T+ZvaooH+wb21WmOTZgr7l+wBuuB18TB1nLMzxh1sMKse0y4OatxDdepNDs65mdnB/KZ9YS6IR6xv6vqVbqH9L6V6tQRr9kfepxd6xyrawH1N/Um5HhPH3m2Vcd7byGVfW379zry0bGTOxX3j3oUxuvb3f5+wfy9Tp8rHaPuLfaZmBzz1fZ59f+yfrSaG8phahl7f80OqT5Qa6StriuseVy31wPy7cS5Qd3RWdjrDWG9SitH7Hdkrh+Kx0fb15Sr+bpGEiu1mTUq1eSzOjeZ/zO1m3WT9yEeez1JbyipHpy1Ht8SN4RZeUVOizv+HlHpOPOPtT/1oOxvtS7reFVTRuzHmYacTrV6gK/u0GcE4uEsQT2nLjEOesd1bpDLnKv8DNU7knz5duQzArH7mTnzeIxlxDxg39SvUKN9viVerx3sEXtzleOfsbdjSrrhevPs+63nu3PW33iuLZ/Be7kqzs7fM/rk/s5lr/Wp7vscvIR1XeuUk6zVrnk9I17qlONSzo3tubMkDVwx/9//i/rVtvZ1/wFulm96
+  </data>
+ </layer>
+ <layer id="4" name="river" width="45" height="60" locked="1">
+  <data encoding="base64" compression="zlib">
+   eJztzrENgDAQBEGXBTQANGDcfyX+xDnBv4TQjLTp6VoDAAAAAL5ii/bkjqLdtX1GV3J30W7lts//+NyjJ7lRtLu2AQAAAOCNCTz4S/E=
+  </data>
+ </layer>
+ <layer id="5" name="road" width="45" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztmktOwzAQhn2CcgJ6BB4HKLBiRcWqKygJUij3vwEzUipZaRxP5xUjzS/9cirFzvSzazuephQKhVrVHXgP7gjl23i9H69rde6NYt6BP8E9ofwAH8Ff43WtzpNSjBvwjaD+AfyqFAtVt+CtoP4z+EUnFDetwVmqFjjjvFH7feM93egB/JN97gj1tUXpa7zne8HeY4XS163FrMH5PFaoa9O55I4rDc6/ibYmTctT4vXRmuOZOwdZjGfqWsud6y04U9daS864j+oXzN0LWXK2kiVnKwVnHwVnH1lwlr6H1WTBWfoeVlOMZx8FZx8FZx+1zLk0z7fMuTTPt8y5pJY5lxScrxN3L7UmZ+5eisvrAfzIqKchLi/8ru+Jd94mzRENgpgxp9On68/bpDkiLDlnI9pjw2Me0n6GR8zaa0pwnldwvmwvz3nVTM1TWHOunV1T8wX5/sCas1bM+f7gv3BeeoZU2F6epx0MYtbmPM1jnAixrs15rv3WOU9lETP2pdZ/cErt90RbxhGa1x/5G6i4
+  </data>
+ </layer>
+ <layer id="6" name="buildings and trees" width="45" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztWUtOxTAM7BIQrAGJNQ/BGt4F4ARwArj/HUgWlazgz8R22iJlJK/aphPH/yzLhBcXRS6LXHV881nky/Gvc9Jat0XuityD/6j4LvKjrGnxoOtqa0nraJwRcPuy9oRCWifKeQ9MztvgscipyNMG/5J8yhuHtoDkU1k+mwFP7KeQYm30XCovidPqK+/KOygoz+i5VH+QfGHl7PHxVpcSz2xfiHBGdZntCxHOmdDst8UenDm/1ey3xVH03INMztTXrLPusYUWXs5cLKC+Zp219RyJz6/GGi3aWCDlFgkPxnNtT6NqmZG2kQHOTqK2MRqenNHaBqL3tTayxNs399oGonfqeydG3hY5lkj1Q2bckL7RfE97nlE/WHFjpI+2Ol9jXjRujPRRSedHjxsTExMTWZDyZWSm4p2P03e0unmrOS+Sl6O5m+McnWd5gM5dKreP5S/nzHkWClT3Uv+J9qVSfYNC0611z+LlHL0n4r4/K88qam3E1eZZM4tRM2fOB48+G/qPnLke6Oicub4K4Yz23dFeHAXCmb7TKyPODpnBWbOC3vlBFMgMzlOn7H236pktIt9cg3LTT5kFl7uRfO6Zn1gzmV703o15ZhXZnLe4J/Zw5mpsyzYy63IP573jRsu5+qWlE9oXoPmP6y+yOFNOW+TBrLiBzpc90q5J48YzKC+d+5mI4xdZjU4Z
+  </data>
+ </layer>
+ <objectgroup id="3" name="objects">
+  <object id="1" type="border" x="0" y="0" width="16" height="960"/>
+  <object id="2" type="border" x="704" y="0" width="16" height="960"/>
+  <object id="3" type="border" x="16" y="0" width="688" height="16"/>
+  <object id="4" type="border" x="16" y="944" width="688" height="16"/>
+  <object id="5" type="building" x="80" y="176" width="32" height="32"/>
+  <object id="6" type="building" x="16" y="240" width="32" height="32"/>
+  <object id="7" type="building" x="80" y="304" width="32" height="32"/>
+  <object id="8" type="building" x="16" y="368" width="32" height="32"/>
+  <object id="9" type="building" x="80" y="416" width="32" height="32"/>
+  <object id="10" type="building" x="544" y="272" width="32" height="32"/>
+  <object id="11" type="building" x="544" y="320" width="32" height="32"/>
+  <object id="12" type="building" x="544" y="368" width="32" height="32"/>
+  <object id="13" type="building" x="544" y="416" width="32" height="32"/>
+  <object id="14" type="building" x="672" y="272" width="32" height="32"/>
+  <object id="15" type="building" x="672" y="320" width="32" height="32"/>
+  <object id="16" type="building" x="672" y="368" width="32" height="32"/>
+  <object id="17" type="building" x="672" y="416" width="32" height="32"/>
+  <object id="18" type="building" x="464" y="800" width="32" height="32"/>
+  <object id="19" type="building" x="464" y="896" width="32" height="32"/>
+  <object id="20" type="building" x="32" y="880" width="48" height="48"/>
+  <object id="21" type="building" x="16" y="592" width="48" height="192"/>
+  <object id="22" type="building" x="656" y="544" width="48" height="160"/>
+  <object id="23" type="building" x="192" y="160" width="48" height="176"/>
+  <object id="24" type="building" x="240" y="176" width="16" height="144"/>
+  <object id="25" type="building" x="64" y="608" width="16" height="160"/>
+  <object id="26" type="building" x="640" y="592" width="16" height="64"/>
+  <object id="27" type="building" x="160" y="368" width="176" height="32"/>
+  <object id="28" type="building" x="160" y="720" width="256" height="48"/>
+  <object id="29" type="building" x="160" y="880" width="256" height="48"/>
+  <object id="30" type="building" x="160" y="768" width="48" height="32"/>
+  <object id="31" type="building" x="368" y="768" width="48" height="32"/>
+  <object id="32" type="building" x="368" y="848" width="48" height="32"/>
+  <object id="33" type="building" x="160" y="848" width="48" height="32"/>
+  <object id="34" type="building" x="160" y="400" width="48" height="16"/>
+  <object id="35" type="building" x="288" y="400" width="48" height="16"/>
+  <object id="36" type="water" x="12" y="456" width="100" height="80"/>
+  <object id="37" type="water" x="144" y="456" width="200" height="80"/>
+  <object id="38" type="water" x="364" y="456" width="244" height="80"/>
+  <object id="39" type="water" x="640" y="456" width="72" height="80"/>
+  <object id="40" type="barrier" x="400" y="128" width="256" height="32"/>
+  <object id="41" type="barrier" x="160" y="336" width="288" height="32"/>
+  <object id="42" type="barrier" x="112" y="128" width="128" height="32"/>
+  <object id="43" type="barrier" x="480" y="720" width="224" height="48"/>
+  <object id="44" type="barrier" x="512" y="16" width="32" height="112"/>
+  <object id="45" type="barrier" x="160" y="160" width="28" height="176"/>
+  <object id="46" type="barrier" x="336" y="368" width="32" height="224"/>
+  <object id="47" type="barrier" x="320" y="592" width="64" height="32"/>
+  <object id="48" type="tree" x="36" y="36" width="24" height="24"/>
+  <object id="49" type="tree" x="164" y="52" width="24" height="24"/>
+  <object id="50" type="tree" x="340" y="36" width="24" height="24"/>
+  <object id="51" type="tree" x="452" y="52" width="24" height="24"/>
+  <object id="52" type="tree" x="356" y="132" width="24" height="24"/>
+  <object id="53" type="tree" x="260" y="132" width="24" height="24"/>
+  <object id="54" type="tree" x="436" y="196" width="24" height="24"/>
+  <object id="55" type="tree" x="500" y="180" width="24" height="24"/>
+  <object id="56" type="tree" x="548" y="164" width="24" height="24"/>
+  <object id="61" type="tree" x="596" y="196" width="24" height="24"/>
+  <object id="62" type="tree" x="500" y="276" width="24" height="24"/>
+  <object id="63" type="tree" x="420" y="292" width="24" height="24"/>
+  <object id="64" type="tree" x="468" y="340" width="24" height="24"/>
+  <object id="65" type="tree" x="500" y="372" width="24" height="24"/>
+  <object id="66" type="tree" x="452" y="420" width="24" height="24"/>
+  <object id="67" type="tree" x="404" y="388" width="24" height="24"/>
+  <object id="68" type="tree" x="564" y="548" width="24" height="24"/>
+  <object id="69" type="tree" x="548" y="628" width="24" height="24"/>
+  <object id="70" type="tree" x="484" y="596" width="24" height="24"/>
+  <object id="71" type="tree" x="436" y="628" width="24" height="24"/>
+  <object id="72" type="tree" x="404" y="564" width="24" height="24"/>
+  <object id="73" type="tree" x="308" y="644" width="24" height="24"/>
+  <object id="74" type="tree" x="260" y="564" width="24" height="24"/>
+  <object id="75" type="tree" x="180" y="628" width="24" height="24"/>
+  <object id="76" type="tree" x="276" y="820" width="24" height="24"/>
+  <object id="77" type="bush" x="80" y="64" width="16" height="16"/>
+  <object id="78" type="bush" x="256" y="32" width="16" height="16"/>
+  <object id="79" type="bush" x="288" y="48" width="16" height="16"/>
+  <object id="80" type="bush" x="656" y="32" width="16" height="16"/>
+  <object id="81" type="bush" x="448" y="160" width="16" height="16"/>
+  <object id="82" type="bush" x="656" y="240" width="16" height="16"/>
+  <object id="83" type="bush" x="480" y="304" width="16" height="16"/>
+  <object id="84" type="bush" x="512" y="416" width="16" height="16"/>
+  <object id="85" type="bush" x="512" y="640" width="16" height="16"/>
+  <object id="86" type="bush" x="448" y="560" width="16" height="16"/>
+  <object id="87" type="bush" x="240" y="624" width="16" height="16"/>
+  <object id="88" type="bush" x="176" y="560" width="16" height="16"/>
+  <object id="89" type="bush" x="240" y="800" width="16" height="16"/>
+  <object id="90" type="bush" x="320" y="800" width="16" height="16"/>
+  <object id="91" type="bush" x="320" y="848" width="16" height="16"/>
+  <object id="92" type="bush" x="240" y="848" width="16" height="16"/>
+  <object id="93" type="sandbag" x="676" y="304" width="12" height="112"/>
+  <object id="94" type="sandbag" x="660" y="704" width="12" height="16"/>
+  <object id="95" type="sandbag" x="676" y="788" width="8" height="136"/>
+  <object id="96" type="sandbag" x="512" y="788" width="164" height="8"/>
+  <object id="97" type="sandbag" x="512" y="916" width="164" height="8"/>
+  <object id="98" type="sandbag" x="16" y="884" width="60" height="60"/>
+  <object id="170" type="building" x="544" y="16" width="48" height="112"/>
+ </objectgroup>
+ <objectgroup id="7" name="spawn" locked="1">
+  <object id="99" type="alien spawn" x="64" y="124">
+   <point/>
+  </object>
+  <object id="100" type="alien spawn" x="464" y="280">
+   <point/>
+  </object>
+  <object id="101" type="alien spawn" x="240" y="432">
+   <point/>
+  </object>
+  <object id="102" type="alien spawn" x="528" y="560">
+   <point/>
+  </object>
+  <object id="103" type="alien spawn" x="400" y="640">
+   <point/>
+  </object>
+  <object id="104" type="alien spawn" x="80" y="832">
+   <point/>
+  </object>
+  <object id="105" type="human spawn" x="392" y="824">
+   <point/>
+  </object>
+  <object id="106" type="human spawn" x="268" y="252">
+   <point/>
+  </object>
+  <object id="107" type="human spawn" x="72" y="584">
+   <point/>
+  </object>
+  <object id="108" type="human spawn" x="652" y="340">
+   <point/>
+  </object>
+  <object id="109" type="human spawn" x="64" y="320">
+   <point/>
+  </object>
+  <object id="110" type="human spawn" x="648" y="696">
+   <point/>
+  </object>
+  <object id="176" type="human spawn" x="612" y="80">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="8" name="navigation">
+  <object id="111" x="120" y="96">
+   <polyline points="0,0 196,0"/>
+  </object>
+  <object id="112" x="324" y="96">
+   <polyline points="0,0 164,0"/>
+  </object>
+  <object id="113" x="320" y="104">
+   <polyline points="0,0 0,76"/>
+  </object>
+  <object id="114" x="328" y="184">
+   <polyline points="0,0 72,52"/>
+  </object>
+  <object id="115" x="400" y="244">
+   <polyline points="0,0 -72,68 -132,12"/>
+  </object>
+  <object id="116" x="312" y="184">
+   <polyline points="0,0 -44,48"/>
+  </object>
+  <object id="117" x="320" y="76">
+   <polyline points="0,0 0,-44 32,-52 140,-44 172,-24 172,12"/>
+  </object>
+  <object id="118" x="484" y="88">
+   <polyline points="0,0 -44,0 -76,-44 -120,-12 -160,0"/>
+  </object>
+  <object id="119" x="312" y="88">
+   <polyline points="0,0 -40,-20 -92,-24 -128,-60 -228,-60 -260,-12 -200,8"/>
+  </object>
+  <object id="120" x="112" y="104">
+   <polyline points="0,0 -24,36 -72,56 -72,116 -16,148 -40,184"/>
+  </object>
+  <object id="121" x="60" y="284">
+   <polyline points="0,0 0,-120 32,-128 44,-184"/>
+  </object>
+  <object id="122" x="80" y="288">
+   <polyline points="0,0 40,0 40,-104"/>
+  </object>
+  <object id="123" x="136" y="184">
+   <polyline points="0,0 0,108"/>
+  </object>
+  <object id="124" x="80" y="296">
+   <polyline points="0,0 48,0"/>
+  </object>
+  <object id="125" x="128" y="304">
+   <polyline points="0,0 0,88"/>
+  </object>
+  <object id="126" x="128" y="408">
+   <polyline points="0,0 0,20"/>
+  </object>
+  <object id="127" x="128" y="440">
+   <polyline points="0,0 0,104"/>
+  </object>
+  <object id="128" x="124" y="396">
+   <polyline points="0,0 -24,-40 -48,-44 -52,-72"/>
+  </object>
+  <object id="129" x="120" y="404">
+   <polyline points="0,0 -56,0 -68,-44 -84,-84 -68,-116"/>
+  </object>
+  <object id="130" x="136" y="432">
+   <polyline points="0,0 68,0 84,-20 144,-20 152,-8 152,12 12,12 0,4"/>
+  </object>
+  <object id="131" x="124" y="548">
+   <polyline points="0,0 -44,32"/>
+  </object>
+  <object id="132" x="76" y="588">
+   <polyline points="0,0 20,28 20,96 52,96"/>
+  </object>
+  <object id="133" x="128" y="552">
+   <polyline points="0,0 0,124"/>
+  </object>
+  <object id="134" x="128" y="824">
+   <polyline points="0,0 0,-136"/>
+  </object>
+  <object id="135" x="128" y="836">
+   <polyline points="0,0 0,80"/>
+  </object>
+  <object id="136" x="120" y="912">
+   <polyline points="0,0 -28,-40 -80,-40 -80,-116 -36,-128 4,-84"/>
+  </object>
+  <object id="137" x="136" y="828">
+   <polyline points="0,0 24,-16 80,-16 92,-40 148,-40"/>
+  </object>
+  <object id="138" x="296" y="788">
+   <polyline points="0,0 56,0 56,20 92,36"/>
+  </object>
+  <object id="139" x="136" y="836">
+   <polyline points="0,0 20,4 76,4 88,28 100,36 152,36"/>
+  </object>
+  <object id="140" x="296" y="872">
+   <polyline points="0,0 44,0 60,-28 92,-40"/>
+  </object>
+  <object id="141" x="380" y="828">
+   <polyline points="0,0 -64,0 -92,-36"/>
+  </object>
+  <object id="142" x="288" y="864">
+   <polyline points="0,0 -32,-32 -148,-32"/>
+  </object>
+  <object id="143" x="396" y="832">
+   <polyline points="0,0 48,0"/>
+  </object>
+  <object id="144" x="444" y="840">
+   <polyline points="0,0 0,28 64,28"/>
+  </object>
+  <object id="145" x="452" y="832">
+   <polyline points="0,0 4,20 52,24"/>
+  </object>
+  <object id="146" x="448" y="824">
+   <polyline points="0,0 0,-128"/>
+  </object>
+  <object id="147" x="508" y="848">
+   <polyline points="0,0 0,-40"/>
+  </object>
+  <object id="148" x="508" y="876">
+   <polyline points="0,0 0,28"/>
+  </object>
+  <object id="149" x="516" y="908">
+   <polyline points="0,0 148,0 148,-44"/>
+  </object>
+  <object id="150" x="664" y="852">
+   <polyline points="0,0 0,-48 -148,-48"/>
+  </object>
+  <object id="151" x="516" y="896">
+   <polyline points="0,0 76,-36"/>
+  </object>
+  <object id="152" x="592" y="852">
+   <polyline points="0,0 -76,-44"/>
+  </object>
+  <object id="153" x="512" y="860">
+   <polyline points="0,0 88,-4"/>
+  </object>
+  <object id="154" x="612" y="856">
+   <polyline points="0,0 48,0"/>
+  </object>
+  <object id="155" x="136" y="688">
+   <polyline points="0,0 104,0"/>
+  </object>
+  <object id="156" x="256" y="688">
+   <polyline points="0,0 184,0"/>
+  </object>
+  <object id="157" x="456" y="688">
+   <polyline points="0,0 168,0"/>
+  </object>
+  <object id="158" x="624" y="676">
+   <polyline points="0,0 0,-132"/>
+  </object>
+  <object id="159" x="624" y="528">
+   <polyline points="0,0 0,-132"/>
+  </object>
+  <object id="160" x="624" y="384">
+   <polyline points="0,0 0,-140"/>
+  </object>
+  <object id="161" x="616" y="244">
+   <polyline points="0,0 -208,-4"/>
+  </object>
+  <object id="162" x="244" y="680">
+   <polyline points="0,0 -16,-40 -44,-68 -88,-104 -104,-132"/>
+  </object>
+  <object id="163" x="252" y="680">
+   <polyline points="0,0 32,-48 52,-96 40,-128 -4,-132 -36,-96 -92,-60 -120,0"/>
+  </object>
+  <object id="164" x="448" y="680">
+   <polyline points="0,0 36,-36 80,-64 128,-68 172,0"/>
+  </object>
+  <object id="165" x="628" y="388">
+   <polyline points="0,0 32,48 28,-32"/>
+  </object>
+  <object id="166" x="656" y="348">
+   <polyline points="0,0 0,-56 -28,-108"/>
+  </object>
+  <object id="167" x="648" y="352">
+   <polyline points="0,0 -56,8 -56,-40"/>
+  </object>
+  <object id="168" x="592" y="300">
+   <polyline points="0,0 24,-52"/>
+  </object>
+  <object id="169" x="624" y="236">
+   <polyline points="0,0 20,-36 -8,-64 -52,-36 -104,-12 -216,0"/>
+  </object>
+  <object id="171" x="632" y="240">
+   <polyline points="0,0 44,-16 60,-44 60,-188"/>
+  </object>
+  <object id="172" x="636" y="232">
+   <polyline points="0,0 32,-40 32,-116"/>
+  </object>
+  <object id="173" x="672" y="100">
+   <polyline points="0,0 16,-48"/>
+  </object>
+  <object id="174" x="664" y="108">
+   <polyline points="0,0 -56,8 -64,-32"/>
+  </object>
+  <object id="177" x="664" y="96">
+   <polyline points="0,0 -20,-28"/>
+  </object>
+  <object id="178" x="648" y="64">
+   <polyline points="0,0 36,-16"/>
+  </object>
+  <object id="179" x="636" y="60">
+   <polyline points="0,0 -16,-28 -36,-20 -36,4"/>
+  </object>
+ </objectgroup>
+</map>

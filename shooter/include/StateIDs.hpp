@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "LoadingScreen.hpp"
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Cursor.hpp>
 
 namespace StateID
 {
@@ -51,6 +52,8 @@ struct KeyMap final
 
 struct SharedData final
 {
+    SharedData() = default;
+
     xy::ResourceHandler resources;
     xy::ShaderResource* shaders = nullptr;
     enum
@@ -77,6 +80,6 @@ struct SharedData final
     std::int32_t difficulty = Easy;
 
     KeyMap keymap;
-
+    //sf::Cursor cursor;
     LoadingScreen loadingScreen;
 };

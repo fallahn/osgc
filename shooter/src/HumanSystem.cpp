@@ -228,6 +228,7 @@ void HumanSystem::updateNormal(xy::Entity entity)
     if (!nearby.empty())
     {
         human.state = Human::State::Scared;
+        nav.pathIndex = path.size(); //effectively clears the path so humans won't run scared into the aliens
     }
 }
 
@@ -273,7 +274,7 @@ void HumanSystem::updateSeeking(xy::Entity entity)
             {
                 //must be aliens nearby, run away!
                 human.state = Human::State::Scared;
-
+                entity.getComponent<Navigator>().pathIndex = entity.getComponent<Navigator>().target.getComponent<Node>().path.size();
                 return;
             }
         }
@@ -297,8 +298,27 @@ void HumanSystem::updateScared(xy::Entity entity)
     float count = 0.f;
     sf::Vector2f centreOfMass;
     sf::Vector2f wallVector;
+    sf::Vector2f pathVector;
 
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionBox::Filter::Alien | CollisionBox::Solid | CollisionBox::Filter::Navigation);
+    sf::Uint64 searchFlags = CollisionBox::Filter::Alien | CollisionBox::Solid;
+    auto& nav = entity.getComponent<Navigator>();
+    if (nav.pathIndex == nav.target.getComponent<Node>().path.size())
+    {
+        //searchFlags |=CollisionBox::Filter::Navigation;
+        //look for a new nav node
+    }
+    else
+    {
+        //add next path point to velocity.
+        pathVector = nav.target.getComponent<Node>().path[nav.pathIndex] - tx.getPosition();
+
+        if (xy::Util::Vector::lengthSquared(pathVector) < NodeDistanceSqr)
+        {
+            nav.pathIndex++;
+        }
+    }
+
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, searchFlags);
     for (auto e : nearby)
     {
         auto flags = e.getComponent<xy::BroadphaseComponent>().getFilterFlags();
@@ -326,9 +346,19 @@ void HumanSystem::updateScared(xy::Entity entity)
         }
         else if (flags & CollisionBox::Navigation)
         {
+            //NOTE we should only find these if nav nodes have been added to the search filter (above)
+
             //run towards these
-            //TODO don't want to get stuck though... perhaps need to 
-            //do something a bit clever combining 'normal' state and running away
+            const auto& node = e.getComponent<Node>();
+
+            if (nav.previousNode != node.ID)
+            {
+                nav.previousNode = node.ID;
+                nav.target = e;
+                nav.pathIndex = 0;
+
+                pathVector = xy::Util::Vector::normalise(node.path[0] - tx.getPosition());
+            }
         }
         else
         {
@@ -340,7 +370,16 @@ void HumanSystem::updateScared(xy::Entity entity)
             auto result = intersects(std::make_pair(tx.getPosition(), tx.getPosition() + ray), otherBounds);
             if (result.intersects)
             {
-                wallVector += xy::Util::Vector::reflect(human.velocity, result.normal);
+                //TODO this doesn't work if the reflection is directly back at the human
+                const float WallDeterrant = 100.f; //strength of wall vector
+                /*if (xy::Util::Vector::dot(-human.velocity, result.normal) > 0.5f)
+                {
+                    
+                }
+                else*/
+                {
+                    wallVector += xy::Util::Vector::reflect(human.velocity, result.normal) * WallDeterrant;
+                }
             }
         }
     }
@@ -350,6 +389,7 @@ void HumanSystem::updateScared(xy::Entity entity)
         centreOfMass /= count;
         human.velocity += (tx.getPosition() - centreOfMass);
         human.velocity += wallVector;
+        //human.velocity += pathVector;
         human.velocity = xy::Util::Vector::normalise(human.velocity);
     }
     else

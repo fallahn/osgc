@@ -32,7 +32,7 @@ source distribution.
 #include <map>
 #include <string>
 
-static const std::map<sf::Keyboard::Key, std::string> KeyMap = 
+static const std::map<sf::Keyboard::Key, std::string> KeyMapping = 
 {
     std::make_pair(sf::Keyboard::Unknown, "Invalid"),
     std::make_pair(sf::Keyboard::A, "A"),

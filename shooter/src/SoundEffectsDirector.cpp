@@ -94,7 +94,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<BombEvent>();
         if (data.type == BombEvent::Dropped)
         {
-            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::BombDrop]), data.position);
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[AudioID::BombDrop]), data.position).setVolume(0.4f);
         }
         else if (data.type == BombEvent::Exploded)
         {
@@ -144,7 +144,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case HumanEvent::Died:
-            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[xy::Util::Random::value(AudioID::Die01, AudioID::Die04)]), data.position);
+            playSound(m_resources.get<sf::SoundBuffer>(audioHandles[xy::Util::Random::value(AudioID::Die01, AudioID::Die04)]), data.position).setVolume(1.4f);
             break;
         }
     }

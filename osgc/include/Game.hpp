@@ -30,6 +30,7 @@ source distribution.
 #include "States.hpp"
 #include "LoadingScreen.hpp"
 #include <xyginext/core/App.hpp>
+#include <SFML/Window/Cursor.hpp>
 #include <any>
 
 using SharedStateData = std::any;
@@ -58,6 +59,8 @@ private:
     SharedStateData m_sharedData;
 
     fe::LoadingScreen m_loadingScreen;
+
+    sf::Cursor m_defaultCursor;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

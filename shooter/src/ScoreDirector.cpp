@@ -54,7 +54,8 @@ ScoreDirector::ScoreDirector(sf::Font& font, std::int32_t difficulty)
     m_alienCount    (Alien::NumberPerRound / difficulty),
     m_humanCount    (Human::NumberPerRound / difficulty)
 {
-    LOG("Store difficulty in score director", xy::Logger::Type::Info);
+    //won't need to do this if loading new game state with each map
+    //LOG("Store difficulty in score director", xy::Logger::Type::Info);
 }
 
 //public

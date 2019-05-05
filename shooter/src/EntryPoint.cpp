@@ -36,6 +36,7 @@ source distribution.
 #include <xyginext/core/Log.hpp>
 
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Image.hpp>
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
@@ -44,6 +45,18 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     auto& data = std::any_cast<SharedData&>(*sharedData);
     FontID::handles[FontID::CGA] = data.resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
     
+#ifndef __linux__
+    /*sf::Image img;
+    if (img.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/cursor.png"))
+    {
+        data.cursor = std::make_unique<sf::Cursor>();
+        if (data.cursor->loadFromPixels(img.getPixelsPtr(), img.getSize(), { 0,0 }))
+        {
+            xy::App::getRenderWindow()->setMouseCursor(*data.cursor);
+        }
+    }*/
+#endif //cursors are kinda broken on linux
+
     ss->registerState<MenuState>(StateID::MainMenu, data);
     ss->registerState<GameState>(StateID::Game, data);
     ss->registerState<PauseState>(StateID::Pause, data);

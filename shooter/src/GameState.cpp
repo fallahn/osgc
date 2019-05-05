@@ -486,7 +486,7 @@ void GameState::loadAssets()
 
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
-    if(!m_mapLoader.load("assets/maps/01.tmx"))
+    if(!m_mapLoader.load("assets/maps/02.tmx"))
     {
         m_sharedData.messageString = "Failed To Load Map";
         m_sharedData.pauseMessage = SharedData::Error;

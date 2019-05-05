@@ -22,83 +22,175 @@ bool intersects(const Segment& segOne, const Segment& segTwo, sf::Vector2f& inte
 
 IntersectionResult intersects(const Segment& firstSegment, sf::FloatRect target)
 {
-    sf::Vector2f targetCentre(target.left + (target.width / 2.f), target.top + (target.height / 2.f));
-    auto point = firstSegment.first;
+    /*sf::Vector2f targetCentre(target.left + (target.width / 2.f), target.top + (target.height / 2.f));
+    auto point = firstSegment.first;*/
 
     //TODO this side detection isn't correct - need to look at firstSeg and check if
     //it potentially intersects before doing actual intersection test...
 
+    /*IntersectionResult result;*/
+    //if (targetCentre.x < point.x && targetCentre.y < point.y)
+    //{
+    //    //up left
+    //    std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
+    //        std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
+
+    //    result.normal.y = 1.f;
+
+    //    if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+    //    {
+    //        secondSegment =
+    //            std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
+    //        result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+
+    //        result.normal.x = 1.f;
+    //        result.normal.y = 0.f;
+    //    }
+    //}
+    //else if (targetCentre.x > point.x && targetCentre.y < point.y)
+    //{
+    //    //up right
+    //    std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
+    //        std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
+
+    //    result.normal.y = 1.f;
+
+    //    if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+    //    {
+    //        secondSegment =
+    //            std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
+    //        result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+
+    //        result.normal.x = -1.f;
+    //        result.normal.y = 0.f;
+    //    }
+    //}
+    //else if (targetCentre.x > point.x && targetCentre.y > point.y)
+    //{
+    //    //down right
+    //    std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
+    //        std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
+
+    //    result.normal.y = -1.f;
+
+    //    if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+    //    {
+    //        secondSegment =
+    //            std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
+    //        result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+
+    //        result.normal.y = 0.f;
+    //        result.normal.x = -1.f;
+    //    }
+    //}
+    //else if (targetCentre.x < point.x && targetCentre.y > point.y)
+    //{
+    //    //down left
+    //    std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
+    //        std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
+
+    //    result.normal.y = -1.f;
+
+    //    if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+    //    {
+    //        secondSegment =
+    //            std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
+    //        result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+
+    //        result.normal.y = 0.f;
+    //        result.normal.x = 1.f;
+    //    }
+    //}
+
     IntersectionResult result;
-    if (targetCentre.x < point.x && targetCentre.y < point.y)
+    static const float corner = 0.70711f;//hax. saves a sqrt.
+    if (target.contains(firstSegment.second))
     {
-        //up left
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
+        result.intersects = true;
 
-        result.normal.y = 1.f;
-
-        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+        auto point = firstSegment.first;
+        if (point.y < target.top)
         {
-            secondSegment =
-                std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
-            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+            //above
+            if (point.x > target.left &&
+                point.x < (target.left + target.width))
+            {
+                //directly above
+                result.normal = { 0.f, -1.f };
+                return result;
+            }
+            //TODO test quadrant and seg intersect correct two sides
 
-            result.normal.x = 1.f;
-            result.normal.y = 0.f;
+            else if (point.x < target.left)
+            {
+                result.normal = {-corner, -corner};
+            }
+            else
+            {
+                result.normal = { corner, -corner };
+            }
         }
-    }
-    else if (targetCentre.x > point.x && targetCentre.y < point.y)
-    {
-        //up right
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left + target.width, target.top + target.height));
-
-        result.normal.y = 1.f;
-
-        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+        else if (point.y > (target.top + target.height))
         {
-            secondSegment =
-                std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
-            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+            //below
+            if (point.x > target.left &&
+                point.x < (target.left + target.width))
+            {
+                //directly below
+                result.normal = { 0.f, 1.f };
+                return result;
+            }
+            //TODO test quadrant and seg intersect correct two sides
 
-            result.normal.x = -1.f;
-            result.normal.y = 0.f;
+            else if (point.x < target.left)
+            {
+                result.normal = { -corner, corner };
+            }
+            else
+            {
+                result.normal = { corner, corner };
+            }
         }
-    }
-    else if (targetCentre.x > point.x && targetCentre.y > point.y)
-    {
-        //down right
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
 
-        result.normal.y = -1.f;
-
-        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+        else if (point.x < target.left)
         {
-            secondSegment =
-                std::make_pair(sf::Vector2f(target.left, target.top + target.height), sf::Vector2f(target.left, target.top));
-            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+            //on the left
+            if (point.y > target.top
+                && point.y < (target.top + target.height))
+            {
+                //directly left
+                result.normal = { -1.f, 0.f };
+            }
+            //TODO test quadrant and seg intersect correct two sides
 
-            result.normal.y = 0.f;
-            result.normal.x = -1.f;
+            else if (point.y < target.top)
+            {
+                result.normal = { -corner, -corner };
+            }
+            else
+            {
+                result.normal = { -corner, corner };
+            }
         }
-    }
-    else if (targetCentre.x < point.x && targetCentre.y > point.y)
-    {
-        //down left
-        std::pair<sf::Vector2f, sf::Vector2f> secondSegment =
-            std::make_pair(sf::Vector2f(target.left, target.top), sf::Vector2f(target.left + target.width, target.top));
-
-        result.normal.y = -1.f;
-
-        if (result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint); !result.intersects)
+        else if (point.x > (target.left + target.width))
         {
-            secondSegment =
-                std::make_pair(sf::Vector2f(target.left + target.width, target.top + target.height), sf::Vector2f(target.left + target.width, target.top));
-            result.intersects = intersects(firstSegment, secondSegment, result.intersectionPoint);
+            //on the right
+            if (point.y > target.top
+                && point.y < (target.top + target.height))
+            {
+                //directly right
+                result.normal = { 1.f, 0.f };
+            }
+            //TODO test quadrant and seg intersect correct two sides
 
-            result.normal.y = 0.f;
-            result.normal.x = 1.f;
+            else if (point.y < target.top)
+            {
+                result.normal = { corner, -corner };
+            }
+            else
+            {
+                result.normal = { corner, corner };
+            }
         }
     }
 

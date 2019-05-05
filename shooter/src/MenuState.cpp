@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "SliderSystem.hpp"
 #include "CommandIDs.hpp"
 #include "MessageIDs.hpp"
+#include "KeyMapping.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -177,6 +178,14 @@ bool MenuState::update(float dt)
                 //slider.target = {}; //target was set on entity creation
                 slider.active = true;
             }
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        //tidies up finished text entities
+        cmd.targetFlags = CommandID::Menu::TextCrawl;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<xy::Callback>().active = true;
         };
         m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
@@ -639,65 +648,97 @@ void MenuState::buildHelp()
             });
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
-    /*sf::Vector2f textPos(330.f, 10.f);
+    sf::Vector2f textPos(417.f, 39.f);
     const sf::Vector2f textScale(0.25f, 0.25f);
-    const float verticalSpacing = 26.f;
+    const float verticalSpacing = 24.f;
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Controls");
-    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
-    parentTx.addChild(entity.getComponent<xy::Transform>());
-
-    textPos.y += verticalSpacing * 2.f;
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(textPos);
-    entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Up");
+    entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.up));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Down");
+    entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.down));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Left");
+    entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.left));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Right");
+    entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.right));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Drop\nBomb");
+    entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.fire));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
     entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
-    entity.addComponent<xy::Text>(font).setString("Collect\nItem");
-    parentTx.addChild(entity.getComponent<xy::Transform>());*/
+    entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.pickup));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    //joy buttons
+    textPos.x += 17.f;
+    textPos.y += 32.f;
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString(std::to_string(m_sharedData.keymap.joyPickup));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    textPos.y += verticalSpacing;
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
+    entity.getComponent<xy::Transform>().setScale(textScale);
+    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Text>(font).setString(std::to_string(m_sharedData.keymap.joyFire));
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::buildDifficultySelect()

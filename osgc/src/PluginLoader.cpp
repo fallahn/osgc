@@ -77,6 +77,16 @@ void Game::unloadPlugin()
 {
     if (m_pluginHandle)
     {
+        //reset the mouse cursor in case the plugin modified it
+        if (!m_defaultCursor.loadFromSystem(sf::Cursor::Arrow))
+        {
+            xy::Logger::log("Something is wrong with the system cursors.....", xy::Logger::Type::Error);
+        }
+        else
+        {
+            getRenderWindow()->setMouseCursor(m_defaultCursor);
+        }
+
         auto exit = (Exit)GetProcAddress(m_pluginHandle, "end");
         exit(&m_stateStack);
 
