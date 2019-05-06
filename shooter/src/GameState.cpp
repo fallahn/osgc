@@ -493,6 +493,10 @@ void GameState::loadAssets()
     m_sprites[SpriteID::BeetleBody] = spriteSheet.getSprite("beetle");
     m_sprites[SpriteID::ScorpionBody] = spriteSheet.getSprite("scorpion");
 
+    spriteSheet.loadFromFile("assets/sprites/sidebar.spt", m_resources);
+    m_sprites[SpriteID::Science01] = spriteSheet.getSprite("science");
+    m_sprites[SpriteID::Science02] = spriteSheet.getSprite("more_science");
+
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
     std::string mapfile = "assets/maps/" + ConstVal::MapNames[m_sharedData.playerData.currentMap];
@@ -568,7 +572,7 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Humans");
-    entity.getComponent<xy::Text>().setCharacterSize(22);
+    entity.getComponent<xy::Text>().setCharacterSize(24);
     entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     sideTx.addChild(entity.getComponent<xy::Transform>());
@@ -578,10 +582,18 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Human::NumberPerRound / m_sharedData.difficulty));
-    entity.getComponent<xy::Text>().setCharacterSize(28);
+    entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::HumanCount;
+    sideTx.addChild(entity.getComponent<xy::Transform>());
+
+    //wobbly widget
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(8.f, 60.f);
+    entity.addComponent<xy::Drawable>().setDepth(1);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Science01];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
     sideTx.addChild(entity.getComponent<xy::Transform>());
 
     //right side bar
@@ -622,7 +634,7 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Aliens");
-    entity.getComponent<xy::Text>().setCharacterSize(22);
+    entity.getComponent<xy::Text>().setCharacterSize(24);
     entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     otherSideTx.addChild(entity.getComponent<xy::Transform>());
@@ -632,10 +644,18 @@ void GameState::loadWorld()
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString(std::to_string(Alien::NumberPerRound / m_sharedData.difficulty));
-    entity.getComponent<xy::Text>().setCharacterSize(28);
+    entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::AlienCount;
+    otherSideTx.addChild(entity.getComponent<xy::Transform>());
+
+    //wobbly widget
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(8.f, 60.f);
+    entity.addComponent<xy::Drawable>().setDepth(1);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Science02];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
     otherSideTx.addChild(entity.getComponent<xy::Transform>());
 
 

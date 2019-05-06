@@ -1,0 +1,41 @@
+sprite sidebar
+{
+	src="assets/images/sidebar_anim.png"
+	blend=alpha
+
+	sprite science
+	{
+		bounds = 0,0,32,66
+
+		animation idle
+		{
+			frame = 0,0,32,66
+			frame = 32,0,32,66
+			frame = 64,0,32,66
+			frame = 96,0,32,66
+			frame = 128,0,32,66
+			frame = 160,0,32,66
+
+			loop = true
+			framerate = 10
+		}
+	}
+
+	sprite more_science
+	{
+		bounds = 0,66,32,66
+
+		animation idle
+		{
+			frame = 0,66,32,66
+			frame = 32,66,32,66
+			frame = 64,66,32,66
+			frame = 96,66,32,66
+			frame = 128,66,32,66
+			frame = 160,66,32,66
+
+			loop = true
+			framerate = 10
+		}
+	}
+}

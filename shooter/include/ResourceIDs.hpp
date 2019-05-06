@@ -101,6 +101,9 @@ namespace SpriteID
         BeetleBody,
         ScorpionBody,
 
+        Science01,
+        Science02,
+
         Count
     };
 }

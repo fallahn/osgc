@@ -1,0 +1,23 @@
+spritesheet science_small
+{
+	src="assets/images/science_animation_small.png"
+	blend=alpha
+
+	sprite science
+	{
+		bounds = 0,0,47,74
+
+		animation idle
+		{
+			frame = 0,0,47,74
+			frame = 47,0,47,74
+			frame = 94,0,47,74
+			frame = 141,0,47,74
+			frame = 188,0,47,74
+			frame = 235,0,47,74
+
+			loop = true
+			framerate = 12
+		}
+	}
+}

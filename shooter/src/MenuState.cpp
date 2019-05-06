@@ -33,6 +33,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/UIHitBox.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 
@@ -43,11 +44,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/util/Random.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 #include <xyginext/core/FileSystem.hpp>
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -250,6 +253,7 @@ void MenuState::initScene()
     m_scene.addSystem<SliderSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
+    m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
     m_scene.addSystem<xy::AudioSystem>(mb);
@@ -875,6 +879,26 @@ void MenuState::buildDifficultySelect()
                     requestStackPush(StateID::Game);
                 }
             });
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    //and some cheeky little animations
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/science_large.spt", m_resources);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(12.f, 28.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("science");
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    spriteSheet.loadFromFile("assets/sprites/science_small.spt", m_resources);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(144.f, 28.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("science");
+    entity.addComponent<xy::SpriteAnimation>().play(0);
     parentTx.addChild(entity.getComponent<xy::Transform>());
 }
 
