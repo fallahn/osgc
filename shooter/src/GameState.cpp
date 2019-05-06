@@ -143,12 +143,15 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     recalcViews();
 
+    xy::App::setMouseCursorVisible(false);
+
     quitLoadingScreen();
 }
 
 GameState::~GameState()
 {
     m_sharedData.shaders = nullptr;
+    xy::App::setMouseCursorVisible(true);
 }
 
 //public
@@ -169,6 +172,7 @@ bool GameState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
             m_sharedData.pauseMessage = SharedData::Paused;
             requestStackPush(StateID::Pause);
+            m_sideCamera.getComponent<xy::AudioEmitter>().pause();
             break;
         //case sf::Keyboard::K:
         //    m_sharedData.pauseMessage = SharedData::GameOver;
@@ -189,6 +193,7 @@ bool GameState::handleEvent(const sf::Event& evt)
         {
             m_sharedData.pauseMessage = SharedData::Paused;
             requestStackPush(StateID::Pause);
+            m_sideCamera.getComponent<xy::AudioEmitter>().pause();
         }
     }
 
@@ -236,7 +241,6 @@ void GameState::handleMessage(const xy::Message& msg)
             cmd.targetFlags = CommandID::BackgroundTop;
             cmd.action = [&, data](xy::Entity e, float)
             {
-                //e.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Noise));
                 e.getComponent<xy::Drawable>().setDepth(-ConstVal::BackgroundDepth);
 
                 showCrashMessage(data.lives == 0); //has to be done here to ensure shader updated
@@ -312,6 +316,11 @@ void GameState::handleMessage(const xy::Message& msg)
                 };
                 m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
+            else if (m_sharedData.pauseMessage == SharedData::Paused)
+            {
+                m_sideCamera.getComponent<xy::AudioEmitter>().play();
+            }
+            xy::App::setMouseCursorVisible(false);
         }
     }
     else if (msg.id == MessageID::HumanMessage)
@@ -401,7 +410,7 @@ void GameState::initScene()
     m_gameScene.addDirector<PlayerDirector>(m_sharedData.keymap);
     m_gameScene.addDirector<SpawnDirector>(m_sprites);
     m_gameScene.addDirector<SFXDirector>(m_resources);
-    m_gameScene.addDirector<ScoreDirector>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]), m_sharedData.difficulty);
+    m_gameScene.addDirector<ScoreDirector>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]), m_sharedData.difficulty, m_sharedData);
 
     m_sideCamera = m_gameScene.createEntity();
     m_sideCamera.addComponent<xy::Transform>();
@@ -486,11 +495,13 @@ void GameState::loadAssets()
 
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
-    if(!m_mapLoader.load("assets/maps/02.tmx"))
+    std::string mapfile = "assets/maps/" + ConstVal::MapNames[m_sharedData.playerData.currentMap];
+    if(!m_mapLoader.load(mapfile))
     {
         m_sharedData.messageString = "Failed To Load Map";
         m_sharedData.pauseMessage = SharedData::Error;
         requestStackPush(StateID::Pause);
+        xy::Logger::log("Couldn't open " + mapfile, xy::Logger::Type::Error);
     }
 }
 
@@ -545,7 +556,7 @@ void GameState::loadWorld()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x + (xy::DefaultSceneSize.x / 2.f), 10.f);// (11.f, 56.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Score: 0");
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Score: " + std::to_string(m_sharedData.playerData.score));
     entity.getComponent<xy::Text>().setCharacterSize(36);
     entity.getComponent<xy::Text>().setFillColour({ 0,0,128 });
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);

@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "Alien.hpp"
 #include "Human.hpp"
+#include "StateIDs.hpp"
 
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -46,16 +47,17 @@ namespace
     const std::int32_t BatteryScore = 40;
     const std::int32_t DeathScore = -50;
     const std::int32_t DestroyCollectibleScore = -10;
+
+    const sf::Time RoundEndDelay = sf::seconds(1.f); //slight delay before pushing end screen
 }
 
-ScoreDirector::ScoreDirector(sf::Font& font, std::int32_t difficulty)
+ScoreDirector::ScoreDirector(sf::Font& font, std::int32_t difficulty, SharedData& sd)
     : m_font        (font),
-    m_score         (0),
+    m_sharedData    (sd),
     m_alienCount    (Alien::NumberPerRound / difficulty),
     m_humanCount    (Human::NumberPerRound / difficulty)
 {
-    //won't need to do this if loading new game state with each map
-    //LOG("Store difficulty in score director", xy::Logger::Type::Info);
+    
 }
 
 //public
@@ -117,17 +119,38 @@ void ScoreDirector::handleMessage(const xy::Message& msg)
     }
 }
 
+void ScoreDirector::process(float)
+{
+    if (m_humanCount == 0
+        && m_alienClock.getElapsedTime() > RoundEndDelay)
+    {
+        //end the game
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::StateChange;
+        msg->reason = GameEvent::NoHumansLeft;
+    }
+
+    if (m_alienCount == 0
+        && m_alienClock.getElapsedTime() > RoundEndDelay)
+    {
+        //end the game
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::StateChange;
+        msg->reason = GameEvent::NoAliensLeft;
+    }
+}
+
 //private
 void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
 {
-    m_score = std::max(0, m_score + score);
+    m_sharedData.playerData.score = std::max(0, m_sharedData.playerData.score + score);
 
     //update score view
     xy::Command cmd;
     cmd.targetFlags = CommandID::ScoreText;
     cmd.action = [&](xy::Entity entity, float)
     {
-        entity.getComponent<xy::Text>().setString("Score: " + std::to_string(m_score));
+        entity.getComponent<xy::Text>().setString("Score: " + std::to_string(m_sharedData.playerData.score));
     };
     sendCommand(cmd);
 
@@ -169,6 +192,7 @@ void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
 void ScoreDirector::updateAlienCount()
 {
     m_alienCount--;
+    m_alienClock.restart();
 
     //send command to UI
     xy::Command cmd;
@@ -178,19 +202,12 @@ void ScoreDirector::updateAlienCount()
         e.getComponent<xy::Text>().setString(std::to_string(m_alienCount));
     };
     sendCommand(cmd);
-
-    if (m_alienCount == 0)
-    {
-        //end the game
-        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
-        msg->type = GameEvent::StateChange;
-        msg->reason = GameEvent::NoAliensLeft;
-    }
 }
 
 void ScoreDirector::updateHumanCount()
 {
     m_humanCount--;
+    m_humanClock.restart();
 
     //send command to UI
     xy::Command cmd;
@@ -200,12 +217,4 @@ void ScoreDirector::updateHumanCount()
         e.getComponent<xy::Text>().setString(std::to_string(m_humanCount));
     };
     sendCommand(cmd);
-
-    if (m_humanCount == 0)
-    {
-        //end the game
-        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
-        msg->type = GameEvent::StateChange;
-        msg->reason = GameEvent::NoHumansLeft;
-    }
 }

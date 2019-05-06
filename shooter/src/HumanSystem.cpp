@@ -228,7 +228,7 @@ void HumanSystem::updateNormal(xy::Entity entity)
     if (!nearby.empty())
     {
         human.state = Human::State::Scared;
-        nav.pathIndex = path.size(); //effectively clears the path so humans won't run scared into the aliens
+        //nav.pathIndex = path.size(); //effectively clears the path so humans won't run scared into the aliens
     }
 }
 
@@ -274,7 +274,7 @@ void HumanSystem::updateSeeking(xy::Entity entity)
             {
                 //must be aliens nearby, run away!
                 human.state = Human::State::Scared;
-                entity.getComponent<Navigator>().pathIndex = entity.getComponent<Navigator>().target.getComponent<Node>().path.size();
+                //entity.getComponent<Navigator>().pathIndex = entity.getComponent<Navigator>().target.getComponent<Node>().path.size();
                 return;
             }
         }

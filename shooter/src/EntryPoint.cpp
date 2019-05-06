@@ -46,7 +46,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     FontID::handles[FontID::CGA] = data.resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
     
 #ifndef __linux__
-    /*sf::Image img;
+    sf::Image img;
     if (img.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/cursor.png"))
     {
         data.cursor = std::make_unique<sf::Cursor>();
@@ -54,7 +54,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
         {
             xy::App::getRenderWindow()->setMouseCursor(*data.cursor);
         }
-    }*/
+    }
 #endif //cursors are kinda broken on linux
 
     ss->registerState<MenuState>(StateID::MainMenu, data);

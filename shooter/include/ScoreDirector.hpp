@@ -20,25 +20,33 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 
+#include <SFML/System/Clock.hpp>
+
 namespace sf
 {
     class Font;
 }
 
+struct SharedData;
 class ScoreDirector final : public xy::Director
 {
 public:
-    ScoreDirector(sf::Font&, std::int32_t);
+    ScoreDirector(sf::Font&, std::int32_t, SharedData&);
 
     void handleMessage(const xy::Message&) override;
+
+    void process(float) override;
 
 private:
 
     sf::Font& m_font;
-    std::int32_t m_score;
+    SharedData& m_sharedData;
 
     std::int32_t m_alienCount;
     std::int32_t m_humanCount;
+
+    sf::Clock m_alienClock;
+    sf::Clock m_humanClock;
 
     void spawnScoreItem(sf::Vector2f, std::int32_t);
     void updateAlienCount();

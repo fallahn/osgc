@@ -29,6 +29,7 @@ source distribution.
 
 #include "PauseState.hpp"
 #include "ResourceIDs.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -47,7 +48,7 @@ source distribution.
 
 namespace
 {
-    const sf::Time DelayTime = sf::seconds(1.5f); //delay input buy this so we don't accidentally close the menu
+    const sf::Time DelayTime = sf::seconds(0.5f); //delay input buy this so we don't accidentally close the menu
     const std::int32_t Deletable = 0x1;
     const std::int32_t ScoreString = 0x2;
     const std::int32_t TableString = 0x4;
@@ -104,7 +105,7 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
-    ctx.appInstance.setMouseCursorVisible(true);
+    xy::App::setMouseCursorVisible(true);
 }
 
 //public
@@ -143,8 +144,18 @@ bool PauseState::handleEvent(const sf::Event& evt)
         }
         else if (m_sharedData.pauseMessage == SharedData::GameOver)
         {
-            //TODO move to next level if game won instead
-            showScoreInput();
+            //move to next level if game won
+            if (m_sharedData.gameoverType == SharedData::Win)
+            {
+                LOG("Refactor this into own GameOver state", xy::Logger::Type::Info);
+                m_sharedData.playerData.currentMap = (m_sharedData.playerData.currentMap + 1) % ConstVal::MapNames.size();
+                requestStackClear();
+                requestStackPush(StateID::Game);
+            }
+            else
+            {
+                showScoreInput();
+            }
         }
         else if(m_sharedData.pauseMessage == SharedData::Error)
         {
@@ -162,7 +173,18 @@ bool PauseState::handleEvent(const sf::Event& evt)
         case 1:
             if (m_sharedData.pauseMessage == SharedData::GameOver)
             {
-                showScoreInput();
+                //move to next level if game won
+                if (m_sharedData.gameoverType == SharedData::Win)
+                {
+                    LOG("Refactor this into own GameOver state", xy::Logger::Type::Info);
+                    m_sharedData.playerData.currentMap = (m_sharedData.playerData.currentMap + 1) % ConstVal::MapNames.size();
+                    requestStackClear();
+                    requestStackPush(StateID::Game);
+                }
+                else
+                {
+                    showScoreInput();
+                }
             }
             else if (m_sharedData.pauseMessage == SharedData::Error)
             {

@@ -23,6 +23,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Cursor.hpp>
 
+#include <memory>
+
 namespace StateID
 {
     enum
@@ -50,11 +52,19 @@ struct KeyMap final
     std::int32_t joyPickup = 1;
 };
 
+struct PlayerData final
+{
+    std::int32_t score = 0;
+    std::size_t currentMap = 0;
+};
+
 struct SharedData final
 {
-    SharedData() = default;
-
     xy::ResourceHandler resources;
+    LoadingScreen loadingScreen;
+    KeyMap keymap;
+    PlayerData playerData;
+
     xy::ShaderResource* shaders = nullptr;
     enum
     {
@@ -79,7 +89,7 @@ struct SharedData final
     };
     std::int32_t difficulty = Easy;
 
-    KeyMap keymap;
-    //sf::Cursor cursor;
-    LoadingScreen loadingScreen;
+    //hax to get around std::any not supporting non-copyable
+    //types. Don't try this at home kids!
+    std::shared_ptr<sf::Cursor> cursor;
 };

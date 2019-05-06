@@ -222,9 +222,18 @@ void MenuState::initScene()
         m_configSettings.save(xy::FileSystem::getConfigDirectory(AppName) + ConfigName);
     }
 
-    //TODO validate loaded settings incase someone dicked around with the file
-    LOG("MUST validate loaded settings file...", xy::Logger::Type::Warning);
+    //validate loaded settings incase someone dicked around with the file
+    if (!m_configSettings.findProperty("up")) { m_configSettings.addProperty("up", std::to_string(m_sharedData.keymap.up)); }
+    if (!m_configSettings.findProperty("down")) { m_configSettings.addProperty("down", std::to_string(m_sharedData.keymap.down)); }
+    if (!m_configSettings.findProperty("left")) { m_configSettings.addProperty("left", std::to_string(m_sharedData.keymap.left)); }
+    if (!m_configSettings.findProperty("right")) { m_configSettings.addProperty("right", std::to_string(m_sharedData.keymap.right)); }
+    if (!m_configSettings.findProperty("fire")) { m_configSettings.addProperty("fire", std::to_string(m_sharedData.keymap.fire)); }
+    if (!m_configSettings.findProperty("pickup")) { m_configSettings.addProperty("pickup", std::to_string(m_sharedData.keymap.pickup)); }
+    if (!m_configSettings.findProperty("joy_fire")) { m_configSettings.addProperty("joy_fire", std::to_string(m_sharedData.keymap.joyFire)); }
+    if (!m_configSettings.findProperty("joy_pickup")) { m_configSettings.addProperty("joy_pickup", std::to_string(m_sharedData.keymap.joyPickup)); }
+    if (!m_configSettings.findProperty("difficulty")) { m_configSettings.addProperty("difficulty", std::to_string(m_sharedData.difficulty)); }
 
+    //then read back into the struct
     m_sharedData.keymap.up = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("up")->getValue<std::int32_t>());
     m_sharedData.keymap.down = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("down")->getValue<std::int32_t>());
     m_sharedData.keymap.left = static_cast<sf::Keyboard::Key>(m_configSettings.findProperty("left")->getValue<std::int32_t>());
@@ -810,6 +819,8 @@ void MenuState::buildDifficultySelect()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_sharedData.difficulty = SharedData::Easy;
+                    m_sharedData.playerData.currentMap = 0;
+                    m_sharedData.playerData.score = 0;
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -833,6 +844,8 @@ void MenuState::buildDifficultySelect()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_sharedData.difficulty = SharedData::Medium;
+                    m_sharedData.playerData.currentMap = 0;
+                    m_sharedData.playerData.score = 0;
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -856,6 +869,8 @@ void MenuState::buildDifficultySelect()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_sharedData.difficulty = SharedData::Hard;
+                    m_sharedData.playerData.currentMap = 0;
+                    m_sharedData.playerData.score = 0;
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
