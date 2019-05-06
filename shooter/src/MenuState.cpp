@@ -73,7 +73,7 @@ namespace
     const std::int32_t HelpDepth = 10;
 
     const std::string AppName("drone_drop");
-    const std::string ConfigName("settings.cfg");
+    const std::string ConfigName("keybinds.cfg");
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
