@@ -243,7 +243,7 @@ void GameState::handleMessage(const xy::Message& msg)
             {
                 e.getComponent<xy::Drawable>().setDepth(-ConstVal::BackgroundDepth);
 
-                showCrashMessage(data.lives == 0); //has to be done here to ensure shader updated
+                showCrashMessage(m_sharedData.playerData.lives == 0); //has to be done here to ensure shader updated
             };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -301,7 +301,6 @@ void GameState::handleMessage(const xy::Message& msg)
 
                     auto* msg = getContext().appInstance.getMessageBus().post<DroneEvent>(MessageID::DroneMessage);
                     msg->type = DroneEvent::Spawned;
-                    msg->lives = drone.lives;
                     msg->position = e.getComponent<xy::Transform>().getPosition();
                 };
                 m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -393,7 +392,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
-    m_gameScene.addSystem<DroneSystem>(mb, m_sprites, m_sharedData.difficulty);
+    m_gameScene.addSystem<DroneSystem>(mb, m_sprites, m_sharedData);
     m_gameScene.addSystem<AlienSystem>(mb, m_sprites, m_sharedData.difficulty);
     m_gameScene.addSystem<HumanSystem>(mb, m_sprites, m_sharedData.difficulty);
     m_gameScene.addSystem<BombSystem>(mb);
@@ -623,7 +622,7 @@ void GameState::loadWorld()
     entity.addComponent<xy::Transform>().setPosition(8.f, 28.f);
     entity.addComponent<xy::Drawable>().setTexture(m_sprites[SpriteID::Drone].getTexture());
     entity.addComponent<ItemBar>().xCount = 4;
-    entity.getComponent<ItemBar>().itemCount = Drone::StartLives;
+    entity.getComponent<ItemBar>().itemCount = m_sharedData.playerData.lives;
     entity.getComponent<ItemBar>().textureRect = m_sprites[SpriteID::Drone].getTextureRect();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::LifeMeter;
     otherSideTx.addChild(entity.getComponent<xy::Transform>());

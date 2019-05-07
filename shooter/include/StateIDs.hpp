@@ -57,6 +57,7 @@ struct PlayerData final
 {
     std::int32_t score = 0;
     std::size_t currentMap = 0;
+    std::int32_t lives = 5;
 };
 
 struct SharedData final

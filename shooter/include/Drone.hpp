@@ -40,7 +40,7 @@ struct Drone final
     float health = StartHealth;
     float battery = 100.f;
     std::int32_t ammo = StartAmmo;
-    std::int32_t lives = StartLives;
+    //std::int32_t lives = StartLives; //moved to shared data so maintained between maps
     float height = ConstVal::DroneHeight;
     float gravity = 0.f;
     xy::Entity camera;
@@ -74,10 +74,11 @@ struct Drone final
     }
 };
 
+struct SharedData;
 class DroneSystem final : public xy::System
 {
 public:
-    DroneSystem(xy::MessageBus&, const SpriteArray&, std::int32_t);
+    DroneSystem(xy::MessageBus&, const SpriteArray&, SharedData&);
 
     void handleMessage(const xy::Message&) override;
 
@@ -87,6 +88,7 @@ private:
 
     std::vector<float> m_wavetable;
     const SpriteArray& m_sprites;
+    SharedData& m_sharedData;
     float m_difficulty;
 
     void processFlying(xy::Entity, float);

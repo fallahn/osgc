@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "MessageIDs.hpp"
 #include "KeyMapping.hpp"
+#include "Drone.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -1071,6 +1072,7 @@ void MenuState::buildDifficultySelect()
                     m_sharedData.difficulty = SharedData::Easy;
                     m_sharedData.playerData.currentMap = 0;
                     m_sharedData.playerData.score = 0;
+                    m_sharedData.playerData.lives = Drone::StartLives;
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -1096,6 +1098,7 @@ void MenuState::buildDifficultySelect()
                     m_sharedData.difficulty = SharedData::Medium;
                     m_sharedData.playerData.currentMap = 0;
                     m_sharedData.playerData.score = 0;
+                    m_sharedData.playerData.lives = Drone::StartLives;
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -1121,6 +1124,7 @@ void MenuState::buildDifficultySelect()
                     m_sharedData.difficulty = SharedData::Hard;
                     m_sharedData.playerData.currentMap = 0;
                     m_sharedData.playerData.score = 0;
+                    m_sharedData.playerData.lives = Drone::StartLives;
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }

@@ -63,7 +63,6 @@ struct DroneEvent final
         CollisionStart,
         CollisionEnd
     }type = Spawned;
-    std::int32_t lives = 0;
     sf::Vector2f position;
 };
 

@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "ItemBar.hpp"
 #include "CollisionTypes.hpp"
 #include "Alien.hpp"
+#include "StateIDs.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -47,10 +48,11 @@ namespace
     const float Gravity = 9.9f;
 }
 
-DroneSystem::DroneSystem(xy::MessageBus& mb, const SpriteArray& sprites, std::int32_t difficulty)
+DroneSystem::DroneSystem(xy::MessageBus& mb, const SpriteArray& sprites, SharedData& sd)
     : xy::System(mb, typeid(DroneSystem)),
     m_sprites   (sprites),
-    m_difficulty(static_cast<float>(difficulty))
+    m_difficulty(static_cast<float>(sd.difficulty)),
+    m_sharedData(sd)
 {
     requireComponent<xy::Transform>();
     requireComponent<Drone>();
@@ -453,19 +455,19 @@ void DroneSystem::processDying(xy::Entity entity, float dt)
     if (drone.height > ConstVal::MaxDroneHeight)
     {
         //hit the ground!
-        drone.lives--;
+        m_sharedData.playerData.lives--;
         drone.state = Drone::State::Dead;
         drone.health = 1.f; //prevents immediately dying again when respawning with no health
 
         auto* msg = postMessage<DroneEvent>(MessageID::DroneMessage);
         msg->type = DroneEvent::Died;
         msg->position = tx.getPosition();
-        msg->lives = drone.lives;
 
+        auto lives = m_sharedData.playerData.lives;
         cmd.targetFlags = CommandID::LifeMeter;
-        cmd.action = [drone](xy::Entity e, float)
+        cmd.action = [lives](xy::Entity e, float)
         {
-            e.getComponent<ItemBar>().itemCount = drone.lives;
+            e.getComponent<ItemBar>().itemCount = lives;
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 
