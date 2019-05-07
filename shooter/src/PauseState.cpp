@@ -108,10 +108,6 @@ bool PauseState::handleEvent(const sf::Event& evt)
         return false;
     }
 
-    //oh what have I done? Take note, don't be lazy and try
-    //cramming so many state types into one state class!!
-    //TODO refactor this mess before it gets any more knotted
-
     if (evt.type == sf::Event::KeyReleased)
     {
         if (m_sharedData.pauseMessage == SharedData::Paused)

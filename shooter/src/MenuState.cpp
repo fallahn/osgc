@@ -73,6 +73,26 @@ namespace
         gl_FragColor = texture2D(u_texture, coord) * gl_Color * u_alpha;
     })";
 
+    class FlashCallback final
+    {
+    public:
+        void operator() (xy::Entity e, float dt)
+        {
+            m_currentTime -= dt;
+            if (m_currentTime < 0)
+            {
+                m_currentTime = 0.25f;
+
+                auto colour = e.getComponent<xy::Text>().getFillColour();
+                colour.a = (colour.a == 0) ? 255 : 0;
+                e.getComponent<xy::Text>().setFillColour(colour);
+             }
+        }
+
+    private:
+        float m_currentTime = 0.25f;
+    };
+
     const std::string AppName("drone_drop");
     const std::string ConfigName("keybinds.cfg");
 }
@@ -85,6 +105,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_menuActive    (false)
 {
     launchLoadingScreen();
+
+    m_activeMapping.joyButtonDest = nullptr;
 
     initScene();
     loadAssets();
@@ -145,6 +167,51 @@ bool MenuState::handleEvent(const sf::Event& evt)
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
     }
+
+    if (m_activeMapping.joybindActive)
+    {
+        if (evt.type == sf::Event::JoystickButtonPressed
+            && evt.joystickButton.joystickId == 0)
+        {
+            //TODO check existing bindings (but not the requested one)
+            //to see if key code already bound
+
+            *m_activeMapping.joyButtonDest = evt.joystickButton.button;
+            m_activeMapping.joyButtonDest = nullptr;
+            m_activeMapping.joybindActive = false;
+
+            auto ent = m_activeMapping.displayEntity;
+            m_activeMapping.displayEntity = {};
+
+            ent.getComponent<xy::Text>().setString(KeyMapping.at(evt.key.code));
+            auto colour = ent.getComponent<xy::Text>().getFillColour();
+            colour.a = 255;
+            ent.getComponent<xy::Text>().setFillColour(colour);
+            ent.getComponent<xy::Callback>().active = false;
+        }
+    }
+    else if (m_activeMapping.keybindActive)
+    {
+        if (evt.type == sf::Event::KeyReleased)
+        {
+            //TODO check existing bindings (but not the requested one)
+            //to see if key code already bound
+
+            *m_activeMapping.keyDest = evt.key.code;
+            m_activeMapping.keyDest = nullptr;
+            m_activeMapping.keybindActive = false;
+
+            auto ent = m_activeMapping.displayEntity;
+            m_activeMapping.displayEntity = {};
+
+            ent.getComponent<xy::Text>().setString(KeyMapping.at(evt.key.code));
+            auto colour = ent.getComponent<xy::Text>().getFillColour();
+            colour.a = 255;
+            ent.getComponent<xy::Text>().setFillColour(colour);
+            ent.getComponent<xy::Callback>().active = false;
+        }
+    }
+
 
     m_scene.forwardEvent(evt);
     return true;
@@ -655,6 +722,23 @@ void MenuState::buildHelp()
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    saveSettings();
+
+                    m_activeMapping.joybindActive = false;
+                    m_activeMapping.keybindActive = false;
+                    m_activeMapping.keyDest = nullptr;
+
+                    auto ent = m_activeMapping.displayEntity;
+                    m_activeMapping.displayEntity = {};
+
+                    if (ent.isValid())
+                    {
+                        auto colour = ent.getComponent<xy::Text>().getFillColour();
+                        colour.a = 255;
+                        ent.getComponent<xy::Text>().setFillColour(colour);
+                        ent.getComponent<xy::Callback>().active = false;
+                    }
                 }
             });
     parentTx.addChild(entity.getComponent<xy::Transform>());
@@ -663,6 +747,7 @@ void MenuState::buildHelp()
     const sf::Vector2f textScale(0.25f, 0.25f);
     const float verticalSpacing = 24.f;
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
+    
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
@@ -670,7 +755,28 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.up));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    sf::FloatRect buttonArea(0.f, 0.f, 12.f, 12.f);
+    auto buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeMapping.keybindActive = true;
+                    m_activeMapping.keyDest = &m_sharedData.keymap.up;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
 
@@ -681,7 +787,27 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.down));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeMapping.keybindActive = true;
+                    m_activeMapping.keyDest = &m_sharedData.keymap.down;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
 
@@ -692,7 +818,27 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.left));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeMapping.keybindActive = true;
+                    m_activeMapping.keyDest = &m_sharedData.keymap.left;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
 
@@ -703,7 +849,27 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.right));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeMapping.keybindActive = true;
+                    m_activeMapping.keyDest = &m_sharedData.keymap.right;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
 
@@ -714,7 +880,27 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.fire));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeMapping.keybindActive = true;
+                    m_activeMapping.keyDest = &m_sharedData.keymap.fire;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
 
@@ -725,7 +911,27 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.pickup));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeMapping.keybindActive = true;
+                    m_activeMapping.keyDest = &m_sharedData.keymap.pickup;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     //joy buttons
     textPos.x += 17.f;
@@ -738,7 +944,28 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(std::to_string(m_sharedData.keymap.joyPickup));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(15.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse
+                    && sf::Joystick::isConnected(0))
+                {
+                    m_activeMapping.joybindActive = true;
+                    m_activeMapping.joyButtonDest = &m_sharedData.keymap.joyPickup;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 
     textPos.y += verticalSpacing;
 
@@ -749,7 +976,28 @@ void MenuState::buildHelp()
     entity.addComponent<xy::Text>(font).setString(std::to_string(m_sharedData.keymap.joyFire));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonEnt = m_scene.createEntity();
+    buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
+    buttonEnt.getComponent<xy::Transform>().move(15.f, -2.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback(
+            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse
+                    && sf::Joystick::isConnected(0))
+                {
+                    m_activeMapping.joybindActive = true;
+                    m_activeMapping.joyButtonDest = &m_sharedData.keymap.joyFire;
+                    m_activeMapping.displayEntity = entity;
+
+                    entity.getComponent<xy::Callback>().active = true;
+                }
+            });
+    parentTx.addChild(buttonEnt.getComponent<xy::Transform>());
 }
 
 void MenuState::buildDifficultySelect()

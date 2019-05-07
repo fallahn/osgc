@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/ConfigFile.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 struct SharedData;
 class MenuState final : public xy::State
@@ -54,6 +55,20 @@ private:
     bool m_menuActive;
 
     xy::ConfigFile m_configSettings;
+
+    struct ActiveMapping final
+    {
+        bool keybindActive = false;
+        bool joybindActive = false;
+
+        union
+        {
+            sf::Keyboard::Key* keyDest;
+            std::int32_t* joyButtonDest;
+        };
+
+        xy::Entity displayEntity;
+    }m_activeMapping;
 
     void initScene();
     void loadAssets();
