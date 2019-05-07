@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 #include <array>
+#include <string>
 
 namespace ConstVal
 {
