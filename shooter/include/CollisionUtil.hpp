@@ -14,6 +14,7 @@ struct IntersectionResult
     bool intersects = false;
     sf::Vector2f normal;
     sf::Vector2f intersectionPoint;
+    float penetration = 0.f;
 };
 
 IntersectionResult intersects(const Segment&, sf::FloatRect target);

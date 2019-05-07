@@ -302,21 +302,21 @@ void HumanSystem::updateScared(xy::Entity entity)
 
     sf::Uint64 searchFlags = CollisionBox::Filter::Alien | CollisionBox::Solid;
     auto& nav = entity.getComponent<Navigator>();
-    if (nav.pathIndex == nav.target.getComponent<Node>().path.size())
-    {
-        //searchFlags |=CollisionBox::Filter::Navigation;
-        //look for a new nav node
-    }
-    else
-    {
-        //add next path point to velocity.
-        pathVector = nav.target.getComponent<Node>().path[nav.pathIndex] - tx.getPosition();
+    //if (nav.pathIndex == nav.target.getComponent<Node>().path.size())
+    //{
+    //    //searchFlags |=CollisionBox::Filter::Navigation;
+    //    //look for a new nav node
+    //}
+    //else
+    //{
+    //    //add next path point to velocity.
+    //    pathVector = nav.target.getComponent<Node>().path[nav.pathIndex] - tx.getPosition();
 
-        if (xy::Util::Vector::lengthSquared(pathVector) < NodeDistanceSqr)
-        {
-            nav.pathIndex++;
-        }
-    }
+    //    if (xy::Util::Vector::lengthSquared(pathVector) < NodeDistanceSqr)
+    //    {
+    //        nav.pathIndex++;
+    //    }
+    //}
 
     auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, searchFlags);
     for (auto e : nearby)
@@ -378,7 +378,7 @@ void HumanSystem::updateScared(xy::Entity entity)
                 }
                 else*/
                 {
-                    wallVector += xy::Util::Vector::reflect(human.velocity, result.normal) * WallDeterrant;
+                    wallVector += /*result.normal * -result.penetration;*/ xy::Util::Vector::reflect(human.velocity, result.normal)* WallDeterrant;
                 }
             }
         }

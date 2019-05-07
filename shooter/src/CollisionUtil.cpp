@@ -117,6 +117,7 @@ IntersectionResult intersects(const Segment& firstSegment, sf::FloatRect target)
             {
                 //directly above
                 result.normal = { 0.f, -1.f };
+                result.penetration = firstSegment.second.y - target.top;
                 return result;
             }
             //TODO test quadrant and seg intersect correct two sides
@@ -138,6 +139,7 @@ IntersectionResult intersects(const Segment& firstSegment, sf::FloatRect target)
             {
                 //directly below
                 result.normal = { 0.f, 1.f };
+                result.penetration = (target.top + target.height) - firstSegment.second.y;
                 return result;
             }
             //TODO test quadrant and seg intersect correct two sides
@@ -160,6 +162,7 @@ IntersectionResult intersects(const Segment& firstSegment, sf::FloatRect target)
             {
                 //directly left
                 result.normal = { -1.f, 0.f };
+                result.penetration = firstSegment.second.x - target.left;
             }
             //TODO test quadrant and seg intersect correct two sides
 
@@ -180,6 +183,7 @@ IntersectionResult intersects(const Segment& firstSegment, sf::FloatRect target)
             {
                 //directly right
                 result.normal = { 1.f, 0.f };
+                result.penetration = (target.left + target.width) - firstSegment.second.x;
             }
             //TODO test quadrant and seg intersect correct two sides
 
