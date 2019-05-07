@@ -184,7 +184,7 @@ bool MenuState::handleEvent(const sf::Event& evt)
             auto ent = m_activeMapping.displayEntity;
             m_activeMapping.displayEntity = {};
 
-            ent.getComponent<xy::Text>().setString(KeyMapping.at(evt.key.code));
+            ent.getComponent<xy::Text>().setString(std::to_string(evt.joystickButton.button));
             auto colour = ent.getComponent<xy::Text>().getFillColour();
             colour.a = 255;
             ent.getComponent<xy::Text>().setFillColour(colour);
