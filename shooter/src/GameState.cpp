@@ -174,16 +174,16 @@ bool GameState::handleEvent(const sf::Event& evt)
             requestStackPush(StateID::Pause);
             m_sideCamera.getComponent<xy::AudioEmitter>().pause();
             break;
-        //case sf::Keyboard::K:
-        //    m_sharedData.pauseMessage = SharedData::GameOver;
-        //    m_sharedData.gameoverType = SharedData::Lose;
-        //    requestStackPush(StateID::Pause);
-        //    break;
-        //case sf::Keyboard::L:
-        //    m_sharedData.pauseMessage = SharedData::GameOver;
-        //    m_sharedData.gameoverType = SharedData::Win;
-        //    requestStackPush(StateID::Pause);
-        //    break;
+        case sf::Keyboard::K:
+            m_sharedData.pauseMessage = SharedData::GameOver;
+            m_sharedData.gameoverType = SharedData::Lose;
+            requestStackPush(StateID::GameOver);
+            break;
+        case sf::Keyboard::L:
+            m_sharedData.pauseMessage = SharedData::GameOver;
+            m_sharedData.gameoverType = SharedData::Win;
+            requestStackPush(StateID::GameOver);
+            break;
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed
@@ -342,12 +342,12 @@ void GameState::handleMessage(const xy::Message& msg)
             case GameEvent::NoAliensLeft:
                 m_sharedData.pauseMessage = SharedData::GameOver;
                 m_sharedData.gameoverType = SharedData::Win;
-                requestStackPush(StateID::Pause);
+                requestStackPush(StateID::GameOver);
                 break;
             case GameEvent::NoHumansLeft:
                 m_sharedData.pauseMessage = SharedData::GameOver;
                 m_sharedData.gameoverType = SharedData::Lose;
-                requestStackPush(StateID::Pause);
+                requestStackPush(StateID::GameOver);
                 break;
             }
         }
@@ -808,13 +808,13 @@ void GameState::showCrashMessage(bool gameOver)
     {
         m_sharedData.pauseMessage = SharedData::GameOver;
         m_sharedData.gameoverType = SharedData::Lose;
+        requestStackPush(StateID::GameOver);
     }
     else
     {
         m_sharedData.pauseMessage = SharedData::Died;
+        requestStackPush(StateID::Pause);
     }
-
-    requestStackPush(StateID::Pause);
 }
 
 void GameState::drawCrater(sf::Vector2f position)

@@ -6,6 +6,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/DroneSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameOverState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/HumanSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ItemBarSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp

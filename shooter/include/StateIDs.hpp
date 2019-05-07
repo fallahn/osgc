@@ -31,7 +31,8 @@ namespace StateID
     {
         MainMenu,
         Game,
-        Pause
+        Pause,
+        GameOver
     };
 }
 
