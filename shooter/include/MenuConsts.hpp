@@ -41,5 +41,7 @@ namespace Menu
     static const float HelpHiddenPosition = 1100.f;
     static const float PlanetShownPosition = 0.f;
 
+    static const std::int32_t BackgroundRenderDepth = -10;
+    static const std::int32_t MenuRenderDepth = 10;
     static const std::int32_t TextRenderDepth = 1;
 }

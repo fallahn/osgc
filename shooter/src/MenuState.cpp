@@ -73,8 +73,6 @@ namespace
         gl_FragColor = texture2D(u_texture, coord) * gl_Color * u_alpha;
     })";
 
-    const std::int32_t HelpDepth = 10;
-
     const std::string AppName("drone_drop");
     const std::string ConfigName("keybinds.cfg");
 }
@@ -285,7 +283,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setString("Drone Drop!");
     entity.getComponent<xy::Text>().setCharacterSize(120);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //menu items
@@ -297,7 +295,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setString("Start Game");
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
 
     auto textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
@@ -343,7 +341,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setString("Options");
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
@@ -366,7 +364,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setString("Help/Controls");
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
@@ -412,7 +410,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setString("Return to Launcher");
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
@@ -436,7 +434,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setString("Quit To Desktop");
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
@@ -461,7 +459,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize / 2);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::TextCrawl;
     entity.addComponent<xy::Callback>().userData = std::make_any<float>(1.f);
     entity.getComponent<xy::Callback>().function =
@@ -482,7 +480,7 @@ void MenuState::buildMenu()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(0.f, -xy::DefaultSceneSize.y);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts.resize(6);
     verts[0] = { sf::Vector2f(0.f, 220.f), sf::Color(0,0,0,120) };
@@ -519,7 +517,7 @@ void MenuState::buildMenu()
     //planet sprite
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
-    entity.addComponent<xy::Drawable>().setDepth(-10);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::BackgroundRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::MenuBackground]));
     entity.addComponent<xy::AudioEmitter>().setSource("assets/sound/menu.ogg");
     entity.getComponent<xy::AudioEmitter>().setChannel(0);
@@ -563,7 +561,7 @@ void MenuState::buildStarfield()
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Drawable>().setDepth(-20);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::BackgroundRenderDepth - 2);
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts.clear();
 
@@ -579,7 +577,7 @@ void MenuState::buildStarfield()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(40.f, 0.f);
-    entity.addComponent<xy::Drawable>().setDepth(-20);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::BackgroundRenderDepth - 2);
     auto& verts2 = entity.getComponent<xy::Drawable>().getVertices();
     verts2.clear();
 
@@ -597,7 +595,7 @@ void MenuState::buildStarfield()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(-40.f, 0.f);
-    entity.addComponent<xy::Drawable>().setDepth(-20);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::BackgroundRenderDepth - 1);
     auto& verts3 = entity.getComponent<xy::Drawable>().getVertices();
     verts3.clear();
 
@@ -616,7 +614,7 @@ void MenuState::buildHelp()
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(20.f, Menu::HelpHiddenPosition);
     entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::HowToPlay]));
     entity.addComponent<Slider>().speed = 4.f;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Help;
@@ -668,7 +666,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.up));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -679,7 +677,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.down));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -690,7 +688,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.left));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -701,7 +699,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.right));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -712,7 +710,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.fire));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -723,7 +721,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.keymap.pickup));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -736,7 +734,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(std::to_string(m_sharedData.keymap.joyPickup));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -747,7 +745,7 @@ void MenuState::buildHelp()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
-    entity.addComponent<xy::Drawable>().setDepth(HelpDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setString(std::to_string(m_sharedData.keymap.joyFire));
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -758,7 +756,7 @@ void MenuState::buildDifficultySelect()
 {
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::DifficultySelect]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
@@ -809,7 +807,7 @@ void MenuState::buildDifficultySelect()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(buttonPos);
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Novice");
@@ -835,7 +833,7 @@ void MenuState::buildDifficultySelect()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(buttonPos);
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Seasoned");
@@ -860,7 +858,7 @@ void MenuState::buildDifficultySelect()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(buttonPos);
     entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(32);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Pro");
@@ -887,7 +885,7 @@ void MenuState::buildDifficultySelect()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(12.f, 28.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("science");
     entity.addComponent<xy::SpriteAnimation>().play(0);
     parentTx.addChild(entity.getComponent<xy::Transform>());
@@ -896,7 +894,7 @@ void MenuState::buildDifficultySelect()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(144.f, 28.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("science");
     entity.addComponent<xy::SpriteAnimation>().play(0);
     parentTx.addChild(entity.getComponent<xy::Transform>());
