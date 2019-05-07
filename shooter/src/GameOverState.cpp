@@ -76,10 +76,10 @@ GameOverState::GameOverState(xy::StateStack& ss, xy::State::Context ctx, SharedD
     auto & verts = entity.getComponent<xy::Drawable>().getVertices();
     verts =
     {
-        sf::Vertex(sf::Vector2f(0.f, 0.f), sf::Color(0,0,0,120)),
-        sf::Vertex(sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color(0,0,0,120)),
-        sf::Vertex(xy::DefaultSceneSize, sf::Color(0,0,0,120)),
-        sf::Vertex(sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color(0,0,0,120)),
+        sf::Vertex(sf::Vector2f(0.f, 0.f), sf::Color(0,0,0,ConstVal::OverlayTransparency)),
+        sf::Vertex(sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color(0,0,0,ConstVal::OverlayTransparency)),
+        sf::Vertex(xy::DefaultSceneSize, sf::Color(0,0,0,ConstVal::OverlayTransparency)),
+        sf::Vertex(sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color(0,0,0,ConstVal::OverlayTransparency)),
     };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
@@ -108,7 +108,7 @@ bool GameOverState::handleEvent(const sf::Event& evt)
     if (evt.type == sf::Event::KeyReleased)
     {
         //this is a fudge set by submitscore() - we'll get rid of this eventually
-        if (m_sharedData.pauseMessage == SharedData::Error)
+        if (m_sharedData.pauseMessage == SharedData::None)
         {
             requestStackClear();
             requestStackPush(StateID::MainMenu);
@@ -130,24 +130,14 @@ bool GameOverState::handleEvent(const sf::Event& evt)
     else if (evt.type == sf::Event::JoystickButtonPressed
         && evt.joystickButton.joystickId == 0)
     {
-        switch (evt.joystickButton.button)
+        //move to next level if game won
+        if (m_sharedData.gameoverType == SharedData::Win)
         {
-        default: break;
-        case 6:
-        case 1:
-            //move to next level if game won
-            if (m_sharedData.gameoverType == SharedData::Win)
-            {
-                gotoNextMap();
-            }
-            else
-            {
-                showScoreInput();
-            }
-            break;
-        case 0:
-
-            break;
+            gotoNextMap();
+        }
+        else
+        {
+            showScoreInput();
         }
     }
 
@@ -194,7 +184,7 @@ bool GameOverState::update(float dt)
     m_sharedData.shaders->get(ShaderID::Noise).setUniform("u_time", shaderTime);
 
     m_scene.update(dt);
-    return true;
+    return false;
 }
 
 void GameOverState::draw()
@@ -213,28 +203,38 @@ void GameOverState::createGameover()
 {
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
 
+    std::string mainString;
+    std::string subString;
+    std::uint32_t textSize = 176; //best size is multiple of 8
+
+    if (m_sharedData.gameoverType == SharedData::Win)
+    {
+        mainString = "Round Complete";
+        subString = "X Colonists Were Saved!";
+        textSize = 120;
+    }
+    else
+    {
+        mainString = "GAME OVER";
+        subString = (m_sharedData.playerData.lives == 0) ? "No Drones Left" : "The Colonists All Died";
+    }
+
     //text entities
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -160.f);
-    entity.addComponent<xy::Text>(font).setString("GAME OVER");
-    entity.getComponent<xy::Text>().setCharacterSize(180);
+    entity.getComponent<xy::Transform>().move(0.f, -80.f);
+    entity.addComponent<xy::Text>(font).setString(mainString);
+    entity.getComponent<xy::Text>().setCharacterSize(textSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = Deletable;
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 128.f);
-    if (m_sharedData.gameoverType == SharedData::Win)
-    {
-        entity.addComponent<xy::Text>(font).setString("You Win");
-    }
-    else
-    {
-        entity.addComponent<xy::Text>(font).setString("You Lose");
-    }
-    entity.getComponent<xy::Text>().setCharacterSize(50);
+    entity.getComponent<xy::Transform>().move(0.f, 108.f);
+    entity.addComponent<xy::Text>(font).setString(subString);
+
+    entity.getComponent<xy::Text>().setCharacterSize(48);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = Deletable;
@@ -351,6 +351,6 @@ void GameOverState::submitScore()
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
     //fudge the state so key presses return to the main menu
-    m_sharedData.pauseMessage = SharedData::Error;
+    m_sharedData.pauseMessage = SharedData::None;
     m_delayClock.restart();
 }

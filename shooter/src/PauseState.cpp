@@ -72,10 +72,10 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts =
     {
-        sf::Vertex(sf::Vector2f(0.f, 0.f), sf::Color(0,0,0,120)),
-        sf::Vertex(sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color(0,0,0,120)),
-        sf::Vertex(xy::DefaultSceneSize, sf::Color(0,0,0,120)),
-        sf::Vertex(sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color(0,0,0,120)),
+        sf::Vertex(sf::Vector2f(0.f, 0.f), sf::Color(0,0,0,ConstVal::OverlayTransparency)),
+        sf::Vertex(sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color(0,0,0,ConstVal::OverlayTransparency)),
+        sf::Vertex(xy::DefaultSceneSize, sf::Color(0,0,0,ConstVal::OverlayTransparency)),
+        sf::Vertex(sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color(0,0,0,ConstVal::OverlayTransparency)),
     };
     entity.getComponent<xy::Drawable>().updateLocalBounds(); // this is required whenever vertex data is modified
 

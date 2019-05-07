@@ -41,4 +41,6 @@ namespace ConstVal
     static const sf::FloatRect DamageRadius(-32.f, -32.f, 64.f, 64.f);
 
     static const std::array<std::string, 2u> MapNames = { "01.tmx", "02.tmx" }; //TODO fetch this from a config file
+
+    static const std::uint8_t OverlayTransparency = 180;
 }

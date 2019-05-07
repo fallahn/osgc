@@ -1,7 +1,15 @@
-Top Down Shooter Game
----------------------
+Drone Drop!
+-----------
 
-This project compiles as a plugin for OSGC.
+A distant earth colony has come under attack from alien insects for some reason! Their only hope is a maverick drone pilot, armed with drop-bombs and some second hand batteries. Beat back the alien infestation from above and save as many humans as you can!
+
+Drone drop is a defense style game, played by dropping bombs on the alien scourge from above. Protect the colonists while being careful not to run out of battery power or ammo, swooping down to collect more whenever you can.
+
+Based on games from the 8-bit era, carefully adhering to the 27 colour palette of the Amstrad CPC series of micro computers from the 1980s, Drone Drop offers all the pixelated nostalgia you could want...
+
+This project compiles as a plugin for [OSGC](https://github.com/fallahn/osgc).  
+
+![Drone Drop](../screens/linux01.png?raw=true "Drone Drop plugin")
 
 The source code for this project is licensed under the Apache 2.0 license
 
