@@ -71,6 +71,7 @@ private:
     }m_activeMapping;
 
     std::vector<std::string> m_highScores;
+    std::vector<std::string> m_scoreTitles;
     std::size_t m_scoreIndex;
 
     void initScene();

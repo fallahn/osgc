@@ -174,7 +174,7 @@ bool GameState::handleEvent(const sf::Event& evt)
             requestStackPush(StateID::Pause);
             m_sideCamera.getComponent<xy::AudioEmitter>().pause();
             break;
-        case sf::Keyboard::K:
+        /*case sf::Keyboard::K:
             m_sharedData.pauseMessage = SharedData::GameOver;
             m_sharedData.gameoverType = SharedData::Lose;
             requestStackPush(StateID::GameOver);
@@ -183,7 +183,7 @@ bool GameState::handleEvent(const sf::Event& evt)
             m_sharedData.pauseMessage = SharedData::GameOver;
             m_sharedData.gameoverType = SharedData::Win;
             requestStackPush(StateID::GameOver);
-            break;
+            break;*/
         }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed

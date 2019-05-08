@@ -40,6 +40,7 @@ namespace CommandID
         Starfield = 0x2,
         Help = 0x4,
         TextCrawl = 0x8,
-        DifficultySelect = 0x10
+        DifficultySelect = 0x10,
+        ScoreMenu = 0x20
     };
 }

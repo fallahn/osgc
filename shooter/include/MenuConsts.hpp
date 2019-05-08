@@ -28,7 +28,7 @@ namespace Menu
     static const sf::Vector2f TitlePosition(120.f, 80.f);
     static const std::uint32_t TitleCharSize = 128;
 
-    static const sf::Vector2f ItemFirstPosition(120.f, 480.f);
+    static const sf::Vector2f ItemFirstPosition(120.f, 440.f);
     static const float ItemVerticalSpacing = 88.f;
     static const std::uint32_t ItemCharSize = 64;
     static const sf::Color TextColour = sf::Color::Yellow;
@@ -40,6 +40,7 @@ namespace Menu
     static const float StarfieldDownPosition = -xy::DefaultSceneSize.y / 2.f;
     static const float HelpHiddenPosition = 1100.f;
     static const float PlanetShownPosition = 0.f;
+    static const float ScoreHiddenPosition = xy::DefaultSceneSize.y * 1.5f;
 
     static const std::int32_t BackgroundRenderDepth = -10;
     static const std::int32_t MenuRenderDepth = 10;

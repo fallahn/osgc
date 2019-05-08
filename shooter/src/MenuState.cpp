@@ -107,6 +107,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     launchLoadingScreen();
 
     m_activeMapping.joyButtonDest = nullptr;
+    m_scoreTitles = { "Novice", "Seasoned", "Pro" };
 
     initScene();
     loadAssets();
@@ -118,6 +119,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    xy::App::setMouseCursorVisible(true);
 
     quitLoadingScreen();
 }
@@ -447,6 +450,52 @@ void MenuState::buildMenu()
                     cmd.action = [](xy::Entity e, float)
                     {
                         e.getComponent<Slider>().target = Menu::HelpShownPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::Starfield;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    itemPos.y += Menu::ItemVerticalSpacing;
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //high scores
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPos);
+    entity.addComponent<xy::Text>(font);
+    entity.getComponent<xy::Text>().setString("High Scores");
+    entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
+    entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+
+    textBounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::ScoreMenu;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = xy::DefaultSceneSize / 2.f;
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -1192,15 +1241,123 @@ void MenuState::buildHighScores()
     properties = m_sharedData.highScores.hard.getProperties();
     setString(2, properties);
 
-    /*auto tempId = m_resources.load<sf::Texture>("buns");
+    auto tempId = m_resources.load<sf::Texture>("buns");
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect({ 0.f, 0.f, 128.f, 186.f });
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect({ 0.f, 0.f, 158.f, 186.f });
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);*/
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, Menu::ScoreHiddenPosition);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::ScoreMenu;
+    entity.addComponent<Slider>().speed = 4.f;
+    auto& parentTx = entity.getComponent<xy::Transform>();
 
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(32);
+    entity.getComponent<xy::Text>().setString(m_highScores[0]);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, 22.f);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+    auto scoreTextEntity = entity; //store this so we can copy into button lambdas
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(32);
+    entity.getComponent<xy::Text>().setString(m_scoreTitles[0]);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, 6.f);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+    auto titleTextEntity = entity;
+
+    sf::FloatRect buttonSize(0.f, 0.f, 16.f, 16.f);
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(18.f, 164.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + 1); // TODO remove this when artwork done
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect(buttonSize);
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Black);
+    entity.addComponent<xy::UIHitBox>().area = buttonSize;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&, scoreTextEntity, titleTextEntity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_scoreIndex = (m_scoreIndex + 1) % m_highScores.size();
+                    scoreTextEntity.getComponent<xy::Text>().setString(m_highScores[m_scoreIndex]);
+                    titleTextEntity.getComponent<xy::Text>().setString(m_scoreTitles[m_scoreIndex]);
+                }
+            });
+
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(bounds.width - (18.f + buttonSize.width), 164.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + 1); // TODO remove this when artwork done
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect(buttonSize);
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Black);
+    entity.addComponent<xy::UIHitBox>().area = buttonSize;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&, scoreTextEntity, titleTextEntity](xy::Entity e, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_scoreIndex = m_scoreIndex == 0 ? m_highScores.size() - 1 : m_scoreIndex - 1;
+                    scoreTextEntity.getComponent<xy::Text>().setString(m_highScores[m_scoreIndex]);
+                    titleTextEntity.getComponent<xy::Text>().setString(m_scoreTitles[m_scoreIndex]);
+                }
+            });
+
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buttonSize.width = 32.f;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((bounds.width - buttonSize.width) / 2.f, 164.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + 1); // TODO remove this when artwork done
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect(buttonSize);
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Black);
+    entity.addComponent<xy::UIHitBox>().area = buttonSize;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::ScoreMenu;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::ScoreHiddenPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Menu::Starfield;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                }
+            });
+
+    parentTx.addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::saveSettings()
