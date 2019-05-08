@@ -1165,7 +1165,7 @@ void MenuState::buildHighScores()
             for (auto i = 0u; i < count; ++i)
             {
                 auto name = properties[i].getName();
-                m_highScores[idx] += name.substr(std::min(std::size_t(3), name.size() - 1)) + " - " + properties[i].getValue<std::string>() + "\n";
+                m_highScores[idx] += name.substr(0, std::min(std::size_t(3), name.size())) + "      " + properties[i].getValue<std::string>() + "\n";
             }
         }
     };

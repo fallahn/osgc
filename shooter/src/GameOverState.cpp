@@ -29,6 +29,7 @@ source distribution.
 #include "StateIDs.hpp"
 #include "ResourceIDs.hpp"
 #include "GameConsts.hpp"
+#include "MenuConsts.hpp"
 
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -225,7 +226,7 @@ void GameOverState::createGameover()
     //text entities
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -160.f);
+    entity.getComponent<xy::Transform>().move(0.f, -180.f);
     entity.addComponent<xy::Text>(font).setString(mainString);
     entity.getComponent<xy::Text>().setCharacterSize(textSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -310,7 +311,7 @@ void GameOverState::showScoreInput()
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 348.f);
+    entity.getComponent<xy::Transform>().move(0.f, 148.f);
     entity.addComponent<xy::Text>(font).setString(">___");
     entity.getComponent<xy::Text>().setCharacterSize(40);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -321,7 +322,7 @@ void GameOverState::showScoreInput()
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -148.f);
     entity.addComponent<xy::Text>(font).setString("Enter Your Initials");
-    entity.getComponent<xy::Text>().setCharacterSize(60);
+    entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = TableString;
@@ -360,8 +361,52 @@ void GameOverState::submitScore()
         m_initialsString = "AAA";
     }
 
+    std::string tableStr;
+    auto setString = [&](std::vector<xy::ConfigProperty> properties)
+    {
+        if (properties.empty())
+        {
+            tableStr = "No Scores Yet...";
+        }
+        else
+        {
+            std::sort(properties.begin(), properties.end(), [](const xy::ConfigProperty& a, const xy::ConfigProperty& b)
+                {
+                    return a.getValue<std::int32_t>() > b.getValue<std::int32_t>();
+                });
+
+            auto count = std::min(std::size_t(10), properties.size());
+            for (auto i = 0u; i < count; ++i)
+            {
+                auto name = properties[i].getName();
+                tableStr += name.substr(0, std::min(std::size_t(3), name.size())) + "      " + properties[i].getValue<std::string>() + "\n";
+            }
+        }
+    };
+
     //insert into scores
-    //TODO use something sortable like xy::ConfigFile ?
+    std::string initials = m_initialsString.toAnsiString();
+    std::replace(initials.begin(), initials.end(), ' ', '_');
+    std::transform(initials.begin(), initials.end(), initials.begin(), ::toupper);
+
+    if (m_sharedData.difficulty == SharedData::Easy)
+    {
+        m_sharedData.highScores.easy.addProperty(initials, std::to_string(m_sharedData.playerData.score));
+        setString(m_sharedData.highScores.easy.getProperties());
+        m_sharedData.highScores.easy.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreEasyName);
+    }
+    else if (m_sharedData.difficulty == SharedData::Medium)
+    {
+        m_sharedData.highScores.medium.addProperty(initials, std::to_string(m_sharedData.playerData.score));
+        setString(m_sharedData.highScores.medium.getProperties());
+        m_sharedData.highScores.medium.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreMedName);
+    }
+    else
+    {
+        m_sharedData.highScores.hard.addProperty(initials, std::to_string(m_sharedData.playerData.score));
+        setString(m_sharedData.highScores.hard.getProperties());
+        m_sharedData.highScores.hard.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreHardName);
+    }
 
     //set table string
     xy::Command cmd;
@@ -374,13 +419,9 @@ void GameOverState::submitScore()
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
     cmd.targetFlags = TableString;
-    cmd.action = [](xy::Entity e, float)
+    cmd.action = [tableStr](xy::Entity e, float)
     {
-        sf::String str =
-        {
-            " 1. AAA      10000\n 2. BUN      9001\n 3. SFL      9000\n 4. APS      8000\n 5. WEE      7000\n 6. SLE      6000\n 7. BLO      5000\n 8. JOB      4000\n 9. POO      3000\n10. ASS      2000"
-        };
-        e.getComponent<xy::Text>().setString(str);
+        e.getComponent<xy::Text>().setString(tableStr);
         e.getComponent<xy::Text>().setCharacterSize(40);
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
