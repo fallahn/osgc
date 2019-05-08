@@ -50,8 +50,8 @@ struct KeyMap final
     sf::Keyboard::Key right = sf::Keyboard::D;
     sf::Keyboard::Key fire = sf::Keyboard::Space;
     sf::Keyboard::Key pickup = sf::Keyboard::LControl;
-    std::int32_t joyFire = 0;
-    std::int32_t joyPickup = 1;
+    std::uint32_t joyFire = 0;
+    std::uint32_t joyPickup = 1;
 };
 
 struct PlayerData final

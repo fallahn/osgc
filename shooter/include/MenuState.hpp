@@ -64,7 +64,7 @@ private:
         union
         {
             sf::Keyboard::Key* keyDest;
-            std::int32_t* joyButtonDest;
+            std::uint32_t* joyButtonDest;
         };
 
         xy::Entity displayEntity;

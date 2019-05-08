@@ -815,7 +815,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -846,7 +846,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -877,7 +877,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -908,7 +908,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -939,7 +939,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -970,7 +970,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1003,7 +1003,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse
                     && sf::Joystick::isConnected(0))
@@ -1035,7 +1035,7 @@ void MenuState::buildHelp()
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&, entity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, entity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse
                     && sf::Joystick::isConnected(0))
@@ -1284,7 +1284,7 @@ void MenuState::buildHighScores()
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, scoreTextEntity, titleTextEntity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, scoreTextEntity, titleTextEntity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1304,7 +1304,7 @@ void MenuState::buildHighScores()
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, scoreTextEntity, titleTextEntity](xy::Entity e, sf::Uint64 flags) mutable
+            [&, scoreTextEntity, titleTextEntity](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1325,7 +1325,7 @@ void MenuState::buildHighScores()
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1368,8 +1368,8 @@ void MenuState::saveSettings()
     m_configSettings.findProperty("right")->setValue(m_sharedData.keymap.right);
     m_configSettings.findProperty("fire")->setValue(m_sharedData.keymap.fire);
     m_configSettings.findProperty("pickup")->setValue(m_sharedData.keymap.pickup);
-    m_configSettings.findProperty("joy_fire")->setValue(m_sharedData.keymap.joyFire);
-    m_configSettings.findProperty("joy_pickup")->setValue(m_sharedData.keymap.joyPickup);
+    m_configSettings.findProperty("joy_fire")->setValue(static_cast<std::int32_t>(m_sharedData.keymap.joyFire));
+    m_configSettings.findProperty("joy_pickup")->setValue(static_cast<std::int32_t>(m_sharedData.keymap.joyPickup));
     m_configSettings.findProperty("difficulty")->setValue(m_sharedData.difficulty);
     m_configSettings.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ConfigName);
 }

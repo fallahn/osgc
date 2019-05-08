@@ -259,7 +259,7 @@ void AlienSystem::processBoid(xy::Entity entity, Results& results)
         auto& alien = entity.getComponent<Alien>();
         //DPRINT("com", std::to_string(centreOfMass.x) + ", " + std::to_string(centreOfMass.y));
         auto coalescenceDirection = centreOfMass - tx.getPosition();
-        auto coalescenceStrength = /*1.f - */xy::Util::Math::clamp(xy::Util::Vector::lengthSquared(coalescenceDirection) / MaxCoalescenceRadius, 0.f, 1.f);
+        //auto coalescenceStrength = /*1.f - */xy::Util::Math::clamp(xy::Util::Vector::lengthSquared(coalescenceDirection) / MaxCoalescenceRadius, 0.f, 1.f);
         results.coalescence = (coalescenceDirection/* * coalescenceStrength*/) / 100.f;
         //DPRINT("align", std::to_string(avgVelocity.x) + ", " + std::to_string(avgVelocity.y));
         results.alignment = ((avgVelocity - alien.velocity) / 16.f);

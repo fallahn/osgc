@@ -51,8 +51,8 @@ namespace
 DroneSystem::DroneSystem(xy::MessageBus& mb, const SpriteArray& sprites, SharedData& sd)
     : xy::System(mb, typeid(DroneSystem)),
     m_sprites   (sprites),
-    m_difficulty(static_cast<float>(sd.difficulty)),
-    m_sharedData(sd)
+    m_sharedData(sd),
+    m_difficulty(static_cast<float>(sd.difficulty))
 {
     requireComponent<xy::Transform>();
     requireComponent<Drone>();
