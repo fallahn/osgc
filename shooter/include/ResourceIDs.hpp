@@ -41,6 +41,7 @@ namespace TextureID
         MenuBackground,
         HowToPlay,
         DifficultySelect,
+        HighScores,
 
         Count
     };

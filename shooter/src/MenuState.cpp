@@ -336,6 +336,7 @@ void MenuState::loadAssets()
     TextureID::handles[TextureID::MenuBackground] = m_resources.load<sf::Texture>("assets/images/menu_background.png");
     TextureID::handles[TextureID::HowToPlay] = m_resources.load<sf::Texture>("assets/images/how_to_play.png");
     TextureID::handles[TextureID::DifficultySelect] = m_resources.load<sf::Texture>("assets/images/difficulty_select.png");
+    TextureID::handles[TextureID::HighScores] = m_resources.load<sf::Texture>("assets/images/high_scores.png");
 }
 
 void MenuState::buildMenu()
@@ -1241,11 +1242,11 @@ void MenuState::buildHighScores()
     properties = m_sharedData.highScores.hard.getProperties();
     setString(2, properties);
 
-    auto tempId = m_resources.load<sf::Texture>("buns");
+    //background
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect({ 0.f, 0.f, 158.f, 186.f });
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::HighScores]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, Menu::ScoreHiddenPosition);
@@ -1253,6 +1254,7 @@ void MenuState::buildHighScores()
     entity.addComponent<Slider>().speed = 4.f;
     auto& parentTx = entity.getComponent<xy::Transform>();
 
+    //score test
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(0.25f, 0.25f);
@@ -1260,10 +1262,11 @@ void MenuState::buildHighScores()
     entity.addComponent<xy::Text>(font).setCharacterSize(32);
     entity.getComponent<xy::Text>().setString(m_highScores[0]);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, 22.f);
+    entity.getComponent<xy::Transform>().setPosition(bounds.width / 2.f, 28.f);
     parentTx.addChild(entity.getComponent<xy::Transform>());
     auto scoreTextEntity = entity; //store this so we can copy into button lambdas
 
+    //title text
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(0.25f, 0.25f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
@@ -1275,12 +1278,20 @@ void MenuState::buildHighScores()
     parentTx.addChild(entity.getComponent<xy::Transform>());
     auto titleTextEntity = entity;
 
+    //wiggler
+    /*xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/bar_anim.spt", m_resources);
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(14.f, 123.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + Menu::TextRenderDepth);
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("anim");
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    parentTx.addChild(entity.getComponent<xy::Transform>());*/
+
+    //button boxes
     sf::FloatRect buttonSize(0.f, 0.f, 16.f, 16.f);
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(18.f, 164.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + 1); // TODO remove this when artwork done
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect(buttonSize);
-    entity.getComponent<xy::Sprite>().setColour(sf::Color::Black);
+    entity.addComponent<xy::Transform>().setPosition(18.f, 158.f);
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -1297,10 +1308,7 @@ void MenuState::buildHighScores()
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(bounds.width - (18.f + buttonSize.width), 164.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + 1); // TODO remove this when artwork done
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect(buttonSize);
-    entity.getComponent<xy::Sprite>().setColour(sf::Color::Black);
+    entity.addComponent<xy::Transform>().setPosition(bounds.width - (18.f + buttonSize.width), 158.f);
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -1316,12 +1324,10 @@ void MenuState::buildHighScores()
 
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
-    buttonSize.width = 32.f;
+    buttonSize.width = 46.f;
+    buttonSize.height = 26.f;
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition((bounds.width - buttonSize.width) / 2.f, 164.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth + 1); // TODO remove this when artwork done
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect(buttonSize);
-    entity.getComponent<xy::Sprite>().setColour(sf::Color::Black);
+    entity.addComponent<xy::Transform>().setPosition(56.f, 151.f);
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(

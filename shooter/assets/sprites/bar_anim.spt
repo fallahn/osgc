@@ -1,0 +1,27 @@
+sprite bar_anim
+{
+	src="assets/images/bar_anim.png"
+	blend = alpha
+
+	sprite anim
+	{
+		bounds = 0,0,130,22
+
+		animation idle
+		{
+			frame = 0,0,130,22
+			frame = 0,22,130,22
+			frame = 0,44,130,22
+			frame = 0,66,130,22
+			frame = 0,88,130,22
+			frame = 0,110,130,22
+			frame = 0,132,130,22
+			frame = 0,154,130,22
+			frame = 0,176,130,22
+			frame = 0,198,130,22
+
+			loop=true
+			framerate=15
+		}
+	}
+}
