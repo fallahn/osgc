@@ -174,11 +174,11 @@ bool GameState::handleEvent(const sf::Event& evt)
             requestStackPush(StateID::Pause);
             m_sideCamera.getComponent<xy::AudioEmitter>().pause();
             break;
-        /*case sf::Keyboard::K:
+        case sf::Keyboard::K:
             m_sharedData.pauseMessage = SharedData::GameOver;
             m_sharedData.gameoverType = SharedData::Lose;
             requestStackPush(StateID::GameOver);
-            break;*/
+            break;
         case sf::Keyboard::L:
             m_sharedData.pauseMessage = SharedData::GameOver;
             m_sharedData.gameoverType = SharedData::Win;

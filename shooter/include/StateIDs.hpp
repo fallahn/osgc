@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include "LoadingScreen.hpp"
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/core/ConfigFile.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Cursor.hpp>
 
@@ -58,6 +59,14 @@ struct PlayerData final
     std::int32_t score = 0;
     std::size_t currentMap = 0;
     std::int32_t lives = 5;
+    std::int32_t colonistsSaved = 0;
+};
+
+struct HighScores final
+{
+    xy::ConfigFile easy;
+    xy::ConfigFile medium;
+    xy::ConfigFile hard;
 };
 
 struct SharedData final
@@ -66,6 +75,8 @@ struct SharedData final
     LoadingScreen loadingScreen;
     KeyMap keymap;
     PlayerData playerData;
+
+    HighScores highScores;
 
     xy::ShaderResource* shaders = nullptr;
     enum

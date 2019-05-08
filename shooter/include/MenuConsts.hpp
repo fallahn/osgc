@@ -44,4 +44,10 @@ namespace Menu
     static const std::int32_t BackgroundRenderDepth = -10;
     static const std::int32_t MenuRenderDepth = 10;
     static const std::int32_t TextRenderDepth = 1;
+
+    static const std::string AppName("drone_drop");
+    static const std::string ConfigName("keybinds.cfg");
+    static const std::string ScoreEasyName("easy.sco");
+    static const std::string ScoreMedName("med.sco");
+    static const std::string ScoreHardName("hard.sco");
 }

@@ -35,10 +35,12 @@ source distribution.
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -65,6 +67,7 @@ GameOverState::GameOverState(xy::StateStack& ss, xy::State::Context ctx, SharedD
 {
     auto& mb = ctx.appInstance.getMessageBus();
 
+    m_scene.addSystem<xy::CallbackSystem>(mb);
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
@@ -210,7 +213,7 @@ void GameOverState::createGameover()
     if (m_sharedData.gameoverType == SharedData::Win)
     {
         mainString = "Round Complete";
-        subString = "X Colonists Were Saved!";
+        subString = std::to_string(m_sharedData.playerData.colonistsSaved) + " Colonists Were Saved!";
         textSize = 120;
     }
     else
@@ -222,7 +225,7 @@ void GameOverState::createGameover()
     //text entities
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -80.f);
+    entity.getComponent<xy::Transform>().move(0.f, -160.f);
     entity.addComponent<xy::Text>(font).setString(mainString);
     entity.getComponent<xy::Text>().setCharacterSize(textSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -231,13 +234,45 @@ void GameOverState::createGameover()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 108.f);
+    entity.getComponent<xy::Transform>().move(0.f, 28.f);
     entity.addComponent<xy::Text>(font).setString(subString);
-
     entity.getComponent<xy::Text>().setCharacterSize(48);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = Deletable;
+
+    if (m_sharedData.gameoverType == SharedData::Win)
+    {
+        std::int32_t bonus = m_sharedData.playerData.colonistsSaved * 100;
+        m_sharedData.playerData.score += bonus;
+
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, 130.f);
+        entity.addComponent<xy::Text>(font).setString("BONUS 100 x " + std::to_string(m_sharedData.playerData.colonistsSaved));
+        entity.getComponent<xy::Text>().setCharacterSize(48);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        entity.getComponent<xy::Text>().setFillColour(sf::Color::Yellow);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::CommandTarget>().ID = Deletable;
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().userData = std::make_any<float>(0.5f);
+        entity.getComponent<xy::Callback>().function =
+            [](xy::Entity e, float dt)
+        {
+            auto& currTime = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+            currTime -= dt;
+
+            if (currTime < 0)
+            {
+                currTime = 0.5f;
+
+                auto colour = e.getComponent<xy::Text>().getFillColour();
+                colour.a = (colour.a == 0) ? 255 : 0;
+                e.getComponent<xy::Text>().setFillColour(colour);
+            }
+        };
+    }
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);

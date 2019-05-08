@@ -137,6 +137,8 @@ void ScoreDirector::process(float)
         auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
         msg->type = GameEvent::StateChange;
         msg->reason = GameEvent::NoAliensLeft;
+
+        m_sharedData.playerData.colonistsSaved = m_humanCount;
     }
 }
 

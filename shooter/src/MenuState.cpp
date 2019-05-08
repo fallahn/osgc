@@ -93,9 +93,6 @@ namespace
     private:
         float m_currentTime = 0.25f;
     };
-
-    const std::string AppName("drone_drop");
-    const std::string ConfigName("keybinds.cfg");
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -103,7 +100,9 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_sharedData    (sd),
     m_scene         (ctx.appInstance.getMessageBus()),
     m_textCrawl     (sd.resources.get<sf::Font>(FontID::handles[FontID::CGA])),
-    m_menuActive    (false)
+    m_menuActive    (false),
+    m_highScores    (3),
+    m_scoreIndex    (0)
 {
     launchLoadingScreen();
 
@@ -115,6 +114,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     buildStarfield();
     buildHelp();
     buildDifficultySelect();
+    buildHighScores();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -277,7 +277,7 @@ xy::StateID MenuState::stateID() const
 //private
 void MenuState::initScene()
 {
-    if (!m_configSettings.loadFromFile(xy::FileSystem::getConfigDirectory(AppName) + ConfigName))
+    if (!m_configSettings.loadFromFile(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ConfigName))
     {
         m_configSettings.addProperty("up", std::to_string(m_sharedData.keymap.up));
         m_configSettings.addProperty("down", std::to_string(m_sharedData.keymap.down));
@@ -288,7 +288,7 @@ void MenuState::initScene()
         m_configSettings.addProperty("joy_fire", std::to_string(m_sharedData.keymap.joyFire));
         m_configSettings.addProperty("joy_pickup", std::to_string(m_sharedData.keymap.joyPickup));
         m_configSettings.addProperty("difficulty", std::to_string(m_sharedData.difficulty));
-        m_configSettings.save(xy::FileSystem::getConfigDirectory(AppName) + ConfigName);
+        m_configSettings.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ConfigName);
     }
 
     //validate loaded settings incase someone dicked around with the file
@@ -1070,9 +1070,7 @@ void MenuState::buildDifficultySelect()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_sharedData.difficulty = SharedData::Easy;
-                    m_sharedData.playerData.currentMap = 0;
-                    m_sharedData.playerData.score = 0;
-                    m_sharedData.playerData.lives = Drone::StartLives;
+                    m_sharedData.playerData = {};
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -1096,9 +1094,7 @@ void MenuState::buildDifficultySelect()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_sharedData.difficulty = SharedData::Medium;
-                    m_sharedData.playerData.currentMap = 0;
-                    m_sharedData.playerData.score = 0;
-                    m_sharedData.playerData.lives = Drone::StartLives;
+                    m_sharedData.playerData = {};
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -1122,9 +1118,7 @@ void MenuState::buildDifficultySelect()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_sharedData.difficulty = SharedData::Hard;
-                    m_sharedData.playerData.currentMap = 0;
-                    m_sharedData.playerData.score = 0;
-                    m_sharedData.playerData.lives = Drone::StartLives;
+                    m_sharedData.playerData = {};
                     requestStackClear();
                     requestStackPush(StateID::Game);
                 }
@@ -1152,6 +1146,63 @@ void MenuState::buildDifficultySelect()
     parentTx.addChild(entity.getComponent<xy::Transform>());
 }
 
+void MenuState::buildHighScores()
+{
+    auto setString = [&](std::size_t idx, std::vector<xy::ConfigProperty>& properties)
+    {
+        if (properties.empty())
+        {
+            m_highScores[idx] = "No Scores Yet...";
+        }
+        else
+        {
+            std::sort(properties.begin(), properties.end(), [](const xy::ConfigProperty& a, const xy::ConfigProperty& b)
+                {
+                    return a.getValue<std::int32_t>() > b.getValue<std::int32_t>();
+                });
+
+            auto count = std::min(std::size_t(10), properties.size());
+            for (auto i = 0u; i < count; ++i)
+            {
+                auto name = properties[i].getName();
+                m_highScores[idx] += name.substr(std::min(std::size_t(3), name.size() - 1)) + " - " + properties[i].getValue<std::string>() + "\n";
+            }
+        }
+    };
+    
+    if (!m_sharedData.highScores.easy.loadFromFile(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreEasyName))
+    {
+        m_sharedData.highScores.easy.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreEasyName);
+    }
+
+    auto properties = m_sharedData.highScores.easy.getProperties();
+    setString(0, properties);
+
+    if (!m_sharedData.highScores.medium.loadFromFile(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreMedName))
+    {
+        m_sharedData.highScores.medium.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreMedName);
+    }
+    properties = m_sharedData.highScores.medium.getProperties();
+    setString(1, properties);
+
+    if (!m_sharedData.highScores.hard.loadFromFile(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreHardName))
+    {
+        m_sharedData.highScores.hard.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreHardName);
+    }
+    properties = m_sharedData.highScores.hard.getProperties();
+    setString(2, properties);
+
+    /*auto tempId = m_resources.load<sf::Texture>("buns");
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempId)).setTextureRect({ 0.f, 0.f, 128.f, 186.f });
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);*/
+
+}
+
 void MenuState::saveSettings()
 {
     m_configSettings.findProperty("up")->setValue(m_sharedData.keymap.up);
@@ -1163,7 +1214,7 @@ void MenuState::saveSettings()
     m_configSettings.findProperty("joy_fire")->setValue(m_sharedData.keymap.joyFire);
     m_configSettings.findProperty("joy_pickup")->setValue(m_sharedData.keymap.joyPickup);
     m_configSettings.findProperty("difficulty")->setValue(m_sharedData.difficulty);
-    m_configSettings.save(xy::FileSystem::getConfigDirectory(AppName) + ConfigName);
+    m_configSettings.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ConfigName);
 }
 
 void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

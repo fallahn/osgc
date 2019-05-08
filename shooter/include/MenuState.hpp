@@ -70,12 +70,16 @@ private:
         xy::Entity displayEntity;
     }m_activeMapping;
 
+    std::vector<std::string> m_highScores;
+    std::size_t m_scoreIndex;
+
     void initScene();
     void loadAssets();
     void buildMenu();
     void buildStarfield();
     void buildHelp();
     void buildDifficultySelect();
+    void buildHighScores();
     void saveSettings();
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
