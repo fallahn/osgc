@@ -146,8 +146,7 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_slideshowIndex    (0),
     m_audioScape        (m_audioResource),
     m_locked            (true),
-    m_quitShown         (false)/*,
-    m_lastSort          (true)*/
+    m_quitShown         (false)
 {
     launchLoadingScreen();
     

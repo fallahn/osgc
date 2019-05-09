@@ -428,5 +428,6 @@ void GameOverState::submitScore()
 
     //fudge the state so key presses return to the main menu
     m_sharedData.pauseMessage = SharedData::None;
+    m_scoreShown = false; //prevents 'any key' submitting score again if it is return or enter
     m_delayClock.restart();
 }
