@@ -498,7 +498,7 @@ void GameState::loadAssets()
 
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
-    std::string mapfile = "assets/maps/" + ConstVal::MapNames[m_sharedData.playerData.currentMap];
+    std::string mapfile = "assets/maps/" + m_sharedData.mapNames[m_sharedData.playerData.currentMap];
     if(!m_mapLoader.load(mapfile))
     {
         m_sharedData.messageString = "Failed To Load Map";

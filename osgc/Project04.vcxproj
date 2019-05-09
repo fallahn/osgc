@@ -38,6 +38,9 @@
     <ClCompile Include="src\PluginLoader.cpp" />
     <ClCompile Include="src\SliderSystem.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="osgc.rc" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{C5CBAE0B-6404-4446-A93E-98F44243F277}</ProjectGuid>

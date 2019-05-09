@@ -287,7 +287,7 @@ void GameOverState::createGameover()
 
 void GameOverState::gotoNextMap()
 {
-    m_sharedData.playerData.currentMap = (m_sharedData.playerData.currentMap + 1) % ConstVal::MapNames.size();
+    m_sharedData.playerData.currentMap = (m_sharedData.playerData.currentMap + 1) % m_sharedData.mapNames.size();
     requestStackClear();
     requestStackPush(StateID::Game);
 }

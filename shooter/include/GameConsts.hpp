@@ -23,7 +23,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Rect.hpp>
 
 #include <cstdint>
-#include <array>
+#include <vector>
 #include <string>
 
 namespace ConstVal
@@ -40,8 +40,6 @@ namespace ConstVal
     static const sf::FloatRect MapArea(0.f, 0.f, 2880.f, 3840.f);
 
     static const sf::FloatRect DamageRadius(-32.f, -32.f, 64.f, 64.f);
-
-    static const std::array<std::string, 2u> MapNames = { "01.tmx", "02.tmx" }; //TODO fetch this from a config file
 
     static const std::uint8_t OverlayTransparency = 180;
 }

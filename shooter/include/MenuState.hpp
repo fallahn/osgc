@@ -24,12 +24,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/core/ConfigFile.hpp>
+#include <xyginext/gui/GuiClient.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 struct SharedData;
-class MenuState final : public xy::State
+class MenuState final : public xy::State, public xy::GuiClient
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);

@@ -105,4 +105,6 @@ struct SharedData final
     //hax to get around std::any not supporting non-copyable
     //types. Don't try this at home kids!
     std::shared_ptr<sf::Cursor> cursor;
+
+    std::vector<std::string> mapNames;
 };

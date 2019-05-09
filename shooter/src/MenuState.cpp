@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "MenuState.hpp"
 #include "MenuConsts.hpp"
+#include "GameConsts.hpp"
 #include "StateIDs.hpp"
 #include "ResourceIDs.hpp"
 #include "PluginExport.hpp"
@@ -55,6 +56,8 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
+
+#include <fstream>
 
 namespace
 {
@@ -121,6 +124,13 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     xy::App::setMouseCursorVisible(true);
+
+    registerConsoleTab("About", 
+        []()
+        {
+            xy::Nim::text("Drone Drop (c)2019 Matt Marchant and Contributors");
+            xy::Nim::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
+        });
 
     quitLoadingScreen();
 }
@@ -337,6 +347,37 @@ void MenuState::loadAssets()
     TextureID::handles[TextureID::HowToPlay] = m_resources.load<sf::Texture>("assets/images/how_to_play.png");
     TextureID::handles[TextureID::DifficultySelect] = m_resources.load<sf::Texture>("assets/images/difficulty_select.png");
     TextureID::handles[TextureID::HighScores] = m_resources.load<sf::Texture>("assets/images/high_scores.png");
+
+    m_sharedData.mapNames.clear();
+    std::ifstream file(xy::FileSystem::getResourcePath() + "assets/maps/mapcycle.txt");
+    if (file.is_open() && file.good())
+    {
+        //read in map names
+        std::string line;
+        while (std::getline(file, line))
+        {
+            if (xy::FileSystem::getFileExtension(line) == ".tmx")
+            {
+                m_sharedData.mapNames.push_back(line);
+            }
+        }
+
+        if (m_sharedData.mapNames.empty())
+        {
+            xy::Logger::log("No valid maps were loaded from mapcycle.txt", xy::Logger::Type::Error);
+
+            requestStackClear();
+            requestStackPush(StateID::ParentState);
+        }
+    }
+    else
+    {
+        //safest thing to do is quit plugin
+        xy::Logger::log("Failed to open mapcycle.txt", xy::Logger::Type::Error);
+
+        requestStackClear();
+        requestStackPush(StateID::ParentState);
+    }
 }
 
 void MenuState::buildMenu()
