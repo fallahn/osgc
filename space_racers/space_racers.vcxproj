@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,11 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{F610E0C3-725E-4FAB-9BF0-AB9310715B78}</ProjectGuid>
-    <RootNamespace>shooter</RootNamespace>
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{E932802A-6053-40AE-A61D-065443E7C269}</ProjectGuid>
+    <RootNamespace>spaceracers</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>drone_drop</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -71,14 +70,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>osgc</TargetName>
     <TargetExt>.dll</TargetExt>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\</OutDir>
-    <TargetName>osgc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>osgc</TargetName>
     <TargetExt>.dll</TargetExt>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\</OutDir>
-    <TargetName>osgc</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -86,19 +85,17 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;../extlibs/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../extlibs/include;include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;XY_DEBUG;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>XY_DEBUG;_ITERATOR_DEBUG_LEVEL=0;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <SubSystem>
+      </SubSystem>
       <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/tmxlite;../extlibs/bin/msvc_x64/xygine/Debug;../extlibs/bin/msvc_x64/sfml/Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;xyginext-d.lib;libtmxlite-s-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>4194304</StackReserveSize>
     </Link>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,6 +104,9 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -118,6 +118,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -130,72 +131,27 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;../extlibs/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../extlibs/include;include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/tmxlite;../extlibs/bin/msvc_x64/xygine/Release;../extlibs/bin/msvc_x64/sfml/Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;xyginext.lib;libtmxlite-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>4194304</StackReserveSize>
     </Link>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Alien.hpp" />
-    <ClInclude Include="include\BobAnimator.hpp" />
-    <ClInclude Include="include\Bomb.hpp" />
-    <ClInclude Include="include\CollisionTypes.hpp" />
-    <ClInclude Include="include\CollisionUtil.hpp" />
-    <ClInclude Include="include\CommandIDs.hpp" />
-    <ClInclude Include="include\Drone.hpp" />
-    <ClInclude Include="include\GameConsts.hpp" />
-    <ClInclude Include="include\GameOverState.hpp" />
-    <ClInclude Include="include\GameState.hpp" />
-    <ClInclude Include="include\Human.hpp" />
-    <ClInclude Include="include\LoadingScreen.hpp" />
-    <ClInclude Include="include\Navigation.hpp" />
-    <ClInclude Include="include\RadarItemSystem.hpp" />
-    <ClInclude Include="include\ScoreDirector.hpp" />
-    <ClInclude Include="include\ItemBar.hpp" />
-    <ClInclude Include="include\MapLoader.hpp" />
-    <ClInclude Include="include\MenuConsts.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
-    <ClInclude Include="include\MessageIDs.hpp" />
-    <ClInclude Include="include\PauseState.hpp" />
-    <ClInclude Include="include\PlayerDirector.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
-    <ClInclude Include="include\ResourceIDs.hpp" />
-    <ClInclude Include="include\SliderSystem.hpp" />
-    <ClInclude Include="include\SoundEffectsDirector.hpp" />
-    <ClInclude Include="include\SpawnDirector.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
-    <ClInclude Include="include\TextCrawl.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AlienSystem.cpp" />
-    <ClCompile Include="src\BombSystem.cpp" />
-    <ClCompile Include="src\CollisionUtil.cpp" />
-    <ClCompile Include="src\DroneSystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
-    <ClCompile Include="src\GameOverState.cpp" />
-    <ClCompile Include="src\GameState.cpp" />
-    <ClCompile Include="src\HumanSystem.cpp" />
-    <ClCompile Include="src\ItemBarSystem.cpp" />
-    <ClCompile Include="src\LoadingScreen.cpp" />
-    <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
-    <ClCompile Include="src\PauseState.cpp" />
-    <ClCompile Include="src\PlayerDirector.cpp" />
-    <ClCompile Include="src\ScoreDirector.cpp" />
-    <ClCompile Include="src\SliderSystem.cpp" />
-    <ClCompile Include="src\SoundEffectsDirector.cpp" />
-    <ClCompile Include="src\SpawnDirector.cpp" />
-    <ClCompile Include="src\TextCrawl.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

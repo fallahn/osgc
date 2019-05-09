@@ -1,0 +1,7 @@
+game_info
+{
+    thumb = "assets/images/thumb.png"
+    title = "Space Racers"
+    version = "0.0.1"
+    author = "fallahn"
+}
