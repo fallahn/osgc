@@ -150,11 +150,13 @@
     <ClInclude Include="include\RaceState.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\VehicleSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
+    <ClCompile Include="src\VehicleSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

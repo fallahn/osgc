@@ -3,4 +3,5 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
   PARENT_SCOPE)
