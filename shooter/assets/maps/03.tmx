@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="45" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="36">
+ <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="160" columns="16">
+  <image source="../images/tileset.png" width="256" height="160"/>
+ </tileset>
+ <layer id="2" name="Tile Layer 1" width="45" height="60" locked="1">
+  <data encoding="base64" compression="zlib">
+   eJzVmsGOIzcMRJUEwZ5z2nM2WOSv2v4Ct79gWp8eG5nCvikX1WrPbJA5ENDIElkiSyTVu99ba98+kfx1k683WW5yusn5E4z/eMV8ucl6k+snGAvzy022m/QPHK+Q0foFMqNfmNfJuLikNcR6epXVpNJDmeXGarFwDJX4unQ+YvH9G2SWG9rbB7jks82k4gAxav5u85ebfAn7X4Lu3mpu8Py0tbRHXOf26C+3NZIU27WN+bCXN+hXYa7iRanW8HxX89NH5Y3EuRSjGf6eXu3wb/rpMti7FHadGykWzg2/c/JXEuLW336HqvxTzVc1hX5J3CD+xBNyi772e6+9I/7P1hT6ZTP8Hq+9HCjsl/aImXnI+ZnmZ7jhcSaGvTueuLMa5j2dW5g/2m/4nZm57y6ymXSeMK7y1TP9xtIesZ+K9Qm3c8Pv6LKDYSZvjPKJ7kjVJ6S4e95wDlF3svtsL7qYbvKuytFeU5Q3LhgL9/a67yN7Ufom9QmpVmgvMZM/L7a2qmXPcmOm16tENjv8yhwivEf6jSN5QHZSblH9p//Jjd4e+ab89tHvlNRzis+yS7y+N91Bvx+zeYP2JIkbrM3n9paz3lu50E+b2RRm2kpjciPZlL5RvzHCx7h7HWS+ka+rOlJxQ5gVC/KX8x4vckNn5hri7e3x3h/JVxU3GAvH7fHivtQbEK/XFL+ji42PcCPFhdivtl62eQbmEO0/t7d54wQ9WxjPcqOKF/vc3h65r7H0aK/2CW83zFq/hfEMNzy3Mi6Mr+bu7+dfn5Df2ttelLzyu3EO45l3CrnBufve7+2574R/w4bix/EzNcVx08/CztrAvcyzveU8sxTzrCkVV0f9RurHyY3qu9m1/cizvY1rhDBqnmO/55qf6Tcq7NX7ucMviW+jvsJrCrl4tN9I2P9s//KSd+ha6CEf2B8nWzzLUW5wTD57fiEe3v+q7mz2m9cgYk55bLYXZU3he2KBrt7qmPB+jXqUVFOEeYYb7Dm9ptz/1vfNK2wxjsz5jpdn8/q0mi39LmwjbpBP3jMwRtKbYs675hyVHudZ6nXfyw2Pkdcvnlm+pyRfOIdoa4Yb6X3h3PAYETN7nRRz9oiSi+nxnLPHjRSXETdYC8hdj/kJa/wM0llxjGtG38wTNzxGv7f9nugL7PpbuPpm8kxN8bdGhx7F615TZv/NlD5zHhKbc+NITXFdimmqv6p9ft8Yx/NAnB+b/X4kb1TC3qC3H33QGdglfk+vhXhN4W9HagrHygejc7h06E99R9LTzRfaM1tTNFZ9lm+ZrxbTT9G7IH0Dde5pLBupNgnPXk1ZMN7CGu9xXRwzMaVeynM769AsN9jb+JqUj1z4XmWed9xeZ7wezeQNjrdivson9FviBnErdsS+Yj7Znek3tmKeY5fF9PuZUmyEmWf6L///hrDrLZPORawdfu/tLe9d/3v+PWU0Tn6VOF7WbPLQc4jmR9wY2d2TlMvdv+QV7yRzCDk/w430PloG846R9ch/ky3nQ9LJNSNujGr3SJLPz0G/cIxitdpa7Z19p3gfUc1X9n0d147y1Ybxe/NGwjCSdA7qrKTb+Gfljcp+Wu9xn9E/+9b4P8n9W/A/lX4C4Q==
+  </data>
+ </layer>
+ <layer id="4" name="river" width="45" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztmTkSAiEQRTmRmrvmrrl6CLcDuB1AvbBNlVMaMAw2bQPWf1UvlHkiTGAbA0AYG3LrcJcyqoEjeXJ4Mfl21zVbzwm7fKBZh39rtvcwx3fIjby/PJiy9ttS1x/b3CV7TPvM/kdk85icMJ1GPpsLmnVAsw5o1mFJrpiuE/QCAAAAobTINtlJHfIFA3JIjhJ3fAOadUCzDmjWAc06oFmHGTknF4zPljYzs71XU9bMzDdfyPF/et8e59gc0ptbc9OZkGh23e2Y+6HR7HoGd73QcyHVvDfvWRZ3vdA9lmq278xqj0ppllgvtNn+pjHzvc85Yey8UOP+SVN9/7oZtcQe/wpfe0577ELy3AFQCk+TCLsa
+  </data>
+ </layer>
+ <layer id="5" name="road" width="45" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztmckOwiAQhnkllxdwOXlzOXlzT1ze/yoESZoKhYHpWOL/Jf+hnWT6BZs4BaXAUBnpbDqyjtRzMi50nukcPznpnBvXJofWdSy+Hu36stC5yYKhX6wHxzO4+8G5/HkcPbid9zoPnYsnqfzC+RZIKhOdaUGdCodzjesM5zhwzqtTgXNenQqc8+pU4JxXpzKUecN876V+fw1lnSm/RY3OHMBZBjjLAGcZ4CzDPzvvFG1/OLTn3L7f3Gdy97aR520Tnbv2g30J7Tm37z+VnUVexP7zBOe+3g03U62Y+8LZYmZy8w7flXV2e6ml5ySOPpxDczbXesPZAudv4Gwx56BXT2L/FalIzxscwFkG7rMtCWpcZzjLAGcZ4CxDjc5mnuGaXUC9vAFl56K0
+  </data>
+ </layer>
+ <layer id="6" name="buildings and trees" width="45" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztmktOw0AMhmcJ5bWF8tryEHvgBHADuAHcgcMzozSSGRw/JrYzlfJJ3iRK+rfx2L8nTWllheYjx+fSIpR85fg2vudpjjPlNQc5DnexMdYj4SbH7cS5UdumOvae42IXb8lO9w9x7kp4j/M06Noix2Bs/1+6GL1qhrlZ50GvmmsNmL590nyX4z7HA3IMBjwfAaW5V7w1vxrfr9Db70zV6JElNbd6kQjNU/6g1YtEaKb8QQu95bOEVfNfqDUm9WkYlGbMi2rw8PsFrd/wRFr7tH5jpGW+4ZA+l9Z8tq5fNbVHhgHnpJ7qBuZ5p0KqWep9JP4Bw0OzN5hPn4oo/x65V4OtjZb67VW7MVrmQQ/fr6GHGXYEW99YzvWkGQPLud41Y2j2Co5znATpsuR6aQFKSl1cYq93DiX3pbk+Zwag0PaukvveffUoDesGAtcRVkc4H+2dz5cNnwt9dP18qXcYVjNDi2YKWMvrvLaaGSI1W2GtGfYfr7VorZm7lnovQp2DPKahTtTx1KiX6ykld54T/izgM3pJcZ6G6ynSnqPpTXO9OtdTpD0nojdBvHuK9VwZ8V7ceq6MqM/W7KNmrqeU3JF8F6kPt8ptag1a1zqL3Jb0lPL/D64Pln1Qr9yqvSj3+9TzMPVeHcstj/0z714wlQtzvblVT9H0ZM6bc8+nx72CyP1Nb34BTvs7Nw==
+  </data>
+ </layer>
+ <objectgroup id="3" name="objects">
+  <object id="1" type="border" x="0" y="0" width="16" height="960"/>
+  <object id="2" type="border" x="704" y="0" width="16" height="960"/>
+  <object id="3" type="border" x="16" y="0" width="688" height="16"/>
+  <object id="4" type="border" x="16" y="944" width="688" height="16"/>
+  <object id="5" type="water" x="72" y="56" width="96" height="112"/>
+  <object id="6" type="water" x="476" y="184" width="52" height="128"/>
+  <object id="7" type="water" x="560" y="184" width="96" height="128"/>
+  <object id="8" type="water" x="688" y="184" width="28" height="128"/>
+  <object id="9" type="water" x="328" y="480" width="32" height="64"/>
+  <object id="10" type="water" x="328" y="576" width="32" height="92"/>
+  <object id="11" type="water" x="200" y="760" width="32" height="80"/>
+  <object id="12" type="water" x="248" y="760" width="32" height="80"/>
+  <object id="13" type="water" x="232" y="760" width="16" height="32"/>
+  <object id="14" type="water" x="232" y="808" width="16" height="32"/>
+  <object id="15" type="water" x="168" y="152" width="48" height="48"/>
+  <object id="16" type="water" x="168" y="72" width="16" height="80"/>
+  <object id="17" type="water" x="120" y="168" width="48" height="16"/>
+  <object id="18" type="water" x="568" y="664" width="96" height="192"/>
+  <object id="19" type="water" x="504" y="776" width="32" height="80"/>
+  <object id="20" type="water" x="520" y="728" width="16" height="48"/>
+  <object id="21" type="water" x="568" y="856" width="80" height="32"/>
+  <object id="22" type="water" x="536" y="712" width="32" height="160"/>
+  <object id="23" type="water" x="664" y="680" width="16" height="144"/>
+ </objectgroup>
+ <objectgroup id="7" name="spawn">
+  <object id="24" type="alien spawn" x="384" y="76">
+   <point/>
+  </object>
+  <object id="25" type="alien spawn" x="64" y="272">
+   <point/>
+  </object>
+  <object id="26" type="alien spawn" x="612" y="368">
+   <point/>
+  </object>
+  <object id="27" type="alien spawn" x="640" y="624">
+   <point/>
+  </object>
+  <object id="28" type="alien spawn" x="512" y="916">
+   <point/>
+  </object>
+  <object id="29" type="alien spawn" x="144" y="656">
+   <point/>
+  </object>
+  <object id="30" type="human spawn" x="64" y="900">
+   <point/>
+  </object>
+  <object id="31" type="human spawn" x="332" y="804">
+   <point/>
+  </object>
+  <object id="32" type="human spawn" x="240" y="432">
+   <point/>
+  </object>
+  <object id="33" type="human spawn" x="352" y="180">
+   <point/>
+  </object>
+  <object id="34" type="human spawn" x="504" y="388">
+   <point/>
+  </object>
+  <object id="35" type="human spawn" x="652" y="68">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="8" name="navigation"/>
+</map>
