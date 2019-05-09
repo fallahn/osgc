@@ -140,11 +140,12 @@ void MenuState::buildMenu()
     auto bounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        uiSystem.addMouseButtonCallback([](xy::Entity e, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-
+                    requestStackClear();
+                    requestStackPush(StateID::Race);
                 }
             });
     itemPosition.y += itemStride;

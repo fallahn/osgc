@@ -32,7 +32,7 @@ namespace StateID
     enum
     {
         MainMenu,
-        //add your new state IDs here
+        Race
     };
 }
 
