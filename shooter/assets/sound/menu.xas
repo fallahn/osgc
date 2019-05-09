@@ -1,0 +1,35 @@
+audioscape menu
+{
+	emitter button
+	{
+		path = "assets/sound/button.wav"
+		looped = false
+		streaming = false
+		volume = 0.3
+		attenuation = 0
+		falloff = 0
+        mixer_channel = 1
+	}
+
+	emitter menu_up
+	{
+		path = "assets/sound/menu_up.wav"
+		looped = false
+		streaming = false
+		volume = 0.3
+		attenuation = 0
+		falloff = 0
+        mixer_channel = 1
+	}
+
+	emitter menu_down
+	{
+		path = "assets/sound/menu_down.wav"
+		looped = false
+		streaming = false
+		volume = 0.3
+		attenuation = 0
+		falloff = 0
+        mixer_channel = 1
+	}
+}

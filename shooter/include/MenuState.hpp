@@ -23,8 +23,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/Resource.hpp>
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/gui/GuiClient.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -52,6 +54,9 @@ private:
     TextCrawl m_textCrawl;
     sf::Shader m_crawlShader;
     xy::ResourceHandler m_resources;
+
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_audioscape;
 
     bool m_menuActive;
 

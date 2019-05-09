@@ -103,6 +103,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_sharedData    (sd),
     m_scene         (ctx.appInstance.getMessageBus()),
     m_textCrawl     (sd.resources.get<sf::Font>(FontID::handles[FontID::CGA])),
+    m_audioscape    (m_audioResource),
     m_menuActive    (false),
     m_highScores    (3),
     m_scoreIndex    (0)
@@ -348,6 +349,8 @@ void MenuState::loadAssets()
     TextureID::handles[TextureID::DifficultySelect] = m_resources.load<sf::Texture>("assets/images/difficulty_select.png");
     TextureID::handles[TextureID::HighScores] = m_resources.load<sf::Texture>("assets/images/high_scores.png");
 
+    m_audioscape.loadFromFile("assets/sound/menu.xas");
+
     m_sharedData.mapNames.clear();
     std::ifstream file(xy::FileSystem::getResourcePath() + "assets/maps/mapcycle.txt");
     if (file.is_open() && file.good())
@@ -409,12 +412,13 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_up");
 
     auto textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::LeftMouse)
         {
@@ -442,6 +446,8 @@ void MenuState::buildMenu()
                 e.getComponent<Slider>().active = true;
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            e.getComponent<xy::AudioEmitter>().play();
         }
     });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -455,16 +461,18 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("button");
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     xy::Console::show();
+                    e.getComponent<xy::AudioEmitter>().play();
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -478,12 +486,13 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_up");
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -511,6 +520,8 @@ void MenuState::buildMenu()
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    e.getComponent<xy::AudioEmitter>().play();
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -524,12 +535,13 @@ void MenuState::buildMenu()
     entity.getComponent<xy::Text>().setCharacterSize(Menu::ItemCharSize);
     entity.getComponent<xy::Text>().setFillColour(Menu::TextColour);
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_up");
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -557,6 +569,8 @@ void MenuState::buildMenu()
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    e.getComponent<xy::AudioEmitter>().play();
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -783,10 +797,11 @@ void MenuState::buildHelp()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(256.f, 221.f);
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_down");
     entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 45.f, 25.f };
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags) 
+            [&](xy::Entity e, sf::Uint64 flags) 
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -814,6 +829,8 @@ void MenuState::buildHelp()
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    e.getComponent<xy::AudioEmitter>().play();
 
                     saveSettings();
 
@@ -1103,10 +1120,11 @@ void MenuState::buildDifficultySelect()
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y + (bounds.height * 2.f));
     entity.addComponent<xy::CommandTarget>().ID = CommandID::DifficultySelect;
     entity.addComponent<Slider>().speed = 4.f;
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_down");
     entity.addComponent<xy::UIHitBox>().area = { 68.f, 85.f, 68.f, 17.f };
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, bounds](xy::Entity, sf::Uint64 flags) 
+            [&, bounds](xy::Entity e, sf::Uint64 flags) 
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1134,6 +1152,8 @@ void MenuState::buildDifficultySelect()
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    e.getComponent<xy::AudioEmitter>().play();
                 }
             });
 
@@ -1369,10 +1389,11 @@ void MenuState::buildHighScores()
     buttonSize.height = 26.f;
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(56.f, 151.f);
+    entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_down");
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1401,6 +1422,7 @@ void MenuState::buildHighScores()
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+                    e.getComponent<xy::AudioEmitter>().play();
                 }
             });
 
