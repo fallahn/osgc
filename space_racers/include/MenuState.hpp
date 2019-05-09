@@ -28,11 +28,13 @@ source distribution.
 #pragma once
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
 
+struct SharedData;
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context);
+    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -46,4 +48,10 @@ public:
 
 private:
 
+    SharedData& m_sharedData;
+    xy::Scene m_scene;
+
+    void initScene();
+    void loadResources();
+    void buildMenu();
 };

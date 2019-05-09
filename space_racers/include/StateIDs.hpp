@@ -35,3 +35,11 @@ namespace StateID
         //add your new state IDs here
     };
 }
+
+
+#include <xyginext/resources/ResourceHandler.hpp>
+
+struct SharedData final
+{
+    xy::ResourceHandler resources;
+};

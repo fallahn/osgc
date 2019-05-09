@@ -35,7 +35,11 @@ source distribution.
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
-    ss->registerState<MenuState>(StateID::MainMenu);
+    *sharedData = std::make_any<SharedData>();
+
+    auto& data = std::any_cast<SharedData&>(*sharedData);
+
+    ss->registerState<MenuState>(StateID::MainMenu, data);
     return StateID::MainMenu;
 }
 
