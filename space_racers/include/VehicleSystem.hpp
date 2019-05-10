@@ -24,8 +24,8 @@ Copyright 2019 Matt Marchant
 
 struct Input final
 {
-    sf::Uint16 mask = 0;
     sf::Int64 timestamp = 0;
+    sf::Uint16 flags = 0;
 };
 
 using History = std::array<Input, 120>;
@@ -34,9 +34,23 @@ struct Vehicle final
 {
     History history;
     std::size_t currentInput = 0;
-    std::size_t lastUpdateInput = history.size() - 1;
+    std::size_t lastUpdatedInput = 0;
 
+    sf::Vector2f velocity;
+    float anglularVelocity = 0.f; //rads
 
+    //technically these are const vals
+    //but may be un-consted to create
+    //vehicular variations
+    static constexpr float angularDrag = 0.9f;
+    static constexpr float turnSpeed = 0.8f; //rads per second
+
+    static constexpr float drag = 0.95f; //multiplier
+    static constexpr float acceleration = 80.f; //units per second
+    static constexpr float maxSpeed() { return drag * (acceleration / (1.f - drag)); }
+    static constexpr float maxSpeedSqr() { return maxSpeed() * maxSpeed(); }
+
+    static constexpr float brakeStrength = 0.15f; //multiplier
 };
 
 class VehicleSystem final : public xy::System 
@@ -47,4 +61,7 @@ public:
     void process(float) override;
 
 private:
+
+    void processInput(xy::Entity);
+    void applyInput(xy::Entity, float);
 };

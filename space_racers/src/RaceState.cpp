@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "RaceState.hpp"
+#include "VehicleSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -37,6 +38,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     initScene();
     loadResources();
     buildWorld();
+    addLocalPlayers();
 
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -46,6 +48,11 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
 bool RaceState::handleEvent(const sf::Event& evt)
 {
+    for (auto& ip : m_playerInputs)
+    {
+        ip.handleEvent(evt);
+    }
+
     m_gameScene.forwardEvent(evt);
     return true;
 }
@@ -57,6 +64,11 @@ void RaceState::handleMessage(const xy::Message& msg)
 
 bool RaceState::update(float dt)
 {
+    for (auto& ip : m_playerInputs)
+    {
+        ip.update();
+    }
+
     m_gameScene.update(dt);
     return true;
 }
@@ -72,6 +84,8 @@ void RaceState::draw()
 void RaceState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+
+    m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
@@ -87,4 +101,24 @@ void RaceState::loadResources()
 void RaceState::buildWorld()
 {
 
+}
+
+void RaceState::addLocalPlayers()
+{
+    auto tempID = m_resources.load<sf::Texture>("dummy resource");
+    sf::FloatRect tempRect(0.f, 0.f, 48.f, 80.f);
+
+    for (auto i = 0u; i < m_sharedData.localPlayerCount; ++i)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().setOrigin(tempRect.width / 2.f, tempRect.height / 2.f);
+        entity.addComponent<Vehicle>();
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
+
+        //TODO add camera and update view as appropriate
+
+        m_playerInputs.emplace_back(entity, m_sharedData.inputBindings[i]);
+    }
 }

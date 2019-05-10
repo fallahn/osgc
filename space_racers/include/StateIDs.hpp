@@ -36,10 +36,12 @@ namespace StateID
     };
 }
 
-
+#include "InputBinding.hpp"
 #include <xyginext/resources/ResourceHandler.hpp>
 
 struct SharedData final
 {
     xy::ResourceHandler resources;
+    std::array<InputBinding, 4u> inputBindings;
+    std::size_t localPlayerCount = 1;
 };

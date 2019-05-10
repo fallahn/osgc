@@ -19,9 +19,12 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "StateIDs.hpp"
+#include "InputParser.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+
+#include <vector>
 
 class RaceState final : public xy::State
 {
@@ -45,7 +48,10 @@ private:
 
     xy::ResourceHolder m_resources;
 
+    std::vector<InputParser> m_playerInputs;
+
     void initScene();
     void loadResources();
     void buildWorld();
+    void addLocalPlayers();
 };

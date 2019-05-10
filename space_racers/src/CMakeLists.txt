@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
