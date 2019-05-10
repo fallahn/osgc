@@ -20,6 +20,8 @@ Copyright 2019 Matt Marchant
 #include "InputBinding.hpp"
 #include "VehicleSystem.hpp"
 
+#include <xyginext/ecs/components/Transform.hpp>
+
 #include <SFML/Window/Event.hpp>
 
 InputParser::InputParser(xy::Entity entity, const InputBinding& binding)
@@ -71,6 +73,12 @@ void InputParser::handleEvent(const sf::Event& evt)
         {
             m_currentInput &= ~InputFlag::Brake;
         }
+#ifdef XY_DEBUG
+        else if (evt.key.code == sf::Keyboard::Space)
+        {
+            m_playerEntity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        }
+#endif //XY_DEBUG
     }
     else if (evt.type == sf::Event::JoystickButtonPressed)
     {

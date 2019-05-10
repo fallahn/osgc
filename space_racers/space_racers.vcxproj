@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MenuState.hpp" />

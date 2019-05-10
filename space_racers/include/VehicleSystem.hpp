@@ -19,6 +19,9 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <xyginext/ecs/System.hpp>
+#ifdef XY_DEBUG
+#include <xyginext/gui/GuiClient.hpp>
+#endif //XY_DEBUG
 
 #include <array>
 
@@ -43,10 +46,10 @@ struct Vehicle final
     //but may be un-consted to create
     //vehicular variations
     static constexpr float angularDrag = 0.9f;
-    static constexpr float turnSpeed = 0.8f; //rads per second
+    static constexpr float turnSpeed = 0.76f; //rads per second
 
-    static constexpr float drag = 0.95f; //multiplier
-    static constexpr float acceleration = 80.f; //units per second
+    static constexpr float drag = 0.93f; //multiplier
+    static constexpr float acceleration = 84.f; //units per second
     static constexpr float maxSpeed() { return drag * (acceleration / (1.f - drag)); }
     static constexpr float maxSpeedSqr() { return maxSpeed() * maxSpeed(); }
 
@@ -54,6 +57,9 @@ struct Vehicle final
 };
 
 class VehicleSystem final : public xy::System 
+#ifdef XY_DEBUG
+    , public xy::GuiClient
+#endif //XY_DEBUG
 {
 public: 
     explicit VehicleSystem(xy::MessageBus& mb);

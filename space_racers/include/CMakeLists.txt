@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
