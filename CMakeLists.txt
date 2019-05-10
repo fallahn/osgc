@@ -3,5 +3,6 @@ project(osgc)
 
 add_subdirectory(osgc)
 add_subdirectory(shooter)
+add_subdirectory(space_racers)
 
 #add further plugin project directories here

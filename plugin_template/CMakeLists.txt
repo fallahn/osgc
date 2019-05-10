@@ -47,19 +47,20 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 # Create the actual binary (PROJECT_SRC variable is set inside previous steps)
-SET(BINARY_NAME osgc)
-add_library(${BINARY_NAME} SHARED ${PROJECT_SRC})
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
 
 # Linker settings
-target_link_libraries(${BINARY_NAME} xyginext)
+target_link_libraries(${PROJECT_NAME} xyginext)
 
 # Additional include directories
-target_include_directories(${BINARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
   target_link_libraries(${PROJECT_NAME}
     ${X11_LIBRARIES})
 endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
 
 message(warning "this file needs to be updated to correctly install plugins to plugin folder")
 
