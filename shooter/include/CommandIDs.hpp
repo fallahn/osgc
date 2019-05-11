@@ -32,6 +32,7 @@ namespace CommandID
         ScoreText = 0x80,
         HumanCount = 0x100,
         AlienCount = 0x200,
+        BatteryWarningText = 0x400
     };
 
     enum Menu

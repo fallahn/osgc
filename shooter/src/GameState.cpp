@@ -278,6 +278,16 @@ void GameState::handleMessage(const xy::Message& msg)
         {
             m_shaders.get(ShaderID::Noise).setUniform("u_mix", 0.f);
         }
+        else if (data.type == DroneEvent::BatteryLow)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::BatteryWarningText;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<xy::Callback>().active = true;
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
     }
     else if (msg.id == xy::Message::StateMessage)
     {
@@ -560,10 +570,48 @@ void GameState::loadWorld()
     entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x + (xy::DefaultSceneSize.x / 2.f), 10.f);// (11.f, 56.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("Score: " + std::to_string(m_sharedData.playerData.score));
-    entity.getComponent<xy::Text>().setCharacterSize(36);
+    entity.getComponent<xy::Text>().setCharacterSize(48);
     entity.getComponent<xy::Text>().setFillColour({ 0,0,128 });
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreText;
+
+    //battery warning
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(ConstVal::BackgroundPosition.x + (xy::DefaultSceneSize.x / 2.f), 80.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA])).setString("BATTERY LOW");
+    entity.getComponent<xy::Text>().setCharacterSize(160);
+    entity.getComponent<xy::Text>().setFillColour({ 255,0,0,0 });
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::BatteryWarningText;
+    entity.addComponent<xy::Callback>().userData = std::make_any<std::pair<float, float>>(std::make_pair(0.5f, 6.f));
+    entity.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float dt) 
+    {
+        auto& [flashTime, duration] = std::any_cast<std::pair<float, float>&>(e.getComponent<xy::Callback>().userData);
+        flashTime -= dt;
+        duration -= dt;
+
+        if (flashTime < 0.f)
+        {
+            flashTime = 0.5f;
+
+            auto colour = e.getComponent<xy::Text>().getFillColour();
+            colour.a = (colour.a == 0) ? 255 : 0;
+            e.getComponent<xy::Text>().setFillColour(colour);
+        }
+
+        if (duration < 0.f)
+        {
+            flashTime = 0.5f;
+            duration = 6.f;
+
+            auto colour = e.getComponent<xy::Text>().getFillColour();
+            colour.a = 0;
+            e.getComponent<xy::Text>().setFillColour(colour);
+            e.getComponent<xy::Callback>().active = false;
+        }
+    };
 
     //human count
     entity = m_gameScene.createEntity();
