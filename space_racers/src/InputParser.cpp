@@ -26,7 +26,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float Deadzone = 20.f;
+    const float Deadzone = 30.f;
 }
 
 InputParser::InputParser(xy::Entity entity, const InputBinding& binding)

@@ -44,6 +44,10 @@ struct Vehicle final
 	//for different vehicle types
 	struct Settings final
 	{
+		Settings() {};
+		Settings(float ad, float ts, float d, float a)
+			: angularDrag(ad), turnSpeed(ts), drag(d), acceleration(a) {}
+
 		float angularDrag = 0.8f;
 		float turnSpeed = 0.717f; //rads per second
 
@@ -52,8 +56,12 @@ struct Vehicle final
 		float maxSpeed() { return drag * (acceleration / (1.f - drag)); }
 		float maxSpeedSqr() { auto speed = maxSpeed(); return speed * speed; }
 
-		static constexpr float brakeStrength = 0.15f; //multiplier
+		static constexpr float brakeStrength = 0.92f; //multiplier
 	}settings;
+
+	//how near to the front of the vehicle the pivot point is
+	//where 0 is at the back, 0.5 in the dead centre and 1 at the front
+	static constexpr float centreOffset = 0.45f; 
 };
 
 class VehicleSystem final : public xy::System 

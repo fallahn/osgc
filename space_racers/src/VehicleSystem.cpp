@@ -80,11 +80,6 @@ void VehicleSystem::processInput(xy::Entity entity)
         acceleration += vehicle.settings.acceleration;
     }
 
-    if (input.flags & InputFlag::Brake)
-    {
-        acceleration -= vehicle.settings.acceleration * vehicle.settings.brakeStrength;
-    }
-
     //rotation
     const auto& tx = entity.getComponent<xy::Transform>();
     auto rotation = tx.getRotation() * xy::Util::Const::degToRad;
@@ -95,6 +90,12 @@ void VehicleSystem::processInput(xy::Entity entity)
 #else
     vehicle.velocity += sf::Vector2f(std::cos(rotation), std::sin(rotation)) * acceleration;
 #endif //FAST_SIN
+
+	if (input.flags & InputFlag::Brake)
+	{
+		//acceleration -= vehicle.settings.acceleration * vehicle.settings.brakeStrength;
+		vehicle.velocity *= vehicle.settings.brakeStrength;
+	}
 
     if (input.flags & InputFlag::Left)
     {
@@ -117,7 +118,7 @@ void VehicleSystem::applyInput(xy::Entity entity, float dt)
 
     //rotate more slowly at lower speeds
     float rotationMultiplier = xy::Util::Vector::lengthSquared(vehicle.velocity) / vehicle.settings.maxSpeedSqr();
-    rotationMultiplier = 0.05f + (rotationMultiplier * 0.95f);
+    rotationMultiplier = 0.25f + (rotationMultiplier * 0.75f);
 
     tx.rotate(((xy::Util::Const::radToDeg * vehicle.anglularVelocity) * rotationMultiplier) * dt);
     vehicle.anglularVelocity *= vehicle.settings.angularDrag;

@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "RaceState.hpp"
 #include "VehicleSystem.hpp"
+#include "VehicleDefs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -46,6 +47,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     quitLoadingScreen();
 }
 
+//public
 bool RaceState::handleEvent(const sf::Event& evt)
 {
     for (auto& ip : m_playerInputs)
@@ -117,8 +119,8 @@ void RaceState::addLocalPlayers()
     {
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.getComponent<xy::Transform>().setOrigin(tempRect.width / 2.f, tempRect.height / 2.f);
-        entity.addComponent<Vehicle>();
+        entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
+        entity.addComponent<Vehicle>().settings = Definition::car;
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
 

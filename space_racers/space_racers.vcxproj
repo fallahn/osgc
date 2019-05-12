@@ -154,6 +154,7 @@
     <ClInclude Include="include\RaceState.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
