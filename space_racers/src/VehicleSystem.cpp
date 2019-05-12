@@ -117,8 +117,8 @@ void VehicleSystem::applyInput(xy::Entity entity, float dt)
     vehicle.velocity *= vehicle.settings.drag;
 
     //rotate more slowly at lower speeds
-    float rotationMultiplier = xy::Util::Vector::lengthSquared(vehicle.velocity) / vehicle.settings.maxSpeedSqr();
-    rotationMultiplier = 0.25f + (rotationMultiplier * 0.75f);
+    float rotationMultiplier = std::min(1.f, xy::Util::Vector::lengthSquared(vehicle.velocity) / (vehicle.settings.maxSpeedSqr() / 8.f));
+    rotationMultiplier = 0.03f + (rotationMultiplier * 0.97f);
 
     tx.rotate(((xy::Util::Const::radToDeg * vehicle.anglularVelocity) * rotationMultiplier) * dt);
     vehicle.anglularVelocity *= vehicle.settings.angularDrag;

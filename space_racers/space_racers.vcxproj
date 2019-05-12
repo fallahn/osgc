@@ -153,6 +153,8 @@
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\RaceState.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\Server.hpp" />
+    <ClInclude Include="include\ServerStates.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
@@ -163,6 +165,7 @@
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
+    <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
