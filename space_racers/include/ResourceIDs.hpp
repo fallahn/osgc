@@ -32,3 +32,15 @@ namespace FontID
 
     static std::array<std::size_t, Count> handles = {};
 }
+
+namespace TextureID
+{
+    enum
+    {
+        Temp01, Temp02,
+
+        Count
+    };
+
+    static std::array<std::size_t, Count> handles = {};
+}

@@ -29,6 +29,7 @@ source distribution.
 #include "StateIDs.hpp"
 #include "MenuState.hpp"
 #include "RaceState.hpp"
+#include "DebugState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -42,9 +43,10 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
     ss->registerState<MenuState>(StateID::MainMenu, data);
     ss->registerState<RaceState>(StateID::Race, data);
+	ss->registerState<DebugState>(StateID::Debug, data);
 
 #ifdef XY_DEBUG
-    return StateID::Race;
+    return StateID::Debug;
 #else
     return StateID::MainMenu;
 #endif
@@ -54,4 +56,5 @@ void end(xy::StateStack* ss)
 {
     ss->unregisterState(StateID::MainMenu);
     ss->unregisterState(StateID::Race);
+	ss->unregisterState(StateID::Debug);
 }

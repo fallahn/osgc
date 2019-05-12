@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="include\VehicleSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />

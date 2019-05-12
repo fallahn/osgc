@@ -40,8 +40,8 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     buildWorld();
     addLocalPlayers();
 
-    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
-    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+    //m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
+    //m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     quitLoadingScreen();
 }
@@ -59,6 +59,8 @@ bool RaceState::handleEvent(const sf::Event& evt)
 
 void RaceState::handleMessage(const xy::Message& msg)
 {
+    //TODO handle resize message and update all cameras
+
     m_gameScene.forwardMessage(msg);
 }
 
@@ -101,12 +103,15 @@ void RaceState::loadResources()
 void RaceState::buildWorld()
 {
 
+
 }
 
 void RaceState::addLocalPlayers()
 {
     auto tempID = m_resources.load<sf::Texture>("dummy resource");
-    sf::FloatRect tempRect(0.f, 0.f, 48.f, 80.f);
+    sf::FloatRect tempRect(0.f, 0.f, 135.f, 77.f);
+
+    auto view = getContext().defaultView;
 
     for (auto i = 0u; i < m_sharedData.localPlayerCount; ++i)
     {
@@ -117,7 +122,11 @@ void RaceState::addLocalPlayers()
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
 
-        //TODO add camera and update view as appropriate
+        //update view as appropriate
+        entity.addComponent<xy::Camera>().setView(view.getSize());
+        entity.getComponent<xy::Camera>().setViewport(view.getViewport());
+        entity.getComponent<xy::Camera>().lockRotation(true);
+        m_gameScene.setActiveCamera(entity);
 
         m_playerInputs.emplace_back(entity, m_sharedData.inputBindings[i]);
     }

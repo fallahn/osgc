@@ -39,6 +39,7 @@ public:
 private:
     xy::Entity m_playerEntity;
     const InputBinding& m_inputBinding;
+    float m_analogueMultiplier;
 
     std::uint16_t m_currentInput;
     sf::Clock m_clientClock;

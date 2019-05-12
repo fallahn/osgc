@@ -24,10 +24,16 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Window/Event.hpp>
 
+namespace
+{
+    const float Deadzone = 20.f;
+}
+
 InputParser::InputParser(xy::Entity entity, const InputBinding& binding)
     : m_playerEntity    (entity),
     m_inputBinding      (binding),
-    m_currentInput      (0)
+    m_currentInput      (0),
+    m_analogueMultiplier(1.f)
 {
 
 }
@@ -108,8 +114,77 @@ void InputParser::handleEvent(const sf::Event& evt)
             }
         }
     }
+    else if (evt.type == sf::Event::JoystickMoved
+        && evt.joystickMove.joystickId == m_inputBinding.controllerID)
+    {
+        if (evt.joystickMove.axis == sf::Joystick::PovX
+            || evt.joystickMove.axis == sf::Joystick::X)
+        {
+            if (evt.joystickMove.position > Deadzone)
+            {
+                m_currentInput |= InputFlag::Right;
+                m_currentInput &= ~InputFlag::Left;
 
-    //TODO joystick moved events (and analogue velocity)
+                m_analogueMultiplier = evt.joystickMove.position / 100.f;
+            }
+            else if (evt.joystickMove.position < -Deadzone)
+            {
+                m_currentInput |= InputFlag::Left;
+                m_currentInput &= ~InputFlag::Right;
+
+                m_analogueMultiplier = evt.joystickMove.position / -100.f;
+            }
+            else
+            {
+                m_currentInput &= ~(InputFlag::Left | InputFlag::Right);
+            }
+        }
+        else if (evt.joystickMove.axis == sf::Joystick::PovY)
+        {
+#ifdef WIN32 //this axis is inverted on win32
+            if (evt.joystickMove.position > Deadzone)
+            {
+                
+            }
+            else if (evt.joystickMove.position < -Deadzone)
+            {
+                
+            }
+            else
+            {
+                
+            }
+#else
+            if (evt.joystickMove.position > Deadzone)
+            {
+                
+            }
+            else if (evt.joystickMove.position < -Deadzone)
+            {
+                
+            }
+            else
+            {
+                
+            }
+#endif
+        }
+        else if (evt.joystickMove.axis == sf::Joystick::Y)
+        {
+            if (evt.joystickMove.position > Deadzone)
+            {
+                
+            }
+            else if (evt.joystickMove.position < -Deadzone)
+            {
+                
+            }
+            else
+            {
+                
+            }
+        }
+    }
 }
 
 void InputParser::update()
@@ -122,10 +197,14 @@ void InputParser::update()
         Input input;
         input.flags = m_currentInput;
         input.timestamp = m_clientClock.getElapsedTime().asMicroseconds();
+        input.multiplier = std::min(1.f, m_analogueMultiplier);
 
         //update player input history
         vehicle.history[vehicle.currentInput] = input;
         vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
+
+        //reset analogue multiplier
+        m_analogueMultiplier = 1.f;
 
         //TODO send input to server
         /*InputUpdate iu;

@@ -32,7 +32,8 @@ namespace StateID
     enum
     {
         MainMenu,
-        Race
+        Race,
+		Debug
     };
 }
 
