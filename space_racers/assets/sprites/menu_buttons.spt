@@ -1,0 +1,30 @@
+spritesheet menu_buttons
+{
+	src="assets/images/menu_buttons./png"
+	blend=alpha
+
+	sprite timetrial
+	{
+		bounds=0,0,349, 72
+	}
+
+	sprite local
+	{
+		bounds=0,72,349, 72
+	}
+
+	sprite net
+	{
+		bounds=0,144,349, 72
+	}
+
+	sprite options
+	{
+		bounds=0,216,349, 72
+	}
+
+	sprite quit
+	{
+		bounds=0,288,349, 72
+	}
+}

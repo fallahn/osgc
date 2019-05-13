@@ -41,7 +41,7 @@ struct InputBinding final
         Accelerate, Brake, Left, Right, Count
     };
 
-    std::array<sf::Keyboard::Key, Count> keys = { sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D };
+    std::array<sf::Keyboard::Key, Count> keys = { sf::Keyboard::W, sf::Keyboard::Space, sf::Keyboard::A, sf::Keyboard::D };
     std::array<sf::Uint32, 2u> buttons = { 0, 1 };
     sf::Uint32 controllerID = 0;
 };

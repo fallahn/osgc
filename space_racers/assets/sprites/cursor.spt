@@ -1,0 +1,26 @@
+spritesheet cursor
+{
+	src="assets/images/cursor.png"
+	blend = alpha
+
+	sprite cursor
+	{
+		bounds = 0,0,40,40
+
+		animation idle
+		{
+			frame = 0,0,40,40
+			frame = 40,0,40,40
+			frame = 80,0,40,40
+			frame = 120,0,40,40
+			frame = 160,0,40,40
+			frame = 200,0,40,40
+			frame = 240,0,40,40
+			frame = 280,0,40,40
+			frame = 320,0,40,40
+
+			loop = true
+			framerate = 12
+		}
+	}
+}
