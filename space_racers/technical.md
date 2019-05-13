@@ -1,6 +1,6 @@
 A few notes on things I'm bound to forget:
 
-#####Network game initialisation
+##### Network game initialisation
 Assumes clients are in lobby state with one acting as a host, running a server instance also in a lobby state.
 
 Host sends game data to server:
