@@ -16,43 +16,35 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#pragma once
+#include "ServerRaceState.hpp"
 
-#include <cstdint>
+using namespace sv;
 
-namespace xy
+RaceState::RaceState(SharedData& sd)
+    : m_shareData(sd)
 {
-    class Message;
-    struct NetEvent;
+
 }
 
-namespace sv
+//public
+void RaceState::handleMessage(const xy::Message&)
 {
-    struct SharedData;
 
-    enum StateID
-    {
-        Lobby = 1,
-        Race = 2
-    };
-
-    class State
-    {
-    public:
-        virtual ~State() = default;
-
-        virtual void handleMessage(const xy::Message&) = 0;
-
-        virtual void handleNetEvent(const xy::NetEvent&) = 0;
-
-        virtual void netUpdate(float) = 0;
-
-        //after each update return a state ID
-        //if we return our own then don't switch
-        //else return the ID of the state we want
-        //to switch the server to
-        virtual std::int32_t logicUpdate(float) = 0;
-
-        virtual std::int32_t getID() const = 0;
-    };
 }
+
+void RaceState::handleNetEvent(const xy::NetEvent&)
+{
+
+}
+
+void RaceState::netUpdate(float)
+{
+
+}
+
+std::int32_t RaceState::logicUpdate(float)
+{
+
+    return StateID::Race;
+}
+

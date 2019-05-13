@@ -149,11 +149,15 @@
     <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
+    <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\NetConsts.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\RaceState.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\Server.hpp" />
+    <ClInclude Include="include\ServerLobbyState.hpp" />
+    <ClInclude Include="include\ServerRaceState.hpp" />
     <ClInclude Include="include\ServerStates.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
@@ -163,9 +167,12 @@
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
+    <ClCompile Include="src\LobbyState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
     <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\ServerLobbyState.cpp" />
+    <ClCompile Include="src\ServerRaceState.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,41 +18,22 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
+#include "StateIDs.hpp"
 
-namespace xy
+#include <xyginext/core/State.hpp>
+
+class LobbyState final : public xy::State 
 {
-    class Message;
-    struct NetEvent;
-}
+public:
+    LobbyState(xy::StateStack&, xy::State::Context, SharedData&);
 
-namespace sv
-{
-    struct SharedData;
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
 
-    enum StateID
-    {
-        Lobby = 1,
-        Race = 2
-    };
+    xy::StateID stateID() const override { return StateID::Lobby; }
 
-    class State
-    {
-    public:
-        virtual ~State() = default;
-
-        virtual void handleMessage(const xy::Message&) = 0;
-
-        virtual void handleNetEvent(const xy::NetEvent&) = 0;
-
-        virtual void netUpdate(float) = 0;
-
-        //after each update return a state ID
-        //if we return our own then don't switch
-        //else return the ID of the state we want
-        //to switch the server to
-        virtual std::int32_t logicUpdate(float) = 0;
-
-        virtual std::int32_t getID() const = 0;
-    };
-}
+private:
+    SharedData& m_sharedData;
+};

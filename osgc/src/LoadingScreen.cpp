@@ -27,6 +27,8 @@ source distribution.
 
 #include "LoadingScreen.hpp"
 
+#include <xyginext/core/FileSystem.hpp>
+
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 
@@ -54,7 +56,7 @@ LoadingScreen::LoadingScreen()
     : m_currentFrameTime(0.f),
     m_frameIndex        (0)
 {
-    m_texture.loadFromFile("assets/images/loading.png");
+    m_texture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/loading.png");
     m_sprite.setTexture(m_texture);
     m_sprite.setTextureRect(frames[0]);
     m_sprite.setPosition(40.f, 20.f);

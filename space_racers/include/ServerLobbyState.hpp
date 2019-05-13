@@ -18,41 +18,21 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
-
-namespace xy
-{
-    class Message;
-    struct NetEvent;
-}
+#include "ServerStates.hpp"
 
 namespace sv
 {
-    struct SharedData;
-
-    enum StateID
-    {
-        Lobby = 1,
-        Race = 2
-    };
-
-    class State
+    class LobbyState final : public State
     {
     public:
-        virtual ~State() = default;
+        explicit LobbyState(SharedData&);
+        void handleMessage(const xy::Message&) override;
+        void handleNetEvent(const xy::NetEvent&) override;
+        void netUpdate(float) override;
+        std::int32_t logicUpdate(float) override;
+        std::int32_t getID() const override { return StateID::Lobby; }
 
-        virtual void handleMessage(const xy::Message&) = 0;
-
-        virtual void handleNetEvent(const xy::NetEvent&) = 0;
-
-        virtual void netUpdate(float) = 0;
-
-        //after each update return a state ID
-        //if we return our own then don't switch
-        //else return the ID of the state we want
-        //to switch the server to
-        virtual std::int32_t logicUpdate(float) = 0;
-
-        virtual std::int32_t getID() const = 0;
+    private:
+        SharedData& m_sharedData;
     };
 }

@@ -19,6 +19,8 @@ Copyright 2019 Matt Marchant
 #include "RaceState.hpp"
 #include "VehicleSystem.hpp"
 #include "VehicleDefs.hpp"
+#include "ServerStates.hpp"
+#include "NetConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -30,19 +32,28 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 
 RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State(ss, ctx),
+    : xy::State (ss, ctx),
     m_sharedData(sd),
-    m_gameScene(ctx.appInstance.getMessageBus())
+    m_gameScene (ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
 
     initScene();
     loadResources();
     buildWorld();
-    addLocalPlayers();
 
-    //m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
-    //m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+    //temp while we get this set up...
+    //eventually this will be done when the host creates a lobby
+    if (!sd.server)
+    {
+        sd.server = std::make_unique<sv::Server>();
+        sd.server->run(sv::StateID::Race);
+    }
+
+    sf::Clock tempClock;
+    while (tempClock.getElapsedTime().asSeconds() < 2.f) {} //give the server time to start
+
+    sd.netClient->connect("127.0.0.1", NetConst::Port);
 
     quitLoadingScreen();
 }
@@ -71,6 +82,13 @@ bool RaceState::update(float dt)
     for (auto& ip : m_playerInputs)
     {
         ip.update();
+    }
+
+    //poll event afterwards so gathered inputs are sent immediately
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
+    {
+
     }
 
     m_gameScene.update(dt);

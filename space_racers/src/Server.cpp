@@ -18,6 +18,11 @@ Copyright 2019 Matt Marchant
 
 #include "Server.hpp"
 #include "ServerStates.hpp"
+#include "ServerLobbyState.hpp"
+#include "ServerRaceState.hpp"
+#include "NetConsts.hpp"
+
+#include <xyginext/network/NetData.hpp>
 
 #include <iostream>
 
@@ -47,8 +52,6 @@ void Server::run(std::int32_t firstState)
     if (!m_running)
     {
         m_activeState = m_stateFactory[firstState]();
-
-        m_running = true;
         m_thread.launch();
     }
 }
@@ -57,7 +60,7 @@ void Server::quit()
 {
     if (m_running)
     {
-        std::cout << "Quitting server...\n";
+        LOG("Quitting server...", xy::Logger::Type::Info);
         m_running = false;
         m_thread.wait();
     }
@@ -66,7 +69,9 @@ void Server::quit()
 //private
 void Server::threadFunc()
 {
-    std::cout << "Server launched!\n";
+    LOG("Server launched!", xy::Logger::Type::Info);
+
+    m_running = m_sharedData.netHost.start("", NetConst::Port, 4, 2);
 
     m_netClock.restart();
     m_netAccumulator = sf::Time::Zero;
@@ -76,11 +81,33 @@ void Server::threadFunc()
 
     while (m_running)
     {
-        //TODO poll incoming packets and pass to active state
-
         while (!m_messageBus.empty())
         {
             m_activeState->handleMessage(m_messageBus.poll());
+        }
+
+        xy::NetEvent evt;
+        while (m_sharedData.netHost.pollEvent(evt))
+        {
+            if (evt.type == xy::NetEvent::ClientConnect)
+            {
+                //TODO only allow new connections when in a lobby
+                LOG("Only allow new connections from lobby!", xy::Logger::Type::Warning);
+                m_sharedData.clients.push_back(evt.peer);
+            }
+            else if (evt.type == xy::NetEvent::ClientDisconnect)
+            {
+                m_sharedData.clients.erase(std::remove_if(
+                    m_sharedData.clients.begin(),
+                    m_sharedData.clients.end(),
+                    [&](const xy::NetPeer peer)
+                    {
+                        return evt.peer == peer;
+                    }),
+                    m_sharedData.clients.end());
+            }
+
+            m_activeState->handleNetEvent(evt);
         }
 
         m_netAccumulator += m_netClock.restart();
@@ -91,7 +118,7 @@ void Server::threadFunc()
             m_netAccumulator -= NetTime;
         }
 
-        std::int32_t stateResult = 0;
+        std::int32_t stateResult = m_activeState->getID();
         m_updateAccumulator += m_updateClock.restart();
         while (m_updateAccumulator > UpdateTime)
         {
@@ -104,25 +131,26 @@ void Server::threadFunc()
         {
             m_activeState = m_stateFactory[stateResult]();
         }
-
     }
 
-    //TODO tidy up
+    //tidy up
+    m_sharedData.netHost.stop();
+    m_sharedData.clients.clear();
 
-    std::cout << "Server quit!\n";
+    LOG("Server quit!", xy::Logger::Type::Info);
 }
 
 void Server::registerStates()
 {
     m_stateFactory[sv::StateID::Lobby] =
-        []()->std::unique_ptr<State>
+        [&]()->std::unique_ptr<State>
     {
-        return std::make_unique<LobbyState>();
+        return std::make_unique<LobbyState>(m_sharedData);
     };
 
     m_stateFactory[sv::StateID::Race] =
-        []()->std::unique_ptr<State>
+        [&]()->std::unique_ptr<State>
     {
-        return std::make_unique<RaceState>();
+        return std::make_unique<RaceState>(m_sharedData);
     };
 }

@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <xyginext/core/MessageBus.hpp>
+#include <xyginext/network/NetHost.hpp>
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Thread.hpp>
@@ -30,6 +31,13 @@ Copyright 2019 Matt Marchant
 namespace sv
 {
     class State;
+
+    struct SharedData final
+    {
+        xy::NetHost netHost;
+        std::vector<xy::NetPeer> clients;
+    };
+
     class Server final
     {
     public:
@@ -62,5 +70,7 @@ namespace sv
         std::unique_ptr<State> m_activeState;
         std::map<std::int32_t, std::function<std::unique_ptr<State>()>> m_stateFactory;
         void registerStates();
+
+        SharedData m_sharedData;
     };
 }

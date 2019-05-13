@@ -30,6 +30,7 @@ source distribution.
 #include "MenuState.hpp"
 #include "RaceState.hpp"
 #include "DebugState.hpp"
+#include "LobbyState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -40,13 +41,20 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     *sharedData = std::make_any<SharedData>();
 
     auto& data = std::any_cast<SharedData&>(*sharedData);
+    data.netClient = std::make_unique<xy::NetClient>();
+    if (!data.netClient->create(2))
+    {
+        xy::Logger::log("Creating net client failed...", xy::Logger::Type::Error);
+    }
 
     ss->registerState<MenuState>(StateID::MainMenu, data);
     ss->registerState<RaceState>(StateID::Race, data);
     ss->registerState<DebugState>(StateID::Debug, data);
+    ss->registerState<LobbyState>(StateID::Lobby, data);
 
 #ifdef XY_DEBUG
-    return StateID::Debug;
+    //return StateID::Debug;
+    return StateID::Lobby;
 #else
     return StateID::MainMenu;
 #endif
@@ -57,4 +65,5 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::MainMenu);
     ss->unregisterState(StateID::Race);
     ss->unregisterState(StateID::Debug);
+    ss->unregisterState(StateID::Lobby);
 }

@@ -27,22 +27,35 @@ source distribution.
 
 #pragma once
 
+
+#include "InputBinding.hpp"
+#include "Server.hpp"
+
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/network/NetClient.hpp>
+
+#include <memory>
+
 namespace StateID
 {
     enum
     {
         MainMenu,
+        Lobby,
         Race,
         Debug
     };
 }
-
-#include "InputBinding.hpp"
-#include <xyginext/resources/ResourceHandler.hpp>
 
 struct SharedData final
 {
     xy::ResourceHandler resources;
     std::array<InputBinding, 4u> inputBindings;
     std::size_t localPlayerCount = 1;
+
+    //hack to allow non-copyable member in std::any
+    //please don't pass copies of this around...
+    std::shared_ptr<xy::NetClient> netClient;
+    //only used if we're hosting, else nullptr
+    std::shared_ptr<sv::Server> server;
 };

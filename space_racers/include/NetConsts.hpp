@@ -20,39 +20,15 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
-namespace xy
+namespace NetConst
 {
-    class Message;
-    struct NetEvent;
+    const std::uint16_t Port = 4330;
 }
 
-namespace sv
+namespace PacketID
 {
-    struct SharedData;
-
-    enum StateID
+    enum
     {
-        Lobby = 1,
-        Race = 2
-    };
 
-    class State
-    {
-    public:
-        virtual ~State() = default;
-
-        virtual void handleMessage(const xy::Message&) = 0;
-
-        virtual void handleNetEvent(const xy::NetEvent&) = 0;
-
-        virtual void netUpdate(float) = 0;
-
-        //after each update return a state ID
-        //if we return our own then don't switch
-        //else return the ID of the state we want
-        //to switch the server to
-        virtual std::int32_t logicUpdate(float) = 0;
-
-        virtual std::int32_t getID() const = 0;
     };
 }

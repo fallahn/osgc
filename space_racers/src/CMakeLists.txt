@@ -3,8 +3,11 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/DebugState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
   PARENT_SCOPE)

@@ -16,43 +16,32 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#pragma once
+#include "ServerLobbyState.hpp"
 
-#include <cstdint>
-
-namespace xy
+using namespace sv;
+LobbyState::LobbyState(SharedData& sd)
+    : m_sharedData(sd)
 {
-    class Message;
-    struct NetEvent;
+
 }
 
-namespace sv
+//public
+void LobbyState::handleMessage(const xy::Message&)
 {
-    struct SharedData;
 
-    enum StateID
-    {
-        Lobby = 1,
-        Race = 2
-    };
+};
 
-    class State
-    {
-    public:
-        virtual ~State() = default;
+void LobbyState::handleNetEvent(const xy::NetEvent&)
+{
 
-        virtual void handleMessage(const xy::Message&) = 0;
+};
 
-        virtual void handleNetEvent(const xy::NetEvent&) = 0;
+void LobbyState::netUpdate(float)
+{
 
-        virtual void netUpdate(float) = 0;
+}
 
-        //after each update return a state ID
-        //if we return our own then don't switch
-        //else return the ID of the state we want
-        //to switch the server to
-        virtual std::int32_t logicUpdate(float) = 0;
-
-        virtual std::int32_t getID() const = 0;
-    };
+std::int32_t LobbyState::logicUpdate(float)
+{
+    return StateID::Lobby; 
 }

@@ -4,13 +4,17 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NetConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerStates.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.hpp
   PARENT_SCOPE)
