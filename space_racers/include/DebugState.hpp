@@ -31,7 +31,7 @@ class DebugState final : public xy::State, public xy::GuiClient
 {
 public:
     DebugState(xy::StateStack&, xy::State::Context, SharedData&);
-	~DebugState();
+    ~DebugState();
 
     bool handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

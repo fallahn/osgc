@@ -103,8 +103,8 @@ bool GameOverState::handleEvent(const sf::Event& evt)
         return false;
     }
 
-	//prevents events being forwarded if the console wishes to consume them
-	if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    //prevents events being forwarded if the console wishes to consume them
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
     {
         return false;
     }

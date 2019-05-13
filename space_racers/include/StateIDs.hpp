@@ -33,7 +33,7 @@ namespace StateID
     {
         MainMenu,
         Race,
-		Debug
+        Debug
     };
 }
 

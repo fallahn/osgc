@@ -65,8 +65,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool MenuState::handleEvent(const sf::Event& evt)
 {
-	//prevents events being forwarded if the console wishes to consume them
-	if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    //prevents events being forwarded if the console wishes to consume them
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
     {
         return true;
     }

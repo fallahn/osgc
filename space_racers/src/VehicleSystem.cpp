@@ -34,7 +34,7 @@ Copyright 2019 Matt Marchant
 #include <cmath>
 
 VehicleSystem::VehicleSystem(xy::MessageBus& mb)
-    :xy::System(mb, typeid(VehicleSystem))
+    : xy::System(mb, typeid(VehicleSystem))
 {
     requireComponent<Vehicle>();
     requireComponent<xy::Transform>();
@@ -85,17 +85,17 @@ void VehicleSystem::processInput(xy::Entity entity)
     auto rotation = tx.getRotation() * xy::Util::Const::degToRad;
 
 #ifdef FAST_SIN
-	//TODO if the table is pre-baked it would also be more consistent across platforms
+    //TODO if the table is pre-baked it would also be more consistent across platforms
     vehicle.velocity += sf::Vector2f(ft::cos(rotation), ft::sin(rotation)) * acceleration;
 #else
     vehicle.velocity += sf::Vector2f(std::cos(rotation), std::sin(rotation)) * acceleration;
 #endif //FAST_SIN
 
-	if (input.flags & InputFlag::Brake)
-	{
-		//acceleration -= vehicle.settings.acceleration * vehicle.settings.brakeStrength;
-		vehicle.velocity *= vehicle.settings.brakeStrength;
-	}
+    if (input.flags & InputFlag::Brake)
+    {
+        //acceleration -= vehicle.settings.acceleration * vehicle.settings.brakeStrength;
+        vehicle.velocity *= vehicle.settings.brakeStrength;
+    }
 
     if (input.flags & InputFlag::Left)
     {

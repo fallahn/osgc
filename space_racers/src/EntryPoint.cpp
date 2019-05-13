@@ -43,7 +43,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
     ss->registerState<MenuState>(StateID::MainMenu, data);
     ss->registerState<RaceState>(StateID::Race, data);
-	ss->registerState<DebugState>(StateID::Debug, data);
+    ss->registerState<DebugState>(StateID::Debug, data);
 
 #ifdef XY_DEBUG
     return StateID::Debug;
@@ -56,5 +56,5 @@ void end(xy::StateStack* ss)
 {
     ss->unregisterState(StateID::MainMenu);
     ss->unregisterState(StateID::Race);
-	ss->unregisterState(StateID::Debug);
+    ss->unregisterState(StateID::Debug);
 }
