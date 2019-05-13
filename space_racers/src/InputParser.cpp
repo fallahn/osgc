@@ -20,7 +20,6 @@ Copyright 2019 Matt Marchant
 #include "InputBinding.hpp"
 #include "VehicleSystem.hpp"
 
-#include <xyginext/ecs/components/Transform.hpp> //TODO remove this
 #include <xyginext/network/NetClient.hpp>
 
 #include <SFML/Window/Event.hpp>
@@ -30,7 +29,7 @@ namespace
     const float Deadzone = 30.f;
 }
 
-InputParser::InputParser(const InputBinding& binding, xy::NetClient& netClient)
+InputParser::InputParser(const InputBinding& binding, xy::NetClient* netClient)
     : m_inputBinding    (binding),
     m_netClient         (netClient),
     m_currentInput      (0),
@@ -80,12 +79,6 @@ void InputParser::handleEvent(const sf::Event& evt)
         {
             m_currentInput &= ~InputFlag::Brake;
         }
-#ifdef XY_DEBUG
-        else if (evt.key.code == sf::Keyboard::Space)
-        {
-            m_playerEntity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        }
-#endif //XY_DEBUG
     }
     else if (evt.type == sf::Event::JoystickButtonPressed)
     {
@@ -207,7 +200,7 @@ void InputParser::update()
         //reset analogue multiplier
         m_analogueMultiplier = 1.f;
 
-        //TODO send input to server
+        //TODO send input to server - remember this might be nullptr for local games!
         /*InputUpdate iu;
         iu.clientTime = input.timestamp;
         iu.input = input.mask;

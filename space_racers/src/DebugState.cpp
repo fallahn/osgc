@@ -87,9 +87,10 @@ namespace
 }
 
 DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State(ss, ctx),
-    m_sharedData(sd),
-    m_gameScene(ctx.appInstance.getMessageBus())
+    : xy::State     (ss, ctx),
+    m_sharedData    (sd),
+    m_gameScene     (ctx.appInstance.getMessageBus()),
+    m_playerInput   (sd.inputBindings[0], sd.netClient.get())
 {
     launchLoadingScreen();
 
@@ -168,11 +169,7 @@ DebugState::~DebugState()
 //public
 bool DebugState::handleEvent(const sf::Event& evt)
 {
-    for (auto& ip : m_playerInputs)
-    {
-        ip.handleEvent(evt);
-    }
-
+    m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
     return true;
 }
@@ -186,10 +183,7 @@ void DebugState::handleMessage(const xy::Message& msg)
 
 bool DebugState::update(float dt)
 {
-    for (auto& ip : m_playerInputs)
-    {
-        ip.update();
-    }
+    m_playerInput.update();
 
     xy::Command cmd;
     cmd.targetFlags = vehicleCommandID;
@@ -249,26 +243,22 @@ void DebugState::addLocalPlayers()
 
     auto view = getContext().defaultView;
 
-    //for (auto i = 0u; i < m_sharedData.localPlayerCount; ++i)
-    {
-        //auto entity = m_gameScene.createEntity();
-        //entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        //entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
-        //entity.addComponent<Vehicle>();
-        //entity.addComponent<xy::Drawable>();
-        //entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
-        //entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
+    entity.addComponent<Vehicle>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
+    entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
 
-        ////update view as appropriate
-        //auto camEnt = m_gameScene.createEntity();
-        //camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-        //camEnt.addComponent<xy::Camera>().setView(view.getSize());
-        //camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
-        //camEnt.getComponent<xy::Camera>().lockRotation(true);
-        //m_gameScene.setActiveCamera(camEnt);
+    //update view as appropriate
+    auto camEnt = m_gameScene.createEntity();
+    camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    camEnt.addComponent<xy::Camera>().setView(view.getSize());
+    camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+    camEnt.getComponent<xy::Camera>().lockRotation(true);
+    m_gameScene.setActiveCamera(camEnt);
 
-        //entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
-
-        //m_playerInputs.emplace_back(entity, m_sharedData.inputBindings[0]);
-    }
+    entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
+    m_playerInput.setPlayerEntity(entity);
 }

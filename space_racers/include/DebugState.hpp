@@ -50,7 +50,7 @@ private:
 
     xy::ResourceHolder m_resources;
 
-    std::vector<InputParser> m_playerInputs;
+    InputParser m_playerInput;
 
     void initScene();
     void loadResources();

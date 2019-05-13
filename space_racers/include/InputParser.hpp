@@ -36,7 +36,7 @@ namespace xy
 class InputParser final
 {
 public:
-    InputParser(const InputBinding&, xy::NetClient&);
+    InputParser(const InputBinding&, xy::NetClient* = nullptr);
 
     void handleEvent(const sf::Event&);
     void update();
@@ -44,7 +44,7 @@ public:
 
 private:
     const InputBinding& m_inputBinding;
-    xy::NetClient& m_netClient;
+    xy::NetClient* m_netClient;
     xy::Entity m_playerEntity;
     float m_analogueMultiplier;
 

@@ -36,7 +36,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_sharedData    (sd),
     m_gameScene     (ctx.appInstance.getMessageBus()),
-    m_playerInput   (sd.inputBindings[0], *sd.netClient)
+    m_playerInput   (sd.inputBindings[0], sd.netClient.get())
 {
     launchLoadingScreen();
 
