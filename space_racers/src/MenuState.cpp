@@ -36,14 +36,25 @@ source distribution.
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/UIHitBox.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
 
+#include <xyginext/graphics/SpriteSheet.hpp>
+
 #include <SFML/Graphics/Font.hpp>
+
+namespace
+{
+    const std::int32_t BackgroundDepth = -20;
+    const std::int32_t MenuDepth = 0;
+    const std::int32_t ButtonDepth = 1;
+}
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
@@ -105,6 +116,7 @@ void MenuState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
 }
@@ -112,6 +124,16 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+
+    TextureID::handles[TextureID::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
+
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/menu_buttons.spt", m_resources);
+    SpriteID::sprites[SpriteID::TimeTrialButton] = spriteSheet.getSprite("timetrial");
+    SpriteID::sprites[SpriteID::LocalButton] = spriteSheet.getSprite("local");
+    SpriteID::sprites[SpriteID::NetButton] = spriteSheet.getSprite("net");
+    SpriteID::sprites[SpriteID::OptionsButton] = spriteSheet.getSprite("options");
+    SpriteID::sprites[SpriteID::QuitButton] = spriteSheet.getSprite("quit");
 }
 
 void MenuState::buildMenu()
@@ -120,46 +142,126 @@ void MenuState::buildMenu()
 
     //title
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(100.f, 80.f);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(font).setCharacterSize(120);
-    entity.getComponent<xy::Text>().setString("Space Racers");
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::MainMenu));
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    auto& parentTx = entity.getComponent<xy::Transform>();
+
 
     auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+    auto mouseEnter = uiSystem.addMouseMoveCallback(
+        [](xy::Entity e, sf::Vector2f)
+        {
+            auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
+            bounds.left = bounds.width;
+            e.getComponent<xy::Sprite>().setTextureRect(bounds);
+        });
+    auto mouseExit = uiSystem.addMouseMoveCallback([](xy::Entity e, sf::Vector2f) 
+        {
+            auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
+            bounds.left = 0.f;
+            e.getComponent<xy::Sprite>().setTextureRect(bounds);
+        });
 
-    sf::Vector2f itemPosition(100.f, 540.f);
-    static const float itemStride = 40.f;
-    static const std::uint32_t CharSize(60);
 
-    //start game
+    sf::Vector2f itemPosition(402.f ,380.f);
+
+    //time trial
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(font).setString("Start Game");
-    entity.getComponent<xy::Text>().setCharacterSize(CharSize);
-    auto bounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::TimeTrialButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    requestStackClear();
-                    requestStackPush(StateID::Race);
+
                 }
             });
-    itemPosition.y += itemStride;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+    
+    itemPosition.y += bounds.height;
 
-    //quit to browser
+    //local
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(font).setString("Return to Browser");
-    entity.getComponent<xy::Text>().setCharacterSize(CharSize);
-    bounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::LocalButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+    //net
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::NetButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    //TODO choose host/join
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+    //options
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::OptionsButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Console::show();
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+
+    //quit
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::QuitButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -167,23 +269,7 @@ void MenuState::buildMenu()
                     requestStackPush(StateID::ParentState);
                 }
             });
-    itemPosition.y += itemStride;
-
-    //quit
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(font).setString("Quit");
-    entity.getComponent<xy::Text>().setCharacterSize(CharSize);
-    bounds = xy::Text::getLocalBounds(entity);
-    entity.addComponent<xy::UIHitBox>().area = bounds;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        uiSystem.addMouseButtonCallback([](xy::Entity e, sf::Uint64 flags)
-            {
-                if (flags & xy::UISystem::LeftMouse)
-                {
-                    xy::App::quit();
-                }
-            });
-    itemPosition.y += itemStride;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
 }

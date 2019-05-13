@@ -37,10 +37,27 @@ namespace TextureID
 {
     enum
     {
-        Temp01, Temp02,
+        MainMenu,
 
         Count
     };
 
     static std::array<std::size_t, Count> handles = {};
+}
+
+#include <xyginext/ecs/components/Sprite.hpp>
+namespace SpriteID
+{
+    enum
+    {
+        TimeTrialButton,
+        LocalButton,
+        NetButton,
+        OptionsButton,
+        QuitButton,
+
+        Count
+    };
+
+    static std::array<xy::Sprite, Count> sprites;
 }

@@ -29,6 +29,7 @@ source distribution.
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
 
 struct SharedData;
 class MenuState final : public xy::State
@@ -50,6 +51,7 @@ private:
 
     SharedData& m_sharedData;
     xy::Scene m_scene;
+    xy::ResourceHolder m_resources;
 
     void initScene();
     void loadResources();

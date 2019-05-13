@@ -1,6 +1,6 @@
 spritesheet menu_buttons
 {
-	src="assets/images/menu_buttons./png"
+	src="assets/images/menu_buttons.png"
 	blend=alpha
 
 	sprite timetrial
