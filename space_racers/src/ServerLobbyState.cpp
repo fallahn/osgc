@@ -17,10 +17,17 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "ServerLobbyState.hpp"
+#include "Server.hpp"
+#include "NetConsts.hpp"
+#include "ClientPackets.hpp"
+#include "GameModes.hpp"
+
+#include <xyginext/network/NetData.hpp>
 
 using namespace sv;
-LobbyState::LobbyState(SharedData& sd)
-    : m_sharedData(sd)
+LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
+    : m_sharedData  (sd),
+    m_nextState     (StateID::Lobby)
 {
 
 }
@@ -31,9 +38,19 @@ void LobbyState::handleMessage(const xy::Message&)
 
 };
 
-void LobbyState::handleNetEvent(const xy::NetEvent&)
+void LobbyState::handleNetEvent(const xy::NetEvent& evt)
 {
-
+    if (evt.type == xy::NetEvent::PacketReceived)
+    {
+        const auto& packet = evt.packet;
+        switch (packet.getID())
+        {
+        default: break;
+        case PacketID::LobbyData:
+            startGame(packet.as<LobbyData>());            
+            break;
+        }
+    }
 };
 
 void LobbyState::netUpdate(float)
@@ -43,5 +60,28 @@ void LobbyState::netUpdate(float)
 
 std::int32_t LobbyState::logicUpdate(float)
 {
-    return StateID::Lobby; 
+    return m_nextState; 
+}
+
+//private
+void LobbyState::startGame(const LobbyData& data)
+{
+    m_sharedData.playerCount = data.playerCount;
+    m_sharedData.mapIndex = data.mapIndex;
+
+    for (auto i = 0u; i < data.playerCount; ++i)
+    {
+        m_sharedData.peerIDs[i] = data.peerIDs[i];
+        m_sharedData.vehicleIDs[i] = data.vehicleIDs[i];
+    }
+
+    switch (data.gameMode)
+    {
+    default: break;
+    case GameMode::Race:
+        m_nextState = StateID::Race;
+        break;
+    }
+
+    //TODO ignore any further input in this state?
 }

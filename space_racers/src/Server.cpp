@@ -145,12 +145,12 @@ void Server::registerStates()
     m_stateFactory[sv::StateID::Lobby] =
         [&]()->std::unique_ptr<State>
     {
-        return std::make_unique<LobbyState>(m_sharedData);
+        return std::make_unique<LobbyState>(m_sharedData, m_messageBus);
     };
 
     m_stateFactory[sv::StateID::Race] =
         [&]()->std::unique_ptr<State>
     {
-        return std::make_unique<RaceState>(m_sharedData);
+        return std::make_unique<RaceState>(m_sharedData, m_messageBus);
     };
 }

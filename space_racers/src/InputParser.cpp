@@ -20,7 +20,8 @@ Copyright 2019 Matt Marchant
 #include "InputBinding.hpp"
 #include "VehicleSystem.hpp"
 
-#include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Transform.hpp> //TODO remove this
+#include <xyginext/network/NetClient.hpp>
 
 #include <SFML/Window/Event.hpp>
 
@@ -29,9 +30,9 @@ namespace
     const float Deadzone = 30.f;
 }
 
-InputParser::InputParser(xy::Entity entity, const InputBinding& binding)
-    : m_playerEntity    (entity),
-    m_inputBinding      (binding),
+InputParser::InputParser(const InputBinding& binding, xy::NetClient& netClient)
+    : m_inputBinding    (binding),
+    m_netClient         (netClient),
     m_currentInput      (0),
     m_analogueMultiplier(1.f)
 {

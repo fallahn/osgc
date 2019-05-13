@@ -20,12 +20,15 @@ Copyright 2019 Matt Marchant
 
 #include "ServerStates.hpp"
 
+#include <xyginext/ecs/Scene.hpp>
+
+struct LobbyData;
 namespace sv
 {
     class LobbyState final : public State
     {
     public:
-        explicit LobbyState(SharedData&);
+        LobbyState(SharedData&, xy::MessageBus&);
         void handleMessage(const xy::Message&) override;
         void handleNetEvent(const xy::NetEvent&) override;
         void netUpdate(float) override;
@@ -34,5 +37,8 @@ namespace sv
 
     private:
         SharedData& m_sharedData;
+        std::int32_t m_nextState;
+
+        void startGame(const LobbyData&);
     };
 }

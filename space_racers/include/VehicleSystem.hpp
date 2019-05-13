@@ -59,6 +59,11 @@ struct Vehicle final
         static constexpr float brakeStrength = 0.92f; //multiplier
     }settings;
 
+    enum Type
+    {
+        Car, Bike, Ship
+    }type = Car;
+
     //how near to the front of the vehicle the pivot point is
     //where 0 is at the back, 0.5 in the dead centre and 1 at the front
     static constexpr float centreOffset = 0.45f; 

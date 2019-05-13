@@ -19,8 +19,9 @@ Copyright 2019 Matt Marchant
 #include "RaceState.hpp"
 #include "VehicleSystem.hpp"
 #include "VehicleDefs.hpp"
-#include "ServerStates.hpp"
 #include "NetConsts.hpp"
+#include "ClientPackets.hpp"
+#include "ServerPackets.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -32,9 +33,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 
 RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State (ss, ctx),
-    m_sharedData(sd),
-    m_gameScene (ctx.appInstance.getMessageBus())
+    : xy::State     (ss, ctx),
+    m_sharedData    (sd),
+    m_gameScene     (ctx.appInstance.getMessageBus()),
+    m_playerInput   (sd.inputBindings[0], *sd.netClient)
 {
     launchLoadingScreen();
 
@@ -42,30 +44,13 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     loadResources();
     buildWorld();
 
-    //temp while we get this set up...
-    //eventually this will be done when the host creates a lobby
-    if (!sd.server)
-    {
-        sd.server = std::make_unique<sv::Server>();
-        sd.server->run(sv::StateID::Race);
-    }
-
-    sf::Clock tempClock;
-    while (tempClock.getElapsedTime().asSeconds() < 2.f) {} //give the server time to start
-
-    sd.netClient->connect("127.0.0.1", NetConst::Port);
-
     quitLoadingScreen();
 }
 
 //public
 bool RaceState::handleEvent(const sf::Event& evt)
 {
-    for (auto& ip : m_playerInputs)
-    {
-        ip.handleEvent(evt);
-    }
-
+    m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
     return true;
 }
@@ -79,16 +64,23 @@ void RaceState::handleMessage(const xy::Message& msg)
 
 bool RaceState::update(float dt)
 {
-    for (auto& ip : m_playerInputs)
-    {
-        ip.update();
-    }
+    m_playerInput.update();
 
     //poll event afterwards so gathered inputs are sent immediately
     xy::NetEvent evt;
     while (m_sharedData.netClient->pollEvent(evt))
     {
-
+        if (evt.type == xy::NetEvent::PacketReceived)
+        {
+            const auto& packet = evt.packet;
+            switch (packet.getID())
+            {
+            default: break;
+            case PacketID::VehicleData:
+                spawnVehicle(packet.as<VehicleData>());
+                break;
+            }
+        }
     }
 
     m_gameScene.update(dt);
@@ -111,8 +103,6 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
-
-
 }
 
 void RaceState::loadResources()
@@ -122,32 +112,23 @@ void RaceState::loadResources()
 
 void RaceState::buildWorld()
 {
+    auto tempID = m_resources.load<sf::Texture>("assets/images/temp01.png");
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(-20);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
 
-
+    //let the server know the world is loaded so it can send us all player cars
+    m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);
 }
 
-void RaceState::addLocalPlayers()
+void RaceState::spawnVehicle(const VehicleData& data)
 {
-    auto tempID = m_resources.load<sf::Texture>("dummy resource");
-    sf::FloatRect tempRect(0.f, 0.f, 135.f, 77.f);
+    //TODO spawn vehicle
+    std::cout << "Spawned vehicle!\n";
+    //TODO check if data has our peer ID and add to controller
 
-    auto view = getContext().defaultView;
+    //TODO count spawned vehicles and tell server when all are spawned
 
-    for (auto i = 0u; i < m_sharedData.localPlayerCount; ++i)
-    {
-        auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
-        entity.addComponent<Vehicle>().settings = Definition::car;
-        entity.addComponent<xy::Drawable>();
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
-
-        //update view as appropriate
-        entity.addComponent<xy::Camera>().setView(view.getSize());
-        entity.getComponent<xy::Camera>().setViewport(view.getViewport());
-        entity.getComponent<xy::Camera>().lockRotation(true);
-        m_gameScene.setActiveCamera(entity);
-
-        m_playerInputs.emplace_back(entity, m_sharedData.inputBindings[i]);
-    }
+    //TODO map vehicle entities to server ID for easy updating from incoming packets
 }

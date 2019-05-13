@@ -47,11 +47,18 @@ namespace StateID
     };
 }
 
+struct GameData final
+{
+    std::uint8_t playerCount = 1;
+    std::uint8_t mapIndex = 0;
+};
+
 struct SharedData final
 {
     xy::ResourceHandler resources;
     std::array<InputBinding, 4u> inputBindings;
-    std::size_t localPlayerCount = 1;
+    
+    GameData gameData;
 
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...

@@ -249,26 +249,26 @@ void DebugState::addLocalPlayers()
 
     auto view = getContext().defaultView;
 
-    for (auto i = 0u; i < m_sharedData.localPlayerCount; ++i)
+    //for (auto i = 0u; i < m_sharedData.localPlayerCount; ++i)
     {
-        auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
-        entity.addComponent<Vehicle>();
-        entity.addComponent<xy::Drawable>();
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
-        entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
+        //auto entity = m_gameScene.createEntity();
+        //entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        //entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
+        //entity.addComponent<Vehicle>();
+        //entity.addComponent<xy::Drawable>();
+        //entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
+        //entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
 
-        //update view as appropriate
-        auto camEnt = m_gameScene.createEntity();
-        camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-        camEnt.addComponent<xy::Camera>().setView(view.getSize());
-        camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
-        camEnt.getComponent<xy::Camera>().lockRotation(true);
-        m_gameScene.setActiveCamera(camEnt);
+        ////update view as appropriate
+        //auto camEnt = m_gameScene.createEntity();
+        //camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        //camEnt.addComponent<xy::Camera>().setView(view.getSize());
+        //camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+        //camEnt.getComponent<xy::Camera>().lockRotation(true);
+        //m_gameScene.setActiveCamera(camEnt);
 
-        entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
+        //entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
 
-        m_playerInputs.emplace_back(entity, m_sharedData.inputBindings[i]);
+        //m_playerInputs.emplace_back(entity, m_sharedData.inputBindings[0]);
     }
 }

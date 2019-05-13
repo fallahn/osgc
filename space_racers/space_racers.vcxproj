@@ -145,8 +145,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\ClientPackets.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
+    <ClInclude Include="include\GameModes.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
@@ -157,8 +159,10 @@
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\Server.hpp" />
     <ClInclude Include="include\ServerLobbyState.hpp" />
+    <ClInclude Include="include\ServerPackets.hpp" />
     <ClInclude Include="include\ServerRaceState.hpp" />
     <ClInclude Include="include\ServerStates.hpp" />
+    <ClInclude Include="include\SharedPackets.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />

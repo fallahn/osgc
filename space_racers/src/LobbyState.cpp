@@ -17,17 +17,55 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "LobbyState.hpp"
+#include "NetConsts.hpp"
+#include "Server.hpp"
+#include "ServerStates.hpp"
+#include "ClientPackets.hpp"
+#include "ServerPackets.hpp"
+#include "GameModes.hpp"
+
+#include <SFML/Window/Event.hpp>
 
 LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State(ss, ctx),
     m_sharedData(sd)
 {
+    launchLoadingScreen();
 
+    //launch a local server instance, then connect
+    //TODO only do this if we're hosting
+    if (!sd.server)
+    {
+        sd.server = std::make_unique<sv::Server>();
+        sd.server->run(sv::StateID::Lobby);
+    }
+
+    sf::Clock tempClock;
+    while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
+
+    sd.netClient->connect("127.0.0.1", NetConst::Port);
+
+    quitLoadingScreen();
 }
 
 //public
-bool LobbyState::handleEvent(const sf::Event&)
+bool LobbyState::handleEvent(const sf::Event& evt)
 {
+    //temp just to launch a game
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        if (evt.key.code == sf::Keyboard::Space)
+        {
+            LobbyData data;
+            data.peerIDs[0] = m_sharedData.netClient->getPeer().getID();
+
+            m_sharedData.netClient->sendPacket(PacketID::LobbyData, data, xy::NetFlag::Reliable);
+
+            //TODO we need to ignore further input from other clients to the lobby
+            //perhaps relay this from the server when it rx lobby data
+        }
+    }
+
     return true;
 }
 
@@ -38,6 +76,43 @@ void LobbyState::handleMessage(const xy::Message&)
 
 bool LobbyState::update(float)
 {
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
+    {
+        if (evt.type == xy::NetEvent::PacketReceived)
+        {
+            const auto& packet = evt.packet;
+            switch (packet.getID())
+            {
+            default: break;
+            case PacketID::GameStarted:
+                //set shared data with game info
+                //and launch game state
+            {
+                auto data = packet.as<GameStart>();
+                m_sharedData.gameData.playerCount = data.playerCount;
+                m_sharedData.gameData.mapIndex = data.mapIndex;
+
+                switch (data.gameMode)
+                {
+                default: break; //only network races implemented...
+                case GameMode:: Race:
+                    requestStackClear();
+                    requestStackPush(StateID::Race);
+                    break;
+                }
+            }
+                break;
+            case PacketID::ErrorServerMap:
+                LOG("Server failed to laod map - TODO report map index which failed", xy::Logger::Type::Error);
+                //TODO push an error state here with a meaningful message
+                requestStackClear();
+                requestStackPush(StateID::MainMenu);
+                break;
+            }
+        }
+    }
+
     return true;
 }
 

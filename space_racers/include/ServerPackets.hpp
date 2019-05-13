@@ -20,24 +20,17 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
-namespace NetConst
+struct GameStart final
 {
-    const std::uint16_t Port = 4330;
-}
+    std::uint8_t playerCount = 1; //so the client knows it has received all player info
+    std::uint8_t mapIndex = 0;
+    std::uint8_t gameMode = 0;
+};
 
-namespace PacketID
+struct VehicleData final
 {
-    enum
-    {
-        LobbyData, //contains settings about the game from the lobby owner
-        GameStarted, //sends a GameStarted packet
-        ClientMapLoaded, //clients has loaded map, requesting vehicles
-        VehicleData, //packet contains data for a single vehicle
-        ClientVehiclesLoaded, //client has loaded all vehicles and is ready to start
-        RaceStarted, //countdown has triggered
-
-
-        ErrorServerMap, //server failed to load map
-        ErrorServerGeneric, //generic server error
-    };
-}
+    std::uint64_t peerID = 0;
+    std::uint32_t serverEntityID = 0; //for clients side tracking when receiving updates
+    float x = 0.f; float y = 0.f; //initial position
+    std::uint8_t vehicleType = 0;
+};

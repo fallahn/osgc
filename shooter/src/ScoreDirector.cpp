@@ -158,7 +158,7 @@ void ScoreDirector::spawnScoreItem(sf::Vector2f position, std::int32_t score)
 
     //spawn on screen doohickey
     sf::Color textColour = score > 0 ? sf::Color::Green : sf::Color::Red;
-
+    
     auto entity = getScene().createEntity();
     entity.addComponent<xy::Transform>().setPosition(position);
     entity.addComponent<xy::Drawable>();

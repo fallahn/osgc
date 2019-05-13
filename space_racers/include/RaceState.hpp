@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 
 #include <vector>
 
+struct VehicleData;
 class RaceState final : public xy::State
 {
 public:
@@ -48,10 +49,11 @@ private:
 
     xy::ResourceHolder m_resources;
 
-    std::vector<InputParser> m_playerInputs;
+    InputParser m_playerInput;
 
     void initScene();
     void loadResources();
     void buildWorld();
-    void addLocalPlayers();
+
+    void spawnVehicle(const VehicleData&);
 };

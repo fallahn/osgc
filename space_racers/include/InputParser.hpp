@@ -25,20 +25,27 @@ Copyright 2019 Matt Marchant
 
 struct InputBinding;
 
+namespace xy
+{
+    class NetClient;
+}
+
 //one of these exists in the 'play' state for each local player
 //it reads the input based on the current binding (keyb/mouse)
 //applies it to the clientside player and forwards it to the server
 class InputParser final
 {
 public:
-    InputParser(xy::Entity, const InputBinding&);
+    InputParser(const InputBinding&, xy::NetClient&);
 
     void handleEvent(const sf::Event&);
     void update();
+    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
 
 private:
-    xy::Entity m_playerEntity;
     const InputBinding& m_inputBinding;
+    xy::NetClient& m_netClient;
+    xy::Entity m_playerEntity;
     float m_analogueMultiplier;
 
     std::uint16_t m_currentInput;

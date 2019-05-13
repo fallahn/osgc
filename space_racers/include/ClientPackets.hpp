@@ -20,24 +20,12 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
-namespace NetConst
+struct LobbyData final
 {
-    const std::uint16_t Port = 4330;
-}
-
-namespace PacketID
-{
-    enum
-    {
-        LobbyData, //contains settings about the game from the lobby owner
-        GameStarted, //sends a GameStarted packet
-        ClientMapLoaded, //clients has loaded map, requesting vehicles
-        VehicleData, //packet contains data for a single vehicle
-        ClientVehiclesLoaded, //client has loaded all vehicles and is ready to start
-        RaceStarted, //countdown has triggered
-
-
-        ErrorServerMap, //server failed to load map
-        ErrorServerGeneric, //generic server error
-    };
-}
+    std::uint64_t peerIDs[4]; //list of connected peers to map to vehicle type
+    std::uint8_t vehicleIDs[4]; //type of vehicle for each player
+    std::uint8_t playerCount = 1;
+    std::uint8_t mapIndex = 0;
+    std::uint8_t lapCount = 0;
+    std::uint8_t gameMode = 0;
+};

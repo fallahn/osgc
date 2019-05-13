@@ -18,26 +18,17 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
+//each game mode has its own state (currently only network racing is available)
+//this enum tells the server / client which state it should be loading
 
-namespace NetConst
-{
-    const std::uint16_t Port = 4330;
-}
-
-namespace PacketID
+namespace GameMode
 {
     enum
     {
-        LobbyData, //contains settings about the game from the lobby owner
-        GameStarted, //sends a GameStarted packet
-        ClientMapLoaded, //clients has loaded map, requesting vehicles
-        VehicleData, //packet contains data for a single vehicle
-        ClientVehiclesLoaded, //client has loaded all vehicles and is ready to start
-        RaceStarted, //countdown has triggered
-
-
-        ErrorServerMap, //server failed to load map
-        ErrorServerGeneric, //generic server error
+        Race,
+        Elimination,
+        TimeTrial, //local only
+        SplitScreenRace, //local only
+        SplitScreenElimination, //local only
     };
 }

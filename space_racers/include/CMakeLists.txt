@@ -1,7 +1,9 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/ClientPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DebugState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameModes.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
@@ -11,9 +13,11 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ServerStates.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerStates.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SharedPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.hpp

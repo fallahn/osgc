@@ -17,27 +17,3 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #pragma once
-
-#include <cstdint>
-
-namespace NetConst
-{
-    const std::uint16_t Port = 4330;
-}
-
-namespace PacketID
-{
-    enum
-    {
-        LobbyData, //contains settings about the game from the lobby owner
-        GameStarted, //sends a GameStarted packet
-        ClientMapLoaded, //clients has loaded map, requesting vehicles
-        VehicleData, //packet contains data for a single vehicle
-        ClientVehiclesLoaded, //client has loaded all vehicles and is ready to start
-        RaceStarted, //countdown has triggered
-
-
-        ErrorServerMap, //server failed to load map
-        ErrorServerGeneric, //generic server error
-    };
-}
