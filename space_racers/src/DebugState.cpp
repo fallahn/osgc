@@ -152,6 +152,14 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 }
             }
 
+            xy::Nim::sameLine();
+
+            if (xy::Nim::button("quit"))
+            {
+                requestStackClear();
+                requestStackPush(StateID::MainMenu);
+            }
+
             xy::Nim::end();
         });
 

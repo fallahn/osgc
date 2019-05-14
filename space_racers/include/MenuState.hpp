@@ -27,12 +27,13 @@ source distribution.
 
 #pragma once
 
+#include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
 struct SharedData;
-class MenuState final : public xy::State
+class MenuState final : public xy::State, public xy::ConsoleClient
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);

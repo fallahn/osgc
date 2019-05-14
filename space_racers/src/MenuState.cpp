@@ -62,13 +62,20 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_scene     (ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
-    LOG("Register con command for debug state", xy::Logger::Type::Info);
+
     initScene();
     loadResources();
     buildMenu();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    registerCommand("debug_mode",
+        [&](const std::string&)
+        {
+            requestStackClear();
+            requestStackPush(StateID::Debug);
+        });
 
     quitLoadingScreen();
 }
