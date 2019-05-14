@@ -39,8 +39,9 @@ public:
     InputParser(const InputBinding&, xy::NetClient* = nullptr);
 
     void handleEvent(const sf::Event&);
-    void update();
+    void update(float);
     void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
+    xy::Entity getPlayerEntity() const { return m_playerEntity; }
 
 private:
     const InputBinding& m_inputBinding;
@@ -50,5 +51,5 @@ private:
 
     std::uint16_t m_currentInput;
     sf::Clock m_clientClock;
-
+    std::int32_t m_timeAccumulator;
 };

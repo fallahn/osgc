@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "DebugState.hpp"
 #include "VehicleSystem.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -48,7 +49,7 @@ namespace
         float maxSpeed = 1010.f;
     };
     std::array<VehicleTest, 3> vehicles = { };
-    std::array<sf::FloatRect, 3> sizes = {sf::FloatRect(0.f, 0.f, 135.f, 77.f), sf::FloatRect(0.f, 0.f, 132.f, 40.f), sf::FloatRect(0.f, 0.f, 132.f, 120.f)};
+    std::array<sf::FloatRect, 3> sizes = {GameConst::CarSize, GameConst::BikeSize, GameConst::ShipSize};
     std::int32_t vehicleIndex = 0;
 
     std::uint32_t vehicleCommandID = 1;
@@ -183,7 +184,7 @@ void DebugState::handleMessage(const xy::Message& msg)
 
 bool DebugState::update(float dt)
 {
-    m_playerInput.update();
+    m_playerInput.update(dt);
 
     xy::Command cmd;
     cmd.targetFlags = vehicleCommandID;

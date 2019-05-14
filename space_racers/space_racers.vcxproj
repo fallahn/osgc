@@ -145,14 +145,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\ActorIDs.hpp" />
     <ClInclude Include="include\ClientPackets.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
+    <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\GameModes.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\NetActor.hpp" />
     <ClInclude Include="include\NetConsts.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\RaceState.hpp" />

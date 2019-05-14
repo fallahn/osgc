@@ -34,3 +34,15 @@ struct VehicleData final
     float x = 0.f; float y = 0.f; //initial position
     std::uint8_t vehicleType = 0;
 };
+
+//server state sent for reconciliation
+struct ClientUpdate final
+{
+    float x = 0.f;
+    float y = 0.f;
+    float rotation = 0.f;
+    float velX = 0.f;
+    float velY = 0.f;
+    float velRot = 0.f;
+    std::int32_t clientTimestamp = 0;
+};

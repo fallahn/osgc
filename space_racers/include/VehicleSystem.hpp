@@ -24,9 +24,9 @@ Copyright 2019 Matt Marchant
 
 struct Input final
 {
-    sf::Int64 timestamp = 0;
+    std::int32_t timestamp = 0;
     float multiplier = 1.f;
-    sf::Uint16 flags = 0;
+    std::int16_t flags = 0;
 };
 
 using History = std::array<Input, 120>;
@@ -69,6 +69,7 @@ struct Vehicle final
     static constexpr float centreOffset = 0.45f; 
 };
 
+struct ClientUpdate;
 class VehicleSystem final : public xy::System 
 {
 public: 
@@ -76,8 +77,12 @@ public:
 
     void process(float) override;
 
+    void reconcile(const ClientUpdate&, xy::Entity);
+
 private:
 
     void processInput(xy::Entity);
     void applyInput(xy::Entity, float);
+
+    float getDelta(const History&, std::size_t);
 };

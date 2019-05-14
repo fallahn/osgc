@@ -73,13 +73,38 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
         case PacketID::ClientMapLoaded:
             sendPlayerData(evt.peer);
             break;
+        case PacketID::ClientInput:
+            updatePlayerInput(m_players[evt.peer.getID()].entity, packet.as<InputUpdate>());
+            break;
         }
     }
 }
 
 void RaceState::netUpdate(float)
 {
-    //TODO broadcast data for each player
+    
+    for (const auto& p : m_players)
+    {
+        //send server side position (debug, remove this)
+        m_sharedData.netHost.sendPacket(p.second.peer, PacketID::DebugPosition, p.second.entity.getComponent<xy::Transform>().getPosition(), xy::NetFlag::Unreliable);
+
+        //send reconciliation data to each player
+        const auto& tx = p.second.entity.getComponent<xy::Transform>();
+        const auto& vehicle = p.second.entity.getComponent<Vehicle>();
+        ClientUpdate cu;
+        cu.x = tx.getPosition().x;
+        cu.y = tx.getPosition().y;
+        cu.rotation = tx.getRotation();
+        cu.velX = vehicle.velocity.x;
+        cu.velY = vehicle.velocity.y;
+        cu.velRot = vehicle.anglularVelocity;
+        cu.clientTimestamp = vehicle.history[vehicle.lastUpdatedInput].timestamp;
+        m_sharedData.netHost.sendPacket(p.second.peer, PacketID::ClientUpdate, cu, xy::NetFlag::Unreliable);
+    }
+
+    //TODO broadcast data for each actor
+
+    //TODO send stats updates such as scores
 }
 
 std::int32_t RaceState::logicUpdate(float dt)
@@ -105,29 +130,41 @@ bool RaceState::createPlayers()
 {
     for (auto i = 0u; i < m_sharedData.playerCount; ++i)
     {
-        //create vehicle entity
-        auto entity = m_scene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.addComponent<Vehicle>();
-        entity.getComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.vehicleIDs[i]);
+        auto peerID = m_sharedData.peerIDs[i];
+        auto result = std::find_if(m_sharedData.clients.begin(), m_sharedData.clients.end(),
+            [peerID](const xy::NetPeer & peer) {return peer.getID() == peerID; });
 
-        switch (m_sharedData.vehicleIDs[i])
+        if (result != m_sharedData.clients.end())
         {
-        default: break;
-        case Vehicle::Car:
-            entity.getComponent<Vehicle>().settings = Definition::car;
-            //TODO collision bounds
-            break;
-        case Vehicle::Bike:
-            entity.getComponent<Vehicle>().settings = Definition::bike;
-            break;
-        case Vehicle::Ship:
-            entity.getComponent<Vehicle>().settings = Definition::ship;
-            break;
-        }
+            //create vehicle entity
+            auto entity = m_scene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+            entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.vehicleIDs[i]);
 
-        //map entity to peerID
-        m_players[m_sharedData.peerIDs[i]] = entity;
+            switch (entity.getComponent<Vehicle>().type)
+            {
+            default:
+            case Vehicle::Car:
+                entity.getComponent<Vehicle>().settings = Definition::car;
+                //TODO collision bounds
+                break;
+            case Vehicle::Bike:
+                entity.getComponent<Vehicle>().settings = Definition::bike;
+                break;
+            case Vehicle::Ship:
+                entity.getComponent<Vehicle>().settings = Definition::ship;
+                break;
+            }
+
+            //map entity to peerID
+            m_players[peerID].entity = entity;
+            m_players[peerID].peer = *result;
+        }
+        else
+        {
+            //client disconnected somewhere.
+            //TODO handle this
+        }
     }
     return true;
 }
@@ -138,11 +175,25 @@ void RaceState::sendPlayerData(const xy::NetPeer& peer)
     {
         VehicleData data;
         data.peerID = player.first;
-        data.serverEntityID = player.second.getIndex();
-        data.vehicleType = player.second.getComponent<Vehicle>().type;
-        data.x = player.second.getComponent<xy::Transform>().getPosition().x;
-        data.y = player.second.getComponent<xy::Transform>().getPosition().y;
+        data.serverEntityID = player.second.entity.getIndex();
+        data.vehicleType = player.second.entity.getComponent<Vehicle>().type;
+        data.x = player.second.entity.getComponent<xy::Transform>().getPosition().x;
+        data.y = player.second.entity.getComponent<xy::Transform>().getPosition().y;
 
         m_sharedData.netHost.sendPacket(peer, PacketID::VehicleData, data, xy::NetFlag::Reliable);
     }
+}
+
+void RaceState::updatePlayerInput(xy::Entity entity, const InputUpdate& iu)
+{
+    auto& vehicle = entity.getComponent<Vehicle>();
+
+    Input input;
+    input.flags = iu.inputFlags;
+    input.timestamp = iu.timestamp;
+    input.multiplier = iu.acceleration;
+
+    //update player input history
+    vehicle.history[vehicle.currentInput] = input;
+    vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
 }

@@ -39,5 +39,10 @@ namespace PacketID
 
         ErrorServerMap, //server failed to load map
         ErrorServerGeneric, //generic server error
+
+        ClientInput, //packet contains controller input from client (InputUpdate)
+        ClientUpdate, //update for the client to reconcile (from server)
+
+        DebugPosition, //packet contains position info for debug
     };
 }

@@ -18,22 +18,25 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
+#include <xyginext/ecs/System.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
 
-struct LobbyData final
+//net actors are any entities which are syncronised between client and server
+struct NetActor final
 {
-    std::uint64_t peerIDs[4]; //list of connected peers to map to vehicle type
-    std::uint8_t vehicleIDs[4]; //type of vehicle for each player
-    std::uint8_t playerCount = 1;
-    std::uint8_t mapIndex = 0;
-    std::uint8_t lapCount = 0;
-    std::uint8_t gameMode = 0;
+    std::int32_t serverID = 0;
+    std::int32_t actorID = 0;
 };
 
-//input taken from the client and sent to the server
-struct InputUpdate final
+class NetActorSystem final : public xy::System 
 {
-    float acceleration = 1.f; //analogue controller multyiplier
-    std::int32_t timestamp = 0;
-    std::uint16_t inputFlags = 0;
+public:
+    explicit NetActorSystem(xy::MessageBus& mb) 
+        : xy::System(mb, typeid(NetActorSystem))
+    {
+        requireComponent<NetActor>();
+        requireComponent<xy::Transform>();
+    }
+
+    const std::vector<xy::Entity>& getActors() const { return getEntities(); }
 };

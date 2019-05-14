@@ -19,6 +19,8 @@ Copyright 2019 Matt Marchant
 #include "InputParser.hpp"
 #include "InputBinding.hpp"
 #include "VehicleSystem.hpp"
+#include "ClientPackets.hpp"
+#include "NetConsts.hpp"
 
 #include <xyginext/network/NetClient.hpp>
 
@@ -181,8 +183,10 @@ void InputParser::handleEvent(const sf::Event& evt)
     }
 }
 
-void InputParser::update()
+void InputParser::update(float dt)
 {
+    m_timeAccumulator += static_cast<std::int32_t>(dt * 1000000.f);
+
     if (m_playerEntity.isValid())
     {
         //set local player input
@@ -190,7 +194,7 @@ void InputParser::update()
 
         Input input;
         input.flags = m_currentInput;
-        input.timestamp = m_clientClock.getElapsedTime().asMicroseconds();
+        input.timestamp = m_timeAccumulator;// m_clientClock.getElapsedTime().asMicroseconds();
         input.multiplier = std::min(1.f, m_analogueMultiplier);
 
         //update player input history
@@ -200,12 +204,15 @@ void InputParser::update()
         //reset analogue multiplier
         m_analogueMultiplier = 1.f;
 
-        //TODO send input to server - remember this might be nullptr for local games!
-        /*InputUpdate iu;
-        iu.clientTime = input.timestamp;
-        iu.input = input.mask;
-        iu.playerNumber = player.playerNumber;
+        //send input to server - remember this might be nullptr for local games!
+        if (m_netClient)
+        {
+            InputUpdate iu;
+            iu.timestamp = input.timestamp; //remind me why we're truncating this??
+            iu.inputFlags = input.flags;
+            iu.acceleration = input.multiplier;
 
-        m_netClient.sendPacket<InputUpdate>(PacketID::ClientInput, iu, xy::NetFlag::Reliable, 0);*/
+            m_netClient->sendPacket<InputUpdate>(PacketID::ClientInput, iu, xy::NetFlag::Unreliable, 0);
+        }
     }
 }

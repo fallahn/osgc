@@ -21,16 +21,21 @@ Copyright 2019 Matt Marchant
 #include "ServerStates.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/network/NetData.hpp>
 
 #include <unordered_map>
 
-namespace xy
-{
-    struct NetPeer;
-}
+struct InputUpdate;
+
 
 namespace sv
 {
+    struct ClientConnection final
+    {
+        xy::NetPeer peer;
+        xy::Entity entity;
+    };
+
     class RaceState final : public State
     {
     public:
@@ -46,12 +51,13 @@ namespace sv
         xy::MessageBus& m_messageBus;
         xy::Scene m_scene;
 
-        std::unordered_map<std::uint64_t, xy::Entity> m_players;
+        std::unordered_map<std::uint64_t, ClientConnection> m_players;
 
         void initScene();
         bool loadMap();
         bool createPlayers();
 
         void sendPlayerData(const xy::NetPeer&);
+        void updatePlayerInput(xy::Entity, const InputUpdate&);
     };
 }

@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 
 #include "VehicleSystem.hpp"
 #include "InputBinding.hpp"
+#include "ServerPackets.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -45,7 +46,7 @@ VehicleSystem::VehicleSystem(xy::MessageBus& mb)
 }
 
 //public
-void VehicleSystem::process(float dt)
+void VehicleSystem::process(float)
 {
     auto& entities = getEntities();
     for (auto entity : entities)
@@ -58,11 +59,46 @@ void VehicleSystem::process(float dt)
         while (vehicle.lastUpdatedInput != idx)
         {
             processInput(entity);
-            applyInput(entity, dt);
+
+            auto delta = getDelta(vehicle.history, vehicle.lastUpdatedInput);
+            applyInput(entity, delta);
 
             //TODO collision
 
             vehicle.lastUpdatedInput = (vehicle.lastUpdatedInput + 1) % vehicle.history.size();
+        }
+    }
+}
+
+void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
+{
+    //sync state
+    auto& vehicle = entity.getComponent<Vehicle>();
+    vehicle.velocity = { update.velX, update.velY };
+    vehicle.anglularVelocity = update.velRot;
+
+    auto& tx = entity.getComponent<xy::Transform>();
+    tx.setPosition(update.x, update.y);
+    tx.setRotation(update.rotation);
+
+    //redo prediction from last known server input
+    auto ip = std::find_if(vehicle.history.rbegin(), vehicle.history.rend(),
+        [&update](const Input & input)
+        {
+            return update.clientTimestamp == input.timestamp;
+        });
+
+    if (ip != vehicle.history.rend())
+    {
+        std::size_t idx = std::distance(vehicle.history.begin(), ip.base()) - 1;
+        auto end = (vehicle.currentInput + vehicle.history.size() - 1) % vehicle.history.size();
+
+        while (idx != end) //currentInput points to the next free slot in history
+        {
+            float delta = getDelta(vehicle.history, idx);
+            applyInput(entity, delta);            
+
+            idx = (idx + 1) % vehicle.history.size();
         }
     }
 }
@@ -122,4 +158,19 @@ void VehicleSystem::applyInput(xy::Entity entity, float dt)
 
     tx.rotate(((xy::Util::Const::radToDeg * vehicle.anglularVelocity) * rotationMultiplier) * dt);
     vehicle.anglularVelocity *= vehicle.settings.angularDrag;
+}
+
+float VehicleSystem::getDelta(const History& history, std::size_t idx)
+{
+    auto prevInput = (idx + history.size() - 1) % history.size();
+
+    //skip any inputs in the wrong order
+    /*while (history[prevInput].timestamp > history[idx].timestamp)
+    {
+        prevInput = (prevInput + history.size() - 1) % history.size();
+    }*/
+
+    auto delta = history[idx].timestamp - history[prevInput].timestamp;
+
+    return static_cast<float>(delta) / 1000000.f;
 }

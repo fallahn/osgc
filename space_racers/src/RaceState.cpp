@@ -22,6 +22,9 @@ Copyright 2019 Matt Marchant
 #include "NetConsts.hpp"
 #include "ClientPackets.hpp"
 #include "ServerPackets.hpp"
+#include "GameConsts.hpp"
+#include "NetActor.hpp"
+#include "ActorIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -31,6 +34,11 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
+
+namespace
+{
+    xy::Entity debugEnt;
+}
 
 RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
@@ -64,7 +72,7 @@ void RaceState::handleMessage(const xy::Message& msg)
 
 bool RaceState::update(float dt)
 {
-    m_playerInput.update();
+    m_playerInput.update(dt);
 
     //poll event afterwards so gathered inputs are sent immediately
     xy::NetEvent evt;
@@ -78,6 +86,13 @@ bool RaceState::update(float dt)
             default: break;
             case PacketID::VehicleData:
                 spawnVehicle(packet.as<VehicleData>());
+                break;
+            case PacketID::DebugPosition:
+                if(debugEnt.isValid())
+                debugEnt.getComponent<xy::Transform>().setPosition(packet.as<sf::Vector2f>());
+                break;
+            case PacketID::ClientUpdate:
+                reconcile(packet.as<ClientUpdate>());
                 break;
             }
         }
@@ -115,7 +130,7 @@ void RaceState::buildWorld()
     auto tempID = m_resources.load<sf::Texture>("assets/images/temp01.png");
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Drawable>().setDepth(-20);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
 
     //let the server know the world is loaded so it can send us all player cars
@@ -124,11 +139,74 @@ void RaceState::buildWorld()
 
 void RaceState::spawnVehicle(const VehicleData& data)
 {
-    //TODO spawn vehicle
-    std::cout << "Spawned vehicle!\n";
-    //TODO check if data has our peer ID and add to controller
+    auto tempID = m_resources.load<sf::Texture>("nothing_to_see_here");
+
+    //spawn vehicle
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
+    entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
+    entity.addComponent<NetActor>().actorID = ActorID::Vehicle;
+    entity.getComponent<NetActor>().serverID = data.serverEntityID;
+
+    switch (entity.getComponent<Vehicle>().type)
+    {
+    default:
+    case Vehicle::Car:
+        entity.getComponent<Vehicle>().settings = Definition::car;
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize); //TODO replace this with collision
+        break;
+    case Vehicle::Bike:
+        entity.getComponent<Vehicle>().settings = Definition::bike;
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
+        break;
+    case Vehicle::Ship:
+        entity.getComponent<Vehicle>().settings = Definition::ship;
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
+        break;
+    }
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width * Vehicle::centreOffset, bounds.height);
+
+
+    //check if data has our peer ID and add to controller
+    if (data.peerID == m_sharedData.netClient->getPeer().getID())
+    {
+        m_playerInput.setPlayerEntity(entity);
+
+        //add a camera
+        auto view = getContext().defaultView;
+        auto camEnt = m_gameScene.createEntity();
+        camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        camEnt.addComponent<xy::Camera>().setView(view.getSize());
+        camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+        camEnt.getComponent<xy::Camera>().lockRotation(true);
+        entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
+
+        m_gameScene.setActiveCamera(camEnt);
+
+        debugEnt = m_gameScene.createEntity();
+        debugEnt.addComponent<xy::Transform>();
+        debugEnt.addComponent<xy::Drawable>().setDepth(100);
+        debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
+        debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+    }
+    else
+    {
+        //TODO add net interpolator
+    }
 
     //TODO count spawned vehicles and tell server when all are spawned
 
     //TODO map vehicle entities to server ID for easy updating from incoming packets
+}
+
+void RaceState::reconcile(const ClientUpdate& update)
+{
+    auto entity = m_playerInput.getPlayerEntity();
+    if (entity.isValid())
+    {
+        m_gameScene.getSystem<VehicleSystem>().reconcile(update, entity);
+    }
 }

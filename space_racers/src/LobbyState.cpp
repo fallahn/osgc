@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "ClientPackets.hpp"
 #include "ServerPackets.hpp"
 #include "GameModes.hpp"
+#include "VehicleSystem.hpp"
 
 #include <SFML/Window/Event.hpp>
 
@@ -58,6 +59,7 @@ bool LobbyState::handleEvent(const sf::Event& evt)
         {
             LobbyData data;
             data.peerIDs[0] = m_sharedData.netClient->getPeer().getID();
+            data.vehicleIDs[0] = Vehicle::Type::Ship;
 
             m_sharedData.netClient->sendPacket(PacketID::LobbyData, data, xy::NetFlag::Reliable);
 

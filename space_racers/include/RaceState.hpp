@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include <vector>
 
 struct VehicleData;
+struct ClientUpdate;
 class RaceState final : public xy::State
 {
 public:
@@ -56,4 +57,5 @@ private:
     void buildWorld();
 
     void spawnVehicle(const VehicleData&);
+    void reconcile(const ClientUpdate&);
 };

@@ -30,7 +30,7 @@ using namespace sv;
 
 namespace
 {
-    const sf::Time NetTime = sf::seconds(1.f / 10.f);
+    const sf::Time NetTime = sf::seconds(1.f / 20.f);
     const sf::Time UpdateTime = sf::seconds(1.f / 60.f);
 }
 
@@ -81,11 +81,6 @@ void Server::threadFunc()
 
     while (m_running)
     {
-        while (!m_messageBus.empty())
-        {
-            m_activeState->handleMessage(m_messageBus.poll());
-        }
-
         xy::NetEvent evt;
         while (m_sharedData.netHost.pollEvent(evt))
         {
@@ -122,6 +117,11 @@ void Server::threadFunc()
         m_updateAccumulator += m_updateClock.restart();
         while (m_updateAccumulator > UpdateTime)
         {
+            while (!m_messageBus.empty())
+            {
+                m_activeState->handleMessage(m_messageBus.poll());
+            }
+
             //do logic update
             stateResult = m_activeState->logicUpdate(UpdateTime.asSeconds());
             m_updateAccumulator -= UpdateTime;

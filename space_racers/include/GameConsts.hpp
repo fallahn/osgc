@@ -20,20 +20,13 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
-struct LobbyData final
+namespace GameConst
 {
-    std::uint64_t peerIDs[4]; //list of connected peers to map to vehicle type
-    std::uint8_t vehicleIDs[4]; //type of vehicle for each player
-    std::uint8_t playerCount = 1;
-    std::uint8_t mapIndex = 0;
-    std::uint8_t lapCount = 0;
-    std::uint8_t gameMode = 0;
-};
+    static const std::int32_t TrackRenderDepth = -10;
+    static const std::int32_t VehicleRenderDepth = 0;
+    static const std::int32_t RoidRenderDepth = 5;
 
-//input taken from the client and sent to the server
-struct InputUpdate final
-{
-    float acceleration = 1.f; //analogue controller multyiplier
-    std::int32_t timestamp = 0;
-    std::uint16_t inputFlags = 0;
-};
+    static const sf::FloatRect CarSize(0.f, 0.f, 135.f, 77.f);
+    static const sf::FloatRect BikeSize(0.f, 0.f, 132.f, 40.f);
+    static const sf::FloatRect ShipSize(0.f, 0.f, 132.f, 120.f);
+}
