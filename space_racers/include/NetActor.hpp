@@ -26,6 +26,7 @@ struct NetActor final
 {
     std::int32_t serverID = 0;
     std::int32_t actorID = 0;
+    std::uint32_t colourID = 4;
 };
 
 class NetActorSystem final : public xy::System 

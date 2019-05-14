@@ -22,7 +22,9 @@ namespace ActorID
 {
     enum
     {
-        Vehicle,
+        Car,
+        Bike,
+        Ship,
         Roid
     };
 }

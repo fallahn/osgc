@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <SFML/Graphics/Color.hpp>
+
 #include <cstdint>
 
 namespace GameConst
@@ -29,4 +31,22 @@ namespace GameConst
     static const sf::FloatRect CarSize(0.f, 0.f, 135.f, 77.f);
     static const sf::FloatRect BikeSize(0.f, 0.f, 132.f, 40.f);
     static const sf::FloatRect ShipSize(0.f, 0.f, 132.f, 120.f);
+
+    enum Colour
+    {
+        Cyan,
+        Magenta,
+        Green,
+        Purple,
+        None,
+        Count
+    };
+    static const std::array<sf::Color, Colour::Count> colours =
+    {
+        sf::Color(0,255,255),
+        sf::Color(225,0,255),
+        sf::Color(0,255,0),
+        sf::Color(255,128,255),
+        sf::Color::White
+    };
 }

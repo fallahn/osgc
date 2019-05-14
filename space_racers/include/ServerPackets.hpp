@@ -22,17 +22,27 @@ Copyright 2019 Matt Marchant
 
 struct GameStart final
 {
-    std::uint8_t playerCount = 1; //so the client knows it has received all player info
+    std::uint8_t actorCount = 1; //so the client knows it has received all actor info
     std::uint8_t mapIndex = 0;
     std::uint8_t gameMode = 0;
 };
 
 struct VehicleData final
 {
-    std::uint64_t peerID = 0;
-    std::uint32_t serverEntityID = 0; //for clients side tracking when receiving updates
     float x = 0.f; float y = 0.f; //initial position
     std::uint8_t vehicleType = 0;
+    std::uint8_t colourID = 0; //index into colour array
+};
+
+//tells the client to spawn an actor
+struct ActorData final
+{
+    float x = 0.f;
+    float y = 0.f;
+    float rotation = 0.f;
+    std::int16_t serverID = 0;
+    std::int16_t actorID = 0;
+    std::uint8_t colourID = 0;
 };
 
 //server state sent for reconciliation

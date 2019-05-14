@@ -23,7 +23,7 @@ The new server state loads the map information and creates server side player en
     PacketID::GameStart;
     struct GameStart final
     {
-        std::uint8_t playerCount = 1; //so the client knows it has received all player info
+        std::uint8_t actorCount = 1; //so the client knows it has received all player info
         std::uint8_t mapIndex = 0;
         std::uint8_t gameMode = 0;
     };
@@ -41,12 +41,10 @@ The server game state then iterates over the expected player list, and their veh
     PacketID::VehicleData;
     struct VehicleData final
     {
-        std::uint64_t peerID = 0;
-        std::uint32_t serverEntityID = 0; //for clients side tracking when receiving updates
         float x = 0.f; float y = 0.f; //initial position
         std::uint8_t vehicleType = 0;
     };
 
-When the client receives each one it is counted, and checked to see if the peerID matches the client. If the peerID matches then the `InputParser` for player control is also added. Vehicle entities are mapped to `serverEntityID` so that incoming updates from the server are easily applied. Once the clients vehicle count matches the player count the client sends a `Ready` packet.
+All other entities (other players, rocks) are sent as 'net actors'. These are counted and when the total matches the actorCount value sent in the GameStart packet, the client notifies the server that it has finished loading.
 
 When the server sees all clients are ready a 'count -in' packet is broadcast to all clients to trigger the race start.

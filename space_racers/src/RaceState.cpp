@@ -87,9 +87,14 @@ bool RaceState::update(float dt)
             case PacketID::VehicleData:
                 spawnVehicle(packet.as<VehicleData>());
                 break;
+            case PacketID::ActorData:
+                spawnActor(packet.as<ActorData>());
+                break;
             case PacketID::DebugPosition:
-                if(debugEnt.isValid())
-                debugEnt.getComponent<xy::Transform>().setPosition(packet.as<sf::Vector2f>());
+                if (debugEnt.isValid())
+                {
+                    debugEnt.getComponent<xy::Transform>().setPosition(packet.as<sf::Vector2f>());
+                }
                 break;
             case PacketID::ClientUpdate:
                 reconcile(packet.as<ClientUpdate>());
@@ -147,8 +152,6 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
-    entity.addComponent<NetActor>().actorID = ActorID::Vehicle;
-    entity.getComponent<NetActor>().serverID = data.serverEntityID;
 
     switch (entity.getComponent<Vehicle>().type)
     {
@@ -167,39 +170,35 @@ void RaceState::spawnVehicle(const VehicleData& data)
         break;
     }
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width * Vehicle::centreOffset, bounds.height);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width * Vehicle::centreOffset, bounds.height / 2.f);
 
+    m_playerInput.setPlayerEntity(entity);
 
-    //check if data has our peer ID and add to controller
-    if (data.peerID == m_sharedData.netClient->getPeer().getID())
-    {
-        m_playerInput.setPlayerEntity(entity);
+    //add a camera
+    auto view = getContext().defaultView;
+    auto camEnt = m_gameScene.createEntity();
+    camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    camEnt.addComponent<xy::Camera>().setView(view.getSize());
+    camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+    camEnt.getComponent<xy::Camera>().lockRotation(true);
+    entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
 
-        //add a camera
-        auto view = getContext().defaultView;
-        auto camEnt = m_gameScene.createEntity();
-        camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-        camEnt.addComponent<xy::Camera>().setView(view.getSize());
-        camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
-        camEnt.getComponent<xy::Camera>().lockRotation(true);
-        entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
+    m_gameScene.setActiveCamera(camEnt);
 
-        m_gameScene.setActiveCamera(camEnt);
-
-        debugEnt = m_gameScene.createEntity();
-        debugEnt.addComponent<xy::Transform>();
-        debugEnt.addComponent<xy::Drawable>().setDepth(100);
-        debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
-        debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
-    }
-    else
-    {
-        //TODO add net interpolator
-    }
+#ifdef XY_DEBUG
+    debugEnt = m_gameScene.createEntity();
+    debugEnt.addComponent<xy::Transform>();
+    debugEnt.addComponent<xy::Drawable>().setDepth(100);
+    debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
+    debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+#endif //XY_DEBUG
 
     //TODO count spawned vehicles and tell server when all are spawned
+}
 
-    //TODO map vehicle entities to server ID for easy updating from incoming packets
+void RaceState::spawnActor(const ActorData& data)
+{
+    std::cout << "spawned actor " << data.actorID << "\n";
 }
 
 void RaceState::reconcile(const ClientUpdate& update)

@@ -33,6 +33,7 @@ namespace PacketID
         GameStarted, //sends a GameStarted packet
         ClientMapLoaded, //clients has loaded map, requesting vehicles
         VehicleData, //packet contains data for a single vehicle
+        ActorData, //packet contains actor data to spawn on client
         ClientVehiclesLoaded, //client has loaded all vehicles and is ready to start
         RaceStarted, //countdown has triggered
 

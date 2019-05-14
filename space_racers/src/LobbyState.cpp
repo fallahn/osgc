@@ -92,7 +92,7 @@ bool LobbyState::update(float)
                 //and launch game state
             {
                 auto data = packet.as<GameStart>();
-                m_sharedData.gameData.playerCount = data.playerCount;
+                m_sharedData.gameData.playerCount = data.actorCount;
                 m_sharedData.gameData.mapIndex = data.mapIndex;
 
                 switch (data.gameMode)

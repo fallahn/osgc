@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 #include "VehicleDefs.hpp"
 #include "Server.hpp"
 #include "GameModes.hpp"
+#include "ActorIDs.hpp"
+#include "NetActor.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -42,7 +44,7 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     {
         GameStart gs;
         gs.gameMode = GameMode::Race;
-        gs.playerCount = sd.playerCount;
+        gs.actorCount = sd.playerCount; //TODO add other actors such as roids
         gs.mapIndex = sd.mapIndex;
 
         sd.netHost.broadcastPacket(PacketID::GameStarted, gs, xy::NetFlag::Reliable);
@@ -81,12 +83,13 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
 }
 
 void RaceState::netUpdate(float)
-{
-    
+{   
     for (const auto& p : m_players)
     {
+#ifdef XY_DEBUG
         //send server side position (debug, remove this)
         m_sharedData.netHost.sendPacket(p.second.peer, PacketID::DebugPosition, p.second.entity.getComponent<xy::Transform>().getPosition(), xy::NetFlag::Unreliable);
+#endif //XY_DEBUG
 
         //send reconciliation data to each player
         const auto& tx = p.second.entity.getComponent<xy::Transform>();
@@ -117,6 +120,7 @@ std::int32_t RaceState::logicUpdate(float dt)
 void RaceState::initScene()
 {
     m_scene.addSystem<VehicleSystem>(m_messageBus);
+    m_scene.addSystem<NetActorSystem>(m_messageBus);
 }
 
 bool RaceState::loadMap()
@@ -146,15 +150,20 @@ bool RaceState::createPlayers()
             default:
             case Vehicle::Car:
                 entity.getComponent<Vehicle>().settings = Definition::car;
+                entity.addComponent<NetActor>().actorID = ActorID::Car;
                 //TODO collision bounds
                 break;
             case Vehicle::Bike:
                 entity.getComponent<Vehicle>().settings = Definition::bike;
+                entity.addComponent<NetActor>().actorID = ActorID::Bike;
                 break;
             case Vehicle::Ship:
                 entity.getComponent<Vehicle>().settings = Definition::ship;
+                entity.addComponent<NetActor>().actorID = ActorID::Ship;
                 break;
             }
+            entity.getComponent<NetActor>().colourID = i;
+            entity.getComponent<NetActor>().serverID = entity.getIndex();
 
             //map entity to peerID
             m_players[peerID].entity = entity;
@@ -166,21 +175,45 @@ bool RaceState::createPlayers()
             //TODO handle this
         }
     }
+
+    //TODO create asteroids
+
     return true;
 }
 
 void RaceState::sendPlayerData(const xy::NetPeer& peer)
 {
-    for (const auto& player : m_players)
-    {
-        VehicleData data;
-        data.peerID = player.first;
-        data.serverEntityID = player.second.entity.getIndex();
-        data.vehicleType = player.second.entity.getComponent<Vehicle>().type;
-        data.x = player.second.entity.getComponent<xy::Transform>().getPosition().x;
-        data.y = player.second.entity.getComponent<xy::Transform>().getPosition().y;
+    //actual player entity for this peer
+    const auto& player = m_players[peer.getID()];
 
-        m_sharedData.netHost.sendPacket(peer, PacketID::VehicleData, data, xy::NetFlag::Reliable);
+    VehicleData data;
+    data.vehicleType = player.entity.getComponent<Vehicle>().type;
+    data.x = player.entity.getComponent<xy::Transform>().getPosition().x;
+    data.y = player.entity.getComponent<xy::Transform>().getPosition().y;
+    data.colourID = static_cast<std::uint8_t>(player.entity.getComponent<NetActor>().colourID);
+
+    m_sharedData.netHost.sendPacket(peer, PacketID::VehicleData, data, xy::NetFlag::Reliable);
+
+
+    //all other actors are 'dumb' representations
+    const auto& actors = m_scene.getSystem<NetActorSystem>().getActors();
+    for (auto actor : actors)
+    {
+        if (actor != player.entity)
+        {
+            auto netActor = actor.getComponent<NetActor>();
+            const auto& tx = actor.getComponent<xy::Transform>();
+
+            ActorData data;
+            data.actorID = static_cast<std::int16_t>(netActor.actorID);
+            data.serverID = static_cast<std::int16_t>(netActor.serverID);
+            data.colourID = static_cast<std::uint8_t>(netActor.colourID);
+            data.x = tx.getPosition().x;
+            data.y = tx.getPosition().y;
+            data.rotation = tx.getRotation();
+
+            m_sharedData.netHost.sendPacket(peer, PacketID::ActorData, data, xy::NetFlag::Reliable);
+        }
     }
 }
 
