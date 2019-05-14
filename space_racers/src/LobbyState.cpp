@@ -59,7 +59,7 @@ bool LobbyState::handleEvent(const sf::Event& evt)
         {
             LobbyData data;
             data.peerIDs[0] = m_sharedData.netClient->getPeer().getID();
-            data.vehicleIDs[0] = Vehicle::Type::Ship;
+            data.vehicleIDs[0] = Vehicle::Type::Car;
 
             m_sharedData.netClient->sendPacket(PacketID::LobbyData, data, xy::NetFlag::Reliable);
 

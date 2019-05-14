@@ -33,7 +33,7 @@ struct LobbyData final
 //input taken from the client and sent to the server
 struct InputUpdate final
 {
-    float acceleration = 1.f; //analogue controller multyiplier
+    float steeringMultiplier = 1.f; //analogue controller multiplier
     std::int32_t timestamp = 0;
     std::uint16_t inputFlags = 0;
 };

@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "NetConsts.hpp"
 
 #include <xyginext/network/NetClient.hpp>
+#include <xyginext/core/App.hpp> //remove this when done logging!
 
 #include <SFML/Window/Event.hpp>
 
@@ -32,10 +33,11 @@ namespace
 }
 
 InputParser::InputParser(const InputBinding& binding, xy::NetClient* netClient)
-    : m_inputBinding    (binding),
-    m_netClient         (netClient),
-    m_analogueMultiplier(1.f),
-    m_currentInput      (0)
+    : m_inputBinding        (binding),
+    m_netClient             (netClient),
+    m_steeringMultiplier    (1.f),
+    m_accelerationMultiplier(1.f),
+    m_currentInput          (0)
 {
 
 }
@@ -102,6 +104,7 @@ void InputParser::handleEvent(const sf::Event& evt)
         {
             if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Accelerate])
             {
+                //TODO prevent this overriding the z-axis state
                 m_currentInput &= ~InputFlag::Accelerate;
             }
             else if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Brake])
@@ -121,63 +124,33 @@ void InputParser::handleEvent(const sf::Event& evt)
                 m_currentInput |= InputFlag::Right;
                 m_currentInput &= ~InputFlag::Left;
 
-                m_analogueMultiplier = evt.joystickMove.position / 100.f;
+                m_steeringMultiplier = evt.joystickMove.position / 100.f;
             }
             else if (evt.joystickMove.position < -Deadzone)
             {
                 m_currentInput |= InputFlag::Left;
                 m_currentInput &= ~InputFlag::Right;
 
-                m_analogueMultiplier = evt.joystickMove.position / -100.f;
+                m_steeringMultiplier = evt.joystickMove.position / -100.f;
             }
             else
             {
                 m_currentInput &= ~(InputFlag::Left | InputFlag::Right);
             }
         }
-        else if (evt.joystickMove.axis == sf::Joystick::PovY)
+        
+        else if (evt.joystickMove.axis == sf::Joystick::Z)
         {
-#ifdef WIN32 //this axis is inverted on win32
-            if (evt.joystickMove.position > Deadzone)
+            if (evt.joystickMove.position < -Deadzone)
             {
-                
-            }
-            else if (evt.joystickMove.position < -Deadzone)
-            {
-                
+                m_currentInput |= InputFlag::Accelerate;
+
+                m_accelerationMultiplier = evt.joystickMove.position / -100.f;
             }
             else
             {
-                
-            }
-#else
-            if (evt.joystickMove.position > Deadzone)
-            {
-                
-            }
-            else if (evt.joystickMove.position < -Deadzone)
-            {
-                
-            }
-            else
-            {
-                
-            }
-#endif
-        }
-        else if (evt.joystickMove.axis == sf::Joystick::Y)
-        {
-            if (evt.joystickMove.position > Deadzone)
-            {
-                
-            }
-            else if (evt.joystickMove.position < -Deadzone)
-            {
-                
-            }
-            else
-            {
-                
+                //TODO prevent this overriding button down state
+                m_currentInput &= ~InputFlag::Accelerate;
             }
         }
     }
@@ -185,6 +158,7 @@ void InputParser::handleEvent(const sf::Event& evt)
 
 void InputParser::update(float dt)
 {
+    //this just works better than sf::Clock - I don't know why.
     m_timeAccumulator += static_cast<std::int32_t>(dt * 1000000.f);
 
     if (m_playerEntity.isValid())
@@ -194,25 +168,36 @@ void InputParser::update(float dt)
 
         Input input;
         input.flags = m_currentInput;
-        input.timestamp = m_timeAccumulator;// m_clientClock.getElapsedTime().asMicroseconds();
-        input.multiplier = std::min(1.f, m_analogueMultiplier);
+        input.timestamp = m_timeAccumulator;
+        input.steeringMultiplier = std::min(1.f, m_steeringMultiplier);
 
         //update player input history
         vehicle.history[vehicle.currentInput] = input;
         vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
 
         //reset analogue multiplier
-        m_analogueMultiplier = 1.f;
+        //this has to be set at one for keyboard input
+        if ((m_currentInput & (InputFlag::Left | InputFlag::Right)) == 0)
+        {
+            m_steeringMultiplier = 1.f;
+        }
+
+        if ((m_currentInput & InputFlag::Accelerate) == 0)
+        {
+            m_accelerationMultiplier = 1.f;
+        }
 
         //send input to server - remember this might be nullptr for local games!
         if (m_netClient)
         {
             InputUpdate iu;
-            iu.timestamp = input.timestamp; //remind me why we're truncating this??
+            iu.timestamp = input.timestamp;
             iu.inputFlags = input.flags;
-            iu.acceleration = input.multiplier;
+            iu.steeringMultiplier = input.steeringMultiplier;
 
             m_netClient->sendPacket<InputUpdate>(PacketID::ClientInput, iu, xy::NetFlag::Unreliable, 0);
         }
     }
+
+    DPRINT("acc", std::to_string(m_accelerationMultiplier));
 }

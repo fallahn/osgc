@@ -258,7 +258,7 @@ void DebugState::buildWorld()
     //asteroids
     temp = m_resources.load<sf::Texture>("assets/images/temp02.png");
 
-    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1000, 10);
+    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);
     for (auto position : positions)
     {
         entity = m_gameScene.createEntity();

@@ -135,12 +135,12 @@ void VehicleSystem::processInput(xy::Entity entity)
 
     if (input.flags & InputFlag::Left)
     {
-        vehicle.anglularVelocity -= vehicle.settings.turnSpeed * input.multiplier;
+        vehicle.anglularVelocity -= vehicle.settings.turnSpeed * input.steeringMultiplier;
     }
 
     if (input.flags & InputFlag::Right)
     {
-        vehicle.anglularVelocity += vehicle.settings.turnSpeed * input.multiplier;
+        vehicle.anglularVelocity += vehicle.settings.turnSpeed * input.steeringMultiplier;
     }
 }
 

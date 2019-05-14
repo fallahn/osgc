@@ -224,7 +224,7 @@ void RaceState::updatePlayerInput(xy::Entity entity, const InputUpdate& iu)
     Input input;
     input.flags = iu.inputFlags;
     input.timestamp = iu.timestamp;
-    input.multiplier = iu.acceleration;
+    input.steeringMultiplier = iu.steeringMultiplier;
 
     //update player input history
     vehicle.history[vehicle.currentInput] = input;

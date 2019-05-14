@@ -47,9 +47,9 @@ private:
     const InputBinding& m_inputBinding;
     xy::NetClient* m_netClient;
     xy::Entity m_playerEntity;
-    float m_analogueMultiplier;
+    float m_steeringMultiplier;
+    float m_accelerationMultiplier;
 
     std::uint16_t m_currentInput;
-    sf::Clock m_clientClock;
     std::int32_t m_timeAccumulator;
 };
