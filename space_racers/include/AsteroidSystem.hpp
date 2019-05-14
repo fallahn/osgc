@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/System.hpp>
 #include <xyginext/util/Const.hpp>
 
+#include <cmath>
+
 //roid component. Looks a bit complicated but only
 //because we want to make sure the mass is accurate
 //when the radius is set.

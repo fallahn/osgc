@@ -34,8 +34,8 @@ namespace
 InputParser::InputParser(const InputBinding& binding, xy::NetClient* netClient)
     : m_inputBinding    (binding),
     m_netClient         (netClient),
-    m_currentInput      (0),
-    m_analogueMultiplier(1.f)
+    m_analogueMultiplier(1.f),
+    m_currentInput      (0)
 {
 
 }
