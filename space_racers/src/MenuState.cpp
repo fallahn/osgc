@@ -62,7 +62,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_scene     (ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
-
+    LOG("Register con command for debug state", xy::Logger::Type::Info);
     initScene();
     loadResources();
     buildMenu();

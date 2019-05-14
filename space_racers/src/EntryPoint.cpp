@@ -41,6 +41,9 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     *sharedData = std::make_any<SharedData>();
 
     auto& data = std::any_cast<SharedData&>(*sharedData);
+
+    //TODO we probably don't want to create a client until
+    //the user chooses 'netplay' from the menu
     data.netClient = std::make_unique<xy::NetClient>();
     if (!data.netClient->create(2))
     {
@@ -53,8 +56,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<LobbyState>(StateID::Lobby, data);
 
 #ifdef XY_DEBUG
-    //return StateID::Debug;
-    return StateID::Lobby;
+    return StateID::Debug;
+    //return StateID::Lobby;
     //return StateID::MainMenu;
 #else
     return StateID::MainMenu;

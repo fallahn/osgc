@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\ActorIDs.hpp" />
+    <ClInclude Include="include\AsteroidSystem.hpp" />
     <ClInclude Include="include\ClientPackets.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="include\VehicleSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AsteroidSystem.cpp" />
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\InputParser.cpp" />

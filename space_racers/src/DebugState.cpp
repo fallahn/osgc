@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "DebugState.hpp"
 #include "VehicleSystem.hpp"
 #include "GameConsts.hpp"
+#include "AsteroidSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -32,6 +33,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/util/Random.hpp>
+#include <xyginext/util/Vector.hpp>
 
 #include <fstream>
 
@@ -215,6 +218,7 @@ void DebugState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_gameScene.addSystem<VehicleSystem>(mb);
+    m_gameScene.addSystem<AsteroidSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
@@ -228,12 +232,46 @@ void DebugState::loadResources()
 
 void DebugState::buildWorld()
 {
+    //track texture
     auto temp = m_resources.load<sf::Texture>("assets/images/temp01.png");
 
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(-20);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
+
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    bounds.left -= 100.f;
+    bounds.top -= 100.f;
+    bounds.width += 200.f;
+    bounds.height += 200.f;
+    m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
+
+    //asteroids
+    temp = m_resources.load<sf::Texture>("assets/images/temp02.png");
+
+    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1000, 10);
+    for (auto position : positions)
+    {
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
+        entity.addComponent<Asteroid>().setSpeed(xy::Util::Random::value(100.f, 400.f));
+
+        sf::Vector2f velocity =
+        {
+            xy::Util::Random::value(-1.f, 1.f),
+            xy::Util::Random::value(-1.f, 1.f)
+        };
+        entity.getComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity));
+
+        auto radius = entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f;
+        entity.getComponent<xy::Transform>().setOrigin(radius, radius);
+        auto scale = xy::Util::Random::value(0.5f, 2.5f);
+        entity.getComponent<xy::Transform>().setScale(scale, scale);
+        entity.getComponent<Asteroid>().setRadius(radius * scale);
+    }
 
 }
 
