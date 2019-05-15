@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 
 struct VehicleData;
 struct ActorData;
+struct ActorUpdate;
 struct ClientUpdate;
 class RaceState final : public xy::State
 {
@@ -59,5 +60,6 @@ private:
 
     void spawnVehicle(const VehicleData&);
     void spawnActor(const ActorData&);
+    void updateActor(const ActorUpdate&);
     void reconcile(const ClientUpdate&);
 };

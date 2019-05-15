@@ -25,15 +25,20 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "NetActor.hpp"
 #include "ActorIDs.hpp"
+#include "InterpolationSystem.hpp"
+#include "ResourceIDs.hpp"
+#include "CommandIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
 
 namespace
 {
@@ -90,6 +95,9 @@ bool RaceState::update(float dt)
             case PacketID::ActorData:
                 spawnActor(packet.as<ActorData>());
                 break;
+            case PacketID::ActorUpdate:
+                updateActor(packet.as<ActorUpdate>());
+                break;
             case PacketID::DebugPosition:
                 if (debugEnt.isValid())
                 {
@@ -120,6 +128,8 @@ void RaceState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_gameScene.addSystem<VehicleSystem>(mb);
+    m_gameScene.addSystem<InterpolationSystem>(mb);
+    m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
@@ -127,7 +137,8 @@ void RaceState::initScene()
 
 void RaceState::loadResources()
 {
-
+    TextureID::handles[TextureID::Temp01] = m_resources.load<sf::Texture>("nothing_to_see_here");
+    TextureID::handles[TextureID::Temp02] = m_resources.load<sf::Texture>("assets/images/temp02.png");
 }
 
 void RaceState::buildWorld()
@@ -144,13 +155,11 @@ void RaceState::buildWorld()
 
 void RaceState::spawnVehicle(const VehicleData& data)
 {
-    auto tempID = m_resources.load<sf::Texture>("nothing_to_see_here");
-
     //spawn vehicle
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
 
     switch (entity.getComponent<Vehicle>().type)
@@ -189,7 +198,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     debugEnt = m_gameScene.createEntity();
     debugEnt.addComponent<xy::Transform>();
     debugEnt.addComponent<xy::Drawable>().setDepth(100);
-    debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
+    debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01])).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
     debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
 #endif //XY_DEBUG
 
@@ -198,7 +207,59 @@ void RaceState::spawnVehicle(const VehicleData& data)
 
 void RaceState::spawnActor(const ActorData& data)
 {
-    std::cout << "spawned actor " << data.actorID << "\n";
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
+    entity.getComponent<xy::Transform>().setRotation(data.rotation);
+    entity.getComponent<xy::Transform>().setScale(data.scale, data.scale);
+    entity.addComponent<InterpolationComponent>();
+    entity.addComponent<NetActor>().actorID = data.actorID;
+    entity.getComponent<NetActor>().serverID = data.serverID;
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::NetActor;
+
+    switch (data.actorID)
+    {
+    default:
+        //TODO add default sprite
+        break;
+    case ActorID::Car:
+
+        break;
+    case ActorID::Bike:
+
+        break;
+    case ActorID::Ship:
+
+        break;
+    case ActorID::Roid:
+    {
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp02]));
+        auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
+    }
+        break;
+    }
+
+    //TODO count actors so we can tell the server when we're ready
+}
+
+void RaceState::updateActor(const ActorUpdate& update)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::NetActor;
+    cmd.action = [update](xy::Entity e, float)
+    {
+        if (e.getComponent<NetActor>().serverID == update.serverID)
+        {
+            InterpolationPoint point;
+            point.position = { update.x, update.y };
+            point.rotation = update.rotation;
+            point.timestamp = update.timestamp;
+            e.getComponent<InterpolationComponent>().setTarget(point);
+        }
+    };
+    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
 void RaceState::reconcile(const ClientUpdate& update)

@@ -20,6 +20,8 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
+#include <SFML/System/Clock.hpp>
+
 namespace xy
 {
     class Message;
@@ -54,5 +56,11 @@ namespace sv
         virtual std::int32_t logicUpdate(float) = 0;
 
         virtual std::int32_t getID() const = 0;
+
+    protected:
+        std::int32_t getServerTime() const { return m_clock.getElapsedTime().asMilliseconds(); }
+
+    private:
+        sf::Clock m_clock;
     };
 }

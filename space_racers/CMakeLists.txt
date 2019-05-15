@@ -64,6 +64,7 @@ if(X11_FOUND)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
+set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "osgc/plugins/${PROJECT_NAME}")
 
 message(warning " this file needs to be updated to correctly install plugins to plugin folder")
 
@@ -71,6 +72,9 @@ message(warning " this file needs to be updated to correctly install plugins to 
 #TODO this needs to copy the binary to osgc's 'plugins/${PROJECT_NAME}' directory
 #install(TARGETS ${PROJECT_NAME}
 #  RUNTIME DESTINATION .)
+set(dst_path "osgc/plugins/${project_name}")
+FILE(COPY info.xgi DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+#TODO symlink to assets dir
 
 # Install assets folder
 #install(DIRECTORY assets

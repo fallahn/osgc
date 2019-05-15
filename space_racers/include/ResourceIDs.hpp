@@ -39,6 +39,8 @@ namespace TextureID
     {
         MainMenu,
 
+        Temp01, Temp02,
+
         Count
     };
 

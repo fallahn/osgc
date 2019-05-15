@@ -26,9 +26,16 @@ Copyright 2019 Matt Marchant
 #include "GameModes.hpp"
 #include "ActorIDs.hpp"
 #include "NetActor.hpp"
+#include "AsteroidSystem.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+
+#include <xyginext/util/Random.hpp>
+#include <xyginext/util/Vector.hpp>
 
 using namespace sv;
 
@@ -105,7 +112,21 @@ void RaceState::netUpdate(float)
         m_sharedData.netHost.sendPacket(p.second.peer, PacketID::ClientUpdate, cu, xy::NetFlag::Unreliable);
     }
 
-    //TODO broadcast data for each actor
+    //broadcast data for each actor
+    const auto& actors = m_scene.getSystem<NetActorSystem>().getActors();
+    for (auto actor : actors)
+    {
+        const auto& tx = actor.getComponent<xy::Transform>();
+
+        ActorUpdate au;
+        au.serverID = static_cast<std::uint16_t>(actor.getIndex());
+        au.rotation = tx.getRotation();
+        au.x = tx.getPosition().x;
+        au.y = tx.getPosition().y;
+        au.timestamp = getServerTime();
+
+        m_sharedData.netHost.broadcastPacket(PacketID::ActorUpdate, au, xy::NetFlag::Unreliable);
+    }
 
     //TODO send stats updates such as scores
 }
@@ -121,11 +142,47 @@ void RaceState::initScene()
 {
     m_scene.addSystem<VehicleSystem>(m_messageBus);
     m_scene.addSystem<NetActorSystem>(m_messageBus);
+    m_scene.addSystem<AsteroidSystem>(m_messageBus);
+    m_scene.addSystem<NetActorSystem>(m_messageBus);
+    m_scene.addSystem<xy::DynamicTreeSystem>(m_messageBus);
 }
 
 bool RaceState::loadMap()
 {
     //TODO load collision data from map
+
+    sf::FloatRect bounds(0.f, 0.f, 5120.f, 4096.f); //TODO get this from map data
+    bounds.left -= 100.f;
+    bounds.top -= 100.f;
+    bounds.width += 200.f;
+    bounds.height += 200.f;
+    m_scene.getSystem<AsteroidSystem>().setMapSize(bounds);
+
+    //create some roids
+    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);
+    for (auto position : positions)
+    {
+        auto entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+
+        sf::Vector2f velocity =
+        {
+            xy::Util::Random::value(-1.f, 1.f),
+            xy::Util::Random::value(-1.f, 1.f)
+        };
+        entity.addComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity) * xy::Util::Random::value(200.f, 500.f));
+
+        sf::FloatRect aabb(0.f, 0.f, 100.f, 100.f);
+        auto radius = aabb.width / 2.f;
+        entity.getComponent<xy::Transform>().setOrigin(radius, radius);
+        auto scale = xy::Util::Random::value(0.5f, 2.5f);
+        entity.getComponent<xy::Transform>().setScale(scale, scale);
+        entity.getComponent<Asteroid>().setRadius(radius * scale);
+
+        entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
+        entity.addComponent<NetActor>().actorID = ActorID::Roid;
+        entity.getComponent<NetActor>().serverID = entity.getIndex();
+    }
 
     return true;
 }
@@ -211,6 +268,7 @@ void RaceState::sendPlayerData(const xy::NetPeer& peer)
             data.x = tx.getPosition().x;
             data.y = tx.getPosition().y;
             data.rotation = tx.getRotation();
+            data.scale = tx.getScale().x;
 
             m_sharedData.netHost.sendPacket(peer, PacketID::ActorData, data, xy::NetFlag::Reliable);
         }

@@ -40,9 +40,19 @@ struct ActorData final
     float x = 0.f;
     float y = 0.f;
     float rotation = 0.f;
+    float scale = 1.f;
     std::int16_t serverID = 0;
     std::int16_t actorID = 0;
     std::uint8_t colourID = 0;
+};
+
+struct ActorUpdate final
+{
+    float x = 0.f;
+    float y = 0.f;
+    float rotation = 0.f;
+    std::int32_t timestamp = 0;
+    std::uint16_t serverID = 0;
 };
 
 //server state sent for reconciliation
