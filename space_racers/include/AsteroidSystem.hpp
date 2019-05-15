@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Const.hpp>
 
 #include <cmath>
+#include <set>
 
 //roid component. Looks a bit complicated but only
 //because we want to make sure the mass is accurate
@@ -32,7 +33,6 @@ public:
     Asteroid() { updateMass(); }
 
     void setVelocity(sf::Vector2f v) { m_velocity = v; }
-    void setSpeed(float s) { m_speed = s; }
 
     void setRadius(float radius)
     {
@@ -42,14 +42,14 @@ public:
     }
 
     sf::Vector2f getVelocity() const { return m_velocity; }
-    float getSpeed() const { return m_speed; }
+
     float getMass() const { return m_mass; }
     float getRadius() const { return m_radius; }
     float getRadiusSqr() const { return m_radiusSqr; }
 
 private:
     sf::Vector2f m_velocity;
-    float m_speed = 0.f;
+
     float m_mass = 1.f;
     float m_radius = 100.f;
     float m_radiusSqr = m_radius * m_radius;
@@ -74,4 +74,5 @@ public:
 
 private:
     sf::FloatRect m_mapSize;
+    std::set<std::pair<xy::Entity, xy::Entity>> m_collisionPairs;
 };

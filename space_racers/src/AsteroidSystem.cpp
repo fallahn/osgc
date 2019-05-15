@@ -19,18 +19,32 @@ Copyright 2019 Matt Marchant
 #include "AsteroidSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+
+#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+
 #include <xyginext/util/Vector.hpp>
+
+namespace
+{
+    //area around a roid to search for collisions
+    const sf::FloatRect SearchArea(0.f, 0.f, 600.f, 600.f);
+}
 
 AsteroidSystem::AsteroidSystem(xy::MessageBus& mb)
     : xy::System(mb, typeid(AsteroidSystem))
 {
     requireComponent<Asteroid>();
     requireComponent<xy::Transform>();
+    requireComponent<xy::BroadphaseComponent>();
 }
 
 //public
 void AsteroidSystem::process(float dt)
 {
+    m_collisionPairs.clear();
+
     auto& entities = getEntities();
     for (auto entity : entities)
     {
@@ -38,7 +52,7 @@ void AsteroidSystem::process(float dt)
         auto& roid = entity.getComponent<Asteroid>();
 
         //update position
-        tx.move(roid.getVelocity() * roid.getSpeed() * dt);
+        tx.move(roid.getVelocity() /** roid.getSpeed()*/ * dt);
         auto position = tx.getPosition();
 
         //just do simple reflection to keep roids in the map area
@@ -50,7 +64,7 @@ void AsteroidSystem::process(float dt)
         }
         else if (position.x > m_mapSize.left + m_mapSize.width)
         {
-            tx.move(position.x - (m_mapSize.left + m_mapSize.width), 0.f);
+            tx.move((m_mapSize.left + m_mapSize.width) - position.x, 0.f);
             roid.setVelocity(xy::Util::Vector::reflect(roid.getVelocity(), sf::Vector2f(-1.f, 0.f)));
         }
 
@@ -61,11 +75,74 @@ void AsteroidSystem::process(float dt)
         }
         else if (position.y > m_mapSize.top + m_mapSize.height)
         {
-            tx.move(0.f, position.y - (m_mapSize.top + m_mapSize.height));
+            tx.move(0.f, (m_mapSize.top + m_mapSize.height) - position.y);
             roid.setVelocity(xy::Util::Vector::reflect(roid.getVelocity(), sf::Vector2f(0.f, -1.f)));
         }
 
 
-        //TODO collision detection
+        //collision detection broadphase
+        auto searchArea = SearchArea;
+        searchArea.left += position.x;
+        searchArea.top += position.y;
+
+        auto aabb = entity.getComponent<xy::BroadphaseComponent>().getArea();
+        aabb = tx.getTransform().transformRect(aabb);
+
+        auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea);
+        for (auto other : nearby)
+        {
+            if (other != entity)
+            {
+                auto otherAabb = other.getComponent<xy::BroadphaseComponent>().getArea();
+                otherAabb = other.getComponent<xy::Transform>().getTransform().transformRect(otherAabb);
+
+                if (otherAabb.intersects(aabb))
+                {
+                    m_collisionPairs.insert(std::minmax(other, entity));
+                }
+            }
+        }
+    }
+
+    //collision narrow phase
+    for (auto& [a, b] : m_collisionPairs)
+    {
+        //copy these because a and be are const...
+        auto entA = a;
+        auto entB = b;
+
+        auto& txA = entA.getComponent<xy::Transform>();
+        auto& txB = entB.getComponent<xy::Transform>();
+
+        auto& roidA = entA.getComponent<Asteroid>();
+        auto& roidB = entB.getComponent<Asteroid>();
+
+        auto diff = txA.getPosition() - txB.getPosition();
+        auto dist = roidA.getRadius() + roidB.getRadius();
+        auto dist2 = dist * dist;
+
+        //check for overlap
+        auto len2 = xy::Util::Vector::lengthSquared(diff);
+        if (len2 < dist2)
+        {
+            //separate if overlapping
+            auto len = std::sqrt(len2);
+            auto penetration = dist - len;
+            auto normal = diff / len;
+
+            txA.move(normal * (penetration));
+            txB.move(-normal * (penetration));
+
+            //calc new vectors using each mass to update momentum
+            float vA = xy::Util::Vector::dot(roidA.getVelocity(), normal);
+            float vB = xy::Util::Vector::dot(roidB.getVelocity(), normal);
+            float momentum = (2.f * (vA - vB)) / (roidA.getMass() + roidB.getMass());
+
+            sf::Vector2f velA = roidA.getVelocity() - (normal * (momentum * roidB.getMass()));
+            sf::Vector2f velB = roidB.getVelocity() + (normal * (momentum * roidA.getMass()));
+
+            roidA.setVelocity(velA);
+            roidB.setVelocity(velB);
+        }
     }
 }

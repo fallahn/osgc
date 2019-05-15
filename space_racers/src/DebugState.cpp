@@ -26,11 +26,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/util/Random.hpp>
@@ -227,6 +229,7 @@ void DebugState::initScene()
 
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<AsteroidSystem>(mb);
+    m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
@@ -265,20 +268,22 @@ void DebugState::buildWorld()
         entity.addComponent<xy::Transform>().setPosition(position);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
-        entity.addComponent<Asteroid>().setSpeed(xy::Util::Random::value(100.f, 400.f));
 
         sf::Vector2f velocity =
         {
             xy::Util::Random::value(-1.f, 1.f),
             xy::Util::Random::value(-1.f, 1.f)
         };
-        entity.getComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity));
+        entity.addComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity) * xy::Util::Random::value(200.f, 500.f));
 
-        auto radius = entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f;
+        auto aabb = entity.getComponent<xy::Sprite>().getTextureBounds();
+        auto radius = aabb.width / 2.f;
         entity.getComponent<xy::Transform>().setOrigin(radius, radius);
         auto scale = xy::Util::Random::value(0.5f, 2.5f);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
         entity.getComponent<Asteroid>().setRadius(radius * scale);
+
+        entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
     }
 
 }
