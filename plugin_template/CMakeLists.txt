@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 # Rename this variable to change the project name
-SET(PROJECT_NAME shooter)
+SET(PROJECT_NAME give_me_a_name)
 
 # Set up the project
 project(${PROJECT_NAME})
@@ -61,14 +61,7 @@ if(X11_FOUND)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
+set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}")
 
-message(warning "this file needs to be updated to correctly install plugins to plugin folder")
-
-# Install executable
-#TODO this needs to copy the binary to osgc's 'plugins/${PROJECT_NAME}' directory
-#install(TARGETS ${PROJECT_NAME}
-#  RUNTIME DESTINATION .)
-
-# Install assets folder
-#install(DIRECTORY assets
-#  DESTINATION .)
+set(dst_path "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}/")
+FILE(COPY info.xgi DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)

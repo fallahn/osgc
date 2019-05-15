@@ -62,9 +62,9 @@ if(X11_FOUND)
 endif()
 
 # Install executable
-install(TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION .)
+#install(TARGETS ${PROJECT_NAME}
+#  RUNTIME DESTINATION .)
 
 # Install assets folder
-install(DIRECTORY assets
-  DESTINATION .)
+#install(DIRECTORY assets
+#  DESTINATION .)
