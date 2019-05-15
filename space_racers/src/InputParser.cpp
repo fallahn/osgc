@@ -104,8 +104,12 @@ void InputParser::handleEvent(const sf::Event& evt)
         {
             if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Accelerate])
             {
-                //TODO prevent this overriding the z-axis state
-                m_currentInput &= ~InputFlag::Accelerate;
+                //prevent this overriding the z-axis state
+                float z = sf::Joystick::getAxisPosition(m_inputBinding.controllerID, sf::Joystick::Z);
+                if (z > /*-Deadzone && z < Deadzone*/-5.f)
+                {
+                    m_currentInput &= ~InputFlag::Accelerate;
+                }
             }
             else if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Brake])
             {
@@ -141,7 +145,7 @@ void InputParser::handleEvent(const sf::Event& evt)
         
         else if (evt.joystickMove.axis == sf::Joystick::Z)
         {
-            if (evt.joystickMove.position < -Deadzone)
+            if (evt.joystickMove.position < /*-Deadzone*/-5.f)
             {
                 m_currentInput |= InputFlag::Accelerate;
 
@@ -149,8 +153,11 @@ void InputParser::handleEvent(const sf::Event& evt)
             }
             else
             {
-                //TODO prevent this overriding button down state
-                m_currentInput &= ~InputFlag::Accelerate;
+                //prevent this overriding button down state
+                if (!sf::Joystick::isButtonPressed(m_inputBinding.controllerID, m_inputBinding.buttons[InputBinding::Accelerate]))
+                {
+                    m_currentInput &= ~InputFlag::Accelerate;
+                }
             }
         }
     }
@@ -170,6 +177,9 @@ void InputParser::update(float dt)
         input.flags = m_currentInput;
         input.timestamp = m_timeAccumulator;
         input.steeringMultiplier = std::min(1.f, m_steeringMultiplier);
+        input.accelerationMultiplier = std::min(1.f, m_accelerationMultiplier);
+
+        DPRINT("acc", std::to_string(m_accelerationMultiplier));
 
         //update player input history
         vehicle.history[vehicle.currentInput] = input;
@@ -190,14 +200,13 @@ void InputParser::update(float dt)
         //send input to server - remember this might be nullptr for local games!
         if (m_netClient)
         {
-            InputUpdate iu;
+            InputUpdate iu; //TODO this is the same as the Input struct?
             iu.timestamp = input.timestamp;
             iu.inputFlags = input.flags;
             iu.steeringMultiplier = input.steeringMultiplier;
+            iu.accelerationMultiplier = input.accelerationMultiplier;
 
             m_netClient->sendPacket<InputUpdate>(PacketID::ClientInput, iu, xy::NetFlag::Unreliable, 0);
         }
-    }
-
-    DPRINT("acc", std::to_string(m_accelerationMultiplier));
+    } 
 }

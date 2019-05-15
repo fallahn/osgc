@@ -26,6 +26,7 @@ struct Input final
 {
     std::int32_t timestamp = 0;
     float steeringMultiplier = 1.f;
+    float accelerationMultiplier = 1.f;
     std::int16_t flags = 0;
 };
 

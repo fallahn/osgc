@@ -113,7 +113,7 @@ void VehicleSystem::processInput(xy::Entity entity)
     auto acceleration = 0.f;
     if (input.flags & InputFlag::Accelerate)
     {
-        acceleration += vehicle.settings.acceleration;
+        acceleration += vehicle.settings.acceleration * input.accelerationMultiplier;
     }
 
     //rotation

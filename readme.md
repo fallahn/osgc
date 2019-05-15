@@ -10,13 +10,13 @@ All games are open source, and come with the caveat that, well, most of them pro
 
 
 ##### Getting Started
-Dependencies: You'll need to have at least SFML 2.5.x built and installed as well as [xygine](https://github.com/fallahn/xygine) to build the frontend. Different plugins may require further libraries, for example the top down shooter plugin also requires [tmxlite](https://github.com/fallahn/tmxlite). Use the `CMakeLists.txt` in the root of the repository to create project files for your build chain of choice - OSGC is frequently tested on Windows, linux and macOS with Visual Studio, gcc and Apple clang. The output of the binary files may not necessarily meet the directory requirement of OSGC (see below) but it is usually quickly fixed with some symlinks (mklink works just as well on Windows).
+Dependencies: You'll need to have at least SFML 2.5.x built and installed as well as [xygine](https://github.com/fallahn/xygine) to build the frontend. Different plugins may require further libraries, for example the Drone Drop plugin also requires [tmxlite](https://github.com/fallahn/tmxlite). Use the `CMakeLists.txt` in the root of the repository to create project files for your build chain of choice - OSGC is frequently tested on Windows, linux and macOS with Visual Studio, gcc and Apple clang. Note that the cmake file will attempt to copy all of the assets folders to create the correct directory layout (below) and place the binary files in the correct directories, although this isn't gauranteed on all platforms. Symlinks (mklink on Windows) to asset directories can be used as effectively while developing a plugin.
 
 To create your own plugin copy the plugin_template directory and rename it to something of your choice. Edit the included `CMakeLists.txt` for your new project, or create a new project in your IDE if you prefer. Remember to add the template source files to your project, link against SFML and xygine (and any other libraries you require) and set the project to be built as a shared library. The library output file must be named osgc.dll/libosgc.so/libosgc.dylib depending on your platform.
 
 Use the `begin()` and `end()` functions in the `EntryPoint.cpp` file to register and unregister any game states with the frontend. See the plugin example in the 'shooter' directory for further example. To learn more about creating a game with xygine follow the [xygine tutorial](https://github.com/fallahn/xygine/tree/master/tutorial) and refer to the [wiki](https://github.com/fallahn/xygine/wiki).
 
-Note that while OSGC is designed around xygine it is not strictly necessary to use xygine beyond implementing the plugin interface. Any game or software which will run within the evt/update/draw loop of a xygine state and can be drawn to an SFML render window is entirely feasible. For example my Gameboy emulator Speljongen [can be built as an OSGC plugin](https://github.com/fallahn/speljongen/tree/master/spel-osgc).
+Note that while OSGC is designed around xygine it is not strictly necessary to use xygine beyond implementing the plugin interface. Any game or software which will run within the eventt/update/draw loop of a xygine state and can be drawn to an SFML render window is entirely feasible. For example my Gameboy emulator Speljongen [can be built as an OSGC plugin](https://github.com/fallahn/speljongen/tree/master/spel-osgc).
 
 ##### Directory Structure
 To correctly load plugins and their assets, the directory structure must follow this layout:
@@ -52,10 +52,6 @@ Note that these are all string properties and can in theory contain anything the
 
 See the [screens](/screens) directory for screenshots of OSGC in action
 
-Building
---------
-
-OSGC can be built with either the included Visual Studio 2019 solution, or with the cmake file. To use the cmake file you'll also need to have SFML 2.5, xygine and tmxlite installed. Create a build directoy, move to it and execute cmake on the CMakeLists.txt in the root of this repository. This will copy all the assets to your build directory, creating the correct directory structure (assuming correct permissions). Running `make` will then build the frontend and any included plugins and copy them to the correct output directory. OSGC can be run by changing to the `osgc` directory and executing `osgc-frontend`. Currently there's no support for automatically building mac app bundles, but it is planned for the future.
 
 License
 -------

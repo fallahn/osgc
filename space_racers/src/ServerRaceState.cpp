@@ -284,10 +284,11 @@ void RaceState::updatePlayerInput(xy::Entity entity, const InputUpdate& iu)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
 
-    Input input;
+    Input input; //TODO this is the same as the InputUpdate struct?
     input.flags = iu.inputFlags;
     input.timestamp = iu.timestamp;
     input.steeringMultiplier = iu.steeringMultiplier;
+    input.accelerationMultiplier = iu.accelerationMultiplier;
 
     //update player input history
     vehicle.history[vehicle.currentInput] = input;

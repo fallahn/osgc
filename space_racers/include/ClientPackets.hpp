@@ -31,9 +31,12 @@ struct LobbyData final
 };
 
 //input taken from the client and sent to the server
+//TODO not sure we need this if it's identical to the
+//vehicle Input struct?
 struct InputUpdate final
 {
     float steeringMultiplier = 1.f; //analogue controller multiplier
+    float accelerationMultiplier = 1.f;
     std::int32_t timestamp = 0;
     std::uint16_t inputFlags = 0;
 };
