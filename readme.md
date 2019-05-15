@@ -52,6 +52,11 @@ Note that these are all string properties and can in theory contain anything the
 
 See the [screens](/screens) directory for screenshots of OSGC in action
 
+Building
+--------
+
+OSGC can be built with either the included Visual Studio 2019 solution, or with the cmake file. To use the cmake file you'll also need to have SFML 2.5, xygine and tmxlite installed. Create a build directoy, move to it and execute cmake on the CMakeLists.txt in the root of this repository. This will copy all the assets to your build directory, creating the correct directory structure (assuming correct permissions). Running `make` will then build the frontend and any included plugins and copy them to the correct output directory. OSGC can be run by changing to the `osgc` directory and executing `osgc-frontend`. Currently there's no support for automatically building mac app bundles, but it is planned for the future.
+
 License
 -------
 

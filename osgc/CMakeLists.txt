@@ -61,6 +61,10 @@ if(X11_FOUND)
     ${CMAKE_DL_LIBS})
 endif()
 
+#copies the assets directory to the output
+set(dst_path "${CMAKE_BINARY_DIR}/osgc/")
+FILE(COPY assets DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+
 # Install executable
 #install(TARGETS ${PROJECT_NAME}
 #  RUNTIME DESTINATION .)

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 # Rename this variable to change the project name
+# see the last line of this file for info on copying assets
 SET(PROJECT_NAME give_me_a_name)
 
 # Set up the project
@@ -65,3 +66,5 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMA
 
 set(dst_path "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}/")
 FILE(COPY info.xgi DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+#uncomment this and rename 'assets' to whatever your resource directory is called to copy resources to the output directory
+#FILE(COPY assets DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
