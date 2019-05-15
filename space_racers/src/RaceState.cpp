@@ -46,10 +46,10 @@ namespace
 }
 
 RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State     (ss, ctx),
-    m_sharedData    (sd),
-    m_gameScene     (ctx.appInstance.getMessageBus()),
-    m_playerInput   (sd.inputBindings[0], sd.netClient.get())
+    : xy::State         (ss, ctx),
+    m_sharedData        (sd),
+    m_gameScene         (ctx.appInstance.getMessageBus()),
+    m_playerInput       (sd.inputBindings[0], sd.netClient.get())
 {
     launchLoadingScreen();
 
@@ -77,40 +77,16 @@ void RaceState::handleMessage(const xy::Message& msg)
 
 bool RaceState::update(float dt)
 {
-    m_playerInput.update(dt);
+    handlePackets();
 
-    //poll event afterwards so gathered inputs are sent immediately
-    xy::NetEvent evt;
-    while (m_sharedData.netClient->pollEvent(evt))
+    //let the server know we're ready
+    if (m_sharedData.gameData.actorCount == 0)
     {
-        if (evt.type == xy::NetEvent::PacketReceived)
-        {
-            const auto& packet = evt.packet;
-            switch (packet.getID())
-            {
-            default: break;
-            case PacketID::VehicleData:
-                spawnVehicle(packet.as<VehicleData>());
-                break;
-            case PacketID::ActorData:
-                spawnActor(packet.as<ActorData>());
-                break;
-            case PacketID::ActorUpdate:
-                updateActor(packet.as<ActorUpdate>());
-                break;
-            case PacketID::DebugPosition:
-                if (debugEnt.isValid())
-                {
-                    debugEnt.getComponent<xy::Transform>().setPosition(packet.as<sf::Vector2f>());
-                }
-                break;
-            case PacketID::ClientUpdate:
-                reconcile(packet.as<ClientUpdate>());
-                break;
-            }
-        }
+        m_sharedData.netClient->sendPacket(PacketID::ClientReady, std::int8_t(0), xy::NetFlag::Reliable);
+        m_sharedData.gameData.actorCount = std::numeric_limits<std::uint8_t>::max(); //just so this stops triggering
     }
 
+    m_playerInput.update(dt);
     m_gameScene.update(dt);
     return true;
 }
@@ -151,6 +127,41 @@ void RaceState::buildWorld()
 
     //let the server know the world is loaded so it can send us all player cars
     m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);
+}
+
+void RaceState::handlePackets()
+{
+    //poll event afterwards so gathered inputs are sent immediately
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
+    {
+        if (evt.type == xy::NetEvent::PacketReceived)
+        {
+            const auto& packet = evt.packet;
+            switch (packet.getID())
+            {
+            default: break;
+            case PacketID::VehicleData:
+                spawnVehicle(packet.as<VehicleData>());
+                break;
+            case PacketID::ActorData:
+                spawnActor(packet.as<ActorData>());
+                break;
+            case PacketID::ActorUpdate:
+                updateActor(packet.as<ActorUpdate>());
+                break;
+            case PacketID::DebugPosition:
+                if (debugEnt.isValid())
+                {
+                    debugEnt.getComponent<xy::Transform>().setPosition(packet.as<sf::Vector2f>());
+                }
+                break;
+            case PacketID::ClientUpdate:
+                reconcile(packet.as<ClientUpdate>());
+                break;
+            }
+        }
+    }
 }
 
 void RaceState::spawnVehicle(const VehicleData& data)
@@ -202,7 +213,8 @@ void RaceState::spawnVehicle(const VehicleData& data)
     debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
 #endif //XY_DEBUG
 
-    //TODO count spawned vehicles and tell server when all are spawned
+    //count spawned vehicles and tell server when all are spawned
+    m_sharedData.gameData.actorCount--;
 }
 
 void RaceState::spawnActor(const ActorData& data)
@@ -223,13 +235,28 @@ void RaceState::spawnActor(const ActorData& data)
         //TODO add default sprite
         break;
     case ActorID::Car:
-
+    {
+        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize);
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * Vehicle::centreOffset, GameConst::CarSize.height / 2.f);
+    }
         break;
     case ActorID::Bike:
-
+    {
+        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * Vehicle::centreOffset, GameConst::BikeSize.height / 2.f);
+    }
         break;
     case ActorID::Ship:
-
+    {
+        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * Vehicle::centreOffset, GameConst::ShipSize.height / 2.f);
+    }
         break;
     case ActorID::Roid:
     {
@@ -241,7 +268,8 @@ void RaceState::spawnActor(const ActorData& data)
         break;
     }
 
-    //TODO count actors so we can tell the server when we're ready
+    //count actors so we can tell the server when we're ready
+    m_sharedData.gameData.actorCount--;
 }
 
 void RaceState::updateActor(const ActorUpdate& update)

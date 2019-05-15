@@ -58,6 +58,8 @@ private:
     void loadResources();
     void buildWorld();
 
+    void handlePackets();
+
     void spawnVehicle(const VehicleData&);
     void spawnActor(const ActorData&);
     void updateActor(const ActorUpdate&);

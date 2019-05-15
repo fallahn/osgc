@@ -51,7 +51,7 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     {
         GameStart gs;
         gs.gameMode = GameMode::Race;
-        gs.actorCount = sd.playerCount; //TODO add other actors such as roids
+        gs.actorCount = sd.playerCount;
         gs.mapIndex = sd.mapIndex;
 
         sd.netHost.broadcastPacket(PacketID::GameStarted, gs, xy::NetFlag::Reliable);
@@ -84,6 +84,9 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
             break;
         case PacketID::ClientInput:
             updatePlayerInput(m_players[evt.peer.getID()].entity, packet.as<InputUpdate>());
+            break;
+        case PacketID::ClientReady:
+            std::cout << "Client sent ready status from " << evt.peer.getID() << "\n";
             break;
         }
     }
@@ -170,7 +173,7 @@ bool RaceState::loadMap()
             xy::Util::Random::value(-1.f, 1.f),
             xy::Util::Random::value(-1.f, 1.f)
         };
-        entity.addComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity) * xy::Util::Random::value(200.f, 500.f));
+        entity.addComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity) * xy::Util::Random::value(200.f, 300.f));
 
         sf::FloatRect aabb(0.f, 0.f, 100.f, 100.f);
         auto radius = aabb.width / 2.f;
@@ -182,6 +185,8 @@ bool RaceState::loadMap()
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
         entity.addComponent<NetActor>().actorID = ActorID::Roid;
         entity.getComponent<NetActor>().serverID = entity.getIndex();
+
+        m_sharedData.playerCount++; //this is so the client knows the total actor count and can notify when all have been spawned
     }
 
     return true;

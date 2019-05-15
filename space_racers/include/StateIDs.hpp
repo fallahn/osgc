@@ -49,7 +49,7 @@ namespace StateID
 
 struct GameData final
 {
-    std::uint8_t playerCount = 1;
+    std::uint8_t actorCount = 1;
     std::uint8_t mapIndex = 0;
 };
 

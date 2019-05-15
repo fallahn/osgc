@@ -37,7 +37,7 @@ namespace sv
         xy::NetHost netHost;
         std::vector<xy::NetPeer> clients;
 
-        //game infor received from lobby data
+        //game info received from lobby data
         std::uint8_t playerCount = 0;
         std::uint8_t mapIndex = 0;
         std::array<std::uint64_t, 4> peerIDs = {};

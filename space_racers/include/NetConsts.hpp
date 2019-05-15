@@ -34,7 +34,7 @@ namespace PacketID
         ClientMapLoaded, //clients has loaded map, requesting vehicles
         VehicleData, //packet contains data for a single vehicle
         ActorData, //packet contains actor data to spawn on client
-        ClientVehiclesLoaded, //client has loaded all vehicles and is ready to start
+        ClientReady, //client has loaded all actors and is ready to start
         RaceStarted, //countdown has triggered
 
 
