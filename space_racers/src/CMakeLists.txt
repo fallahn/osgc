@@ -7,6 +7,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationComponent.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp

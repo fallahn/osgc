@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include "StateIDs.hpp"
 #include "InputParser.hpp"
+#include "MapParser.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -51,6 +52,7 @@ private:
     xy::ResourceHolder m_resources;
 
     InputParser m_playerInput;
+    MapParser m_mapParser;
 
     void initScene();
     void loadResources();

@@ -83,7 +83,6 @@ void Server::threadFunc()
 
     //use this to save a bit of processing on the server thread
     //when no updates have been performed
-    sf::Clock sleepClock;
     std::int32_t updateCount = 0;
 
     while (m_running)

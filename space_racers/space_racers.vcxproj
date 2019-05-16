@@ -149,6 +149,7 @@
     <ClInclude Include="include\AsteroidSystem.hpp" />
     <ClInclude Include="include\CircularBuffer.hpp" />
     <ClInclude Include="include\ClientPackets.hpp" />
+    <ClInclude Include="include\CollisionObject.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\InterpolationSystem.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
+    <ClInclude Include="include\MapParser.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\NetActor.hpp" />
     <ClInclude Include="include\NetConsts.hpp" />
@@ -169,6 +171,7 @@
     <ClInclude Include="include\ServerPackets.hpp" />
     <ClInclude Include="include\ServerRaceState.hpp" />
     <ClInclude Include="include\ServerStates.hpp" />
+    <ClInclude Include="include\ShapeUtils.hpp" />
     <ClInclude Include="include\SharedPackets.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
@@ -182,6 +185,7 @@
     <ClCompile Include="src\InterpolationComponent.cpp" />
     <ClCompile Include="src\InterpolationSystem.cpp" />
     <ClCompile Include="src\LobbyState.cpp" />
+    <ClCompile Include="src\MapParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
     <ClCompile Include="src\Server.cpp" />

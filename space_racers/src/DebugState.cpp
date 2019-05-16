@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "VehicleSystem.hpp"
 #include "GameConsts.hpp"
 #include "AsteroidSystem.hpp"
+#include "CollisionObject.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -96,7 +97,8 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     : xy::State     (ss, ctx),
     m_sharedData    (sd),
     m_gameScene     (ctx.appInstance.getMessageBus()),
-    m_playerInput   (sd.inputBindings[0], sd.netClient.get())
+    m_playerInput   (sd.inputBindings[0], sd.netClient.get()),
+    m_mapParser     (m_gameScene)
 {
     launchLoadingScreen();
 
@@ -104,7 +106,6 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     loadResources();
     buildWorld();
     addLocalPlayers();
-
 
     registerWindow(
         [&]()
@@ -258,6 +259,9 @@ void DebugState::buildWorld()
     bounds.height += 200.f;
     m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
 
+    //load map
+    m_mapParser.load("assets/maps/AceOfSpace.tmx");
+
     //asteroids
     temp = m_resources.load<sf::Texture>("assets/images/temp02.png");
 
@@ -284,6 +288,7 @@ void DebugState::buildWorld()
         entity.getComponent<Asteroid>().setRadius(radius * scale);
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
     }
 
 }
@@ -291,16 +296,17 @@ void DebugState::buildWorld()
 void DebugState::addLocalPlayers()
 {
     auto tempID = m_resources.load<sf::Texture>("dummy resource");
-    sf::FloatRect tempRect(0.f, 0.f, 135.f, 77.f);
 
     auto view = getContext().defaultView;
 
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().setOrigin(tempRect.width * Vehicle::centreOffset, tempRect.height / 2.f);
-    entity.addComponent<Vehicle>();
+    entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * Vehicle::centreOffset, GameConst::CarSize.height / 2.f);
+    entity.addComponent<Vehicle>().setCollisionPoints(GameConst::CarSize);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(tempRect);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(GameConst::CarSize);
     entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
 
     //update view as appropriate

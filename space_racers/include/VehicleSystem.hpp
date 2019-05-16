@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/System.hpp>
 
 #include <array>
+#include <set>
 
 struct Input final
 {
@@ -37,6 +38,16 @@ struct Vehicle final
     History history;
     std::size_t currentInput = 0;
     std::size_t lastUpdatedInput = 0;
+
+    std::array<sf::Vector2f, 4u> collisionPoints;
+    void setCollisionPoints(sf::FloatRect bounds)
+    {
+        //start at the front as these are more likely to collide
+        collisionPoints[0] = { bounds.width / 2.f, -bounds.height / 2.f };
+        collisionPoints[1] = { bounds.width / 2.f, bounds.height / 2.f };
+        collisionPoints[2] = { -bounds.width / 2.f, bounds.height / 2.f };
+        collisionPoints[3] = { -bounds.width / 2.f, -bounds.height / 2.f };
+    }
 
     sf::Vector2f velocity;
     float anglularVelocity = 0.f; //rads
@@ -82,8 +93,12 @@ public:
 
 private:
 
+    std::set<std::pair<xy::Entity, xy::Entity>> m_collisions;
+
     void processInput(xy::Entity);
     void applyInput(xy::Entity, float);
 
     float getDelta(const History&, std::size_t);
+
+    void doCollision(xy::Entity);
 };

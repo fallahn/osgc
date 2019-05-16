@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "AsteroidSystem.hpp"
+#include "CollisionObject.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
@@ -88,7 +89,7 @@ void AsteroidSystem::process(float dt)
         auto aabb = entity.getComponent<xy::BroadphaseComponent>().getArea();
         aabb = tx.getTransform().transformRect(aabb);
 
-        auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea);
+        auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, CollisionFlags::Asteroid);
         for (auto other : nearby)
         {
             if (other != entity)

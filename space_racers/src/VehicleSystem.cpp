@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#define FAST_SIN
+#define FAST_SIN 1
 #ifdef FAST_SIN
 #include "FastTrig.hpp"
 #endif //FAST_SIN
@@ -24,10 +24,14 @@ Copyright 2019 Matt Marchant
 #include "VehicleSystem.hpp"
 #include "InputBinding.hpp"
 #include "ServerPackets.hpp"
+#include "CollisionObject.hpp"
 
 #include <xyginext/core/App.hpp>
+#include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
-#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+
 #include <xyginext/util/Const.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -39,6 +43,7 @@ VehicleSystem::VehicleSystem(xy::MessageBus& mb)
 {
     requireComponent<Vehicle>();
     requireComponent<xy::Transform>();
+    requireComponent<xy::BroadphaseComponent>();
 
 #ifdef FAST_SIN
     ft::init();
@@ -63,7 +68,7 @@ void VehicleSystem::process(float)
             auto delta = getDelta(vehicle.history, vehicle.lastUpdatedInput);
             applyInput(entity, delta);
 
-            //TODO collision
+            doCollision(entity);
 
             vehicle.lastUpdatedInput = (vehicle.lastUpdatedInput + 1) % vehicle.history.size();
         }
@@ -97,6 +102,8 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
         {
             float delta = getDelta(vehicle.history, idx);
             applyInput(entity, delta);            
+
+            doCollision(entity);
 
             idx = (idx + 1) % vehicle.history.size();
         }
@@ -164,7 +171,7 @@ float VehicleSystem::getDelta(const History& history, std::size_t idx)
 {
     auto prevInput = (idx + history.size() - 1) % history.size();
 
-    //skip any inputs in the wrong order
+    //skip any inputs in the wrong order - actually enet is supposed to guarantee this for us?
     /*while (history[prevInput].timestamp > history[idx].timestamp)
     {
         prevInput = (prevInput + history.size() - 1) % history.size();
@@ -173,4 +180,53 @@ float VehicleSystem::getDelta(const History& history, std::size_t idx)
     auto delta = history[idx].timestamp - history[prevInput].timestamp;
 
     return static_cast<float>(delta) / 1000000.f;
+}
+
+void VehicleSystem::doCollision(xy::Entity entity)
+{
+    m_collisions.clear();
+
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto& vehicle = entity.getComponent<Vehicle>();
+
+    //broad phase
+    auto queryArea = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionFlags::Static);
+
+    for (auto other : nearby)
+    {
+        if (other != entity)
+        {
+            auto otherBounds = other.getComponent<xy::Transform>().getTransform().transformRect(other.getComponent<xy::BroadphaseComponent>().getArea());
+            if (otherBounds.intersects(queryArea))
+            {
+                m_collisions.insert(std::minmax(other, entity));
+            }
+        }
+    }
+
+    DPRINT("nearby", std::to_string(nearby.size()));
+
+    //narrow phase
+    for (auto [first, second] : m_collisions)
+    {
+        //need to know which is the object
+        xy::Entity object = (first == entity) ? second : first;
+
+        for (auto p : vehicle.collisionPoints)
+        {
+            auto segment = std::make_pair(tx.getPosition(), tx.getTransform().transformPoint(p));
+            const auto& objectSegs = object.getComponent<CollisionObject>().segments;
+
+            for (const auto& segmentTwo : objectSegs)
+            {
+                if (auto result = intersects(segment, segmentTwo); result)
+                {
+                    //tx.move(result->normal * result->penetration);
+                    DPRINT("penetration", std::to_string(result->penetration));
+                    break; //we're nested here, how far do we break out? should we return instead?
+                }
+            }
+        }
+    }
 }

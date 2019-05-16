@@ -4,6 +4,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ClientPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CircularBuffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CollisionObject.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DebugState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp
@@ -13,6 +14,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NetActor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NetConsts.hpp

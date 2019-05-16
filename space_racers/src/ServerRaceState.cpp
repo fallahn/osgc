@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include "ActorIDs.hpp"
 #include "NetActor.hpp"
 #include "AsteroidSystem.hpp"
+#include "CollisionObject.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -183,6 +184,7 @@ bool RaceState::loadMap()
         entity.getComponent<Asteroid>().setRadius(radius * scale);
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
         entity.addComponent<NetActor>().actorID = ActorID::Roid;
         entity.getComponent<NetActor>().serverID = entity.getIndex();
 
