@@ -24,6 +24,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerStates.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ShapeUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp

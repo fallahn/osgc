@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/network/NetData.hpp>
 
+#include <SFML/System/Sleep.hpp>
+
 #include <iostream>
 
 using namespace sv;
@@ -79,6 +81,11 @@ void Server::threadFunc()
     m_updateClock.restart();
     m_updateAccumulator = sf::Time::Zero;
 
+    //use this to save a bit of processing on the server thread
+    //when no updates have been performed
+    sf::Clock sleepClock;
+    std::int32_t updateCount = 0;
+
     while (m_running)
     {
         xy::NetEvent evt;
@@ -111,6 +118,8 @@ void Server::threadFunc()
             //do net update
             m_activeState->netUpdate(NetTime.asSeconds());
             m_netAccumulator -= NetTime;
+
+            updateCount++;
         }
 
         std::int32_t stateResult = m_activeState->getID();
@@ -125,12 +134,22 @@ void Server::threadFunc()
             //do logic update
             stateResult = m_activeState->logicUpdate(UpdateTime.asSeconds());
             m_updateAccumulator -= UpdateTime;
+
+            updateCount++;
         }
 
         if (stateResult != m_activeState->getID())
         {
             m_activeState = m_stateFactory[stateResult]();
+            updateCount++;
         }
+
+        //sleep the thread to save some CPU
+        if (updateCount == 0)
+        {
+            sf::sleep((UpdateTime - m_updateAccumulator) / 2.f);
+        }
+        updateCount = 0;
     }
 
     //tidy up
