@@ -32,6 +32,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
+#include  <xyginext/ecs/components/Sprite.hpp> //REMOVE
+
 #include <xyginext/util/Const.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -188,6 +190,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
 
     auto& tx = entity.getComponent<xy::Transform>();
     auto& vehicle = entity.getComponent<Vehicle>();
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
 
     //broad phase
     auto queryArea = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
@@ -215,7 +218,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
 
         for (auto p : vehicle.collisionPoints)
         {
-            auto segment = std::make_pair(tx.getPosition(), tx.getTransform().transformPoint(p));
+            auto segment = std::make_pair(tx.getPosition(), tx.getTransform().transformPoint(p + tx.getOrigin()));
             const auto& objectSegs = object.getComponent<CollisionObject>().segments;
 
             for (const auto& segmentTwo : objectSegs)
@@ -224,6 +227,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 {
                     //tx.move(result->normal * result->penetration);
                     DPRINT("penetration", std::to_string(result->penetration));
+                    entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
                     break; //we're nested here, how far do we break out? should we return instead?
                 }
             }

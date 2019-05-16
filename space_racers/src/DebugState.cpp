@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "AsteroidSystem.hpp"
 #include "CollisionObject.hpp"
+#include "ShapeUtils.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -308,6 +309,17 @@ void DebugState::addLocalPlayers()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(GameConst::CarSize);
     entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
+
+    //collision debug
+    const auto& pArray = entity.getComponent<Vehicle>().collisionPoints;
+    std::vector<sf::Vector2f> points(pArray.begin(), pArray.end());
+    points.push_back(pArray[0]);
+    auto cEnt = m_gameScene.createEntity();
+    cEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    Shape::setPolyLine(cEnt.addComponent<xy::Drawable>(), points);
+    cEnt.getComponent<xy::Drawable>().setDepth(100);
+    cEnt.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
 
     //update view as appropriate
     auto camEnt = m_gameScene.createEntity();

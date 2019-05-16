@@ -43,6 +43,12 @@ MapParser::MapParser(xy::Scene& scene)
 //public
 bool MapParser::load(const std::string& path)
 {
+    //clockwise if > 0
+    auto getWinding = [](tmx::Vector2f p1, tmx::Vector2f p2, tmx::Vector2f p3)->float
+    {
+        return p1.x* p2.y + p2.x * p3.y + p3.x * p1.y - p1.y * p2.x - p2.y * p3.x - p3.y * p1.x;
+    };
+    
     auto createObj = [&](const tmx::Object& obj, CollisionObject::Type type)->xy::Entity
     {
         sf::FloatRect aabb;
@@ -67,8 +73,8 @@ bool MapParser::load(const std::string& path)
 
             aabb.left = xExtremes.first->x;
             aabb.top = yExtremes.first->y;
-            aabb.width = xExtremes.second->x;
-            aabb.height = yExtremes.second->y;
+            aabb.width = xExtremes.second->x - aabb.left;
+            aabb.height = yExtremes.second->y - aabb.top;
         }
         else
         {
@@ -94,13 +100,27 @@ bool MapParser::load(const std::string& path)
 
         if (points.size() > 1)
         {
+            bool clockwise = true;
+            if (points.size() > 2)
+            {
+                clockwise = (getWinding(points[0], points[1], points[2]) > 0);
+            }
+
             for (auto i = 0u; i < points.size() - 1; ++i)
             {
                 //these are world space
                 sf::Vector2f a(points[i].x + pos.x, points[i].y + pos.y);
                 sf::Vector2f b(points[i + 1].x + pos.x, points[i + 1].y + pos.y);
 
-                segments.emplace_back(std::make_pair(a, b));
+                if (clockwise)
+                {
+                    segments.emplace_back(std::make_pair(a, b));
+                }
+                else
+                {
+                    segments.emplace_back(std::make_pair(b, a));
+                    std::cout << "reversed winding\n";
+                }
             }
         }
 #ifdef DRAW_DEBUG

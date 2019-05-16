@@ -39,7 +39,7 @@ struct Vehicle final
     std::size_t currentInput = 0;
     std::size_t lastUpdatedInput = 0;
 
-    std::array<sf::Vector2f, 4u> collisionPoints;
+    std::array<sf::Vector2f, 4u> collisionPoints = {};
     void setCollisionPoints(sf::FloatRect bounds)
     {
         //start at the front as these are more likely to collide
