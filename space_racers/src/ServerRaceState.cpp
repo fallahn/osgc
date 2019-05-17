@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include "NetActor.hpp"
 #include "AsteroidSystem.hpp"
 #include "CollisionObject.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -43,7 +44,8 @@ using namespace sv;
 RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
     m_messageBus    (mb),
-    m_scene         (mb)
+    m_scene         (mb),
+    m_mapParser     (m_scene)
 {
     initScene();
 
@@ -153,7 +155,11 @@ void RaceState::initScene()
 
 bool RaceState::loadMap()
 {
-    //TODO load collision data from map
+    //load collision data from map
+    if (!m_mapParser.load("assets/maps/AceOfSpace.tmx"))
+    {
+        return false;
+    }
 
     sf::FloatRect bounds(0.f, 0.f, 5120.f, 4096.f); //TODO get this from map data
     bounds.left -= 100.f;
@@ -206,8 +212,11 @@ bool RaceState::createPlayers()
         {
             //create vehicle entity
             auto entity = m_scene.createEntity();
-            entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+            entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize * 0.4f);
             entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.vehicleIDs[i]);
+
+            entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+            entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
 
             switch (entity.getComponent<Vehicle>().type)
             {
@@ -215,17 +224,26 @@ bool RaceState::createPlayers()
             case Vehicle::Car:
                 entity.getComponent<Vehicle>().settings = Definition::car;
                 entity.addComponent<NetActor>().actorID = ActorID::Car;
-                //TODO collision bounds
+                entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+                entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);                
                 break;
             case Vehicle::Bike:
                 entity.getComponent<Vehicle>().settings = Definition::bike;
                 entity.addComponent<NetActor>().actorID = ActorID::Bike;
+                entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
+                entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
                 break;
             case Vehicle::Ship:
                 entity.getComponent<Vehicle>().settings = Definition::ship;
                 entity.addComponent<NetActor>().actorID = ActorID::Ship;
+                entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+                entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
                 break;
             }
+
+            auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+            entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
+
             entity.getComponent<NetActor>().colourID = i;
             entity.getComponent<NetActor>().serverID = entity.getIndex();
 
@@ -239,8 +257,6 @@ bool RaceState::createPlayers()
             //TODO handle this
         }
     }
-
-    //TODO create asteroids
 
     return true;
 }

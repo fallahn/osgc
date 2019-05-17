@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "ServerStates.hpp"
+#include "MapParser.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/network/NetData.hpp>
@@ -50,6 +51,8 @@ namespace sv
         SharedData& m_sharedData;
         xy::MessageBus& m_messageBus;
         xy::Scene m_scene;
+
+        MapParser m_mapParser;
 
         std::unordered_map<std::uint64_t, ClientConnection> m_players;
 

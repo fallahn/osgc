@@ -37,7 +37,8 @@ InputParser::InputParser(const InputBinding& binding, xy::NetClient* netClient)
     m_netClient             (netClient),
     m_steeringMultiplier    (1.f),
     m_accelerationMultiplier(1.f),
-    m_currentInput          (0)
+    m_currentInput          (0),
+    m_timeAccumulator       (0)
 {
 
 }

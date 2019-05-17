@@ -126,7 +126,7 @@ void VehicleSystem::processInput(xy::Entity entity)
 
     if (input.flags & InputFlag::Reverse)
     {
-        acceleration -= vehicle.settings.acceleration * 0.5f;
+        acceleration -= vehicle.settings.acceleration * 0.3f;
     }
 
     //rotation

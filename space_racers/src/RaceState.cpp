@@ -34,11 +34,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 namespace
 {
@@ -49,6 +51,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
     m_gameScene         (ctx.appInstance.getMessageBus()),
+    m_mapParser         (m_gameScene),
     m_playerInput       (sd.inputBindings[0], sd.netClient.get())
 {
     launchLoadingScreen();
@@ -105,6 +108,7 @@ void RaceState::initScene()
 
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<InterpolationSystem>(mb);
+    m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
@@ -119,6 +123,8 @@ void RaceState::loadResources()
 
 void RaceState::buildWorld()
 {
+    m_mapParser.load("assets/maps/AceOfSpace.tmx");
+
     auto tempID = m_resources.load<sf::Texture>("assets/images/temp01.png");
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
@@ -173,23 +179,32 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
 
+    entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+    entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+
     switch (entity.getComponent<Vehicle>().type)
     {
     default:
     case Vehicle::Car:
         entity.getComponent<Vehicle>().settings = Definition::car;
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize); //TODO replace this with collision
+        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize); //TODO remove this
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
         break;
     case Vehicle::Bike:
         entity.getComponent<Vehicle>().settings = Definition::bike;
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
         break;
     case Vehicle::Ship:
         entity.getComponent<Vehicle>().settings = Definition::ship;
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
         break;
     }
-    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
 
     m_playerInput.setPlayerEntity(entity);
@@ -206,11 +221,11 @@ void RaceState::spawnVehicle(const VehicleData& data)
     m_gameScene.setActiveCamera(camEnt);
 
 #ifdef XY_DEBUG
-    debugEnt = m_gameScene.createEntity();
-    debugEnt.addComponent<xy::Transform>();
+    /*debugEnt = m_gameScene.createEntity();
+    debugEnt.addComponent<xy::Transform>().setOrigin(10.f, 10.f);
     debugEnt.addComponent<xy::Drawable>().setDepth(100);
     debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01])).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
-    debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+    debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);*/
 #endif //XY_DEBUG
 
     //count spawned vehicles and tell server when all are spawned
