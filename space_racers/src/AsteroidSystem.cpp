@@ -108,7 +108,7 @@ void AsteroidSystem::process(float dt)
     //collision narrow phase
     for (auto& [a, b] : m_collisionPairs)
     {
-        //copy these because a and be are const...
+        //copy these because a and b are const...
         auto entA = a;
         auto entB = b;
 

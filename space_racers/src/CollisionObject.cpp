@@ -141,5 +141,15 @@ std::optional<Manifold> intersects(xy::Entity a, xy::Entity b)
         return std::nullopt;
     }
 
-    return (manA.penetration > manB.penetration) ? std::optional<Manifold>(manA) : std::optional<Manifold>(manB);
+    if (manA.penetration > manB.penetration)
+    {
+        return manA;
+    }
+    else
+    {
+        //this makes sure the normal is always the 
+        //same direction relative to entity a
+        manB.normal *= -1.f;
+        return manB;
+    }
 }

@@ -18,10 +18,12 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "CollisionObject.hpp"
+
 #include <xyginext/ecs/System.hpp>
 
 #include <array>
-#include <set>
+#include <bitset>
 
 struct Input final
 {
@@ -65,6 +67,8 @@ struct Vehicle final
     {
         Car, Bike, Ship
     }type = Car;
+
+    std::bitset<CollisionObject::Count> activeCollisions;
 };
 
 struct ClientUpdate;
@@ -79,12 +83,11 @@ public:
 
 private:
 
-    std::set<std::pair<xy::Entity, xy::Entity>> m_collisions;
-
     void processInput(xy::Entity);
     void applyInput(xy::Entity, float);
 
     float getDelta(const History&, std::size_t);
 
     void doCollision(xy::Entity);
+    void resolveCollision(xy::Entity, xy::Entity, Manifold);
 };

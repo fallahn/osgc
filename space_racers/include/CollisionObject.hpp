@@ -50,7 +50,9 @@ struct CollisionObject final
 {
     enum Type
     {
-        Fence, Jump, Collision, KillZone, Space, Waypoint, Vehicle
+        Fence, Jump, Collision, KillZone, Space, Waypoint, Vehicle,
+
+        Count
     }type = Collision;
 
     //we'll do all these in local space for now, but a potential

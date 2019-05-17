@@ -24,7 +24,6 @@ Copyright 2019 Matt Marchant
 #include "VehicleSystem.hpp"
 #include "InputBinding.hpp"
 #include "ServerPackets.hpp"
-#include "CollisionObject.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -186,11 +185,9 @@ float VehicleSystem::getDelta(const History& history, std::size_t idx)
 
 void VehicleSystem::doCollision(xy::Entity entity)
 {
-    m_collisions.clear();
+    entity.getComponent<Vehicle>().activeCollisions.reset();
 
     auto& tx = entity.getComponent<xy::Transform>();
-    auto& vehicle = entity.getComponent<Vehicle>();
-    entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
 
     //broad phase
     auto queryArea = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
@@ -203,17 +200,57 @@ void VehicleSystem::doCollision(xy::Entity entity)
             auto otherBounds = other.getComponent<xy::Transform>().getTransform().transformRect(other.getComponent<xy::BroadphaseComponent>().getArea());
             if (otherBounds.intersects(queryArea))
             {
-                m_collisions.insert(std::minmax(other, entity));
+                //we're only doing this on the current vehicle, so let's narrow phase right away!
+                if (auto manifold = intersects(entity, other); manifold)
+                {
+                    resolveCollision(entity, other, *manifold);
+                }
             }
         }
     }
+}
 
-    //narrow phase
-    for (auto [first, second] : m_collisions)
+void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifold manifold)
+{
+    auto& vehicle = entity.getComponent<Vehicle>();
+
+    const auto& otherCollision = other.getComponent<CollisionObject>();
+    switch (otherCollision.type)
     {
-        if (intersects(first, second))
-        {
-            entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
-        }
+    default: break;
+    case CollisionObject::Collision:
+    {
+        auto& tx = entity.getComponent<xy::Transform>();
+        tx.move(manifold.penetration * manifold.normal);       
+        vehicle.velocity = xy::Util::Vector::reflect(vehicle.velocity, manifold.normal) * 0.9f;
     }
+        break;
+    case CollisionObject::Vehicle:
+        //TODO separate, then use the dot product of the difference between vehicle
+        //positions and current velocity to determine if the other vehicle is ahead
+        //dp > 0 means we are behind and should lose some velocity, else we were
+        //hit from behind and should gain some velocity. Amount gained is proportional
+        //to the dp/len of position difference * other vehicle velocity (or so)
+        break;
+    case CollisionObject::Fence:
+        //electric fence, assplode.
+        break;
+    case CollisionObject::Jump:
+        //reduce drag - TODO figure out how we stop colliding?
+        //could use some sort of drag multiplier that reduces over time
+        break;
+    case CollisionObject::Space:
+        //faaaaalllllllll!!!
+        break;
+    case CollisionObject::KillZone:
+        //probably the same as fence. Might raise a different message though.
+        break;
+    case CollisionObject::Waypoint:
+        //TBD
+        break;
+    }
+
+    //mark this type of collision active
+    vehicle.activeCollisions.set(otherCollision.type);
+    
 }

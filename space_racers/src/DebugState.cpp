@@ -29,12 +29,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/util/Random.hpp>
@@ -231,6 +233,7 @@ void DebugState::initScene()
 
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<AsteroidSystem>(mb);
+    m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
@@ -311,6 +314,18 @@ void DebugState::addLocalPlayers()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(GameConst::CarSize);
     entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
+
+    //callback to set sprite colour on collision
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float)
+    {
+        e.getComponent<xy::Sprite>().setColour(sf::Color::White);
+        if (e.getComponent<Vehicle>().activeCollisions.any())
+        {
+            e.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+        }
+    };
 
     //collision debug
     auto cEnt = m_gameScene.createEntity();
