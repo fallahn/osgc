@@ -208,29 +208,12 @@ void VehicleSystem::doCollision(xy::Entity entity)
         }
     }
 
-    DPRINT("nearby", std::to_string(nearby.size()));
-
     //narrow phase
     for (auto [first, second] : m_collisions)
     {
-        //need to know which is the object
-        xy::Entity object = (first == entity) ? second : first;
-
-        for (auto p : vehicle.collisionPoints)
+        if (intersects(first, second))
         {
-            auto segment = std::make_pair(tx.getPosition(), tx.getTransform().transformPoint(p + tx.getOrigin()));
-            const auto& objectSegs = object.getComponent<CollisionObject>().segments;
-
-            for (const auto& segmentTwo : objectSegs)
-            {
-                if (auto result = intersects(segment, segmentTwo); result)
-                {
-                    //tx.move(result->normal * result->penetration);
-                    DPRINT("penetration", std::to_string(result->penetration));
-                    entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
-                    break; //we're nested here, how far do we break out? should we return instead?
-                }
-            }
+            entity.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
         }
     }
 }

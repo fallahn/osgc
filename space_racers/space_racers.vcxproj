@@ -179,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AsteroidSystem.cpp" />
+    <ClCompile Include="src\CollisionObject.cpp" />
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\InputParser.cpp" />

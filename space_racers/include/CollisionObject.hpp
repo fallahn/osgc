@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/ecs/Entity.hpp>
 #include <xyginext/util/Vector.hpp>
 
 #include <SFML/System/Vector2.hpp>
@@ -25,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include <utility>
 #include <vector>
 #include <optional>
+#include <limits>
 
 using Segment = std::pair<sf::Vector2f, sf::Vector2f>;
 
@@ -38,6 +40,12 @@ namespace CollisionFlags
     };
 }
 
+struct Manifold final
+{
+    sf::Vector2f normal;
+    float penetration = -std::numeric_limits<float>::max();
+};
+
 struct CollisionObject final
 {
     enum Type
@@ -45,14 +53,22 @@ struct CollisionObject final
         Fence, Jump, Collision, KillZone, Space, Waypoint, Vehicle
     }type = Collision;
 
-    std::vector<Segment> segments; //in world space
+    //we'll do all these in local space for now, but a potential
+    //optimisation is to move static objects to world space so
+    //that collision doesn't have to needlessly transform the
+    //points every test...
+    std::vector<sf::Vector2f> vertices; //clockwise winding
+    std::vector<sf::Vector2f> normals; //direction of the face created by the current vert and next clockwise vert
+
+    void applyVertices(const std::vector<sf::Vector2f>& points);
 };
 
-struct Manifold final
-{
-    sf::Vector2f normal;
-    float penetration = 0.f;
-};
+// SAT test functions from http://blog.marcher.co/sat1/ 
+sf::Vector2f getSupportPoint(xy::Entity, sf::Vector2f);
+
+Manifold minimumPenetration(xy::Entity, xy::Entity);
+
+std::optional<Manifold> intersects(xy::Entity, xy::Entity);
 
 //from Andre LaMothe's black art of game programming
 static inline std::optional<Manifold> intersects(const Segment& segOne, const Segment& segTwo)

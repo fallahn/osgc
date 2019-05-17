@@ -39,16 +39,6 @@ struct Vehicle final
     std::size_t currentInput = 0;
     std::size_t lastUpdatedInput = 0;
 
-    std::array<sf::Vector2f, 4u> collisionPoints = {};
-    void setCollisionPoints(sf::FloatRect bounds)
-    {
-        //start at the front as these are more likely to collide
-        collisionPoints[0] = { bounds.width / 2.f, -bounds.height / 2.f };
-        collisionPoints[1] = { bounds.width / 2.f, bounds.height / 2.f };
-        collisionPoints[2] = { -bounds.width / 2.f, bounds.height / 2.f };
-        collisionPoints[3] = { -bounds.width / 2.f, -bounds.height / 2.f };
-    }
-
     sf::Vector2f velocity;
     float anglularVelocity = 0.f; //rads
 
@@ -75,10 +65,6 @@ struct Vehicle final
     {
         Car, Bike, Ship
     }type = Car;
-
-    //how near to the front of the vehicle the pivot point is
-    //where 0 is at the back, 0.5 in the dead centre and 1 at the front
-    static constexpr float centreOffset = 0.45f; 
 };
 
 struct ClientUpdate;

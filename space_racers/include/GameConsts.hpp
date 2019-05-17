@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Color.hpp>
 
 #include <cstdint>
+#include <vector>
 
 namespace GameConst
 {
@@ -31,6 +32,36 @@ namespace GameConst
     static const sf::FloatRect CarSize(0.f, 0.f, 135.f, 77.f);
     static const sf::FloatRect BikeSize(0.f, 0.f, 132.f, 40.f);
     static const sf::FloatRect ShipSize(0.f, 0.f, 132.f, 120.f);
+
+    //how near to the front of the vehicle the pivot point is
+    //where 0 is at the back, 0.5 in the dead centre and 1 at the front
+    static const float VehicleCentreOffset = 0.45f;
+
+    static const std::vector<sf::Vector2f> CarPoints =
+    {
+        sf::Vector2f(),
+        sf::Vector2f(CarSize.width, 0.f),
+        sf::Vector2f(CarSize.width, CarSize.height),
+        sf::Vector2f(0.f, CarSize.height)
+    };
+
+    static const std::vector<sf::Vector2f> BikePoints =
+    {
+        sf::Vector2f(),
+        sf::Vector2f(BikeSize.width, 0.f),
+        sf::Vector2f(BikeSize.width, BikeSize.height),
+        sf::Vector2f(0.f, BikeSize.height)
+    };
+
+    static const std::vector<sf::Vector2f> ShipPoints =
+    {
+        sf::Vector2f(),
+        sf::Vector2f(ShipSize.width, 0.f),
+        sf::Vector2f(ShipSize.width, ShipSize.height),
+        sf::Vector2f(0.f, ShipSize.height)
+    };
+
+
 
     enum Colour
     {

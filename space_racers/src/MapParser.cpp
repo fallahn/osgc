@@ -42,13 +42,7 @@ MapParser::MapParser(xy::Scene& scene)
 
 //public
 bool MapParser::load(const std::string& path)
-{
-    //clockwise if > 0
-    auto getWinding = [](tmx::Vector2f p1, tmx::Vector2f p2, tmx::Vector2f p3)->float
-    {
-        return p1.x* p2.y + p2.x * p3.y + p3.x * p1.y - p1.y * p2.x - p2.y * p3.x - p3.y * p1.x;
-    };
-    
+{   
     auto createObj = [&](const tmx::Object& obj, CollisionObject::Type type)->xy::Entity
     {
         sf::FloatRect aabb;
@@ -95,44 +89,37 @@ bool MapParser::load(const std::string& path)
         entity.addComponent<xy::Transform>().setPosition(pos.x, pos.y);
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Static);
-        auto& segments = entity.addComponent<CollisionObject>().segments;
-        entity.getComponent<CollisionObject>().type = type;
+        auto& collisionObj = entity.addComponent<CollisionObject>();
+        collisionObj.type = type;
 
-        if (points.size() > 1)
+        std::vector<sf::Vector2f> sfPoints;
+        for (auto p : points)
         {
-            bool clockwise = true;
-            if (points.size() > 2)
-            {
-                clockwise = (getWinding(points[0], points[1], points[2]) > 0);
-            }
-
-            for (auto i = 0u; i < points.size() - 1; ++i)
-            {
-                //these are world space
-                sf::Vector2f a(points[i].x + pos.x, points[i].y + pos.y);
-                sf::Vector2f b(points[i + 1].x + pos.x, points[i + 1].y + pos.y);
-
-                if (clockwise)
-                {
-                    segments.emplace_back(std::make_pair(a, b));
-                }
-                else
-                {
-                    segments.emplace_back(std::make_pair(b, a));
-                    std::cout << "reversed winding\n";
-                }
-            }
+            sfPoints.emplace_back(p.x, p.y);
         }
+        collisionObj.applyVertices(sfPoints);
+
 #ifdef DRAW_DEBUG
         if (!points.empty())
         {
+            //draw edges
             auto& verts = entity.addComponent<xy::Drawable>().getVertices();
             
-            for (auto p : points)
+            for (auto p : collisionObj.vertices)
             {
-                verts.push_back(sf::Vertex({ p.x, p.y }, MapConst::colours[type]));
+                verts.push_back(sf::Vertex(p, MapConst::colours[type]));
             }
-            verts.push_back(sf::Vertex({ points[0].x, points[0].y }, MapConst::colours[type]));
+            verts.push_back(sf::Vertex(collisionObj.vertices.front(), MapConst::colours[type]));
+            verts.push_back(sf::Vertex(collisionObj.vertices.front(), sf::Color::Transparent));
+
+            //draw the normals
+            for (auto i = 0u; i < collisionObj.vertices.size(); ++i)
+            {
+                verts.emplace_back(collisionObj.vertices[i], sf::Color::Transparent);
+                verts.emplace_back(collisionObj.vertices[i], sf::Color::Red);
+                verts.emplace_back(collisionObj.vertices[i] + (collisionObj.normals[i] * 30.f), sf::Color::Red);
+                verts.emplace_back(collisionObj.vertices[i] + (collisionObj.normals[i] * 30.f), sf::Color::Transparent);
+            }
 
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Drawable>().setDepth(100);

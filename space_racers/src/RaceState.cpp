@@ -190,7 +190,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
         break;
     }
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width * Vehicle::centreOffset, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
 
     m_playerInput.setPlayerEntity(entity);
 
@@ -239,7 +239,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize);
-        entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * Vehicle::centreOffset, GameConst::CarSize.height / 2.f);
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     }
         break;
     case ActorID::Bike:
@@ -247,7 +247,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
-        entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * Vehicle::centreOffset, GameConst::BikeSize.height / 2.f);
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * GameConst::VehicleCentreOffset, GameConst::BikeSize.height / 2.f);
     }
         break;
     case ActorID::Ship:
@@ -255,7 +255,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
-        entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * Vehicle::centreOffset, GameConst::ShipSize.height / 2.f);
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * GameConst::VehicleCentreOffset, GameConst::ShipSize.height / 2.f);
     }
         break;
     case ActorID::Roid:

@@ -131,7 +131,7 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 cmd.action = [](xy::Entity e, float)
                 {
                     e.getComponent<xy::Sprite>().setTextureRect(sizes[vehicleIndex]);
-                    e.getComponent<xy::Transform>().setOrigin(sizes[vehicleIndex].width * Vehicle::centreOffset, sizes[vehicleIndex].height / 2.f);
+                    e.getComponent<xy::Transform>().setOrigin(sizes[vehicleIndex].width * GameConst::VehicleCentreOffset, sizes[vehicleIndex].height / 2.f);
                 };
                 m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
@@ -301,9 +301,11 @@ void DebugState::addLocalPlayers()
     auto view = getContext().defaultView;
 
     auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * Vehicle::centreOffset, GameConst::CarSize.height / 2.f);
-    entity.addComponent<Vehicle>().setCollisionPoints(GameConst::CarSize);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize * 0.4f);
+    entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
+    entity.addComponent<Vehicle>();
+    entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+    entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
     entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
     entity.addComponent<xy::Drawable>();
@@ -311,12 +313,9 @@ void DebugState::addLocalPlayers()
     entity.addComponent<xy::CommandTarget>().ID = vehicleCommandID;
 
     //collision debug
-    const auto& pArray = entity.getComponent<Vehicle>().collisionPoints;
-    std::vector<sf::Vector2f> points(pArray.begin(), pArray.end());
-    points.push_back(pArray[0]);
     auto cEnt = m_gameScene.createEntity();
-    cEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-    Shape::setPolyLine(cEnt.addComponent<xy::Drawable>(), points);
+    cEnt.addComponent<xy::Transform>();
+    Shape::setPolyLine(cEnt.addComponent<xy::Drawable>(), entity.getComponent<CollisionObject>().vertices);
     cEnt.getComponent<xy::Drawable>().setDepth(100);
     cEnt.getComponent<xy::Drawable>().updateLocalBounds();
     entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
