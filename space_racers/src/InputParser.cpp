@@ -64,6 +64,10 @@ void InputParser::handleEvent(const sf::Event& evt)
         {
             m_currentInput |= InputFlag::Brake;
         }
+        else if (evt.key.code == m_inputBinding.keys[InputBinding::Reverse])
+        {
+            m_currentInput |= InputFlag::Reverse;
+        }
     }
     else if (evt.type == sf::Event::KeyReleased)
     {
@@ -83,6 +87,10 @@ void InputParser::handleEvent(const sf::Event& evt)
         {
             m_currentInput &= ~InputFlag::Brake;
         }
+        else if (evt.key.code == m_inputBinding.keys[InputBinding::Reverse])
+        {
+            m_currentInput &= ~InputFlag::Reverse;
+        }
     }
     else if (evt.type == sf::Event::JoystickButtonPressed)
     {
@@ -95,6 +103,10 @@ void InputParser::handleEvent(const sf::Event& evt)
             else if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Brake])
             {
                 m_currentInput |= InputFlag::Brake;
+            }
+            else if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Reverse])
+            {
+                m_currentInput |= InputFlag::Reverse;
             }
         }
     }
@@ -114,6 +126,10 @@ void InputParser::handleEvent(const sf::Event& evt)
             else if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Brake])
             {
                 m_currentInput &= ~InputFlag::Brake;
+            }
+            else if (evt.joystickButton.button == m_inputBinding.buttons[InputBinding::Reverse])
+            {
+                m_currentInput &= ~InputFlag::Reverse;
             }
         }
     }

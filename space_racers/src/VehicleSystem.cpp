@@ -124,6 +124,11 @@ void VehicleSystem::processInput(xy::Entity entity)
         acceleration += vehicle.settings.acceleration * input.accelerationMultiplier;
     }
 
+    if (input.flags & InputFlag::Reverse)
+    {
+        acceleration -= vehicle.settings.acceleration * 0.5f;
+    }
+
     //rotation
     const auto& tx = entity.getComponent<xy::Transform>();
     auto rotation = tx.getRotation() * xy::Util::Const::degToRad;

@@ -29,7 +29,8 @@ namespace InputFlag
         Left = 0x1,
         Right = 0x2,
         Accelerate = 0x4,
-        Brake = 0x8
+        Brake = 0x8,
+        Reverse = 0x10
     };
 }
 
@@ -37,12 +38,12 @@ struct InputBinding final
 {
     enum
     {
-        //accelerate / brake must come first because they also index the joy buttons
-        Accelerate, Brake, Left, Right, Count
+        //accelerate / brake / reverse must come first because they also index the joy buttons
+        Accelerate, Brake, Reverse, Left, Right, Count
     };
 
-    std::array<sf::Keyboard::Key, Count> keys = { sf::Keyboard::W, sf::Keyboard::Space, sf::Keyboard::A, sf::Keyboard::D };
-    std::array<sf::Uint32, 2u> buttons = { 0, 1 };
+    std::array<sf::Keyboard::Key, Count> keys = { sf::Keyboard::W, sf::Keyboard::Space, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D };
+    std::array<sf::Uint32, 3u> buttons = { 0, 1, 2 };
     sf::Uint32 controllerID = 0;
 };
 
