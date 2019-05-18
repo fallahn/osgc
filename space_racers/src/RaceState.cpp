@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include "InterpolationSystem.hpp"
 #include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
+#include "CameraTarget.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -35,12 +36,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 namespace
 {
@@ -109,8 +112,10 @@ void RaceState::initScene()
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<InterpolationSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
+    m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
+    m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
 }
@@ -209,6 +214,21 @@ void RaceState::spawnVehicle(const VehicleData& data)
 
     m_playerInput.setPlayerEntity(entity);
 
+    //temp for collision debugging
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float)
+    {
+        if (e.getComponent<Vehicle>().activeCollisions.any())
+        {
+            e.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
+        }
+        else
+        {
+            e.getComponent<xy::Sprite>().setColour(sf::Color::White);
+        }
+    };
+
     //add a camera
     auto view = getContext().defaultView;
     auto camEnt = m_gameScene.createEntity();
@@ -216,7 +236,8 @@ void RaceState::spawnVehicle(const VehicleData& data)
     camEnt.addComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
     camEnt.getComponent<xy::Camera>().lockRotation(true);
-    entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
+    camEnt.addComponent<CameraTarget>().target = entity;
+    //camEnt.g
 
     m_gameScene.setActiveCamera(camEnt);
 
@@ -279,6 +300,10 @@ void RaceState::spawnActor(const ActorData& data)
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
         entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
+
+        float radius = data.scale * bounds.width;
+        entity.addComponent<CollisionObject>().type = CollisionObject::Type::Roid;
+        entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
     }
         break;
     }

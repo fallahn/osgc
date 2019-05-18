@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="93">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="96">
  <tileset firstgid="1" name="neon" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="neon.png" width="1024" height="640"/>
  </tileset>
@@ -56,7 +56,7 @@
   <object id="21" name="20" x="3474" y="3916" width="588" height="134"/>
   <object id="22" name="21" x="3400" y="4432" width="530" height="514"/>
  </objectgroup>
- <objectgroup color="#000000" id="6" name="Space" locked="1">
+ <objectgroup color="#000000" id="6" name="Space" visible="0" locked="1">
   <object id="23" x="604" y="720">
    <polygon points="0,0 232,-228 988,-236 1212,-12 1216,100 980,352 112,344 8,232"/>
   </object>
@@ -73,12 +73,9 @@
    <polygon points="0,0 864,-8 860,600 1260,1000 2040,1008 2660,1628 4508,1640 4772,1364 4772,697 4655,578 4645,-31 4784,-116 5584,-104 5576,1896 -16,1844"/>
   </object>
  </objectgroup>
- <objectgroup color="#ff0000" id="7" name="KillZone" locked="1">
+ <objectgroup color="#ff0000" id="7" name="KillZone">
   <object id="28" x="816" y="616">
    <polygon points="0,0 -8,344 792,360 784,-24"/>
-  </object>
-  <object id="29" x="2432" y="48">
-   <polygon points="0,0 8,696 600,704 1912,1904 1856,5176 2240,5192 2296,16"/>
   </object>
   <object id="30" x="1296" y="3464">
    <polygon points="0,0 1168,-1200 1768,-1152 1912,760 992,712"/>
@@ -108,6 +105,11 @@
   <object id="39" x="3509" y="2395" width="20" height="69"/>
   <object id="40" x="2783" y="1615">
    <polygon points="0,0 721,724 704,747 -19,16"/>
+  </object>
+  <object id="93" x="2304" y="-96" width="2560" height="864"/>
+  <object id="94" x="4128" y="800" width="672" height="4544"/>
+  <object id="95" x="2720" y="832">
+   <polygon points="0,0 1312,1280 1312,0"/>
   </object>
  </objectgroup>
  <objectgroup color="#ffff00" id="8" name="Collision">

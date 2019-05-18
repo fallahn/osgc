@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Entity.hpp>
 #include <xyginext/util/Vector.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
 
 #include <SFML/System/Vector2.hpp>
 
@@ -36,21 +37,33 @@ namespace CollisionFlags
     {
         Asteroid = 0x1,
         Static = 0x2,
-        Vehicle = 0x4
+        Vehicle = 0x4,
+
+
+        All = Asteroid | Static | Vehicle
     };
 }
 
-struct Manifold final
+static inline std::vector<sf::Vector2f> createCollisionCircle(float radius, sf::Vector2f origin, std::size_t pointCount = 8)
 {
-    sf::Vector2f normal;
-    float penetration = -std::numeric_limits<float>::max();
-};
+    std::vector<sf::Vector2f> retVal;
+    const float step = xy::Util::Const::TAU / static_cast<float>(pointCount);
+
+    for (auto i = 0.f; i < xy::Util::Const::TAU; i += step)
+    {
+        retVal.emplace_back(std::sin(i), std::cos(i));
+        retVal.back() *= radius;
+        retVal.back() += origin;
+    }
+
+    return retVal;
+}
 
 struct CollisionObject final
 {
     enum Type
     {
-        Fence, Jump, Collision, KillZone, Space, Waypoint, Vehicle,
+        Collision, KillZone, Space, Waypoint, Jump, Fence, Vehicle, Roid,
 
         Count
     }type = Collision;
@@ -64,6 +77,39 @@ struct CollisionObject final
 
     void applyVertices(const std::vector<sf::Vector2f>& points);
 };
+
+struct Manifold final
+{
+    sf::Vector2f normal;
+    float penetration = -std::numeric_limits<float>::max();
+};
+
+static inline bool contains(sf::Vector2f point, xy::Entity entity)
+{
+    const auto& tx = entity.getComponent<xy::Transform>().getTransform();
+    const auto& points = entity.getComponent<CollisionObject>().vertices;
+
+    //check if enough poly points
+    if (points.size() < 3) return false;
+
+    //else raycast through points - assuming given point is in world coords
+    std::size_t i = 0;
+    std::size_t j = 0;
+    bool result = false;
+
+    for (i = 0, j = points.size() - 1; i < points.size(); j = i++)
+    {
+        sf::Vector2f pointI = tx.transformPoint(points[i]);
+        sf::Vector2f pointJ = tx.transformPoint(points[j]);
+
+        if (((pointI.y > point.y) != (pointJ.y > point.y))
+            && (point.x < (pointJ.x - pointI.x) * (point.y - pointI.y) / (pointJ.y - pointI.y) + pointI.x))
+        {
+            result = !result;
+        }
+    }
+    return result;
+}
 
 // SAT test functions from http://blog.marcher.co/sat1/ 
 sf::Vector2f getSupportPoint(xy::Entity, sf::Vector2f);

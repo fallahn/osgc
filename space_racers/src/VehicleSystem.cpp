@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "VehicleSystem.hpp"
 #include "InputBinding.hpp"
 #include "ServerPackets.hpp"
+#include "AsteroidSystem.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -82,6 +83,7 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
     auto& vehicle = entity.getComponent<Vehicle>();
     vehicle.velocity = { update.velX, update.velY };
     vehicle.anglularVelocity = update.velRot;
+    vehicle.activeCollisions = update.collisionBits;
 
     auto& tx = entity.getComponent<xy::Transform>();
     tx.setPosition(update.x, update.y);
@@ -190,13 +192,14 @@ float VehicleSystem::getDelta(const History& history, std::size_t idx)
 
 void VehicleSystem::doCollision(xy::Entity entity)
 {
-    entity.getComponent<Vehicle>().activeCollisions.reset();
+    auto& vehicle = entity.getComponent<Vehicle>();
+    vehicle.activeCollisions.reset();
 
     auto& tx = entity.getComponent<xy::Transform>();
 
     //broad phase
     auto queryArea = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionFlags::Static);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionFlags::All);
 
     for (auto other : nearby)
     {
@@ -206,7 +209,14 @@ void VehicleSystem::doCollision(xy::Entity entity)
             if (otherBounds.intersects(queryArea))
             {
                 //we're only doing this on the current vehicle, so let's narrow phase right away!
-                if (auto manifold = intersects(entity, other); manifold)
+                auto type = other.getComponent<CollisionObject>().type;
+                if(type == CollisionObject::Space
+                    && contains(tx.getPosition(), other))
+                {
+                    vehicle.activeCollisions.set(type);
+                }
+
+                else if (auto manifold = intersects(entity, other); manifold)
                 {
                     resolveCollision(entity, other, *manifold);
                 }
@@ -218,6 +228,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
 void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifold manifold)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
+    auto& tx = entity.getComponent<xy::Transform>();
 
     const auto& otherCollision = other.getComponent<CollisionObject>();
     switch (otherCollision.type)
@@ -225,33 +236,48 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     default: break;
     case CollisionObject::Collision:
     {
-        auto& tx = entity.getComponent<xy::Transform>();
-        tx.move(manifold.penetration * manifold.normal);       
+        tx.move(manifold.penetration * manifold.normal);    
         vehicle.velocity = xy::Util::Vector::reflect(vehicle.velocity, manifold.normal) * 0.9f;
     }
         break;
     case CollisionObject::Vehicle:
         //TODO separate, then use the dot product of the difference between vehicle
-        //positions and current velocity to determine if the other vehicle is ahead
+        //velocities to determine if the other vehicle is ahead
         //dp > 0 means we are behind and should lose some velocity, else we were
         //hit from behind and should gain some velocity. Amount gained is proportional
         //to the dp/len of position difference * other vehicle velocity (or so)
-        break;
-    case CollisionObject::Fence:
-        //electric fence, assplode.
+        //TODO this means the client is going to need to know velocities of other
+        //vehicles at the very least
         break;
     case CollisionObject::Jump:
         //reduce drag - TODO figure out how we stop colliding?
         //could use some sort of drag multiplier that reduces over time
         break;
-    case CollisionObject::Space:
-        //faaaaalllllllll!!!
-        break;
     case CollisionObject::KillZone:
-        //probably the same as fence. Might raise a different message though.
+        //clue is in the name
         break;
     case CollisionObject::Waypoint:
         //TBD
+        break;
+    case CollisionObject::Roid:
+    {
+        //TODO this won't work without client side prediction for roids
+        //auto& roid = other.getComponent<Asteroid>();
+        //float direction = xy::Util::Vector::dot(vehicle.velocity, roid.getVelocity());
+
+        //if (direction > 0)
+        //{
+        //    //heading the same way
+        //    vehicle.velocity -= roid.getVelocity() * 0.2f;
+        //}
+        //else
+        //{
+        //    //heading towards
+        //    vehicle.velocity += roid.getVelocity();
+        //}
+                
+        //TODO if roid velocity > certain length kill player
+    }
         break;
     }
 

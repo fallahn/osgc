@@ -144,10 +144,10 @@ void Server::threadFunc()
         }
 
         //sleep the thread to save some CPU
-        if (updateCount == 0)
+        /*if (updateCount == 0)
         {
             sf::sleep((UpdateTime - m_updateAccumulator) / 2.f);
-        }
+        }*/
         updateCount = 0;
     }
 

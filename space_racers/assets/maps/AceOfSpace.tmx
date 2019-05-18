@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="103">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="111">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="diffuse.png" width="1024" height="640"/>
  </tileset>
@@ -32,7 +32,7 @@
    eJztmNsOwiAMhnke9cLz+bB51ht9Pp9WmrBYSclK6dCLfUkTNg79B+sKM+abm6lnwmgDdL3rjrBfLBtmu5G1sSsPrA29+qm1mbO516+noO8ZqL8wx3kEygBo5KwlBXf+6gjNH0ai8SRWJGf3A59acOMOkL4zUqi4y4XGs/pxh1lZWyv44HKOaAvajt69u6KWVA4/8pv7/W/Roaipvyr54YxTKPlqiaeN3zgW1pauzN135qY0H43/ipbGmBweC6VRkvOb3NekziO1r9FGqjGHtooysn1ObRTUt6fJWOCC80m17v5cpeScV0JfCtCouY44PwBbwRhwRuo7g339Hl2H/oFQ4DM4/gblyA+hNabuU7EEz6y91lLw2eoNccobAg==
   </data>
  </layer>
- <objectgroup color="#00aa00" id="5" name="Waypoints" locked="1">
+ <objectgroup color="#00aa00" id="5" name="Waypoints" visible="0" locked="1">
   <object id="1" name="00" x="1668" y="28" width="112" height="584"/>
   <object id="2" name="01" x="2488" y="82" width="640" height="540"/>
   <object id="3" name="02" x="2636" y="762" width="456" height="448"/>
@@ -75,16 +75,7 @@
    <polygon points="0,0 500,-21 502,-702 380,-841 384,-1148 920,-1648 5164,-1644 5436,-1368 5438,-710 5306,-545 5307,-73 5848,-64 5904,-1916 -16,-2040"/>
   </object>
  </objectgroup>
- <objectgroup color="#ff0000" id="7" name="KillZone" locked="1">
-  <object id="30" x="4096" y="756">
-   <polygon points="0,0 24,2128 -516,2668 300,2648 292,-4"/>
-  </object>
-  <object id="31" x="1768" y="1444">
-   <polygon points="12,126 1176,126 1436,-176 1522,-176 1504,1072 932,1644 12,736"/>
-  </object>
-  <object id="32" x="736" y="708">
-   <polygon points="0,0 1648,4 1640,60 193,65 204,1981 980,2676 4,2664"/>
-  </object>
+ <objectgroup color="#ff0000" id="7" name="KillZone">
   <object id="33" x="-296" y="-552">
    <polygon points="0,0 48,416 5760,464 5736,32"/>
   </object>
@@ -103,8 +94,26 @@
   <object id="40" x="84" y="544">
    <polygon points="0,0 461,-467 485,-445 13,19"/>
   </object>
+  <object id="103" x="1728" y="1472">
+   <polygon points="0,0 1536,0 1536,1152 1024,1664 928,1664 0,768"/>
+  </object>
+  <object id="104" x="2976" y="1472">
+   <polygon points="0,0 288,-320 288,0"/>
+  </object>
+  <object id="105" x="3232" y="128">
+   <polygon points="0,0 0,1024 64,1024 32,0"/>
+  </object>
+  <object id="106" x="704" y="704" width="1824" height="32"/>
+  <object id="107" x="704" y="736" width="224" height="1824"/>
+  <object id="108" x="928" y="2560">
+   <polygon points="0,0 864,896 736,1024 -32,1024 -288,800 -288,32 -224,0"/>
+  </object>
+  <object id="109" x="4096" y="768" width="256" height="2624"/>
+  <object id="110" x="3552" y="3392">
+   <polygon points="0,0 544,0 544,-576"/>
+  </object>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision">
+ <objectgroup color="#ffff00" id="8" name="Collision" visible="0">
   <object id="41" x="2561" y="770" width="125" height="125"/>
   <object id="42" x="3203" y="3458" width="124" height="125"/>
   <object id="43" x="2049" y="3458" width="124" height="123"/>
@@ -126,7 +135,7 @@
   <object id="59" x="526" y="10" width="102" height="106"/>
   <object id="60" x="13" y="524" width="105" height="104"/>
  </objectgroup>
- <objectgroup color="#ffffff" id="9" name="Jump" locked="1">
+ <objectgroup color="#ffffff" id="9" name="Jump" visible="0" locked="1">
   <object id="66" x="1676" y="148" width="108" height="360"/>
   <object id="67" x="1936" y="264" width="108" height="112"/>
   <object id="68" x="2696" y="260" width="124" height="124"/>
@@ -161,7 +170,7 @@
   <object id="97" x="272" y="652" width="104" height="112"/>
   <object id="98" x="1416" y="136" width="124" height="112"/>
  </objectgroup>
- <objectgroup color="#ff5500" id="10" name="Fence" locked="1">
+ <objectgroup color="#ff5500" id="10" name="Fence" visible="0" locked="1">
   <object id="99" x="1593" y="2283">
    <polyline points="5,-81 4,-780"/>
   </object>

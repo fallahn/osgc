@@ -294,8 +294,25 @@ void DebugState::buildWorld()
         entity.getComponent<xy::Transform>().setScale(scale, scale);
         entity.getComponent<Asteroid>().setRadius(radius * scale);
 
+        auto collisionVerts = createCollisionCircle(radius * 0.9f, { radius, radius });
+        entity.addComponent<CollisionObject>().type = CollisionObject::Type::Roid;
+        entity.getComponent<CollisionObject>().applyVertices(collisionVerts);
+
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
+
+        auto debugEnt = m_gameScene.createEntity();
+        debugEnt.addComponent<xy::Transform>();
+        auto& verts = debugEnt.addComponent<xy::Drawable>().getVertices();
+        for (auto p : collisionVerts)
+        {
+            verts.emplace_back(p, sf::Color::Red);
+        }
+        verts.emplace_back(collisionVerts.front(), sf::Color::Red);
+        debugEnt.getComponent<xy::Drawable>().updateLocalBounds();
+        debugEnt.getComponent<xy::Drawable>().setDepth(100);
+        debugEnt.getComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
+        entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
     }
 
 }

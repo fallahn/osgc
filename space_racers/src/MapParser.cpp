@@ -34,6 +34,26 @@ Copyright 2019 Matt Marchant
 
 #define DRAW_DEBUG 1
 
+namespace
+{
+    const std::array<std::string, CollisionObject::Type::Count> ObjectLayers =
+    {
+        "collision", "killzone", "space", "waypoints", "jump", "fence", "vehicle", "roid"
+    };
+    
+    const std::array<sf::Color, CollisionObject::Type::Count> colours =
+    {
+        sf::Color::Yellow,
+        sf::Color::Red,
+        sf::Color::White,
+        sf::Color::Magenta,
+        sf::Color::Green,
+        sf::Color::Cyan,
+        sf::Color::Black,
+        sf::Color::Black
+    };
+}
+
 MapParser::MapParser(xy::Scene& scene)
     :m_scene(scene)
 {
@@ -107,9 +127,9 @@ bool MapParser::load(const std::string& path)
             
             for (auto p : collisionObj.vertices)
             {
-                verts.push_back(sf::Vertex(p, MapConst::colours[type]));
+                verts.push_back(sf::Vertex(p, colours[type]));
             }
-            verts.push_back(sf::Vertex(collisionObj.vertices.front(), MapConst::colours[type]));
+            verts.push_back(sf::Vertex(collisionObj.vertices.front(), colours[type]));
             verts.push_back(sf::Vertex(collisionObj.vertices.front(), sf::Color::Transparent));
 
             //draw the normals
@@ -142,33 +162,28 @@ bool MapParser::load(const std::string& path)
             {
                 const auto& objLayer = layer->getLayerAs<tmx::ObjectGroup>();
                 auto name = xy::Util::String::toLower(objLayer.getName());
-                for (auto i = 0; i < MapConst::ObjectLayers.size(); ++i)
+                for (auto i = 0; i < ObjectLayers.size(); ++i)
                 {
                     for (const auto& obj : objLayer.getObjects())
                     {
-                        if (name == MapConst::ObjectLayers[i])
+                        if (name == ObjectLayers[i])
                         {
                             switch (i)
                             {
                             default: break;
-                            case MapConst::Fence:
-                                createObj(obj, CollisionObject::Fence);
+                            case CollisionObject::Fence:
+                                //stash this somewhere so we know we need to draw an electric fence on the client
                                 break;
-                            case MapConst::Jump:
-                                createObj(obj, CollisionObject::Jump);
-                                break;
-                            case MapConst::Collision:
-                                createObj(obj, CollisionObject::Collision);
-                                break;
-                            case MapConst::KillZone:
-                                createObj(obj, CollisionObject::KillZone);
-                                break;
-                            case MapConst::Space:
-                                //createObj(obj, CollisionObject::Space);
-                                break;
-                            case MapConst::WayPoints:
+                            case CollisionObject::Waypoint:
 
                                 break;
+                            case CollisionObject::Jump:
+                            case CollisionObject::Collision:
+                            case CollisionObject::KillZone:
+                            case CollisionObject::Space:
+                                createObj(obj, static_cast<CollisionObject::Type>(i));
+                                break;
+
                             }
                         }
                     }

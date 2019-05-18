@@ -115,6 +115,7 @@ void RaceState::netUpdate(float)
         cu.velY = vehicle.velocity.y;
         cu.velRot = vehicle.anglularVelocity;
         cu.clientTimestamp = vehicle.history[vehicle.lastUpdatedInput].timestamp;
+        cu.collisionBits = vehicle.activeCollisions.to_ulong();
         m_sharedData.netHost.sendPacket(p.second.peer, PacketID::ClientUpdate, cu, xy::NetFlag::Unreliable);
     }
 
@@ -193,6 +194,9 @@ bool RaceState::loadMap()
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
         entity.addComponent<NetActor>().actorID = ActorID::Roid;
         entity.getComponent<NetActor>().serverID = entity.getIndex();
+
+        entity.addComponent<CollisionObject>().type = CollisionObject::Type::Roid;
+        entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
 
         m_sharedData.playerCount++; //this is so the client knows the total actor count and can notify when all have been spawned
     }

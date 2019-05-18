@@ -33,25 +33,6 @@ namespace MapConst
     {
         "neon", "detail", "track", "normal"
     };
-
-    enum
-    {
-        Fence, Jump, Collision, KillZone, Space, WayPoints, Size
-    };
-    static const std::array<std::string, Size> ObjectLayers =
-    {
-        "fence", "jump", "collision", "killzone", "space", "waypoints"
-    };
-
-    static const std::array<sf::Color, Size> colours =
-    {
-        sf::Color::Cyan,
-        sf::Color::Green,
-        sf::Color::Yellow,
-        sf::Color::Red,
-        sf::Color::White,
-        sf::Color::Magenta
-    };
 }
 
 namespace xy

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="98">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="106">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="diffuse.png" width="1024" height="640"/>
  </tileset>
@@ -70,9 +70,6 @@
   <object id="25" x="5408" y="-248">
    <polygon points="0,0 -144,4544 80,4552 224,-8"/>
   </object>
-  <object id="26" x="3456" y="1152">
-   <polygon points="0,0 -16,1704 -2432,1696 -2448,-256 -2688,-256 -2640,2120 696,2088 808,-56"/>
-  </object>
   <object id="27" x="1888" y="224">
    <polygon points="0,0 32,1664 512,1688 592,-16"/>
   </object>
@@ -97,12 +94,6 @@
   <object id="91" x="2560" y="640">
    <polygon points="0,0 0,-416 480,-416"/>
   </object>
-  <object id="92" x="3104" y="32">
-   <polygon points="0,0 -32,128 1472,160 1952,640 1952,0"/>
-  </object>
-  <object id="93" x="32" y="32">
-   <polygon points="0,0 0,256 352,-64 1408,-64 1760,256 1760,-128 32,-96"/>
-  </object>
   <object id="94" x="0" y="1024">
    <polygon points="0,0 0,512 64,416 64,32"/>
   </object>
@@ -115,6 +106,18 @@
   <object id="97" x="5088" y="3456">
    <polygon points="0,0 -736,736 32,736"/>
   </object>
+  <object id="98" x="-32" y="-256">
+   <polygon points="0,0 0,608 480,128"/>
+  </object>
+  <object id="99" x="4576" y="160">
+   <polygon points="0,0 640,608 736,-352 -32,-352"/>
+  </object>
+  <object id="100" x="1600" y="-256" width="2880" height="448"/>
+  <object id="101" x="448" y="-256" width="1088" height="256"/>
+  <object id="102" x="736" y="736" width="352" height="2624"/>
+  <object id="103" x="3296" y="992" width="1056" height="2208"/>
+  <object id="104" x="1152" y="2752" width="2112" height="480"/>
+  <object id="105" x="2624" y="3264" width="1472" height="96"/>
  </objectgroup>
  <objectgroup color="#ffff00" id="8" name="Collision">
   <object id="36" x="2434" y="3716" width="125" height="125"/>
