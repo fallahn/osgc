@@ -16,12 +16,14 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
+
 #include "DebugState.hpp"
 #include "VehicleSystem.hpp"
 #include "GameConsts.hpp"
 #include "AsteroidSystem.hpp"
 #include "CollisionObject.hpp"
 #include "ShapeUtils.hpp"
+#include "CameraTarget.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -237,6 +239,7 @@ void DebugState::initScene()
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
+    m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
 }
@@ -341,8 +344,8 @@ void DebugState::addLocalPlayers()
     camEnt.addComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
     camEnt.getComponent<xy::Camera>().lockRotation(true);
+    camEnt.addComponent<CameraTarget>().target = entity;
     m_gameScene.setActiveCamera(camEnt);
 
-    entity.getComponent<xy::Transform>().addChild(camEnt.getComponent<xy::Transform>());
     m_playerInput.setPlayerEntity(entity);
 }

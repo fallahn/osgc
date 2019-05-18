@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="include\ActorIDs.hpp" />
     <ClInclude Include="include\AsteroidSystem.hpp" />
+    <ClInclude Include="include\CameraTarget.hpp" />
     <ClInclude Include="include\CircularBuffer.hpp" />
     <ClInclude Include="include\ClientPackets.hpp" />
     <ClInclude Include="include\CollisionObject.hpp" />
@@ -179,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AsteroidSystem.cpp" />
+    <ClCompile Include="src\CameraTargetSystem.cpp" />
     <ClCompile Include="src\CollisionObject.cpp" />
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />

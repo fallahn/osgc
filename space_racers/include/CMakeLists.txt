@@ -2,6 +2,7 @@ set(PROJECT_SRC
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/ActorIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CameraTarget.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ClientPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CircularBuffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CollisionObject.hpp
