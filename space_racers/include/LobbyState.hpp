@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "StateIDs.hpp"
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
 
 class LobbyState final : public xy::State 
 {
@@ -36,4 +37,8 @@ public:
 
 private:
     SharedData& m_sharedData;
+
+    xy::Scene m_scene;
+
+    void initScene();
 };

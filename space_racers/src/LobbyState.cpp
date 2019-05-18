@@ -24,14 +24,26 @@ Copyright 2019 Matt Marchant
 #include "ServerPackets.hpp"
 #include "GameModes.hpp"
 #include "VehicleSystem.hpp"
+#include "ResourceIDs.hpp"
+
+#include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
+
+#include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/RenderSystem.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Font.hpp>
 
 LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State(ss, ctx),
-    m_sharedData(sd)
+    : xy::State (ss, ctx),
+    m_sharedData(sd),
+    m_scene     (ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
+
+    initScene();
 
     //launch a local server instance, then connect
     //TODO only do this if we're hosting
@@ -68,15 +80,17 @@ bool LobbyState::handleEvent(const sf::Event& evt)
         }
     }
 
+    m_scene.forwardEvent(evt);
+
     return true;
 }
 
-void LobbyState::handleMessage(const xy::Message&)
+void LobbyState::handleMessage(const xy::Message& msg)
 {
-
+    m_scene.forwardMessage(msg);
 }
 
-bool LobbyState::update(float)
+bool LobbyState::update(float dt)
 {
     xy::NetEvent evt;
     while (m_sharedData.netClient->pollEvent(evt))
@@ -115,10 +129,29 @@ bool LobbyState::update(float)
         }
     }
 
+    m_scene.update(dt);
+
     return true;
 }
 
 void LobbyState::draw()
 {
+    auto& rw = getContext().renderWindow;
+    rw.draw(m_scene);
+}
 
+//private
+void LobbyState::initScene()
+{
+    auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::RenderSystem>(mb);
+    
+    auto fallbackFont = m_sharedData.resources.load<sf::Font>("fallback");
+    
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(fallbackFont)).setString("Press space to not be here");
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 }
