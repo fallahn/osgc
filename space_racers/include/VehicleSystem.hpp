@@ -80,6 +80,8 @@ struct Vehicle final
     std::int32_t waypointID = -1; //because the first we hit is 0
     std::int32_t waypointCount = 0;
     sf::Vector2f waypointPosition;
+    float waypointRotation = 0.f;
+
 };
 
 struct ClientUpdate;
@@ -101,6 +103,9 @@ private:
 
     void doCollision(xy::Entity);
     void resolveCollision(xy::Entity, xy::Entity, Manifold);
+
+    void fall(xy::Entity, float);
+    void explode(xy::Entity);
 
     void onEntityAdded(xy::Entity) override;
 };

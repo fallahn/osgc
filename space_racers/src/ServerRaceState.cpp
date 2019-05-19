@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include "AsteroidSystem.hpp"
 #include "CollisionObject.hpp"
 #include "GameConsts.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -69,6 +70,26 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
 //public
 void RaceState::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == MessageID::VehicleMessage)
+    {
+        const auto& data = msg.getData<VehicleEvent>();
+        if (data.type == VehicleEvent::RequestRespawn)
+        {
+            auto entity = data.entity;
+
+            auto& vehicle = entity.getComponent<Vehicle>();
+            auto& tx = entity.getComponent<xy::Transform>();
+
+            vehicle.velocity = {};
+            vehicle.anglularVelocity = {};
+            vehicle.stateFlags = (1 << Vehicle::Normal);
+
+            tx.setPosition(vehicle.waypointPosition);
+            tx.setRotation(vehicle.waypointRotation);
+            tx.setScale(1.f, 1.f);
+        }
+    }
+
 
     m_scene.forwardMessage(msg);
 }

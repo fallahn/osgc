@@ -114,6 +114,9 @@
     <ClInclude Include="include\WayPoint.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\MessageIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">

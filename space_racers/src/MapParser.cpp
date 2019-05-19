@@ -189,6 +189,14 @@ bool MapParser::load(const std::string& path)
                                 {
                                     std::int32_t id = std::stoi(obj.getName());
 
+                                    const auto properties = obj.getProperties();
+                                    auto result = std::find_if(properties.begin(), properties.end(), 
+                                        [](const tmx::Property & p) 
+                                        {
+                                            return p.getName() == "rotation";
+                                        });
+                                    
+
                                     auto bounds = obj.getAABB();
                                     auto position = obj.getPosition();
                                     std::vector<sf::Vector2f> verts =
@@ -206,6 +214,22 @@ bool MapParser::load(const std::string& path)
                                     entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Static);
                                     entity.getComponent<xy::BroadphaseComponent>().setArea({ -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height });
                                     entity.addComponent<WayPoint>().id = id;
+                                    if (result != properties.end())
+                                    {
+                                        if (result->getType() == tmx::Property::Type::Float)
+                                        {
+                                            entity.getComponent<WayPoint>().rotation = result->getFloatValue();
+                                        }
+                                        else
+                                        {
+                                            xy::Logger::log("Waypoint " + obj.getName() + " rotation property of incorrect type.", xy::Logger::Type::Warning);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        xy::Logger::log("Waypoint " + obj.getName() + " rotation property missing", xy::Logger::Type::Warning);
+                                    }
+
                                     m_waypointCount++;
 
 #ifdef DRAW_DEBUG

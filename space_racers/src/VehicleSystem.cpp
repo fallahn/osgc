@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "ServerPackets.hpp"
 #include "AsteroidSystem.hpp"
 #include "WayPoint.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -66,12 +67,22 @@ void VehicleSystem::process(float)
 
         while (vehicle.lastUpdatedInput != idx)
         {
-            processInput(entity);
-
             auto delta = getDelta(vehicle.history, vehicle.lastUpdatedInput);
-            applyInput(entity, delta);
 
-            doCollision(entity);
+            if (vehicle.stateFlags == (1 << Vehicle::Normal))
+            {
+                processInput(entity);
+                applyInput(entity, delta);
+                doCollision(entity);
+            }
+            else if (vehicle.stateFlags == (1 << Vehicle::Falling))
+            {
+                fall(entity, delta);
+            }
+            else
+            {
+                explode(entity);
+            }
 
             vehicle.lastUpdatedInput = (vehicle.lastUpdatedInput + 1) % vehicle.history.size();
         }
@@ -106,9 +117,21 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
         while (idx != end) //currentInput points to the next free slot in history
         {
             float delta = getDelta(vehicle.history, idx);
-            applyInput(entity, delta);            
 
-            doCollision(entity);
+            if (vehicle.stateFlags == (1 << Vehicle::Normal))
+            {
+                processInput(entity);
+                applyInput(entity, delta);
+                doCollision(entity);
+            }
+            else if (vehicle.stateFlags == (1 << Vehicle::Falling))
+            {
+                fall(entity, delta);
+            }
+            else
+            {
+                explode(entity);
+            }
 
             idx = (idx + 1) % vehicle.history.size();
         }
@@ -175,6 +198,9 @@ void VehicleSystem::applyInput(xy::Entity entity, float dt)
 
     tx.rotate(((xy::Util::Const::radToDeg * vehicle.anglularVelocity) * rotationMultiplier) * dt);
     vehicle.anglularVelocity *= vehicle.settings.angularDrag;
+
+    //if we switched back to normal state scale will be wrong
+    tx.setScale(1.f, 1.f);
 }
 
 float VehicleSystem::getDelta(const History& history, std::size_t idx)
@@ -216,18 +242,24 @@ void VehicleSystem::doCollision(xy::Entity entity)
                     && contains(tx.getPosition(), other))
                 {
                     vehicle.collisionFlags |= (1 << type);
+                    vehicle.stateFlags = (1 << Vehicle::Falling);
+
+                    auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+                    msg->type = VehicleEvent::Fell;
+                    msg->entity = entity;
                 }
                 else if (type == CollisionObject::Waypoint)
                 {
                     vehicle.collisionFlags |= (1 << type);
 
-                    auto waypointID = other.getComponent<WayPoint>().id;
-                    if (waypointID != vehicle.waypointID)
+                    const auto& waypoint = other.getComponent<WayPoint>();
+                    if (waypoint.id != vehicle.waypointID)
                     {
-                        auto diff = waypointID - vehicle.waypointID;
+                        auto diff = waypoint.id - vehicle.waypointID;
                         if (diff == 1 || diff == -vehicle.waypointCount)
                         {
-                            vehicle.waypointID = waypointID;
+                            vehicle.waypointID = waypoint.id;
+                            vehicle.waypointRotation = waypoint.rotation;
                             vehicle.waypointPosition = other.getComponent<xy::Transform>().getPosition();
                             
                             if (diff == -vehicle.waypointCount)
@@ -307,6 +339,34 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     //mark this type of collision active
     vehicle.collisionFlags |= (1 << otherCollision.type);
     
+}
+
+void VehicleSystem::fall(xy::Entity entity, float dt)
+{
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto& vehicle = entity.getComponent<Vehicle>();
+
+    const float scaleFactor = dt * 56.f;
+
+    tx.move(vehicle.velocity * dt);
+    vehicle.velocity *= scaleFactor;
+
+    const float rotation = vehicle.anglularVelocity > 0 ? 840.f : -840.f;
+    tx.rotate(rotation * dt);
+    tx.scale(scaleFactor, scaleFactor);
+
+    if (tx.getScale().x < 0.05f)
+    {
+        //raise a message here so that the server can be the arbiter on resetting the vehicle
+        auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::RequestRespawn;
+        msg->entity = entity;
+    }
+}
+
+void VehicleSystem::explode(xy::Entity entity)
+{
+
 }
 
 //we'll use this just to do some debug assertions that our vehicles are valid

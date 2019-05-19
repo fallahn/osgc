@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "CollisionObject.hpp"
 #include "ShapeUtils.hpp"
 #include "CameraTarget.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -196,7 +197,28 @@ bool DebugState::handleEvent(const sf::Event& evt)
 
 void DebugState::handleMessage(const xy::Message& msg)
 {
-    //TODO handle resize message and update all cameras
+    if (msg.id == MessageID::VehicleMessage)
+    {
+        const auto& data = msg.getData<VehicleEvent>();
+        if (data.type == VehicleEvent::RequestRespawn)
+        {
+            auto entity = data.entity;
+            auto& vehicle = entity.getComponent<Vehicle>();
+            auto& tx = entity.getComponent<xy::Transform>();
+
+            vehicle.velocity = {};
+            vehicle.anglularVelocity = {};
+            vehicle.stateFlags = (1 << Vehicle::Normal);
+
+            tx.setPosition(vehicle.waypointPosition);
+            tx.setRotation(vehicle.waypointRotation);
+            tx.setScale(1.f, 1.f);
+        }
+        else if (data.type == VehicleEvent::Fell)
+        {
+            m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
+        }
+    }
 
     m_gameScene.forwardMessage(msg);
 }

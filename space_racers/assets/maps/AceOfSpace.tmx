@@ -33,30 +33,126 @@
   </data>
  </layer>
  <objectgroup color="#00aa00" id="5" name="Waypoints">
-  <object id="1" name="00" x="1668" y="28" width="112" height="584"/>
-  <object id="2" name="01" x="2488" y="82" width="640" height="540"/>
-  <object id="3" name="02" x="2636" y="762" width="456" height="448"/>
-  <object id="4" name="03" x="2192" y="826" width="92" height="532"/>
-  <object id="5" name="04" x="1135" y="893" width="532" height="548"/>
-  <object id="6" name="05" x="1080" y="1804" width="532" height="112"/>
-  <object id="7" name="06" x="1088" y="2356" width="748" height="260"/>
-  <object id="8" name="07" x="1636" y="3099" width="855" height="68"/>
-  <object id="9" name="08" x="3380" y="3532" width="96" height="380"/>
-  <object id="10" name="09" x="4530" y="3282" width="532" height="522"/>
-  <object id="11" name="10" x="4540" y="2452" width="393" height="88"/>
-  <object id="12" name="11" x="4562" y="1247" width="403" height="77"/>
-  <object id="13" name="12" x="4418" y="152" width="612" height="568"/>
-  <object id="14" name="13" x="3436" y="112" width="590" height="586"/>
-  <object id="15" name="14" x="3384" y="1298" width="704" height="114"/>
-  <object id="16" name="15" x="3392" y="1992" width="528" height="88"/>
-  <object id="17" name="16" x="3364" y="2588" width="516" height="364"/>
-  <object id="18" name="17" x="2946" y="3080" width="504" height="239"/>
-  <object id="19" name="18" x="1912" y="3512" width="120" height="540"/>
-  <object id="20" name="19" x="747" y="3585" width="144" height="459"/>
-  <object id="21" name="20" x="52" y="3256" width="532" height="88"/>
-  <object id="22" name="21" x="56" y="1992" width="422" height="100"/>
-  <object id="23" name="22" x="127" y="655" width="461" height="108"/>
-  <object id="24" name="23" x="684" y="60" width="116" height="520"/>
+  <object id="1" name="00" x="1668" y="28" width="112" height="584">
+   <properties>
+    <property name="rotation" type="float" value="0"/>
+   </properties>
+  </object>
+  <object id="2" name="01" x="2488" y="82" width="640" height="540">
+   <properties>
+    <property name="rotation" type="float" value="45"/>
+   </properties>
+  </object>
+  <object id="3" name="02" x="2636" y="762" width="456" height="448">
+   <properties>
+    <property name="rotation" type="float" value="135"/>
+   </properties>
+  </object>
+  <object id="4" name="03" x="2192" y="826" width="92" height="532">
+   <properties>
+    <property name="rotation" type="float" value="180"/>
+   </properties>
+  </object>
+  <object id="5" name="04" x="1135" y="893" width="532" height="548">
+   <properties>
+    <property name="rotation" type="float" value="135"/>
+   </properties>
+  </object>
+  <object id="6" name="05" x="1080" y="1804" width="532" height="112">
+   <properties>
+    <property name="rotation" type="float" value="90"/>
+   </properties>
+  </object>
+  <object id="7" name="06" x="1088" y="2356" width="748" height="260">
+   <properties>
+    <property name="rotation" type="float" value="45"/>
+   </properties>
+  </object>
+  <object id="8" name="07" x="1636" y="3099" width="855" height="68">
+   <properties>
+    <property name="rotation" type="float" value="45"/>
+   </properties>
+  </object>
+  <object id="9" name="08" x="3380" y="3532" width="96" height="380">
+   <properties>
+    <property name="rotation" type="float" value="0"/>
+   </properties>
+  </object>
+  <object id="10" name="09" x="4530" y="3282" width="532" height="522">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="11" name="10" x="4540" y="2452" width="393" height="88">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="12" name="11" x="4562" y="1247" width="403" height="77">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="13" name="12" x="4418" y="152" width="612" height="568">
+   <properties>
+    <property name="rotation" type="float" value="-135"/>
+   </properties>
+  </object>
+  <object id="14" name="13" x="3436" y="112" width="590" height="586">
+   <properties>
+    <property name="rotation" type="float" value="135"/>
+   </properties>
+  </object>
+  <object id="15" name="14" x="3384" y="1298" width="704" height="114">
+   <properties>
+    <property name="rotation" type="float" value="90"/>
+   </properties>
+  </object>
+  <object id="16" name="15" x="3392" y="1992" width="528" height="88">
+   <properties>
+    <property name="rotation" type="float" value="90"/>
+   </properties>
+  </object>
+  <object id="17" name="16" x="3364" y="2588" width="516" height="364">
+   <properties>
+    <property name="rotation" type="float" value="135"/>
+   </properties>
+  </object>
+  <object id="18" name="17" x="2946" y="3080" width="504" height="239">
+   <properties>
+    <property name="rotation" type="float" value="135"/>
+   </properties>
+  </object>
+  <object id="19" name="18" x="1912" y="3512" width="120" height="540">
+   <properties>
+    <property name="rotation" type="float" value="180"/>
+   </properties>
+  </object>
+  <object id="20" name="19" x="747" y="3585" width="144" height="459">
+   <properties>
+    <property name="rotation" type="float" value="180"/>
+   </properties>
+  </object>
+  <object id="21" name="20" x="52" y="3256" width="532" height="88">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="22" name="21" x="56" y="1992" width="422" height="100">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="23" name="22" x="127" y="655" width="461" height="108">
+   <properties>
+    <property name="rotation" type="float" value="-45"/>
+   </properties>
+  </object>
+  <object id="24" name="23" x="684" y="60" width="116" height="520">
+   <properties>
+    <property name="rotation" type="float" value="0"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup color="#000000" id="6" name="Space" locked="1">
   <object id="25" x="1620" y="1484">

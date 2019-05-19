@@ -23,7 +23,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float CameraSpeed = 5.5f;
+    const float CameraSpeed = 10.f;
     const float SpeedUpDistance = 350.f; //when the camera is within this distance of the target it gets sped up slightly
 
     const float SlackRadius = 100.f * 100.f;
@@ -56,12 +56,12 @@ void CameraTargetSystem::process(float dt)
             if (!camera.lockedOn)
             {
                 //move a bit faster when we get nearer
-                float multiplier = 1.f - (std::min(SpeedUpDistance, len2) / SpeedUpDistance);
-                multiplier *= 2.f;
+                /*float multiplier = 1.f - (std::min(SpeedUpDistance, len2) / SpeedUpDistance);
+                multiplier *= 2.f;*/
 
-                tx.move(movement * (CameraSpeed * (1.f + multiplier)) * dt);
+                tx.move(movement * (CameraSpeed /** (1.f + multiplier)*/) * dt);
 
-                if (len2 < 2.f)
+                if (len2 < 25.f)
                 {
                     camera.lockedOn = true;
 

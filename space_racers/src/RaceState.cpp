@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -76,7 +77,14 @@ bool RaceState::handleEvent(const sf::Event& evt)
 
 void RaceState::handleMessage(const xy::Message& msg)
 {
-    //TODO handle resize message and update all cameras
+    if (msg.id == MessageID::VehicleMessage)
+    {
+        const auto& data = msg.getData<VehicleEvent>();
+        if (data.type == VehicleEvent::Fell)
+        {
+            m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
+        }
+    }
 
     m_gameScene.forwardMessage(msg);
 }

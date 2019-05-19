@@ -162,6 +162,7 @@
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MapParser.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NetActor.hpp" />
     <ClInclude Include="include\NetConsts.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />

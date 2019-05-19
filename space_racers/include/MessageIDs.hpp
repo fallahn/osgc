@@ -18,13 +18,24 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <SFML/Graphics/Rect.hpp>
+#include <xyginext/core/Message.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
-#include <cstdlib>
-
-struct WayPoint final
+namespace MessageID
 {
-    std::int32_t id = 0;
-    //which way should the vehicle point if it spawns here?
-    float rotation = 0.f;
+    enum
+    {
+        VehicleMessage = xy::Message::Count
+    };
+}
+
+struct VehicleEvent final
+{
+    enum
+    {
+        RequestRespawn,
+        Fell
+    }type;
+
+    xy::Entity entity;
 };
