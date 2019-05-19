@@ -84,7 +84,8 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
     auto& vehicle = entity.getComponent<Vehicle>();
     vehicle.velocity = { update.velX, update.velY };
     vehicle.anglularVelocity = update.velRot;
-    vehicle.activeCollisions = update.collisionBits;
+    vehicle.collisionFlags = update.collisionFlags;
+    vehicle.stateFlags = update.stateFlags;
 
     auto& tx = entity.getComponent<xy::Transform>();
     tx.setPosition(update.x, update.y);
@@ -194,7 +195,7 @@ float VehicleSystem::getDelta(const History& history, std::size_t idx)
 void VehicleSystem::doCollision(xy::Entity entity)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
-    vehicle.activeCollisions.reset();
+    vehicle.collisionFlags = 0;
 
     auto& tx = entity.getComponent<xy::Transform>();
 
@@ -214,20 +215,21 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 if(type == CollisionObject::Space
                     && contains(tx.getPosition(), other))
                 {
-                    vehicle.activeCollisions.set(type);
+                    vehicle.collisionFlags |= (1 << type);
                 }
                 else if (type == CollisionObject::Waypoint)
                 {
+                    vehicle.collisionFlags |= (1 << type);
+
                     auto waypointID = other.getComponent<WayPoint>().id;
                     if (waypointID != vehicle.waypointID)
                     {
                         auto diff = waypointID - vehicle.waypointID;
-
                         if (diff == 1 || diff == -vehicle.waypointCount)
                         {
                             vehicle.waypointID = waypointID;
                             vehicle.waypointPosition = other.getComponent<xy::Transform>().getPosition();
-
+                            
                             if (diff == -vehicle.waypointCount)
                             {
                                 //we did a lap
@@ -303,7 +305,7 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     }
 
     //mark this type of collision active
-    vehicle.activeCollisions.set(otherCollision.type);
+    vehicle.collisionFlags |= (1 << otherCollision.type);
     
 }
 

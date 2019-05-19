@@ -183,6 +183,9 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
+    //TODO we shopuld probably get this from the server, but it might not matter
+    //as the server is the final arbiter in laps counted anyway
+    entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount(); 
 
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
@@ -219,7 +222,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.getComponent<xy::Callback>().function =
         [](xy::Entity e, float)
     {
-        if (e.getComponent<Vehicle>().activeCollisions.any())
+        if (e.getComponent<Vehicle>().collisionFlags)
         {
             e.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
         }

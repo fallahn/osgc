@@ -115,7 +115,8 @@ void RaceState::netUpdate(float)
         cu.velY = vehicle.velocity.y;
         cu.velRot = vehicle.anglularVelocity;
         cu.clientTimestamp = vehicle.history[vehicle.lastUpdatedInput].timestamp;
-        cu.collisionBits = vehicle.activeCollisions.to_ulong();
+        cu.collisionFlags = vehicle.collisionFlags;
+        cu.stateFlags = vehicle.stateFlags;
         m_sharedData.netHost.sendPacket(p.second.peer, PacketID::ClientUpdate, cu, xy::NetFlag::Unreliable);
     }
 
@@ -218,6 +219,7 @@ bool RaceState::createPlayers()
             auto entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize * 0.4f);
             entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.vehicleIDs[i]);
+            entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
 
             entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
             entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);

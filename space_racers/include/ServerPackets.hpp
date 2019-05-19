@@ -58,7 +58,6 @@ struct ActorUpdate final
 //server state sent for reconciliation
 struct ClientUpdate final
 {
-    unsigned long collisionBits = 0;
     float x = 0.f;
     float y = 0.f;
     float rotation = 0.f;
@@ -66,4 +65,6 @@ struct ClientUpdate final
     float velY = 0.f;
     float velRot = 0.f;
     std::int32_t clientTimestamp = 0;
+    std::uint16_t collisionFlags = 0;
+    std::uint16_t stateFlags = 1;
 };

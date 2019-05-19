@@ -23,7 +23,6 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/System.hpp>
 
 #include <array>
-#include <bitset>
 
 struct Input final
 {
@@ -68,7 +67,15 @@ struct Vehicle final
         Car, Bike, Ship
     }type = Car;
 
-    std::bitset<CollisionObject::Count> activeCollisions;
+    enum State
+    {
+        Normal = 0,
+        Falling,
+        Explosing
+    };
+
+    std::uint16_t collisionFlags = 0;
+    std::uint16_t stateFlags = 1;
 
     std::int32_t waypointID = -1; //because the first we hit is 0
     std::int32_t waypointCount = 0;

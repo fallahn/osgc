@@ -342,7 +342,7 @@ void DebugState::addLocalPlayers()
         [](xy::Entity e, float)
     {
         e.getComponent<xy::Sprite>().setColour(sf::Color::White);
-        if (e.getComponent<Vehicle>().activeCollisions.any())
+        if (e.getComponent<Vehicle>().collisionFlags)
         {
             e.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
         }
