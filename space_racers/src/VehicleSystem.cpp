@@ -189,15 +189,25 @@ void VehicleSystem::applyInput(xy::Entity entity, float dt)
     auto& vehicle = entity.getComponent<Vehicle>();
     auto& tx = entity.getComponent<xy::Transform>();
 
+    float drag = vehicle.settings.drag;
+    float angularDrag = vehicle.settings.angularDrag;
+
+    //NOTE TO FUTURE SELF this could be a good way of adding 'speed boost' pads
+    //if (vehicle.collisionFlags & (1 << CollisionObject::Type::Jump))
+    //{
+    //    drag *= 1.06f;
+    //    angularDrag *= 1.09f;
+    //}
+
     tx.move(vehicle.velocity * dt);
-    vehicle.velocity *= vehicle.settings.drag;
+    vehicle.velocity *= drag;// vehicle.settings.drag;
 
     //rotate more slowly at lower speeds
     float rotationMultiplier = std::min(1.f, xy::Util::Vector::lengthSquared(vehicle.velocity) / (vehicle.settings.maxSpeedSqr() / 8.f));
     rotationMultiplier = 0.03f + (rotationMultiplier * 0.97f);
 
     tx.rotate(((xy::Util::Const::radToDeg * vehicle.anglularVelocity) * rotationMultiplier) * dt);
-    vehicle.anglularVelocity *= vehicle.settings.angularDrag;
+    vehicle.anglularVelocity *= angularDrag;// vehicle.settings.angularDrag;
 
     //if we switched back to normal state scale will be wrong
     tx.setScale(1.f, 1.f);
@@ -310,8 +320,7 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         //vehicles at the very least
         break;
     case CollisionObject::Jump:
-        //reduce drag - TODO figure out how we stop colliding?
-        //could use some sort of drag multiplier that reduces over time
+        //for now we'll let the flag state do the signalling
         break;
     case CollisionObject::KillZone:
         explode(entity);

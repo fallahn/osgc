@@ -43,6 +43,11 @@ struct Vehicle final
     sf::Vector2f velocity;
     float anglularVelocity = 0.f; //rads
 
+    //TODO we might have to sync these - but as they're
+    //based on collision flags (which are sync'd) maybe not
+    //float currentDrag = 0.f;
+    //float currentAngularDrag = 0.f;
+
     //allows swapping out different behaviour
     //for different vehicle types
     struct Settings final
