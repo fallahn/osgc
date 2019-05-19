@@ -268,6 +268,7 @@ void DebugState::buildWorld()
 
     //load map
     m_mapParser.load("assets/maps/AceOfSpace.tmx");
+    //TODO fail and push an error state if map doesn't load
 
     //asteroids
     temp = m_resources.load<sf::Texture>("assets/images/temp02.png");
@@ -326,7 +327,7 @@ void DebugState::addLocalPlayers()
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize * 0.4f);
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
-    entity.addComponent<Vehicle>();
+    entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
     entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);

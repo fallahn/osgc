@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #include "MapParser.hpp"
 #include "CollisionObject.hpp"
+#include "WayPoint.hpp"
+#include "ShapeUtils.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -55,7 +57,8 @@ namespace
 }
 
 MapParser::MapParser(xy::Scene& scene)
-    :m_scene(scene)
+    : m_scene(scene),
+    m_waypointCount(0)
 {
 
 }
@@ -150,6 +153,7 @@ bool MapParser::load(const std::string& path)
         return entity;
     };
 
+    m_waypointCount = 0;
     tmx::Map map;
     if (map.load(xy::FileSystem::getResourcePath() + path))
     {
@@ -175,7 +179,46 @@ bool MapParser::load(const std::string& path)
                                 //stash this somewhere so we know we need to draw an electric fence on the client
                                 break;
                             case CollisionObject::Waypoint:
+                                if (obj.getShape() != tmx::Object::Shape::Rectangle)
+                                {
+                                    xy::Logger::log("Invalid waypoint type, must be rectangular", xy::Logger::Type::Error);
+                                    return false;
+                                }
 
+                                try
+                                {
+                                    std::int32_t id = std::stoi(obj.getName());
+
+                                    auto bounds = obj.getAABB();
+                                    auto position = obj.getPosition();
+                                    std::vector<sf::Vector2f> verts =
+                                    {
+                                        sf::Vector2f(-bounds.width / 2.f, -bounds.height / 2.f),
+                                        sf::Vector2f(bounds.width / 2.f, -bounds.height / 2.f),
+                                        sf::Vector2f(bounds.width / 2.f, bounds.height / 2.f),
+                                        sf::Vector2f(-bounds.width / 2.f, bounds.height / 2.f)
+                                    };
+
+                                    auto entity = m_scene.createEntity();
+                                    entity.addComponent<xy::Transform>().setPosition(position.x + (bounds.width / 2.f), position.y + (bounds.height / 2.f));
+                                    entity.addComponent<CollisionObject>().type = CollisionObject::Waypoint;
+                                    entity.getComponent<CollisionObject>().applyVertices(verts);
+                                    entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Static);
+                                    entity.getComponent<xy::BroadphaseComponent>().setArea({ -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height });
+                                    entity.addComponent<WayPoint>().id = id;
+                                    m_waypointCount++;
+
+#ifdef DRAW_DEBUG
+                                    verts.push_back(verts.front());
+                                    Shape::setPolyLine(entity.addComponent<xy::Drawable>(), verts, sf::Color::Cyan);
+                                    entity.getComponent<xy::Drawable>().setDepth(100);
+#endif
+                                }
+                                catch (...)
+                                {
+                                    xy::Logger::log("waypoint has invalid name " + obj.getName(), xy::Logger::Type::Error);
+                                    return false;
+                                }
                                 break;
                             case CollisionObject::Jump:
                             case CollisionObject::Collision:

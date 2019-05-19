@@ -32,7 +32,7 @@
    eJztmNsOwiAMhnke9cLz+bB51ht9Pp9WmrBYSclK6dCLfUkTNg79B+sKM+abm6lnwmgDdL3rjrBfLBtmu5G1sSsPrA29+qm1mbO516+noO8ZqL8wx3kEygBo5KwlBXf+6gjNH0ai8SRWJGf3A59acOMOkL4zUqi4y4XGs/pxh1lZWyv44HKOaAvajt69u6KWVA4/8pv7/W/Roaipvyr54YxTKPlqiaeN3zgW1pauzN135qY0H43/ipbGmBweC6VRkvOb3NekziO1r9FGqjGHtooysn1ObRTUt6fJWOCC80m17v5cpeScV0JfCtCouY44PwBbwRhwRuo7g339Hl2H/oFQ4DM4/gblyA+hNabuU7EEz6y91lLw2eoNccobAg==
   </data>
  </layer>
- <objectgroup color="#00aa00" id="5" name="Waypoints" visible="0" locked="1">
+ <objectgroup color="#00aa00" id="5" name="Waypoints">
   <object id="1" name="00" x="1668" y="28" width="112" height="584"/>
   <object id="2" name="01" x="2488" y="82" width="640" height="540"/>
   <object id="3" name="02" x="2636" y="762" width="456" height="448"/>

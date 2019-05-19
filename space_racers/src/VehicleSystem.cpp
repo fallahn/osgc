@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "InputBinding.hpp"
 #include "ServerPackets.hpp"
 #include "AsteroidSystem.hpp"
+#include "WayPoint.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -215,6 +216,26 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 {
                     vehicle.activeCollisions.set(type);
                 }
+                else if (type == CollisionObject::Waypoint)
+                {
+                    auto waypointID = other.getComponent<WayPoint>().id;
+                    if (waypointID != vehicle.waypointID)
+                    {
+                        auto diff = waypointID - vehicle.waypointID;
+
+                        if (diff == 1 || diff == -vehicle.waypointCount)
+                        {
+                            vehicle.waypointID = waypointID;
+                            vehicle.waypointPosition = other.getComponent<xy::Transform>().getPosition();
+
+                            if (diff == -vehicle.waypointCount)
+                            {
+                                //we did a lap
+                                //TODO raise a message
+                            }
+                        }
+                    }
+                }
 
                 else if (auto manifold = intersects(entity, other); manifold)
                 {
@@ -284,4 +305,13 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     //mark this type of collision active
     vehicle.activeCollisions.set(otherCollision.type);
     
+}
+
+//we'll use this just to do some debug assertions that our vehicles are valid
+void VehicleSystem::onEntityAdded(xy::Entity entity)
+{
+#ifdef XY_DEBUG
+    const auto& vehicle = entity.getComponent<Vehicle>();
+    XY_ASSERT(vehicle.waypointCount > 0, "Vehicle waypoints not set!");
+#endif
 }

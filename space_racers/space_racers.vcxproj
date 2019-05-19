@@ -177,6 +177,7 @@
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
+    <ClInclude Include="include\WayPoint.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AsteroidSystem.cpp" />

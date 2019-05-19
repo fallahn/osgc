@@ -18,42 +18,11 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
 
-#include <string>
-#include <array>
+#include <cstdlib>
 
-namespace MapConst
+struct WayPoint final
 {
-    enum
-    {
-        Neon, Detail, Track, Normal, Count
-    };
-    static const std::array<std::string, Count> TileLayers =
-    {
-        "neon", "detail", "track", "normal"
-    };
-}
-
-namespace xy
-{
-    class Scene;
-}
-
-class MapParser final
-{
-public:
-    explicit MapParser(xy::Scene&);
-
-    bool load(const std::string&);
-
-    std::int32_t getWaypointCount() const
-    {
-        return m_waypointCount - 1; //zero based
-    }
-
-private:
-    xy::Scene& m_scene;
-
-    std::int32_t m_waypointCount;
+    std::int32_t id = 0;
 };

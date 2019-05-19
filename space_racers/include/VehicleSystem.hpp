@@ -69,6 +69,10 @@ struct Vehicle final
     }type = Car;
 
     std::bitset<CollisionObject::Count> activeCollisions;
+
+    std::int32_t waypointID = -1; //because the first we hit is 0
+    std::int32_t waypointCount = 0;
+    sf::Vector2f waypointPosition;
 };
 
 struct ClientUpdate;
@@ -90,4 +94,6 @@ private:
 
     void doCollision(xy::Entity);
     void resolveCollision(xy::Entity, xy::Entity, Manifold);
+
+    void onEntityAdded(xy::Entity) override;
 };
