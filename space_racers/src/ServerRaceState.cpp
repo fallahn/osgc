@@ -238,7 +238,7 @@ bool RaceState::createPlayers()
         {
             //create vehicle entity
             auto entity = m_scene.createEntity();
-            entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize * 0.4f);
+            entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
             entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.vehicleIDs[i]);
             entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
 

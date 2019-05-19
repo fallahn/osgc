@@ -71,7 +71,7 @@ struct Vehicle final
     {
         Normal = 0,
         Falling,
-        Explosing
+        Exploding
     };
 
     std::uint16_t collisionFlags = 0;
@@ -82,6 +82,9 @@ struct Vehicle final
     sf::Vector2f waypointPosition;
     float waypointRotation = 0.f;
 
+    //amount of time before respawning vehicle
+    static constexpr float RespawnDuration = 1.5f;
+    float respawnTime = RespawnDuration;
 };
 
 struct ClientUpdate;
@@ -104,7 +107,8 @@ private:
     void doCollision(xy::Entity);
     void resolveCollision(xy::Entity, xy::Entity, Manifold);
 
-    void fall(xy::Entity, float);
+    void updateFalling(xy::Entity, float);
+    void updateExploding(xy::Entity, float);
     void explode(xy::Entity);
 
     void onEntityAdded(xy::Entity) override;

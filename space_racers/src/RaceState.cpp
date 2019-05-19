@@ -82,7 +82,15 @@ void RaceState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<VehicleEvent>();
         if (data.type == VehicleEvent::Fell)
         {
+            auto entity = data.entity;
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 1);
+
             m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
+        }
+        else if (data.type == VehicleEvent::RequestRespawn)
+        {
+            auto entity = data.entity;
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         }
     }
 

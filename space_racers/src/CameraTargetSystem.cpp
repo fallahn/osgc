@@ -61,9 +61,9 @@ void CameraTargetSystem::process(float dt)
 
                 tx.move(movement * (CameraSpeed /** (1.f + multiplier)*/) * dt);
 
-                if (len2 < 25.f)
+                if (len2 < 15.f)
                 {
-                    camera.lockedOn = true;
+                    //camera.lockedOn = true;
 
                     /*auto* msg = postMessage<SceneEvent>(MessageID::SceneMessage);
                     msg->type = SceneEvent::CameraLocked;*/

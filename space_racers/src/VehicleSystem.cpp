@@ -34,7 +34,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
-#include  <xyginext/ecs/components/Sprite.hpp> //REMOVE
+//#include  <xyginext/ecs/components/Sprite.hpp> //REMOVE
 
 #include <xyginext/util/Const.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -77,11 +77,11 @@ void VehicleSystem::process(float)
             }
             else if (vehicle.stateFlags == (1 << Vehicle::Falling))
             {
-                fall(entity, delta);
+                updateFalling(entity, delta);
             }
             else
             {
-                explode(entity);
+                updateExploding(entity, delta);
             }
 
             vehicle.lastUpdatedInput = (vehicle.lastUpdatedInput + 1) % vehicle.history.size();
@@ -126,11 +126,11 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
             }
             else if (vehicle.stateFlags == (1 << Vehicle::Falling))
             {
-                fall(entity, delta);
+                updateFalling(entity, delta);
             }
             else
             {
-                explode(entity);
+                updateExploding(entity, delta);
             }
 
             idx = (idx + 1) % vehicle.history.size();
@@ -243,6 +243,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 {
                     vehicle.collisionFlags |= (1 << type);
                     vehicle.stateFlags = (1 << Vehicle::Falling);
+                    vehicle.respawnTime = Vehicle::RespawnDuration;
 
                     auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
                     msg->type = VehicleEvent::Fell;
@@ -267,6 +268,10 @@ void VehicleSystem::doCollision(xy::Entity entity)
                                 //we did a lap
                                 //TODO raise a message
                             }
+                        }
+                        else
+                        {
+                            explode(entity); //taking shortcuts or going backwards
                         }
                     }
                 }
@@ -309,10 +314,7 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         //could use some sort of drag multiplier that reduces over time
         break;
     case CollisionObject::KillZone:
-        //clue is in the name
-        break;
-    case CollisionObject::Waypoint:
-        //TBD
+        explode(entity);
         break;
     case CollisionObject::Roid:
     {
@@ -341,7 +343,7 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     
 }
 
-void VehicleSystem::fall(xy::Entity entity, float dt)
+void VehicleSystem::updateFalling(xy::Entity entity, float dt)
 {
     auto& tx = entity.getComponent<xy::Transform>();
     auto& vehicle = entity.getComponent<Vehicle>();
@@ -355,8 +357,29 @@ void VehicleSystem::fall(xy::Entity entity, float dt)
     tx.rotate(rotation * dt);
     tx.scale(scaleFactor, scaleFactor);
 
-    if (tx.getScale().x < 0.05f)
+    vehicle.respawnTime -= dt;
+
+    //if (tx.getScale().x < 0.05f)
+    if(vehicle.respawnTime < 0.f)
     {
+        vehicle.respawnTime = Vehicle::RespawnDuration; //just gives a small buffer to prevent mutliple messages
+
+        //raise a message here so that the server can be the arbiter on resetting the vehicle
+        auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::RequestRespawn;
+        msg->entity = entity;
+    }
+}
+
+void VehicleSystem::updateExploding(xy::Entity entity, float dt)
+{
+    auto& vehicle = entity.getComponent<Vehicle>();
+    vehicle.respawnTime -= dt;
+
+    if (vehicle.respawnTime < 0.f)
+    {
+        vehicle.respawnTime = Vehicle::RespawnDuration; //just gives a small buffer to prevent mutliple messages
+
         //raise a message here so that the server can be the arbiter on resetting the vehicle
         auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
         msg->type = VehicleEvent::RequestRespawn;
@@ -366,7 +389,13 @@ void VehicleSystem::fall(xy::Entity entity, float dt)
 
 void VehicleSystem::explode(xy::Entity entity)
 {
+    entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
+    entity.getComponent<Vehicle>().respawnTime = Vehicle::RespawnDuration;
+    entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Exploding);
 
+    auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+    msg->type = VehicleEvent::Exploded;
+    msg->entity = entity;
 }
 
 //we'll use this just to do some debug assertions that our vehicles are valid

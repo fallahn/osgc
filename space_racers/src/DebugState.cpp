@@ -212,11 +212,15 @@ void DebugState::handleMessage(const xy::Message& msg)
 
             tx.setPosition(vehicle.waypointPosition);
             tx.setRotation(vehicle.waypointRotation);
-            tx.setScale(1.f, 1.f);
+            
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         }
         else if (data.type == VehicleEvent::Fell)
         {
             m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
+
+            auto entity = data.entity;
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 1);
         }
     }
 
@@ -347,7 +351,7 @@ void DebugState::addLocalPlayers()
     auto view = getContext().defaultView;
 
     auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize * 0.4f);
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;

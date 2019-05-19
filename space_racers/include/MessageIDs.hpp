@@ -34,7 +34,8 @@ struct VehicleEvent final
     enum
     {
         RequestRespawn,
-        Fell
+        Fell,
+        Exploded
     }type;
 
     xy::Entity entity;

@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <string>
 #include <array>
@@ -52,8 +53,14 @@ public:
         return m_waypointCount - 1; //zero based
     }
 
+    sf::Vector2f getStartPosition() const
+    {
+        return m_startPosition;
+    }
+
 private:
     xy::Scene& m_scene;
 
     std::int32_t m_waypointCount;
+    sf::Vector2f m_startPosition;
 };

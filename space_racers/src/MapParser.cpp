@@ -232,6 +232,10 @@ bool MapParser::load(const std::string& path)
 
                                     m_waypointCount++;
 
+                                    if (id == 0)
+                                    {
+                                        m_startPosition = entity.getComponent<xy::Transform>().getPosition();
+                                    }
 #ifdef DRAW_DEBUG
                                     verts.push_back(verts.front());
                                     Shape::setPolyLine(entity.addComponent<xy::Drawable>(), verts, sf::Color::Cyan);
@@ -261,6 +265,12 @@ bool MapParser::load(const std::string& path)
                 //const auto& tileLayer = layer->getLayerAs<tmx::TileLayer>();
                 //TODO render layers
             }
+        }
+
+        if (m_startPosition == sf::Vector2f())
+        {
+            xy::Logger::log("No start position was set - waypoints should be labelled from 0", xy::Logger::Type::Error);
+            return false;
         }
 
         return true; //TODO only if bitset matches
