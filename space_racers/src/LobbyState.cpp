@@ -150,9 +150,18 @@ void LobbyState::pollNetwork()
             default: break;
             case PacketID::LeftLobby:
                 m_playerInfo.erase(packet.as<std::uint64_t>());
+                LOG("REFRESH LOBBY VIEW", xy::Logger::Type::Info);
                 break;
-            case PacketID::RequestPlayerData:
-                sendPlayerData();
+            case PacketID::RequestPlayerName:
+                sendPlayerName();
+                break;
+            case PacketID::DeliverPlayerData:
+            {
+                auto data = packet.as<PlayerData>();
+                m_playerInfo[data.peerID].ready = data.ready;
+                m_playerInfo[data.peerID].vehicle = data.vehicle;
+                LOG("REFRESH LOBBY VIEW", xy::Logger::Type::Info);
+            }
                 break;
             case PacketID::GameStarted:
                 //set shared data with game info
@@ -182,7 +191,7 @@ void LobbyState::pollNetwork()
     }
 }
 
-void LobbyState::sendPlayerData()
+void LobbyState::sendPlayerName()
 {
     auto nameBytes = m_playerInfo[m_sharedData.netClient->getPeer().getID()].name.toUtf32();
     auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), NetConst::MaxNameSize);

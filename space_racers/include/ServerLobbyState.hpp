@@ -40,5 +40,7 @@ namespace sv
 
         void startGame();
         void setClientName(const xy::NetEvent&);
+        void broadcastNames() const;
+        void broadcastPlayerData() const;
     };
 }

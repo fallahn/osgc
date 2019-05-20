@@ -20,6 +20,16 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
+//player data shared by lobby
+//names are sent separately
+struct PlayerData final
+{
+    std::uint64_t peerID = 0;
+    bool ready = false;
+    std::uint8_t vehicle = 0;
+
+};
+
 struct GameStart final
 {
     std::uint8_t actorCount = 1; //so the client knows it has received all actor info

@@ -33,8 +33,10 @@ namespace PacketID
     {
         LobbyData, //contains settings about the game from the lobby
         LeftLobby, //peer ID of player who left the lobby
-        RequestPlayerData, //lobby wants the player's name
-        NameString, //packet is utf32 coded name string
+        RequestPlayerName, //lobby wants the player's name
+        DeliverPlayerData, //server is sending other player data to clients
+        DeliverPlayerName, //server is sending name of particular player
+        NameString, //packet is utf32 coded name string from client
         LaunchGame, //lobby host has indicated they wish to start
         GameStarted, //sends a GameStarted packet
         ClientMapLoaded, //clients has loaded map, requesting vehicles

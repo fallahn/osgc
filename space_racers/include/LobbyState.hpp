@@ -47,5 +47,5 @@ private:
 
     void initScene();
     void pollNetwork();
-    void sendPlayerData();
+    void sendPlayerName();
 };

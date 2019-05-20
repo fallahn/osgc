@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "Server.hpp"
 #include "NetConsts.hpp"
 #include "ClientPackets.hpp"
+#include "ServerPackets.hpp"
 #include "GameModes.hpp"
 
 #include <xyginext/network/NetData.hpp>
@@ -64,7 +65,7 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
         }
 
         //request info, like name - this is broadcast to other clients once it is received
-        m_sharedData.netHost.sendPacket(evt.peer, PacketID::RequestPlayerData, std::uint8_t(0), xy::NetFlag::Reliable);
+        m_sharedData.netHost.sendPacket(evt.peer, PacketID::RequestPlayerName, std::uint8_t(0), xy::NetFlag::Reliable);
 
         m_sharedData.playerInfo[evt.peer.getID()].ready = false;
         m_sharedData.playerInfo[evt.peer.getID()].vehicle = 0;
@@ -116,5 +117,25 @@ void LobbyState::setClientName(const xy::NetEvent& evt)
 
     m_sharedData.playerInfo[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
 
-    //TODO broadcast update to all clients
+    //broadcast update to all clients
+    broadcastNames();
+    broadcastPlayerData();
+}
+
+void LobbyState::broadcastNames() const
+{
+
+}
+
+void LobbyState::broadcastPlayerData() const
+{
+    for (const auto player : m_sharedData.playerInfo)
+    {
+        PlayerData data;
+        data.peerID = player.first;
+        data.ready = player.second.ready;
+        data.vehicle = static_cast<std::uint8_t>(player.second.vehicle);
+
+        m_sharedData.netHost.broadcastPacket(PacketID::DeliverPlayerData, data, xy::NetFlag::Reliable);
+    }
 }
