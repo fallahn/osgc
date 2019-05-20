@@ -48,4 +48,6 @@ private:
     void initScene();
     void pollNetwork();
     void sendPlayerName();
+    void receivePlayerName(const xy::NetEvent&);
+    void refreshView();
 };

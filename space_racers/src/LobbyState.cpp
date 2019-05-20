@@ -25,18 +25,29 @@ Copyright 2019 Matt Marchant
 #include "GameModes.hpp"
 #include "VehicleSystem.hpp"
 #include "ResourceIDs.hpp"
+#include "CommandIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
 
 #include <cstring>
+
+namespace
+{
+    const std::array<sf::String, 3u> vehicleNames =
+    {
+        "Car", "Bike", "ship"
+    };
+}
 
 LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
@@ -87,7 +98,8 @@ bool LobbyState::handleEvent(const sf::Event& evt)
     //temp just to launch a game
     if (evt.type == sf::Event::KeyReleased)
     {
-        if (evt.key.code == sf::Keyboard::Space)
+        if (evt.key.code == sf::Keyboard::Space
+            && m_sharedData.hosting)
         {
             m_sharedData.netClient->sendPacket(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
 
@@ -125,16 +137,26 @@ void LobbyState::draw()
 void LobbyState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
     
     FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
-    
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default])).setString("Press space to not be here");
+    entity.addComponent<xy::Text>(font).setString("LOBBY");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(40.f, 120.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString("No Players");
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::LobbyText;
 }
 
 void LobbyState::pollNetwork()
@@ -150,7 +172,7 @@ void LobbyState::pollNetwork()
             default: break;
             case PacketID::LeftLobby:
                 m_playerInfo.erase(packet.as<std::uint64_t>());
-                LOG("REFRESH LOBBY VIEW", xy::Logger::Type::Info);
+                refreshView();
                 break;
             case PacketID::RequestPlayerName:
                 sendPlayerName();
@@ -160,8 +182,12 @@ void LobbyState::pollNetwork()
                 auto data = packet.as<PlayerData>();
                 m_playerInfo[data.peerID].ready = data.ready;
                 m_playerInfo[data.peerID].vehicle = data.vehicle;
-                LOG("REFRESH LOBBY VIEW", xy::Logger::Type::Info);
+                refreshView();
             }
+                break;
+            case PacketID::DeliverPlayerName:
+                receivePlayerName(evt);
+                refreshView();
                 break;
             case PacketID::GameStarted:
                 //set shared data with game info
@@ -197,4 +223,43 @@ void LobbyState::sendPlayerName()
     auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), NetConst::MaxNameSize);
 
     m_sharedData.netClient->sendPacket(PacketID::NameString, nameBytes.data(), size, xy::NetFlag::Reliable);
+}
+
+void LobbyState::receivePlayerName(const xy::NetEvent& evt)
+{
+    auto size = evt.packet.getSize();
+    size = std::min(NetConst::MaxNameSize, size - sizeof(sf::Uint64));
+    
+    sf::Uint64 peerID = 0;
+    std::memcpy(&peerID, evt.packet.getData(), sizeof(peerID));
+
+    std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
+    std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(peerID), size);
+
+    m_playerInfo[peerID].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+}
+
+void LobbyState::refreshView()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::LobbyText;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        sf::String output;
+
+        for (const auto& [peer, player] : m_playerInfo)
+        {
+            output += player.name + " - " + vehicleNames[player.vehicle];
+            if (player.ready)
+            {
+                output += " - Ready";
+            }
+            else
+            {
+                output += " - Not Ready\n";
+            }
+        }
+        e.getComponent<xy::Text>().setString(output);
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }

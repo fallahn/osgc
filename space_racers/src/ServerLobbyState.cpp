@@ -124,17 +124,26 @@ void LobbyState::setClientName(const xy::NetEvent& evt)
 
 void LobbyState::broadcastNames() const
 {
+    for (const auto& [peerID, player] : m_sharedData.playerInfo)
+    {
+        auto size = std::min(NetConst::MaxNameSize, player.name.getSize() * sizeof(sf::Uint32));
+        std::vector<char> buffer(sizeof(peerID) + size);
 
+        std::memcpy(buffer.data(), &peerID, sizeof(peerID));
+        std::memcpy(buffer.data() + sizeof(peerID), player.name.getData(), size);
+
+        m_sharedData.netHost.broadcastPacket(PacketID::DeliverPlayerName, buffer.data(), size + sizeof(peerID), xy::NetFlag::Reliable);
+    }
 }
 
 void LobbyState::broadcastPlayerData() const
 {
-    for (const auto player : m_sharedData.playerInfo)
+    for (const auto& [peerID, player] : m_sharedData.playerInfo)
     {
         PlayerData data;
-        data.peerID = player.first;
-        data.ready = player.second.ready;
-        data.vehicle = static_cast<std::uint8_t>(player.second.vehicle);
+        data.peerID = peerID;
+        data.ready = player.ready;
+        data.vehicle = static_cast<std::uint8_t>(player.vehicle);
 
         m_sharedData.netHost.broadcastPacket(PacketID::DeliverPlayerData, data, xy::NetFlag::Reliable);
     }

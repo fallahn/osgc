@@ -190,23 +190,20 @@
   <object id="40" x="84" y="544">
    <polygon points="0,0 461,-467 485,-445 13,19"/>
   </object>
-  <object id="103" x="1728" y="1472">
-   <polygon points="0,0 1536,0 1536,1152 1024,1664 928,1664 0,768"/>
+  <object id="103" x="1824" y="1600">
+   <polygon points="0,0 1376,0 1376,930.462 917.333,1344 831.333,1344 0,620.308"/>
   </object>
-  <object id="104" x="2976" y="1472">
+  <object id="104" x="2912" y="1568">
    <polygon points="0,0 288,-320 288,0"/>
   </object>
-  <object id="105" x="3232" y="128">
-   <polygon points="0,0 0,1024 64,1024 32,0"/>
-  </object>
-  <object id="106" x="704" y="704" width="1824" height="32"/>
-  <object id="107" x="704" y="736" width="224" height="1824"/>
+  <object id="106" x="704" y="704" width="1736" height="16"/>
+  <object id="107" x="734" y="736" width="194" height="1824"/>
   <object id="108" x="928" y="2560">
-   <polygon points="0,0 864,896 736,1024 -32,1024 -288,800 -288,32 -224,0"/>
+   <polygon points="0,0 790,838 738,960 -30,956 -224,758 -256,54 -224,0"/>
   </object>
   <object id="109" x="4096" y="768" width="256" height="2624"/>
   <object id="110" x="3552" y="3392">
-   <polygon points="0,0 544,0 544,-576"/>
+   <polygon points="118,-4 544,0 538,-444"/>
   </object>
  </objectgroup>
  <objectgroup color="#ffff00" id="8" name="Collision" visible="0">
