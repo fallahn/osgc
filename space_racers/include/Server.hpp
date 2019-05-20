@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "ClientPackets.hpp"
+
 #include <xyginext/core/MessageBus.hpp>
 #include <xyginext/network/NetHost.hpp>
 
@@ -37,11 +39,8 @@ namespace sv
         xy::NetHost netHost;
         std::vector<xy::NetPeer> clients;
 
-        //game info received from lobby data
-        std::uint8_t playerCount = 0;
-        std::uint8_t mapIndex = 0;
-        std::array<std::uint64_t, 4> peerIDs = {};
-        std::array<std::uint8_t, 4> vehicleIDs = {};
+        //game info set in lobby
+        LobbyData lobbyData;
     };
 
     class Server final

@@ -63,6 +63,20 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
 
+    //make sure any previous sessions are tidied up
+    if (sd.netClient)
+    {
+        sd.netClient->disconnect();
+        sd.netClient.reset();
+    }
+
+    if (sd.server)
+    {
+        sd.server->quit();
+        sd.server.reset();
+    }
+
+
     initScene();
     loadResources();
     buildMenu();
@@ -230,6 +244,8 @@ void MenuState::buildMenu()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     //TODO choose host/join
+                    requestStackClear();
+                    requestStackPush(StateID::Lobby);
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;

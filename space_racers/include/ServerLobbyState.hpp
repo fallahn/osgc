@@ -39,6 +39,6 @@ namespace sv
         SharedData& m_sharedData;
         std::int32_t m_nextState;
 
-        void startGame(const LobbyData&);
+        void startGame(/*const LobbyData&*/);
     };
 }

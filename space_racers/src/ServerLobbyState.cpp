@@ -46,9 +46,50 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
         switch (packet.getID())
         {
         default: break;
-        case PacketID::LobbyData:
-            startGame(packet.as<LobbyData>());            
+        case PacketID::LaunchGame:
+            startGame();
             break;
+        }
+    }
+    else if (evt.type == xy::NetEvent::ClientConnect)
+    {
+        if (m_sharedData.lobbyData.playerCount == LobbyData::MaxPlayers)
+        {
+            return;
+        }
+
+        //TODO request info, like name
+        m_sharedData.lobbyData.peerIDs[m_sharedData.lobbyData.playerCount] = evt.peer.getID();
+        m_sharedData.lobbyData.vehicleIDs[m_sharedData.lobbyData.playerCount] = 0;
+        m_sharedData.lobbyData.playerCount++;
+    }
+    else if (evt.type == xy::NetEvent::ClientDisconnect)
+    {
+        //TODO hmmm we ought to transfer ownership if the host drops
+        //but likelyhood is that the lobby was taken down anyway
+
+        //clear client data, broadcast to other clients.
+        auto id = evt.peer.getID();
+        auto i = 0u;
+
+        //find who left
+        for (i; i < m_sharedData.lobbyData.playerCount; ++i)
+        {
+            if (m_sharedData.lobbyData.peerIDs[i] == id)
+            {
+                break;
+            }
+        }
+
+        //swap last player into empty slot
+        if (m_sharedData.lobbyData.playerCount > 1)
+        {
+            m_sharedData.lobbyData.playerCount--;
+            if (i != m_sharedData.lobbyData.playerCount)
+            {
+                m_sharedData.lobbyData.peerIDs[i] = m_sharedData.lobbyData.peerIDs[m_sharedData.lobbyData.playerCount];
+                m_sharedData.lobbyData.vehicleIDs[i] = m_sharedData.lobbyData.vehicleIDs[m_sharedData.lobbyData.playerCount];
+            }
         }
     }
 };
@@ -64,18 +105,9 @@ std::int32_t LobbyState::logicUpdate(float)
 }
 
 //private
-void LobbyState::startGame(const LobbyData& data)
+void LobbyState::startGame()
 {
-    m_sharedData.playerCount = data.playerCount;
-    m_sharedData.mapIndex = data.mapIndex;
-
-    for (auto i = 0u; i < data.playerCount; ++i)
-    {
-        m_sharedData.peerIDs[i] = data.peerIDs[i];
-        m_sharedData.vehicleIDs[i] = data.vehicleIDs[i];
-    }
-
-    switch (data.gameMode)
+    switch (m_sharedData.lobbyData.gameMode)
     {
     default: break;
     case GameMode::Race:

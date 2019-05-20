@@ -61,9 +61,7 @@ bool ErrorState::update(float dt)
 {
     m_scene.update(dt);
     
-    //we continue to update existing states in case they
-    //need to send network data. Be mindful of this!
-    return true;
+    return false;
 }
 
 void ErrorState::draw()

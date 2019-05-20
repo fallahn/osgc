@@ -90,11 +90,20 @@ void Server::threadFunc()
         xy::NetEvent evt;
         while (m_sharedData.netHost.pollEvent(evt))
         {
+            //give the state a chance to react to disconnects first
+            m_activeState->handleNetEvent(evt);            
+            
             if (evt.type == xy::NetEvent::ClientConnect)
             {
-                //TODO only allow new connections when in a lobby
-                LOG("Only allow new connections from lobby!", xy::Logger::Type::Warning);
-                m_sharedData.clients.push_back(evt.peer);
+                if (m_activeState->getID() == StateID::Lobby)
+                {
+                    m_sharedData.clients.push_back(evt.peer);
+                }
+                else
+                {
+                    //TODO deny or disconnect client
+                    LOG("this client should be disconnected!", xy::Logger::Type::Error);
+                }
             }
             else if (evt.type == xy::NetEvent::ClientDisconnect)
             {
@@ -106,9 +115,13 @@ void Server::threadFunc()
                         return evt.peer == peer;
                     }),
                     m_sharedData.clients.end());
-            }
 
-            m_activeState->handleNetEvent(evt);
+                if (m_sharedData.clients.empty())
+                {
+                    LOG("Dropped all clients, server quitting...", xy::Logger::Type::Info);
+                    m_running = false;
+                }
+            }
         }
 
         m_netAccumulator += m_netClock.restart();

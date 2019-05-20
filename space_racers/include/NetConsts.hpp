@@ -29,7 +29,8 @@ namespace PacketID
 {
     enum
     {
-        LobbyData, //contains settings about the game from the lobby owner
+        LobbyData, //contains settings about the game from the lobby
+        LaunchGame, //lobby host has indicated they wish to start
         GameStarted, //sends a GameStarted packet
         ClientMapLoaded, //clients has loaded map, requesting vehicles
         VehicleData, //packet contains data for a single vehicle

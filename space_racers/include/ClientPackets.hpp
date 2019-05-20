@@ -22,9 +22,10 @@ Copyright 2019 Matt Marchant
 
 struct LobbyData final
 {
-    std::uint64_t peerIDs[4]; //list of connected peers to map to vehicle type
-    std::uint8_t vehicleIDs[4]; //type of vehicle for each player
-    std::uint8_t playerCount = 1;
+    static constexpr std::uint8_t MaxPlayers = 4;    
+    std::uint64_t peerIDs[MaxPlayers]; //list of connected peers to map to vehicle type
+    std::uint8_t vehicleIDs[MaxPlayers]; //type of vehicle for each player
+    std::uint8_t playerCount = 0;
     std::uint8_t mapIndex = 0;
     std::uint8_t lapCount = 0;
     std::uint8_t gameMode = 0;

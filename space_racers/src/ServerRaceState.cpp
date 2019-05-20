@@ -56,8 +56,8 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     {
         GameStart gs;
         gs.gameMode = GameMode::Race;
-        gs.actorCount = sd.playerCount;
-        gs.mapIndex = sd.mapIndex;
+        gs.actorCount = sd.lobbyData.playerCount;
+        gs.mapIndex = sd.lobbyData.mapIndex;
 
         sd.netHost.broadcastPacket(PacketID::GameStarted, gs, xy::NetFlag::Reliable);
     }
@@ -127,6 +127,7 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
         }
 
         m_players.erase(evt.peer.getID());
+
         if (m_players.empty())
         {
             m_nextState = StateID::Lobby;
@@ -238,7 +239,7 @@ bool RaceState::loadMap()
         entity.addComponent<CollisionObject>().type = CollisionObject::Type::Roid;
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
 
-        m_sharedData.playerCount++; //this is so the client knows the total actor count and can notify when all have been spawned
+        m_sharedData.lobbyData.playerCount++; //this is so the client knows the total actor count and can notify when all have been spawned
     }
 
     return true;
@@ -246,9 +247,9 @@ bool RaceState::loadMap()
 
 bool RaceState::createPlayers()
 {
-    for (auto i = 0u; i < m_sharedData.playerCount; ++i)
+    for (auto i = 0u; i < m_sharedData.lobbyData.playerCount; ++i)
     {
-        auto peerID = m_sharedData.peerIDs[i];
+        auto peerID = m_sharedData.lobbyData.peerIDs[i];
         auto result = std::find_if(m_sharedData.clients.begin(), m_sharedData.clients.end(),
             [peerID](const xy::NetPeer & peer) {return peer.getID() == peerID; });
 
@@ -257,7 +258,7 @@ bool RaceState::createPlayers()
             //create vehicle entity
             auto entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
-            entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.vehicleIDs[i]);
+            entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.lobbyData.vehicleIDs[i]);
             entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
 
             entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
@@ -299,7 +300,7 @@ bool RaceState::createPlayers()
         else
         {
             //client disconnected somewhere.
-            //TODO handle this
+            //TODO check this is handled correctly by net event
         }
     }
 

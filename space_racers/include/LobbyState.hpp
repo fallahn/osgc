@@ -41,4 +41,6 @@ private:
     xy::Scene m_scene;
 
     void initScene();
+
+    void pollNetwork();
 };

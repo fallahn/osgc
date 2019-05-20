@@ -63,6 +63,9 @@ struct SharedData final
     GameData gameData;
     std::string errorMessage;
 
+    bool hosting = true;
+    std::string ip = "127.0.0.1";
+
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...
     std::shared_ptr<xy::NetClient> netClient;

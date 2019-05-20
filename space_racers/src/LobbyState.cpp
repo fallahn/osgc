@@ -42,21 +42,29 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     m_scene     (ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
-
     initScene();
 
-    //launch a local server instance, then connect
-    //TODO only do this if we're hosting
-    if (!sd.server)
+    sd.netClient = std::make_unique<xy::NetClient>();
+    if (!sd.netClient->create(2))
     {
-        sd.server = std::make_unique<sv::Server>();
-        sd.server->run(sv::StateID::Lobby);
+        xy::Logger::log("Creating net client failed...", xy::Logger::Type::Error);
+        sd.errorMessage = "Could not create network connection";
+        requestStackPush(StateID::Error);
     }
+    else
+    {
+        //launch a local server instance if hosting, then connect
+        if (sd.hosting && !sd.server)
+        {
+            sd.server = std::make_unique<sv::Server>();
+            sd.server->run(sv::StateID::Lobby);
+        }
 
-    sf::Clock tempClock;
-    while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
+        sf::Clock tempClock;
+        while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
 
-    sd.netClient->connect("127.0.0.1", NetConst::Port);
+        sd.netClient->connect(sd.ip, NetConst::Port);
+    }
 
     quitLoadingScreen();
 }
@@ -69,11 +77,7 @@ bool LobbyState::handleEvent(const sf::Event& evt)
     {
         if (evt.key.code == sf::Keyboard::Space)
         {
-            LobbyData data;
-            data.peerIDs[0] = m_sharedData.netClient->getPeer().getID();
-            data.vehicleIDs[0] = Vehicle::Type::Car;
-
-            m_sharedData.netClient->sendPacket(PacketID::LobbyData, data, xy::NetFlag::Reliable);
+            m_sharedData.netClient->sendPacket(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
 
             //TODO we need to ignore further input from other clients to the lobby
             //perhaps relay this from the server when it rx lobby data
@@ -92,41 +96,7 @@ void LobbyState::handleMessage(const xy::Message& msg)
 
 bool LobbyState::update(float dt)
 {
-    xy::NetEvent evt;
-    while (m_sharedData.netClient->pollEvent(evt))
-    {
-        if (evt.type == xy::NetEvent::PacketReceived)
-        {
-            const auto& packet = evt.packet;
-            switch (packet.getID())
-            {
-            default: break;
-            case PacketID::GameStarted:
-                //set shared data with game info
-                //and launch game state
-            {
-                auto data = packet.as<GameStart>();
-                m_sharedData.gameData.actorCount = data.actorCount;
-                m_sharedData.gameData.mapIndex = data.mapIndex;
-
-                switch (data.gameMode)
-                {
-                default: break; //only network races implemented...
-                case GameMode:: Race:
-                    requestStackClear();
-                    requestStackPush(StateID::Race);
-                    break;
-                }
-            }
-                break;
-            case PacketID::ErrorServerMap:
-                LOG("Server failed to load map - TODO report map index which failed", xy::Logger::Type::Error);
-                m_sharedData.errorMessage = "Server failed to load map";
-                requestStackPush(StateID::Error);
-                break;
-            }
-        }
-    }
+    pollNetwork();
 
     m_scene.update(dt);
 
@@ -153,4 +123,43 @@ void LobbyState::initScene()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default])).setString("Press space to not be here");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+}
+
+void LobbyState::pollNetwork()
+{
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
+    {
+        if (evt.type == xy::NetEvent::PacketReceived)
+        {
+            const auto& packet = evt.packet;
+            switch (packet.getID())
+            {
+            default: break;
+            case PacketID::GameStarted:
+                //set shared data with game info
+                //and launch game state
+            {
+                auto data = packet.as<GameStart>();
+                m_sharedData.gameData.actorCount = data.actorCount;
+                m_sharedData.gameData.mapIndex = data.mapIndex;
+
+                switch (data.gameMode)
+                {
+                default: break; //only network races implemented...
+                case GameMode::Race:
+                    requestStackClear();
+                    requestStackPush(StateID::Race);
+                    break;
+                }
+            }
+            break;
+            case PacketID::ErrorServerMap:
+                LOG("Server failed to load map - TODO report map index which failed", xy::Logger::Type::Error);
+                m_sharedData.errorMessage = "Server failed to load map";
+                requestStackPush(StateID::Error);
+                break;
+            }
+        }
+    }
 }
