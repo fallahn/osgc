@@ -36,6 +36,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
 
+#include <cstring>
+
 LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
     m_sharedData(sd),
@@ -58,12 +60,22 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
         {
             sd.server = std::make_unique<sv::Server>();
             sd.server->run(sv::StateID::Lobby);
+
+            sf::Clock tempClock;
+            while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
         }
 
-        sf::Clock tempClock;
-        while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
-
-        sd.netClient->connect(sd.ip, NetConst::Port);
+        if (!sd.netClient->connect(sd.ip, NetConst::Port))
+        {
+            m_sharedData.errorMessage = "Failed to connect to lobby " + m_sharedData.ip;
+            requestStackPush(StateID::Error);
+        }
+        else
+        {
+            auto id = sd.netClient->getPeer().getID();
+            m_playerInfo[id] = PlayerInfo();
+            m_playerInfo[id].name = "Player " + std::to_string(id);
+        }
     }
 
     quitLoadingScreen();
@@ -136,6 +148,12 @@ void LobbyState::pollNetwork()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::LeftLobby:
+                m_playerInfo.erase(packet.as<std::uint64_t>());
+                break;
+            case PacketID::RequestPlayerData:
+                sendPlayerData();
+                break;
             case PacketID::GameStarted:
                 //set shared data with game info
                 //and launch game state
@@ -162,4 +180,12 @@ void LobbyState::pollNetwork()
             }
         }
     }
+}
+
+void LobbyState::sendPlayerData()
+{
+    auto nameBytes = m_playerInfo[m_sharedData.netClient->getPeer().getID()].name.toUtf32();
+    auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), NetConst::MaxNameSize);
+
+    m_sharedData.netClient->sendPacket(PacketID::NameString, nameBytes.data(), size, xy::NetFlag::Reliable);
 }

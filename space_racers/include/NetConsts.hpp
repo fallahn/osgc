@@ -19,10 +19,12 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 namespace NetConst
 {
-    const std::uint16_t Port = 4330;
+    static const std::uint16_t Port = 4330;
+    static const std::size_t MaxNameSize = 20 * sizeof(sf::Uint32); //bytes
 }
 
 namespace PacketID
@@ -30,6 +32,9 @@ namespace PacketID
     enum
     {
         LobbyData, //contains settings about the game from the lobby
+        LeftLobby, //peer ID of player who left the lobby
+        RequestPlayerData, //lobby wants the player's name
+        NameString, //packet is utf32 coded name string
         LaunchGame, //lobby host has indicated they wish to start
         GameStarted, //sends a GameStarted packet
         ClientMapLoaded, //clients has loaded map, requesting vehicles

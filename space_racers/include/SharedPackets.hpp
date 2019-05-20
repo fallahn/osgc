@@ -17,3 +17,15 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #pragma once
+
+#include <SFML/System/String.hpp>
+
+#include <cstdint>
+
+//this is only used to display other player info
+struct PlayerInfo final
+{
+    sf::String name;
+    std::uint32_t vehicle = 0;
+    bool ready = false;
+};

@@ -20,11 +20,11 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
+#include <SFML/System/String.hpp>
+
 struct LobbyData final
 {
-    static constexpr std::uint8_t MaxPlayers = 4;    
-    std::uint64_t peerIDs[MaxPlayers]; //list of connected peers to map to vehicle type
-    std::uint8_t vehicleIDs[MaxPlayers]; //type of vehicle for each player
+    static constexpr std::uint8_t MaxPlayers = 4;
     std::uint8_t playerCount = 0;
     std::uint8_t mapIndex = 0;
     std::uint8_t lapCount = 0;

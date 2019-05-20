@@ -19,9 +19,12 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "StateIDs.hpp"
+#include "SharedPackets.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+
+#include <map>
 
 class LobbyState final : public xy::State 
 {
@@ -40,7 +43,9 @@ private:
 
     xy::Scene m_scene;
 
-    void initScene();
+    std::map<std::uint64_t, PlayerInfo> m_playerInfo;
 
+    void initScene();
     void pollNetwork();
+    void sendPlayerData();
 };

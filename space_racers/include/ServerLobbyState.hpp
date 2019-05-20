@@ -22,7 +22,6 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Scene.hpp>
 
-struct LobbyData;
 namespace sv
 {
     class LobbyState final : public State
@@ -39,6 +38,7 @@ namespace sv
         SharedData& m_sharedData;
         std::int32_t m_nextState;
 
-        void startGame(/*const LobbyData&*/);
+        void startGame();
+        void setClientName(const xy::NetEvent&);
     };
 }

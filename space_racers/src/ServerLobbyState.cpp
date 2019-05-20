@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/network/NetData.hpp>
 
+#include <cstring>
+
 using namespace sv;
 LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
@@ -46,6 +48,9 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
         switch (packet.getID())
         {
         default: break;
+        case PacketID::NameString:
+            setClientName(evt);
+            break;
         case PacketID::LaunchGame:
             startGame();
             break;
@@ -58,9 +63,11 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
             return;
         }
 
-        //TODO request info, like name
-        m_sharedData.lobbyData.peerIDs[m_sharedData.lobbyData.playerCount] = evt.peer.getID();
-        m_sharedData.lobbyData.vehicleIDs[m_sharedData.lobbyData.playerCount] = 0;
+        //request info, like name - this is broadcast to other clients once it is received
+        m_sharedData.netHost.sendPacket(evt.peer, PacketID::RequestPlayerData, std::uint8_t(0), xy::NetFlag::Reliable);
+
+        m_sharedData.playerInfo[evt.peer.getID()].ready = false;
+        m_sharedData.playerInfo[evt.peer.getID()].vehicle = 0;
         m_sharedData.lobbyData.playerCount++;
     }
     else if (evt.type == xy::NetEvent::ClientDisconnect)
@@ -70,27 +77,10 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
 
         //clear client data, broadcast to other clients.
         auto id = evt.peer.getID();
-        auto i = 0u;
+        m_sharedData.playerInfo.erase(id);
+        m_sharedData.lobbyData.playerCount--;
 
-        //find who left
-        for (i; i < m_sharedData.lobbyData.playerCount; ++i)
-        {
-            if (m_sharedData.lobbyData.peerIDs[i] == id)
-            {
-                break;
-            }
-        }
-
-        //swap last player into empty slot
-        if (m_sharedData.lobbyData.playerCount > 1)
-        {
-            m_sharedData.lobbyData.playerCount--;
-            if (i != m_sharedData.lobbyData.playerCount)
-            {
-                m_sharedData.lobbyData.peerIDs[i] = m_sharedData.lobbyData.peerIDs[m_sharedData.lobbyData.playerCount];
-                m_sharedData.lobbyData.vehicleIDs[i] = m_sharedData.lobbyData.vehicleIDs[m_sharedData.lobbyData.playerCount];
-            }
-        }
+        m_sharedData.netHost.broadcastPacket(PacketID::LeftLobby, id, xy::NetFlag::Reliable);
     }
 };
 
@@ -116,4 +106,15 @@ void LobbyState::startGame()
     }
 
     //TODO ignore any further input in this state?
+}
+
+void LobbyState::setClientName(const xy::NetEvent& evt)
+{
+    auto size = std::min(evt.packet.getSize(), NetConst::MaxNameSize);
+    std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
+    std::memcpy(buffer.data(), evt.packet.getData(), size);
+
+    m_sharedData.playerInfo[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+
+    //TODO broadcast update to all clients
 }

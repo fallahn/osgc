@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "ClientPackets.hpp"
+#include "SharedPackets.hpp"
 
 #include <xyginext/core/MessageBus.hpp>
 #include <xyginext/network/NetHost.hpp>
@@ -41,6 +42,7 @@ namespace sv
 
         //game info set in lobby
         LobbyData lobbyData;
+        std::map<sf::Uint64, PlayerInfo> playerInfo;
     };
 
     class Server final

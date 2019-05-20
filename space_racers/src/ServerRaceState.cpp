@@ -247,9 +247,10 @@ bool RaceState::loadMap()
 
 bool RaceState::createPlayers()
 {
-    for (auto i = 0u; i < m_sharedData.lobbyData.playerCount; ++i)
+    auto i = 0;
+    for(const auto& playerInfo : m_sharedData.playerInfo)
     {
-        auto peerID = m_sharedData.lobbyData.peerIDs[i];
+        auto peerID = playerInfo.first;
         auto result = std::find_if(m_sharedData.clients.begin(), m_sharedData.clients.end(),
             [peerID](const xy::NetPeer & peer) {return peer.getID() == peerID; });
 
@@ -258,7 +259,7 @@ bool RaceState::createPlayers()
             //create vehicle entity
             auto entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
-            entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.lobbyData.vehicleIDs[i]);
+            entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(playerInfo.second.vehicle);
             entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
 
             entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
@@ -290,12 +291,12 @@ bool RaceState::createPlayers()
             auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
             entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
 
-            entity.getComponent<NetActor>().colourID = i;
+            entity.getComponent<NetActor>().colourID = i++;
             entity.getComponent<NetActor>().serverID = entity.getIndex();
 
             //map entity to peerID
-            m_players[peerID].entity = entity;
-            m_players[peerID].peer = *result;
+            m_players[playerInfo.first].entity = entity;
+            m_players[playerInfo.first].peer = *result;
         }
         else
         {
