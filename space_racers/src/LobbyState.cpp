@@ -120,10 +120,9 @@ bool LobbyState::update(float dt)
             }
                 break;
             case PacketID::ErrorServerMap:
-                LOG("Server failed to laod map - TODO report map index which failed", xy::Logger::Type::Error);
-                //TODO push an error state here with a meaningful message
-                requestStackClear();
-                requestStackPush(StateID::MainMenu);
+                LOG("Server failed to load map - TODO report map index which failed", xy::Logger::Type::Error);
+                m_sharedData.errorMessage = "Server failed to load map";
+                requestStackPush(StateID::Error);
                 break;
             }
         }
@@ -147,11 +146,11 @@ void LobbyState::initScene()
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
     
-    auto fallbackFont = m_sharedData.resources.load<sf::Font>("fallback");
+    FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(fallbackFont)).setString("Press space to not be here");
+    entity.addComponent<xy::Text>(m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default])).setString("Press space to not be here");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 }

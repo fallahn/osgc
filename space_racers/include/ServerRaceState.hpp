@@ -51,6 +51,7 @@ namespace sv
         SharedData& m_sharedData;
         xy::MessageBus& m_messageBus;
         xy::Scene m_scene;
+        std::int32_t m_nextState;
 
         MapParser m_mapParser;
 

@@ -46,6 +46,7 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
     m_messageBus    (mb),
     m_scene         (mb),
+    m_nextState     (StateID::Race),
     m_mapParser     (m_scene)
 {
     initScene();
@@ -90,7 +91,6 @@ void RaceState::handleMessage(const xy::Message& msg)
         }
     }
 
-
     m_scene.forwardMessage(msg);
 }
 
@@ -110,8 +110,26 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
             updatePlayerInput(m_players[evt.peer.getID()].entity, packet.as<InputUpdate>());
             break;
         case PacketID::ClientReady:
-            std::cout << "Client sent ready status from " << evt.peer.getID() << "\n";
+            
             break;
+        }
+    }
+    else if (evt.type == xy::NetEvent::ClientDisconnect)
+    {
+        //tidy up client resources and relay to remaining clients
+        auto entity = m_players[evt.peer.getID()].entity;
+        
+        if (entity.isValid())
+        {
+            m_scene.destroyEntity(entity);
+
+            //TODO send ent ID to clients for removal (perhaps with a messageID)
+        }
+
+        m_players.erase(evt.peer.getID());
+        if (m_players.empty())
+        {
+            m_nextState = StateID::Lobby;
         }
     }
 }
@@ -163,7 +181,7 @@ void RaceState::netUpdate(float)
 std::int32_t RaceState::logicUpdate(float dt)
 {
     m_scene.update(dt);
-    return StateID::Race;
+    return m_nextState;
 }
 
 //private

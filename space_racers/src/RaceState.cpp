@@ -144,7 +144,14 @@ void RaceState::loadResources()
 
 void RaceState::buildWorld()
 {
-    m_mapParser.load("assets/maps/AceOfSpace.tmx");
+    if (!m_mapParser.load("assets/maps/AceOfSpace.tmx"))
+    {
+        m_sharedData.errorMessage = "Client was unable to load map";
+        requestStackClear();
+        requestStackPush(StateID::Error);
+        m_sharedData.netClient->disconnect();
+        return;
+    }
 
     auto tempID = m_resources.load<sf::Texture>("assets/images/temp01.png");
     auto entity = m_gameScene.createEntity();
@@ -185,6 +192,10 @@ void RaceState::handlePackets()
                 break;
             case PacketID::ClientUpdate:
                 reconcile(packet.as<ClientUpdate>());
+                break;
+            case PacketID::ErrorServerGeneric:
+                m_sharedData.errorMessage = "Server Error.";
+                requestStackPush(StateID::Error);
                 break;
             }
         }
@@ -256,7 +267,6 @@ void RaceState::spawnVehicle(const VehicleData& data)
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
     camEnt.getComponent<xy::Camera>().lockRotation(true);
     camEnt.addComponent<CameraTarget>().target = entity;
-    //camEnt.g
 
     m_gameScene.setActiveCamera(camEnt);
 

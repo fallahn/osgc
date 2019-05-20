@@ -266,20 +266,22 @@ void VehicleSystem::doCollision(xy::Entity entity)
                     const auto& waypoint = other.getComponent<WayPoint>();
                     if (waypoint.id != vehicle.waypointID)
                     {
-                        auto diff = waypoint.id - vehicle.waypointID;
-                        if (diff == 1 || diff == -vehicle.waypointCount)
+                        auto expectedID = ((vehicle.waypointID + 1) % vehicle.waypointCount);
+                        if(expectedID == waypoint.id)
                         {
                             vehicle.waypointID = waypoint.id;
                             vehicle.waypointRotation = waypoint.rotation;
                             vehicle.waypointPosition = other.getComponent<xy::Transform>().getPosition();
                             
-                            if (diff == -vehicle.waypointCount)
+                            if (waypoint.id == 0)
                             {
-                                //we did a lap
-                                //TODO raise a message
+                                //we did a lap so raise a message
+                                auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+                                msg->type = VehicleEvent::LapLine;
+                                msg->entity = entity;
                             }
                         }
-                        else
+                        else if(waypoint.id > expectedID % vehicle.waypointCount)
                         {
                             explode(entity); //taking shortcuts or going backwards
                         }

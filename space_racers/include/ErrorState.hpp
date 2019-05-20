@@ -18,49 +18,26 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/System/Vector2.hpp>
+#include "StateIDs.hpp"
 
-#include <string>
-#include <array>
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
 
-namespace MapConst
-{
-    enum
-    {
-        Neon, Detail, Track, Normal, Count
-    };
-    static const std::array<std::string, Count> TileLayers =
-    {
-        "neon", "detail", "track", "normal"
-    };
-}
-
-namespace xy
-{
-    class Scene;
-}
-
-class MapParser final
+class ErrorState final : public xy::State 
 {
 public:
-    explicit MapParser(xy::Scene&);
+    ErrorState(xy::StateStack&, xy::State::Context, SharedData&);
 
-    bool load(const std::string&);
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
 
-    std::int32_t getWaypointCount() const
-    {
-        return m_waypointCount;
-    }
-
-    sf::Vector2f getStartPosition() const
-    {
-        return m_startPosition;
-    }
+    std::int32_t stateID() const override { return StateID::Error; }
 
 private:
-    xy::Scene& m_scene;
+    SharedData& m_sharedData;
+    xy::Scene m_scene;
 
-    std::int32_t m_waypointCount;
-    sf::Vector2f m_startPosition;
+    void initScene();
 };

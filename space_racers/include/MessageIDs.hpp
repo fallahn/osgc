@@ -35,7 +35,8 @@ struct VehicleEvent final
     {
         RequestRespawn,
         Fell,
-        Exploded
+        Exploded,
+        LapLine
     }type;
 
     xy::Entity entity;

@@ -31,6 +31,7 @@ source distribution.
 #include "RaceState.hpp"
 #include "DebugState.hpp"
 #include "LobbyState.hpp"
+#include "ErrorState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -54,10 +55,11 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<RaceState>(StateID::Race, data);
     ss->registerState<DebugState>(StateID::Debug, data);
     ss->registerState<LobbyState>(StateID::Lobby, data);
+    ss->registerState<ErrorState>(StateID::Error, data);
 
 #ifdef XY_DEBUG
-    return StateID::Debug;
-    //return StateID::Lobby;
+    //return StateID::Debug;
+    return StateID::Lobby;
     //return StateID::MainMenu;
 #else
     //return StateID::MainMenu;
@@ -71,4 +73,5 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::Race);
     ss->unregisterState(StateID::Debug);
     ss->unregisterState(StateID::Lobby);
+    ss->unregisterState(StateID::Error);
 }

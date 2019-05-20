@@ -153,6 +153,7 @@
     <ClInclude Include="include\CollisionObject.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
+    <ClInclude Include="include\ErrorState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\GameModes.hpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="src\CollisionObject.cpp" />
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\ErrorState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\InterpolationComponent.cpp" />
     <ClCompile Include="src\InterpolationSystem.cpp" />

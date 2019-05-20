@@ -35,6 +35,7 @@ source distribution.
 #include <xyginext/network/NetClient.hpp>
 
 #include <memory>
+#include <string>
 
 namespace StateID
 {
@@ -43,7 +44,8 @@ namespace StateID
         MainMenu,
         Lobby,
         Race,
-        Debug
+        Debug,
+        Error
     };
 }
 
@@ -59,6 +61,7 @@ struct SharedData final
     std::array<InputBinding, 4u> inputBindings;
     
     GameData gameData;
+    std::string errorMessage;
 
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...
