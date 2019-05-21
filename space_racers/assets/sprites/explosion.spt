@@ -1,0 +1,34 @@
+spritesheet explosion
+{
+	src="assets/images/explosion.png"
+	blend=add
+
+	sprite explosion
+	{
+
+		bounds = 0,0,256,256
+
+		animation explode
+		{
+			frame = 0,0,256,256
+			frame = 256,0,256,256
+			frame = 512,0,256,256
+			frame = 768,0,256,256
+			frame = 0,256,256,256
+			frame = 256,256,256,256
+			frame = 512,256,256,256
+			frame = 768,256,256,256
+			frame = 0,512,256,256
+			frame = 256,512,256,256
+			frame = 512,512,256,256
+			frame = 768,512,256,256
+			frame = 0,768,256,256
+			frame = 256,768,256,256
+			frame = 512,768,256,256
+			frame = 768,768,256,256
+
+			loop=false
+			framerate=12
+		}
+	}
+}
