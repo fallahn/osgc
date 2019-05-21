@@ -101,8 +101,8 @@ void Server::threadFunc()
                 }
                 else
                 {
-                    //TODO deny or disconnect client
-                    LOG("this client should be disconnected!", xy::Logger::Type::Error);
+                    //deny client as we're in game
+                    m_sharedData.netHost.sendPacket(evt.peer, PacketID::ErrorServerFull, std::uint8_t(0), xy::NetFlag::Reliable);
                 }
             }
             else if (evt.type == xy::NetEvent::ClientDisconnect)

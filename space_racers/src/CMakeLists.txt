@@ -16,5 +16,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
   PARENT_SCOPE)

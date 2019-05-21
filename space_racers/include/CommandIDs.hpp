@@ -20,12 +20,22 @@ Copyright 2019 Matt Marchant
 
 namespace CommandID
 {
-    enum
+    enum Game
     {
         NetActor = 0x1,
+        
+    };
+
+    enum Lobby
+    {
+        PlayerText = 0x1
+    };
 
 
-
-        LobbyText = 0x1000
+    enum Menu
+    {
+        RootNode = 0x1,
+        NameText = 0x2,
+        IPText = 0x4,
     };
 }

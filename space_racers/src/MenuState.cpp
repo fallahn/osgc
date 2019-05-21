@@ -29,6 +29,10 @@ source distribution.
 #include "StateIDs.hpp"
 #include "ResourceIDs.hpp"
 #include "PluginExport.hpp"
+#include "MenuConsts.hpp"
+#include "CommandIDs.hpp"
+#include "SliderSystem.hpp"
+#include "NetConsts.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -37,29 +41,35 @@ source distribution.
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/UIHitBox.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Window/Event.hpp>
 
 namespace
 {
-    const std::int32_t BackgroundDepth = -20;
-    const std::int32_t MenuDepth = 0;
-    const std::int32_t ButtonDepth = 1;
+
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State (ss, ctx),
-    m_sharedData(sd),
-    m_scene     (ctx.appInstance.getMessageBus())
+    : xy::State     (ss, ctx),
+    m_sharedData    (sd),
+    m_scene         (ctx.appInstance.getMessageBus()),
+    m_activeString  (nullptr)
 {
     launchLoadingScreen();
 
@@ -103,6 +113,8 @@ bool MenuState::handleEvent(const sf::Event& evt)
         return true;
     }
 
+    updateTextInput(evt);
+
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
 
@@ -136,7 +148,11 @@ void MenuState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
+    m_scene.addSystem<SliderSystem>(mb);
+    m_scene.addSystem<xy::CallbackSystem>(mb);
+    m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
@@ -155,21 +171,54 @@ void MenuState::loadResources()
     SpriteID::sprites[SpriteID::NetButton] = spriteSheet.getSprite("net");
     SpriteID::sprites[SpriteID::OptionsButton] = spriteSheet.getSprite("options");
     SpriteID::sprites[SpriteID::QuitButton] = spriteSheet.getSprite("quit");
+
+    spriteSheet.loadFromFile("assets/sprites/network_buttons.spt", m_resources);
+    SpriteID::sprites[SpriteID::PlayerNameButton] = spriteSheet.getSprite("player_name");
+    SpriteID::sprites[SpriteID::HostButton] = spriteSheet.getSprite("host");
+    SpriteID::sprites[SpriteID::AddressButton] = spriteSheet.getSprite("address");
+    SpriteID::sprites[SpriteID::JoinButton] = spriteSheet.getSprite("join");
+    SpriteID::sprites[SpriteID::NetBackButton] = spriteSheet.getSprite("back");
+
+    if (spriteSheet.loadFromFile("assets/sprites/cursor.spt", m_resources))
+    {
+        SpriteID::sprites[SpriteID::Cursor] = spriteSheet.getSprite("cursor");
+
+        //custom mouse cursor
+        auto entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().setDepth(300);
+        entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Cursor];
+        entity.addComponent<xy::SpriteAnimation>().play(0);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [](xy::Entity e, float)
+        {
+            auto mousePos = xy::App::getRenderWindow()->mapPixelToCoords(sf::Mouse::getPosition(*xy::App::getRenderWindow()));
+            e.getComponent<xy::Transform>().setPosition(mousePos);
+        };
+
+        xy::App::getActiveInstance()->setMouseCursorVisible(false);
+    }
 }
 
 void MenuState::buildMenu()
 {
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
 
+    auto rootNode = m_scene.createEntity();
+    rootNode.addComponent<xy::Transform>();
+    rootNode.addComponent<xy::CommandTarget>().ID = CommandID::RootNode;
+    rootNode.addComponent<Slider>().speed = 7.f;
+
     //title
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.addComponent<xy::Drawable>().setDepth(MenuDepth);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::MenuDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::MainMenu));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     auto& parentTx = entity.getComponent<xy::Transform>();
-
+    rootNode.getComponent<xy::Transform>().addChild(parentTx);
 
     auto& uiSystem = m_scene.getSystem<xy::UISystem>();
     auto mouseEnter = uiSystem.addMouseMoveCallback(
@@ -187,17 +236,17 @@ void MenuState::buildMenu()
         });
 
 
-    sf::Vector2f itemPosition(402.f ,380.f);
+    sf::Vector2f itemPosition = MenuConst::ItemRootPosition;
 
     //time trial
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::TimeTrialButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -213,7 +262,7 @@ void MenuState::buildMenu()
     //local
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::LocalButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
@@ -234,7 +283,7 @@ void MenuState::buildMenu()
     //net
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::NetButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
@@ -244,8 +293,16 @@ void MenuState::buildMenu()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     //TODO choose host/join
-                    requestStackClear();
-                    requestStackPush(StateID::Lobby);
+                    //requestStackClear();
+                    //requestStackPush(StateID::Lobby);
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = MenuConst::NetworkMenuPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
@@ -257,7 +314,7 @@ void MenuState::buildMenu()
     //options
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::OptionsButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
@@ -279,7 +336,7 @@ void MenuState::buildMenu()
     //quit
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
-    entity.addComponent<xy::Drawable>().setDepth(ButtonDepth);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::QuitButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
@@ -295,4 +352,221 @@ void MenuState::buildMenu()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
     parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    buildNetworkMenu(rootNode, mouseEnter, mouseExit);
+}
+
+void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
+{
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(xy::DefaultSceneSize.x, 0.f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::MenuDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::MainMenu));
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    auto & parentTx = entity.getComponent<xy::Transform>();
+    rootNode.getComponent<xy::Transform>().addChild(parentTx);
+
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+    sf::Vector2f itemPosition = MenuConst::ItemRootPosition;
+
+    //name input
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::PlayerNameButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeString = &m_sharedData.name;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::NameText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto textEnt = m_scene.createEntity();
+    textEnt.addComponent<xy::Transform>().setPosition(26.f, 10.f);
+    textEnt.addComponent<xy::Drawable>().setDepth(MenuConst::TextDepth);
+    //TODO set drawable cropping area
+    textEnt.addComponent<xy::Text>(font).setString(m_sharedData.name);
+    textEnt.getComponent<xy::Text>().setCharacterSize(36);
+    textEnt.addComponent<xy::CommandTarget>().ID = CommandID::NameText;
+    entity.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+    //host button
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::HostButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.hosting = true;
+                    m_sharedData.ip = "127.0.0.1";
+                    requestStackClear();
+                    requestStackPush(StateID::Lobby);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+    //address box
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::AddressButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeString = &m_sharedData.ip;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::IPText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    //ip text
+    textEnt = m_scene.createEntity();
+    textEnt.addComponent<xy::Transform>().setPosition(26.f, 10.f);
+    textEnt.addComponent<xy::Drawable>().setDepth(MenuConst::TextDepth);
+    //TODO set drawable cropping area
+    textEnt.addComponent<xy::Text>(font).setString(m_sharedData.ip);
+    textEnt.getComponent<xy::Text>().setCharacterSize(36);
+    textEnt.addComponent<xy::CommandTarget>().ID = CommandID::IPText;
+    entity.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+    //join button
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::JoinButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.hosting = false;
+                    requestStackClear();
+                    requestStackPush(StateID::Lobby);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+
+    itemPosition.y += bounds.height;
+
+    //back button
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(itemPosition);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::NetBackButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = MenuConst::MainMenuPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    parentTx.addChild(entity.getComponent<xy::Transform>());
+}
+
+void MenuState::updateTextInput(const sf::Event& evt)
+{
+    if (m_activeString != nullptr)
+    {
+        std::size_t maxChar = (m_activeString == &m_sharedData.ip)
+            ? 15 : NetConst::MaxNameSize / sizeof(sf::Uint32);
+
+        std::uint32_t targetFlags = (m_activeString == &m_sharedData.ip)
+            ? CommandID::IPText : CommandID::NameText;
+
+        auto updateText = [&, targetFlags]()
+        {
+            xy::Command cmd;
+            cmd.targetFlags = targetFlags;
+            cmd.action = [&](xy::Entity entity, float)
+            {
+                auto& text = entity.getComponent<xy::Text>();
+                text.setString(*m_activeString);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        };
+
+        if (evt.type == sf::Event::TextEntered)
+        {
+            //skipping backspace and delete
+            if (evt.text.unicode > 31
+                /*&& evt.text.unicode < 127*/
+                && m_activeString->getSize() < maxChar)
+            {
+                *m_activeString += evt.text.unicode;
+                updateText();
+            }
+        }
+        else if (evt.type == sf::Event::KeyReleased)
+        {
+            if (evt.key.code == sf::Keyboard::BackSpace
+                && !m_activeString->isEmpty())
+            {
+                m_activeString->erase(m_activeString->getSize() - 1);
+                updateText();
+            }
+            else if (evt.key.code == sf::Keyboard::Return)
+            {
+                m_activeString = nullptr;
+
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::NameText | CommandID::IPText;
+                cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
+                m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
+        }
+    }
 }

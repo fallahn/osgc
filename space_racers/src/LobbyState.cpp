@@ -76,7 +76,7 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
             while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
         }
 
-        if (!sd.netClient->connect(sd.ip, NetConst::Port))
+        if (!sd.netClient->connect(sd.ip.toAnsiString(), NetConst::Port))
         {
             m_sharedData.errorMessage = "Failed to connect to lobby " + m_sharedData.ip;
             requestStackPush(StateID::Error);
@@ -85,9 +85,18 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
         {
             auto id = sd.netClient->getPeer().getID();
             m_playerInfo[id] = PlayerInfo();
-            m_playerInfo[id].name = "Player " + std::to_string(id);
+            if (sd.name.isEmpty())
+            {
+                m_playerInfo[id].name = "Player " + std::to_string(id);
+            }
+            else
+            {
+                m_playerInfo[id].name = sd.name;
+            }
         }
     }
+
+    ctx.appInstance.setMouseCursorVisible(true);
 
     quitLoadingScreen();
 }
@@ -143,7 +152,7 @@ void LobbyState::initScene()
     
     FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
-
+    //TODO split into funcs
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
     entity.addComponent<xy::Drawable>();
@@ -156,7 +165,7 @@ void LobbyState::initScene()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("No Players");
     entity.getComponent<xy::Text>().setCharacterSize(32);
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::LobbyText;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Lobby::PlayerText;
 }
 
 void LobbyState::pollNetwork()
@@ -170,6 +179,11 @@ void LobbyState::pollNetwork()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::ErrorServerFull:
+                m_sharedData.errorMessage = "Could not connect, server full";
+                m_sharedData.netClient->disconnect();
+                requestStackPush(StateID::Error);
+                break;
             case PacketID::LeftLobby:
                 m_playerInfo.erase(packet.as<std::uint64_t>());
                 refreshView();
@@ -242,7 +256,7 @@ void LobbyState::receivePlayerName(const xy::NetEvent& evt)
 void LobbyState::refreshView()
 {
     xy::Command cmd;
-    cmd.targetFlags = CommandID::LobbyText;
+    cmd.targetFlags = CommandID::Lobby::PlayerText;
     cmd.action = [&](xy::Entity e, float)
     {
         sf::String output;

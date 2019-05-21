@@ -59,6 +59,12 @@ void ErrorState::handleMessage(const xy::Message& msg)
 
 bool ErrorState::update(float dt)
 {
+    //make sure any final packets are sent
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
+    {
+    }
+
     m_scene.update(dt);
     
     return false;

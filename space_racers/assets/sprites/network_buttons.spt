@@ -1,0 +1,30 @@
+spritesheet network_buttons
+{
+	src="assets/images/network_buttons.png"
+	blend=alpha
+
+	sprite player_name
+	{
+		bounds=0,0,349, 72
+	}
+
+	sprite host
+	{
+		bounds=0,72,349, 72
+	}
+
+	sprite address
+	{
+		bounds=0,144,349, 72
+	}
+
+	sprite join
+	{
+		bounds=0,216,349, 72
+	}
+
+	sprite back
+	{
+		bounds=0,288,349, 72
+	}
+}

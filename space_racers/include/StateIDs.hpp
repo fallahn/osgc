@@ -64,7 +64,8 @@ struct SharedData final
     std::string errorMessage;
 
     bool hosting = true;
-    std::string ip = "127.0.0.1";
+    sf::String ip = "127.0.0.1";
+    sf::String name = "Player";
 
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...

@@ -162,6 +162,7 @@
     <ClInclude Include="include\InterpolationSystem.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MapParser.hpp" />
+    <ClInclude Include="include\MenuConsts.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NetActor.hpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="include\ServerStates.hpp" />
     <ClInclude Include="include\ShapeUtils.hpp" />
     <ClInclude Include="include\SharedPackets.hpp" />
+    <ClInclude Include="include\SliderSystem.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
@@ -198,6 +200,7 @@
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServerLobbyState.cpp" />
     <ClCompile Include="src\ServerRaceState.cpp" />
+    <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -54,7 +54,12 @@ private:
     xy::Scene m_scene;
     xy::ResourceHolder m_resources;
 
+    sf::String* m_activeString;
+
     void initScene();
     void loadResources();
     void buildMenu();
+    void buildNetworkMenu(xy::Entity, sf::Uint32, sf::Uint32);
+
+    void updateTextInput(const sf::Event&);
 };

@@ -18,56 +18,18 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
-#include <array>
+#include <xyginext/Config.hpp>
 
-namespace FontID
+#include <SFML/System/Vector2.hpp>
+
+namespace MenuConst
 {
-    enum
-    {
-        Default,
+    static const sf::Vector2f MainMenuPosition;
+    static const sf::Vector2f NetworkMenuPosition(-xy::DefaultSceneSize.x, 0.f);
+    static const sf::Vector2f ItemRootPosition(402.f, 380.f);
 
-        Count
-    };
-
-    static std::array<std::size_t, Count> handles = {};
-}
-
-namespace TextureID
-{
-    enum
-    {
-        MainMenu,
-
-        Temp01, Temp02,
-
-        Count
-    };
-
-    static std::array<std::size_t, Count> handles = {};
-}
-
-#include <xyginext/ecs/components/Sprite.hpp>
-namespace SpriteID
-{
-    enum
-    {
-        TimeTrialButton,
-        LocalButton,
-        NetButton,
-        OptionsButton,
-        QuitButton,
-
-        PlayerNameButton,
-        HostButton,
-        AddressButton,
-        JoinButton,
-        NetBackButton,
-
-        Cursor,
-
-        Count
-    };
-
-    static std::array<xy::Sprite, Count> sprites;
+    static const std::int32_t BackgroundDepth = -20;
+    static const std::int32_t MenuDepth = 0;
+    static const std::int32_t ButtonDepth = 1;
+    static const std::int32_t TextDepth = 5;
 }

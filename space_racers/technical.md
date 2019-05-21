@@ -1,9 +1,18 @@
 A few notes on things I'm bound to forget:
 
+##### Lobby Initialisation
+If a client chooses to host the LobbyState (clientside) also spins up a server instace, and sets it to LobbyState (server side)
+
+When a client joins the server creates a slot for the client in the shared data struct and populates it with default values. It then requests the name string from the client.
+
+Name strings are a special case as they are 32bit utf encoded arrays of bytes. Once the server has received and decoded the array it broadcasts the player info to all connected clients.
+
+Clients send change requests for readiness state and vehicle. The host can also change the current map and number of laps. Each time one of these properties changes the changeis broadcast to all clients, and clients refresh their view.
+
 ##### Network game initialisation
 Assumes clients are in lobby state with one acting as a host, running a server instance also in a lobby state.
 
-Host sends game data to server:
+Host sends game data to server: TODO this is deprecated
 
     PacketID::LobbyData;
     struct LobbyData final

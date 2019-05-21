@@ -17,6 +17,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MenuConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NetActor.hpp
@@ -31,6 +32,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerStates.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShapeUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedPackets.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.hpp
