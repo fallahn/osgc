@@ -37,7 +37,7 @@ namespace TextureID
 {
     enum
     {
-        MainMenu,
+        MainMenu, VehicleSelect,
 
         Temp01, Temp02,
 

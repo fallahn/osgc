@@ -33,6 +33,8 @@ namespace PacketID
     {
         LobbyData, //contains settings about the game from the lobby
         LeftLobby, //peer ID of player who left the lobby
+        ReadyStateToggled, //0 if not ready, 1 if ready (uint8)
+        VehicleChanged, //client has changed vehicle
         RequestPlayerName, //lobby wants the player's name
         DeliverPlayerData, //server is sending other player data to clients
         DeliverPlayerName, //server is sending name of particular player

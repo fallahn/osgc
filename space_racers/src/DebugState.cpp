@@ -113,6 +113,8 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     buildWorld();
     addLocalPlayers();
 
+    ctx.appInstance.setMouseCursorVisible(true);
+
     registerWindow(
         [&]()
         {

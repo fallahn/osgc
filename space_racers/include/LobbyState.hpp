@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
 
 #include <map>
 
@@ -42,10 +43,14 @@ private:
     SharedData& m_sharedData;
 
     xy::Scene m_scene;
+    xy::ResourceHandler m_resources;
 
     std::map<std::uint64_t, PlayerInfo> m_playerInfo;
 
     void initScene();
+    void loadResources();
+    void buildMenu();
+
     void pollNetwork();
     void sendPlayerName();
     void receivePlayerName(const xy::NetEvent&);

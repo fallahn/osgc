@@ -49,10 +49,26 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
         switch (packet.getID())
         {
         default: break;
+        case PacketID::ReadyStateToggled:
+            m_sharedData.playerInfo[evt.peer.getID()].ready = (evt.packet.as<std::uint8_t>() != 0);
+            broadcastPlayerData(); //make sure clients are updated
+            break;
+        case PacketID::VehicleChanged:
+            m_sharedData.playerInfo[evt.peer.getID()].vehicle = evt.packet.as<std::uint8_t>();
+            broadcastPlayerData();
+            break;
         case PacketID::NameString:
             setClientName(evt);
             break;
         case PacketID::LaunchGame:
+            for (const auto& [peer, player] : m_sharedData.playerInfo)
+            {
+                if (!player.ready)
+                {
+                    return;
+                }
+            }
+
             startGame();
             break;
         }

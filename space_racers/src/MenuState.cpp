@@ -71,6 +71,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_scene         (ctx.appInstance.getMessageBus()),
     m_activeString  (nullptr)
 {
+    ctx.appInstance.setMouseCursorVisible(true);
+
     launchLoadingScreen();
 
     //make sure any previous sessions are tidied up

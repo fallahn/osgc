@@ -31,10 +31,20 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/UIHitBox.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/UISystem.hpp>
+
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -54,8 +64,12 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     m_sharedData(sd),
     m_scene     (ctx.appInstance.getMessageBus())
 {
+    ctx.appInstance.setMouseCursorVisible(true);    
+    
     launchLoadingScreen();
     initScene();
+    loadResources();
+    buildMenu();
 
     sd.netClient = std::make_unique<xy::NetClient>();
     if (!sd.netClient->create(2))
@@ -96,27 +110,13 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
         }
     }
 
-    ctx.appInstance.setMouseCursorVisible(true);
-
     quitLoadingScreen();
 }
 
 //public
 bool LobbyState::handleEvent(const sf::Event& evt)
 {
-    //temp just to launch a game
-    if (evt.type == sf::Event::KeyReleased)
-    {
-        if (evt.key.code == sf::Keyboard::Space
-            && m_sharedData.hosting)
-        {
-            m_sharedData.netClient->sendPacket(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
-
-            //TODO we need to ignore further input from other clients to the lobby
-            //perhaps relay this from the server when it rx lobby data
-        }
-    }
-
+    m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
 
     return true;
@@ -147,25 +147,195 @@ void LobbyState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(mb);
+    m_scene.addSystem<xy::CallbackSystem>(mb);
+    m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::SpriteAnimator>(mb);
+    m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
     
-    FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+}
+
+void LobbyState::loadResources()
+{
+    if (FontID::handles[FontID::Default] == 0)
+    {
+        FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+    }
+
+    TextureID::handles[TextureID::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select.png");
+
+    xy::SpriteSheet spriteSheet;
+
+
+    if (spriteSheet.loadFromFile("assets/sprites/cursor.spt", m_resources))
+    {
+        SpriteID::sprites[SpriteID::Cursor] = spriteSheet.getSprite("cursor");
+
+        //custom mouse cursor
+        auto entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().setDepth(300);
+        entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Cursor];
+        entity.addComponent<xy::SpriteAnimation>().play(0);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [](xy::Entity e, float)
+        {
+            auto mousePos = xy::App::getRenderWindow()->mapPixelToCoords(sf::Mouse::getPosition(*xy::App::getRenderWindow()));
+            e.getComponent<xy::Transform>().setPosition(mousePos);
+        };
+
+        xy::App::getActiveInstance()->setMouseCursorVisible(false);
+    }
+}
+
+void LobbyState::buildMenu()
+{
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
-    //TODO split into funcs
+
+    //title
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("LOBBY");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setCharacterSize(64);
 
+    //body text
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(40.f, 120.f);
+    entity.addComponent<xy::Transform>().setPosition(240.f, 120.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("No Players");
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Lobby::PlayerText;
+
+    //ready button
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(140.f, xy::DefaultSceneSize.y - 120.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString("Ready Up");
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    
+    auto bounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    if (e.getComponent<xy::Text>().getFillColour() == sf::Color::White)
+                    {
+                        //not yet ready
+                        e.getComponent<xy::Text>().setFillColour(sf::Color::Green);
+                        m_sharedData.netClient->sendPacket(PacketID::ReadyStateToggled, std::uint8_t(1), xy::NetFlag::Reliable);
+                    }
+                    else
+                    {
+                        e.getComponent<xy::Text>().setFillColour(sf::Color::White);
+                        m_sharedData.netClient->sendPacket(PacketID::ReadyStateToggled, std::uint8_t(0), xy::NetFlag::Reliable);
+                    }
+                }
+            });
+
+    //quit button
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - 240.f, xy::DefaultSceneSize.y - 120.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString("Leave");
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    if (m_sharedData.server)
+                    {
+                        e.getComponent<xy::Text>().setString("Quitting...");
+                        m_sharedData.server->quit();
+                    }
+
+                    requestStackClear();
+                    requestStackPush(StateID::MainMenu);
+                }
+            });
+
+    //vehicle select buttons
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(400.f, xy::DefaultSceneSize.y - 136.f);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSelect]));
+    entity.addComponent<xy::Drawable>();
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    bounds.height /= 3.f;
+    entity.getComponent<xy::Sprite>().setTextureRect(bounds);
+
+    bounds.width /= 3.f;
+    auto buttonEnt = m_scene.createEntity();
+    entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
+    buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&,entity](xy::Entity, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    auto id = m_sharedData.netClient->getPeer().getID();
+                    m_playerInfo[id].vehicle = (m_playerInfo[id].vehicle + 2) % 3;
+
+                    auto rect = entity.getComponent<xy::Sprite>().getTextureBounds();
+                    rect.top = m_playerInfo[id].vehicle * rect.height;
+                    entity.getComponent<xy::Sprite>().setTextureRect(rect);
+
+                    m_sharedData.netClient->sendPacket(PacketID::VehicleChanged, std::uint8_t(m_playerInfo[id].vehicle), xy::NetFlag::Reliable);
+                }
+            });
+
+    buttonEnt = m_scene.createEntity();
+    entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
+    buttonEnt.getComponent<xy::Transform>().move(bounds.width* 2.f, 0.f);
+    buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&, entity](xy::Entity, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    auto id = m_sharedData.netClient->getPeer().getID();
+                    m_playerInfo[id].vehicle = (m_playerInfo[id].vehicle + 1) % 3;
+
+                    auto rect = entity.getComponent<xy::Sprite>().getTextureBounds();
+                    rect.top = m_playerInfo[id].vehicle * rect.height;
+                    entity.getComponent<xy::Sprite>().setTextureRect(rect);
+
+                    m_sharedData.netClient->sendPacket(PacketID::VehicleChanged, std::uint8_t(m_playerInfo[id].vehicle), xy::NetFlag::Reliable);
+                }
+            });
+
+    if (m_sharedData.hosting)
+    {
+        //TODO map selection / lap count
+
+        //start game button
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y - 120.f);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font).setString("START");
+        entity.getComponent<xy::Text>().setCharacterSize(64);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+
+        bounds = xy::Text::getLocalBounds(entity);
+        entity.addComponent<xy::UIHitBox>().area = bounds;
+        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+                {
+                    if (flags & xy::UISystem::LeftMouse)
+                    {
+                        m_sharedData.netClient->sendPacket(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
+                    }
+                });
+    }
 }
 
 void LobbyState::pollNetwork()
