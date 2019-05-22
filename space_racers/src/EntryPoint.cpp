@@ -55,11 +55,11 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     data.launcher->launch();*/
 
     //return StateID::Debug;
-    //return StateID::Lobby;
-    return StateID::MainMenu;
-#else
-    //return StateID::MainMenu;
     return StateID::Lobby;
+    //return StateID::MainMenu;
+#else
+    return StateID::MainMenu;
+    //return StateID::Lobby;
 #endif
 }
 

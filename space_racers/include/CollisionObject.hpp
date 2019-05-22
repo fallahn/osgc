@@ -63,7 +63,7 @@ struct CollisionObject final
 {
     enum Type
     {
-        Collision, KillZone, Space, Waypoint, Jump, Fence, Vehicle, Roid,
+        Collision, KillZone, Space, Waypoint, Jump, Fence, Vehicle, Roid, NetActor,
 
         Count
     }type = Collision;

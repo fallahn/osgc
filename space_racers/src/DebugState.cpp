@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "ShapeUtils.hpp"
 #include "CameraTarget.hpp"
 #include "MessageIDs.hpp"
+#include "VehicleDefs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -103,7 +104,8 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     : xy::State     (ss, ctx),
     m_sharedData    (sd),
     m_gameScene     (ctx.appInstance.getMessageBus()),
-    m_playerInput   (sd.inputBindings[0], sd.netClient.get()),
+    m_playerInput   (sd.inputBindings[0], /*sd.netClient.get()*/nullptr),
+    m_otherInput    (sd.inputBindings[1], nullptr),
     m_mapParser     (m_gameScene)
 {
     launchLoadingScreen();
@@ -232,6 +234,7 @@ void DebugState::handleMessage(const xy::Message& msg)
 bool DebugState::update(float dt)
 {
     m_playerInput.update(dt);
+    m_otherInput.update(dt);
 
     xy::Command cmd;
     cmd.targetFlags = vehicleCommandID;
@@ -354,6 +357,7 @@ void DebugState::addLocalPlayers()
 
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
+    entity.getComponent<xy::Transform>().move(GameConst::SpawnPositions[0]); //TODO rotate the offset by spawn pos rot
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
@@ -394,4 +398,20 @@ void DebugState::addLocalPlayers()
     m_gameScene.setActiveCamera(camEnt);
 
     m_playerInput.setPlayerEntity(entity);
+
+
+    //another car for collision testing
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
+    entity.getComponent<xy::Transform>().move(GameConst::SpawnPositions[1]); //TODO rotate the offset by spawn pos rot
+    entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
+    entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
+    entity.getComponent<Vehicle>().settings = Definition::car;
+    entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+    entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID)).setTextureRect(GameConst::CarSize);
+    m_otherInput.setPlayerEntity(entity); //vehicle system won't update vehicle physics without an input parser
 }

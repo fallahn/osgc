@@ -27,14 +27,14 @@ Copyright 2019 Matt Marchant
 #include "AsteroidSystem.hpp"
 #include "WayPoint.hpp"
 #include "MessageIDs.hpp"
+#include "NetActor.hpp"
+#include "ActorIDs.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
-
-//#include  <xyginext/ecs/components/Sprite.hpp> //REMOVE
 
 #include <xyginext/util/Const.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -302,6 +302,23 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     auto& vehicle = entity.getComponent<Vehicle>();
     auto& tx = entity.getComponent<xy::Transform>();
 
+    auto separate = [&vehicle](sf::Vector2f otherVel)->float
+    {
+        float direction = xy::Util::Vector::dot(vehicle.velocity, otherVel);
+
+        if (direction > 0)
+        {
+            //heading the same way
+            vehicle.velocity -= otherVel * 0.2f;
+        }
+        else
+        {
+            //heading towards
+            vehicle.velocity += otherVel;
+        }
+        return direction;
+    };
+
     const auto& otherCollision = other.getComponent<CollisionObject>();
     switch (otherCollision.type)
     {
@@ -312,15 +329,6 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         vehicle.velocity = xy::Util::Vector::reflect(vehicle.velocity, manifold.normal) * 0.9f;
     }
         break;
-    case CollisionObject::Vehicle:
-        //TODO separate, then use the dot product of the difference between vehicle
-        //velocities to determine if the other vehicle is ahead
-        //dp > 0 means we are behind and should lose some velocity, else we were
-        //hit from behind and should gain some velocity. Amount gained is proportional
-        //to the dp/len of position difference * other vehicle velocity (or so)
-        //TODO this means the client is going to need to know velocities of other
-        //vehicles at the very least
-        break;
     case CollisionObject::Jump:
         //for now we'll let the flag state do the signalling
         break;
@@ -329,22 +337,48 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         break;
     case CollisionObject::Roid:
     {
-        //TODO this won't work without client side prediction for roids
-        //auto& roid = other.getComponent<Asteroid>();
-        //float direction = xy::Util::Vector::dot(vehicle.velocity, roid.getVelocity());
+        tx.move(manifold.penetration * manifold.normal);
 
-        //if (direction > 0)
-        //{
-        //    //heading the same way
-        //    vehicle.velocity -= roid.getVelocity() * 0.2f;
-        //}
-        //else
-        //{
-        //    //heading towards
-        //    vehicle.velocity += roid.getVelocity();
-        //}
-                
-        //TODO if roid velocity > certain length kill player
+        const auto& roid = other.getComponent<Asteroid>();
+        float impact = separate(roid.getVelocity());
+               
+        /*if (impact < 0)
+        {
+            explode(entity);
+        }*/
+    }
+        break;
+    case CollisionObject::Vehicle:
+    {
+        tx.move(manifold.penetration * manifold.normal);
+
+        auto& otherVehicle = other.getComponent<Vehicle>();
+        vehicle.velocity *= 0.5f;
+        otherVehicle.velocity += vehicle.velocity;
+        //TODO other vehicle should probably rotate when not hit square
+        //something like (1- dot(vel, norm(otherForwardVec) * someForce)
+
+        /*const auto& otherTx = other.getComponent<xy::Transform>();
+        sf::Vector2f forwardVec = otherTx.getTransform().transformPoint({ 1.f, 0.f }) - otherTx.getPosition();
+        float rotation = (1.f - xy::Util::Vector::dot(vehicle.velocity, forwardVec)) * 0.0001f;
+        otherVehicle.anglularVelocity -= rotation;*/
+    }
+        break;
+    case CollisionObject::NetActor:
+    {
+        //done client side to better predict collisions
+        tx.move(manifold.penetration * manifold.normal);
+
+        const auto& actor = other.getComponent<NetActor>();
+        if (actor.actorID == ActorID::Roid)
+        {
+            separate(actor.velocity);
+        }
+        else
+        {
+            vehicle.velocity *= 0.5f;
+            vehicle.velocity += actor.velocity * 0.5f;
+        }
     }
         break;
     }

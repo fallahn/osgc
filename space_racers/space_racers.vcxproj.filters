@@ -218,5 +218,8 @@
     <ClCompile Include="src\ClientLauncher.cpp">
       <Filter>Source Files\dummy client</Filter>
     </ClCompile>
+    <ClCompile Include="src\NetActorSystem.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

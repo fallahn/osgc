@@ -158,6 +158,26 @@ void RaceState::netUpdate(float)
         cu.collisionFlags = vehicle.collisionFlags;
         cu.stateFlags = vehicle.stateFlags;
         m_sharedData.netHost.sendPacket(p.second.peer, PacketID::ClientUpdate, cu, xy::NetFlag::Unreliable);
+
+        //send actor updates only for visible
+        /*sf::FloatRect queryBounds = { tx.getPosition() - (xy::DefaultSceneSize / 2.f), xy::DefaultSceneSize };
+        auto actors = m_scene.getSystem<xy::DynamicTreeSystem>().query(queryBounds, CollisionFlags::Vehicle | CollisionFlags::Asteroid);
+        for (auto actor : actors)
+        {
+            const auto& tx = actor.getComponent<xy::Transform>();
+            auto velocity = actor.getComponent<NetActor>().velocity;
+
+            ActorUpdate au;
+            au.serverID = static_cast<std::uint16_t>(actor.getIndex());
+            au.rotation = tx.getRotation();
+            au.x = tx.getPosition().x;
+            au.y = tx.getPosition().y;
+            au.velX = velocity.x;
+            au.velY = velocity.y;
+            au.timestamp = getServerTime();
+
+            m_sharedData.netHost.sendPacket(p.second.peer, PacketID::ActorUpdate, au, xy::NetFlag::Unreliable);
+        }*/
     }
 
     //broadcast data for each actor
@@ -165,12 +185,15 @@ void RaceState::netUpdate(float)
     for (auto actor : actors)
     {
         const auto& tx = actor.getComponent<xy::Transform>();
+        auto velocity = actor.getComponent<NetActor>().velocity;
 
         ActorUpdate au;
         au.serverID = static_cast<std::uint16_t>(actor.getIndex());
         au.rotation = tx.getRotation();
         au.x = tx.getPosition().x;
         au.y = tx.getPosition().y;
+        au.velX = velocity.x;
+        au.velY = velocity.y;
         au.timestamp = getServerTime();
 
         m_sharedData.netHost.broadcastPacket(PacketID::ActorUpdate, au, xy::NetFlag::Unreliable);
@@ -259,6 +282,7 @@ bool RaceState::createPlayers()
             //create vehicle entity
             auto entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
+            entity.getComponent<xy::Transform>().move(GameConst::SpawnPositions[i]); //TODO rotate the offset by spawn pos rot
             entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(playerInfo.second.vehicle);
             entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
 

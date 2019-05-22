@@ -60,6 +60,8 @@ struct ActorUpdate final
 {
     float x = 0.f;
     float y = 0.f;
+    float velX = 0.f;
+    float velY = 0.f;
     float rotation = 0.f;
     std::int32_t timestamp = 0;
     std::uint16_t serverID = 0;

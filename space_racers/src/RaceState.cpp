@@ -219,6 +219,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     //TODO we shopuld probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
     entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount(); 
+    entity.getComponent<Vehicle>().client = true;
 
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
@@ -333,12 +334,14 @@ void RaceState::spawnActor(const ActorData& data)
     {
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp02]));
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        auto radius = bounds.width / 2.f;
+        entity.getComponent<xy::Transform>().setOrigin(radius, radius);
         entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
 
-        float radius = data.scale * bounds.width;
-        entity.addComponent<CollisionObject>().type = CollisionObject::Type::Roid;
+        entity.addComponent<CollisionObject>().type = CollisionObject::Type::NetActor;
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(bounds);
     }
         break;
     }
@@ -353,13 +356,16 @@ void RaceState::updateActor(const ActorUpdate& update)
     cmd.targetFlags = CommandID::NetActor;
     cmd.action = [update](xy::Entity e, float)
     {
-        if (e.getComponent<NetActor>().serverID == update.serverID)
+        auto& actor = e.getComponent<NetActor>();
+        if (actor.serverID == update.serverID)
         {
             InterpolationPoint point;
             point.position = { update.x, update.y };
             point.rotation = update.rotation;
             point.timestamp = update.timestamp;
             e.getComponent<InterpolationComponent>().setTarget(point);
+
+            actor.velocity = { update.velX, update.velY };
         }
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);

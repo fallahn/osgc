@@ -19,7 +19,6 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <xyginext/ecs/System.hpp>
-#include <xyginext/ecs/components/Transform.hpp>
 
 //net actors are any entities which are syncronised between client and server
 struct NetActor final
@@ -27,17 +26,15 @@ struct NetActor final
     std::int32_t serverID = 0;
     std::int32_t actorID = 0;
     std::uint32_t colourID = 4;
+    sf::Vector2f velocity;
 };
 
 class NetActorSystem final : public xy::System 
 {
 public:
-    explicit NetActorSystem(xy::MessageBus& mb) 
-        : xy::System(mb, typeid(NetActorSystem))
-    {
-        requireComponent<NetActor>();
-        requireComponent<xy::Transform>();
-    }
+    explicit NetActorSystem(xy::MessageBus&);
+
+    void process(float) override;
 
     const std::vector<xy::Entity>& getActors() const { return getEntities(); }
 };

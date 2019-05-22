@@ -90,6 +90,8 @@ struct Vehicle final
     //amount of time before respawning vehicle
     static constexpr float RespawnDuration = 1.5f;
     float respawnTime = RespawnDuration;
+
+    bool client = false;
 };
 
 struct ClientUpdate;

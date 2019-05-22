@@ -54,6 +54,8 @@ private:
     InputParser m_playerInput;
     MapParser m_mapParser;
 
+    InputParser m_otherInput;
+
     void initScene();
     void loadResources();
     void buildWorld();

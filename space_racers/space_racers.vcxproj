@@ -199,6 +199,7 @@
     <ClCompile Include="src\LobbyState.cpp" />
     <ClCompile Include="src\MapParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\NetActorSystem.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServerLobbyState.cpp" />

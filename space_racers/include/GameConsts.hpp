@@ -61,7 +61,14 @@ namespace GameConst
         sf::Vector2f(0.f, ShipSize.height)
     };
 
-
+    static const float SpawnSpacing = ShipSize.height * 1.2f;
+    static const std::array<sf::Vector2f, 4u> SpawnPositions =
+    {
+        sf::Vector2f(0.f, SpawnSpacing * 0.5f),
+        sf::Vector2f(0.f, -SpawnSpacing * 0.5f),
+        sf::Vector2f(0.f, -SpawnSpacing * 1.f),
+        sf::Vector2f(0.f, SpawnSpacing * 1.5f)
+    };
 
     enum Colour
     {
