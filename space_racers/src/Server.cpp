@@ -164,6 +164,10 @@ void Server::threadFunc()
         updateCount = 0;
     }
 
+    m_sharedData.netHost.broadcastPacket(PacketID::ErrorServerDisconnect, std::uint8_t(0), xy::NetFlag::Reliable);
+    //make sure packet is sent
+    xy::NetEvent evt; while (m_sharedData.netHost.pollEvent(evt));
+
     //tidy up
     m_sharedData.netHost.stop();
     m_sharedData.clients.clear();

@@ -51,6 +51,7 @@ namespace PacketID
         ErrorServerMap, //server failed to load map
         ErrorServerGeneric, //generic server error
         ErrorServerFull, //lobby is full or already in game
+        ErrorServerDisconnect, //server was closed, clients should disconnect
 
         ClientInput, //packet contains controller input from client (InputUpdate)
         ClientUpdate, //update for the client to reconcile (from server)

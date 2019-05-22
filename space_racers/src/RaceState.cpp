@@ -195,6 +195,12 @@ void RaceState::handlePackets()
                 break;
             case PacketID::ErrorServerGeneric:
                 m_sharedData.errorMessage = "Server Error.";
+                m_sharedData.netClient->disconnect();
+                requestStackPush(StateID::Error);
+                break;
+            case PacketID::ErrorServerDisconnect:
+                m_sharedData.errorMessage = "Server Disconnected.";
+                m_sharedData.netClient->disconnect();
                 requestStackPush(StateID::Error);
                 break;
             }

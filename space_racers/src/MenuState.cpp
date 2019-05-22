@@ -391,6 +391,11 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
                     cmd.targetFlags = CommandID::NameText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+
+                    cmd.targetFlags = CommandID::IPText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
@@ -450,6 +455,10 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
                     xy::Command cmd;
                     cmd.targetFlags = CommandID::IPText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::NameText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
             });

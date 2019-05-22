@@ -349,6 +349,11 @@ void LobbyState::pollNetwork()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::ErrorServerDisconnect:
+                m_sharedData.errorMessage = "Server Disconnected.";
+                m_sharedData.netClient->disconnect();
+                requestStackPush(StateID::Error);
+                break;
             case PacketID::ErrorServerFull:
                 m_sharedData.errorMessage = "Could not connect, server full";
                 m_sharedData.netClient->disconnect();
@@ -436,7 +441,7 @@ void LobbyState::refreshView()
             output += player.name + " - " + vehicleNames[player.vehicle];
             if (player.ready)
             {
-                output += " - Ready";
+                output += " - Ready\n";
             }
             else
             {

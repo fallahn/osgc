@@ -166,7 +166,7 @@ bool MapParser::load(const std::string& path)
             {
                 const auto& objLayer = layer->getLayerAs<tmx::ObjectGroup>();
                 auto name = xy::Util::String::toLower(objLayer.getName());
-                for (auto i = 0; i < ObjectLayers.size(); ++i)
+                for (auto i = 0u; i < ObjectLayers.size(); ++i)
                 {
                     for (const auto& obj : objLayer.getObjects())
                     {
