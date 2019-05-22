@@ -34,6 +34,12 @@
     <Filter Include="Source Files\systems">
       <UniqueIdentifier>{66832e21-6046-4543-b1af-ca5caf8dcdb7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\dummy client">
+      <UniqueIdentifier>{8ee4b12d-1994-4c2e-ae9e-1942929e032f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\dummy client">
+      <UniqueIdentifier>{3ace6371-24a9-42f4-aa08-2473f6efa93c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\PluginExport.hpp">
@@ -147,6 +153,9 @@
     <ClInclude Include="include\ShapeUtils.hpp">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="include\DummyClient.hpp">
+      <Filter>Header Files\dummy client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -202,6 +211,12 @@
     </ClCompile>
     <ClCompile Include="src\VehicleSystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DummyClient.cpp">
+      <Filter>Source Files\dummy client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientLauncher.cpp">
+      <Filter>Source Files\dummy client</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

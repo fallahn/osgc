@@ -2,8 +2,10 @@ set(PROJECT_SRC
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTargetSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ClientLauncher.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CollisionObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DebugState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DummyClient.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
