@@ -291,6 +291,12 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 else if (auto manifold = intersects(entity, other); manifold)
                 {
                     resolveCollision(entity, other, *manifold);
+
+                    if (vehicle.stateFlags != (1 << Vehicle::Normal))
+                    {
+                        //something happened so quit collision detection
+                        return;
+                    }
                 }
             }
         }
@@ -340,12 +346,12 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         tx.move(manifold.penetration * manifold.normal);
 
         const auto& roid = other.getComponent<Asteroid>();
-        float impact = separate(roid.getVelocity());
+        separate(roid.getVelocity());
                
-        /*if (impact < 0)
+        if (manifold.penetration < -10)
         {
             explode(entity);
-        }*/
+        }
     }
         break;
     case CollisionObject::Vehicle:

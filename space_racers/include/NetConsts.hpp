@@ -48,6 +48,9 @@ namespace PacketID
         RaceStarted, //countdown has triggered
         ClientLeftRace, //server ent ID of leaving client for tidy up
 
+        VehicleExploded, //server id of exploded vehicle
+        VehicleFell, //server id of falling vehicle
+        VehicleSpawned, //server id of respawning vehicle
 
         ErrorServerMap, //server failed to load map
         ErrorServerGeneric, //generic server error

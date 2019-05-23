@@ -190,20 +190,19 @@ void RaceState::handlePackets()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::VehicleExploded:
+                explodeNetVehicle(packet.as<std::uint32_t>());                
+                break;
+            case PacketID::VehicleFell:
+                fallNetVehicle(packet.as<std::uint32_t>());                
+                break;
+            case PacketID::VehicleSpawned:
+                resetNetVehicle(packet.as<std::uint32_t>());
+                break;
             case PacketID::ClientLeftRace:
             {
                 PlayerIdent ident = packet.as<PlayerIdent>();
-
-                xy::Command cmd;
-                cmd.targetFlags = CommandID::NetActor;
-                cmd.action = [&, ident](xy::Entity e, float)
-                {
-                    if (e.getComponent<NetActor>().serverID == ident.serverID)
-                    {
-                        m_gameScene.destroyEntity(e);
-                    }
-                };
-                m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                removeNetVehicle(ident.serverID);                
             }
                 break;
             case PacketID::VehicleData:
@@ -246,6 +245,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
+    entity.getComponent<xy::Sprite>().setColour({ 255,255,255,120 });
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
     //TODO we shopuld probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
@@ -344,8 +344,9 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize);
+        entity.getComponent<xy::Sprite>().setColour(sf::Color(127,0,0,220));
         entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
-
+        
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
@@ -383,6 +384,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Transform>().setOrigin(radius, radius);
         entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
 
+        
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
         entity.getComponent<xy::BroadphaseComponent>().setArea(bounds);
@@ -425,4 +427,63 @@ void RaceState::reconcile(const ClientUpdate& update)
     {
         m_gameScene.getSystem<VehicleSystem>().reconcile(update, entity);
     }
+}
+
+void RaceState::resetNetVehicle(std::uint32_t id)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::NetActor;
+    cmd.action = [id](xy::Entity e, float)
+    {
+        if (e.getComponent<NetActor>().serverID == id)
+        {
+            //TODO disable falling callback
+            e.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+            e.getComponent<xy::Transform>().setScale(1.f, 1.f);
+        }
+    };
+    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void RaceState::explodeNetVehicle(std::uint32_t id)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::NetActor;
+    cmd.action = [id](xy::Entity e, float)
+    {
+        if (e.getComponent<NetActor>().serverID == id)
+        {
+            e.getComponent<xy::Transform>().setScale(0.f, 0.f);
+        }
+    };
+    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void RaceState::fallNetVehicle(std::uint32_t id)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::NetActor;
+    cmd.action = [id](xy::Entity e, float)
+    {
+        if (e.getComponent<NetActor>().serverID == id)
+        {
+            //TODO init scaling callback
+            e.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
+        }
+    };
+    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void RaceState::removeNetVehicle(std::uint32_t id)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::NetActor;
+    cmd.action = [&, id](xy::Entity e, float)
+    {
+        if (e.getComponent<NetActor>().serverID == id)
+        {
+            m_gameScene.destroyEntity(e);
+        }
+    };
+    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }

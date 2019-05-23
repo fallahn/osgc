@@ -88,6 +88,16 @@ void RaceState::handleMessage(const xy::Message& msg)
             tx.setPosition(vehicle.waypointPosition);
             tx.setRotation(vehicle.waypointRotation);
             tx.setScale(1.f, 1.f);
+
+            m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, entity.getIndex(), xy::NetFlag::Reliable);
+        }
+        else if (data.type == VehicleEvent::Exploded)
+        {
+            m_sharedData.netHost.broadcastPacket(PacketID::VehicleExploded, data.entity.getIndex(), xy::NetFlag::Reliable);
+        }
+        else if (data.type == VehicleEvent::Fell)
+        {
+            m_sharedData.netHost.broadcastPacket(PacketID::VehicleFell, data.entity.getIndex(), xy::NetFlag::Reliable);
         }
     }
 

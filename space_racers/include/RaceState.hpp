@@ -66,4 +66,9 @@ private:
     void spawnActor(const ActorData&);
     void updateActor(const ActorUpdate&);
     void reconcile(const ClientUpdate&);
+
+    void resetNetVehicle(std::uint32_t);
+    void explodeNetVehicle(std::uint32_t);
+    void fallNetVehicle(std::uint32_t);
+    void removeNetVehicle(std::uint32_t);
 };
