@@ -29,6 +29,7 @@ source distribution.
 
 #include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/core/State.hpp>
+#include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
@@ -37,6 +38,7 @@ class MenuState final : public xy::State, public xy::ConsoleClient
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    ~MenuState();
 
     bool handleEvent(const sf::Event&) override;
 
@@ -53,6 +55,7 @@ private:
     SharedData& m_sharedData;
     xy::Scene m_scene;
     xy::ResourceHolder m_resources;
+    xy::ConfigFile m_settings;
 
     sf::String* m_activeString;
 

@@ -62,7 +62,8 @@ source distribution.
 
 namespace
 {
-
+    const std::string AppName("space_racers");
+    const std::string CfgName("settings.cfg");
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -104,6 +105,13 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         });
 
     quitLoadingScreen();
+}
+
+MenuState::~MenuState()
+{
+    m_settings.findProperty("name")->setValue(m_sharedData.name.toAnsiString());
+    m_settings.findProperty("ip")->setValue(m_sharedData.ip.toAnsiString());
+    m_settings.save(xy::FileSystem::getConfigDirectory(AppName) + CfgName);
 }
 
 //public
@@ -201,6 +209,33 @@ void MenuState::loadResources()
 
         xy::App::getActiveInstance()->setMouseCursorVisible(false);
     }
+
+    if (m_settings.loadFromFile(xy::FileSystem::getConfigDirectory(AppName) + CfgName))
+    {
+        if (auto prop = m_settings.findProperty("name"); prop)
+        {
+            m_sharedData.name = prop->getValue<std::string>(); //barnacles. This doesn't support sf::String / unicode
+        }
+        else
+        {
+            m_settings.addProperty("name", m_sharedData.name.toAnsiString());
+        }
+
+        if (auto prop = m_settings.findProperty("ip"); prop)
+        {
+            m_sharedData.ip = prop->getValue<std::string>();
+        }
+        else
+        {
+            m_settings.addProperty("ip", m_sharedData.ip.toAnsiString());
+        }
+    }
+    else
+    {
+        m_settings.addProperty("name", m_sharedData.name.toAnsiString());
+        m_settings.addProperty("ip", m_sharedData.ip.toAnsiString());
+    }
+    m_settings.save(xy::FileSystem::getConfigDirectory(AppName) + CfgName);
 }
 
 void MenuState::buildMenu()
