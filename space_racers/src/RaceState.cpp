@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "NetActor.hpp"
 #include "ActorIDs.hpp"
 #include "InterpolationSystem.hpp"
+#include "DeadReckoningSystem.hpp"
 #include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
@@ -127,6 +128,7 @@ void RaceState::initScene()
 
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<InterpolationSystem>(mb);
+    m_gameScene.addSystem<DeadReckoningSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -296,10 +298,12 @@ void RaceState::spawnActor(const ActorData& data)
     entity.getComponent<xy::Transform>().setRotation(data.rotation);
     entity.getComponent<xy::Transform>().setScale(data.scale, data.scale);
     entity.addComponent<InterpolationComponent>();
+    entity.addComponent<DeadReckon>().prevTimestamp = data.timestamp; //important, initial reckoning will be way off otherwise
     entity.addComponent<NetActor>().actorID = data.actorID;
     entity.getComponent<NetActor>().serverID = data.serverID;
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::NetActor;
+    entity.addComponent<CollisionObject>().type = CollisionObject::Type::NetActor;
 
     switch (data.actorID)
     {
@@ -312,6 +316,10 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize);
         entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
+
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
     }
         break;
     case ActorID::Bike:
@@ -320,6 +328,10 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
         entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * GameConst::VehicleCentreOffset, GameConst::BikeSize.height / 2.f);
+
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
     }
         break;
     case ActorID::Ship:
@@ -328,6 +340,10 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
         entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
         entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * GameConst::VehicleCentreOffset, GameConst::ShipSize.height / 2.f);
+
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
     }
         break;
     case ActorID::Roid:
@@ -338,7 +354,6 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Transform>().setOrigin(radius, radius);
         entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
 
-        entity.addComponent<CollisionObject>().type = CollisionObject::Type::NetActor;
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
         entity.getComponent<xy::BroadphaseComponent>().setArea(bounds);
@@ -359,12 +374,15 @@ void RaceState::updateActor(const ActorUpdate& update)
         auto& actor = e.getComponent<NetActor>();
         if (actor.serverID == update.serverID)
         {
+            //we still use interpolation for rotation
             InterpolationPoint point;
-            point.position = { update.x, update.y };
+            //point.position = { update.x, update.y };
             point.rotation = update.rotation;
             point.timestamp = update.timestamp;
             e.getComponent<InterpolationComponent>().setTarget(point);
 
+            e.getComponent<DeadReckon>().update = update;
+            e.getComponent<DeadReckon>().hasUpdate = true;
             actor.velocity = { update.velX, update.velY };
         }
     };

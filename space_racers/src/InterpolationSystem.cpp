@@ -78,14 +78,16 @@ void InterpolationSystem::process(float dt)
         {
             float currTime = std::min(interp.m_elapsedTime.getElapsedTime().asSeconds() / interp.m_timeDifference, 1.f);
 
+            //position is disabled in favour of dead reckoning
+
             if (currTime < 1)
             {
                 tx.setRotation(linearInterpRotation(interp.m_previousPoint.rotation, interp.m_targetPoint.rotation, currTime));
-                tx.setPosition(interp.m_previousPoint.position + (diff * currTime));
+                //tx.setPosition(interp.m_previousPoint.position + (diff * currTime));
             }
             else
             {
-                tx.setPosition(interp.m_targetPoint.position);
+                //tx.setPosition(interp.m_targetPoint.position);
                 tx.setRotation(interp.m_targetPoint.rotation);
 
                 //shift interp target to next in buffer if available

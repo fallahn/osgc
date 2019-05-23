@@ -30,7 +30,7 @@ Copyright 2019 Matt Marchant
 namespace
 {
     //area around a roid to search for collisions
-    const sf::FloatRect SearchArea(0.f, 0.f, 600.f, 600.f);
+    const sf::FloatRect SearchArea(0.f, 0.f, 200.f, 200.f);
 }
 
 AsteroidSystem::AsteroidSystem(xy::MessageBus& mb)

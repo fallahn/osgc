@@ -152,6 +152,7 @@
     <ClInclude Include="include\ClientPackets.hpp" />
     <ClInclude Include="include\CollisionObject.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
+    <ClInclude Include="include\DeadReckoningSystem.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\DummyClient.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
@@ -189,6 +190,7 @@
     <ClCompile Include="src\CameraTargetSystem.cpp" />
     <ClCompile Include="src\ClientLauncher.cpp" />
     <ClCompile Include="src\CollisionObject.cpp" />
+    <ClCompile Include="src\DeadReckoningSystem.cpp" />
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\DummyClient.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />

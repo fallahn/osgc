@@ -51,6 +51,7 @@ struct ActorData final
     float y = 0.f;
     float rotation = 0.f;
     float scale = 1.f;
+    std::int32_t timestamp = 0;
     std::int16_t serverID = 0;
     std::int16_t actorID = 0;
     std::uint8_t colourID = 0;

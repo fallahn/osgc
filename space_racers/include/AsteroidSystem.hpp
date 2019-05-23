@@ -70,8 +70,6 @@ public:
     void process(float) override;
     void setMapSize(sf::FloatRect ms) { m_mapSize = ms; }
 
-    //TODO could possibly client-side predict these too
-
 private:
     sf::FloatRect m_mapSize;
     std::set<std::pair<xy::Entity, xy::Entity>> m_collisionPairs;

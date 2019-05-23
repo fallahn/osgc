@@ -156,6 +156,9 @@
     <ClInclude Include="include\DummyClient.hpp">
       <Filter>Header Files\dummy client</Filter>
     </ClInclude>
+    <ClInclude Include="include\DeadReckoningSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -219,6 +222,9 @@
       <Filter>Source Files\dummy client</Filter>
     </ClCompile>
     <ClCompile Include="src\NetActorSystem.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DeadReckoningSystem.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>

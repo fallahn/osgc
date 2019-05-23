@@ -227,10 +227,10 @@ bool RaceState::loadMap()
     }
 
     sf::FloatRect bounds(0.f, 0.f, 5120.f, 4096.f); //TODO get this from map data
-    bounds.left -= 100.f;
-    bounds.top -= 100.f;
-    bounds.width += 200.f;
-    bounds.height += 200.f;
+    bounds.left -= 1000.f;
+    bounds.top -= 1000.f;
+    bounds.width += 2000.f;
+    bounds.height += 2000.f;
     m_scene.getSystem<AsteroidSystem>().setMapSize(bounds);
 
     //create some roids
@@ -317,7 +317,7 @@ bool RaceState::createPlayers()
 
             entity.getComponent<NetActor>().colourID = i++;
             entity.getComponent<NetActor>().serverID = entity.getIndex();
-
+            
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;
             m_players[playerInfo.first].peer = *result;
@@ -363,6 +363,7 @@ void RaceState::sendPlayerData(const xy::NetPeer& peer)
             data.y = tx.getPosition().y;
             data.rotation = tx.getRotation();
             data.scale = tx.getScale().x;
+            data.timestamp = getServerTime();
 
             m_sharedData.netHost.sendPacket(peer, PacketID::ActorData, data, xy::NetFlag::Reliable);
         }
