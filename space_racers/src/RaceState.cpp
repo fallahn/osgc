@@ -71,6 +71,19 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool RaceState::handleEvent(const sf::Event& evt)
 {
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::Escape:
+        case sf::Keyboard::P:
+        case sf::Keyboard::Pause:
+            requestStackPush(StateID::Pause);
+            break;
+        }
+    }
+
     m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
     return true;

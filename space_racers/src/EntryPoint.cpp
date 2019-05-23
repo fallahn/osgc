@@ -32,6 +32,7 @@ source distribution.
 #include "DebugState.hpp"
 #include "LobbyState.hpp"
 #include "ErrorState.hpp"
+#include "PauseState.hpp"
 #include "DummyClient.hpp"
 
 #include <xyginext/core/StateStack.hpp>
@@ -49,6 +50,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<DebugState>(StateID::Debug, data);
     ss->registerState<LobbyState>(StateID::Lobby, data);
     ss->registerState<ErrorState>(StateID::Error, data);
+    ss->registerState<PauseState>(StateID::Pause, data);
 
 #ifdef XY_DEBUG
     /*data.launcher = std::make_unique<ClientLauncher>();
@@ -70,4 +72,5 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::Debug);
     ss->unregisterState(StateID::Lobby);
     ss->unregisterState(StateID::Error);
+    ss->unregisterState(StateID::Pause);
 }

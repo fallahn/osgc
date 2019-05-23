@@ -45,7 +45,8 @@ namespace StateID
         Lobby,
         Race,
         Debug,
-        Error
+        Error,
+        Pause
     };
 }
 

@@ -16,6 +16,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NetActorSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.cpp

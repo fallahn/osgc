@@ -169,6 +169,7 @@
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NetActor.hpp" />
     <ClInclude Include="include\NetConsts.hpp" />
+    <ClInclude Include="include\PauseState.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\RaceState.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
@@ -202,6 +203,7 @@
     <ClCompile Include="src\MapParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\NetActorSystem.cpp" />
+    <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServerLobbyState.cpp" />
