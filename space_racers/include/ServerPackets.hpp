@@ -30,6 +30,12 @@ struct PlayerData final
 
 };
 
+struct PlayerIdent final
+{
+    std::uint64_t peerID = 0;
+    std::uint32_t serverID = 0;
+};
+
 struct GameStart final
 {
     std::uint8_t actorCount = 1; //so the client knows it has received all actor info

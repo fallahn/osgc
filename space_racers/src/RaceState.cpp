@@ -177,6 +177,22 @@ void RaceState::handlePackets()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::ClientLeftRace:
+            {
+                PlayerIdent ident = packet.as<PlayerIdent>();
+
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::NetActor;
+                cmd.action = [&, ident](xy::Entity e, float)
+                {
+                    if (e.getComponent<NetActor>().serverID == ident.serverID)
+                    {
+                        m_gameScene.destroyEntity(e);
+                    }
+                };
+                m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
+                break;
             case PacketID::VehicleData:
                 spawnVehicle(packet.as<VehicleData>());
                 break;

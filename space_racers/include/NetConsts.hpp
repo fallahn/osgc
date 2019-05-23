@@ -46,6 +46,7 @@ namespace PacketID
         ActorData, //packet contains actor data to spawn on client
         ClientReady, //client has loaded all actors and is ready to start
         RaceStarted, //countdown has triggered
+        ClientLeftRace, //server ent ID of leaving client for tidy up
 
 
         ErrorServerMap, //server failed to load map

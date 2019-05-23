@@ -97,7 +97,7 @@ void Server::threadFunc()
             {
                 if (m_activeState->getID() == StateID::Lobby)
                 {
-                    m_sharedData.clients.push_back(evt.peer);
+                    m_sharedData.clients.push_back(std::make_pair(evt.peer, evt.peer.getID()));
                 }
                 else
                 {
@@ -110,9 +110,9 @@ void Server::threadFunc()
                 m_sharedData.clients.erase(std::remove_if(
                     m_sharedData.clients.begin(),
                     m_sharedData.clients.end(),
-                    [&](const xy::NetPeer peer)
+                    [&](const std::pair<xy::NetPeer, std::uint64_t>& pair)
                     {
-                        return evt.peer == peer;
+                        return evt.peer == pair.first;
                     }),
                     m_sharedData.clients.end());
 

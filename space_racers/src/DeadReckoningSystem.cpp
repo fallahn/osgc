@@ -55,7 +55,10 @@ void DeadReckoningSystem::process(float dt)
 
             auto& tx = entity.getComponent<xy::Transform>();
             tx.setPosition(dr.update.x, dr.update.y);
+
             tx.move(sf::Vector2f(dr.update.velX, dr.update.velY) * delta);
+            //collision(entity);
+
             //tx.setRotation(dr.update.rotation); //we'll use normal interpolation for rotation
         }
         else
@@ -72,7 +75,7 @@ void DeadReckoningSystem::collision(xy::Entity entity)
 {
     //some crude collision detection just to update the predicted velocity
     auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
-    const auto& tx = entity.getComponent<xy::Transform>();
+    auto& tx = entity.getComponent<xy::Transform>();
     bounds = tx.getTransform().transformRect(bounds);
 
     //if we split the types we can do cheaper circle collision on roids
@@ -103,6 +106,10 @@ void DeadReckoningSystem::collision(xy::Entity entity)
                 sf::Vector2f vel = xy::Util::Vector::reflect({ dr.update.velX, dr.update.velY }, diff);
                 dr.update.velX = vel.x;
                 dr.update.velY = vel.y;
+
+                //separate ents just to prevent multiple collisions
+                float penetration = (radius + otherRadius) - len;
+                tx.move(-diff * penetration);
             }
         }
     }

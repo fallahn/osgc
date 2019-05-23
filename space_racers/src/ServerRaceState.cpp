@@ -117,20 +117,34 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
     else if (evt.type == xy::NetEvent::ClientDisconnect)
     {
         //tidy up client resources and relay to remaining clients
-        auto entity = m_players[evt.peer.getID()].entity;
-        
-        if (entity.isValid())
+        auto result = std::find_if(m_sharedData.clients.begin(), m_sharedData.clients.end(),
+            [&evt](const std::pair<xy::NetPeer, std::uint64_t>& pair)
+            {
+                return pair.first == evt.peer;
+            });
+
+        if (result != m_sharedData.clients.end())
         {
-            m_scene.destroyEntity(entity);
+            auto id = result->second;
+            auto entity = m_players[id].entity;
 
-            //TODO send ent ID to clients for removal (perhaps with a messageID)
-        }
+            if (entity.isValid())
+            {
+                m_scene.destroyEntity(entity);
 
-        m_players.erase(evt.peer.getID());
+                //send ent ID to clients for removal
+                PlayerIdent ident;
+                ident.peerID = id;
+                ident.serverID = entity.getIndex();
+                m_sharedData.netHost.broadcastPacket(PacketID::ClientLeftRace, ident, xy::NetFlag::Reliable);
+            }
 
-        if (m_players.empty())
-        {
-            m_nextState = StateID::Lobby;
+            m_players.erase(id);
+
+            if (m_players.empty())
+            {
+                m_nextState = StateID::Lobby;
+            }
         }
     }
 }
@@ -275,7 +289,7 @@ bool RaceState::createPlayers()
     {
         auto peerID = playerInfo.first;
         auto result = std::find_if(m_sharedData.clients.begin(), m_sharedData.clients.end(),
-            [peerID](const xy::NetPeer & peer) {return peer.getID() == peerID; });
+            [peerID](const std::pair<xy::NetPeer, std::uint64_t>& peer) {return peer.second == peerID; });
 
         if (result != m_sharedData.clients.end())
         {
@@ -320,7 +334,7 @@ bool RaceState::createPlayers()
             
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;
-            m_players[playerInfo.first].peer = *result;
+            m_players[playerInfo.first].peer = result->first;
         }
         else
         {

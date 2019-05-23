@@ -38,7 +38,7 @@ namespace sv
     struct SharedData final
     {
         xy::NetHost netHost;
-        std::vector<xy::NetPeer> clients;
+        std::vector<std::pair<xy::NetPeer, std::uint64_t>> clients;
 
         //game info set in lobby
         LobbyData lobbyData;

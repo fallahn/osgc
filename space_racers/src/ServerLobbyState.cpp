@@ -93,11 +93,20 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
         //but likelyhood is that the lobby was taken down anyway
 
         //clear client data, broadcast to other clients.
-        auto id = evt.peer.getID();
-        m_sharedData.playerInfo.erase(id);
-        m_sharedData.lobbyData.playerCount--;
+        auto result = std::find_if(m_sharedData.clients.begin(), m_sharedData.clients.end(),
+            [&evt](const std::pair<xy::NetPeer, std::uint64_t>& pair)
+            {
+                return pair.first == evt.peer;
+            });
 
-        m_sharedData.netHost.broadcastPacket(PacketID::LeftLobby, id, xy::NetFlag::Reliable);
+        if (result != m_sharedData.clients.end())
+        {
+            auto id = result->second;
+            m_sharedData.playerInfo.erase(id);
+            m_sharedData.lobbyData.playerCount--;
+
+            m_sharedData.netHost.broadcastPacket(PacketID::LeftLobby, id, xy::NetFlag::Reliable);
+        }
     }
 };
 
