@@ -47,7 +47,8 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     m_messageBus    (mb),
     m_scene         (mb),
     m_nextState     (StateID::Race),
-    m_mapParser     (m_scene)
+    m_mapParser     (m_scene),
+    m_state         (Prepping)
 {
     initScene();
 
@@ -84,6 +85,7 @@ void RaceState::handleMessage(const xy::Message& msg)
             vehicle.velocity = {};
             vehicle.anglularVelocity = {};
             vehicle.stateFlags = (1 << Vehicle::Normal);
+            vehicle.invincibleTime = GameConst::InvincibleTime;
 
             tx.setPosition(vehicle.waypointPosition);
             tx.setRotation(vehicle.waypointRotation);
@@ -99,6 +101,23 @@ void RaceState::handleMessage(const xy::Message& msg)
         {
             m_sharedData.netHost.broadcastPacket(PacketID::VehicleFell, data.entity.getIndex(), xy::NetFlag::Reliable);
         }
+        else if (data.type == VehicleEvent::LapLine)
+        {
+            //TODO broadcast this to clients
+            for (auto& p : m_players)
+            {
+                if (p.second.entity == data.entity)
+                {
+                    p.second.lapCount--;
+                    if (p.second.lapCount == 0)
+                    {
+                        p.second.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+                        p.second.ready = false;
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     m_scene.forwardMessage(msg);
@@ -108,7 +127,6 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
 {
     if (evt.type == xy::NetEvent::PacketReceived)
     {
-        //TODO grab player inputs and apply to vehicles
         const auto& packet = evt.packet;
         switch (packet.getID())
         {
@@ -120,7 +138,7 @@ void RaceState::handleNetEvent(const xy::NetEvent& evt)
             updatePlayerInput(m_players[evt.peer.getID()].entity, packet.as<InputUpdate>());
             break;
         case PacketID::ClientReady:
-            
+            m_players[evt.peer.getID()].ready = true;
             break;
         }
     }
@@ -228,6 +246,72 @@ void RaceState::netUpdate(float)
 
 std::int32_t RaceState::logicUpdate(float dt)
 {
+    switch (m_state)
+    {
+    default: break;
+    case Prepping:
+        //waiting for clients to all ready up
+    {
+        bool ready = true;
+        for (const auto& p : m_players)
+        {
+            ready = p.second.ready;
+            if (!ready)
+            {
+                break;
+            }
+        }
+
+        m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+        m_state = Countdown;
+        m_countDownTimer.restart();
+    }
+        break;
+    case Countdown:
+        //counting to start
+    {
+        static const sf::Time countInTime = sf::seconds(3.f);
+        if (m_countDownTimer.getElapsedTime() > countInTime)
+        {
+            for (auto& p : m_players)
+            {
+                p.second.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
+            }
+
+            m_sharedData.netHost.broadcastPacket(PacketID::GameStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+            m_state = Racing;
+        }
+    }
+        break;
+    case Racing:
+        //game is a GO!
+        //check player ready state (set to false once crossed the finish line)
+        //if all false the game is over!
+    {
+        std::int32_t readyCount = 0;
+        for (const auto& p : m_players)
+        {
+            if (!p.second.ready)
+            {
+                readyCount++;
+            }
+        }
+
+        if (readyCount == m_players.size())
+        {
+            m_state = RaceOver;
+            m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, std::uint8_t(0), xy::NetFlag::Reliable);
+        }
+        else if (readyCount == m_players.size() - 1)
+        {
+            //we're in timeout mode
+            //TODO skip to game over on timeout
+        }
+    }
+        break;
+    case RaceOver: break;
+    }
+
     m_scene.update(dt);
     return m_nextState;
 }
@@ -345,6 +429,7 @@ bool RaceState::createPlayers()
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;
             m_players[playerInfo.first].peer = result->first;
+            m_players[playerInfo.first].lapCount = m_sharedData.lobbyData.lapCount + 1; //add one because we get the initial start line counted
         }
         else
         {

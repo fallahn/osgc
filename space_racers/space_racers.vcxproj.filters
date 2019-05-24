@@ -162,6 +162,12 @@
     <ClInclude Include="include\PauseState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\AnimationCallbacks.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SummaryState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -231,6 +237,9 @@
       <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\PauseState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SummaryState.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>

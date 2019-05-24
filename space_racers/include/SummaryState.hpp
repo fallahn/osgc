@@ -18,26 +18,35 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
+#include "StateIDs.hpp"
 
-#include <SFML/System/String.hpp>
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
 
-struct LobbyData final
+#include <SFML/System/Clock.hpp>
+
+class SummaryState final : public xy::State
 {
-    static constexpr std::uint8_t MaxPlayers = 4;
-    std::uint8_t playerCount = 0;
-    std::uint8_t mapIndex = 0;
-    std::uint8_t lapCount = 1;
-    std::uint8_t gameMode = 0;
-};
+public:
+    SummaryState(xy::StateStack&, xy::State::Context, SharedData&);
 
-//input taken from the client and sent to the server
-//TODO not sure we need this if it's identical to the
-//vehicle Input struct?
-struct InputUpdate final
-{
-    float steeringMultiplier = 1.f; //analogue controller multiplier
-    float accelerationMultiplier = 1.f;
-    std::int32_t timestamp = 0;
-    std::uint16_t inputFlags = 0;
+    bool handleEvent(const sf::Event&) override;
+
+    void handleMessage(const xy::Message&) override;
+
+    bool update(float) override;
+
+    void draw() override;
+
+    xy::StateID stateID() const override { return StateID::Summary; }
+
+private:
+    SharedData& m_sharedData;
+
+    xy::Scene m_scene;
+
+    sf::Clock m_delayClock;
+
+    void initScene();
+    void buildMenu();
 };

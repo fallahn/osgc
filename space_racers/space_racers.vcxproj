@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\ActorIDs.hpp" />
+    <ClInclude Include="include\AnimationCallbacks.hpp" />
     <ClInclude Include="include\AsteroidSystem.hpp" />
     <ClInclude Include="include\CameraTarget.hpp" />
     <ClInclude Include="include\CircularBuffer.hpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="include\SharedPackets.hpp" />
     <ClInclude Include="include\SliderSystem.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\SummaryState.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
     <ClInclude Include="include\WayPoint.hpp" />
@@ -209,6 +211,7 @@
     <ClCompile Include="src\ServerLobbyState.cpp" />
     <ClCompile Include="src\ServerRaceState.cpp" />
     <ClCompile Include="src\SliderSystem.cpp" />
+    <ClCompile Include="src\SummaryState.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

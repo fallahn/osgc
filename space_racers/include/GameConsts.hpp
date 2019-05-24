@@ -25,6 +25,8 @@ Copyright 2019 Matt Marchant
 
 namespace GameConst
 {
+    static const float InvincibleTime = 1.f;
+
     static const std::int32_t TrackRenderDepth = -10;
     static const std::int32_t VehicleRenderDepth = 0;
     static const std::int32_t RoidRenderDepth = 5;

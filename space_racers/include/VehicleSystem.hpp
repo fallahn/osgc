@@ -76,11 +76,13 @@ struct Vehicle final
     {
         Normal = 0,
         Falling,
-        Exploding
+        Exploding,
+        Disabled //input is ignored, we're on the starting grid
     };
+    float invincibleTime = 5.f;
 
     std::uint16_t collisionFlags = 0;
-    std::uint16_t stateFlags = 1;
+    std::uint16_t stateFlags = (1 << Disabled);
 
     std::int32_t waypointID = -1; //because the first we hit is 0
     std::int32_t waypointCount = 0;
@@ -105,6 +107,8 @@ public:
     void reconcile(const ClientUpdate&, xy::Entity);
 
 private:
+
+    void processVehicle(xy::Entity, float);
 
     void processInput(xy::Entity);
     void applyInput(xy::Entity, float);

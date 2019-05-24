@@ -87,6 +87,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     {
         sd.server->quit();
         sd.server.reset();
+
+        m_sharedData.hosting = false;
     }
 
 

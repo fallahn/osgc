@@ -68,21 +68,8 @@ void VehicleSystem::process(float)
         while (vehicle.lastUpdatedInput != idx)
         {
             auto delta = getDelta(vehicle.history, vehicle.lastUpdatedInput);
-
-            if (vehicle.stateFlags == (1 << Vehicle::Normal))
-            {
-                processInput(entity);
-                applyInput(entity, delta);
-                doCollision(entity);
-            }
-            else if (vehicle.stateFlags == (1 << Vehicle::Falling))
-            {
-                updateFalling(entity, delta);
-            }
-            else
-            {
-                updateExploding(entity, delta);
-            }
+            
+            processVehicle(entity, delta);
 
             vehicle.lastUpdatedInput = (vehicle.lastUpdatedInput + 1) % vehicle.history.size();
         }
@@ -118,20 +105,7 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
         {
             float delta = getDelta(vehicle.history, idx);
 
-            if (vehicle.stateFlags == (1 << Vehicle::Normal))
-            {
-                processInput(entity);
-                applyInput(entity, delta);
-                doCollision(entity);
-            }
-            else if (vehicle.stateFlags == (1 << Vehicle::Falling))
-            {
-                updateFalling(entity, delta);
-            }
-            else
-            {
-                updateExploding(entity, delta);
-            }
+            processVehicle(entity, delta);
 
             idx = (idx + 1) % vehicle.history.size();
         }
@@ -139,6 +113,29 @@ void VehicleSystem::reconcile(const ClientUpdate& update, xy::Entity entity)
 }
 
 //private
+void VehicleSystem::processVehicle(xy::Entity entity, float delta)
+{
+    auto& vehicle = entity.getComponent<Vehicle>();
+    switch (vehicle.stateFlags)
+    {
+    default: break;
+    case (1 << Vehicle::Normal):
+        processInput(entity);
+    //this is meant to fall through
+    case (1 << Vehicle::Disabled):
+        applyInput(entity, delta);
+        doCollision(entity);
+        break;
+    case (1 << Vehicle::Falling):
+        updateFalling(entity, delta);
+        break;
+    case (1 << Vehicle::Exploding):
+        updateExploding(entity, delta);
+        break;
+    }
+    vehicle.invincibleTime -= delta;
+}
+
 void VehicleSystem::processInput(xy::Entity entity)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
@@ -251,13 +248,16 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 if(type == CollisionObject::Space
                     && contains(tx.getPosition(), other))
                 {
-                    vehicle.collisionFlags |= (1 << type);
-                    vehicle.stateFlags = (1 << Vehicle::Falling);
-                    vehicle.respawnTime = Vehicle::RespawnDuration;
+                    if (vehicle.collisionFlags |= (1 << Vehicle::Disabled))
+                    {
+                        vehicle.collisionFlags |= (1 << type);
+                        vehicle.stateFlags = (1 << Vehicle::Falling);
+                        vehicle.respawnTime = Vehicle::RespawnDuration;
 
-                    auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
-                    msg->type = VehicleEvent::Fell;
-                    msg->entity = entity;
+                        auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+                        msg->type = VehicleEvent::Fell;
+                        msg->entity = entity;
+                    }
                 }
                 else if (type == CollisionObject::Waypoint)
                 {
@@ -345,10 +345,15 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
     {
         tx.move(manifold.penetration * manifold.normal);
 
-        const auto& roid = other.getComponent<Asteroid>();
+        auto& roid = other.getComponent<Asteroid>();
         separate(roid.getVelocity());
                
-        if (manifold.penetration < -10)
+        if (vehicle.stateFlags == (1 << Vehicle::Disabled)
+            || vehicle.invincibleTime > 0)
+        {
+            roid.setVelocity(xy::Util::Vector::reflect(roid.getVelocity(), -manifold.normal));
+        }
+        else if (manifold.penetration < -14)
         {
             explode(entity);
         }
@@ -410,7 +415,6 @@ void VehicleSystem::updateFalling(xy::Entity entity, float dt)
 
     vehicle.respawnTime -= dt;
 
-    //if (tx.getScale().x < 0.05f)
     if(vehicle.respawnTime < 0.f)
     {
         vehicle.respawnTime = Vehicle::RespawnDuration; //just gives a small buffer to prevent mutliple messages
@@ -426,6 +430,8 @@ void VehicleSystem::updateExploding(xy::Entity entity, float dt)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
     vehicle.respawnTime -= dt;
+
+    entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
 
     if (vehicle.respawnTime < 0.f)
     {

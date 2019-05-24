@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/ActorIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/AnimationCallbacks.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTarget.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ClientPackets.hpp
@@ -37,6 +38,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/WayPoint.hpp

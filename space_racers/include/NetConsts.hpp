@@ -45,7 +45,9 @@ namespace PacketID
         VehicleData, //packet contains data for a single vehicle
         ActorData, //packet contains actor data to spawn on client
         ClientReady, //client has loaded all actors and is ready to start
-        RaceStarted, //countdown has triggered
+        CountdownStarted, //start count-in
+        RaceStarted, //countdown has completed
+        RaceFinished, //all players crossed the line or were eliminated
         ClientLeftRace, //server ent ID of leaving client for tidy up
 
         VehicleExploded, //server id of exploded vehicle

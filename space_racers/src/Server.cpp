@@ -120,6 +120,7 @@ void Server::threadFunc()
                 {
                     LOG("Dropped all clients, server quitting...", xy::Logger::Type::Info);
                     m_running = false;
+                    break; //quit loop now because there are no clients to update
                 }
             }
         }

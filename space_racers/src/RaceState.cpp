@@ -31,6 +31,7 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
 #include "MessageIDs.hpp"
+#include "AnimationCallbacks.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -190,6 +191,15 @@ void RaceState::handlePackets()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::RaceFinished:
+                requestStackPush(StateID::Summary);
+                break;
+            case PacketID::CountdownStarted:
+                //TODO some audio/visual effect
+                break;
+            case PacketID::RaceStarted:
+                m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
+                break;
             case PacketID::VehicleExploded:
                 explodeNetVehicle(packet.as<std::uint32_t>());                
                 break;
@@ -245,7 +255,6 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
-    entity.getComponent<xy::Sprite>().setColour({ 255,255,255,120 });
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
     //TODO we shopuld probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
@@ -350,6 +359,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+        entity.addComponent<xy::Callback>().function = ScaleCallback();
     }
         break;
     case ActorID::Bike:
@@ -362,6 +372,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+        entity.addComponent<xy::Callback>().function = ScaleCallback();
     }
         break;
     case ActorID::Ship:
@@ -374,6 +385,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+        entity.addComponent<xy::Callback>().function = ScaleCallback();
     }
         break;
     case ActorID::Roid:
@@ -437,7 +449,7 @@ void RaceState::resetNetVehicle(std::uint32_t id)
     {
         if (e.getComponent<NetActor>().serverID == id)
         {
-            //TODO disable falling callback
+            e.getComponent<xy::Callback>().active = false;
             e.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
             e.getComponent<xy::Transform>().setScale(1.f, 1.f);
         }
@@ -467,7 +479,7 @@ void RaceState::fallNetVehicle(std::uint32_t id)
     {
         if (e.getComponent<NetActor>().serverID == id)
         {
-            //TODO init scaling callback
+            e.getComponent<xy::Callback>().active = true; //performs scaling
             e.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
         }
     };

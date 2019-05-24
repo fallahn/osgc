@@ -35,6 +35,8 @@ namespace sv
     {
         xy::NetPeer peer;
         xy::Entity entity;
+        bool ready = false; //client has signalled game loaded
+        std::uint8_t lapCount = 0;
     };
 
     class RaceState final : public State
@@ -56,6 +58,12 @@ namespace sv
         MapParser m_mapParser;
 
         std::unordered_map<std::uint64_t, ClientConnection> m_players;
+
+        enum
+        {
+            Prepping, Countdown, Racing, RaceOver
+        }m_state;
+        sf::Clock m_countDownTimer;
 
         void initScene();
         bool loadMap();

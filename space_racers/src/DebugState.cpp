@@ -226,6 +226,7 @@ void DebugState::handleMessage(const xy::Message& msg)
             vehicle.velocity = {};
             vehicle.anglularVelocity = {};
             vehicle.stateFlags = (1 << Vehicle::Normal);
+            vehicle.invincibleTime = GameConst::InvincibleTime;
 
             tx.setPosition(vehicle.waypointPosition);
             tx.setRotation(vehicle.waypointRotation);

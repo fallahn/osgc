@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#include "PauseState.hpp"
+#include "SummaryState.hpp"
 #include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
@@ -27,98 +27,105 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 
-PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State(ss, ctx),
+namespace
+{
+    //small delay before input works
+    const sf::Time delayTime = sf::seconds(0.5f);
+}
+
+
+SummaryState::SummaryState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
+    : xy::State (ss, ctx),
     m_sharedData(sd),
-    m_scene(ctx.appInstance.getMessageBus())
+    m_scene     (ctx.appInstance.getMessageBus())
 {
     initScene();
     buildMenu();
-
-    auto view = ctx.defaultView;
-    m_scene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
-    m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(view.getViewport());
 }
 
 //public
-bool PauseState::handleEvent(const sf::Event& evt)
+bool SummaryState::handleEvent(const sf::Event& evt)
 {
-    if (evt.type == sf::Event::KeyReleased)
-    {
-        switch (evt.key.code)
-        {
-        default: break;
-        case sf::Keyboard::Escape:
-        case sf::Keyboard::P:
-        case sf::Keyboard::Pause:
-            requestStackPop();
-            break;
-        case sf::Keyboard::Q:
-            if (m_sharedData.hosting)
-            {
-                m_sharedData.server->quit();
-            }
+    //TODO we want this to return to the lobby
+    //rather than the main menu - in which case does
+    //the server want to keep the lobby state alive?
+    //we also have to remember that the lobby state will
+    //try creating a new connection instead of using the
+    //existing one....
 
-            requestStackClear();
-            requestStackPush(StateID::MainMenu);
-            break;
+    if (evt.type == sf::Event::KeyPressed
+        && m_delayClock.getElapsedTime() > delayTime)
+    {
+        if (m_sharedData.hosting)
+        {
+            m_sharedData.server->quit();
         }
+
+        requestStackClear();
+        requestStackPush(StateID::MainMenu);
     }
 
     m_scene.forwardEvent(evt);
     return false;
 }
 
-void PauseState::handleMessage(const xy::Message& msg)
+void SummaryState::handleMessage(const xy::Message& msg)
 {
     m_scene.forwardMessage(msg);
 }
 
-bool PauseState::update(float dt)
+bool SummaryState::update(float dt)
 {
     m_scene.update(dt);
-
-    //TODO return false in non-network games
     return true;
 }
 
-void PauseState::draw()
+void SummaryState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
 }
 
 //private
-void PauseState::initScene()
+void SummaryState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+
+    auto view = getContext().defaultView;
+    m_scene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
+    m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(view.getViewport());
 }
 
-void PauseState::buildMenu()
+void SummaryState::buildMenu()
 {
-    sf::Color c(0, 0, 0, 200);
+    sf::Color c(0, 0, 0, 220);
+
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(-10);
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+
     verts.emplace_back(sf::Vector2f(), c);
     verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x, 0.f), c);
     verts.emplace_back(xy::DefaultSceneSize, c);
     verts.emplace_back(sf::Vector2f(0.f, xy::DefaultSceneSize.y), c);
+
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+
 
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -200.f);
+    entity.getComponent<xy::Transform>().move(0.f, - 80.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(font).setString("Press Q to Quit or P to Continue");
+    entity.addComponent<xy::Text>(font).setString("Press Any Key To Continue");
     entity.getComponent<xy::Text>().setCharacterSize(96);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 }

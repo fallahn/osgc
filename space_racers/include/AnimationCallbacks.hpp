@@ -18,26 +18,16 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <cstdint>
+#include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
-#include <SFML/System/String.hpp>
-
-struct LobbyData final
+class ScaleCallback final
 {
-    static constexpr std::uint8_t MaxPlayers = 4;
-    std::uint8_t playerCount = 0;
-    std::uint8_t mapIndex = 0;
-    std::uint8_t lapCount = 1;
-    std::uint8_t gameMode = 0;
-};
-
-//input taken from the client and sent to the server
-//TODO not sure we need this if it's identical to the
-//vehicle Input struct?
-struct InputUpdate final
-{
-    float steeringMultiplier = 1.f; //analogue controller multiplier
-    float accelerationMultiplier = 1.f;
-    std::int32_t timestamp = 0;
-    std::uint16_t inputFlags = 0;
+public:
+    void operator()(xy::Entity e, float dt)
+    {
+        const float scaleFactor = dt * 56.f;
+        e.getComponent<xy::Transform>().scale(scaleFactor, scaleFactor);
+    }
+private:
 };

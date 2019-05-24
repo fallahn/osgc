@@ -46,7 +46,8 @@ namespace StateID
         Race,
         Debug,
         Error,
-        Pause
+        Pause,
+        Summary
     };
 }
 
