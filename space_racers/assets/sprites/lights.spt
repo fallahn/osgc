@@ -1,0 +1,30 @@
+spritesheet lights
+{
+    src="assets/images/lights.png"
+    blend="alpha"
+
+    sprite lights
+    {
+        bounds = 0,0,400,102
+
+        animation play
+        {
+            frame = 0,0,400, 102
+            frame = 0,102,400, 102
+            frame = 0,204,400, 102
+            frame = 0,306,400, 102
+            frame = 0,408,400, 102
+
+            loop=false
+            framerate=1
+        }
+
+        animation stop
+        {
+            frame=0,408,400,102
+
+            loop=true
+            framerate=30
+        }
+    }
+}
