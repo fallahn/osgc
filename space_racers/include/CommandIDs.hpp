@@ -26,6 +26,11 @@ namespace CommandID
         
     };
 
+    enum UI
+    {
+        StartLights = 0x1
+    };
+
     enum Lobby
     {
         PlayerText = 0x1

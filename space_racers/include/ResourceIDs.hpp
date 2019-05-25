@@ -48,6 +48,8 @@ namespace TextureID
 }
 
 #include <xyginext/ecs/components/Sprite.hpp>
+//TODO these should be split in to appropriate sections
+//we don't really want one static array with ALL the sprites in it
 namespace SpriteID
 {
     enum
@@ -65,6 +67,10 @@ namespace SpriteID
         NetBackButton,
 
         Cursor,
+
+        UIStartLights,
+        Explosion,
+        SmokePuff,
 
         Count
     };

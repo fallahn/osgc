@@ -49,7 +49,7 @@ private:
     //sf::RenderTexture m_gameBuffer;
     //sf::RenderWindow m_lightingBuffer;
     //xy::Scene m_outputScene;
-    //xy::Scene m_uiScene;
+    xy::Scene m_uiScene;
 
     MapParser m_mapParser;
     xy::ResourceHolder m_resources;
@@ -60,6 +60,7 @@ private:
     void initScene();
     void loadResources();
     void buildWorld();
+    void buildUI();
 
     void handlePackets();
 

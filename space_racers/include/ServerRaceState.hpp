@@ -59,10 +59,13 @@ namespace sv
 
         std::unordered_map<std::uint64_t, ClientConnection> m_players;
 
-        enum
+        enum GameState
         {
-            Prepping, Countdown, Racing, RaceOver
+            Prepping, Countdown, Racing, RaceOver, Pause //not paused game, pause between state changes
         }m_state;
+        GameState m_unpauseState; //where to next guv?
+        sf::Clock m_pauseClock;
+        sf::Time m_pauseTime;
         sf::Clock m_countDownTimer;
 
         void initScene();

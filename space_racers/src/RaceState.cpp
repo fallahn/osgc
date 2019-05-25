@@ -35,6 +35,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
@@ -42,11 +43,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 namespace
 {
@@ -59,6 +63,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
     m_gameScene         (ctx.appInstance.getMessageBus()),
+    m_uiScene           (ctx.appInstance.getMessageBus()),
     m_mapParser         (m_gameScene),
     m_playerInput       (sd.inputBindings[0], sd.netClient.get())
 {
@@ -67,6 +72,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     initScene();
     loadResources();
     buildWorld();
+    buildUI();
 
     quitLoadingScreen();
 }
@@ -89,6 +95,7 @@ bool RaceState::handleEvent(const sf::Event& evt)
 
     m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
+    m_uiScene.forwardEvent(evt);
     return true;
 }
 
@@ -112,6 +119,7 @@ void RaceState::handleMessage(const xy::Message& msg)
     }
 
     m_gameScene.forwardMessage(msg);
+    m_uiScene.forwardMessage(msg);
 }
 
 bool RaceState::update(float dt)
@@ -133,6 +141,7 @@ bool RaceState::update(float dt)
 
     m_playerInput.update(dt);
     m_gameScene.update(dt);
+    m_uiScene.update(dt);
     return true;
 }
 
@@ -141,6 +150,7 @@ void RaceState::draw()
     auto& rw = getContext().renderWindow;
 
     rw.draw(m_gameScene);
+    rw.draw(m_uiScene);
 }
 
 //private
@@ -158,12 +168,37 @@ void RaceState::initScene()
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+
+    m_uiScene.addSystem<xy::CommandSystem>(mb);
+    m_uiScene.addSystem<xy::CallbackSystem>(mb);
+    m_uiScene.addSystem<xy::SpriteSystem>(mb);
+    m_uiScene.addSystem<xy::SpriteAnimator>(mb);
+    m_uiScene.addSystem<xy::RenderSystem>(mb);
+
+    auto view = getContext().defaultView;
+    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
+    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(view.getViewport());
 }
 
 void RaceState::loadResources()
 {
     TextureID::handles[TextureID::Temp01] = m_resources.load<sf::Texture>("nothing_to_see_here");
     TextureID::handles[TextureID::Temp02] = m_resources.load<sf::Texture>("assets/images/temp02.png");
+
+    xy::SpriteSheet spriteSheet;
+
+    //game scene assets
+    spriteSheet.loadFromFile("assets/sprites/dust_puff.spt", m_resources);
+    SpriteID::sprites[SpriteID::SmokePuff] = spriteSheet.getSprite("dust_puff");
+
+    spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
+    SpriteID::sprites[SpriteID::Explosion] = spriteSheet.getSprite("explosion");
+
+    //ui scene assets
+    spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
+    SpriteID::sprites[SpriteID::UIStartLights] = spriteSheet.getSprite("lights");
+
+
 }
 
 void RaceState::buildWorld()
@@ -187,6 +222,34 @@ void RaceState::buildWorld()
     m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);
 }
 
+void RaceState::buildUI()
+{
+    //startlights
+    auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 0.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::UIStartLights];
+    entity.addComponent<xy::SpriteAnimation>();
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::StartLights;
+    entity.addComponent<xy::Callback>().userData = std::make_any<float>(1.5f);
+    entity.getComponent<xy::Callback>().function = [](xy::Entity e, float dt)
+    {
+        auto& delay = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        delay -= dt;
+
+        if (delay < 0)
+        {
+            e.getComponent<xy::Transform>().move(0.f, -100.f * dt);
+            if (e.getComponent<xy::Transform>().getPosition().y < -e.getComponent<xy::Sprite>().getTextureBounds().height)
+            {
+                e.getComponent<xy::Callback>().active = false;
+            }
+        }
+    };
+}
+
 void RaceState::handlePackets()
 {
     //poll event afterwards so gathered inputs are sent immediately
@@ -204,10 +267,21 @@ void RaceState::handlePackets()
                 requestStackPush(StateID::Summary);
                 break;
             case PacketID::CountdownStarted:
-                //TODO some audio/visual effect
+            {
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::UI::StartLights;
+                cmd.action = [](xy::Entity e, float dt) {e.getComponent<xy::SpriteAnimation>().play(0); };
+                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
                 break;
             case PacketID::RaceStarted:
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::UI::StartLights;
+                    cmd.action = [](xy::Entity e, float dt) {e.getComponent<xy::Callback>().active = true; };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
                 break;
             case PacketID::VehicleExploded:
                 explodeNetVehicle(packet.as<std::uint32_t>());                

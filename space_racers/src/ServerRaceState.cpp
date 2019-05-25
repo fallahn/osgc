@@ -48,7 +48,8 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     m_scene         (mb),
     m_nextState     (StateID::Race),
     m_mapParser     (m_scene),
-    m_state         (Prepping)
+    m_state         (Prepping),
+    m_unpauseState  (Countdown)
 {
     initScene();
 
@@ -264,9 +265,9 @@ std::int32_t RaceState::logicUpdate(float dt)
 
         if (ready)
         {
-            m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
-            m_state = Countdown;
-            m_countDownTimer.restart();
+            m_state = Pause;
+            m_pauseTime = sf::seconds(2.f);
+            m_pauseClock.restart();
         }
     }
         break;
@@ -281,7 +282,7 @@ std::int32_t RaceState::logicUpdate(float dt)
                 p.second.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
             }
 
-            m_sharedData.netHost.broadcastPacket(PacketID::GameStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+            m_sharedData.netHost.broadcastPacket(PacketID::RaceStarted, std::uint8_t(0), xy::NetFlag::Reliable);
             m_state = Racing;
         }
     }
@@ -317,6 +318,14 @@ std::int32_t RaceState::logicUpdate(float dt)
         //I forget what I was going to do here. let's just get the lobby running again
         m_nextState = sv::StateID::Lobby;
         
+        break;
+    case Pause:
+        if (m_pauseClock.getElapsedTime() > m_pauseTime)
+        {
+            m_state = m_unpauseState;
+            m_countDownTimer.restart();
+            m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+        }
         break;
     }
 

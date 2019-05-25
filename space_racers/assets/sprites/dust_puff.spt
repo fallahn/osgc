@@ -3,7 +3,7 @@ spritesheet dust_puff
 	src="assets/images/dust_puff.png"
 	blend=add
 
-	sprite puff
+	sprite dust_puff
 	{
 
 		bounds = 0,0,256,256
