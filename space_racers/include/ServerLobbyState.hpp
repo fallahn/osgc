@@ -22,6 +22,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Scene.hpp>
 
+#include <SFML/System/Clock.hpp>
+
 namespace sv
 {
     class LobbyState final : public State
@@ -37,6 +39,8 @@ namespace sv
     private:
         SharedData& m_sharedData;
         std::int32_t m_nextState;
+
+        sf::Clock m_broadcastClock;
 
         void startGame();
         void setClientName(const xy::NetEvent&);

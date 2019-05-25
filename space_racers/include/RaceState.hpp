@@ -55,6 +55,7 @@ private:
     xy::ResourceHolder m_resources;
 
     InputParser m_playerInput;
+    sf::Clock m_pingClock;
 
     void initScene();
     void loadResources();

@@ -25,6 +25,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
+#include <SFML/System/Clock.hpp>
+
 #include <map>
 
 class LobbyState final : public xy::State 
@@ -46,6 +48,8 @@ private:
     xy::ResourceHandler m_resources;
 
     std::map<std::uint64_t, PlayerInfo> m_playerInfo;
+
+    sf::Clock m_pingClock;
 
     void initScene();
     void loadResources();

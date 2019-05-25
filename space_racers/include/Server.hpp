@@ -79,5 +79,8 @@ namespace sv
         void registerStates();
 
         SharedData m_sharedData;
+
+        std::map<std::uint64_t, sf::Clock> m_timeoutClocks;
+
     };
 }

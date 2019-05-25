@@ -262,9 +262,12 @@ std::int32_t RaceState::logicUpdate(float dt)
             }
         }
 
-        m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
-        m_state = Countdown;
-        m_countDownTimer.restart();
+        if (ready)
+        {
+            m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+            m_state = Countdown;
+            m_countDownTimer.restart();
+        }
     }
         break;
     case Countdown:
@@ -288,7 +291,7 @@ std::int32_t RaceState::logicUpdate(float dt)
         //check player ready state (set to false once crossed the finish line)
         //if all false the game is over!
     {
-        std::int32_t readyCount = 0;
+        std::uint32_t readyCount = 0;
         for (const auto& p : m_players)
         {
             if (!p.second.ready)
@@ -306,10 +309,15 @@ std::int32_t RaceState::logicUpdate(float dt)
         {
             //we're in timeout mode
             //TODO skip to game over on timeout
+            
         }
     }
         break;
-    case RaceOver: break;
+    case RaceOver:
+        //I forget what I was going to do here. let's just get the lobby running again
+        m_nextState = sv::StateID::Lobby;
+        
+        break;
     }
 
     m_scene.update(dt);
@@ -429,6 +437,7 @@ bool RaceState::createPlayers()
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;
             m_players[playerInfo.first].peer = result->first;
+            m_players[playerInfo.first].ready = false;
             m_players[playerInfo.first].lapCount = m_sharedData.lobbyData.lapCount + 1; //add one because we get the initial start line counted
         }
         else

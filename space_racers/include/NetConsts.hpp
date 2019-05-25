@@ -21,10 +21,13 @@ Copyright 2019 Matt Marchant
 #include <cstdint>
 #include <cstddef>
 
+#include <SFML/System/Clock.hpp>
+
 namespace NetConst
 {
     static const std::uint16_t Port = 4330;
     static const std::size_t MaxNameSize = 20 * sizeof(sf::Uint32); //bytes
+    static const sf::Time PingTimeout = sf::seconds(12.f);
 }
 
 namespace PacketID
@@ -49,6 +52,7 @@ namespace PacketID
         RaceStarted, //countdown has completed
         RaceFinished, //all players crossed the line or were eliminated
         ClientLeftRace, //server ent ID of leaving client for tidy up
+        ClientPing, //stop the client timeing out (also updates lobby browser)
 
         VehicleExploded, //server id of exploded vehicle
         VehicleFell, //server id of falling vehicle

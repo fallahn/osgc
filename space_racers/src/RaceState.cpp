@@ -51,6 +51,8 @@ Copyright 2019 Matt Marchant
 namespace
 {
     xy::Entity debugEnt;
+
+    const sf::Time pingTime = sf::seconds(3.f);
 }
 
 RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -123,6 +125,12 @@ bool RaceState::update(float dt)
         m_sharedData.gameData.actorCount = std::numeric_limits<std::uint8_t>::max(); //just so this stops triggering
     }
 
+    if (m_pingClock.getElapsedTime() > pingTime)
+    {
+        m_sharedData.netClient->sendPacket(PacketID::ClientPing, std::uint8_t(0), xy::NetFlag::Unreliable);
+        m_pingClock.restart();
+    }
+
     m_playerInput.update(dt);
     m_gameScene.update(dt);
     return true;
@@ -192,6 +200,7 @@ void RaceState::handlePackets()
             {
             default: break;
             case PacketID::RaceFinished:
+                m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
                 requestStackPush(StateID::Summary);
                 break;
             case PacketID::CountdownStarted:
@@ -406,6 +415,7 @@ void RaceState::spawnActor(const ActorData& data)
 
     //count actors so we can tell the server when we're ready
     m_sharedData.gameData.actorCount--;
+    std::cout << m_sharedData.gameData.actorCount << "\n";
 }
 
 void RaceState::updateActor(const ActorUpdate& update)
@@ -426,7 +436,7 @@ void RaceState::updateActor(const ActorUpdate& update)
 
             e.getComponent<DeadReckon>().update = update;
             e.getComponent<DeadReckon>().hasUpdate = true;
-            actor.velocity = { update.velX, update.velY };
+            actor.velocity = { update.velX, update.velY }; //this is used in client side collisions
         }
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);

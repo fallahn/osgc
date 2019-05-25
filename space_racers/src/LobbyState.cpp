@@ -57,6 +57,8 @@ namespace
     {
         "Car", "Bike", "ship"
     };
+
+    const sf::Time pingTime = sf::seconds(5.f);
 }
 
 LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -71,45 +73,47 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     loadResources();
     buildMenu();
 
-    sd.netClient = std::make_unique<xy::NetClient>();
-    if (!sd.netClient->create(2))
+    if (!sd.netClient) //first time joining
     {
-        xy::Logger::log("Creating net client failed...", xy::Logger::Type::Error);
-        sd.errorMessage = "Could not create network connection";
-        requestStackPush(StateID::Error);
-    }
-    else
-    {
-        //launch a local server instance if hosting, then connect
-        if (sd.hosting && !sd.server)
+        sd.netClient = std::make_unique<xy::NetClient>();
+        if (!sd.netClient->create(2))
         {
-            sd.server = std::make_unique<sv::Server>();
-            sd.server->run(sv::StateID::Lobby);
-
-            sf::Clock tempClock;
-            while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
-        }
-
-        if (!sd.netClient->connect(sd.ip.toAnsiString(), NetConst::Port))
-        {
-            m_sharedData.errorMessage = "Failed to connect to lobby " + m_sharedData.ip;
+            xy::Logger::log("Creating net client failed...", xy::Logger::Type::Error);
+            sd.errorMessage = "Could not create network connection";
             requestStackPush(StateID::Error);
         }
         else
         {
-            auto id = sd.netClient->getPeer().getID();
-            m_playerInfo[id] = PlayerInfo();
-            if (sd.name.isEmpty())
+            //launch a local server instance if hosting, then connect
+            if (sd.hosting && !sd.server)
             {
-                m_playerInfo[id].name = "Player " + std::to_string(id);
+                sd.server = std::make_unique<sv::Server>();
+                sd.server->run(sv::StateID::Lobby);
+
+                sf::Clock tempClock;
+                while (tempClock.getElapsedTime().asSeconds() < 1.f) {} //give the server time to start
+            }
+
+            if (!sd.netClient->connect(sd.ip.toAnsiString(), NetConst::Port))
+            {
+                m_sharedData.errorMessage = "Failed to connect to lobby " + m_sharedData.ip;
+                requestStackPush(StateID::Error);
             }
             else
             {
-                m_playerInfo[id].name = sd.name;
+                auto id = sd.netClient->getPeer().getID();
+                m_playerInfo[id] = PlayerInfo();
+                if (sd.name.isEmpty())
+                {
+                    m_playerInfo[id].name = "Player " + std::to_string(id);
+                }
+                else
+                {
+                    m_playerInfo[id].name = sd.name;
+                }
             }
         }
     }
-
     quitLoadingScreen();
 }
 
@@ -130,6 +134,12 @@ void LobbyState::handleMessage(const xy::Message& msg)
 bool LobbyState::update(float dt)
 {
     pollNetwork();
+
+    if (m_pingClock.getElapsedTime() > pingTime)
+    {
+        m_sharedData.netClient->sendPacket(PacketID::ClientPing, std::int8_t(0), xy::NetFlag::Unreliable);
+        m_pingClock.restart();
+    }
 
     m_scene.update(dt);
 

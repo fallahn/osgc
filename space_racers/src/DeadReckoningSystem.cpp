@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "DeadReckoningSystem.hpp"
 #include "NetActor.hpp"
 #include "ActorIDs.hpp"
+#include "CollisionObject.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -66,6 +67,7 @@ void DeadReckoningSystem::process(float dt)
             //use the current known velocity to move forward
             auto& tx = entity.getComponent<xy::Transform>();
             tx.move(sf::Vector2f(dr.update.velX, dr.update.velY) * dt);
+            //collision(entity);
         }
     }
 }
@@ -82,7 +84,7 @@ void DeadReckoningSystem::collision(xy::Entity entity)
     const auto& actor = entity.getComponent<NetActor>();
     if (actor.actorID == ActorID::Roid)
     {
-        auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds);
+        auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds, CollisionFlags::Asteroid);
         //for asteroids the origin is centre so we can assume it as radius
         float radius = tx.getOrigin().x * tx.getScale().x;
 

@@ -60,13 +60,15 @@ bool SummaryState::handleEvent(const sf::Event& evt)
     if (evt.type == sf::Event::KeyPressed
         && m_delayClock.getElapsedTime() > delayTime)
     {
-        if (m_sharedData.hosting)
+        /*if (m_sharedData.hosting)
         {
             m_sharedData.server->quit();
         }
 
         requestStackClear();
-        requestStackPush(StateID::MainMenu);
+        requestStackPush(StateID::MainMenu);*/
+        requestStackClear();
+        requestStackPush(StateID::Lobby);
     }
 
     m_scene.forwardEvent(evt);

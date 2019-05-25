@@ -28,11 +28,21 @@ Copyright 2019 Matt Marchant
 #include <cstring>
 
 using namespace sv;
+
+namespace
+{
+    const sf::Time pingTime = sf::seconds(3.f);
+}
+
 LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
     m_nextState     (StateID::Lobby)
 {
-
+    for (auto& [id, player] : m_sharedData.playerInfo)
+    {
+        player.ready = false;
+    }
+    m_sharedData.lobbyData.playerCount = static_cast<std::uint8_t>(m_sharedData.clients.size());
 }
 
 //public
@@ -117,6 +127,13 @@ void LobbyState::netUpdate(float)
 
 std::int32_t LobbyState::logicUpdate(float)
 {
+    if (m_broadcastClock.getElapsedTime() > pingTime)
+    {
+        broadcastNames();
+        broadcastPlayerData();
+        m_broadcastClock.restart();
+    }
+
     return m_nextState; 
 }
 

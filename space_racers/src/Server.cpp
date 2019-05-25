@@ -98,6 +98,7 @@ void Server::threadFunc()
                 if (m_activeState->getID() == StateID::Lobby)
                 {
                     m_sharedData.clients.push_back(std::make_pair(evt.peer, evt.peer.getID()));
+                    m_timeoutClocks.insert(std::make_pair(evt.peer.getID(), sf::Clock()));
                 }
                 else
                 {
@@ -112,7 +113,12 @@ void Server::threadFunc()
                     m_sharedData.clients.end(),
                     [&](const std::pair<xy::NetPeer, std::uint64_t>& pair)
                     {
-                        return evt.peer == pair.first;
+                        if (evt.peer == pair.first)
+                        {
+                            m_timeoutClocks.erase(pair.second);
+                            return true;
+                        }
+                        return false;
                     }),
                     m_sharedData.clients.end());
 
@@ -123,6 +129,13 @@ void Server::threadFunc()
                     break; //quit loop now because there are no clients to update
                 }
             }
+            else if (evt.type == xy::NetEvent::PacketReceived)
+            {
+                if (evt.packet.getID() == PacketID::ClientPing)
+                {
+                    m_timeoutClocks[evt.peer.getID()].restart();
+                }
+            }
         }
 
         m_netAccumulator += m_netClock.restart();
@@ -131,6 +144,24 @@ void Server::threadFunc()
             //do net update
             m_activeState->netUpdate(NetTime.asSeconds());
             m_netAccumulator -= NetTime;
+
+            for (const auto& [p,t] : m_timeoutClocks)
+            {
+                if (t.getElapsedTime() > NetConst::PingTimeout)
+                {
+                    m_sharedData.clients.erase(std::remove_if(
+                        m_sharedData.clients.begin(),
+                        m_sharedData.clients.end(),
+                        [&](const std::pair<xy::NetPeer, std::uint64_t>& pair)
+                        {
+                            return (p == pair.second);
+                        }),
+                        m_sharedData.clients.end());
+
+                    m_timeoutClocks.erase(p);
+                    break;
+                }
+            }
 
             updateCount++;
         }
@@ -190,3 +221,5 @@ void Server::registerStates()
         return std::make_unique<RaceState>(m_sharedData, m_messageBus);
     };
 }
+
+//private
