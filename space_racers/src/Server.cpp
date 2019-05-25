@@ -149,12 +149,13 @@ void Server::threadFunc()
             {
                 if (t.getElapsedTime() > NetConst::PingTimeout)
                 {
+                	auto id = p;
                     m_sharedData.clients.erase(std::remove_if(
                         m_sharedData.clients.begin(),
                         m_sharedData.clients.end(),
-                        [&](const std::pair<xy::NetPeer, std::uint64_t>& pair)
+                        [&, id](const std::pair<xy::NetPeer, std::uint64_t>& pair)
                         {
-                            return (p == pair.second);
+                            return (id == pair.second);
                         }),
                         m_sharedData.clients.end());
 

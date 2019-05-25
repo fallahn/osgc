@@ -415,7 +415,6 @@ void RaceState::spawnActor(const ActorData& data)
 
     //count actors so we can tell the server when we're ready
     m_sharedData.gameData.actorCount--;
-    std::cout << m_sharedData.gameData.actorCount << "\n";
 }
 
 void RaceState::updateActor(const ActorUpdate& update)
