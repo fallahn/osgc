@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "frontend", "osgc\Project04.vcxproj", "{C5CBAE0B-6404-4446-A93E-98F44243F277}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E932802A-6053-40AE-A61D-065443E7C269} = {E932802A-6053-40AE-A61D-065443E7C269}
+		{F610E0C3-725E-4FAB-9BF0-AB9310715B78} = {F610E0C3-725E-4FAB-9BF0-AB9310715B78}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "drone_drop", "shooter\shooter.vcxproj", "{F610E0C3-725E-4FAB-9BF0-AB9310715B78}"
 EndProject

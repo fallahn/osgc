@@ -42,6 +42,11 @@ Copyright 2019 Matt Marchant
 
 using namespace sv;
 
+namespace
+{
+    const sf::Time RaceTimeOut = sf::seconds(60.f);
+}
+
 RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
     m_messageBus    (mb),
@@ -49,7 +54,8 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
     m_nextState     (StateID::Race),
     m_mapParser     (m_scene),
     m_state         (Prepping),
-    m_unpauseState  (Countdown)
+    m_unpauseState  (Countdown),
+    m_finished      (0)
 {
     initScene();
 
@@ -119,6 +125,13 @@ void RaceState::handleMessage(const xy::Message& msg)
                     {
                         p.second.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
                         p.second.ready = false;
+
+                        m_finished++;
+                        if (m_finished == 1)
+                        {
+                            //tell clients to show one minute timer
+                            m_sharedData.netHost.broadcastPacket(PacketID::RaceTimerStarted, std::uint32_t(0), xy::NetFlag::Reliable);
+                        }
                     }
                     break;
                 }
@@ -294,35 +307,27 @@ std::int32_t RaceState::logicUpdate(float dt)
         break;
     case Racing:
         //game is a GO!
-        //check player ready state (set to false once crossed the finish line)
-        //if all false the game is over!
-    {
-        std::uint32_t readyCount = 0;
-        for (const auto& p : m_players)
+        if (m_finished == m_players.size())
         {
-            if (!p.second.ready)
-            {
-                readyCount++;
-            }
-        }
-
-        if (readyCount == m_players.size())
-        {
-            //m_state = RaceOver;
-            //m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, std::uint8_t(0), xy::NetFlag::Reliable);
-
             m_state = Pause;
             m_unpauseState = RaceOver;
             m_pauseTime = sf::seconds(1.f);
             m_pauseClock.restart();
         }
-        else if (readyCount == m_players.size() - 1)
+        else if (m_finished > 0)
         {
             //we're in timeout mode
-            //TODO skip to game over on timeout
-            
+            //skip to game over on timeout
+            if (m_timeoutClock.getElapsedTime() > RaceTimeOut)
+            {
+                m_finished = m_players.size();
+            }
         }
-    }
+        else
+        {
+            //restart the timer
+            m_timeoutClock.restart();
+        }
         break;
     case RaceOver:
         //I forget what I was going to do here. let's just get the lobby running again

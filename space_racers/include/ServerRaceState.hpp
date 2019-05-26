@@ -68,6 +68,9 @@ namespace sv
         sf::Time m_pauseTime;
         sf::Clock m_countDownTimer;
 
+        sf::Clock m_timeoutClock;
+        std::size_t m_finished; //cars that have crossed the line
+
         void initScene();
         bool loadMap();
         bool createPlayers();

@@ -41,6 +41,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
+#include <xyginext/ecs/components/AudioListener.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
@@ -49,6 +51,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 
@@ -64,6 +67,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_sharedData        (sd),
     m_gameScene         (ctx.appInstance.getMessageBus()),
     m_uiScene           (ctx.appInstance.getMessageBus()),
+    m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_playerInput       (sd.inputBindings[0], sd.netClient.get())
 {
@@ -169,7 +173,8 @@ void RaceState::initScene()
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
-
+    m_gameScene.addSystem<xy::AudioSystem>(mb);
+    
     m_gameScene.addDirector<VFXDirector>(m_sprites);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
@@ -177,6 +182,7 @@ void RaceState::initScene()
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
+    m_uiScene.addSystem<xy::AudioSystem>(mb);
 
     auto view = getContext().defaultView;
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -200,6 +206,8 @@ void RaceState::loadResources()
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
     m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
+
+    m_uiSounds.loadFromFile("assets/sound/ui.xas");
 
 
 }
@@ -251,6 +259,7 @@ void RaceState::buildUI()
             }
         }
     };
+    entity.addComponent<xy::AudioEmitter>() = m_uiSounds.getEmitter("start");
 }
 
 void RaceState::handlePackets()
@@ -273,7 +282,11 @@ void RaceState::handlePackets()
             {
                 xy::Command cmd;
                 cmd.targetFlags = CommandID::UI::StartLights;
-                cmd.action = [](xy::Entity e, float dt) {e.getComponent<xy::SpriteAnimation>().play(0); };
+                cmd.action = [](xy::Entity e, float dt) 
+                {
+                    e.getComponent<xy::SpriteAnimation>().play(0); 
+                    e.getComponent<xy::AudioEmitter>().play();
+                };
                 m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
                 break;
@@ -282,7 +295,10 @@ void RaceState::handlePackets()
                 {
                     xy::Command cmd;
                     cmd.targetFlags = CommandID::UI::StartLights;
-                    cmd.action = [](xy::Entity e, float dt) {e.getComponent<xy::Callback>().active = true; };
+                    cmd.action = [](xy::Entity e, float dt)
+                    {
+                        e.getComponent<xy::Callback>().active = true; 
+                    };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
                 break;
@@ -401,8 +417,10 @@ void RaceState::spawnVehicle(const VehicleData& data)
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
     camEnt.getComponent<xy::Camera>().lockRotation(true);
     camEnt.addComponent<CameraTarget>().target = entity;
-
+    camEnt.addComponent<xy::AudioListener>();
+    
     m_gameScene.setActiveCamera(camEnt);
+    m_gameScene.setActiveListener(camEnt);
 
 #ifdef XY_DEBUG
     /*debugEnt = m_gameScene.createEntity();

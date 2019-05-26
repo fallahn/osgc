@@ -37,7 +37,8 @@ struct VehicleEvent final
         Respawned,
         Fell,
         Exploded,
-        LapLine
+        LapLine,
+        WentAfk
     }type;
 
     xy::Entity entity;

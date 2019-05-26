@@ -29,6 +29,14 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Vector.hpp>
 
+namespace
+{
+    sf::Vector2f lerp(const sf::Vector2f& a, const sf::Vector2f& b, float t)
+    {
+        return (a * t) + (b * (1.f - t));
+    }
+}
+
 DeadReckoningSystem::DeadReckoningSystem(xy::MessageBus& mb)
     : xy::System(mb, typeid(DeadReckoningSystem))
 {
@@ -57,16 +65,26 @@ void DeadReckoningSystem::process(float dt)
             auto& tx = entity.getComponent<xy::Transform>();
             tx.setPosition(dr.update.x, dr.update.y);
 
-            tx.move(sf::Vector2f(dr.update.velX, dr.update.velY) * delta);
+            sf::Vector2f newVel(dr.update.velX, dr.update.velY);
+            tx.move(newVel * delta);
             //collision(entity);
 
             //tx.setRotation(dr.update.rotation); //we'll use normal interpolation for rotation
+
+            dr.targetTime = delta;
+            dr.currentTime = 0.f;
+            dr.currVelocity = dr.targetVelocity;
+            dr.targetVelocity = newVel;
         }
         else
         {
             //use the current known velocity to move forward
+
+            dr.currentTime = std::min(dr.targetTime, dr.currentTime + dt);
+            sf::Vector2f vel = lerp(dr.currVelocity, dr.targetVelocity, dr.currentTime / dr.targetTime);
+
             auto& tx = entity.getComponent<xy::Transform>();
-            tx.move(sf::Vector2f(dr.update.velX, dr.update.velY) * dt);
+            tx.move(vel * dt);
             //collision(entity);
         }
     }
@@ -90,28 +108,32 @@ void DeadReckoningSystem::collision(xy::Entity entity)
 
         for (auto e : nearby)
         {
-            const auto& otherTx = e.getComponent<xy::Transform>();
-            float otherRadius = otherTx.getOrigin().x * otherTx.getScale().x;
-
-            float otherLen2 = radius + otherRadius;
-            otherLen2 *= otherLen2;
-
-            auto diff = otherTx.getPosition() - tx.getPosition();
-            float len2 = xy::Util::Vector::lengthSquared(diff);
-
-            if (len2 < otherLen2)
+            if (e != entity)
             {
-                float len = std::sqrt(len2);
-                diff /= len;
+                const auto& otherTx = e.getComponent<xy::Transform>();
+                float otherRadius = otherTx.getOrigin().x * otherTx.getScale().x;
 
-                auto& dr = entity.getComponent<DeadReckon>();
-                sf::Vector2f vel = xy::Util::Vector::reflect({ dr.update.velX, dr.update.velY }, diff);
-                dr.update.velX = vel.x;
-                dr.update.velY = vel.y;
+                float minDist = radius + otherRadius;
+                float minDist2 = minDist * minDist;
 
-                //separate ents just to prevent multiple collisions
-                float penetration = (radius + otherRadius) - len;
-                tx.move(-diff * penetration);
+                auto diff = tx.getPosition() - otherTx.getPosition();
+                float len2 = xy::Util::Vector::lengthSquared(diff);
+
+                if (len2 < minDist2)
+                {
+                    float len = std::sqrt(len2);
+                    float penetration = minDist - len;
+                    sf::Vector2f normal = diff / len;
+
+                    tx.move(normal * penetration);
+
+                    auto& dr = entity.getComponent<DeadReckon>();
+                    sf::Vector2f vel = xy::Util::Vector::reflect({ dr.update.velX, dr.update.velY }, diff);
+                    dr.update.velX = vel.x;
+                    dr.update.velY = vel.y;
+                    dr.currVelocity = dr.targetVelocity;
+                    dr.targetVelocity = vel;
+                }
             }
         }
     }

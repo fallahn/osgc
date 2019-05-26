@@ -71,6 +71,28 @@ void VehicleSystem::process(float)
             
             processVehicle(entity, delta);
 
+            //check to see if the player went AFK
+            if (vehicle.history[vehicle.lastUpdatedInput].flags != 0)
+            {
+                vehicle.afkTimer.restart();
+                vehicle.stateFlags &= ~(1 << Vehicle::AFK);
+            }
+            if (vehicle.afkTimer.getElapsedTime().asSeconds() > Vehicle::AfkTime
+                && ((vehicle.stateFlags & (1 << Vehicle::AFK)) == 0))
+            {
+                vehicle.stateFlags |= (1 << Vehicle::AFK);
+
+                auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+                msg->type = VehicleEvent::WentAfk;
+                msg->entity = entity;
+
+                std::cout << "Player went AFK\n";
+            }
+            /*if (vehicle.afkTimer.getElapsedTime().asSeconds() > Vehicle::AfkTimeout)
+            {
+                std::cout << "request kick AFK player!\n";
+            }*/
+
             vehicle.lastUpdatedInput = (vehicle.lastUpdatedInput + 1) % vehicle.history.size();
         }
     }

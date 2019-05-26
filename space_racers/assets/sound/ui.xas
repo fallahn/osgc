@@ -1,0 +1,12 @@
+audioscape ui
+{
+    emitter start
+    {
+        path = "assets/sound/start.wav"
+        streaming = false
+        looped = false
+        volume = 0.1
+        falloff = 0
+        mixer_channel = 1
+    }
+}

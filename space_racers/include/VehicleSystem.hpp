@@ -77,7 +77,8 @@ struct Vehicle final
         Normal = 0,
         Falling,
         Exploding,
-        Disabled //input is ignored, we're on the starting grid
+        Disabled, //input is ignored, we're on the starting grid
+        AFK //idled too long
     };
     float invincibleTime = 5.f;
 
@@ -88,6 +89,10 @@ struct Vehicle final
     std::int32_t waypointCount = 0;
     sf::Vector2f waypointPosition;
     float waypointRotation = 0.f;
+
+    sf::Clock afkTimer;
+    static constexpr float AfkTime = 30.f;
+    static constexpr float AfkTimeout = 60.f;
 
     //amount of time before respawning vehicle
     static constexpr float RespawnDuration = 1.5f;

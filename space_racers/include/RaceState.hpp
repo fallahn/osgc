@@ -26,6 +26,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/audio/AudioScape.hpp>
+#include <xyginext/resources/Resource.hpp>
 
 #include <vector>
 #include <array>
@@ -54,6 +56,9 @@ private:
     //xy::Scene m_outputScene;
     xy::Scene m_uiScene;
 
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_uiSounds;
+    
     MapParser m_mapParser;
     xy::ResourceHolder m_resources;
 

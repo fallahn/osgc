@@ -10,6 +10,7 @@ spritesheet lights
         animation play
         {
             frame = 0,0,400, 102
+            frame = 0,0,400, 102
             frame = 0,102,400, 102
             frame = 0,204,400, 102
             frame = 0,306,400, 102

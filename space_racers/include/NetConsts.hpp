@@ -50,6 +50,7 @@ namespace PacketID
         ClientReady, //client has loaded all actors and is ready to start
         CountdownStarted, //start count-in
         RaceStarted, //countdown has completed
+        RaceTimerStarted, //first player has crossed the line
         RaceFinished, //all players crossed the line or were eliminated
         ClientLeftRace, //server ent ID of leaving client for tidy up
         ClientPing, //stop the client timeing out (also updates lobby browser)
