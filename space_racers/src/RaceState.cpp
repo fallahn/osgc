@@ -643,9 +643,11 @@ void RaceState::showTimer()
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
 
     auto entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setFillColour(sf::Color::Red);
+    entity.getComponent<xy::Text>().setCharacterSize(48);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().userData = std::make_any<float>(60.f);
     entity.getComponent<xy::Callback>().function =

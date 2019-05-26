@@ -85,8 +85,6 @@ void VehicleSystem::process(float)
                 auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
                 msg->type = VehicleEvent::WentAfk;
                 msg->entity = entity;
-
-                std::cout << "Player went AFK\n";
             }
             /*if (vehicle.afkTimer.getElapsedTime().asSeconds() > Vehicle::AfkTimeout)
             {
