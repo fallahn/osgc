@@ -43,6 +43,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
+#include <xyginext/ecs/components/Text.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
@@ -52,6 +53,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
+#include <xyginext/ecs/systems/TextSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 
@@ -181,6 +183,7 @@ void RaceState::initScene()
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
+    m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
     m_uiScene.addSystem<xy::AudioSystem>(mb);
 
@@ -274,6 +277,9 @@ void RaceState::handlePackets()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::RaceTimerStarted:
+                showTimer();
+                break;
             case PacketID::RaceFinished:
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
                 requestStackPush(StateID::Summary);
@@ -630,4 +636,23 @@ void RaceState::removeNetVehicle(std::uint32_t id)
         }
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void RaceState::showTimer()
+{
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+
+    auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setFillColour(sf::Color::Red);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<float>(60.f);
+    entity.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float dt)
+    {
+        auto& currTime = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        currTime = std::max(0.f, currTime - dt);
+        e.getComponent<xy::Text>().setString(std::to_string(static_cast<std::int32_t>(currTime)));
+    };
 }
