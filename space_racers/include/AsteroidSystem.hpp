@@ -69,8 +69,10 @@ public:
 
     void process(float) override;
     void setMapSize(sf::FloatRect ms) { m_mapSize = ms; }
+    void setSpawnPosition(sf::Vector2f position) { m_spawnPosition = position; }
 
 private:
     sf::FloatRect m_mapSize;
+    sf::Vector2f m_spawnPosition;
     std::set<std::pair<xy::Entity, xy::Entity>> m_collisionPairs;
 };

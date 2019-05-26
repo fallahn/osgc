@@ -376,6 +376,7 @@ bool RaceState::loadMap()
     bounds.width += 2000.f;
     bounds.height += 2000.f;
     m_scene.getSystem<AsteroidSystem>().setMapSize(bounds);
+    m_scene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
 
     //create some roids
     auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);

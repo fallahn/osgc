@@ -312,8 +312,14 @@ void DebugState::buildWorld()
     m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
 
     //load map
-    m_mapParser.load("assets/maps/AceOfSpace.tmx");
-    //TODO fail and push an error state if map doesn't load
+    if (!m_mapParser.load("assets/maps/AceOfSpace.tmx"))
+    {
+        m_sharedData.errorMessage = "Failed to load map";
+        requestStackPush(StateID::Error);
+        return;
+    }
+    
+    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
 
     //asteroids
     temp = m_resources.load<sf::Texture>("assets/images/temp02.png");

@@ -31,6 +31,9 @@ namespace
 {
     //area around a roid to search for collisions
     const sf::FloatRect SearchArea(0.f, 0.f, 200.f, 200.f);
+
+    //area around start point to avoid
+    const float StartRadius = 384.f;
 }
 
 AsteroidSystem::AsteroidSystem(xy::MessageBus& mb)
@@ -53,7 +56,7 @@ void AsteroidSystem::process(float dt)
         auto& roid = entity.getComponent<Asteroid>();
 
         //update position
-        tx.move(roid.getVelocity() /** roid.getSpeed()*/ * dt);
+        tx.move(roid.getVelocity() * dt);
         auto position = tx.getPosition();
 
         //just do simple reflection to keep roids in the map area
@@ -78,6 +81,22 @@ void AsteroidSystem::process(float dt)
         {
             tx.move(0.f, (m_mapSize.top + m_mapSize.height) - position.y);
             roid.setVelocity(xy::Util::Vector::reflect(roid.getVelocity(), sf::Vector2f(0.f, -1.f)));
+        }
+
+        //check we're not in the start line area (simple circle collision)
+        auto diff = tx.getPosition() - m_spawnPosition;
+        float len2 = xy::Util::Vector::lengthSquared(diff);
+        float minDist = StartRadius + roid.getRadius();
+        float minDist2 = minDist * minDist;
+        if (len2 < minDist2)
+        {
+            float len = std::sqrt(len2);
+            float penetration = minDist - len;
+            sf::Vector2f normal = diff / len;
+
+            tx.move(normal * penetration);
+
+            roid.setVelocity(xy::Util::Vector::reflect(roid.getVelocity(), normal));
         }
 
 
