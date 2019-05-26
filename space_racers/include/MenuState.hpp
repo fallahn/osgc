@@ -27,11 +27,16 @@ source distribution.
 
 #pragma once
 
+#include "ResourceIDs.hpp"
+
 #include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/core/State.hpp>
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+
+#include <array>
 
 struct SharedData;
 class MenuState final : public xy::State, public xy::ConsoleClient
@@ -58,6 +63,8 @@ private:
     xy::ConfigFile m_settings;
 
     sf::String* m_activeString;
+
+    std::array<xy::Sprite, SpriteID::Menu::Count> m_sprites;
 
     void initScene();
     void loadResources();

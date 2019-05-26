@@ -19,13 +19,16 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "StateIDs.hpp"
+#include "ResourceIDs.hpp"
 #include "InputParser.hpp"
 #include "MapParser.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 
 #include <vector>
+#include <array>
 
 struct VehicleData;
 struct ActorData;
@@ -54,6 +57,8 @@ private:
     MapParser m_mapParser;
     xy::ResourceHolder m_resources;
 
+    std::array<xy::Sprite, SpriteID::Game::Count> m_sprites;
+
     InputParser m_playerInput;
     sf::Clock m_pingClock;
 
@@ -69,7 +74,7 @@ private:
     void updateActor(const ActorUpdate&);
     void reconcile(const ClientUpdate&);
 
-    void resetNetVehicle(std::uint32_t);
+    void resetNetVehicle(const VehicleData&);
     void explodeNetVehicle(std::uint32_t);
     void fallNetVehicle(std::uint32_t);
     void removeNetVehicle(std::uint32_t);

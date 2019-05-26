@@ -92,7 +92,12 @@ void RaceState::handleMessage(const xy::Message& msg)
             tx.setRotation(vehicle.waypointRotation);
             tx.setScale(1.f, 1.f);
 
-            m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, entity.getIndex(), xy::NetFlag::Reliable);
+            VehicleData data; //TODO specialise this packet to include rotation?
+            data.x = vehicle.waypointPosition.x;
+            data.x = vehicle.waypointPosition.y;
+            data.serverID = entity.getIndex();
+
+            m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, data, xy::NetFlag::Reliable);
         }
         else if (data.type == VehicleEvent::Exploded)
         {
@@ -266,7 +271,7 @@ std::int32_t RaceState::logicUpdate(float dt)
         if (ready)
         {
             m_state = Pause;
-            m_pauseTime = sf::seconds(2.f);
+            m_pauseTime = sf::seconds(1.f);
             m_pauseClock.restart();
         }
     }
@@ -303,8 +308,13 @@ std::int32_t RaceState::logicUpdate(float dt)
 
         if (readyCount == m_players.size())
         {
-            m_state = RaceOver;
-            m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, std::uint8_t(0), xy::NetFlag::Reliable);
+            //m_state = RaceOver;
+            //m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, std::uint8_t(0), xy::NetFlag::Reliable);
+
+            m_state = Pause;
+            m_unpauseState = RaceOver;
+            m_pauseTime = sf::seconds(1.f);
+            m_pauseClock.restart();
         }
         else if (readyCount == m_players.size() - 1)
         {
@@ -323,8 +333,17 @@ std::int32_t RaceState::logicUpdate(float dt)
         if (m_pauseClock.getElapsedTime() > m_pauseTime)
         {
             m_state = m_unpauseState;
-            m_countDownTimer.restart();
-            m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+            switch (m_state)
+            {
+            default: break;
+            case Countdown:
+                m_countDownTimer.restart();
+                m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
+                break;
+            case RaceOver:
+                m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, std::uint8_t(0), xy::NetFlag::Reliable);
+                break;
+            }
         }
         break;
     }
@@ -468,6 +487,7 @@ void RaceState::sendPlayerData(const xy::NetPeer& peer)
     data.vehicleType = player.entity.getComponent<Vehicle>().type;
     data.x = player.entity.getComponent<xy::Transform>().getPosition().x;
     data.y = player.entity.getComponent<xy::Transform>().getPosition().y;
+    data.serverID = player.entity.getIndex();
     data.colourID = static_cast<std::uint8_t>(player.entity.getComponent<NetActor>().colourID);
 
     m_sharedData.netHost.sendPacket(peer, PacketID::VehicleData, data, xy::NetFlag::Reliable);

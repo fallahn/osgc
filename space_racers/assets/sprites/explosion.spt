@@ -1,7 +1,7 @@
 spritesheet explosion
 {
-	src="assets/images/explosion.png"
-	blend=add
+	src="assets/images/explode.png"
+	blendmode=add
 
 	sprite explosion
 	{
@@ -28,7 +28,7 @@ spritesheet explosion
 			frame = 768,768,256,256
 
 			loop=false
-			framerate=12
+			framerate=24
 		}
 	}
 }

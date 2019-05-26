@@ -27,11 +27,11 @@ Copyright 2019 Matt Marchant
 #include "ActorIDs.hpp"
 #include "InterpolationSystem.hpp"
 #include "DeadReckoningSystem.hpp"
-#include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
 #include "MessageIDs.hpp"
 #include "AnimationCallbacks.hpp"
+#include "VFXDirector.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -165,9 +165,12 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
+    m_gameScene.addSystem<xy::SpriteAnimator>(mb);
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+
+    m_gameScene.addDirector<VFXDirector>(m_sprites);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -189,14 +192,14 @@ void RaceState::loadResources()
 
     //game scene assets
     spriteSheet.loadFromFile("assets/sprites/dust_puff.spt", m_resources);
-    SpriteID::sprites[SpriteID::SmokePuff] = spriteSheet.getSprite("dust_puff");
+    m_sprites[SpriteID::Game::SmokePuff] = spriteSheet.getSprite("dust_puff");
 
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
-    SpriteID::sprites[SpriteID::Explosion] = spriteSheet.getSprite("explosion");
+    m_sprites[SpriteID::Game::Explosion] = spriteSheet.getSprite("explosion");
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
-    SpriteID::sprites[SpriteID::UIStartLights] = spriteSheet.getSprite("lights");
+    m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
 
 
 }
@@ -228,7 +231,7 @@ void RaceState::buildUI()
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 0.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::UIStartLights];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::UIStartLights];
     entity.addComponent<xy::SpriteAnimation>();
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
@@ -290,7 +293,7 @@ void RaceState::handlePackets()
                 fallNetVehicle(packet.as<std::uint32_t>());                
                 break;
             case PacketID::VehicleSpawned:
-                resetNetVehicle(packet.as<std::uint32_t>());
+                resetNetVehicle(packet.as<VehicleData>());
                 break;
             case PacketID::ClientLeftRace:
             {
@@ -322,7 +325,7 @@ void RaceState::handlePackets()
                 requestStackPush(StateID::Error);
                 break;
             case PacketID::ErrorServerDisconnect:
-                m_sharedData.errorMessage = "Server Disconnected.";
+                m_sharedData.errorMessage = "Host Disconnected.";
                 m_sharedData.netClient->disconnect();
                 requestStackPush(StateID::Error);
                 break;
@@ -343,6 +346,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     //as the server is the final arbiter in laps counted anyway
     entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount(); 
     entity.getComponent<Vehicle>().client = true;
+    entity.addComponent<std::int32_t>() = data.serverID;
 
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
@@ -524,34 +528,61 @@ void RaceState::reconcile(const ClientUpdate& update)
     }
 }
 
-void RaceState::resetNetVehicle(std::uint32_t id)
+void RaceState::resetNetVehicle(const VehicleData& data)
 {
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::NetActor;
-    cmd.action = [id](xy::Entity e, float)
+    if (auto e = m_playerInput.getPlayerEntity(); e.getComponent<std::int32_t>() == data.serverID)
     {
-        if (e.getComponent<NetActor>().serverID == id)
+        auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::Respawned;
+        msg->entity = e;
+    }
+    else
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::NetActor;
+        cmd.action = [&,data](xy::Entity e, float)
         {
-            e.getComponent<xy::Callback>().active = false;
-            e.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-            e.getComponent<xy::Transform>().setScale(1.f, 1.f);
-        }
-    };
-    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            if (e.getComponent<NetActor>().serverID == data.serverID)
+            {
+                e.getComponent<xy::Callback>().active = false;
+                e.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+                e.getComponent<xy::Transform>().setScale(1.f, 1.f);
+                e.getComponent<xy::Transform>().setPosition(data.x, data.y);
+
+                auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+                msg->type = VehicleEvent::Respawned;
+                msg->entity = e;
+            }
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void RaceState::explodeNetVehicle(std::uint32_t id)
 {
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::NetActor;
-    cmd.action = [id](xy::Entity e, float)
+    if (auto e = m_playerInput.getPlayerEntity(); e.getComponent<std::int32_t>() == id)
     {
-        if (e.getComponent<NetActor>().serverID == id)
+        auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::Exploded;
+        msg->entity = e;
+    }
+    else
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::NetActor;
+        cmd.action = [&, id](xy::Entity e, float)
         {
-            e.getComponent<xy::Transform>().setScale(0.f, 0.f);
-        }
-    };
-    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            if (e.getComponent<NetActor>().serverID == id)
+            {
+                e.getComponent<xy::Transform>().setScale(0.f, 0.f);
+
+                auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+                msg->type = VehicleEvent::Exploded;
+                msg->entity = e;
+            }
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void RaceState::fallNetVehicle(std::uint32_t id)

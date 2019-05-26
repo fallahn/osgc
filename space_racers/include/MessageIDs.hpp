@@ -34,6 +34,7 @@ struct VehicleEvent final
     enum
     {
         RequestRespawn,
+        Respawned,
         Fell,
         Exploded,
         LapLine

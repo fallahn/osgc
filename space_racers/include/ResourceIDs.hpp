@@ -47,10 +47,7 @@ namespace TextureID
     static std::array<std::size_t, Count> handles = {};
 }
 
-#include <xyginext/ecs/components/Sprite.hpp>
-//TODO these should be split in to appropriate sections
-//we don't really want one static array with ALL the sprites in it
-namespace SpriteID
+namespace SpriteID::Menu
 {
     enum
     {
@@ -66,14 +63,18 @@ namespace SpriteID
         JoinButton,
         NetBackButton,
 
-        Cursor,
+        Count
+    };
+}
 
+namespace SpriteID::Game
+{
+    enum
+    {
         UIStartLights,
         Explosion,
         SmokePuff,
 
         Count
     };
-
-    static std::array<xy::Sprite, Count> sprites;
 }

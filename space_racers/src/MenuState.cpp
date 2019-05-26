@@ -27,7 +27,6 @@ source distribution.
 
 #include "MenuState.hpp"
 #include "StateIDs.hpp"
-#include "ResourceIDs.hpp"
 #include "PluginExport.hpp"
 #include "MenuConsts.hpp"
 #include "CommandIDs.hpp"
@@ -178,28 +177,26 @@ void MenuState::loadResources()
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/menu_buttons.spt", m_resources);
-    SpriteID::sprites[SpriteID::TimeTrialButton] = spriteSheet.getSprite("timetrial");
-    SpriteID::sprites[SpriteID::LocalButton] = spriteSheet.getSprite("local");
-    SpriteID::sprites[SpriteID::NetButton] = spriteSheet.getSprite("net");
-    SpriteID::sprites[SpriteID::OptionsButton] = spriteSheet.getSprite("options");
-    SpriteID::sprites[SpriteID::QuitButton] = spriteSheet.getSprite("quit");
+    m_sprites[SpriteID::Menu::TimeTrialButton] = spriteSheet.getSprite("timetrial");
+    m_sprites[SpriteID::Menu::LocalButton] = spriteSheet.getSprite("local");
+    m_sprites[SpriteID::Menu::NetButton] = spriteSheet.getSprite("net");
+    m_sprites[SpriteID::Menu::OptionsButton] = spriteSheet.getSprite("options");
+    m_sprites[SpriteID::Menu::QuitButton] = spriteSheet.getSprite("quit");
 
     spriteSheet.loadFromFile("assets/sprites/network_buttons.spt", m_resources);
-    SpriteID::sprites[SpriteID::PlayerNameButton] = spriteSheet.getSprite("player_name");
-    SpriteID::sprites[SpriteID::HostButton] = spriteSheet.getSprite("host");
-    SpriteID::sprites[SpriteID::AddressButton] = spriteSheet.getSprite("address");
-    SpriteID::sprites[SpriteID::JoinButton] = spriteSheet.getSprite("join");
-    SpriteID::sprites[SpriteID::NetBackButton] = spriteSheet.getSprite("back");
+    m_sprites[SpriteID::Menu::PlayerNameButton] = spriteSheet.getSprite("player_name");
+    m_sprites[SpriteID::Menu::HostButton] = spriteSheet.getSprite("host");
+    m_sprites[SpriteID::Menu::AddressButton] = spriteSheet.getSprite("address");
+    m_sprites[SpriteID::Menu::JoinButton] = spriteSheet.getSprite("join");
+    m_sprites[SpriteID::Menu::NetBackButton] = spriteSheet.getSprite("back");
 
     if (spriteSheet.loadFromFile("assets/sprites/cursor.spt", m_resources))
     {
-        SpriteID::sprites[SpriteID::Cursor] = spriteSheet.getSprite("cursor");
-
         //custom mouse cursor
         auto entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>();
         entity.addComponent<xy::Drawable>().setDepth(300);
-        entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Cursor];
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("cursor");
         entity.addComponent<xy::SpriteAnimation>().play(0);
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().function =
@@ -281,7 +278,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::TimeTrialButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::TimeTrialButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -302,7 +299,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::LocalButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::LocalButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -323,7 +320,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::NetButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NetButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -354,7 +351,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::OptionsButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::OptionsButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -376,7 +373,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::QuitButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::QuitButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -414,7 +411,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::PlayerNameButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::PlayerNameButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -455,7 +452,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::HostButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::HostButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -479,7 +476,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::AddressButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::AddressButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -519,7 +516,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::JoinButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::JoinButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -542,7 +539,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(itemPosition);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::NetBackButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NetBackButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =

@@ -180,13 +180,11 @@ void LobbyState::loadResources()
 
     if (spriteSheet.loadFromFile("assets/sprites/cursor.spt", m_resources))
     {
-        SpriteID::sprites[SpriteID::Cursor] = spriteSheet.getSprite("cursor");
-
         //custom mouse cursor
         auto entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>();
         entity.addComponent<xy::Drawable>().setDepth(300);
-        entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Cursor];
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("cursor");
         entity.addComponent<xy::SpriteAnimation>().play(0);
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().function =
@@ -360,7 +358,7 @@ void LobbyState::pollNetwork()
             {
             default: break;
             case PacketID::ErrorServerDisconnect:
-                m_sharedData.errorMessage = "Server Disconnected.";
+                m_sharedData.errorMessage = "Host Disconnected.";
                 m_sharedData.netClient->disconnect();
                 requestStackPush(StateID::Error);
                 break;

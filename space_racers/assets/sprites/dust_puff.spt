@@ -1,7 +1,7 @@
 spritesheet dust_puff
 {
 	src="assets/images/dust_puff.png"
-	blend=add
+	blendmode=add
 
 	sprite dust_puff
 	{
