@@ -60,6 +60,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/TextSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/util/Random.hpp>
 
 namespace
 {
@@ -256,10 +257,39 @@ void RaceState::buildWorld()
 
     float fov = Camera3D::calcFOV(view.getSize().y);
     float ratio = view.getSize().x / view.getSize().y;
-    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 10.f);
+    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 1500.f);
 
     m_gameScene.setActiveCamera(camEnt);
     m_gameScene.setActiveListener(camEnt);
+
+    //dem starrs
+    tempID = m_resources.load<sf::Texture>("buns");
+    auto& tempTexture = m_resources.get<sf::Texture>(tempID);
+    for (auto i = 0; i < 4; ++i)
+    {
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
+        auto points = xy::Util::Random::poissonDiscDistribution(sf::FloatRect(sf::Vector2f(), xy::DefaultSceneSize * 3.f), 800.f, 10);
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+
+        for (auto p : points)
+        {
+            float size = (5 - i) / 2.f;
+            verts.emplace_back(sf::Vector2f(-size, -size) + p, sf::Color::White);
+            verts.emplace_back(sf::Vector2f(size, -size) + p, sf::Color::White);
+            verts.emplace_back(sf::Vector2f(size, size) + p, sf::Color::White);
+            verts.emplace_back(sf::Vector2f(-size, size) + p, sf::Color::White);
+        }
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+        entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Quads);
+
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
+        entity.getComponent<xy::Drawable>().bindUniform("u_texture", tempTexture);
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = -500.f + (i * 200.f);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    }
 
     //let the server know the world is loaded so it can send us all player cars
     m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);
@@ -547,6 +577,13 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
         entity.getComponent<xy::BroadphaseComponent>().setArea(bounds);
+
+        auto cameraEntity = m_gameScene.getActiveCamera();
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
+        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = radius * data.scale;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
     }
         break;
     }

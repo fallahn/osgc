@@ -53,11 +53,11 @@ void Sprite3DSystem::process(float)
 
         //SFML 'optimises' by pre-transforming verts if there are 4 or fewer
         auto& matrix = spr.getMatrix();
-        //if (drawable.getVertices().size() < 5) 
-        //{
-        //    matrix = glm::mat4(1.f);// glm::translate(glm::mat4(1.f), glm::vec3(0.f, height - position.y - spr.verticalOffset, position.y));
-        //}
-        //else
+        if (drawable.getVertices().size() < 5) 
+        {
+            matrix = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, spr.depth));
+        }
+        else
         {
             auto scale = tx.getScale(); //sadly not world (combined) scale
 

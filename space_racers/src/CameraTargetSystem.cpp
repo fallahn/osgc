@@ -45,10 +45,11 @@ void CameraTargetSystem::process(float dt)
     {
         auto& tx = entity.getComponent<xy::Transform>();
         auto& camera = entity.getComponent<CameraTarget>();
-        auto destPosition = camera.target.getComponent<xy::Transform>().getPosition();
         
         if (camera.target.isValid() && camera.active)
         {
+            auto destPosition = camera.target.getComponent<xy::Transform>().getPosition();
+
             auto txPosition = tx.getPosition();
             auto movement = destPosition - txPosition;
             auto len2 = xy::Util::Vector::lengthSquared(movement);
