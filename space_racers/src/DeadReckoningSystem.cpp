@@ -70,19 +70,11 @@ void DeadReckoningSystem::process(float dt)
             //collision(entity);
 
             //tx.setRotation(dr.update.rotation); //we'll use normal interpolation for rotation
-
-            dr.targetTime = delta;
-            dr.currentTime = 0.f;
-            dr.currVelocity = dr.targetVelocity;
-            dr.targetVelocity = newVel;
         }
         else
         {
             //use the current known velocity to move forward
-
-            dr.currentTime = std::min(dr.targetTime, dr.currentTime + dt);
-            sf::Vector2f vel = lerp(dr.currVelocity, dr.targetVelocity, dr.currentTime / dr.targetTime);
-
+            sf::Vector2f vel = { dr.update.velX, dr.update.velY };// = lerp(dr.currVelocity, dr.targetVelocity, dr.currentTime / dr.targetTime);
             auto& tx = entity.getComponent<xy::Transform>();
             tx.move(vel * dt);
             //collision(entity);
@@ -129,10 +121,10 @@ void DeadReckoningSystem::collision(xy::Entity entity)
 
                     auto& dr = entity.getComponent<DeadReckon>();
                     sf::Vector2f vel = xy::Util::Vector::reflect({ dr.update.velX, dr.update.velY }, diff);
-                    dr.update.velX = vel.x;
+                    /*dr.update.velX = vel.x;
                     dr.update.velY = vel.y;
                     dr.currVelocity = dr.targetVelocity;
-                    dr.targetVelocity = vel;
+                    dr.targetVelocity = vel;*/
                 }
             }
         }

@@ -27,11 +27,6 @@ struct DeadReckon final
     ActorUpdate update;
     bool hasUpdate = false;
     std::int32_t prevTimestamp = 0;
-
-    sf::Vector2f currVelocity;
-    sf::Vector2f targetVelocity;
-    float currentTime = 0.f;
-    float targetTime = 1.f;
 };
 
 class DeadReckoningSystem final : public xy::System
