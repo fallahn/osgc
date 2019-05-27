@@ -21,6 +21,14 @@ Copyright 2019 Matt Marchant
 #include <cstdint>
 #include <array>
 
+namespace ShaderID
+{
+    enum
+    {
+        Sprite3D
+    };
+}
+
 namespace FontID
 {
     enum

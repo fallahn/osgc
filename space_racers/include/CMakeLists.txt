@@ -3,6 +3,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ActorIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AnimationCallbacks.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTarget.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ClientPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CircularBuffer.hpp
@@ -20,6 +21,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
@@ -37,6 +39,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ShapeUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedPackets.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp

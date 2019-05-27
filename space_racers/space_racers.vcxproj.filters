@@ -46,6 +46,9 @@
     <Filter Include="Source Files\directors">
       <UniqueIdentifier>{9da66eae-94f9-4b26-8f81-d7d0f6cf6dcc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\shaders">
+      <UniqueIdentifier>{2759995f-e72a-4207-9b84-1fe5df81d7c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\PluginExport.hpp">
@@ -177,6 +180,15 @@
     <ClInclude Include="include\VFXDirector.hpp">
       <Filter>Header Files\directors</Filter>
     </ClInclude>
+    <ClInclude Include="include\Camera3D.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Sprite3D.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MatrixPool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -254,5 +266,19 @@
     <ClCompile Include="src\VFXDirector.cpp">
       <Filter>Source Files\directors</Filter>
     </ClCompile>
+    <ClCompile Include="src\Camera3D.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sprite3DSystem.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MatrixPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Sprite3DShader.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

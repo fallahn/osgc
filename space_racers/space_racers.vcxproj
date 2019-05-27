@@ -148,6 +148,7 @@
     <ClInclude Include="include\ActorIDs.hpp" />
     <ClInclude Include="include\AnimationCallbacks.hpp" />
     <ClInclude Include="include\AsteroidSystem.hpp" />
+    <ClInclude Include="include\Camera3D.hpp" />
     <ClInclude Include="include\CameraTarget.hpp" />
     <ClInclude Include="include\CircularBuffer.hpp" />
     <ClInclude Include="include\ClientPackets.hpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="include\InterpolationSystem.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MapParser.hpp" />
+    <ClInclude Include="include\MatrixPool.hpp" />
     <ClInclude Include="include\MenuConsts.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
@@ -182,6 +184,7 @@
     <ClInclude Include="include\ShapeUtils.hpp" />
     <ClInclude Include="include\SharedPackets.hpp" />
     <ClInclude Include="include\SliderSystem.hpp" />
+    <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\SummaryState.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
@@ -191,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AsteroidSystem.cpp" />
+    <ClCompile Include="src\Camera3D.cpp" />
     <ClCompile Include="src\CameraTargetSystem.cpp" />
     <ClCompile Include="src\ClientLauncher.cpp" />
     <ClCompile Include="src\CollisionObject.cpp" />
@@ -204,6 +208,7 @@
     <ClCompile Include="src\InterpolationSystem.cpp" />
     <ClCompile Include="src\LobbyState.cpp" />
     <ClCompile Include="src\MapParser.cpp" />
+    <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\NetActorSystem.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
@@ -212,9 +217,13 @@
     <ClCompile Include="src\ServerLobbyState.cpp" />
     <ClCompile Include="src\ServerRaceState.cpp" />
     <ClCompile Include="src\SliderSystem.cpp" />
+    <ClCompile Include="src\Sprite3DSystem.cpp" />
     <ClCompile Include="src\SummaryState.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
     <ClCompile Include="src\VFXDirector.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Sprite3DShader.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

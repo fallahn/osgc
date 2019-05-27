@@ -32,6 +32,10 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "AnimationCallbacks.hpp"
 #include "VFXDirector.hpp"
+#include "Camera3D.hpp"
+#include "Sprite3D.hpp"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -59,6 +63,8 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
+#include "Sprite3DShader.inl"
+
     xy::Entity debugEnt;
 
     const sf::Time pingTime = sf::seconds(3.f);
@@ -79,6 +85,8 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     loadResources();
     buildWorld();
     buildUI();
+
+    buildTest();
 
     quitLoadingScreen();
 }
@@ -172,8 +180,10 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
+    m_gameScene.addSystem<Sprite3DSystem>(mb);
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
+    m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
     
@@ -206,6 +216,8 @@ void RaceState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
     m_sprites[SpriteID::Game::Explosion] = spriteSheet.getSprite("explosion");
 
+    m_shaders.preload(ShaderID::Sprite3D, SpriteVertex, SpriteFragment);
+
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
     m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
@@ -231,6 +243,23 @@ void RaceState::buildWorld()
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
+
+    //add a camera
+    auto view = getContext().defaultView;
+    auto camEnt = m_gameScene.createEntity();
+    camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    camEnt.addComponent<xy::Camera>().setView(view.getSize());
+    camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+    camEnt.getComponent<xy::Camera>().lockRotation(true);
+    camEnt.addComponent<CameraTarget>();
+    camEnt.addComponent<xy::AudioListener>();
+
+    float fov = Camera3D::calcFOV(view.getSize().y);
+    float ratio = view.getSize().x / view.getSize().y;
+    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 10.f);
+
+    m_gameScene.setActiveCamera(camEnt);
+    m_gameScene.setActiveListener(camEnt);
 
     //let the server know the world is loaded so it can send us all player cars
     m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);
@@ -263,6 +292,23 @@ void RaceState::buildUI()
         }
     };
     entity.addComponent<xy::AudioEmitter>() = m_uiSounds.getEmitter("start");
+}
+
+void RaceState::buildTest()
+{
+    auto temp = m_resources.load<sf::Texture>("assets/images/temp01a.png");
+    
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(1000);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
+
+    auto cameraEntity = m_gameScene.getActiveCamera();
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
+    entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 }
 
 void RaceState::handlePackets()
@@ -415,18 +461,8 @@ void RaceState::spawnVehicle(const VehicleData& data)
         }
     };
 
-    //add a camera
-    auto view = getContext().defaultView;
-    auto camEnt = m_gameScene.createEntity();
-    camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-    camEnt.addComponent<xy::Camera>().setView(view.getSize());
-    camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
-    camEnt.getComponent<xy::Camera>().lockRotation(true);
-    camEnt.addComponent<CameraTarget>().target = entity;
-    camEnt.addComponent<xy::AudioListener>();
-    
-    m_gameScene.setActiveCamera(camEnt);
-    m_gameScene.setActiveListener(camEnt);
+    auto cameraEntity = m_gameScene.getActiveCamera();
+    cameraEntity.getComponent<CameraTarget>().target = entity;
 
 #ifdef XY_DEBUG
     /*debugEnt = m_gameScene.createEntity();

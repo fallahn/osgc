@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTargetSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ClientLauncher.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CollisionObject.cpp
@@ -14,6 +15,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NetActorSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
@@ -22,6 +24,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VFXDirector.cpp

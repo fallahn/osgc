@@ -22,12 +22,14 @@ Copyright 2019 Matt Marchant
 #include "ResourceIDs.hpp"
 #include "InputParser.hpp"
 #include "MapParser.hpp"
+#include "MatrixPool.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/audio/AudioScape.hpp>
 #include <xyginext/resources/Resource.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 #include <vector>
 #include <array>
@@ -62,6 +64,9 @@ private:
     MapParser m_mapParser;
     xy::ResourceHolder m_resources;
 
+    xy::ShaderResource m_shaders;
+
+    MatrixPool m_matrixPool;
     std::array<xy::Sprite, SpriteID::Game::Count> m_sprites;
 
     InputParser m_playerInput;
@@ -71,6 +76,8 @@ private:
     void loadResources();
     void buildWorld();
     void buildUI();
+
+    void buildTest();
 
     void handlePackets();
 
