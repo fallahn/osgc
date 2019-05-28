@@ -34,7 +34,7 @@ Copyright 2019 Matt Marchant
 
 #include <limits>
 
-#define DRAW_DEBUG 1
+//#define DRAW_DEBUG 1
 
 namespace
 {
