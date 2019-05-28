@@ -174,6 +174,7 @@ void MenuState::loadResources()
     FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
 
     TextureID::handles[TextureID::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
+    TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/menu_buttons.spt", m_resources);
@@ -239,6 +240,12 @@ void MenuState::loadResources()
 
 void MenuState::buildMenu()
 {
+    //background
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::BackgroundDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]));
+
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
 
     auto rootNode = m_scene.createEntity();
@@ -247,7 +254,7 @@ void MenuState::buildMenu()
     rootNode.addComponent<Slider>().speed = 7.f;
 
     //title
-    auto entity = m_scene.createEntity();
+    entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::MenuDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::MainMenu));

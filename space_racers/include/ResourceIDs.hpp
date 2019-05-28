@@ -25,7 +25,8 @@ namespace ShaderID
 {
     enum
     {
-        Sprite3D
+        Sprite3DTextured,
+        Sprite3DColoured
     };
 }
 
@@ -46,6 +47,7 @@ namespace TextureID
     enum
     {
         MainMenu, VehicleSelect,
+        Stars,
 
         Temp01, Temp02,
 

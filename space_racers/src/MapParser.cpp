@@ -18,8 +18,8 @@ Copyright 2019 Matt Marchant
 
 #include "MapParser.hpp"
 #include "CollisionObject.hpp"
-#include "WayPoint.hpp"
 #include "ShapeUtils.hpp"
+#include "WayPoint.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -153,6 +153,9 @@ bool MapParser::load(const std::string& path)
         return entity;
     };
 
+    //used for sorting waypoints
+    std::vector<WayPoint*> waypoints;
+
     m_waypointCount = 0;
     tmx::Map map;
     if (map.load(xy::FileSystem::getResourcePath() + path))
@@ -214,6 +217,7 @@ bool MapParser::load(const std::string& path)
                                     entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Static);
                                     entity.getComponent<xy::BroadphaseComponent>().setArea({ -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height });
                                     entity.addComponent<WayPoint>().id = id;
+                                    entity.getComponent<WayPoint>().nextPoint = entity.getComponent<xy::Transform>().getPosition(); //this is correctly processed below
                                     if (result != properties.end())
                                     {
                                         if (result->getType() == tmx::Property::Type::Float)
@@ -231,6 +235,7 @@ bool MapParser::load(const std::string& path)
                                     }
 
                                     m_waypointCount++;
+                                    waypoints.push_back(&entity.getComponent<WayPoint>());
 
                                     if (id == 0)
                                     {
@@ -267,11 +272,39 @@ bool MapParser::load(const std::string& path)
             }
         }
 
+        //validate the waypoint data
         if (m_startPosition == sf::Vector2f())
         {
             xy::Logger::log("No start position was set - waypoints should be labelled from 0", xy::Logger::Type::Error);
             return false;
         }
+
+        if (m_waypointCount < 2)
+        {
+            xy::Logger::log("No waypoints were loaded for map!", xy::Logger::Type::Error);
+            return false;
+        }
+
+        //make sure we have all the correct indices
+        //then calculate the vector to the next waypoint from
+        //each one - this is how we know how far around the
+        //track a player is.
+        std::sort(waypoints.begin(), waypoints.end(), [](const WayPoint* a, const WayPoint* b) {return a->id < b->id; });
+        for (auto i = 0u; i < waypoints.size() - 1; ++i)
+        {
+            if (waypoints[i + 1]->id - waypoints[i]->id != 1)
+            {
+                xy::Logger::log("Waypoints missing correct number at " + std::to_string(i), xy::Logger::Type::Error);
+                return false;
+            }
+
+            waypoints[i]->nextPoint = waypoints[i + 1]->nextPoint - waypoints[i]->nextPoint;
+            waypoints[i]->distance = xy::Util::Vector::length(waypoints[i]->nextPoint);
+            waypoints[i]->nextPoint /= waypoints[i]->distance;            
+        }
+        waypoints.back()->nextPoint = m_startPosition - waypoints.back()->nextPoint;
+        waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);
+        waypoints.back()->nextPoint /= waypoints.back()->distance;
 
         return true; //TODO only if bitset matches
     }

@@ -85,10 +85,10 @@ struct Vehicle final
     std::uint16_t collisionFlags = 0;
     std::uint16_t stateFlags = (1 << Disabled);
 
-    std::int32_t waypointID = -1; //because the first we hit is 0
+    xy::Entity currentWaypoint;
     std::int32_t waypointCount = 0;
-    sf::Vector2f waypointPosition;
-    float waypointRotation = 0.f;
+    float waypointDistance = 0.f; //total of current passed waypoints
+    float totalDistance = 0.f; //above plus distance toward next waypoint
 
     sf::Clock afkTimer;
     static constexpr float AfkTime = 30.f;

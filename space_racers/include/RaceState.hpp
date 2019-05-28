@@ -31,6 +31,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
+#include <SFML/Graphics/Sprite.hpp>
+
 #include <vector>
 #include <array>
 
@@ -71,6 +73,8 @@ private:
 
     InputParser m_playerInput;
     sf::Clock m_pingClock;
+
+    sf::Sprite m_backgroundSprite;
 
     void initScene();
     void loadResources();

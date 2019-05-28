@@ -18,11 +18,14 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+
+
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <string>
 #include <array>
+#include <vector>
 
 namespace MapConst
 {

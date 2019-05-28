@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include "CollisionObject.hpp"
 #include "GameConsts.hpp"
 #include "MessageIDs.hpp"
+#include "WayPoint.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -94,13 +95,21 @@ void RaceState::handleMessage(const xy::Message& msg)
             vehicle.stateFlags = (1 << Vehicle::Normal);
             vehicle.invincibleTime = GameConst::InvincibleTime;
 
-            tx.setPosition(vehicle.waypointPosition);
-            tx.setRotation(vehicle.waypointRotation);
+            if (vehicle.currentWaypoint.isValid())
+            {
+                tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
+                tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
+            }
+            else
+            {
+                tx.setPosition(m_mapParser.getStartPosition());
+            }
+
             tx.setScale(1.f, 1.f);
 
             VehicleData data; //TODO specialise this packet to include rotation?
-            data.x = vehicle.waypointPosition.x;
-            data.x = vehicle.waypointPosition.y;
+            data.x = tx.getPosition().x;
+            data.x = tx.getPosition().y;
             data.serverID = entity.getIndex();
 
             m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, data, xy::NetFlag::Reliable);

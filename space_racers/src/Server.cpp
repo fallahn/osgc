@@ -32,7 +32,7 @@ using namespace sv;
 
 namespace
 {
-    const sf::Time NetTime = sf::seconds(1.f / 20.f);
+    const sf::Time NetTime = sf::seconds(1.f / 30.f);
     const sf::Time UpdateTime = sf::seconds(1.f / 60.f);
 }
 

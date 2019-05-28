@@ -157,12 +157,18 @@ bool RaceState::update(float dt)
     m_playerInput.update(dt);
     m_gameScene.update(dt);
     m_uiScene.update(dt);
+
     return true;
 }
 
 void RaceState::draw()
 {
     auto& rw = getContext().renderWindow;
+
+    //draw the background first so it doesn't
+    //follow the game scene's camera
+    rw.setView(getContext().defaultView);
+    rw.draw(m_backgroundSprite);
 
     rw.draw(m_gameScene);
     rw.draw(m_uiScene);
@@ -207,6 +213,8 @@ void RaceState::loadResources()
 {
     TextureID::handles[TextureID::Temp01] = m_resources.load<sf::Texture>("nothing_to_see_here");
     TextureID::handles[TextureID::Temp02] = m_resources.load<sf::Texture>("assets/images/temp02.png");
+    TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
+    m_backgroundSprite.setTexture(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]), true);
 
     xy::SpriteSheet spriteSheet;
 
@@ -217,7 +225,8 @@ void RaceState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
     m_sprites[SpriteID::Game::Explosion] = spriteSheet.getSprite("explosion");
 
-    m_shaders.preload(ShaderID::Sprite3D, SpriteVertex, SpriteFragment);
+    m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertex, SpriteFragmentTextured);
+    m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
@@ -263,9 +272,8 @@ void RaceState::buildWorld()
     m_gameScene.setActiveListener(camEnt);
 
     //dem starrs
-    tempID = m_resources.load<sf::Texture>("buns");
     auto& tempTexture = m_resources.get<sf::Texture>(tempID);
-    for (auto i = 0; i < 4; ++i)
+    for (auto i = 0; i < 3; ++i)
     {
         entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>();
@@ -275,7 +283,7 @@ void RaceState::buildWorld()
 
         for (auto p : points)
         {
-            float size = (5 - i) / 2.f;
+            float size = (7 - i) / 1.8f;
             verts.emplace_back(sf::Vector2f(-size, -size) + p, sf::Color::White);
             verts.emplace_back(sf::Vector2f(size, -size) + p, sf::Color::White);
             verts.emplace_back(sf::Vector2f(size, size) + p, sf::Color::White);
@@ -284,8 +292,7 @@ void RaceState::buildWorld()
         entity.getComponent<xy::Drawable>().updateLocalBounds();
         entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Quads);
 
-        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", tempTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DColoured));
         entity.addComponent<Sprite3D>(m_matrixPool).depth = -500.f + (i * 200.f);
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
@@ -334,7 +341,7 @@ void RaceState::buildTest()
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
 
     auto cameraEntity = m_gameScene.getActiveCamera();
-    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());
     entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
@@ -579,7 +586,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::BroadphaseComponent>().setArea(bounds);
 
         auto cameraEntity = m_gameScene.getActiveCamera();
-        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());
         entity.addComponent<Sprite3D>(m_matrixPool).depth = radius * data.scale;
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);

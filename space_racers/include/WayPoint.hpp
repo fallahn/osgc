@@ -19,12 +19,15 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <cstdlib>
 
 struct WayPoint final
 {
     std::int32_t id = 0;
+    sf::Vector2f nextPoint; //points to next waypoint
+    float distance = 0.f; //length of above
     //which way should the vehicle point if it spawns here?
     float rotation = 0.f;
 };

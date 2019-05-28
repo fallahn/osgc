@@ -154,6 +154,14 @@ void VehicleSystem::processVehicle(xy::Entity entity, float delta)
         break;
     }
     vehicle.invincibleTime -= delta;
+
+    //checks where we are along the track
+    if (vehicle.currentWaypoint.isValid())
+    {
+        auto relPosition = entity.getComponent<xy::Transform>().getPosition() - vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition();
+        float dist = xy::Util::Vector::dot(relPosition, vehicle.currentWaypoint.getComponent<WayPoint>().nextPoint);
+        vehicle.totalDistance = vehicle.waypointDistance + dist;
+    }
 }
 
 void VehicleSystem::processInput(xy::Entity entity)
@@ -186,7 +194,6 @@ void VehicleSystem::processInput(xy::Entity entity)
 
     if (input.flags & InputFlag::Brake)
     {
-        //acceleration -= vehicle.settings.acceleration * vehicle.settings.brakeStrength;
         vehicle.velocity *= vehicle.settings.brakeStrength;
     }
 
@@ -284,14 +291,29 @@ void VehicleSystem::doCollision(xy::Entity entity)
                     vehicle.collisionFlags |= (1 << type);
 
                     const auto& waypoint = other.getComponent<WayPoint>();
-                    if (waypoint.id != vehicle.waypointID)
+                    if (!vehicle.currentWaypoint.isValid())
                     {
-                        auto expectedID = ((vehicle.waypointID + 1) % vehicle.waypointCount);
+                        if (waypoint.id == 0)
+                        {
+                            vehicle.currentWaypoint = other;
+                            //crossed the start line
+                            auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+                            msg->type = VehicleEvent::LapLine;
+                            msg->entity = entity;
+                        }
+                        else
+                        {
+                            explode(entity);
+                        }
+                    }
+                    else if (waypoint.id != vehicle.currentWaypoint.getComponent<WayPoint>().id)
+                    {
+                        auto& vehicleWaypoint = vehicle.currentWaypoint.getComponent<WayPoint>();
+                        auto expectedID = ((vehicleWaypoint.id + 1) % vehicle.waypointCount);
                         if(expectedID == waypoint.id)
                         {
-                            vehicle.waypointID = waypoint.id;
-                            vehicle.waypointRotation = waypoint.rotation;
-                            vehicle.waypointPosition = other.getComponent<xy::Transform>().getPosition();
+                            vehicle.currentWaypoint = other;
+                            vehicle.waypointDistance += waypoint.distance;
                             
                             if (waypoint.id == 0)
                             {
@@ -299,6 +321,8 @@ void VehicleSystem::doCollision(xy::Entity entity)
                                 auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
                                 msg->type = VehicleEvent::LapLine;
                                 msg->entity = entity;
+
+                                vehicle.waypointDistance = 0.f;
                             }
                         }
                         else if(waypoint.id > expectedID % vehicle.waypointCount)
