@@ -50,23 +50,9 @@ SummaryState::SummaryState(xy::StateStack& ss, xy::State::Context ctx, SharedDat
 //public
 bool SummaryState::handleEvent(const sf::Event& evt)
 {
-    //TODO we want this to return to the lobby
-    //rather than the main menu - in which case does
-    //the server want to keep the lobby state alive?
-    //we also have to remember that the lobby state will
-    //try creating a new connection instead of using the
-    //existing one....
-
     if (evt.type == sf::Event::KeyPressed
         && m_delayClock.getElapsedTime() > delayTime)
     {
-        /*if (m_sharedData.hosting)
-        {
-            m_sharedData.server->quit();
-        }
-
-        requestStackClear();
-        requestStackPush(StateID::MainMenu);*/
         requestStackClear();
         requestStackPush(StateID::Lobby);
     }
@@ -121,11 +107,77 @@ void SummaryState::buildMenu()
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
-
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+
+    //make a copy of thte player info and erase any found in race positions...
+    //those who are left didn't get a podium finish.
+    auto playerInfo = m_sharedData.playerInfo;
+    float verticalOffset = -280.f;
+    if (m_sharedData.racePositions[0] != 0)
+    {
+        auto peerID = m_sharedData.racePositions[0];
+
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, verticalOffset);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font).setString(playerInfo[peerID].name + " 50 points");
+        entity.getComponent<xy::Text>().setCharacterSize(96);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        m_sharedData.playerInfo[peerID].score += 50;
+        verticalOffset += 160.f;
+        playerInfo.erase(peerID);
+    }
+    if (m_sharedData.racePositions[1] != 0)
+    {
+        auto peerID = m_sharedData.racePositions[1];
+
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, verticalOffset);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font).setString(playerInfo[peerID].name + " 30 points");
+        entity.getComponent<xy::Text>().setCharacterSize(96);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        m_sharedData.playerInfo[peerID].score += 30;
+        verticalOffset += 160.f;
+        playerInfo.erase(peerID);
+    }
+    if (m_sharedData.racePositions[2] != 0)
+    {
+        auto peerID = m_sharedData.racePositions[2];
+
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, verticalOffset);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font).setString(playerInfo[peerID].name + " 10 points");
+        entity.getComponent<xy::Text>().setCharacterSize(96);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        m_sharedData.playerInfo[peerID].score += 10;
+        verticalOffset += 160.f;
+        playerInfo.erase(peerID);
+    }
+
+
+    for (const auto& p : playerInfo)
+    {
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, verticalOffset);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font).setString(p.second.name + " DNF");
+        entity.getComponent<xy::Text>().setCharacterSize(96);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        verticalOffset += 160.f;
+    }
+
+    m_sharedData.racePositions = {};
+
+    //quit message
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, - 80.f);
+    entity.getComponent<xy::Transform>().move(0.f, 380.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("Press Any Key To Continue");
     entity.getComponent<xy::Text>().setCharacterSize(96);

@@ -365,6 +365,7 @@ void RaceState::handlePackets()
                 break;
             case PacketID::RaceFinished:
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+                m_sharedData.racePositions = packet.as<std::array<std::uint64_t, 4u>>();
                 requestStackPush(StateID::Summary);
                 break;
             case PacketID::CountdownStarted:

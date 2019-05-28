@@ -71,6 +71,8 @@ namespace sv
         sf::Clock m_timeoutClock;
         std::size_t m_finished; //cars that have crossed the line
 
+        std::array<std::uint64_t, 4u> m_racePositions = {}; //peers in the order they crossed the line
+
         void initScene();
         bool loadMap();
         bool createPlayers();

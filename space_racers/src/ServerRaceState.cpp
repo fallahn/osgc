@@ -124,19 +124,21 @@ void RaceState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == VehicleEvent::LapLine)
         {
-            //TODO broadcast this to clients
-            for (auto& p : m_players)
+            //TODO broadcast this to clients (?)
+            for (auto& [peer, connection] : m_players)
             {
-                if (p.second.entity == data.entity)
+                if (connection.entity == data.entity)
                 {
-                    p.second.lapCount++;
-                    if (p.second.lapCount == m_sharedData.lobbyData.lapCount)
+                    connection.lapCount++;
+                    if (connection.lapCount == m_sharedData.lobbyData.lapCount)
                     {
-                        p.second.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
-                        p.second.ready = false;
+                        connection.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+                        connection.ready = false;
 
+                        m_racePositions[m_finished] = peer;
                         m_finished++;
-                        if (m_finished == 1)
+
+                        if (m_finished == 1 && m_sharedData.lobbyData.playerCount > 1)
                         {
                             //tell clients to show one minute timer
                             m_sharedData.netHost.broadcastPacket(PacketID::RaceTimerStarted, std::uint32_t(0), xy::NetFlag::Reliable);
@@ -355,7 +357,7 @@ std::int32_t RaceState::logicUpdate(float dt)
                 m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
                 break;
             case RaceOver:
-                m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, std::uint8_t(0), xy::NetFlag::Reliable);
+                m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, /*std::uint8_t(0)*/m_racePositions, xy::NetFlag::Reliable);
                 break;
             }
         }

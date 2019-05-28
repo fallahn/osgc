@@ -71,6 +71,7 @@ struct SharedData final
     sf::String name = "Player";
 
     std::map<std::uint64_t, PlayerInfo> playerInfo;
+    std::array<std::uint64_t, 4u> racePositions = {};
 
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...
