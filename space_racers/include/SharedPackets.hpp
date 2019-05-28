@@ -23,9 +23,12 @@ Copyright 2019 Matt Marchant
 #include <cstdint>
 
 //this is only used to display other player info
+//such as in the lobby or round summary
 struct PlayerInfo final
 {
     sf::String name;
     std::uint32_t vehicle = 0;
+    std::uint32_t score = 0; //scores are calculated client side, but based on the race position dictated by server
+    std::uint8_t position = 0;
     bool ready = false;
 };

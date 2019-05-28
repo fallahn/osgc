@@ -70,11 +70,13 @@ struct SharedData final
     sf::String ip = "127.0.0.1";
     sf::String name = "Player";
 
+    std::map<std::uint64_t, PlayerInfo> playerInfo;
+
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...
     std::shared_ptr<xy::NetClient> netClient;
     //only used if we're hosting, else nullptr
     std::shared_ptr<sv::Server> server;
 
-    std::shared_ptr<ClientLauncher> launcher;
+    //std::shared_ptr<ClientLauncher> launcher;
 };

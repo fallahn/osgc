@@ -102,14 +102,14 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
             else
             {
                 auto id = sd.netClient->getPeer().getID();
-                m_playerInfo[id] = PlayerInfo();
+                m_sharedData.playerInfo[id] = PlayerInfo();
                 if (sd.name.isEmpty())
                 {
-                    m_playerInfo[id].name = "Player " + std::to_string(id);
+                    m_sharedData.playerInfo[id].name = "Player " + std::to_string(id);
                 }
                 else
                 {
-                    m_playerInfo[id].name = sd.name;
+                    m_sharedData.playerInfo[id].name = sd.name;
                 }
             }
         }
@@ -212,11 +212,19 @@ void LobbyState::buildMenu()
 
     //body text
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(240.f, 120.f);
+    entity.addComponent<xy::Transform>().setPosition(240.f, 220.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("No Players");
-    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setCharacterSize(48);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Lobby::PlayerText;
+
+    //lobby info
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(1440.f, 220.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString("Lobby");
+    entity.getComponent<xy::Text>().setCharacterSize(48);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Lobby::LobbyText;
 
     //ready button
     auto& uiSystem = m_scene.getSystem<xy::UISystem>();
@@ -291,13 +299,13 @@ void LobbyState::buildMenu()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     auto id = m_sharedData.netClient->getPeer().getID();
-                    m_playerInfo[id].vehicle = (m_playerInfo[id].vehicle + 2) % 3;
+                    m_sharedData.playerInfo[id].vehicle = (m_sharedData.playerInfo[id].vehicle + 2) % 3;
 
                     auto rect = entity.getComponent<xy::Sprite>().getTextureBounds();
-                    rect.top = m_playerInfo[id].vehicle * rect.height;
+                    rect.top = m_sharedData.playerInfo[id].vehicle * rect.height;
                     entity.getComponent<xy::Sprite>().setTextureRect(rect);
 
-                    m_sharedData.netClient->sendPacket(PacketID::VehicleChanged, std::uint8_t(m_playerInfo[id].vehicle), xy::NetFlag::Reliable);
+                    m_sharedData.netClient->sendPacket(PacketID::VehicleChanged, std::uint8_t(m_sharedData.playerInfo[id].vehicle), xy::NetFlag::Reliable);
                 }
             });
 
@@ -311,19 +319,55 @@ void LobbyState::buildMenu()
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     auto id = m_sharedData.netClient->getPeer().getID();
-                    m_playerInfo[id].vehicle = (m_playerInfo[id].vehicle + 1) % 3;
+                    m_sharedData.playerInfo[id].vehicle = (m_sharedData.playerInfo[id].vehicle + 1) % 3;
 
                     auto rect = entity.getComponent<xy::Sprite>().getTextureBounds();
-                    rect.top = m_playerInfo[id].vehicle * rect.height;
+                    rect.top = m_sharedData.playerInfo[id].vehicle * rect.height;
                     entity.getComponent<xy::Sprite>().setTextureRect(rect);
 
-                    m_sharedData.netClient->sendPacket(PacketID::VehicleChanged, std::uint8_t(m_playerInfo[id].vehicle), xy::NetFlag::Reliable);
+                    m_sharedData.netClient->sendPacket(PacketID::VehicleChanged, std::uint8_t(m_sharedData.playerInfo[id].vehicle), xy::NetFlag::Reliable);
                 }
             });
 
     if (m_sharedData.hosting)
     {
-        //TODO map selection / lap count
+        //TODO map selection
+
+        //lap count buttons
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - 400.f, xy::DefaultSceneSize.y - 136.f);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSelect]));
+        entity.addComponent<xy::Drawable>();
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        bounds.height /= 3.f;
+        entity.getComponent<xy::Sprite>().setTextureRect(bounds);
+        entity.getComponent<xy::Transform>().move(-bounds.width, 0.f);
+
+        bounds.width /= 3.f;
+        auto buttonEnt = m_scene.createEntity();
+        entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
+        buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
+        buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            uiSystem.addMouseButtonCallback([&, entity](xy::Entity, sf::Uint64 flags)
+                {
+                    if (flags & xy::UISystem::LeftMouse)
+                    {
+                        m_sharedData.netClient->sendPacket(PacketID::LapCountChanged, std::uint8_t(0), xy::NetFlag::Reliable);
+                    }
+                });
+
+        buttonEnt = m_scene.createEntity();
+        entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
+        buttonEnt.getComponent<xy::Transform>().move(bounds.width * 2.f, 0.f);
+        buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
+        buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            uiSystem.addMouseButtonCallback([&, entity](xy::Entity, sf::Uint64 flags)
+                {
+                    if (flags & xy::UISystem::LeftMouse)
+                    {
+                        m_sharedData.netClient->sendPacket(PacketID::LapCountChanged, std::uint8_t(1), xy::NetFlag::Reliable);
+                    }
+                });
 
         //start game button
         entity = m_scene.createEntity();
@@ -357,6 +401,9 @@ void LobbyState::pollNetwork()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::LobbyData:
+                updateLobbyData(packet.as<LobbyData>());
+                break;
             case PacketID::ErrorServerDisconnect:
                 m_sharedData.errorMessage = "Host Disconnected.";
                 m_sharedData.netClient->disconnect();
@@ -368,7 +415,7 @@ void LobbyState::pollNetwork()
                 requestStackPush(StateID::Error);
                 break;
             case PacketID::LeftLobby:
-                m_playerInfo.erase(packet.as<std::uint64_t>());
+                m_sharedData.playerInfo.erase(packet.as<std::uint64_t>());
                 refreshView();
                 break;
             case PacketID::RequestPlayerName:
@@ -377,8 +424,8 @@ void LobbyState::pollNetwork()
             case PacketID::DeliverPlayerData:
             {
                 auto data = packet.as<PlayerData>();
-                m_playerInfo[data.peerID].ready = data.ready;
-                m_playerInfo[data.peerID].vehicle = data.vehicle;
+                m_sharedData.playerInfo[data.peerID].ready = data.ready;
+                m_sharedData.playerInfo[data.peerID].vehicle = data.vehicle;
                 refreshView();
             }
                 break;
@@ -416,7 +463,7 @@ void LobbyState::pollNetwork()
 
 void LobbyState::sendPlayerName()
 {
-    auto nameBytes = m_playerInfo[m_sharedData.netClient->getPeer().getID()].name.toUtf32();
+    auto nameBytes = m_sharedData.playerInfo[m_sharedData.netClient->getPeer().getID()].name.toUtf32();
     auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), NetConst::MaxNameSize);
 
     m_sharedData.netClient->sendPacket(PacketID::NameString, nameBytes.data(), size, xy::NetFlag::Reliable);
@@ -433,7 +480,7 @@ void LobbyState::receivePlayerName(const xy::NetEvent& evt)
     std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
     std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(peerID), size);
 
-    m_playerInfo[peerID].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+    m_sharedData.playerInfo[peerID].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
 }
 
 void LobbyState::refreshView()
@@ -442,21 +489,45 @@ void LobbyState::refreshView()
     cmd.targetFlags = CommandID::Lobby::PlayerText;
     cmd.action = [&](xy::Entity e, float)
     {
+        static const auto ColumnWidth = (NetConst::MaxNameSize / sizeof(std::uint32_t)) + 6;
+        
         sf::String output;
 
-        for (const auto& [peer, player] : m_playerInfo)
+        for (const auto& [peer, player] : m_sharedData.playerInfo)
         {
-            output += player.name + " - " + vehicleNames[player.vehicle];
+            output += player.name;
+            for (auto i = 0u; i < (ColumnWidth - player.name.getSize()); ++i)
+            {
+                output += " ";
+            }
+
+            output += "Score: " + std::to_string(player.score) + "\n";
+            output += vehicleNames[player.vehicle];
             if (player.ready)
             {
-                output += " - Ready\n";
+                output += " - Ready\n\n";
             }
             else
             {
-                output += " - Not Ready\n";
+                output += " - Not Ready\n\n";
             }
         }
         e.getComponent<xy::Text>().setString(output);
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+}
+
+void LobbyState::updateLobbyData(const LobbyData& data)
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::Lobby::LobbyText;
+    cmd.action = [data](xy::Entity e, float)
+    {
+        std::string str("Lobby Info\n");
+        str += "Map :" + std::to_string(data.mapIndex) + "\n"; //TODO look up map names
+        str += "Laps: " + std::to_string(data.lapCount) + "\n";
+        str += "Mode: " + std::to_string(data.gameMode) + "\n"; //TODO look up mode names
+        e.getComponent<xy::Text>().setString(str);
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }

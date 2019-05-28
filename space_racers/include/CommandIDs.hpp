@@ -33,7 +33,8 @@ namespace CommandID
 
     enum Lobby
     {
-        PlayerText = 0x1
+        PlayerText = 0x1,
+        LobbyText = 0x2,
     };
 
 

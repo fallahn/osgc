@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 
 #include <map>
 
+struct LobbyData;
 class LobbyState final : public xy::State 
 {
 public:
@@ -47,7 +48,7 @@ private:
     xy::Scene m_scene;
     xy::ResourceHandler m_resources;
 
-    std::map<std::uint64_t, PlayerInfo> m_playerInfo;
+    /*std::map<std::uint64_t, PlayerInfo> m_playerInfo;*/
 
     sf::Clock m_pingClock;
 
@@ -59,4 +60,5 @@ private:
     void sendPlayerName();
     void receivePlayerName(const xy::NetEvent&);
     void refreshView();
+    void updateLobbyData(const LobbyData&);
 };

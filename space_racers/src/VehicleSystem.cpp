@@ -296,10 +296,6 @@ void VehicleSystem::doCollision(xy::Entity entity)
                         if (waypoint.id == 0)
                         {
                             vehicle.currentWaypoint = other;
-                            //crossed the start line
-                            auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
-                            msg->type = VehicleEvent::LapLine;
-                            msg->entity = entity;
                         }
                         else
                         {

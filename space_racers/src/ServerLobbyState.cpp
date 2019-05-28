@@ -32,6 +32,9 @@ using namespace sv;
 namespace
 {
     const sf::Time pingTime = sf::seconds(3.f);
+
+    const std::uint8_t MinLaps = 1;
+    const std::uint8_t MaxLaps = 9;
 }
 
 LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
@@ -69,6 +72,18 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
             break;
         case PacketID::NameString:
             setClientName(evt);
+            break;
+        case PacketID::LapCountChanged:
+            if (packet.as<std::uint8_t>() == 0)
+            {
+                m_sharedData.lobbyData.lapCount
+                    = (m_sharedData.lobbyData.lapCount == MinLaps) ? MinLaps : m_sharedData.lobbyData.lapCount - 2;
+            }
+            else
+            {
+                m_sharedData.lobbyData.lapCount = std::min(std::uint8_t(m_sharedData.lobbyData.lapCount + 2), MaxLaps);
+            }
+            m_sharedData.netHost.broadcastPacket(PacketID::LobbyData, m_sharedData.lobbyData, xy::NetFlag::Reliable);
             break;
         case PacketID::LaunchGame:
             for (const auto& [peer, player] : m_sharedData.playerInfo)
@@ -189,4 +204,5 @@ void LobbyState::broadcastPlayerData() const
 
         m_sharedData.netHost.broadcastPacket(PacketID::DeliverPlayerData, data, xy::NetFlag::Reliable);
     }
+    m_sharedData.netHost.broadcastPacket(PacketID::LobbyData, m_sharedData.lobbyData, xy::NetFlag::Reliable);
 }

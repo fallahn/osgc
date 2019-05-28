@@ -403,7 +403,9 @@ void RaceState::handlePackets()
             case PacketID::ClientLeftRace:
             {
                 PlayerIdent ident = packet.as<PlayerIdent>();
-                removeNetVehicle(ident.serverID);                
+                removeNetVehicle(ident.serverID); 
+                m_sharedData.playerInfo.erase(ident.peerID);
+                LOG("Removed player at peer " + std::to_string(ident.peerID), xy::Logger::Type::Info);
             }
                 break;
             case PacketID::VehicleData:

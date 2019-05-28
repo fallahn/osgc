@@ -129,8 +129,8 @@ void RaceState::handleMessage(const xy::Message& msg)
             {
                 if (p.second.entity == data.entity)
                 {
-                    p.second.lapCount--;
-                    if (p.second.lapCount == 0)
+                    p.second.lapCount++;
+                    if (p.second.lapCount == m_sharedData.lobbyData.lapCount)
                     {
                         p.second.entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
                         p.second.ready = false;
@@ -481,7 +481,7 @@ bool RaceState::createPlayers()
             m_players[playerInfo.first].entity = entity;
             m_players[playerInfo.first].peer = result->first;
             m_players[playerInfo.first].ready = false;
-            m_players[playerInfo.first].lapCount = m_sharedData.lobbyData.lapCount + 1; //add one because we get the initial start line counted
+            m_players[playerInfo.first].lapCount = 0;// m_sharedData.lobbyData.lapCount + 1; //add one because we get the initial start line counted
         }
         else
         {
