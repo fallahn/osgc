@@ -47,7 +47,7 @@ namespace TextureID
     enum
     {
         MainMenu, VehicleSelect,
-        Stars,
+        Stars, StarsFar, StarsMid, StarsNear,
 
         Temp01, Temp02,
 

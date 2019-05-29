@@ -306,6 +306,9 @@ bool MapParser::load(const std::string& path)
         waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);
         waypoints.back()->nextPoint /= waypoints.back()->distance;
 
+        auto mapSize = map.getTileCount() * map.getTileSize();
+        m_size = { static_cast<float>(mapSize.x), static_cast<float>(mapSize.y) };
+
         return true; //TODO only if bitset matches
     }
 

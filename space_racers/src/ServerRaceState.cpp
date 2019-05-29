@@ -386,7 +386,7 @@ bool RaceState::loadMap()
         return false;
     }
 
-    sf::FloatRect bounds(0.f, 0.f, 5120.f, 4096.f); //TODO get this from map data
+    sf::FloatRect bounds(sf::Vector2f(), m_mapParser.getSize());
     bounds.left -= 1000.f;
     bounds.top -= 1000.f;
     bounds.width += 2000.f;

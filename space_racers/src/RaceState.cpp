@@ -34,6 +34,7 @@ Copyright 2019 Matt Marchant
 #include "VFXDirector.hpp"
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
+#include "AsteroidSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -182,6 +183,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<InterpolationSystem>(mb);
     m_gameScene.addSystem<DeadReckoningSystem>(mb);
+    m_gameScene.addSystem<AsteroidSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -215,6 +217,13 @@ void RaceState::loadResources()
     TextureID::handles[TextureID::Temp02] = m_resources.load<sf::Texture>("assets/images/temp02.png");
     TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
     m_backgroundSprite.setTexture(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]), true);
+    TextureID::handles[TextureID::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsFar]).setRepeated(true);
+    TextureID::handles[TextureID::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsMid]).setRepeated(true);
+    TextureID::handles[TextureID::StarsNear] = m_resources.load<sf::Texture>("assets/images/stars_near.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsNear]).setRepeated(true);
+
 
     xy::SpriteSheet spriteSheet;
 
@@ -248,6 +257,14 @@ void RaceState::buildWorld()
         return;
     }
 
+    sf::FloatRect bounds(sf::Vector2f(), m_mapParser.getSize());
+    bounds.left -= 1000.f;
+    bounds.top -= 1000.f;
+    bounds.width += 2000.f;
+    bounds.height += 2000.f;
+    m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
+    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
+
     auto tempID = m_resources.load<sf::Texture>("assets/images/temp01.png");
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
@@ -266,34 +283,40 @@ void RaceState::buildWorld()
 
     float fov = Camera3D::calcFOV(view.getSize().y);
     float ratio = view.getSize().x / view.getSize().y;
-    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 1500.f);
+    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 2600.f);
 
     m_gameScene.setActiveCamera(camEnt);
     m_gameScene.setActiveListener(camEnt);
 
     //dem starrs
-    auto& tempTexture = m_resources.get<sf::Texture>(tempID);
+    std::array<std::size_t, 3u> IDs =
+    {
+        TextureID::handles[TextureID::StarsNear],
+        TextureID::handles[TextureID::StarsMid],
+        TextureID::handles[TextureID::StarsFar],
+    };
     for (auto i = 0; i < 3; ++i)
     {
         entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>();
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
-        auto points = xy::Util::Random::poissonDiscDistribution(sf::FloatRect(sf::Vector2f(), xy::DefaultSceneSize * 3.f), 800.f, 10);
+        entity.addComponent<xy::Transform>().setPosition(bounds.left, bounds.top);
+        entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - (2 + i));
+        entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+        entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(IDs[i]));
+
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
 
-        for (auto p : points)
-        {
-            float size = (7 - i) / 1.8f;
-            verts.emplace_back(sf::Vector2f(-size, -size) + p, sf::Color::White);
-            verts.emplace_back(sf::Vector2f(size, -size) + p, sf::Color::White);
-            verts.emplace_back(sf::Vector2f(size, size) + p, sf::Color::White);
-            verts.emplace_back(sf::Vector2f(-size, size) + p, sf::Color::White);
-        }
-        entity.getComponent<xy::Drawable>().updateLocalBounds();
-        entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Quads);
+        verts.emplace_back(sf::Vector2f(bounds.left, bounds.top), sf::Vector2f(bounds.left, bounds.top));
+        verts.emplace_back(sf::Vector2f(bounds.left + bounds.width, bounds.top), sf::Vector2f(bounds.left + bounds.width, bounds.top));
+        verts.emplace_back(sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height));
+        verts.emplace_back(sf::Vector2f(bounds.left, bounds.top + bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height));
 
-        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DColoured));
-        entity.addComponent<Sprite3D>(m_matrixPool).depth = -500.f + (i * 200.f);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = -(1500.f + (i * 500.f));
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
     }
@@ -582,7 +605,7 @@ void RaceState::spawnActor(const ActorData& data)
         auto radius = bounds.width / 2.f;
         entity.getComponent<xy::Transform>().setOrigin(radius, radius);
         entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
-
+        entity.addComponent<Asteroid>().setRadius(radius * data.scale);
         
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);

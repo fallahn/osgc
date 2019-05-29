@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "DeadReckoningSystem.hpp"
 #include "NetActor.hpp"
 #include "ActorIDs.hpp"
+#include "AsteroidSystem.hpp"
 #include "CollisionObject.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
@@ -67,18 +68,22 @@ void DeadReckoningSystem::process(float dt)
 
             sf::Vector2f newVel(dr.update.velX, dr.update.velY);
             tx.move(newVel * delta);
-            //collision(entity);
 
-            //tx.setRotation(dr.update.rotation); //we'll use normal interpolation for rotation
+            if (entity.getComponent<NetActor>().actorID == ActorID::Roid)
+            {
+                entity.getComponent<Asteroid>().setVelocity(newVel);
+            }
+            //TODO else if vehicle set vel/rotVel/input
         }
-        else
-        {
-            //use the current known velocity to move forward
-            sf::Vector2f vel = { dr.update.velX, dr.update.velY };// = lerp(dr.currVelocity, dr.targetVelocity, dr.currentTime / dr.targetTime);
-            auto& tx = entity.getComponent<xy::Transform>();
-            tx.move(vel * dt);
-            //collision(entity);
-        }
+        //TODO else if vehicle apply current input
+        //else
+        //{
+        //    //use the current known velocity to move forward
+        //    sf::Vector2f vel = { dr.update.velX, dr.update.velY };// = lerp(dr.currVelocity, dr.targetVelocity, dr.currentTime / dr.targetTime);
+        //    auto& tx = entity.getComponent<xy::Transform>();
+        //    tx.move(vel * dt);
+        //    //collision(entity);
+        //}
     }
 }
 

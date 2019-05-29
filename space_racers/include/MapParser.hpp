@@ -61,9 +61,15 @@ public:
         return m_startPosition;
     }
 
+    sf::Vector2f getSize() const
+    {
+        return m_size;
+    }
+
 private:
     xy::Scene& m_scene;
 
     std::int32_t m_waypointCount;
     sf::Vector2f m_startPosition;
+    sf::Vector2f m_size;
 };
