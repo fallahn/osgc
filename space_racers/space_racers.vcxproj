@@ -223,6 +223,7 @@
     <ClCompile Include="src\VFXDirector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\GlobeShader.inl" />
     <None Include="src\Sprite3DShader.inl" />
     <None Include="src\TrackShader.inl" />
   </ItemGroup>

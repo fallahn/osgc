@@ -67,6 +67,7 @@ namespace
 {
 #include "Sprite3DShader.inl"
 #include "TrackShader.inl"
+#include "GlobeShader.inl"
 
     xy::Entity debugEnt;
 
@@ -201,9 +202,11 @@ void RaceState::initScene()
 
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<Sprite3DSystem>(mb);
+    m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<Camera3DSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
     m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setView(xy::DefaultSceneSize);
+    m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
 
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<InterpolationSystem>(mb);
@@ -240,6 +243,7 @@ void RaceState::loadResources()
 {
     TextureID::handles[TextureID::Temp01] = m_resources.load<sf::Texture>("nothing_to_see_here");
     TextureID::handles[TextureID::Temp02] = m_resources.load<sf::Texture>("assets/images/temp02.png");
+
     TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
     m_backgroundSprite.setTexture(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]), true);
     TextureID::handles[TextureID::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
@@ -248,6 +252,11 @@ void RaceState::loadResources()
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsMid]).setRepeated(true);
     TextureID::handles[TextureID::StarsNear] = m_resources.load<sf::Texture>("assets/images/stars_near.png");
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsNear]).setRepeated(true);
+
+    TextureID::handles[TextureID::PlanetDiffuse] = m_resources.load<sf::Texture>("assets/images/globe_diffuse.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetDiffuse]).setRepeated(true);
+    TextureID::handles[TextureID::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
+    m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]).setRepeated(true);
 
     if (!m_backgroundBuffer.create(1920, 1080))
     {
@@ -279,6 +288,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertex, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
     m_shaders.preload(ShaderID::TrackDistortion, TrackFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
@@ -375,6 +385,14 @@ void RaceState::buildWorld()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
     }
+
+    //planet
+    entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Globe));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetDiffuse]));
+
 
     //let the server know the world is loaded so it can send us all player cars
     m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);

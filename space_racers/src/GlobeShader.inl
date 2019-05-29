@@ -20,24 +20,25 @@ Copyright 2019 Matt Marchant
 
 #include <string>
 
-static const std::string TrackFragment =
+const std::string  GlobeFragment =
 R"(
 #version 120
 
 uniform sampler2D u_texture;
-uniform sampler2D u_normalMap;
-
-const float distortionAmount = 0.001;
 
 void main()
 {
-    vec2 coords = gl_TexCoord[0].xy;
-    vec3 offset = texture2D(u_normalMap, coords).rgb; //not a valid vector without 3rd component!
-    offset = /*normalize*/(offset * 2.0 - 1.0);
+    vec2 centre = -1.0 + 2.0 * gl_TexCoord[0].xy;
+    float radius = sqrt(dot(centre, centre));
+    if (radius < 1.0)
+    {
+        float offsetAmount = (1.0 - sqrt(1.0 - radius)) / (radius);
 
-    offset *= distortionAmount;
-
-    //gl_FragColor.rg = offset.rg;
-    //gl_FragColor.a = 1.0;
-    gl_FragColor = texture2D(u_texture, coords + offset.rg);
+        vec2 uv = centre * offsetAmount; // + u_time
+        gl_FragColor = vec4(texture2D(u_texture, uv).rgb * (1.0-offsetAmount), 1.0);
+    }
+    else
+    {
+        gl_FragColor = vec4(0.0);
+    }
 })";
