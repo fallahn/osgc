@@ -77,7 +77,7 @@ bool MapLoader::load(const std::string& path)
         for (const auto& ts : tileSets)
         {
             std::unique_ptr<sf::Texture> tex = std::make_unique<sf::Texture>();
-            if (!tex->loadFromFile(xy::FileSystem::getResourcePath() +  + "assets/images/" + xy::FileSystem::getFileName(ts.getImagePath())))
+            if (!tex->loadFromFile(ts.getImagePath()))
             {
                 xy::Logger::log("failed loading tile set image " + ts.getImagePath());
                 return false;

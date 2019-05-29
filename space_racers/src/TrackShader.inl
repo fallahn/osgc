@@ -27,13 +27,12 @@ R"(
 uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
 
-const float distortionAmount = 0.001;
+const float distortionAmount = 0.2;
 
 void main()
 {
     vec2 coords = gl_TexCoord[0].xy;
-    vec3 offset = texture2D(u_normalMap, coords).rgb; //not a valid vector without 3rd component!
-    offset = /*normalize*/(offset * 2.0 - 1.0);
+    vec2 offset = texture2D(u_normalMap, coords).rg * 2.0 - 1.0;
 
     offset *= distortionAmount;
 

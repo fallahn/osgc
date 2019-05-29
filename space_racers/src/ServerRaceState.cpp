@@ -303,7 +303,7 @@ std::int32_t RaceState::logicUpdate(float dt)
     case Countdown:
         //counting to start
     {
-        static const sf::Time countInTime = sf::seconds(3.f);
+        static const sf::Time countInTime = sf::seconds(4.f);
         if (m_countDownTimer.getElapsedTime() > countInTime)
         {
             for (auto& p : m_players)
@@ -357,7 +357,7 @@ std::int32_t RaceState::logicUpdate(float dt)
                 m_sharedData.netHost.broadcastPacket(PacketID::CountdownStarted, std::uint8_t(0), xy::NetFlag::Reliable);
                 break;
             case RaceOver:
-                m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, /*std::uint8_t(0)*/m_racePositions, xy::NetFlag::Reliable);
+                m_sharedData.netHost.broadcastPacket(PacketID::RaceFinished, m_racePositions, xy::NetFlag::Reliable);
                 break;
             }
         }

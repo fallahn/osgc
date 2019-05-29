@@ -186,7 +186,7 @@ void RaceState::draw()
 
     //TODO we could calc the coords in the distort shader
     //to save buffering this
-    m_normalBuffer.clear();
+    m_normalBuffer.clear({ 127,127,255 });
     m_normalBuffer.draw(m_normalSprite);
     m_normalBuffer.display();
 

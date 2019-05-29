@@ -357,7 +357,7 @@ void MapParser::renderLayers(std::array<sf::RenderTexture, 3u>& targets) const
     for (const auto& ts : *tsi.tileSets)
     {
         std::unique_ptr<sf::Texture> tex = std::make_unique<sf::Texture>();
-        if (!tex->loadFromFile(xy::FileSystem::getResourcePath() + +"assets/images/tiles/" + xy::FileSystem::getFileName(ts.getImagePath())))
+        if (!tex->loadFromFile(ts.getImagePath()))
         {
             xy::Logger::log("failed loading tile set image " + ts.getImagePath());
             return;
