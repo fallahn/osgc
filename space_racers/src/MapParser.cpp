@@ -29,8 +29,11 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/String.hpp>
 
-#include <tmxlite/Map.hpp>
 #include <tmxlite/Layer.hpp>
+#include <tmxlite/TileLayer.hpp>
+
+#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include <limits>
 
@@ -60,7 +63,7 @@ MapParser::MapParser(xy::Scene& scene)
     : m_scene(scene),
     m_waypointCount(0)
 {
-
+    m_layers = { nullptr, nullptr, nullptr, nullptr };
 }
 
 //public
@@ -157,12 +160,12 @@ bool MapParser::load(const std::string& path)
     std::vector<WayPoint*> waypoints;
 
     m_waypointCount = 0;
-    tmx::Map map;
-    if (map.load(xy::FileSystem::getResourcePath() + path))
+    m_layers = { nullptr, nullptr, nullptr, nullptr };
+    if (m_map.load(xy::FileSystem::getResourcePath() + path))
     {
         //TODO bitset of found layers and return false if all necessary layers not found
 
-        const auto& layers = map.getLayers();
+        const auto& layers = m_map.getLayers();
         for (const auto& layer : layers)
         {
             if (layer->getType() == tmx::Layer::Type::Object)
@@ -267,8 +270,26 @@ bool MapParser::load(const std::string& path)
             }
             else if (layer->getType() == tmx::Layer::Type::Tile)
             {
-                //const auto& tileLayer = layer->getLayerAs<tmx::TileLayer>();
-                //TODO render layers
+                const auto& tileLayer = layer->getLayerAs<tmx::TileLayer>();
+                //save this layer if valid - that way we can only render if we're
+                //on the client, plus check if all the necessary layers were found after loading
+                auto name = xy::Util::String::toLower(tileLayer.getName());
+                if (name == "track")
+                {
+                    m_layers[Track] = &tileLayer;
+                }
+                else if (name == "neon")
+                {
+                    m_layers[Neon] = &tileLayer;
+                }
+                else if (name == "detail")
+                {
+                    m_layers[Detail] = &tileLayer;
+                }
+                else if (name == "normal")
+                {
+                    m_layers[Normal] = &tileLayer;
+                }
             }
         }
 
@@ -306,13 +327,114 @@ bool MapParser::load(const std::string& path)
         waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);
         waypoints.back()->nextPoint /= waypoints.back()->distance;
 
-        auto mapSize = map.getTileCount() * map.getTileSize();
+        //make sure we found all the image layers
+        for (auto l : m_layers)
+        {
+            if (l == nullptr)
+            {
+                xy::Logger::log("Missing one or more image layers", xy::Logger::Type::Error);
+                return false;
+            }
+        }
+
+        auto mapSize = m_map.getTileCount() * m_map.getTileSize();
         m_size = { static_cast<float>(mapSize.x), static_cast<float>(mapSize.y) };
 
-        return true; //TODO only if bitset matches
+        return true; //TODO only if bitset matches / layer pointers are valid
     }
 
     return false;
 }
 
+void MapParser::renderLayers(std::array<sf::RenderTexture, 3u>& targets) const
+{
+    XY_ASSERT(targets.size() == 3, "Not enough render targets!");
+
+    //tileset data
+    TilesetInfo tsi;
+    tsi.tileSets = &m_map.getTilesets();
+
+    for (const auto& ts : *tsi.tileSets)
+    {
+        std::unique_ptr<sf::Texture> tex = std::make_unique<sf::Texture>();
+        if (!tex->loadFromFile(xy::FileSystem::getResourcePath() + +"assets/images/tiles/" + xy::FileSystem::getFileName(ts.getImagePath())))
+        {
+            xy::Logger::log("failed loading tile set image " + ts.getImagePath());
+            return;
+        }
+        else
+        {
+            tsi.textures.push_back(std::move(tex));
+        }
+    }
+
+
+    auto mapSize = m_map.getTileCount() * m_map.getTileSize();
+
+    targets[0].create(mapSize.x, mapSize.y);
+    targets[0].clear(sf::Color::Transparent);
+    renderLayer(targets[0], m_layers[Track], tsi);
+    renderLayer(targets[0], m_layers[Detail], tsi);
+    targets[0].display();
+
+    targets[1].create(mapSize.x, mapSize.y);
+    targets[1].clear(sf::Color::Transparent);
+    renderLayer(targets[1], m_layers[Neon], tsi);
+    targets[1].display();
+
+    targets[2].create(mapSize.x, mapSize.y);
+    targets[2].clear(sf::Color::Transparent);
+    renderLayer(targets[2], m_layers[Normal], tsi);
+    targets[2].display();
+}
 //private
+void MapParser::renderLayer(sf::RenderTarget& target, const tmx::TileLayer* layer, const TilesetInfo& tsi) const
+{
+    XY_ASSERT(layer != nullptr, "Map not correctly loaded!");
+    
+    sf::IntRect textureRect(0, 0, (m_map.getTileSize().x), (m_map.getTileSize().y));
+    sf::Sprite tileSprite;
+
+    //render layer
+    const auto& tileSets = *tsi.tileSets;
+    const auto& tiles = layer->getTiles();
+
+    for (auto y = 0u; y < m_map.getTileCount().y; ++y)
+    {
+        for (auto x = 0u; x < m_map.getTileCount().x; ++x)
+        {
+            auto posX = static_cast<float>(x * m_map.getTileSize().x);
+            auto posY = static_cast<float>(y * m_map.getTileSize().y);
+            sf::Vector2f position(posX, posY);
+
+            tileSprite.setPosition(position);
+
+            auto tileID = tiles[y * m_map.getTileCount().x + x].ID;
+
+            if (tileID == 0)
+            {
+                continue; //empty tile
+            }
+
+            std::size_t i = 0;
+            for (; i < tsi.tileSets->size(); ++i)
+            {
+                if (tileID >= tileSets[i].getFirstGID() && tileID <= tileSets[i].getLastGID())
+                {
+                    break;
+                }
+            }
+
+            auto relativeID = tileID - tileSets[i].getFirstGID();
+            auto tileX = relativeID % tileSets[i].getColumnCount();
+            auto tileY = relativeID / tileSets[i].getColumnCount();
+            textureRect.left = tileX * tileSets[i].getTileSize().x;
+            textureRect.top = tileY * tileSets[i].getTileSize().y;
+
+            tileSprite.setTexture(*tsi.textures[i]);
+            tileSprite.setTextureRect(textureRect);
+
+            target.draw(tileSprite);
+        }
+    }
+}

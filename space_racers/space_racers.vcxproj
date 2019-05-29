@@ -224,6 +224,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Sprite3DShader.inl" />
+    <None Include="src\TrackShader.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

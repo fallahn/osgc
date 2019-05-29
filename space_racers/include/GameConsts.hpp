@@ -110,4 +110,11 @@ namespace GameConst
             sf::Color(0u, 54u, 37u)
         };
     }
+
+    enum TrackLayer
+    {
+        Track,
+        Neon,
+        Normal
+    };
 }

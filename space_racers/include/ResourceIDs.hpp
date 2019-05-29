@@ -26,7 +26,8 @@ namespace ShaderID
     enum
     {
         Sprite3DTextured,
-        Sprite3DColoured
+        Sprite3DColoured,
+        TrackDistortion
     };
 }
 

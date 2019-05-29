@@ -32,6 +32,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/resources/ShaderResource.hpp>
 
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 
 #include <vector>
 #include <array>
@@ -54,6 +55,13 @@ public:
 
 private:
     SharedData& m_sharedData;
+    
+    sf::RenderTexture m_backgroundBuffer;
+    xy::Scene m_backgroundScene;
+
+    sf::RenderTexture m_normalBuffer; 
+    sf::Sprite m_normalSprite;
+
     xy::Scene m_gameScene;
     //sf::RenderTexture m_gameBuffer;
     //sf::RenderWindow m_lightingBuffer;
@@ -67,6 +75,7 @@ private:
     xy::ResourceHolder m_resources;
 
     xy::ShaderResource m_shaders;
+    std::array<sf::RenderTexture, 3u> m_trackTextures;
 
     MatrixPool m_matrixPool;
     std::array<xy::Sprite, SpriteID::Game::Count> m_sprites;

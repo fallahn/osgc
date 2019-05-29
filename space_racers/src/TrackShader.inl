@@ -18,28 +18,26 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include <string>
 
-namespace MessageID
+static const std::string TrackFragment =
+R"(
+#version 120
+
+uniform sampler2D u_texture;
+uniform sampler2D u_normalMap;
+
+const float distortionAmount = 0.001; //this should be approx 2/vec2(1920,1080)
+
+void main()
 {
-    enum
-    {
-        VehicleMessage = xy::Message::Count
-    };
-}
+    vec2 coords = gl_TexCoord[0].xy;
+    vec3 offset = texture2D(u_normalMap, coords).rgb; //not a valid vector without 3rd component!
+    offset = normalize(offset * 2.0 - 1.0);
 
-struct VehicleEvent final
-{
-    enum
-    {
-        RequestRespawn,
-        Respawned,
-        Fell,
-        Exploded,
-        LapLine,
-        WentAfk
-    }type = RequestRespawn;
+    offset *= distortionAmount;
 
-    xy::Entity entity;
-};
+    //gl_FragColor.rg = offset.rg;
+    //gl_FragColor.a = 1.0;
+    gl_FragColor = texture2D(u_texture, coords + offset.rg);
+})";

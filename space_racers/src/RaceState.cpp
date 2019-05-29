@@ -66,6 +66,7 @@ Copyright 2019 Matt Marchant
 namespace
 {
 #include "Sprite3DShader.inl"
+#include "TrackShader.inl"
 
     xy::Entity debugEnt;
 
@@ -75,6 +76,7 @@ namespace
 RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
+    m_backgroundScene   (ctx.appInstance.getMessageBus()),
     m_gameScene         (ctx.appInstance.getMessageBus()),
     m_uiScene           (ctx.appInstance.getMessageBus()),
     m_uiSounds          (m_audioResource),
@@ -110,6 +112,7 @@ bool RaceState::handleEvent(const sf::Event& evt)
     }
 
     m_playerInput.handleEvent(evt);
+    m_backgroundScene.forwardEvent(evt);
     m_gameScene.forwardEvent(evt);
     m_uiScene.forwardEvent(evt);
     return true;
@@ -134,6 +137,7 @@ void RaceState::handleMessage(const xy::Message& msg)
         }
     }
 
+    m_backgroundScene.forwardMessage(msg);
     m_gameScene.forwardMessage(msg);
     m_uiScene.forwardMessage(msg);
 }
@@ -156,21 +160,36 @@ bool RaceState::update(float dt)
     }
 
     m_playerInput.update(dt);
+    m_backgroundScene.update(dt);
     m_gameScene.update(dt);
     m_uiScene.update(dt);
+
+    auto& camPosition = m_gameScene.getActiveCamera().getComponent<xy::Transform>().getPosition();
+    m_backgroundScene.getActiveCamera().getComponent<xy::Transform>().setPosition(camPosition);
+    
+    auto view = m_backgroundBuffer.getDefaultView();
+    view.setCenter(camPosition);
+    m_normalBuffer.setView(view);
 
     return true;
 }
 
 void RaceState::draw()
 {
+    //draw the background first for distort effect
+    m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
+    m_backgroundBuffer.clear();
+    m_backgroundBuffer.draw(m_backgroundSprite);
+    m_backgroundBuffer.draw(m_backgroundScene);
+    m_backgroundBuffer.display();
+
+    //TODO we could calc the coords in the distort shader
+    //to save buffering this
+    m_normalBuffer.clear();
+    m_normalBuffer.draw(m_normalSprite);
+    m_normalBuffer.display();
+
     auto& rw = getContext().renderWindow;
-
-    //draw the background first so it doesn't
-    //follow the game scene's camera
-    rw.setView(getContext().defaultView);
-    rw.draw(m_backgroundSprite);
-
     rw.draw(m_gameScene);
     rw.draw(m_uiScene);
 }
@@ -179,6 +198,12 @@ void RaceState::draw()
 void RaceState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+
+    m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
+    m_backgroundScene.addSystem<Sprite3DSystem>(mb);
+    m_backgroundScene.addSystem<Camera3DSystem>(mb);
+    m_backgroundScene.addSystem<xy::RenderSystem>(mb);
+    m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setView(xy::DefaultSceneSize);
 
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<InterpolationSystem>(mb);
@@ -224,6 +249,23 @@ void RaceState::loadResources()
     TextureID::handles[TextureID::StarsNear] = m_resources.load<sf::Texture>("assets/images/stars_near.png");
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsNear]).setRepeated(true);
 
+    if (!m_backgroundBuffer.create(1920, 1080))
+    {
+        m_sharedData.errorMessage = "Failed to create background buffer";
+        requestStackPush(StateID::Error);
+        return;
+    }
+
+    if (!m_normalBuffer.create(480, 270))
+    {
+        m_sharedData.errorMessage = "Failed to create normal buffer";
+        requestStackPush(StateID::Error);
+        return;
+    }
+    else
+    {
+        m_normalBuffer.setSmooth(true);
+    }
 
     xy::SpriteSheet spriteSheet;
 
@@ -236,6 +278,7 @@ void RaceState::loadResources()
 
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertex, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
+    m_shaders.preload(ShaderID::TrackDistortion, TrackFragment, sf::Shader::Fragment);
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
@@ -265,11 +308,13 @@ void RaceState::buildWorld()
     m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
     m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
 
-    auto tempID = m_resources.load<sf::Texture>("assets/images/temp01.png");
+    m_mapParser.renderLayers(m_trackTextures);
+    m_normalSprite.setTexture(m_trackTextures[GameConst::Normal].getTexture(), true);
+
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(tempID));
+    entity.addComponent<xy::Sprite>(m_trackTextures[0].getTexture());
 
     //add a camera
     auto view = getContext().defaultView;
@@ -280,6 +325,16 @@ void RaceState::buildWorld()
     camEnt.getComponent<xy::Camera>().lockRotation(true);
     camEnt.addComponent<CameraTarget>();
     camEnt.addComponent<xy::AudioListener>();
+
+    auto backgroundEnt = m_gameScene.createEntity();
+    backgroundEnt.addComponent<xy::Transform>().setOrigin(xy::DefaultSceneSize / 2.f);
+    backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
+    backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
+    backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_normalBuffer.getTexture());
+    backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    backgroundEnt.addComponent<xy::Sprite>(m_backgroundBuffer.getTexture());
+    camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
+
 
     float fov = Camera3D::calcFOV(view.getSize().y);
     float ratio = view.getSize().x / view.getSize().y;
@@ -297,7 +352,7 @@ void RaceState::buildWorld()
     };
     for (auto i = 0; i < 3; ++i)
     {
-        entity = m_gameScene.createEntity();
+        entity = m_backgroundScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(bounds.left, bounds.top);
         entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - (2 + i));

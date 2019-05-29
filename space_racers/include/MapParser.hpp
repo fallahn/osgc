@@ -18,10 +18,11 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-
+#include <tmxlite/Map.hpp>
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 #include <string>
 #include <array>
@@ -39,9 +40,20 @@ namespace MapConst
     };
 }
 
+namespace sf
+{
+    class RenderTarget;
+    class RenderTexture;
+}
+
 namespace xy
 {
     class Scene;
+}
+
+namespace tmx
+{
+    class TileLayer;
 }
 
 class MapParser final
@@ -66,10 +78,31 @@ public:
         return m_size;
     }
 
+    void renderLayers(std::array<sf::RenderTexture, 3u>&) const;
+
 private:
     xy::Scene& m_scene;
 
     std::int32_t m_waypointCount;
     sf::Vector2f m_startPosition;
     sf::Vector2f m_size;
+
+    tmx::Map m_map;
+    enum LayerID
+    {
+        Track, Detail,
+        Normal,
+        Neon,
+
+        Count
+    };
+    std::array<const tmx::TileLayer*, Count> m_layers = {};
+
+    struct TilesetInfo final
+    {
+        std::vector<std::unique_ptr<sf::Texture>> textures;
+        const std::vector<tmx::Tileset>* tileSets = nullptr;
+    };
+
+    void renderLayer(sf::RenderTarget&, const tmx::TileLayer*, const TilesetInfo&) const;
 };

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="111">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="111">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
-  <image source="diffuse.png" width="1024" height="640"/>
+  <image source="../images/tiles/diffuse.png" width="1024" height="640"/>
  </tileset>
  <tileset firstgid="41" name="neon" tilewidth="128" tileheight="128" tilecount="40" columns="8">
-  <image source="neon.png" width="1024" height="640"/>
+  <image source="../images/tiles/neon.png" width="1024" height="640"/>
  </tileset>
  <tileset firstgid="81" name="normal" tilewidth="128" tileheight="128" tilecount="40" columns="8">
-  <image source="normal.png" width="1024" height="640"/>
+  <image source="../images/tiles/normal.png" width="1024" height="640"/>
  </tileset>
  <tileset firstgid="121" name="detail" tilewidth="128" tileheight="128" tilecount="48" columns="8">
-  <image source="detail.png" width="1024" height="768"/>
+  <image source="../images/tiles/detail.png" width="1024" height="768"/>
  </tileset>
  <layer id="1" name="Track" width="40" height="32">
   <data encoding="base64" compression="zlib">
