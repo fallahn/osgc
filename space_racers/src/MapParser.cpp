@@ -182,7 +182,21 @@ bool MapParser::load(const std::string& path)
                             {
                             default: break;
                             case CollisionObject::Fence:
-                                //stash this somewhere so we know we need to draw an electric fence on the client
+                            {
+                                if (obj.getShape() == tmx::Object::Shape::Polyline)
+                                {
+                                    const auto& points = obj.getPoints();
+                                    if (points.size() == 2)
+                                    {
+                                        Lightning lightning;
+                                        auto start = obj.getPosition() + points[0];
+                                        auto end = obj.getPosition() + points[1];
+                                        lightning.start = { start.x, start.y };
+                                        lightning.end = { end.x, end.y };
+                                        m_barriers.push_back(lightning);
+                                    }
+                                }
+                            }
                                 break;
                             case CollisionObject::Waypoint:
                                 if (obj.getShape() != tmx::Object::Shape::Rectangle)
@@ -340,7 +354,7 @@ bool MapParser::load(const std::string& path)
         auto mapSize = m_map.getTileCount() * m_map.getTileSize();
         m_size = { static_cast<float>(mapSize.x), static_cast<float>(mapSize.y) };
 
-        return true; //TODO only if bitset matches / layer pointers are valid
+        return true;
     }
 
     return false;

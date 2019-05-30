@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "LightningSystem.hpp"
+
 #include <tmxlite/Map.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -78,6 +80,11 @@ public:
         return m_size;
     }
 
+    const std::vector<Lightning>& getBarriers() const
+    {
+        return m_barriers;
+    }
+
     void renderLayers(std::array<sf::RenderTexture, 3u>&) const;
 
 private:
@@ -86,6 +93,8 @@ private:
     std::int32_t m_waypointCount;
     sf::Vector2f m_startPosition;
     sf::Vector2f m_size;
+
+    std::vector<Lightning> m_barriers;
 
     tmx::Map m_map;
     enum LayerID

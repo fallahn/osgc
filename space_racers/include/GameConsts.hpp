@@ -111,13 +111,24 @@ namespace GameConst
         };
     }
 
-    enum TrackLayer
+    enum FilterFlags
     {
-        Track,
-        Neon,
-        Normal
+        Neon = 0x1,
+        Normal = 0x2,
+
+
+        All = Neon | Normal
     };
 
+    namespace TrackLayer
+    {
+        enum
+        {
+            Track,
+            Neon,
+            Normal
+        };
+    }
     static const sf::Vector2u LargeBufferSize(1920, 1080);
     static const sf::Vector2u SmallBufferSize(480u, 270u);
 }

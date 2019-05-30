@@ -164,6 +164,7 @@
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\InterpolationSystem.hpp" />
+    <ClInclude Include="include\LightningSystem.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MapParser.hpp" />
     <ClInclude Include="include\MatrixPool.hpp" />
@@ -206,6 +207,7 @@
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\InterpolationComponent.cpp" />
     <ClCompile Include="src\InterpolationSystem.cpp" />
+    <ClCompile Include="src\LightningSystem.cpp" />
     <ClCompile Include="src\LobbyState.cpp" />
     <ClCompile Include="src\MapParser.cpp" />
     <ClCompile Include="src\MatrixPool.cpp" />

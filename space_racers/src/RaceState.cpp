@@ -35,6 +35,7 @@ Copyright 2019 Matt Marchant
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
 #include "AsteroidSystem.hpp"
+#include "LightningSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -61,6 +62,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/TextSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/graphics/postprocess/Bloom.hpp>
 #include <xyginext/util/Random.hpp>
 
 namespace
@@ -197,29 +199,35 @@ void RaceState::draw()
     m_normalBuffer.draw(m_normalSprite);
     m_normalBuffer.display();
 
-    m_neonSprite.setTexture(m_trackTextures[GameConst::Neon].getTexture(), true);
+    m_gameScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::Neon);
+    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
+    m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
     m_neonBuffer.clear(sf::Color::Black);
     m_neonBuffer.draw(m_neonSprite);
-    //TODO draw scene with neon object filter
+    m_neonBuffer.draw(m_backgroundScene);
+    m_neonBuffer.draw(m_gameScene);
     m_neonBuffer.display();
 
-    //blur pass
+    //blur passs
+    static const float BlurAmount = 0.5f;
     auto& shader = m_shaders.get(ShaderID::Blur);
     shader.setUniform("u_texture", m_neonBuffer.getTexture());
-    shader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f));
+    shader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f) * BlurAmount);
     m_neonSprite.setTexture(m_neonBuffer.getTexture(), true);
     m_blurBuffer.clear(sf::Color::Black);
     m_blurBuffer.draw(m_neonSprite, &shader);
     m_blurBuffer.display();
 
     shader.setUniform("u_texture", m_blurBuffer.getTexture());
-    shader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y));
+    shader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y) * BlurAmount);
     m_neonSprite.setTexture(m_blurBuffer.getTexture(), true);
     m_neonBuffer.setView(m_neonBuffer.getDefaultView());
     m_neonBuffer.clear(sf::Color::Black);
     m_neonBuffer.draw(m_neonSprite, &shader);
     m_neonBuffer.display();
 
+    m_gameScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::All);
+    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
     rw.draw(m_uiScene);
@@ -242,6 +250,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<InterpolationSystem>(mb);
     m_gameScene.addSystem<DeadReckoningSystem>(mb);
     m_gameScene.addSystem<AsteroidSystem>(mb);
+    m_gameScene.addSystem<LightningSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -255,6 +264,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::AudioSystem>(mb);
     
     m_gameScene.addDirector<VFXDirector>(m_sprites);
+    //m_gameScene.addPostProcess<xy::PostBloom>();
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -371,13 +381,14 @@ void RaceState::buildWorld()
     m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
 
     m_mapParser.renderLayers(m_trackTextures);
-    m_normalSprite.setTexture(m_trackTextures[GameConst::Normal].getTexture(), true);
-    m_neonSprite.setTexture(m_trackTextures[GameConst::Neon].getTexture(), true);
+    m_normalSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Normal].getTexture(), true);
+    m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
 
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth);
-    entity.addComponent<xy::Sprite>(m_trackTextures[GameConst::Track].getTexture());
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+    entity.addComponent<xy::Sprite>(m_trackTextures[GameConst::TrackLayer::Track].getTexture());
 
     //add a camera
     auto view = getContext().defaultView;
@@ -392,6 +403,7 @@ void RaceState::buildWorld()
     auto backgroundEnt = m_gameScene.createEntity();
     backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
     backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
+    backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
     backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_normalBuffer.getTexture());
     backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -403,9 +415,7 @@ void RaceState::buildWorld()
     neonEnt.getComponent<xy::Transform>().setScale(4.f, 4.f);
     neonEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
     neonEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
-    //neonEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
-    //neonEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_normalBuffer.getTexture());
-    //neonEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    neonEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     neonEnt.addComponent<xy::Sprite>(m_neonBuffer.getTexture());
     camEnt.getComponent<xy::Transform>().addChild(neonEnt.getComponent<xy::Transform>());
 
@@ -457,9 +467,23 @@ void RaceState::buildWorld()
     entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]));
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetDiffuse]));
 
+    addProps();
 
     //let the server know the world is loaded so it can send us all player cars
     m_sharedData.netClient->sendPacket(PacketID::ClientMapLoaded, std::uint8_t(0), xy::NetFlag::Reliable);
+}
+
+void RaceState::addProps()
+{
+    const auto& barriers = m_mapParser.getBarriers();
+
+    for (const auto& b : barriers)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>(); //points are in world space. Should we change this to improve culling?
+        entity.addComponent<xy::Drawable>().setFilterFlags(GameConst::FilterFlags::All);
+        entity.addComponent<Lightning>() = b;
+    }
 }
 
 void RaceState::buildUI()
@@ -498,6 +522,7 @@ void RaceState::buildTest()
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(1000);
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
 
     auto cameraEntity = m_gameScene.getActiveCamera();
@@ -608,6 +633,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
     //TODO we shopuld probably get this from the server, but it might not matter
@@ -687,6 +713,7 @@ void RaceState::spawnActor(const ActorData& data)
     entity.addComponent<NetActor>().actorID = data.actorID;
     entity.getComponent<NetActor>().serverID = data.serverID;
     entity.addComponent<xy::Drawable>();
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::All);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::NetActor;
     entity.addComponent<CollisionObject>().type = CollisionObject::Type::NetActor;
 
@@ -742,6 +769,7 @@ void RaceState::spawnActor(const ActorData& data)
         auto radius = bounds.width / 2.f;
         entity.getComponent<xy::Transform>().setOrigin(radius, radius);
         entity.getComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
+        entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
         entity.addComponent<Asteroid>().setRadius(radius * data.scale);
         
         entity.getComponent<CollisionObject>().applyVertices(createCollisionCircle(radius * 0.9f, { radius, radius }));

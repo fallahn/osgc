@@ -89,6 +89,7 @@ private:
     void initScene();
     void loadResources();
     void buildWorld();
+    void addProps();
     void buildUI();
 
     void buildTest();
