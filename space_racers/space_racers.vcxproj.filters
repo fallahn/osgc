@@ -286,5 +286,8 @@
     <None Include="src\GlobeShader.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
+    <None Include="src\BlurShader.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -375,6 +375,7 @@ void MapParser::renderLayers(std::array<sf::RenderTexture, 3u>& targets) const
     targets[0].clear(sf::Color::Transparent);
     renderLayer(targets[0], m_layers[Track], tsi);
     renderLayer(targets[0], m_layers[Detail], tsi);
+    renderLayer(targets[0], m_layers[Neon], tsi);
     targets[0].display();
 
     targets[1].create(mapSize.x, mapSize.y);

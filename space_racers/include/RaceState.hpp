@@ -62,10 +62,11 @@ private:
     sf::RenderTexture m_normalBuffer; 
     sf::Sprite m_normalSprite;
 
+    sf::RenderTexture m_neonBuffer;
+    sf::RenderTexture m_blurBuffer;
+    sf::Sprite m_neonSprite;
+
     xy::Scene m_gameScene;
-    //sf::RenderTexture m_gameBuffer;
-    //sf::RenderWindow m_lightingBuffer;
-    //xy::Scene m_outputScene;
     xy::Scene m_uiScene;
 
     xy::AudioResource m_audioResource;

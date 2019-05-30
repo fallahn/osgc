@@ -28,7 +28,9 @@ namespace ShaderID
         Sprite3DTextured,
         Sprite3DColoured,
         TrackDistortion,
-        Globe
+        Globe,
+        Asteroid,
+        Blur
     };
 }
 
@@ -50,7 +52,7 @@ namespace TextureID
     {
         MainMenu, VehicleSelect,
         Stars, StarsFar, StarsMid, StarsNear,
-        PlanetDiffuse, PlanetNormal,
+        RoidDiffuse, PlanetDiffuse, PlanetNormal,
 
         Temp01, Temp02,
 

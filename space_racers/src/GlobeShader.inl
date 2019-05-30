@@ -25,17 +25,31 @@ R"(
 #version 120
 
 uniform sampler2D u_texture;
+uniform sampler2D u_normalMap;
+uniform float u_time;
+
+const vec3 lightDir = vec3(1.0, 0.0, 1.0);
+const float shadowAmount = 0.7;
 
 void main()
 {
-    vec2 centre = -1.0 + 2.0 * gl_TexCoord[0].xy;
+    vec2 coord = gl_TexCoord[0].xy;
+
+    vec2 centre = -1.0 + 2.0 * coord;
     float radius = sqrt(dot(centre, centre));
     if (radius < 1.0)
     {
         float offsetAmount = (1.0 - sqrt(1.0 - radius)) / (radius);
 
-        vec2 uv = centre * offsetAmount; // + u_time
-        gl_FragColor = vec4(texture2D(u_texture, uv).rgb * (1.0-offsetAmount), 1.0);
+        vec2 uv = centre * offsetAmount + u_time;
+
+        //the planet sprite is never rotated so we'll be lazy and assume the normal
+        //map is already in world space.
+        vec3 normal = texture2D(u_normalMap, uv).rgb * 2.0 - 1.0;
+        float shadow = dot(normal, normalize(lightDir)) * shadowAmount;
+        vec3 colour = texture2D(u_texture, uv).rgb * (1.0 - offsetAmount);
+        vec3 ambient = colour * 0.5;
+        gl_FragColor = vec4((ambient + colour) * shadow, 1.0);
     }
     else
     {

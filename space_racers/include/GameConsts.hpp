@@ -117,4 +117,7 @@ namespace GameConst
         Neon,
         Normal
     };
+
+    static const sf::Vector2u LargeBufferSize(1920, 1080);
+    static const sf::Vector2u SmallBufferSize(480u, 270u);
 }

@@ -275,6 +275,8 @@ void LobbyState::buildMenu()
                         m_sharedData.server->quit();
                     }
 
+                    m_sharedData.playerInfo.clear();
+
                     requestStackClear();
                     requestStackPush(StateID::MainMenu);
                 }
