@@ -21,12 +21,15 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
-
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -84,7 +87,13 @@ void SummaryState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::SpriteSystem>(mb);
+    m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+
+    //if we stash this in shared resources it should remain loaded after the first time
+    //this state is show and (I think!!) the resource manager is smart enough to know this
+    TextureID::handles[TextureID::Podium] = m_sharedData.resources.load<sf::Texture>("assets/images/podium.png");
 
     auto view = getContext().defaultView;
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -106,6 +115,13 @@ void SummaryState::buildMenu()
     verts.emplace_back(sf::Vector2f(0.f, xy::DefaultSceneSize.y), c);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Drawable>().setDepth(-5);
+    entity.addComponent<xy::Sprite>(m_sharedData.resources.get<sf::Texture>(TextureID::handles[TextureID::Podium]));
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
 

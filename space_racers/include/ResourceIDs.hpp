@@ -30,7 +30,8 @@ namespace ShaderID
         TrackDistortion,
         Globe,
         Asteroid,
-        Blur
+        Blur,
+        NeonBlend
     };
 }
 
@@ -50,7 +51,7 @@ namespace TextureID
 {
     enum
     {
-        MainMenu, VehicleSelect,
+        MainMenu, VehicleSelect, Podium,
         Stars, StarsFar, StarsMid, StarsNear,
         RoidDiffuse, PlanetDiffuse, PlanetNormal,
 
@@ -59,6 +60,7 @@ namespace TextureID
         Count
     };
 
+    //TODO tidy this up to limit texture IDs to correct scope(s)
     static std::array<std::size_t, Count> handles = {};
 }
 

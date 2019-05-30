@@ -172,7 +172,7 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
-
+    
     TextureID::handles[TextureID::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
     TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
 

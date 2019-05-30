@@ -66,6 +66,8 @@ private:
     sf::RenderTexture m_blurBuffer;
     sf::Sprite m_neonSprite;
 
+    sf::RenderTexture m_gameSceneBuffer;
+    sf::Sprite m_gameSceneSprite;
     xy::Scene m_gameScene;
     xy::Scene m_uiScene;
 

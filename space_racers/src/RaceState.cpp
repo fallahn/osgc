@@ -71,6 +71,7 @@ namespace
 #include "TrackShader.inl"
 #include "GlobeShader.inl"
 #include "BlurShader.inl"
+#include "NeonBlendShader.inl"
 
     xy::Entity debugEnt;
 
@@ -187,6 +188,7 @@ bool RaceState::update(float dt)
 void RaceState::draw()
 {
     //draw the background first for distort effect
+    //m_backgroundScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::All);
     m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
     m_backgroundBuffer.clear();
     m_backgroundBuffer.draw(m_backgroundSprite);
@@ -200,36 +202,47 @@ void RaceState::draw()
     m_normalBuffer.display();
 
     m_gameScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::Neon);
-    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
+    //m_backgroundScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::Neon);
     m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
+    m_neonSprite.setScale(1.f, 1.f);
     m_neonBuffer.clear(sf::Color::Black);
     m_neonBuffer.draw(m_neonSprite);
-    m_neonBuffer.draw(m_backgroundScene);
+    //m_neonBuffer.draw(m_backgroundScene);
     m_neonBuffer.draw(m_gameScene);
     m_neonBuffer.display();
 
     //blur passs
     static const float BlurAmount = 0.5f;
-    auto& shader = m_shaders.get(ShaderID::Blur);
-    shader.setUniform("u_texture", m_neonBuffer.getTexture());
-    shader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f) * BlurAmount);
+    auto& blurShader = m_shaders.get(ShaderID::Blur);
+    blurShader.setUniform("u_texture", m_neonBuffer.getTexture());
+    blurShader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f)/* * BlurAmount*/);
     m_neonSprite.setTexture(m_neonBuffer.getTexture(), true);
+    m_neonSprite.setScale(0.5f, 0.5f);
     m_blurBuffer.clear(sf::Color::Black);
-    m_blurBuffer.draw(m_neonSprite, &shader);
+    m_blurBuffer.draw(m_neonSprite, &blurShader);
     m_blurBuffer.display();
 
-    shader.setUniform("u_texture", m_blurBuffer.getTexture());
-    shader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y) * BlurAmount);
+    blurShader.setUniform("u_texture", m_blurBuffer.getTexture());
+    blurShader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y)/* * BlurAmount*/);
     m_neonSprite.setTexture(m_blurBuffer.getTexture(), true);
+    m_neonSprite.setScale(2.f, 2.f);
     m_neonBuffer.setView(m_neonBuffer.getDefaultView());
     m_neonBuffer.clear(sf::Color::Black);
-    m_neonBuffer.draw(m_neonSprite, &shader);
+    m_neonBuffer.draw(m_neonSprite, &blurShader);
     m_neonBuffer.display();
 
     m_gameScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::All);
-    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
+    m_gameSceneBuffer.clear();
+    m_gameSceneBuffer.draw(m_gameScene);
+    m_gameSceneBuffer.display();
+
+    auto& blendShader = m_shaders.get(ShaderID::NeonBlend);
+    blendShader.setUniform("u_sceneTexture", m_gameSceneBuffer.getTexture());
+    blendShader.setUniform("u_neonTexture", m_neonBuffer.getTexture());
+
     auto& rw = getContext().renderWindow;
-    rw.draw(m_gameScene);
+    rw.setView(getContext().defaultView);
+    rw.draw(m_gameSceneSprite, &blendShader);
     rw.draw(m_uiScene);
 }
 
@@ -318,7 +331,7 @@ void RaceState::loadResources()
         m_normalBuffer.setSmooth(true);
     }
     
-    if (!m_neonBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
+    if (!m_neonBuffer.create(GameConst::MediumBufferSize.x, GameConst::MediumBufferSize.y))
     {
         m_sharedData.errorMessage = "Failed to create neon buffer";
         requestStackPush(StateID::Error);
@@ -336,6 +349,12 @@ void RaceState::loadResources()
         return;
     }
 
+    if (!m_gameSceneBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
+    {
+        xy::Logger::log("Failed creating game scen buffer", xy::Logger::Type::Error);
+        return;
+    }
+
     xy::SpriteSheet spriteSheet;
 
     //game scene assets
@@ -350,6 +369,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::TrackDistortion, TrackFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Blur, BlurFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::NeonBlend, BlendFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
 
     //ui scene assets
@@ -383,6 +403,7 @@ void RaceState::buildWorld()
     m_mapParser.renderLayers(m_trackTextures);
     m_normalSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Normal].getTexture(), true);
     m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
+    m_gameSceneSprite.setTexture(m_gameSceneBuffer.getTexture(), true);
 
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
@@ -394,8 +415,8 @@ void RaceState::buildWorld()
     auto view = getContext().defaultView;
     auto camEnt = m_gameScene.createEntity();
     camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-    camEnt.addComponent<xy::Camera>().setView(view.getSize());
-    camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+    camEnt.addComponent<xy::Camera>().setView(/*view.getSize()*/xy::DefaultSceneSize);
+    //camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
     camEnt.getComponent<xy::Camera>().lockRotation(true);
     camEnt.addComponent<CameraTarget>();
     camEnt.addComponent<xy::AudioListener>();
@@ -410,14 +431,14 @@ void RaceState::buildWorld()
     backgroundEnt.addComponent<xy::Sprite>(m_backgroundBuffer.getTexture());
     camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
 
-    auto neonEnt = m_gameScene.createEntity();
-    neonEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::SmallBufferSize) / 2.f);
+    /*auto neonEnt = m_gameScene.createEntity();
+    neonEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::MediumBufferSize) / 2.f);
     neonEnt.getComponent<xy::Transform>().setScale(4.f, 4.f);
     neonEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
     neonEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
     neonEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     neonEnt.addComponent<xy::Sprite>(m_neonBuffer.getTexture());
-    camEnt.getComponent<xy::Transform>().addChild(neonEnt.getComponent<xy::Transform>());
+    camEnt.getComponent<xy::Transform>().addChild(neonEnt.getComponent<xy::Transform>());*/
 
     float fov = Camera3D::calcFOV(view.getSize().y);
     float ratio = view.getSize().x / view.getSize().y;
@@ -463,6 +484,7 @@ void RaceState::buildWorld()
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Globe));
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]));
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetDiffuse]));

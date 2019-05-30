@@ -20,7 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include <string>
 
-const std::string  GlobeFragment =
+static const std::string  GlobeFragment =
 R"(
 #version 120
 
