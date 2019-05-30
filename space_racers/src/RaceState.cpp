@@ -364,6 +364,11 @@ void RaceState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/explosion.spt", m_resources);
     m_sprites[SpriteID::Game::Explosion] = spriteSheet.getSprite("explosion");
 
+    spriteSheet.loadFromFile("assets/sprites/vehicles.spt", m_resources);
+    m_sprites[SpriteID::Game::Car] = spriteSheet.getSprite("car");
+    m_sprites[SpriteID::Game::Bike] = spriteSheet.getSprite("bike");
+    m_sprites[SpriteID::Game::Ship] = spriteSheet.getSprite("ship");
+
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertex, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
     m_shaders.preload(ShaderID::TrackDistortion, TrackFragment, sf::Shader::Fragment);
@@ -656,9 +661,9 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
-    //TODO we shopuld probably get this from the server, but it might not matter
+    //TODO we should probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
     entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount(); 
     entity.getComponent<Vehicle>().client = true;
@@ -672,19 +677,16 @@ void RaceState::spawnVehicle(const VehicleData& data)
     default:
     case Vehicle::Car:
         entity.getComponent<Vehicle>().settings = Definition::car;
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize); //TODO remove this
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
         break;
     case Vehicle::Bike:
         entity.getComponent<Vehicle>().settings = Definition::bike;
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
         break;
     case Vehicle::Ship:
         entity.getComponent<Vehicle>().settings = Definition::ship;
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
         entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
         break;
@@ -695,7 +697,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     m_playerInput.setPlayerEntity(entity);
 
     //temp for collision debugging
-    entity.addComponent<xy::Callback>().active = true;
+    /*entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =
         [](xy::Entity e, float)
     {
@@ -707,7 +709,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
         {
             e.getComponent<xy::Sprite>().setColour(sf::Color::White);
         }
-    };
+    };*/
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;
@@ -746,44 +748,42 @@ void RaceState::spawnActor(const ActorData& data)
         break;
     case ActorID::Car:
     {
-        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::CarSize);
-        entity.getComponent<xy::Sprite>().setColour(sf::Color(127,0,0,220));
-        entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
-        
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
-        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
-        entity.addComponent<xy::Callback>().function = ScaleCallback();
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car];
+        entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);       
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);       
+        entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+
+        goto Vehicle;
     }
         break;
     case ActorID::Bike:
-    {
-        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::BikeSize);
+    {        
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Bike];
         entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * GameConst::VehicleCentreOffset, GameConst::BikeSize.height / 2.f);
+        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);       
+        entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
 
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
-        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
-        entity.addComponent<xy::Callback>().function = ScaleCallback();
+        goto Vehicle;
     }
         break;
     case ActorID::Ship:
     {
-        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01]));
-        entity.getComponent<xy::Sprite>().setTextureRect(GameConst::ShipSize);
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Ship];
         entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * GameConst::VehicleCentreOffset, GameConst::ShipSize.height / 2.f);
-
         entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
-        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
-        entity.addComponent<xy::Callback>().function = ScaleCallback();
+        entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+
+        goto Vehicle;
     }
         break;
+
+    Vehicle:
+        entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+        entity.addComponent<xy::Callback>().function = ScaleCallback();
+
+        break;
+
     case ActorID::Roid:
     {
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::RoidDiffuse]));

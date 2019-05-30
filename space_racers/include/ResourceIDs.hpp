@@ -92,6 +92,10 @@ namespace SpriteID::Game
         Explosion,
         SmokePuff,
 
+        Car,
+        Bike,
+        Ship,
+
         Count
     };
 }

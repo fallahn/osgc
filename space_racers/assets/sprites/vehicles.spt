@@ -1,0 +1,20 @@
+spritesheet vehicles
+{
+    src="assets/images/vehicles/vehicles_diffuse.png"
+    blendmode = "alpha"
+
+    sprite car
+    {
+        bounds=0,0,135,77
+    }
+
+    sprite bike
+    {
+        bounds=0,77,132,40
+    }
+
+    sprite ship
+    {
+        bounds=0,117,132,120
+    }
+}
