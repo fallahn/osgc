@@ -84,7 +84,7 @@ void main()
 
     vec3 halfVec = normalize(v_lightTanDirection + v_cameraTanDirection);
     float specAmount = max(dot(normal, halfVec), 0.0);
-    specular = vec3(pow(specAmount, 120));
+    specular = vec3(pow(specAmount, 120.0));
     diffuse = diffuseColour.rgb * colourAmount;
 
     gl_FragColor = vec4(specular + diffuse, diffuseColour.a);
