@@ -72,6 +72,7 @@ namespace
 #include "GlobeShader.inl"
 #include "BlurShader.inl"
 #include "NeonBlendShader.inl"
+#include "VehicleShader.inl"
 
     xy::Entity debugEnt;
 
@@ -180,6 +181,8 @@ bool RaceState::update(float dt)
     auto view = m_backgroundBuffer.getDefaultView();
     view.setCenter(camPosition);
     m_normalBuffer.setView(view);
+
+    //m_shaders.get(ShaderID::Vehicle).setUniform("u_camWorldPosition", sf::Vector3f(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y / 2.f, Camera3D::depth));
 
     return true;
 }
@@ -305,6 +308,7 @@ void RaceState::loadResources()
     TextureID::handles[TextureID::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]).setRepeated(true);
     TextureID::handles[TextureID::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
+    TextureID::handles[TextureID::VehicleNormal] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_normal.png");
 
     if (!m_backgroundBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
     {
@@ -370,6 +374,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::NeonBlend, BlendFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NeonExtract, ExtractFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
+    m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -379,6 +384,9 @@ void RaceState::loadResources()
 
     auto& extractShader = m_shaders.get(ShaderID::NeonExtract);
     extractShader.setUniform("u_texture", m_gameSceneBuffer.getTexture());
+
+    auto& vehicleShader = m_shaders.get(ShaderID::Vehicle);
+    vehicleShader.setUniform("u_normalMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleNormal]));
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
@@ -664,6 +672,9 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+    //entity.getComponent<xy::Drawable>().bindUniform("u_modelMatrix", entity.getComponent<xy::Transform>().getTransform().getMatrix());
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
     //TODO we should probably get this from the server, but it might not matter

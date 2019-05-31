@@ -230,6 +230,7 @@
     <None Include="src\NeonBlendShader.inl" />
     <None Include="src\Sprite3DShader.inl" />
     <None Include="src\TrackShader.inl" />
+    <None Include="src\VehicleShader.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

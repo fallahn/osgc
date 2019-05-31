@@ -32,7 +32,8 @@ namespace ShaderID
         Asteroid,
         Blur,
         NeonBlend,
-        NeonExtract
+        NeonExtract,
+        Vehicle
     };
 }
 
@@ -56,6 +57,8 @@ namespace TextureID
         Stars, StarsFar, StarsMid, StarsNear,
         RoidDiffuse, PlanetDiffuse, PlanetNormal,
         RoidShadow,
+
+        VehicleNormal,
 
         Temp01, Temp02,
 

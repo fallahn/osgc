@@ -298,5 +298,8 @@
     <None Include="src\NeonBlendShader.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
+    <None Include="src\VehicleShader.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
