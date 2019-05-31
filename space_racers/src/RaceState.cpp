@@ -180,7 +180,7 @@ bool RaceState::update(float dt)
     auto view = m_backgroundBuffer.getDefaultView();
     view.setCenter(camPosition);
     m_normalBuffer.setView(view);
-    m_neonBuffer.setView(view);
+    //m_neonBuffer.setView(view);
 
     return true;
 }
@@ -188,27 +188,29 @@ bool RaceState::update(float dt)
 void RaceState::draw()
 {
     //draw the background first for distort effect
-    //m_backgroundScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::All);
     m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
     m_backgroundBuffer.clear();
     m_backgroundBuffer.draw(m_backgroundSprite);
     m_backgroundBuffer.draw(m_backgroundScene);
     m_backgroundBuffer.display();
 
-    //TODO we could calc the coords in the distort shader
-    //to save buffering this(?)
+    //normal map for distortion of background
     m_normalBuffer.clear({ 127,127,255 });
     m_normalBuffer.draw(m_normalSprite);
     m_normalBuffer.display();
 
-    m_gameScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::Neon);
-    //m_backgroundScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::Neon);
-    m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
-    m_neonSprite.setScale(1.f, 1.f);
-    m_neonBuffer.clear(sf::Color::Black);
-    m_neonBuffer.draw(m_neonSprite);
-    //m_neonBuffer.draw(m_backgroundScene);
-    m_neonBuffer.draw(m_gameScene);
+    //draws the full scene including distorted background
+    m_gameSceneBuffer.clear();
+    m_gameSceneBuffer.draw(m_gameScene);
+    m_gameSceneBuffer.display();
+
+    //extract the brightest points to the neon buffer
+    auto& extractShader = m_shaders.get(ShaderID::NeonExtract);
+    //extractShader.setUniform("u_texture", m_gameSceneBuffer.getTexture());
+    m_neonSprite.setTexture(m_gameSceneBuffer.getTexture(), true);
+    m_neonBuffer.setView(m_gameSceneBuffer.getDefaultView());
+    m_neonBuffer.clear(sf::Color::Transparent);
+    m_neonBuffer.draw(m_neonSprite, &extractShader);
     m_neonBuffer.display();
 
     //blur passs
@@ -217,28 +219,22 @@ void RaceState::draw()
     blurShader.setUniform("u_texture", m_neonBuffer.getTexture());
     blurShader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f)/* * BlurAmount*/);
     m_neonSprite.setTexture(m_neonBuffer.getTexture(), true);
-    m_neonSprite.setScale(0.5f, 0.5f);
-    m_blurBuffer.clear(sf::Color::Black);
+    m_blurBuffer.clear(sf::Color::Transparent);
     m_blurBuffer.draw(m_neonSprite, &blurShader);
     m_blurBuffer.display();
 
     blurShader.setUniform("u_texture", m_blurBuffer.getTexture());
     blurShader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y)/* * BlurAmount*/);
     m_neonSprite.setTexture(m_blurBuffer.getTexture(), true);
-    m_neonSprite.setScale(2.f, 2.f);
     m_neonBuffer.setView(m_neonBuffer.getDefaultView());
-    m_neonBuffer.clear(sf::Color::Black);
+    m_neonBuffer.clear(sf::Color::Transparent);
     m_neonBuffer.draw(m_neonSprite, &blurShader);
     m_neonBuffer.display();
 
-    m_gameScene.getSystem<xy::RenderSystem>().setFilterFlags(GameConst::All);
-    m_gameSceneBuffer.clear();
-    m_gameSceneBuffer.draw(m_gameScene);
-    m_gameSceneBuffer.display();
-
+    //render blended output to window
     auto& blendShader = m_shaders.get(ShaderID::NeonBlend);
-    blendShader.setUniform("u_sceneTexture", m_gameSceneBuffer.getTexture());
-    blendShader.setUniform("u_neonTexture", m_neonBuffer.getTexture());
+    //blendShader.setUniform("u_sceneTexture", m_gameSceneBuffer.getTexture());
+    //blendShader.setUniform("u_neonTexture", m_neonBuffer.getTexture());
 
     auto& rw = getContext().renderWindow;
     rw.setView(getContext().defaultView);
@@ -331,7 +327,7 @@ void RaceState::loadResources()
         m_normalBuffer.setSmooth(true);
     }
     
-    if (!m_neonBuffer.create(GameConst::MediumBufferSize.x, GameConst::MediumBufferSize.y))
+    if (!m_neonBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
     {
         m_sharedData.errorMessage = "Failed to create neon buffer";
         requestStackPush(StateID::Error);
@@ -375,7 +371,17 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Blur, BlurFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NeonBlend, BlendFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::NeonExtract, ExtractFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
+
+    //only set these once if we can help it - no access to uniform IDs
+    //in SFML means lots of string look-ups setting uniforms :(
+    auto& blendShader = m_shaders.get(ShaderID::NeonBlend);
+    blendShader.setUniform("u_sceneTexture", m_gameSceneBuffer.getTexture());
+    blendShader.setUniform("u_neonTexture", m_neonBuffer.getTexture());
+
+    auto& extractShader = m_shaders.get(ShaderID::NeonExtract);
+    extractShader.setUniform("u_texture", m_gameSceneBuffer.getTexture());
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);

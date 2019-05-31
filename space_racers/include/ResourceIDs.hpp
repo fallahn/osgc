@@ -31,7 +31,8 @@ namespace ShaderID
         Globe,
         Asteroid,
         Blur,
-        NeonBlend
+        NeonBlend,
+        NeonExtract
     };
 }
 
