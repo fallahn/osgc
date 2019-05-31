@@ -180,7 +180,6 @@ bool RaceState::update(float dt)
     auto view = m_backgroundBuffer.getDefaultView();
     view.setCenter(camPosition);
     m_normalBuffer.setView(view);
-    //m_neonBuffer.setView(view);
 
     return true;
 }
@@ -290,9 +289,6 @@ void RaceState::initScene()
 
 void RaceState::loadResources()
 {
-    TextureID::handles[TextureID::Temp01] = m_resources.load<sf::Texture>("nothing_to_see_here");
-    TextureID::handles[TextureID::Temp02] = m_resources.load<sf::Texture>("assets/images/temp02.png");
-
     TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
     m_backgroundSprite.setTexture(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]), true);
     TextureID::handles[TextureID::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
@@ -308,6 +304,7 @@ void RaceState::loadResources()
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::RoidDiffuse]).setRepeated(true);
     TextureID::handles[TextureID::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]).setRepeated(true);
+    TextureID::handles[TextureID::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
 
     if (!m_backgroundBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
     {
@@ -811,6 +808,13 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<Sprite3D>(m_matrixPool).depth = radius * data.scale;
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        //TODO I'd quite like to mask these with the track alpha channel but.. meh. Maybe later.
+        auto shadowEnt = m_gameScene.createEntity();
+        shadowEnt.addComponent<xy::Transform>().setPosition(sf::Vector2f(-18.f, 18.f));
+        shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth - 1);
+        shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::RoidShadow]));
+        entity.getComponent<xy::Transform>().addChild(shadowEnt.getComponent<xy::Transform>());
     }
         break;
     }

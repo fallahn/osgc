@@ -55,6 +55,7 @@ namespace TextureID
         MainMenu, VehicleSelect, Podium,
         Stars, StarsFar, StarsMid, StarsNear,
         RoidDiffuse, PlanetDiffuse, PlanetNormal,
+        RoidShadow,
 
         Temp01, Temp02,
 
