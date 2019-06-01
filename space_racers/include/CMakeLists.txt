@@ -19,6 +19,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/InverseRotationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LightningSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.hpp
