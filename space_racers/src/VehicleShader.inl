@@ -67,9 +67,17 @@ static const std::string VehicleFrag =
 R"(
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
+uniform sampler2D u_specularMap;
+uniform sampler2D u_neonMap;
+uniform vec4 u_neonColour;
 
 varying vec3 v_cameraTanDirection;
 varying vec3 v_lightTanDirection;
+
+float BlendOverlay(float base, float blend)
+{
+    return (base < 0.5) ? (2.0 * base * blend) : (1.0 - 2.0 * (1.0 - base) * (1.0 - blend));
+}
 
 void main()
 {
@@ -81,15 +89,19 @@ void main()
 
 
     float colourAmount = max(dot(normal, normalize(v_lightTanDirection)), 0.0);
+    float specularMultiplier = texture2D(u_specularMap, coord).r;
     
     vec3 specular = vec3(0.0);
     vec3 diffuse = vec3(0.0);
 
     vec3 halfVec = normalize(v_lightTanDirection + v_cameraTanDirection);
     float specAmount = max(dot(normal, halfVec), 0.0);
-    specular = vec3(pow(specAmount, 120.0));
+    specular = vec3(pow(specAmount, 120.0)) * specularMultiplier;
     diffuse = diffuseColour.rgb * colourAmount;
 
-    gl_FragColor = vec4(specular + diffuse, diffuseColour.a);
+    vec4 neonSample = texture2D(u_neonMap, coord);
+    vec3 neon = vec3(BlendOverlay(neonSample.r, u_neonColour.r), BlendOverlay(neonSample.g, u_neonColour.g), BlendOverlay(neonSample.b, u_neonColour.b));
 
+    gl_FragColor = vec4(specular + diffuse, diffuseColour.a);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, dot(neonSample.rgb, vec3(0.299, 0.587, 0.114))); //uses neon map brightness as blend amount
 })";

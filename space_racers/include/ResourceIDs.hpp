@@ -58,7 +58,8 @@ namespace TextureID
         RoidDiffuse, PlanetDiffuse, PlanetNormal,
         RoidShadow,
 
-        VehicleNormal,
+        VehicleNormal, VehicleSpecular, VehicleNeon,
+        VehicleShadow,
 
         Temp01, Temp02,
 

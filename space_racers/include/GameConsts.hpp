@@ -95,19 +95,18 @@ namespace GameConst
     {
         static const std::array<sf::Color, 4u> Light =
         {
+            sf::Color(0u, 191u, 127u),
+            sf::Color(63u, 0u, 255u),
             sf::Color(255u, 0u, 10u),
             sf::Color(0u, 127u, 255u),
-            sf::Color(63u, 0u, 255u),
-            sf::Color(0u, 191u, 127u)
-
         };
 
         static const std::array<sf::Color, 4u> Dark =
         {
+            sf::Color(0u, 54u, 37u),
+            sf::Color(18u, 0u, 76u),
             sf::Color(76u, 0u, 0u),
             sf::Color(0u, 37u, 76u),
-            sf::Color(18u, 0u, 76u),
-            sf::Color(0u, 54u, 37u)
         };
     }
 

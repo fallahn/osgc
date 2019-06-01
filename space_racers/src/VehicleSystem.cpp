@@ -275,7 +275,8 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 if(type == CollisionObject::Space
                     && contains(tx.getPosition(), other))
                 {
-                    if (vehicle.stateFlags != (1 << Vehicle::Disabled))
+                    if (vehicle.stateFlags != (1 << Vehicle::Disabled)
+                        && vehicle.type != Vehicle::Type::Ship)
                     {
                         vehicle.collisionFlags |= (1 << type);
                         vehicle.stateFlags = (1 << Vehicle::Falling);

@@ -183,10 +183,6 @@ bool RaceState::update(float dt)
     view.setCenter(camPosition);
     m_normalBuffer.setView(view);
 
-    /*sf::Transform tx;
-    tx.rotate(-m_playerInput.getPlayerEntity().getComponent<xy::Transform>().getRotation());
-    m_shaders.get(ShaderID::Vehicle).setUniform("u_lightRotationMatrix", sf::Glsl::Mat4(tx));*/
-
     return true;
 }
 
@@ -323,6 +319,9 @@ void RaceState::loadResources()
     m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]).setRepeated(true);
     TextureID::handles[TextureID::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
     TextureID::handles[TextureID::VehicleNormal] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_normal.png");
+    TextureID::handles[TextureID::VehicleSpecular] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_specular.png");
+    TextureID::handles[TextureID::VehicleNeon] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_neon.png");
+    TextureID::handles[TextureID::VehicleShadow] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_shadow.png");
 
     if (!m_backgroundBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
     {
@@ -691,6 +690,9 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSpecular]));
+    entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleNeon]));
+    entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[data.colourID]);
     entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
@@ -725,33 +727,28 @@ void RaceState::spawnVehicle(const VehicleData& data)
     auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
 
-    m_playerInput.setPlayerEntity(entity);
-
-    //temp for collision debugging
-    /*entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function =
-        [](xy::Entity e, float)
+    auto shadowEnt = m_gameScene.createEntity();
+    shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
+    shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+    shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleShadow]));
+    shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
+    shadowEnt.addComponent<xy::Callback>().active = true;
+    shadowEnt.getComponent<xy::Callback>().function =
+        [entity](xy::Entity thisEnt, float)
     {
-        if (e.getComponent<Vehicle>().collisionFlags)
-        {
-            e.getComponent<xy::Sprite>().setColour(sf::Color::Blue);
-        }
-        else
-        {
-            e.getComponent<xy::Sprite>().setColour(sf::Color::White);
-        }
-    };*/
+        auto& thisTx = thisEnt.getComponent<xy::Transform>();
+        const auto& thatTx = entity.getComponent<xy::Transform>();
+
+        thisTx.setPosition(thatTx.getPosition() + sf::Vector2f(-10.f, 10.f)); //TODO larger shadow dist for ships
+        thisTx.setRotation(thatTx.getRotation());
+        thisTx.setScale(thatTx.getScale());
+    };
+
+    m_playerInput.setPlayerEntity(entity);
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;
 
-#ifdef XY_DEBUG
-    /*debugEnt = m_gameScene.createEntity();
-    debugEnt.addComponent<xy::Transform>().setOrigin(10.f, 10.f);
-    debugEnt.addComponent<xy::Drawable>().setDepth(100);
-    debugEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Temp01])).setTextureRect({ -10.f, -10.f, 20.f, 20.f });
-    debugEnt.getComponent<xy::Sprite>().setColour(sf::Color::Blue);*/
-#endif //XY_DEBUG
 
     //count spawned vehicles and tell server when all are spawned
     m_sharedData.gameData.actorCount--;
@@ -812,6 +809,32 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.addComponent<xy::Callback>().function = ScaleCallback();
+
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+        entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSpecular]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleNeon]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[data.colourID]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
+
+        {
+            auto shadowEnt = m_gameScene.createEntity();
+            shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
+            shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+            shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleShadow]));
+            shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
+            shadowEnt.addComponent<xy::Callback>().active = true;
+            shadowEnt.getComponent<xy::Callback>().function =
+                [entity](xy::Entity thisEnt, float)
+            {
+                auto& thisTx = thisEnt.getComponent<xy::Transform>();
+                const auto& thatTx = entity.getComponent<xy::Transform>();
+
+                thisTx.setPosition(thatTx.getPosition() + sf::Vector2f(-10.f, 10.f)); //TODO larger shadow dist for ships
+                thisTx.setRotation(thatTx.getRotation());
+                thisTx.setScale(thatTx.getScale());
+            };
+        }
 
         break;
 
