@@ -53,7 +53,7 @@ endif()
 
 if(LOSPEC)
   add_definitions(-DLO_SPEC)
-#endif()
+endif()
 
 # Create the actual binary (PROJECT_SRC variable is set inside previous steps)
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
