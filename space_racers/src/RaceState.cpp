@@ -196,6 +196,7 @@ void RaceState::draw()
     m_backgroundBuffer.draw(m_backgroundScene);
     m_backgroundBuffer.display();
 
+#ifndef LO_SPEC
     //normal map for distortion of background
     m_normalBuffer.clear({ 127,127,255 });
     m_normalBuffer.draw(m_normalSprite);
@@ -241,6 +242,15 @@ void RaceState::draw()
     auto& rw = getContext().renderWindow;
     rw.setView(getContext().defaultView);
     rw.draw(m_gameSceneSprite, &blendShader);
+#else
+    m_gameSceneBuffer.clear();
+    m_gameSceneBuffer.draw(m_gameScene);
+    m_gameSceneBuffer.display();
+
+    auto& rw = getContext().renderWindow;
+    rw.setView(getContext().defaultView);
+    rw.draw(m_gameSceneSprite);
+#endif //LO_SPEC
     rw.draw(m_uiScene);
 }
 
@@ -441,9 +451,11 @@ void RaceState::buildWorld()
     backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
     backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
     backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+#ifndef LO_SPEC
     backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
     backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_normalBuffer.getTexture());
     backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+#endif
     backgroundEnt.addComponent<xy::Sprite>(m_backgroundBuffer.getTexture());
     camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
 
@@ -674,7 +686,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
-    //entity.getComponent<xy::Drawable>().bindUniform("u_modelMatrix", entity.getComponent<xy::Transform>().getTransform().getMatrix());
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMatrix", entity.getComponent<xy::Transform>().getInverseTransform().getMatrix());
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
     //TODO we should probably get this from the server, but it might not matter

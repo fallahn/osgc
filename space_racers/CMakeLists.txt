@@ -10,6 +10,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # Some default variables which the user may change
 SET(CMAKE_BUILD_TYPE        Debug CACHE STRING  "Choose the type of build (Debug or Release)")
+# disables neon rendering for builds on lower spec computers
+set(LOSPEC false CACHE BOOL "Disable neon rendering on lower spec machines")
 
 # We're using c++17
 set(CMAKE_CXX_STANDARD 17)
@@ -48,6 +50,10 @@ add_subdirectory(src)
 if (CMAKE_BUILD_TYPE MATCHES Debug) 
   add_definitions(-DXY_DEBUG)
 endif()
+
+if(LOSPEC)
+  add_definitions(-DLO_SPEC)
+#endif()
 
 # Create the actual binary (PROJECT_SRC variable is set inside previous steps)
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
