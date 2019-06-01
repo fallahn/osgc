@@ -36,6 +36,7 @@ Copyright 2019 Matt Marchant
 #include "Sprite3D.hpp"
 #include "AsteroidSystem.hpp"
 #include "LightningSystem.hpp"
+#include "InverseRotationSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -182,7 +183,9 @@ bool RaceState::update(float dt)
     view.setCenter(camPosition);
     m_normalBuffer.setView(view);
 
-    //m_shaders.get(ShaderID::Vehicle).setUniform("u_camWorldPosition", sf::Vector3f(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y / 2.f, Camera3D::depth));
+    /*sf::Transform tx;
+    tx.rotate(-m_playerInput.getPlayerEntity().getComponent<xy::Transform>().getRotation());
+    m_shaders.get(ShaderID::Vehicle).setUniform("u_lightRotationMatrix", sf::Glsl::Mat4(tx));*/
 
     return true;
 }
@@ -272,6 +275,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<DeadReckoningSystem>(mb);
     m_gameScene.addSystem<AsteroidSystem>(mb);
     m_gameScene.addSystem<LightningSystem>(mb);
+    m_gameScene.addSystem<InverseRotationSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -682,11 +686,12 @@ void RaceState::spawnVehicle(const VehicleData& data)
     //spawn vehicle
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
+    entity.addComponent<InverseRotation>();
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
-    entity.getComponent<xy::Drawable>().bindUniform("u_modelMatrix", entity.getComponent<xy::Transform>().getInverseTransform().getMatrix());
+    entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
     //TODO we should probably get this from the server, but it might not matter

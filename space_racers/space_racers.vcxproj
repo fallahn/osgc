@@ -164,6 +164,7 @@
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\InterpolationSystem.hpp" />
+    <ClInclude Include="include\InverseRotationSystem.hpp" />
     <ClInclude Include="include\LightningSystem.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\MapParser.hpp" />

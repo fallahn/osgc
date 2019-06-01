@@ -26,17 +26,28 @@ Copyright 2019 Matt Marchant
 //placing the light and camera directions in tangent space
 //requires only transforming them by the inverse of the model
 //matrix.
+
+/*
+A problem with SFML is that it 'optimises' drawing less than 5
+vertices by pre-transforming them. This means that gl_Vertex is
+*already* in world coords, and gl_ModelViewMatrix is an identity
+matrix, making it effectively useless.
+
+*/
+
 static const std::string VehicleVertex =
 R"(
 #version 120
 
-uniform vec3 u_camWorldPosition;
-uniform mat4 u_modelMatrix;
+//uniform vec3 u_camWorldPosition;
+uniform mat4 u_lightRotationMatrix; //rotates the light source the opposite way to the sprite - this is because the only relative transform is z rotation
 
-const vec3 lightDirection = vec3(1.0, -1.0, 1.0);
+const vec3 lightDirection = normalize(vec3(1.0, 0.0, 2.0));
 const vec4 normal = vec4(0.0, 0.0, 1.0, 1.0);
 const vec4 tangent = vec4(1.0, 0.0, 0.0, 1.0);
 const vec4 bitan = vec4(0.0, 1.0, 0.0, 1.0);
+
+const vec3 lightPosition = vec3(200.0, 200.0, 3000.0);
 
 varying vec3 v_cameraTanDirection;
 varying vec3 v_lightTanDirection;
@@ -47,16 +58,8 @@ void main()
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
     gl_FrontColor = gl_Color;
 
-    //vec4 vertexWorldViewPosition = gl_ModelViewMatrix * gl_Vertex; //does this hold true with SFML's 4 vert 'optimisation'?
-    //vec4 camWorldViewDirection = (/*gl_ModelViewMatrix */ vec4(u_camWorldPosition, 1.0)) - vertexWorldViewPosition;
-
-    vec3 normalWorldView = (gl_ModelViewMatrix * normal).xyz;
-    vec3 tanWorldView = (gl_ModelViewMatrix * tangent).xyz;
-    vec3 bitanWorldView = (gl_ModelViewMatrix * bitan).xyz;
-
-    mat3 TBN = transpose(mat3(tanWorldView, bitanWorldView, normalWorldView));
-    v_cameraTanDirection = TBN * vec3(0.0, 0.0, 1.0);//camWorldViewDirection.xyz;
-    v_lightTanDirection =  TBN * normalize(lightDirection);
+    v_cameraTanDirection = vec3(0.0,0.0,1.0);//u_camWorldPosition - gl_Vertex.xyz;
+    v_lightTanDirection = (u_lightRotationMatrix * vec4(lightDirection, 1.0)).xyz;
 
 })";
 

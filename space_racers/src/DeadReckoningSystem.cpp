@@ -74,16 +74,24 @@ void DeadReckoningSystem::process(float dt)
                 entity.getComponent<Asteroid>().setVelocity(newVel);
             }
             //TODO else if vehicle set vel/rotVel/input
+            else
+            {
+
+            }
         }
-        //TODO else if vehicle apply current input
-        //else
-        //{
-        //    //use the current known velocity to move forward
-        //    sf::Vector2f vel = { dr.update.velX, dr.update.velY };// = lerp(dr.currVelocity, dr.targetVelocity, dr.currentTime / dr.targetTime);
-        //    auto& tx = entity.getComponent<xy::Transform>();
-        //    tx.move(vel * dt);
-        //    //collision(entity);
-        //}
+        
+        else
+        {
+            //TODO else if vehicle apply current input to vehicle system
+
+            if (entity.getComponent<NetActor>().actorID != ActorID::Roid)
+            {
+                //use the current known velocity to move forward
+                sf::Vector2f vel = { dr.update.velX, dr.update.velY };
+                auto& tx = entity.getComponent<xy::Transform>();
+                tx.move(vel * dt);
+            }
+        }
     }
 }
 
