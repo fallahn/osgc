@@ -109,4 +109,5 @@ private:
     void removeNetVehicle(std::uint32_t);
 
     void showTimer();
+    void spawnTrail(xy::Entity, sf::Color);
 };

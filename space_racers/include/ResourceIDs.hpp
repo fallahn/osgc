@@ -33,7 +33,8 @@ namespace ShaderID
         Blur,
         NeonBlend,
         NeonExtract,
-        Vehicle
+        Vehicle,
+        Trail
     };
 }
 
@@ -59,7 +60,7 @@ namespace TextureID
         RoidShadow,
 
         VehicleNormal, VehicleSpecular, VehicleNeon,
-        VehicleShadow,
+        VehicleShadow, VehicleTrail,
 
         Temp01, Temp02,
 

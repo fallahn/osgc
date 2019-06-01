@@ -23,7 +23,7 @@ namespace CommandID
     enum Game
     {
         NetActor = 0x1,
-        
+        Trail = 0x2
     };
 
     enum UI

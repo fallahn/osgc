@@ -105,3 +105,12 @@ void main()
     gl_FragColor = vec4(specular + diffuse, diffuseColour.a);
     gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, dot(neonSample.rgb, vec3(0.299, 0.587, 0.114))); //uses neon map brightness as blend amount
 })";
+
+static const std::string VehicleTrail =
+R"(
+uniform sampler2D u_texture;
+
+void main()
+{
+    gl_FragColor = texture2D(u_texture, gl_TexCoord[0].xy) + gl_Color;
+})";

@@ -189,6 +189,7 @@
     <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\SummaryState.hpp" />
+    <ClInclude Include="include\TrailSystem.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
     <ClInclude Include="include\VFXDirector.hpp" />
@@ -222,6 +223,7 @@
     <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\Sprite3DSystem.cpp" />
     <ClCompile Include="src\SummaryState.cpp" />
+    <ClCompile Include="src\TrailSystem.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
     <ClCompile Include="src\VFXDirector.cpp" />
   </ItemGroup>

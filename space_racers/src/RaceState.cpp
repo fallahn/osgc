@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include "AsteroidSystem.hpp"
 #include "LightningSystem.hpp"
 #include "InverseRotationSystem.hpp"
+#include "TrailSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -141,6 +142,37 @@ void RaceState::handleMessage(const xy::Message& msg)
         {
             auto entity = data.entity;
             entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Trail;
+            cmd.action = [entity](xy::Entity e, float)
+            {
+                if (e.getComponent<Trail>().parent == entity)
+                {
+                    e.getComponent<Trail>().parent = {};
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        else if (data.type == VehicleEvent::Exploded)
+        {
+            //detatch the current trail
+            auto entity = data.entity;
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Trail;
+            cmd.action = [entity](xy::Entity e, float)
+            {
+                if (e.getComponent<Trail>().parent == entity)
+                {
+                    e.getComponent<Trail>().parent = {};
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        else if (data.type == VehicleEvent::Respawned)
+        {
+            spawnTrail(data.entity, GameConst::PlayerColour::Light[0]);
         }
     }
 
@@ -272,6 +304,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<AsteroidSystem>(mb);
     m_gameScene.addSystem<LightningSystem>(mb);
     m_gameScene.addSystem<InverseRotationSystem>(mb);
+    m_gameScene.addSystem<TrailSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -322,6 +355,7 @@ void RaceState::loadResources()
     TextureID::handles[TextureID::VehicleSpecular] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_specular.png");
     TextureID::handles[TextureID::VehicleNeon] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_neon.png");
     TextureID::handles[TextureID::VehicleShadow] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_shadow.png");
+    TextureID::handles[TextureID::VehicleTrail] = m_resources.load<sf::Texture>("assets/images/vehicles/trail.png");
 
     if (!m_backgroundBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
     {
@@ -388,6 +422,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::NeonExtract, ExtractFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
+    m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -729,7 +764,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
 
     auto shadowEnt = m_gameScene.createEntity();
     shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
-    shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+    shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 2); //make sure renders below trail
     shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleShadow]));
     shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
     shadowEnt.addComponent<xy::Callback>().active = true;
@@ -749,6 +784,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;
 
+    spawnTrail(entity, GameConst::PlayerColour::Light[data.colourID]);
 
     //count spawned vehicles and tell server when all are spawned
     m_sharedData.gameData.actorCount--;
@@ -809,6 +845,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.addComponent<xy::Callback>().function = ScaleCallback();
+        entity.addComponent<InverseRotation>();
 
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
@@ -966,17 +1003,31 @@ void RaceState::explodeNetVehicle(std::uint32_t id)
 
 void RaceState::fallNetVehicle(std::uint32_t id)
 {
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::NetActor;
-    cmd.action = [id](xy::Entity e, float)
+    /*if (auto e = m_playerInput.getPlayerEntity(); e.getComponent<std::int32_t>() == id)
     {
-        if (e.getComponent<NetActor>().serverID == id)
+        auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::Fell;
+        msg->entity = e;
+    }
+    else*/
+    //above is already handled locally
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::NetActor;
+        cmd.action = [&, id](xy::Entity e, float)
         {
-            e.getComponent<xy::Callback>().active = true; //performs scaling
-            e.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
-        }
-    };
-    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            if (e.getComponent<NetActor>().serverID == id)
+            {
+                e.getComponent<xy::Callback>().active = true; //performs scaling
+                e.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
+
+                auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+                msg->type = VehicleEvent::Fell;
+                msg->entity = e;
+            }
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void RaceState::removeNetVehicle(std::uint32_t id)
@@ -1012,4 +1063,17 @@ void RaceState::showTimer()
         currTime = std::max(0.f, currTime - dt);
         e.getComponent<xy::Text>().setString(std::to_string(static_cast<std::int32_t>(currTime)));
     };
+}
+
+void RaceState::spawnTrail(xy::Entity parent, sf::Color colour)
+{
+    auto trailEnt = m_gameScene.createEntity();
+    trailEnt.addComponent<xy::Transform>();
+    trailEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+    trailEnt.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleTrail]));
+    trailEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Trail));
+    trailEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    trailEnt.addComponent<Trail>().parent = parent;
+    trailEnt.getComponent<Trail>().colour = colour;
+    trailEnt.addComponent<xy::CommandTarget>().ID = CommandID::Game::Trail;
 }
