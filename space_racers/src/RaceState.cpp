@@ -98,7 +98,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     buildWorld();
     buildUI();
 
-    //buildTest();
+    buildTest();
 
     quitLoadingScreen();
 }
@@ -605,20 +605,36 @@ void RaceState::buildUI()
 
 void RaceState::buildTest()
 {
-    auto temp = m_resources.load<sf::Texture>("assets/images/temp01a.png");
+    auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
+    m_resources.get<sf::Texture>(temp).setSmooth(true);
     
     auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
     entity.addComponent<xy::Drawable>().setDepth(1000);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-    entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    sf::Color c(0, 0, 0);
+
+    for (auto i = 0; i <= 255; i += 85)
+    {
+        c.r += i;
+
+        verts.emplace_back(sf::Vector2f(-384.f, -384.f ), c, sf::Vector2f(0.f, 0.f));
+        verts.emplace_back(sf::Vector2f(384.f, -384.f), c, sf::Vector2f(384.f, 0.f));
+        verts.emplace_back(sf::Vector2f(384.f, 384.f ), c, sf::Vector2f(384.f, 384.f));
+        verts.emplace_back(sf::Vector2f(-384.f, 384.f ), c, sf::Vector2f(0.f, 384.f));
+    }
+
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
 }
 
 void RaceState::handlePackets()

@@ -20,6 +20,9 @@ Copyright 2019 Matt Marchant
 
 #include <string>
 
+//because we don't have direct access to vertex attribs
+//we've fudged depth information into the red channel of the colour attrib
+
 static const std::string SpriteVertex =
 R"(
 #version 120
@@ -30,9 +33,9 @@ uniform mat4 u_modelMat;
 void main()
 {
     vec4 worldPos = u_modelMat * gl_Vertex;
-    //v_worldPosition = worldPos.xyz;
+    worldPos.z *= gl_Color.r;
 
-    gl_Position = u_viewProjMat * worldPos;//u_viewProjMat * worldPos;//u_modelMat * gl_Vertex; //gl_ModelViewProjectionMatrix
+    gl_Position = u_viewProjMat * worldPos;
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
@@ -56,5 +59,5 @@ R"(
 
 void main()
 {
-    gl_FragColor = gl_Color;
+    gl_FragColor = vec4(0.4, 0.4, 0.4, 1.0);// gl_Color;
 })";
