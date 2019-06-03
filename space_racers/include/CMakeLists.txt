@@ -22,6 +22,8 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InverseRotationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LightningSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LocalEliminationState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LocalRaceState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConsts.hpp
@@ -44,6 +46,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TrailSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.hpp

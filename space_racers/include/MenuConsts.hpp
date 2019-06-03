@@ -26,6 +26,8 @@ namespace MenuConst
 {
     static const sf::Vector2f MainMenuPosition;
     static const sf::Vector2f NetworkMenuPosition(-xy::DefaultSceneSize.x, 0.f);
+    static const sf::Vector2f TimeTrialMenuPosition(0.f, xy::DefaultSceneSize.y);
+    static const sf::Vector2f LocalPlayMenuPosition(0.f, -xy::DefaultSceneSize.y);
     static const sf::Vector2f ItemRootPosition(402.f, 380.f);
 
     static const std::int32_t BackgroundDepth = -20;

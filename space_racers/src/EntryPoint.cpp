@@ -34,6 +34,9 @@ source distribution.
 #include "ErrorState.hpp"
 #include "PauseState.hpp"
 #include "SummaryState.hpp"
+#include "LocalRaceState.hpp"
+#include "LocalEliminationState.hpp"
+#include "TimeTrialState.hpp"
 #include "DummyClient.hpp"
 
 #include <xyginext/core/StateStack.hpp>
@@ -53,14 +56,17 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<ErrorState>(StateID::Error, data);
     ss->registerState<PauseState>(StateID::Pause, data);
     ss->registerState<SummaryState>(StateID::Summary, data);
+    ss->registerState<LocalEliminationState>(StateID::LocalElimination, data);
+    ss->registerState<LocalRaceState>(StateID::LocalRace, data);
+    ss->registerState<TimeTrialState>(StateID::TimeTrial, data);
 
 #ifdef XY_DEBUG
     /*data.launcher = std::make_unique<ClientLauncher>();
     data.launcher->launch();*/
 
     //return StateID::Debug;
-    //return StateID::Lobby;
-    return StateID::MainMenu;
+    return StateID::Lobby;
+    //return StateID::MainMenu;
 #else
     return StateID::MainMenu;
     //return StateID::Lobby;
@@ -76,4 +82,7 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::Error);
     ss->unregisterState(StateID::Pause);
     ss->unregisterState(StateID::Summary);
+    ss->unregisterState(StateID::LocalElimination);
+    ss->unregisterState(StateID::LocalRace);
+    ss->unregisterState(StateID::TimeTrial);
 }

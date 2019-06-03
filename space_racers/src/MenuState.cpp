@@ -356,7 +356,14 @@ void MenuState::buildMenu()
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = MenuConst::TimeTrialMenuPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
@@ -377,7 +384,14 @@ void MenuState::buildMenu()
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = MenuConst::LocalPlayMenuPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
@@ -457,6 +471,8 @@ void MenuState::buildMenu()
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
     buildNetworkMenu(rootNode, mouseEnter, mouseExit);
+    buildTimeTrialMenu(rootNode, mouseEnter, mouseExit);
+    buildLocalPlayMenu(rootNode, mouseEnter, mouseExit);
 }
 
 void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
@@ -627,6 +643,66 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
     parentTx.addChild(entity.getComponent<xy::Transform>());
+}
+
+void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
+{
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y * 0.75f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NetBackButton];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = MenuConst::MainMenuPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+}
+
+void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
+{
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y * 1.25f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NetBackButton];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<Slider>().target = MenuConst::MainMenuPosition;
+                        e.getComponent<Slider>().active = true;
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::updateTextInput(const sf::Event& evt)

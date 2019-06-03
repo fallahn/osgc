@@ -47,14 +47,16 @@ namespace StateID
         Debug,
         Error,
         Pause,
-        Summary
+        Summary,
+        LocalRace,
+        LocalElimination,
+        TimeTrial
     };
 }
 
 struct GameData final
 {
     std::uint8_t actorCount = 1;
-    std::uint8_t mapIndex = 0;
 };
 
 class ClientLauncher;

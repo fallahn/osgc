@@ -14,6 +14,8 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationComponent.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LightningSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LocalEliminationState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LocalRaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
@@ -27,6 +29,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TrailSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VFXDirector.cpp

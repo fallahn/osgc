@@ -27,24 +27,15 @@ source distribution.
 
 #pragma once
 
-#include "ResourceIDs.hpp"
+#include "StateIDs.hpp"
 
-#include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/core/State.hpp>
-#include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/ecs/Scene.hpp>
-#include <xyginext/ecs/components/Sprite.hpp>
-#include <xyginext/resources/ResourceHandler.hpp>
-#include <xyginext/resources/ShaderResource.hpp>
 
-#include <array>
-
-struct SharedData;
-class MenuState final : public xy::State, public xy::ConsoleClient
+class LocalRaceState final : public xy::State 
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
-    ~MenuState();
+    LocalRaceState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -54,27 +45,12 @@ public:
 
     void draw() override;
 
-    xy::StateID stateID() const override;
+    xy::StateID stateID() const override { return StateID::LocalRace; }
 
 private:
-
     SharedData& m_sharedData;
     xy::Scene m_scene;
-    xy::ResourceHolder m_resources;
-    xy::ShaderResource m_shaders;
-    xy::ConfigFile m_settings;
-
-    sf::String* m_activeString;
-
-    std::array<xy::Sprite, SpriteID::Menu::Count> m_sprites;
-    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
 
     void initScene();
     void loadResources();
-    void buildMenu();
-    void buildNetworkMenu(xy::Entity, sf::Uint32, sf::Uint32);
-    void buildTimeTrialMenu(xy::Entity, sf::Uint32, sf::Uint32);
-    void buildLocalPlayMenu(xy::Entity, sf::Uint32, sf::Uint32);
-
-    void updateTextInput(const sf::Event&);
 };
