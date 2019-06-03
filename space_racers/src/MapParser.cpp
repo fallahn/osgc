@@ -360,10 +360,8 @@ bool MapParser::load(const std::string& path)
     return false;
 }
 
-void MapParser::renderLayers(std::array<sf::RenderTexture, 3u>& targets) const
+void MapParser::renderLayers(std::array<sf::RenderTexture, 2u>& targets) const
 {
-    XY_ASSERT(targets.size() == 3, "Not enough render targets!");
-
     //tileset data
     TilesetInfo tsi;
     tsi.tileSets = &m_map.getTilesets();
@@ -392,15 +390,15 @@ void MapParser::renderLayers(std::array<sf::RenderTexture, 3u>& targets) const
     renderLayer(targets[0], m_layers[Neon], tsi);
     targets[0].display();
 
+    //targets[1].create(mapSize.x, mapSize.y);
+    //targets[1].clear(sf::Color::Transparent);
+    //renderLayer(targets[1], m_layers[Neon], tsi);
+    //targets[1].display();
+
     targets[1].create(mapSize.x, mapSize.y);
     targets[1].clear(sf::Color::Transparent);
-    renderLayer(targets[1], m_layers[Neon], tsi);
+    renderLayer(targets[1], m_layers[Normal], tsi);
     targets[1].display();
-
-    targets[2].create(mapSize.x, mapSize.y);
-    targets[2].clear(sf::Color::Transparent);
-    renderLayer(targets[2], m_layers[Normal], tsi);
-    targets[2].display();
 }
 //private
 void MapParser::renderLayer(sf::RenderTarget& target, const tmx::TileLayer* layer, const TilesetInfo& tsi) const

@@ -240,7 +240,6 @@ void RaceState::draw()
 
     //extract the brightest points to the neon buffer
     auto& extractShader = m_shaders.get(ShaderID::NeonExtract);
-    //extractShader.setUniform("u_texture", m_gameSceneBuffer.getTexture());
     m_neonSprite.setTexture(m_gameSceneBuffer.getTexture(), true);
     m_neonBuffer.setView(m_gameSceneBuffer.getDefaultView());
     m_neonBuffer.clear(sf::Color::Transparent);
@@ -248,17 +247,16 @@ void RaceState::draw()
     m_neonBuffer.display();
 
     //blur passs
-    static const float BlurAmount = 0.5f;
     auto& blurShader = m_shaders.get(ShaderID::Blur);
     blurShader.setUniform("u_texture", m_neonBuffer.getTexture());
-    blurShader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f)/* * BlurAmount*/);
+    blurShader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f));
     m_neonSprite.setTexture(m_neonBuffer.getTexture(), true);
     m_blurBuffer.clear(sf::Color::Transparent);
     m_blurBuffer.draw(m_neonSprite, &blurShader);
     m_blurBuffer.display();
 
     blurShader.setUniform("u_texture", m_blurBuffer.getTexture());
-    blurShader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y)/* * BlurAmount*/);
+    blurShader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y));
     m_neonSprite.setTexture(m_blurBuffer.getTexture(), true);
     m_neonBuffer.setView(m_neonBuffer.getDefaultView());
     m_neonBuffer.clear(sf::Color::Transparent);
@@ -335,27 +333,27 @@ void RaceState::initScene()
 
 void RaceState::loadResources()
 {
-    TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
-    m_backgroundSprite.setTexture(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]), true);
-    TextureID::handles[TextureID::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
-    m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsFar]).setRepeated(true);
-    TextureID::handles[TextureID::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
-    m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsMid]).setRepeated(true);
-    TextureID::handles[TextureID::StarsNear] = m_resources.load<sf::Texture>("assets/images/stars_near.png");
-    m_resources.get<sf::Texture>(TextureID::handles[TextureID::StarsNear]).setRepeated(true);
+    m_textureIDs[TextureID::Game::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
+    m_backgroundSprite.setTexture(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Stars]), true);
+    m_textureIDs[TextureID::Game::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::StarsFar]).setRepeated(true);
+    m_textureIDs[TextureID::Game::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::StarsMid]).setRepeated(true);
+    m_textureIDs[TextureID::Game::StarsNear] = m_resources.load<sf::Texture>("assets/images/stars_near.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::StarsNear]).setRepeated(true);
 
-    TextureID::handles[TextureID::PlanetDiffuse] = m_resources.load<sf::Texture>("assets/images/globe_diffuse.png");
-    m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetDiffuse]).setRepeated(true);
-    TextureID::handles[TextureID::RoidDiffuse] = m_resources.load<sf::Texture>("assets/images/roid_diffuse.png");
-    m_resources.get<sf::Texture>(TextureID::handles[TextureID::RoidDiffuse]).setRepeated(true);
-    TextureID::handles[TextureID::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
-    m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]).setRepeated(true);
-    TextureID::handles[TextureID::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
-    TextureID::handles[TextureID::VehicleNormal] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_normal.png");
-    TextureID::handles[TextureID::VehicleSpecular] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_specular.png");
-    TextureID::handles[TextureID::VehicleNeon] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_neon.png");
-    TextureID::handles[TextureID::VehicleShadow] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_shadow.png");
-    TextureID::handles[TextureID::VehicleTrail] = m_resources.load<sf::Texture>("assets/images/vehicles/trail.png");
+    m_textureIDs[TextureID::Game::PlanetDiffuse] = m_resources.load<sf::Texture>("assets/images/globe_diffuse.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetDiffuse]).setRepeated(true);
+    m_textureIDs[TextureID::Game::RoidDiffuse] = m_resources.load<sf::Texture>("assets/images/roid_diffuse.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidDiffuse]).setRepeated(true);
+    m_textureIDs[TextureID::Game::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]).setRepeated(true);
+    m_textureIDs[TextureID::Game::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
+    m_textureIDs[TextureID::Game::VehicleNormal] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_normal.png");
+    m_textureIDs[TextureID::Game::VehicleSpecular] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_specular.png");
+    m_textureIDs[TextureID::Game::VehicleNeon] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_neon.png");
+    m_textureIDs[TextureID::Game::VehicleShadow] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_shadow.png");
+    m_textureIDs[TextureID::Game::VehicleTrail] = m_resources.load<sf::Texture>("assets/images/vehicles/trail.png");
 
     if (!m_backgroundBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
     {
@@ -434,7 +432,7 @@ void RaceState::loadResources()
     extractShader.setUniform("u_texture", m_gameSceneBuffer.getTexture());
 
     auto& vehicleShader = m_shaders.get(ShaderID::Vehicle);
-    vehicleShader.setUniform("u_normalMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleNormal]));
+    vehicleShader.setUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNormal]));
 
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
@@ -466,7 +464,7 @@ void RaceState::buildWorld()
 
     m_mapParser.renderLayers(m_trackTextures);
     m_normalSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Normal].getTexture(), true);
-    m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
+    //m_neonSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Neon].getTexture(), true);
     m_gameSceneSprite.setTexture(m_gameSceneBuffer.getTexture(), true);
 
     auto entity = m_gameScene.createEntity();
@@ -497,15 +495,6 @@ void RaceState::buildWorld()
     backgroundEnt.addComponent<xy::Sprite>(m_backgroundBuffer.getTexture());
     camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
 
-    /*auto neonEnt = m_gameScene.createEntity();
-    neonEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::MediumBufferSize) / 2.f);
-    neonEnt.getComponent<xy::Transform>().setScale(4.f, 4.f);
-    neonEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
-    neonEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
-    neonEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    neonEnt.addComponent<xy::Sprite>(m_neonBuffer.getTexture());
-    camEnt.getComponent<xy::Transform>().addChild(neonEnt.getComponent<xy::Transform>());*/
-
     float fov = Camera3D::calcFOV(view.getSize().y);
     float ratio = view.getSize().x / view.getSize().y;
     camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 2600.f);
@@ -516,9 +505,9 @@ void RaceState::buildWorld()
     //dem starrs
     std::array<std::size_t, 3u> IDs =
     {
-        TextureID::handles[TextureID::StarsNear],
-        TextureID::handles[TextureID::StarsMid],
-        TextureID::handles[TextureID::StarsFar],
+        m_textureIDs[TextureID::Game::StarsNear],
+        m_textureIDs[TextureID::Game::StarsMid],
+        m_textureIDs[TextureID::Game::StarsFar],
     };
     for (auto i = 0; i < 3; ++i)
     {
@@ -552,8 +541,8 @@ void RaceState::buildWorld()
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Globe));
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]));
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetDiffuse]));
+    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetDiffuse]));
 
     addProps();
 
@@ -741,8 +730,8 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
-    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSpecular]));
-    entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleNeon]));
+    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
+    entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
     entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[data.colourID]);
     entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
@@ -781,7 +770,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     auto shadowEnt = m_gameScene.createEntity();
     shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
     shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 2); //make sure renders below trail
-    shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleShadow]));
+    shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleShadow]));
     shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
     shadowEnt.addComponent<xy::Callback>().active = true;
     shadowEnt.getComponent<xy::Callback>().function =
@@ -865,16 +854,18 @@ void RaceState::spawnActor(const ActorData& data)
 
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
-        entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSpecular]));
-        entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleNeon]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
         entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[data.colourID]);
         entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
+
+        spawnTrail(entity, GameConst::PlayerColour::Light[data.colourID]);
 
         {
             auto shadowEnt = m_gameScene.createEntity();
             shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
             shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
-            shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleShadow]));
+            shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleShadow]));
             shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
             shadowEnt.addComponent<xy::Callback>().active = true;
             shadowEnt.getComponent<xy::Callback>().function =
@@ -893,7 +884,7 @@ void RaceState::spawnActor(const ActorData& data)
 
     case ActorID::Roid:
     {
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::RoidDiffuse]));
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidDiffuse]));
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         auto radius = bounds.width / 2.f;
         entity.getComponent<xy::Transform>().setOrigin(radius, radius);
@@ -908,7 +899,7 @@ void RaceState::spawnActor(const ActorData& data)
         auto cameraEntity = m_gameScene.getActiveCamera();
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Asteroid));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-        entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(TextureID::handles[TextureID::PlanetNormal]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
         entity.addComponent<Sprite3D>(m_matrixPool).depth = radius * data.scale;
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
@@ -917,7 +908,7 @@ void RaceState::spawnActor(const ActorData& data)
         auto shadowEnt = m_gameScene.createEntity();
         shadowEnt.addComponent<xy::Transform>().setPosition(sf::Vector2f(-18.f, 18.f));
         shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth - 1);
-        shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::RoidShadow]));
+        shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidShadow]));
         entity.getComponent<xy::Transform>().addChild(shadowEnt.getComponent<xy::Transform>());
     }
         break;
@@ -1086,7 +1077,7 @@ void RaceState::spawnTrail(xy::Entity parent, sf::Color colour)
     auto trailEnt = m_gameScene.createEntity();
     trailEnt.addComponent<xy::Transform>();
     trailEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
-    trailEnt.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleTrail]));
+    trailEnt.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleTrail]));
     trailEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Trail));
     trailEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     trailEnt.addComponent<Trail>().parent = parent;

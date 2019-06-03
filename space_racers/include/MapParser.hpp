@@ -85,7 +85,7 @@ public:
         return m_barriers;
     }
 
-    void renderLayers(std::array<sf::RenderTexture, 3u>&) const;
+    void renderLayers(std::array<sf::RenderTexture, 2u>&) const;
 
 private:
     xy::Scene& m_scene;

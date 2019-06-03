@@ -17,7 +17,6 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "SummaryState.hpp"
-#include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -93,7 +92,7 @@ void SummaryState::initScene()
 
     //if we stash this in shared resources it should remain loaded after the first time
     //this state is show and (I think!!) the resource manager is smart enough to know this
-    TextureID::handles[TextureID::Podium] = m_sharedData.resources.load<sf::Texture>("assets/images/podium.png");
+    m_textureIDs[TextureID::Menu::Podium] = m_sharedData.resources.load<sf::Texture>("assets/images/podium.png");
 
     auto view = getContext().defaultView;
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -119,7 +118,7 @@ void SummaryState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>().setDepth(-5);
-    entity.addComponent<xy::Sprite>(m_sharedData.resources.get<sf::Texture>(TextureID::handles[TextureID::Podium]));
+    entity.addComponent<xy::Sprite>(m_sharedData.resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Podium]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 

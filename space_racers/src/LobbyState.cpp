@@ -24,7 +24,6 @@ Copyright 2019 Matt Marchant
 #include "ServerPackets.hpp"
 #include "GameModes.hpp"
 #include "VehicleSystem.hpp"
-#include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
@@ -173,7 +172,7 @@ void LobbyState::loadResources()
         FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     }
 
-    TextureID::handles[TextureID::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select.png");
+    m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select.png");
 
     xy::SpriteSheet spriteSheet;
 
@@ -285,7 +284,7 @@ void LobbyState::buildMenu()
     //vehicle select buttons
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(400.f, xy::DefaultSceneSize.y - 136.f);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSelect]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
     entity.addComponent<xy::Drawable>();
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     bounds.height /= 3.f;
@@ -338,7 +337,7 @@ void LobbyState::buildMenu()
         //lap count buttons
         entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - 400.f, xy::DefaultSceneSize.y - 136.f);
-        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::VehicleSelect]));
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
         entity.addComponent<xy::Drawable>();
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         bounds.height /= 3.f;

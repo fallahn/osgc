@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "StateIDs.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -42,6 +43,7 @@ public:
 
 private:
     SharedData& m_sharedData;
+    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
 
     xy::Scene m_scene;
 

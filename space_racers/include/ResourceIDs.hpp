@@ -52,23 +52,31 @@ namespace FontID
 
 namespace TextureID
 {
-    enum
+    namespace Menu
     {
-        MainMenu, VehicleSelect, Podium,
-        Stars, StarsFar, StarsMid, StarsNear,
-        RoidDiffuse, PlanetDiffuse, PlanetNormal,
-        RoidShadow,
+        enum
+        {
+            MainMenu, VehicleSelect, Podium,
+            Stars, StarsFar, StarsMid, StarsNear,
+            PlanetDiffuse, PlanetNormal,
 
-        VehicleNormal, VehicleSpecular, VehicleNeon,
-        VehicleShadow, VehicleTrail,
+            Count
+        };
+    }
 
-        Temp01, Temp02,
+    namespace Game
+    {
+        enum
+        {
+            Stars, StarsFar, StarsMid, StarsNear,
+            RoidDiffuse, PlanetDiffuse, PlanetNormal,
+            RoidShadow,
+            VehicleNormal, VehicleSpecular, VehicleNeon,
+            VehicleShadow, VehicleTrail,
 
-        Count
-    };
-
-    //TODO tidy this up to limit texture IDs to correct scope(s)
-    static std::array<std::size_t, Count> handles = {};
+            Count
+        };
+    }
 }
 
 namespace SpriteID::Menu

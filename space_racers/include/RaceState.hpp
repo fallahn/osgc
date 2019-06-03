@@ -76,9 +76,10 @@ private:
     
     MapParser m_mapParser;
     xy::ResourceHolder m_resources;
+    std::array<std::size_t, TextureID::Game::Count> m_textureIDs;
 
     xy::ShaderResource m_shaders;
-    std::array<sf::RenderTexture, 3u> m_trackTextures;
+    std::array<sf::RenderTexture, 2u> m_trackTextures;
 
     MatrixPool m_matrixPool;
     std::array<xy::Sprite, SpriteID::Game::Count> m_sprites;

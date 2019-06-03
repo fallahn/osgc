@@ -65,6 +65,7 @@ private:
     sf::String* m_activeString;
 
     std::array<xy::Sprite, SpriteID::Menu::Count> m_sprites;
+    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
 
     void initScene();
     void loadResources();

@@ -124,8 +124,8 @@ namespace GameConst
         enum
         {
             Track,
-            Neon,
-            Normal
+            Normal,
+            Neon
         };
     }
     static const sf::Vector2u LargeBufferSize(1920, 1080);

@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include "StateIDs.hpp"
 #include "SharedPackets.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -28,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/System/Clock.hpp>
 
 #include <map>
+#include <array>
 
 struct LobbyData;
 class LobbyState final : public xy::State 
@@ -47,8 +49,8 @@ private:
 
     xy::Scene m_scene;
     xy::ResourceHandler m_resources;
-
-    /*std::map<std::uint64_t, PlayerInfo> m_playerInfo;*/
+    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
+    
 
     sf::Clock m_pingClock;
 

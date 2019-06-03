@@ -173,8 +173,8 @@ void MenuState::loadResources()
 {
     FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     
-    TextureID::handles[TextureID::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
-    TextureID::handles[TextureID::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
+    m_textureIDs[TextureID::Menu::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
+    m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/menu_buttons.spt", m_resources);
@@ -244,7 +244,7 @@ void MenuState::buildMenu()
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::BackgroundDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Stars]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Stars]));
 
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
 
@@ -257,7 +257,7 @@ void MenuState::buildMenu()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::MenuDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::MainMenu));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::MainMenu]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     auto& parentTx = entity.getComponent<xy::Transform>();
@@ -335,9 +335,6 @@ void MenuState::buildMenu()
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    //TODO choose host/join
-                    //requestStackClear();
-                    //requestStackPush(StateID::Lobby);
                     xy::Command cmd;
                     cmd.targetFlags = CommandID::Menu::RootNode;
                     cmd.action = [](xy::Entity e, float)
@@ -405,7 +402,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(xy::DefaultSceneSize.x, 0.f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::MenuDepth);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::MainMenu));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::MainMenu]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     auto & parentTx = entity.getComponent<xy::Transform>();
