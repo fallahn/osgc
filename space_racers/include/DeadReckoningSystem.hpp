@@ -27,6 +27,7 @@ struct DeadReckon final
     ActorUpdate update;
     bool hasUpdate = false;
     std::int32_t prevTimestamp = 0;
+    std::int32_t lastExtrapolatedTimestamp = 0;
 };
 
 class DeadReckoningSystem final : public xy::System
@@ -37,5 +38,5 @@ public:
     void process(float) override;
 
 private:
-    void collision(xy::Entity);
+
 };

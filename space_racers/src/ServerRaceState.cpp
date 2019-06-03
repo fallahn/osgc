@@ -266,6 +266,7 @@ void RaceState::netUpdate(float)
         au.velX = velocity.x;
         au.velY = velocity.y;
         au.timestamp = getServerTime();
+        au.lastInput = actor.getComponent<NetActor>().lastInput;
 
         m_sharedData.netHost.broadcastPacket(PacketID::ActorUpdate, au, xy::NetFlag::Unreliable);
     }

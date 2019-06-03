@@ -43,7 +43,9 @@ void NetActorSystem::process(float)
         }
         else
         {
-            actor.velocity = entity.getComponent<Vehicle>().velocity;
+            const auto& vehicle = entity.getComponent<Vehicle>();
+            actor.velocity = vehicle.velocity;
+            actor.lastInput = vehicle.history[vehicle.lastUpdatedInput].flags;
         }
     }
 }

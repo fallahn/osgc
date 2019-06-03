@@ -73,6 +73,7 @@ struct ActorUpdate final
     float rotation = 0.f;
     std::int32_t timestamp = 0;
     std::uint16_t serverID = 0;
+    std::uint16_t lastInput = 0;
 };
 
 //server state sent for reconciliation

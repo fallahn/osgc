@@ -25,7 +25,6 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "NetActor.hpp"
 #include "ActorIDs.hpp"
-#include "InterpolationSystem.hpp"
 #include "DeadReckoningSystem.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
@@ -246,7 +245,6 @@ void RaceState::initScene()
     m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
 
     m_gameScene.addSystem<VehicleSystem>(mb);
-    m_gameScene.addSystem<InterpolationSystem>(mb);
     m_gameScene.addSystem<DeadReckoningSystem>(mb);
     m_gameScene.addSystem<AsteroidSystem>(mb);
     m_gameScene.addSystem<LightningSystem>(mb);
@@ -265,7 +263,6 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::AudioSystem>(mb);
     
     m_gameScene.addDirector<VFXDirector>(m_sprites);
-    //m_gameScene.addPostProcess<xy::PostBloom>();
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -750,7 +747,6 @@ void RaceState::spawnActor(const ActorData& data)
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
     entity.getComponent<xy::Transform>().setRotation(data.rotation);
     entity.getComponent<xy::Transform>().setScale(data.scale, data.scale);
-    entity.addComponent<InterpolationComponent>();
     entity.addComponent<DeadReckon>().prevTimestamp = data.timestamp; //important, initial reckoning will be way off otherwise
     entity.addComponent<NetActor>().actorID = data.actorID;
     entity.getComponent<NetActor>().serverID = data.serverID;
@@ -770,6 +766,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);       
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);       
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+        entity.addComponent<Vehicle>().type = Vehicle::Car;
 
         goto Vehicle;
     }
@@ -780,6 +777,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * GameConst::VehicleCentreOffset, GameConst::BikeSize.height / 2.f);
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);       
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+        entity.addComponent<Vehicle>().type = Vehicle::Bike;
 
         goto Vehicle;
     }
@@ -790,6 +788,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * GameConst::VehicleCentreOffset, GameConst::ShipSize.height / 2.f);
         entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+        entity.addComponent<Vehicle>().type = Vehicle::Ship;
 
         goto Vehicle;
     }
@@ -801,8 +800,8 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<xy::Callback>().function = ScaleCallback();
         entity.addComponent<InverseRotation>();
 
-        //entity.addComponent<Vehicle>().colourID = data.colourID;
-        //TODO set up the vehicle properly so it can receive network updates
+        entity.getComponent<Vehicle>().colourID = data.colourID;
+        //TODO do vehicles want to be properly colliding as vehicles, or net actors?
 
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
@@ -879,13 +878,6 @@ void RaceState::updateActor(const ActorUpdate& update)
         auto& actor = e.getComponent<NetActor>();
         if (actor.serverID == update.serverID)
         {
-            //we still use interpolation for rotation
-            InterpolationPoint point;
-            //point.position = { update.x, update.y };
-            point.rotation = update.rotation;
-            point.timestamp = update.timestamp;
-            e.getComponent<InterpolationComponent>().setTarget(point);
-
             e.getComponent<DeadReckon>().update = update;
             e.getComponent<DeadReckon>().hasUpdate = true;
             actor.velocity = { update.velX, update.velY }; //this is used in client side collisions

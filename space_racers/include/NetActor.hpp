@@ -27,6 +27,7 @@ struct NetActor final
     std::int32_t actorID = 0;
     std::uint32_t colourID = 4;
     sf::Vector2f velocity;
+    std::uint16_t lastInput = 0;
 };
 
 class NetActorSystem final : public xy::System 
