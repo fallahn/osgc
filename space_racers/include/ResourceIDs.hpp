@@ -34,7 +34,8 @@ namespace ShaderID
         NeonBlend,
         NeonExtract,
         Vehicle,
-        Trail
+        Trail,
+        Stars
     };
 }
 

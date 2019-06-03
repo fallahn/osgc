@@ -61,6 +61,9 @@ source distribution.
 
 namespace
 {
+#include "MenuShader.inl"
+#include "GlobeShader.inl"
+
     const std::string AppName("space_racers");
     const std::string CfgName("settings.cfg");
 }
@@ -139,6 +142,11 @@ void MenuState::handleMessage(const xy::Message& msg)
 
 bool MenuState::update(float dt)
 {
+    static float currTime = 0.f;
+    currTime += dt;
+    m_shaders.get(ShaderID::Stars).setUniform("u_time", currTime / 100.f);
+    m_shaders.get(ShaderID::Globe).setUniform("u_time", currTime / 10.f);
+
     m_scene.update(dt);
     return true;
 }
@@ -175,6 +183,21 @@ void MenuState::loadResources()
     
     m_textureIDs[TextureID::Menu::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
     m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
+
+    m_textureIDs[TextureID::Menu::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
+    m_textureIDs[TextureID::Menu::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
+    m_textureIDs[TextureID::Menu::StarsNear] = m_resources.load<sf::Texture>("assets/images/stars_near.png");
+    m_textureIDs[TextureID::Menu::PlanetDiffuse] = m_resources.load<sf::Texture>("assets/images/globe_diffuse.png");
+    m_textureIDs[TextureID::Menu::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
+
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::StarsFar]).setRepeated(true);
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::StarsMid]).setRepeated(true);
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::StarsNear]).setRepeated(true);
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::PlanetDiffuse]).setRepeated(true);
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::PlanetNormal]).setRepeated(true);
+
+    m_shaders.preload(ShaderID::Stars, StarsFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/menu_buttons.spt", m_resources);
@@ -245,6 +268,46 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::BackgroundDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Stars]));
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::BackgroundDepth + 1);
+    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Stars));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_speed", 1.f);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::StarsFar]));
+    entity.getComponent<xy::Sprite>().setTextureRect({ sf::Vector2f(), xy::DefaultSceneSize });
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::BackgroundDepth + 2);
+    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Stars));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_speed", 2.f);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::StarsMid]));
+    entity.getComponent<xy::Sprite>().setTextureRect({ sf::Vector2f(), xy::DefaultSceneSize });
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::BackgroundDepth + 3);
+    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Stars));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_speed", 4.f);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::StarsNear]));
+    entity.getComponent<xy::Sprite>().setTextureRect({ sf::Vector2f(), xy::DefaultSceneSize });
+
+    //planet
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Globe));
+    entity.getComponent<xy::Drawable>().setDepth(MenuConst::MenuDepth - 1);
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::PlanetNormal]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::PlanetDiffuse]));
+
 
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
 

@@ -35,6 +35,7 @@ source distribution.
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 #include <array>
 
@@ -60,6 +61,7 @@ private:
     SharedData& m_sharedData;
     xy::Scene m_scene;
     xy::ResourceHolder m_resources;
+    xy::ShaderResource m_shaders;
     xy::ConfigFile m_settings;
 
     sf::String* m_activeString;
