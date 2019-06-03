@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include <atomic>
 #include <map>
 #include <memory>
+#include <string>
 
 namespace sv
 {
@@ -43,6 +44,7 @@ namespace sv
         //game info set in lobby
         LobbyData lobbyData;
         std::map<sf::Uint64, PlayerInfo> playerInfo;
+        std::string mapName;
     };
 
     class Server final

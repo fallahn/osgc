@@ -71,6 +71,7 @@ struct Vehicle final
     {
         Car, Bike, Ship
     }type = Car;
+    std::int32_t colourID = 0;
 
     enum State
     {

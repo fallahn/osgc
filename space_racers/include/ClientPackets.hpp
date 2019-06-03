@@ -26,7 +26,6 @@ struct LobbyData final
 {
     static constexpr std::uint8_t MaxPlayers = 4;
     std::uint8_t playerCount = 0;
-    std::uint8_t mapIndex = 0;
     std::uint8_t lapCount = 1;
     std::uint8_t gameMode = 0;
 };

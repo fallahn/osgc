@@ -61,6 +61,7 @@ private:
     void pollNetwork();
     void sendPlayerName();
     void receivePlayerName(const xy::NetEvent&);
+    void receiveMapName(const xy::NetEvent&);
     void refreshView();
     void updateLobbyData(const LobbyData&);
 };

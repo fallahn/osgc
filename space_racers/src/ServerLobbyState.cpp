@@ -39,13 +39,21 @@ namespace
 
 LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
-    m_nextState     (StateID::Lobby)
+    m_nextState     (StateID::Lobby),
+    m_mapIndex      (0)
 {
     for (auto& [id, player] : m_sharedData.playerInfo)
     {
         player.ready = false;
     }
     m_sharedData.lobbyData.playerCount = static_cast<std::uint8_t>(m_sharedData.clients.size());
+
+    m_mapNames = xy::FileSystem::listFiles(xy::FileSystem::getResourcePath() + "assets/maps");
+    m_mapNames.erase(std::remove_if(m_mapNames.begin(), m_mapNames.end(), 
+        [](const std::string& str)
+        {
+            return xy::FileSystem::getFileExtension(str) != ".tmx";
+        }), m_mapNames.end());
 }
 
 //public
@@ -83,6 +91,18 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
             {
                 m_sharedData.lobbyData.lapCount = std::min(std::uint8_t(m_sharedData.lobbyData.lapCount + 2), MaxLaps);
             }
+            m_sharedData.netHost.broadcastPacket(PacketID::LobbyData, m_sharedData.lobbyData, xy::NetFlag::Reliable);
+            break;
+        case PacketID::MapChanged:
+            if (packet.as<std::uint8_t>() == 0)
+            {
+                m_mapIndex = (m_mapIndex + (m_mapNames.size() - 1)) % m_mapNames.size();
+            }
+            else
+            {
+                m_mapIndex = (m_mapIndex + 1) % m_mapNames.size();
+            }
+            broadcastMapName();
             m_sharedData.netHost.broadcastPacket(PacketID::LobbyData, m_sharedData.lobbyData, xy::NetFlag::Reliable);
             break;
         case PacketID::LaunchGame:
@@ -146,6 +166,7 @@ std::int32_t LobbyState::logicUpdate(float)
     {
         broadcastNames();
         broadcastPlayerData();
+        broadcastMapName();
         m_broadcastClock.restart();
     }
 
@@ -205,4 +226,22 @@ void LobbyState::broadcastPlayerData() const
         m_sharedData.netHost.broadcastPacket(PacketID::DeliverPlayerData, data, xy::NetFlag::Reliable);
     }
     m_sharedData.netHost.broadcastPacket(PacketID::LobbyData, m_sharedData.lobbyData, xy::NetFlag::Reliable);
+}
+
+void LobbyState::broadcastMapName() const
+{
+    if (m_mapNames.empty())
+    {
+        m_sharedData.netHost.broadcastPacket(PacketID::ErrorServerGeneric, std::uint8_t(0), xy::NetFlag::Reliable);
+    }
+    else
+    {
+        auto size = std::min(NetConst::MaxNameSize, m_mapNames[m_mapIndex].size());
+        std::vector<char> buffer(size);
+
+        std::memcpy(buffer.data(), m_mapNames[m_mapIndex].data(), size);
+
+        m_sharedData.netHost.broadcastPacket(PacketID::DeliverMapName, buffer.data(), size, xy::NetFlag::Reliable);
+        m_sharedData.mapName = m_mapNames[m_mapIndex];
+    }
 }

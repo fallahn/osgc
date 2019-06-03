@@ -70,6 +70,8 @@ struct SharedData final
     sf::String ip = "127.0.0.1";
     sf::String name = "Player";
 
+    std::string mapName;
+
     std::map<std::uint64_t, PlayerInfo> playerInfo;
     std::array<std::uint64_t, 4u> racePositions = {};
 

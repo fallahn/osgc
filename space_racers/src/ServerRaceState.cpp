@@ -66,7 +66,6 @@ RaceState::RaceState(SharedData& sd, xy::MessageBus& mb)
         GameStart gs;
         gs.gameMode = GameMode::Race;
         gs.actorCount = sd.lobbyData.playerCount;
-        gs.mapIndex = sd.lobbyData.mapIndex;
 
         sd.netHost.broadcastPacket(PacketID::GameStarted, gs, xy::NetFlag::Reliable);
     }
@@ -381,7 +380,7 @@ void RaceState::initScene()
 bool RaceState::loadMap()
 {
     //load collision data from map
-    if (!m_mapParser.load("assets/maps/AceOfSpace.tmx"))
+    if (!m_mapParser.load("assets/maps/" + m_sharedData.mapName))
     {
         return false;
     }

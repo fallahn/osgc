@@ -172,7 +172,7 @@ void RaceState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == VehicleEvent::Respawned)
         {
-            spawnTrail(data.entity, GameConst::PlayerColour::Light[0]);
+            spawnTrail(data.entity, GameConst::PlayerColour::Light[data.entity.getComponent<Vehicle>().colourID]);
         }
     }
 
@@ -445,7 +445,7 @@ void RaceState::loadResources()
 
 void RaceState::buildWorld()
 {
-    if (!m_mapParser.load("assets/maps/AceOfSpace.tmx"))
+    if (!m_mapParser.load("assets/maps/" + m_sharedData.mapName))
     {
         m_sharedData.errorMessage = "Client was unable to load map";
         requestStackClear();
@@ -736,6 +736,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + data.vehicleType];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(data.vehicleType);
+    entity.getComponent<Vehicle>().colourID = data.colourID;
     //TODO we should probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
     entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount(); 
@@ -851,6 +852,9 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.addComponent<xy::Callback>().function = ScaleCallback();
         entity.addComponent<InverseRotation>();
+
+        //entity.addComponent<Vehicle>().colourID = data.colourID;
+        //TODO set up the vehicle properly so it can receive network updates
 
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");

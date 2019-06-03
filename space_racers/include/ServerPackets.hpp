@@ -39,7 +39,7 @@ struct PlayerIdent final
 struct GameStart final
 {
     std::uint8_t actorCount = 1; //so the client knows it has received all actor info
-    std::uint8_t mapIndex = 0;
+    //std::uint8_t mapIndex = 0;  //map name is sent to client via lobby
     std::uint8_t gameMode = 0;
 };
 

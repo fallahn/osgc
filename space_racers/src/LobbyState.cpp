@@ -332,7 +332,42 @@ void LobbyState::buildMenu()
 
     if (m_sharedData.hosting)
     {
-        //TODO map selection
+        //map selection
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - 400.f, xy::DefaultSceneSize.y - 236.f);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
+        entity.addComponent<xy::Drawable>();
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        bounds.height /= 3.f;
+        entity.getComponent<xy::Sprite>().setTextureRect(bounds);
+        entity.getComponent<xy::Transform>().move(-bounds.width, 0.f);
+
+        bounds.width /= 3.f;
+        auto buttonEnt = m_scene.createEntity();
+        entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
+        buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
+        buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            uiSystem.addMouseButtonCallback([&, entity](xy::Entity, sf::Uint64 flags)
+                {
+                    if (flags & xy::UISystem::LeftMouse)
+                    {
+                        m_sharedData.netClient->sendPacket(PacketID::MapChanged, std::uint8_t(0), xy::NetFlag::Reliable);
+                    }
+                });
+
+        buttonEnt = m_scene.createEntity();
+        entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
+        buttonEnt.getComponent<xy::Transform>().move(bounds.width * 2.f, 0.f);
+        buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
+        buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            uiSystem.addMouseButtonCallback([&, entity](xy::Entity, sf::Uint64 flags)
+                {
+                    if (flags & xy::UISystem::LeftMouse)
+                    {
+                        m_sharedData.netClient->sendPacket(PacketID::MapChanged, std::uint8_t(1), xy::NetFlag::Reliable);
+                    }
+                });
+
 
         //lap count buttons
         entity = m_scene.createEntity();
@@ -345,7 +380,7 @@ void LobbyState::buildMenu()
         entity.getComponent<xy::Transform>().move(-bounds.width, 0.f);
 
         bounds.width /= 3.f;
-        auto buttonEnt = m_scene.createEntity();
+        buttonEnt = m_scene.createEntity();
         entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
         buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
         buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -402,8 +437,17 @@ void LobbyState::pollNetwork()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::DeliverMapName:
+                receiveMapName(evt);
+                refreshView();
+                break;
             case PacketID::LobbyData:
                 updateLobbyData(packet.as<LobbyData>());
+                break;
+            case PacketID::ErrorServerGeneric:
+                m_sharedData.errorMessage = "No maps found on server.";
+                m_sharedData.netClient->disconnect();
+                requestStackPush(StateID::Error);
                 break;
             case PacketID::ErrorServerDisconnect:
                 m_sharedData.errorMessage = "Host Disconnected.";
@@ -413,6 +457,11 @@ void LobbyState::pollNetwork()
             case PacketID::ErrorServerFull:
                 m_sharedData.errorMessage = "Could not connect, server full";
                 m_sharedData.netClient->disconnect();
+                requestStackPush(StateID::Error);
+                break;
+            case PacketID::ErrorServerMap:
+                LOG("Server failed to load map - TODO report map index which failed", xy::Logger::Type::Error);
+                m_sharedData.errorMessage = "Server failed to load map";
                 requestStackPush(StateID::Error);
                 break;
             case PacketID::LeftLobby:
@@ -440,7 +489,6 @@ void LobbyState::pollNetwork()
             {
                 auto data = packet.as<GameStart>();
                 m_sharedData.gameData.actorCount = data.actorCount;
-                m_sharedData.gameData.mapIndex = data.mapIndex;
 
                 switch (data.gameMode)
                 {
@@ -452,11 +500,7 @@ void LobbyState::pollNetwork()
                 }
             }
             break;
-            case PacketID::ErrorServerMap:
-                LOG("Server failed to load map - TODO report map index which failed", xy::Logger::Type::Error);
-                m_sharedData.errorMessage = "Server failed to load map";
-                requestStackPush(StateID::Error);
-                break;
+
             }
         }
     }
@@ -482,6 +526,14 @@ void LobbyState::receivePlayerName(const xy::NetEvent& evt)
     std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(peerID), size);
 
     m_sharedData.playerInfo[peerID].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+}
+
+void LobbyState::receiveMapName(const xy::NetEvent& evt)
+{
+    std::string str;
+    str.resize(evt.packet.getSize());
+    std::memcpy(str.data(), evt.packet.getData(), evt.packet.getSize());
+    m_sharedData.mapName = str;
 }
 
 void LobbyState::refreshView()
@@ -522,10 +574,10 @@ void LobbyState::updateLobbyData(const LobbyData& data)
 {
     xy::Command cmd;
     cmd.targetFlags = CommandID::Lobby::LobbyText;
-    cmd.action = [data](xy::Entity e, float)
+    cmd.action = [&, data](xy::Entity e, float)
     {
         std::string str("Lobby Info\n");
-        str += "Map :" + std::to_string(data.mapIndex) + "\n"; //TODO look up map names
+        str += "Map :" + m_sharedData.mapName + "\n";
         str += "Laps: " + std::to_string(data.lapCount) + "\n";
         str += "Mode: " + std::to_string(data.gameMode) + "\n"; //TODO look up mode names
         e.getComponent<xy::Text>().setString(str);

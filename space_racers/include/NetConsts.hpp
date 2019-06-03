@@ -38,10 +38,12 @@ namespace PacketID
         LeftLobby, //peer ID of player who left the lobby
         ReadyStateToggled, //0 if not ready, 1 if ready (uint8)
         LapCountChanged, //decrease if 0, else increase (uint8)
+        MapChanged, //decrease index if 0, else increase (uint8)
         VehicleChanged, //client has changed vehicle
         RequestPlayerName, //lobby wants the player's name
         DeliverPlayerData, //server is sending other player data to clients
         DeliverPlayerName, //server is sending name of particular player
+        DeliverMapName, //lobby is sending map name
         NameString, //packet is utf32 coded name string from client
         LaunchGame, //lobby host has indicated they wish to start
         GameStarted, //sends a GameStarted packet

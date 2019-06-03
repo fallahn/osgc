@@ -42,9 +42,13 @@ namespace sv
 
         sf::Clock m_broadcastClock;
 
+        std::vector<std::string> m_mapNames;
+        std::size_t m_mapIndex;
+
         void startGame();
         void setClientName(const xy::NetEvent&);
         void broadcastNames() const;
         void broadcastPlayerData() const;
+        void broadcastMapName() const;
     };
 }
