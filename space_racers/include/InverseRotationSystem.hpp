@@ -22,14 +22,53 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "FastTrig.hpp"
+
 #include <xyginext/ecs/System.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 
-#include <SFML/Graphics/Transform.hpp>
+//uses the fast trig sin/cos lookup table
+class Transform final
+{
+public:
+    Transform()
+    {
+        m_matrix[0] = 1.f; m_matrix[4] = 0.f; m_matrix[8] = 0.f; m_matrix[12] = 0.f;
+        m_matrix[1] = 0.f; m_matrix[5] = 1.f; m_matrix[9] = 0.f; m_matrix[13] = 0.f;
+        m_matrix[2] = 0.f; m_matrix[6] = 0.f; m_matrix[10] = 1.f; m_matrix[14] = 0.f;
+        m_matrix[3] = 0.f; m_matrix[7] = 0.f; m_matrix[11] = 0.f; m_matrix[15] = 1.f;
+    }
+
+    Transform(float a00, float a01, float a02,
+              float a10, float a11, float a12,
+              float a20, float a21, float a22)
+    {
+        m_matrix[0] = a00; m_matrix[4] = a01; m_matrix[8] = 0.f; m_matrix[12] = a02;
+        m_matrix[1] = a10; m_matrix[5] = a11; m_matrix[9] = 0.f; m_matrix[13] = a12;
+        m_matrix[2] = 0.f; m_matrix[6] = 0.f; m_matrix[10] = 1.f; m_matrix[14] = 0.f;
+        m_matrix[3] = a20; m_matrix[7] = a21; m_matrix[11] = 0.f; m_matrix[15] = a22;
+    }
+
+    void setRotation(float angle)
+    {
+        float rad = angle * 3.141592654f / 180.f;
+        float cos = ft::cos(rad);
+        float sin = ft::sin(rad);
+
+        *this = Transform(cos, -sin, 0.f,
+                          sin, cos, 0.f,
+                          0.f, 0.f, 1.f);
+    }
+
+    const float* getMatrix() const { return m_matrix.data(); }
+
+private:
+    std::array<float, 16u> m_matrix;
+};
 
 struct InverseRotation final
 {
-    sf::Transform matrix;
+    Transform matrix;
 };
 
 class InverseRotationSystem final : public xy::System 
@@ -40,6 +79,8 @@ public:
     {
         requireComponent<xy::Transform>();
         requireComponent<InverseRotation>();
+
+        ft::init();
     }
 
     void process(float)
@@ -47,10 +88,7 @@ public:
         auto& entities = getEntities();
         for (auto entity : entities)
         {
-            sf::Transform tx;
-            tx.rotate(-entity.getComponent<xy::Transform>().getRotation());
-
-            entity.getComponent<InverseRotation>().matrix = tx;
+            entity.getComponent<InverseRotation>().matrix.setRotation(-entity.getComponent<xy::Transform>().getRotation());
         }
     }
 };
