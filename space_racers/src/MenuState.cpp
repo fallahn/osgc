@@ -79,6 +79,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     launchLoadingScreen();
 
     //make sure any previous sessions are tidied up
+    m_sharedData.playerInfo.clear();
     if (sd.netClient)
     {
         sd.netClient->disconnect();

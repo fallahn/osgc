@@ -98,6 +98,7 @@ void RaceState::handleMessage(const xy::Message& msg)
             {
                 tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
                 tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
+                auto& wp = vehicle.currentWaypoint.getComponent<WayPoint>();
             }
             else
             {
@@ -108,7 +109,7 @@ void RaceState::handleMessage(const xy::Message& msg)
 
             VehicleData data; //TODO specialise this packet to include rotation?
             data.x = tx.getPosition().x;
-            data.x = tx.getPosition().y;
+            data.y = tx.getPosition().y;
             data.serverID = entity.getIndex();
 
             m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, data, xy::NetFlag::Reliable);

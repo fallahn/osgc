@@ -235,6 +235,7 @@ bool MapParser::load(const std::string& path)
                                     entity.getComponent<xy::BroadphaseComponent>().setArea({ -bounds.width / 2.f, -bounds.height / 2.f, bounds.width, bounds.height });
                                     entity.addComponent<WayPoint>().id = id;
                                     entity.getComponent<WayPoint>().nextPoint = entity.getComponent<xy::Transform>().getPosition(); //this is correctly processed below
+
                                     if (result != properties.end())
                                     {
                                         if (result->getType() == tmx::Property::Type::Float)
@@ -335,7 +336,7 @@ bool MapParser::load(const std::string& path)
 
             waypoints[i]->nextPoint = waypoints[i + 1]->nextPoint - waypoints[i]->nextPoint;
             waypoints[i]->distance = xy::Util::Vector::length(waypoints[i]->nextPoint);
-            waypoints[i]->nextPoint /= waypoints[i]->distance;            
+            waypoints[i]->nextPoint /= waypoints[i]->distance;
         }
         waypoints.back()->nextPoint = m_startPosition - waypoints.back()->nextPoint;
         waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);

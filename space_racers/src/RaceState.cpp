@@ -684,7 +684,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     entity.getComponent<Vehicle>().colourID = data.colourID;
     //TODO we should probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
-    entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount(); 
+    entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.getComponent<Vehicle>().client = true;
     entity.addComponent<std::int32_t>() = data.serverID;
 
@@ -801,6 +801,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<InverseRotation>();
 
         entity.getComponent<Vehicle>().colourID = data.colourID;
+        entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
         //TODO do vehicles want to be properly colliding as vehicles, or net actors?
 
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));

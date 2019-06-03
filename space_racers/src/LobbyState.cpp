@@ -577,7 +577,7 @@ void LobbyState::updateLobbyData(const LobbyData& data)
     cmd.action = [&, data](xy::Entity e, float)
     {
         std::string str("Lobby Info\n");
-        str += "Map :" + m_sharedData.mapName + "\n";
+        str += "Map: " + m_sharedData.mapName + "\n";
         str += "Laps: " + std::to_string(data.lapCount) + "\n";
         str += "Mode: " + std::to_string(data.gameMode) + "\n"; //TODO look up mode names
         e.getComponent<xy::Text>().setString(str);
