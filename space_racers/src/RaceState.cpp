@@ -100,6 +100,15 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     buildTest();
 
+    if (sd.useBloom)
+    {
+        render = std::bind(&RaceState::renderFancy, this);
+    }
+    else
+    {
+        render = std::bind(&RaceState::renderPlain, this);
+    }
+
     quitLoadingScreen();
 }
 
@@ -220,67 +229,7 @@ bool RaceState::update(float dt)
 
 void RaceState::draw()
 {
-    //draw the background first for distort effect
-    m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
-    m_backgroundBuffer.clear();
-    m_backgroundBuffer.draw(m_backgroundSprite);
-    m_backgroundBuffer.draw(m_backgroundScene);
-    m_backgroundBuffer.display();
-
-#ifndef LO_SPEC
-    //normal map for distortion of background
-    m_normalBuffer.clear({ 127,127,255 });
-    m_normalBuffer.draw(m_normalSprite);
-    m_normalBuffer.display();
-
-    //draws the full scene including distorted background
-    m_gameSceneBuffer.clear();
-    m_gameSceneBuffer.draw(m_gameScene);
-    m_gameSceneBuffer.display();
-
-    //extract the brightest points to the neon buffer
-    auto& extractShader = m_shaders.get(ShaderID::NeonExtract);
-    m_neonSprite.setTexture(m_gameSceneBuffer.getTexture(), true);
-    m_neonBuffer.setView(m_gameSceneBuffer.getDefaultView());
-    m_neonBuffer.clear(sf::Color::Transparent);
-    m_neonBuffer.draw(m_neonSprite, &extractShader);
-    m_neonBuffer.display();
-
-    //blur passs
-    auto& blurShader = m_shaders.get(ShaderID::Blur);
-    blurShader.setUniform("u_texture", m_neonBuffer.getTexture());
-    blurShader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f));
-    m_neonSprite.setTexture(m_neonBuffer.getTexture(), true);
-    m_blurBuffer.clear(sf::Color::Transparent);
-    m_blurBuffer.draw(m_neonSprite, &blurShader);
-    m_blurBuffer.display();
-
-    blurShader.setUniform("u_texture", m_blurBuffer.getTexture());
-    blurShader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y));
-    m_neonSprite.setTexture(m_blurBuffer.getTexture(), true);
-    m_neonBuffer.setView(m_neonBuffer.getDefaultView());
-    m_neonBuffer.clear(sf::Color::Transparent);
-    m_neonBuffer.draw(m_neonSprite, &blurShader);
-    m_neonBuffer.display();
-
-    //render blended output to window
-    auto& blendShader = m_shaders.get(ShaderID::NeonBlend);
-    //blendShader.setUniform("u_sceneTexture", m_gameSceneBuffer.getTexture());
-    //blendShader.setUniform("u_neonTexture", m_neonBuffer.getTexture());
-
-    auto& rw = getContext().renderWindow;
-    rw.setView(getContext().defaultView);
-    rw.draw(m_gameSceneSprite, &blendShader);
-#else
-    m_gameSceneBuffer.clear();
-    m_gameSceneBuffer.draw(m_gameScene);
-    m_gameSceneBuffer.display();
-
-    auto& rw = getContext().renderWindow;
-    rw.setView(getContext().defaultView);
-    rw.draw(m_gameSceneSprite);
-#endif //LO_SPEC
-    rw.draw(m_uiScene);
+    render();
 }
 
 //private
@@ -439,8 +388,6 @@ void RaceState::loadResources()
     m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
 
     m_uiSounds.loadFromFile("assets/sound/ui.xas");
-
-
 }
 
 void RaceState::buildWorld()
@@ -487,11 +434,12 @@ void RaceState::buildWorld()
     backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
     backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
     backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-#ifndef LO_SPEC
-    backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
-    backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_normalBuffer.getTexture());
-    backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-#endif
+    if (m_sharedData.useBloom)
+    {
+        backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
+        backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_normalBuffer.getTexture());
+        backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    }
     backgroundEnt.addComponent<xy::Sprite>(m_backgroundBuffer.getTexture());
     camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
 
@@ -1093,4 +1041,80 @@ void RaceState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
 {
     m_sharedData.loadingScreen.update(dt);
     rw.draw(m_sharedData.loadingScreen);
+}
+
+void RaceState::renderFancy()
+{
+    //draw the background first for distort effect
+    m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
+    m_backgroundBuffer.clear();
+    m_backgroundBuffer.draw(m_backgroundSprite);
+    m_backgroundBuffer.draw(m_backgroundScene);
+    m_backgroundBuffer.display();
+
+    //normal map for distortion of background
+    m_normalBuffer.clear({ 127,127,255 });
+    m_normalBuffer.draw(m_normalSprite);
+    m_normalBuffer.display();
+
+    //draws the full scene including distorted background
+    m_gameSceneBuffer.clear();
+    m_gameSceneBuffer.draw(m_gameScene);
+    m_gameSceneBuffer.display();
+
+    //extract the brightest points to the neon buffer
+    auto& extractShader = m_shaders.get(ShaderID::NeonExtract);
+    m_neonSprite.setTexture(m_gameSceneBuffer.getTexture(), true);
+    m_neonBuffer.setView(m_gameSceneBuffer.getDefaultView());
+    m_neonBuffer.clear(sf::Color::Transparent);
+    m_neonBuffer.draw(m_neonSprite, &extractShader);
+    m_neonBuffer.display();
+
+    //blur passs
+    auto& blurShader = m_shaders.get(ShaderID::Blur);
+    blurShader.setUniform("u_texture", m_neonBuffer.getTexture());
+    blurShader.setUniform("u_offset", sf::Vector2f(1.f / GameConst::SmallBufferSize.x, 0.f));
+    m_neonSprite.setTexture(m_neonBuffer.getTexture(), true);
+    m_blurBuffer.clear(sf::Color::Transparent);
+    m_blurBuffer.draw(m_neonSprite, &blurShader);
+    m_blurBuffer.display();
+
+    blurShader.setUniform("u_texture", m_blurBuffer.getTexture());
+    blurShader.setUniform("u_offset", sf::Vector2f(0.f, 1.f / GameConst::SmallBufferSize.y));
+    m_neonSprite.setTexture(m_blurBuffer.getTexture(), true);
+    m_neonBuffer.setView(m_neonBuffer.getDefaultView());
+    m_neonBuffer.clear(sf::Color::Transparent);
+    m_neonBuffer.draw(m_neonSprite, &blurShader);
+    m_neonBuffer.display();
+
+    //render blended output to window
+    auto& blendShader = m_shaders.get(ShaderID::NeonBlend);
+    //blendShader.setUniform("u_sceneTexture", m_gameSceneBuffer.getTexture());
+    //blendShader.setUniform("u_neonTexture", m_neonBuffer.getTexture());
+
+    auto& rw = getContext().renderWindow;
+    rw.setView(getContext().defaultView);
+    rw.draw(m_gameSceneSprite, &blendShader);
+
+    rw.draw(m_uiScene);
+}
+
+void RaceState::renderPlain()
+{
+    //draw the background first for distort effect
+    m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
+    m_backgroundBuffer.clear();
+    m_backgroundBuffer.draw(m_backgroundSprite);
+    m_backgroundBuffer.draw(m_backgroundScene);
+    m_backgroundBuffer.display();
+
+    m_gameSceneBuffer.clear();
+    m_gameSceneBuffer.draw(m_gameScene);
+    m_gameSceneBuffer.display();
+
+    auto& rw = getContext().renderWindow;
+    rw.setView(getContext().defaultView);
+    rw.draw(m_gameSceneSprite);
+
+    rw.draw(m_uiScene);
 }

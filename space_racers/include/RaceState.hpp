@@ -113,4 +113,8 @@ private:
     void spawnTrail(xy::Entity, sf::Color);
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
+
+    std::function<void()> render;
+    void renderFancy();
+    void renderPlain();
 };
