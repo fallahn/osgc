@@ -64,4 +64,6 @@ private:
     void receiveMapName(const xy::NetEvent&);
     void refreshView();
     void updateLobbyData(const LobbyData&);
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

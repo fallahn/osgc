@@ -111,4 +111,6 @@ private:
 
     void showTimer();
     void spawnTrail(xy::Entity, sf::Color);
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

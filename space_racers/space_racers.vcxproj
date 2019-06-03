@@ -166,6 +166,7 @@
     <ClInclude Include="include\InterpolationSystem.hpp" />
     <ClInclude Include="include\InverseRotationSystem.hpp" />
     <ClInclude Include="include\LightningSystem.hpp" />
+    <ClInclude Include="include\LoadingScreen.hpp" />
     <ClInclude Include="include\LobbyState.hpp" />
     <ClInclude Include="include\LocalEliminationState.hpp" />
     <ClInclude Include="include\LocalRaceState.hpp" />
@@ -213,6 +214,7 @@
     <ClCompile Include="src\InterpolationComponent.cpp" />
     <ClCompile Include="src\InterpolationSystem.cpp" />
     <ClCompile Include="src\LightningSystem.cpp" />
+    <ClCompile Include="src\LoadingScreen.cpp" />
     <ClCompile Include="src\LobbyState.cpp" />
     <ClCompile Include="src\LocalEliminationState.cpp" />
     <ClCompile Include="src\LocalRaceState.cpp" />

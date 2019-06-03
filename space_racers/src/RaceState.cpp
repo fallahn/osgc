@@ -1088,3 +1088,9 @@ void RaceState::spawnTrail(xy::Entity parent, sf::Color colour)
     trailEnt.getComponent<Trail>().colour = colour;
     trailEnt.addComponent<xy::CommandTarget>().ID = CommandID::Game::Trail;
 }
+
+void RaceState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
+}

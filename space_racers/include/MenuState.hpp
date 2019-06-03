@@ -77,4 +77,6 @@ private:
     void buildLocalPlayMenu(xy::Entity, sf::Uint32, sf::Uint32);
 
     void updateTextInput(const sf::Event&);
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

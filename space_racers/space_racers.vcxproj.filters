@@ -207,6 +207,9 @@
     <ClInclude Include="include\TimeTrialState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\LoadingScreen.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -307,6 +310,9 @@
     </ClCompile>
     <ClCompile Include="src\TimeTrialState.cpp">
       <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LoadingScreen.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

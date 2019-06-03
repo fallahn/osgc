@@ -758,3 +758,9 @@ void MenuState::updateTextInput(const sf::Event& evt)
         }
     }
 }
+
+void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
+}

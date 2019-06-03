@@ -30,6 +30,7 @@ source distribution.
 
 #include "InputBinding.hpp"
 #include "Server.hpp"
+#include "LoadingScreen.hpp"
 
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/network/NetClient.hpp>
@@ -62,6 +63,8 @@ struct GameData final
 class ClientLauncher;
 struct SharedData final
 {
+    LoadingScreen loadingScreen;
+
     xy::ResourceHandler resources;
     std::array<InputBinding, 4u> inputBindings;
     

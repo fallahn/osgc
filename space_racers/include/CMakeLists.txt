@@ -21,6 +21,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InverseRotationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LightningSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LobbyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LocalEliminationState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LocalRaceState.hpp

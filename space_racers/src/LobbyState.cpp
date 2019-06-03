@@ -584,3 +584,9 @@ void LobbyState::updateLobbyData(const LobbyData& data)
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
+
+void LobbyState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
+}
