@@ -32,30 +32,114 @@
    eJztl1kPgyAMgPmLux52ZHNHdmfXi/v5w2REUmttqeCW+CWNCSJ8QgE1pmRo6hkR91IwsDEj7s9tjBO5QJrcHCGO1JxAsDmamtLtQDx7/14LxwWzP+57O1LOEeX2Rsr894/tKB03SExHP180SPIoBCqXe9JzZNR5RHaYRG5fS+9XwskXCOa3tLHyIlM4aXF+sfM8lDbn98ksk9B2/vm5kbXQXqjf2sYGlGHfILBsa2Mn6EczfidTdaTGr3C7CvvQzu9ZUPcS0P4/789uP9WuwZ7uuXUtwKBY/y+k/Bfyr2lvgo4pnaGbfzbsFe26ZzX/RXXjhp0NGLmpfo/5Zwd3nHOBm9SxDrfm7mQtHO5ZKDm/2gRbp44P/3Utpw==
   </data>
  </layer>
- <objectgroup color="#00aa00" id="5" name="Waypoints" locked="1">
-  <object id="1" name="00" x="24" y="1804" width="592" height="96"/>
-  <object id="2" name="01" x="176" y="1036" width="416" height="92"/>
-  <object id="3" name="02" x="188" y="212" width="444" height="444"/>
-  <object id="4" name="03" x="852" y="40" width="100" height="592"/>
-  <object id="5" name="04" x="1168" y="228" width="436" height="424"/>
-  <object id="6" name="05" x="1184" y="1372" width="568" height="96"/>
-  <object id="7" name="06" x="1280" y="2036" width="512" height="532"/>
-  <object id="8" name="07" x="2140" y="2088" width="120" height="588"/>
-  <object id="9" name="08" x="2544" y="2020" width="556" height="568"/>
-  <object id="10" name="09" x="2604" y="1476" width="548" height="120"/>
-  <object id="11" name="10" x="2792" y="552" width="424" height="396"/>
-  <object id="12" name="11" x="3748" y="288" width="132" height="592"/>
-  <object id="13" name="12" x="4444" y="492" width="444" height="424"/>
-  <object id="14" name="13" x="4516" y="1604" width="433" height="87"/>
-  <object id="15" name="14" x="4524" y="2500" width="450" height="99"/>
-  <object id="16" name="15" x="4324" y="3304" width="428" height="436"/>
-  <object id="17" name="16" x="3500" y="3516" width="92" height="532"/>
-  <object id="18" name="17" x="2450" y="3210" width="91" height="812"/>
-  <object id="19" name="18" x="1564" y="3636" width="92" height="288"/>
-  <object id="20" name="19" x="152" y="3420" width="500" height="496"/>
-  <object id="21" name="20" x="40" y="2580" width="388" height="88"/>
+ <objectgroup color="#00aa00" id="5" name="Waypoints">
+  <object id="1" name="00" x="24" y="1804" width="592" height="96">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="2" name="01" x="176" y="1036" width="416" height="92">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="3" name="02" x="188" y="212" width="444" height="444">
+   <properties>
+    <property name="rotation" type="float" value="-45"/>
+   </properties>
+  </object>
+  <object id="4" name="03" x="852" y="40" width="100" height="592">
+   <properties>
+    <property name="rotation" type="float" value="0"/>
+   </properties>
+  </object>
+  <object id="5" name="04" x="1168" y="228" width="436" height="424">
+   <properties>
+    <property name="rotation" type="float" value="45"/>
+   </properties>
+  </object>
+  <object id="6" name="05" x="1184" y="1372" width="568" height="96">
+   <properties>
+    <property name="rotation" type="float" value="90"/>
+   </properties>
+  </object>
+  <object id="7" name="06" x="1280" y="2036" width="512" height="532">
+   <properties>
+    <property name="rotation" type="float" value="45"/>
+   </properties>
+  </object>
+  <object id="8" name="07" x="2140" y="2088" width="120" height="588">
+   <properties>
+    <property name="rotation" type="float" value="0"/>
+   </properties>
+  </object>
+  <object id="9" name="08" x="2544" y="2020" width="556" height="568">
+   <properties>
+    <property name="rotation" type="float" value="-45"/>
+   </properties>
+  </object>
+  <object id="10" name="09" x="2604" y="1476" width="548" height="120">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
+  <object id="11" name="10" x="2792" y="552" width="424" height="396">
+   <properties>
+    <property name="rotation" type="float" value="-45"/>
+   </properties>
+  </object>
+  <object id="12" name="11" x="3748" y="288" width="132" height="592">
+   <properties>
+    <property name="rotation" type="float" value="0"/>
+   </properties>
+  </object>
+  <object id="13" name="12" x="4444" y="492" width="444" height="424">
+   <properties>
+    <property name="rotation" type="float" value="45"/>
+   </properties>
+  </object>
+  <object id="14" name="13" x="4516" y="1604" width="433" height="87">
+   <properties>
+    <property name="rotation" type="float" value="90"/>
+   </properties>
+  </object>
+  <object id="15" name="14" x="4524" y="2500" width="450" height="99">
+   <properties>
+    <property name="rotation" type="float" value="90"/>
+   </properties>
+  </object>
+  <object id="16" name="15" x="4324" y="3304" width="428" height="436">
+   <properties>
+    <property name="rotation" type="float" value="135"/>
+   </properties>
+  </object>
+  <object id="17" name="16" x="3500" y="3516" width="92" height="532">
+   <properties>
+    <property name="rotation" type="float" value="180"/>
+   </properties>
+  </object>
+  <object id="18" name="17" x="2450" y="3210" width="91" height="812">
+   <properties>
+    <property name="rotation" type="float" value="180"/>
+   </properties>
+  </object>
+  <object id="19" name="18" x="1564" y="3636" width="92" height="288">
+   <properties>
+    <property name="rotation" type="float" value="180"/>
+   </properties>
+  </object>
+  <object id="20" name="19" x="152" y="3420" width="500" height="496">
+   <properties>
+    <property name="rotation" type="float" value="-135"/>
+   </properties>
+  </object>
+  <object id="21" name="20" x="40" y="2580" width="388" height="88">
+   <properties>
+    <property name="rotation" type="float" value="-90"/>
+   </properties>
+  </object>
  </objectgroup>
- <objectgroup color="#000000" id="6" name="Space" locked="1">
+ <objectgroup color="#000000" id="6" name="Space" visible="0" locked="1">
   <object id="22" x="600" y="712">
    <polygon points="0,0 104,-104 476,-112 588,-12 576,1660 836,1928 2268,1956 2560,1664 2576,256 2676,148 3788,152 3912,260 3908,2404 3536,2768 1624,2771 1500,2904 753,2907 620,2771 124,2768 12,2652 7,2153 -135,2032 -124,1412 4,1272"/>
   </object>
@@ -66,7 +150,7 @@
    <polygon points="0,0 -231,24 -239,993 -111,1117 -108,1276 -888,2056 -2968,2060 -3097,1923 -3841,1920 -3986,2059 -4752,2052 -5164,1652 -5168,24 -5292,16 -5320,2308 20,2312"/>
   </object>
  </objectgroup>
- <objectgroup color="#ff0000" id="7" name="KillZone">
+ <objectgroup color="#ff0000" id="7" name="KillZone" visible="0" locked="1">
   <object id="25" x="5408" y="-248">
    <polygon points="0,0 -144,4544 80,4552 224,-8"/>
   </object>
@@ -119,7 +203,7 @@
   <object id="104" x="1152" y="2752" width="2112" height="480"/>
   <object id="105" x="2624" y="3264" width="1472" height="96"/>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision">
+ <objectgroup color="#ffff00" id="8" name="Collision" visible="0" locked="1">
   <object id="36" x="2434" y="3716" width="125" height="125"/>
   <object id="38" x="1174" y="768" width="76" height="1483"/>
   <object id="39" x="5022" y="3228" width="70" height="72"/>
@@ -133,7 +217,7 @@
   <object id="54" x="2" y="754" width="60" height="76"/>
   <object id="55" x="574" y="750" width="74" height="88"/>
  </objectgroup>
- <objectgroup color="#ffffff" id="9" name="Jump" locked="1">
+ <objectgroup color="#ffffff" id="9" name="Jump" visible="0" locked="1">
   <object id="57" x="128" y="1796" width="380" height="112"/>
   <object id="58" x="264" y="1280" width="112" height="120"/>
   <object id="59" x="392" y="388" width="124" height="116"/>
@@ -165,7 +249,7 @@
   <object id="85" x="268" y="2828" width="100" height="104"/>
   <object id="86" x="260" y="2564" width="120" height="120"/>
  </objectgroup>
- <objectgroup id="10" name="Fence" locked="1">
+ <objectgroup id="10" name="Fence" visible="0" locked="1">
   <object id="87" x="1887" y="2111">
    <polyline points="0,0 583,3"/>
   </object>
