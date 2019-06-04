@@ -46,6 +46,7 @@ struct GameStart final
 struct VehicleData final
 {
     float x = 0.f; float y = 0.f; //initial position
+    float rotation = 0.f;
     std::int32_t serverID = 0;
     std::uint8_t vehicleType = 0;
     std::uint8_t colourID = 0; //index into colour array

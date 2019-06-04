@@ -308,33 +308,36 @@ void RaceState::loadResources()
         return;
     }
 
-    if (!m_normalBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
+    if (m_sharedData.useBloom)
     {
-        m_sharedData.errorMessage = "Failed to create normal buffer";
-        requestStackPush(StateID::Error);
-        return;
-    }
-    else
-    {
-        m_normalBuffer.setSmooth(true);
-    }
-    
-    if (!m_neonBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
-    {
-        m_sharedData.errorMessage = "Failed to create neon buffer";
-        requestStackPush(StateID::Error);
-        return;
-    }
-    else
-    {
-        m_neonBuffer.setSmooth(true);
-    }
+        if (!m_normalBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
+        {
+            m_sharedData.errorMessage = "Failed to create normal buffer";
+            requestStackPush(StateID::Error);
+            return;
+        }
+        else
+        {
+            m_normalBuffer.setSmooth(true);
+        }
 
-    if (!m_blurBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
-    {
-        m_sharedData.errorMessage = "Failed to create blur buffer";
-        requestStackPush(StateID::Error);
-        return;
+        if (!m_neonBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
+        {
+            m_sharedData.errorMessage = "Failed to create neon buffer";
+            requestStackPush(StateID::Error);
+            return;
+        }
+        else
+        {
+            m_neonBuffer.setSmooth(true);
+        }
+
+        if (!m_blurBuffer.create(GameConst::SmallBufferSize.x, GameConst::SmallBufferSize.y))
+        {
+            m_sharedData.errorMessage = "Failed to create blur buffer";
+            requestStackPush(StateID::Error);
+            return;
+        }
     }
 
     if (!m_gameSceneBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
@@ -404,7 +407,7 @@ void RaceState::buildWorld()
     bounds.width += 2000.f;
     bounds.height += 2000.f;
     m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
-    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
+    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
 
     m_mapParser.renderLayers(m_trackTextures);
     m_normalSprite.setTexture(m_trackTextures[GameConst::TrackLayer::Normal].getTexture(), true);
@@ -543,7 +546,7 @@ void RaceState::buildTest()
     m_resources.get<sf::Texture>(temp).setSmooth(true);
     
     auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
     entity.addComponent<xy::Drawable>().setDepth(1000);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
@@ -670,6 +673,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     //spawn vehicle
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(data.x, data.y);
+    entity.getComponent<xy::Transform>().setRotation(data.rotation);
     entity.addComponent<InverseRotation>();
     entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);

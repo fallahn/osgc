@@ -342,6 +342,8 @@ bool MapParser::load(const std::string& path)
         waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);
         waypoints.back()->nextPoint /= waypoints.back()->distance;
 
+        m_startRotation = waypoints.front()->rotation;
+
         //make sure we found all the image layers
         for (auto l : m_layers)
         {

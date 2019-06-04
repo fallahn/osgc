@@ -50,6 +50,18 @@ DeadReckoningSystem::DeadReckoningSystem(xy::MessageBus& mb)
 //public
 void DeadReckoningSystem::process(float dt)
 {
+    auto updateInput = [](Vehicle& vehicle, DeadReckon& dr)
+    {
+        Input input;
+        input.flags = dr.update.lastInput;
+        input.timestamp = dr.lastExtrapolatedTimestamp;
+        //shame we don't have analogue multipliers...
+        //we'll either have to see what bw we have or split roid/vehicle updates to different packets
+
+        vehicle.history[vehicle.currentInput] = input;
+        vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
+    };
+
     auto& entities = getEntities();
     for (auto entity : entities)
     {
@@ -87,14 +99,7 @@ void DeadReckoningSystem::process(float dt)
                 dr.lastExtrapolatedTimestamp = dr.update.timestamp + (dr.update.timestamp - dr.prevTimestamp);
 
                 //apply input - TODO pop this in a func so we don't repeat code below
-                Input input;
-                input.flags = dr.update.lastInput;
-                input.timestamp = dr.lastExtrapolatedTimestamp;
-                //shame we don't have analogue multipliers...
-                //we'll either have to see what bw we have or split roid/vehicle updates to different packets
-
-                vehicle.history[vehicle.currentInput] = input;
-                vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
+                updateInput(vehicle, dr);
             }
         }
         
@@ -106,21 +111,9 @@ void DeadReckoningSystem::process(float dt)
             if (entity.getComponent<NetActor>().actorID != ActorID::Roid)
             {
                 dr.lastExtrapolatedTimestamp += static_cast<std::int32_t>(dt * 1000000.f);
-
-                Input input;
-                input.flags = dr.update.lastInput;
-                input.timestamp = dr.lastExtrapolatedTimestamp;
-
                 auto& vehicle = entity.getComponent<Vehicle>();
-                vehicle.history[vehicle.currentInput] = input;
-                vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
 
-
-                //use the current known velocity to move forward
-                /*sf::Vector2f vel = { dr.update.velX, dr.update.velY };
-                auto& tx = entity.getComponent<xy::Transform>();
-                tx.move(vel * dt);*/
-
+                updateInput(vehicle, dr);
             }
         }
     }

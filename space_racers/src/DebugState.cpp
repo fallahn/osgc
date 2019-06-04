@@ -236,7 +236,9 @@ void DebugState::handleMessage(const xy::Message& msg)
             }
             else
             {
-                tx.setPosition(m_mapParser.getStartPosition());
+                auto [position, rotation] = m_mapParser.getStartPosition();
+                tx.setPosition(position);
+                tx.setRotation(rotation);
             }
             
             entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
@@ -327,7 +329,7 @@ void DebugState::buildWorld()
         return;
     }
     
-    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition());
+    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
 
     //asteroids
     temp = m_resources.load<sf::Texture>("assets/images/temp02.png");
@@ -384,8 +386,13 @@ void DebugState::addLocalPlayers()
     auto view = getContext().defaultView;
 
     auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
-    entity.getComponent<xy::Transform>().move(GameConst::SpawnPositions[0]); //TODO rotate the offset by spawn pos rot
+    auto [position, rotation] = m_mapParser.getStartPosition();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().setRotation(rotation);
+    sf::Transform offsetTransform;
+    offsetTransform.rotate(rotation);
+    auto offset = offsetTransform.transformPoint(GameConst::SpawnPositions[0]);
+    entity.getComponent<xy::Transform>().move(offset);
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
@@ -430,8 +437,11 @@ void DebugState::addLocalPlayers()
 
     //another car for collision testing
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition());
-    entity.getComponent<xy::Transform>().move(GameConst::SpawnPositions[1]); //TODO rotate the offset by spawn pos rot
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().setRotation(rotation);
+
+    offset = offsetTransform.transformPoint(GameConst::SpawnPositions[1]);
+    entity.getComponent<xy::Transform>().move(offset);
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.getComponent<Vehicle>().settings = Definition::car;

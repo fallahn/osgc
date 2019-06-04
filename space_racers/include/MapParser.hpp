@@ -70,9 +70,9 @@ public:
         return m_waypointCount;
     }
 
-    sf::Vector2f getStartPosition() const
+    std::pair<sf::Vector2f, float> getStartPosition() const
     {
-        return m_startPosition;
+        return std::make_pair(m_startPosition, m_startRotation);
     }
 
     sf::Vector2f getSize() const
@@ -92,6 +92,7 @@ private:
 
     std::int32_t m_waypointCount;
     sf::Vector2f m_startPosition;
+    float m_startRotation;
     sf::Vector2f m_size;
 
     std::vector<Lightning> m_barriers;
