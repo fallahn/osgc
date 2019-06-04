@@ -60,13 +60,19 @@ struct GameData final
     std::uint8_t actorCount = 1;
 };
 
+struct LocalPlayer final
+{
+    std::uint32_t vehicle = 0;
+    InputBinding inputBinding;
+};
+
 class ClientLauncher;
 struct SharedData final
 {
     LoadingScreen loadingScreen;
 
     xy::ResourceHandler resources;
-    std::array<InputBinding, 4u> inputBindings;
+    std::array<LocalPlayer, 4u> localPlayers;
     
     GameData gameData;
     std::string errorMessage;

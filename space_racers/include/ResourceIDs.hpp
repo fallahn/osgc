@@ -96,6 +96,8 @@ namespace SpriteID::Menu
         JoinButton,
         NetBackButton,
 
+        NavLeft, NavRight,
+
         Count
     };
 }

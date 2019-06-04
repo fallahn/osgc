@@ -87,7 +87,7 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
-    m_playerInput       (sd.inputBindings[0], sd.netClient.get())
+    m_playerInput       (sd.localPlayers[0].inputBinding, sd.netClient.get())
 {
     launchLoadingScreen();
 

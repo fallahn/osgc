@@ -1,0 +1,14 @@
+spritesheet menu_arrows
+{
+    src="assets/images/menu_arrows.png"
+
+    sprite left
+    {
+        bounds = 0,72,124,72
+    }
+
+    sprite right
+    {
+        bounds = 0,0,124,72
+    }
+}

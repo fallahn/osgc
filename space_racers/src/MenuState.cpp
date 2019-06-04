@@ -32,6 +32,7 @@ source distribution.
 #include "CommandIDs.hpp"
 #include "SliderSystem.hpp"
 #include "NetConsts.hpp"
+#include "VehicleSelectSystem.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -171,6 +172,7 @@ void MenuState::initScene()
     m_scene.addSystem<SliderSystem>(mb);
     m_scene.addSystem<xy::CallbackSystem>(mb);
     m_scene.addSystem<xy::CommandSystem>(mb);
+    m_scene.addSystem<VehicleSelectSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
@@ -184,6 +186,7 @@ void MenuState::loadResources()
     
     m_textureIDs[TextureID::Menu::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
     m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
+    m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select_large.png");
 
     m_textureIDs[TextureID::Menu::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
     m_textureIDs[TextureID::Menu::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
@@ -214,6 +217,10 @@ void MenuState::loadResources()
     m_sprites[SpriteID::Menu::AddressButton] = spriteSheet.getSprite("address");
     m_sprites[SpriteID::Menu::JoinButton] = spriteSheet.getSprite("join");
     m_sprites[SpriteID::Menu::NetBackButton] = spriteSheet.getSprite("back");
+
+    spriteSheet.loadFromFile("assets/sprites/menu_arrows.spt", m_resources);
+    m_sprites[SpriteID::Menu::NavLeft] = spriteSheet.getSprite("left");
+    m_sprites[SpriteID::Menu::NavRight] = spriteSheet.getSprite("right");
 
     if (spriteSheet.loadFromFile("assets/sprites/cursor.spt", m_resources))
     {
@@ -648,16 +655,19 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
 
 void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
 {
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+
+    //back button
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y * 0.75f);
+    entity.addComponent<xy::Transform>().setPosition(MenuConst::NavLeftPosition);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NetBackButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NavLeft];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -673,6 +683,47 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //next button
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(MenuConst::NavRightPosition);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NavRight];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    requestStackClear();
+                    requestStackPush(StateID::TimeTrial);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //vehicle select
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, 120.f);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
+    entity.addComponent<VehicleSelect>();
+    entity.addComponent<xy::UIHitBox>().area = MenuConst::VehicleSelectArea;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    e.getComponent<VehicleSelect>().index = (e.getComponent<VehicleSelect>().index + 1) % 3;
+                    m_sharedData.localPlayers[0].vehicle = static_cast<std::uint32_t>(e.getComponent<VehicleSelect>().index);
+                }
+            });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 

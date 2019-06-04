@@ -195,6 +195,7 @@
     <ClInclude Include="include\TimeTrialState.hpp" />
     <ClInclude Include="include\TrailSystem.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
+    <ClInclude Include="include\VehicleSelectSystem.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
     <ClInclude Include="include\VFXDirector.hpp" />
     <ClInclude Include="include\WayPoint.hpp" />
@@ -231,6 +232,7 @@
     <ClCompile Include="src\SummaryState.cpp" />
     <ClCompile Include="src\TimeTrialState.cpp" />
     <ClCompile Include="src\TrailSystem.cpp" />
+    <ClCompile Include="src\VehicleSelectSystem.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
     <ClCompile Include="src\VFXDirector.cpp" />
   </ItemGroup>

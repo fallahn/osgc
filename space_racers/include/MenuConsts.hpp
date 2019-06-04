@@ -30,6 +30,10 @@ namespace MenuConst
     static const sf::Vector2f LocalPlayMenuPosition(0.f, -xy::DefaultSceneSize.y);
     static const sf::Vector2f ItemRootPosition(402.f, 380.f);
 
+    static const sf::FloatRect VehicleSelectArea(0.f, 0.f, 517.f, 268.f);
+    static const sf::Vector2f NavLeftPosition(180.f, 980.f);
+    static const sf::Vector2f NavRightPosition(xy::DefaultSceneSize.x - NavLeftPosition.x, NavLeftPosition.y);
+
     static const std::int32_t BackgroundDepth = -20;
     static const std::int32_t MenuDepth = 0;
     static const std::int32_t ButtonDepth = 1;

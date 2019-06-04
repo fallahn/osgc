@@ -105,8 +105,8 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     : xy::State     (ss, ctx),
     m_sharedData    (sd),
     m_gameScene     (ctx.appInstance.getMessageBus()),
-    m_playerInput   (sd.inputBindings[0], /*sd.netClient.get()*/nullptr),
-    m_otherInput    (sd.inputBindings[1], nullptr),
+    m_playerInput   (sd.localPlayers[0].inputBinding, nullptr),
+    m_otherInput    (sd.localPlayers[1].inputBinding, nullptr),
     m_mapParser     (m_gameScene)
 {
     launchLoadingScreen();

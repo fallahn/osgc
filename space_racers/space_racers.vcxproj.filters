@@ -210,6 +210,9 @@
     <ClInclude Include="include\RenderPath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\VehicleSelectSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -310,6 +313,9 @@
     </ClCompile>
     <ClCompile Include="src\RenderPath.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VehicleSelectSystem.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
