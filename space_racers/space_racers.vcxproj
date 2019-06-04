@@ -180,6 +180,7 @@
     <ClInclude Include="include\PauseState.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\RaceState.hpp" />
+    <ClInclude Include="include\RenderPath.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\Server.hpp" />
     <ClInclude Include="include\ServerLobbyState.hpp" />
@@ -224,6 +225,7 @@
     <ClCompile Include="src\NetActorSystem.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
+    <ClCompile Include="src\RenderPath.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServerLobbyState.cpp" />
     <ClCompile Include="src\ServerRaceState.cpp" />

@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "InputParser.hpp"
 #include "MapParser.hpp"
 #include "MatrixPool.hpp"
+#include "RenderPath.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -55,19 +56,8 @@ public:
 
 private:
     SharedData& m_sharedData;
-    
-    sf::RenderTexture m_backgroundBuffer;
+
     xy::Scene m_backgroundScene;
-
-    sf::RenderTexture m_normalBuffer; 
-    sf::Sprite m_normalSprite;
-
-    sf::RenderTexture m_neonBuffer;
-    sf::RenderTexture m_blurBuffer;
-    sf::Sprite m_neonSprite;
-
-    sf::RenderTexture m_gameSceneBuffer;
-    sf::Sprite m_gameSceneSprite;
     xy::Scene m_gameScene;
     xy::Scene m_uiScene;
 
@@ -81,13 +71,13 @@ private:
     xy::ShaderResource m_shaders;
     std::array<sf::RenderTexture, 2u> m_trackTextures;
 
+    RenderPath m_renderPath;
+
     MatrixPool m_matrixPool;
     std::array<xy::Sprite, SpriteID::Game::Count> m_sprites;
 
     InputParser m_playerInput;
     sf::Clock m_pingClock;
-
-    sf::Sprite m_backgroundSprite;
 
     void initScene();
     void loadResources();
@@ -113,8 +103,4 @@ private:
     void spawnTrail(xy::Entity, sf::Color);
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
-
-    std::function<void()> render;
-    void renderFancy();
-    void renderPlain();
 };

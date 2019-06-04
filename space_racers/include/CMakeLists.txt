@@ -35,6 +35,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/RenderPath.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.hpp

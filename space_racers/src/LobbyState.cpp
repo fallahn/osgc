@@ -71,7 +71,7 @@ LobbyState::LobbyState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     initScene();
     loadResources();
     buildMenu();
-
+    //sd.useBloom = false;
     if (!sd.netClient) //first time joining
     {
         sd.netClient = std::make_unique<xy::NetClient>();

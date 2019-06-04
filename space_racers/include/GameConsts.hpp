@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 #include <vector>
+#include <array>
 
 namespace GameConst
 {
