@@ -586,6 +586,9 @@ void RaceState::handlePackets()
             case PacketID::ActorUpdate:
                 updateActor(packet.as<ActorUpdate>());
                 break;
+            case PacketID::VehicleActorUpdate:
+                updateActor(packet.as<VehicleActorUpdate>());
+                break;
             case PacketID::DebugPosition:
                 if (debugEnt.isValid())
                 {
@@ -816,7 +819,7 @@ void RaceState::spawnActor(const ActorData& data)
     m_sharedData.gameData.actorCount--;
 }
 
-void RaceState::updateActor(const ActorUpdate& update)
+void RaceState::updateActor(const VehicleActorUpdate& update)
 {
     xy::Command cmd;
     cmd.targetFlags = CommandID::NetActor;

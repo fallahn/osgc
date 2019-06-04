@@ -56,7 +56,6 @@ void DeadReckoningSystem::process(float dt)
         input.flags = dr.update.lastInput;
         input.timestamp = dr.lastExtrapolatedTimestamp;
         //shame we don't have analogue multipliers...
-        //we'll either have to see what bw we have or split roid/vehicle updates to different packets
 
         vehicle.history[vehicle.currentInput] = input;
         vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
@@ -80,9 +79,7 @@ void DeadReckoningSystem::process(float dt)
             tx.setPosition(dr.update.x, dr.update.y);
 
             sf::Vector2f newVel(dr.update.velX, dr.update.velY);
-            tx.move(newVel * delta);
-
-            tx.setRotation(dr.update.rotation);
+            tx.move(newVel * delta);         
 
             if (entity.getComponent<NetActor>().actorID == ActorID::Roid)
             {
@@ -97,6 +94,7 @@ void DeadReckoningSystem::process(float dt)
                 vehicle.velocity = newVel;
                 
                 dr.lastExtrapolatedTimestamp = dr.update.timestamp + (dr.update.timestamp - dr.prevTimestamp);
+                tx.setRotation(dr.update.rotation);
 
                 //apply input - TODO pop this in a func so we don't repeat code below
                 updateInput(vehicle, dr);

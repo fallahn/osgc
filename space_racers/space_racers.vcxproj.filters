@@ -93,9 +93,6 @@
     <ClInclude Include="include\CollisionObject.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
-    <ClInclude Include="include\InterpolationSystem.hpp">
-      <Filter>Header Files\systems</Filter>
-    </ClInclude>
     <ClInclude Include="include\NetActor.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
@@ -255,12 +252,6 @@
       <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\CollisionObject.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\InterpolationSystem.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\InterpolationComponent.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\SliderSystem.cpp">

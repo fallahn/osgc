@@ -70,6 +70,7 @@ namespace PacketID
         ClientInput, //packet contains controller input from client (InputUpdate)
         ClientUpdate, //update for the client to reconcile (from server)
         ActorUpdate, //actor update for client side interpolation
+        VehicleActorUpdate, //vehicle update for client side interpolation
 
         DebugPosition, //packet contains position info for debug
     };

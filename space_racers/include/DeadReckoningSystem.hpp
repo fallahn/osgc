@@ -24,7 +24,7 @@ Copyright 2019 Matt Marchant
 
 struct DeadReckon final
 {
-    ActorUpdate update;
+    VehicleActorUpdate update; //this has the same fields as a roid update so can be used for both
     bool hasUpdate = false;
     std::int32_t prevTimestamp = 0;
     std::int32_t lastExtrapolatedTimestamp = 0;

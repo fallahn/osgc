@@ -65,16 +65,31 @@ struct ActorData final
     std::uint8_t colourID = 0;
 };
 
-struct ActorUpdate final
+struct ActorUpdate
 {
     float x = 0.f;
     float y = 0.f;
     float velX = 0.f;
     float velY = 0.f;
-    float rotation = 0.f;
     std::int32_t timestamp = 0;
     std::uint16_t serverID = 0;
+};
+
+struct VehicleActorUpdate final : ActorUpdate
+{
+    float rotation = 0.f;
     std::uint16_t lastInput = 0;
+
+    VehicleActorUpdate() = default;
+    VehicleActorUpdate(const ActorUpdate& other)
+    {
+        x = other.x;
+        y = other.y;
+        velX = other.velX;
+        velY = other.velY;
+        timestamp = other.timestamp;
+        serverID = other.serverID;
+    }
 };
 
 //server state sent for reconciliation

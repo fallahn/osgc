@@ -262,17 +262,34 @@ void RaceState::netUpdate(float)
         const auto& tx = actor.getComponent<xy::Transform>();
         auto velocity = actor.getComponent<NetActor>().velocity;
 
-        ActorUpdate au;
-        au.serverID = static_cast<std::uint16_t>(actor.getIndex());
-        au.rotation = tx.getRotation();
-        au.x = tx.getPosition().x;
-        au.y = tx.getPosition().y;
-        au.velX = velocity.x;
-        au.velY = velocity.y;
-        au.timestamp = getServerTime();
-        au.lastInput = actor.getComponent<NetActor>().lastInput;
+        if (actor.getComponent<NetActor>().actorID == ActorID::Roid)
+        {
+            ActorUpdate au;
+            au.serverID = static_cast<std::uint16_t>(actor.getIndex());
+            au.x = tx.getPosition().x;
+            au.y = tx.getPosition().y;
+            au.velX = velocity.x;
+            au.velY = velocity.y;
+            au.timestamp = getServerTime();
 
-        m_sharedData.netHost.broadcastPacket(PacketID::ActorUpdate, au, xy::NetFlag::Unreliable);
+            m_sharedData.netHost.broadcastPacket(PacketID::ActorUpdate, au, xy::NetFlag::Unreliable);
+        }
+        else
+        {
+            VehicleActorUpdate au;
+            au.serverID = static_cast<std::uint16_t>(actor.getIndex());
+            au.rotation = tx.getRotation();
+            au.x = tx.getPosition().x;
+            au.y = tx.getPosition().y;
+            au.velX = velocity.x;
+            au.velY = velocity.y;
+            au.timestamp = getServerTime();
+            au.lastInput = actor.getComponent<NetActor>().lastInput;
+
+            m_sharedData.netHost.broadcastPacket(PacketID::VehicleActorUpdate, au, xy::NetFlag::Unreliable);
+        }
+
+
     }
 
     //TODO send stats updates such as scores
