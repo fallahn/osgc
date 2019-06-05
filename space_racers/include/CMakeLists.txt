@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/ActorIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/AIDriverSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AnimationCallbacks.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AsteroidSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.hpp

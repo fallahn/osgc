@@ -31,6 +31,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "MessageIDs.hpp"
 #include "WayPoint.hpp"
+#include "AIDriverSystem.hpp"
 
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -392,6 +393,7 @@ std::int32_t RaceState::logicUpdate(float dt)
 //private
 void RaceState::initScene()
 {
+    m_scene.addSystem<AIDriverSystem>(m_messageBus);
     m_scene.addSystem<VehicleSystem>(m_messageBus);
     m_scene.addSystem<NetActorSystem>(m_messageBus);
     m_scene.addSystem<AsteroidSystem>(m_messageBus);
@@ -526,6 +528,7 @@ bool RaceState::createPlayers()
 
             //create vehicle entity
             auto entity = createVehicle(static_cast<Vehicle::Type>(playerInfo.second.vehicle));
+            entity.addComponent<AIDriver>().timestamp = getServerTime();
 
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;

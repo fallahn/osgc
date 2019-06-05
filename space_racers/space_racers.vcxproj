@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\ActorIDs.hpp" />
+    <ClInclude Include="include\AIDriverSystem.hpp" />
     <ClInclude Include="include\AnimationCallbacks.hpp" />
     <ClInclude Include="include\AsteroidSystem.hpp" />
     <ClInclude Include="include\Camera3D.hpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="include\WayPoint.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AIDriverSystem.cpp" />
     <ClCompile Include="src\AsteroidSystem.cpp" />
     <ClCompile Include="src\Camera3D.cpp" />
     <ClCompile Include="src\CameraTargetSystem.cpp" />

@@ -58,6 +58,7 @@ LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
         if (id <= std::numeric_limits<std::uint32_t>::max())
         {
             player.ready = false;
+            m_humanCount++;
         }
     }
 
@@ -146,18 +147,17 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
     }
     else if (evt.type == xy::NetEvent::ClientConnect)
     {
-        /*if (m_sharedData.lobbyData.playerCount == LobbyData::MaxPlayers)
+        if (m_humanCount == LobbyData::MaxPlayers)
         {
             return;
-        }*/
-        LOG("MUST REJECT PLAYERS ON MAX HUMAN COUNT", xy::Logger::Type::Warning);
+        }
 
         //request info, like name - this is broadcast to other clients once it is received
         m_sharedData.netHost.sendPacket(evt.peer, PacketID::RequestPlayerName, std::uint8_t(0), xy::NetFlag::Reliable);
 
         m_sharedData.playerInfo[evt.peer.getID()].ready = false;
         m_sharedData.playerInfo[evt.peer.getID()].vehicle = 0;
-        //m_sharedData.lobbyData.playerCount++;
+        m_humanCount++;
 
         //remove a CPU player
         for (auto r : CPUIDs)
@@ -199,6 +199,8 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
                     break;
                 }
             }
+
+            m_humanCount--;
         }
     }
 };
