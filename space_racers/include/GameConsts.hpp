@@ -70,7 +70,7 @@ namespace GameConst
     {
         sf::Vector2f(0.f, SpawnSpacing * 0.5f),
         sf::Vector2f(0.f, -SpawnSpacing * 0.5f),
-        sf::Vector2f(0.f, -SpawnSpacing * 1.f),
+        sf::Vector2f(0.f, -SpawnSpacing * 1.5f),
         sf::Vector2f(0.f, SpawnSpacing * 1.5f)
     };
 

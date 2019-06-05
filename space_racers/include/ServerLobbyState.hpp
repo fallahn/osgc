@@ -45,6 +45,8 @@ namespace sv
         std::vector<std::string> m_mapNames;
         std::size_t m_mapIndex;
 
+        std::size_t m_humanCount;
+
         void startGame();
         void setClientName(const xy::NetEvent&);
         void broadcastNames() const;

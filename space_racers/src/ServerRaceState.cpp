@@ -453,6 +453,54 @@ bool RaceState::loadMap()
 bool RaceState::createPlayers()
 {
     auto i = 0;
+    auto createVehicle = [&](Vehicle::Type type)->xy::Entity
+    {
+        auto entity = m_scene.createEntity();
+        auto [position, rotation] = m_mapParser.getStartPosition();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.getComponent<xy::Transform>().setRotation(rotation);
+        sf::Transform offsetTransform;
+        offsetTransform.rotate(rotation);
+        auto offset = offsetTransform.transformPoint(GameConst::SpawnPositions[i]);
+        entity.getComponent<xy::Transform>().move(offset);
+        entity.addComponent<Vehicle>().type = type;
+        entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
+
+        entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+
+        switch (entity.getComponent<Vehicle>().type)
+        {
+        default:
+        case Vehicle::Car:
+            entity.getComponent<Vehicle>().settings = Definition::car;
+            entity.addComponent<NetActor>().actorID = ActorID::Car;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+            break;
+        case Vehicle::Bike:
+            entity.getComponent<Vehicle>().settings = Definition::bike;
+            entity.addComponent<NetActor>().actorID = ActorID::Bike;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+            break;
+        case Vehicle::Ship:
+            entity.getComponent<Vehicle>().settings = Definition::ship;
+            entity.addComponent<NetActor>().actorID = ActorID::Ship;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+            break;
+        }
+
+        auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
+
+        entity.getComponent<NetActor>().colourID = i++;
+        entity.getComponent<NetActor>().serverID = entity.getIndex();
+
+        return entity;
+    };
+
     for(const auto& playerInfo : m_sharedData.playerInfo)
     {
         auto peerID = playerInfo.first;
@@ -461,60 +509,29 @@ bool RaceState::createPlayers()
 
         if (result != m_sharedData.clients.end())
         {
+            //human player
+
             //create vehicle entity
-            auto entity = m_scene.createEntity();
-            auto [position, rotation] = m_mapParser.getStartPosition();
-            entity.addComponent<xy::Transform>().setPosition(position);
-            entity.getComponent<xy::Transform>().setRotation(rotation);
-            sf::Transform offsetTransform;
-            offsetTransform.rotate(rotation);
-            auto offset = offsetTransform.transformPoint(GameConst::SpawnPositions[i]);
-            entity.getComponent<xy::Transform>().move(offset);
-            entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(playerInfo.second.vehicle);
-            entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
-
-            entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
-            entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-
-            switch (entity.getComponent<Vehicle>().type)
-            {
-            default:
-            case Vehicle::Car:
-                entity.getComponent<Vehicle>().settings = Definition::car;
-                entity.addComponent<NetActor>().actorID = ActorID::Car;
-                entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
-                entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);                
-                break;
-            case Vehicle::Bike:
-                entity.getComponent<Vehicle>().settings = Definition::bike;
-                entity.addComponent<NetActor>().actorID = ActorID::Bike;
-                entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
-                entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
-                break;
-            case Vehicle::Ship:
-                entity.getComponent<Vehicle>().settings = Definition::ship;
-                entity.addComponent<NetActor>().actorID = ActorID::Ship;
-                entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
-                entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
-                break;
-            }
-
-            auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
-            entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
-
-            entity.getComponent<NetActor>().colourID = i++;
-            entity.getComponent<NetActor>().serverID = entity.getIndex();
+            auto entity = createVehicle(static_cast<Vehicle::Type>(playerInfo.second.vehicle));
             
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;
             m_players[playerInfo.first].peer = result->first;
             m_players[playerInfo.first].ready = false;
-            m_players[playerInfo.first].lapCount = 0;// m_sharedData.lobbyData.lapCount + 1; //add one because we get the initial start line counted
+            m_players[playerInfo.first].lapCount = 0;
         }
         else
         {
-            //client disconnected somewhere.
-            //TODO check this is handled correctly by net event
+            //CPU player
+
+            //create vehicle entity
+            auto entity = createVehicle(static_cast<Vehicle::Type>(playerInfo.second.vehicle));
+
+            //map entity to peerID
+            m_players[playerInfo.first].entity = entity;
+            //m_players[playerInfo.first].peer = result->first;
+            m_players[playerInfo.first].ready = true;
+            m_players[playerInfo.first].lapCount = 0;
         }
     }
 

@@ -35,18 +35,44 @@ namespace
 
     const std::uint8_t MinLaps = 1;
     const std::uint8_t MaxLaps = 9;
+
+    const std::vector<std::uint64_t> CPUIDs =
+    {
+        std::uint64_t(std::numeric_limits<std::uint32_t>::max()) + 1,
+        std::uint64_t(std::numeric_limits<std::uint32_t>::max()) + 2,
+        std::uint64_t(std::numeric_limits<std::uint32_t>::max()) + 3,
+        std::uint64_t(std::numeric_limits<std::uint32_t>::max()) + 4
+    };
 }
 
 LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
     : m_sharedData  (sd),
     m_nextState     (StateID::Lobby),
-    m_mapIndex      (0)
+    m_mapIndex      (0),
+    m_humanCount    (0)
 {
+    //we might be returning from a race so we can't assume this
+    //is empty
     for (auto& [id, player] : m_sharedData.playerInfo)
     {
-        player.ready = false;
+        if (id <= std::numeric_limits<std::uint32_t>::max())
+        {
+            player.ready = false;
+        }
     }
-    m_sharedData.lobbyData.playerCount = static_cast<std::uint8_t>(m_sharedData.clients.size());
+
+    //but we can fill it out with CPU players until more people join
+    for (auto i = m_sharedData.playerInfo.size(); i < 4; ++i)
+    {
+        //this is a horrible hack - we know the underlying enet impl
+        //returns no more than uint32 max as a peer ID so CPU peerIDs
+        //are always higher than that
+        PlayerInfo info;
+        info.ready = true;
+        m_sharedData.playerInfo.insert(std::make_pair(std::numeric_limits<std::uint32_t>::max() + i + 1, info));
+    }
+
+    m_sharedData.lobbyData.playerCount = static_cast<std::uint8_t>(m_sharedData.playerInfo.size());
 
     m_mapNames = xy::FileSystem::listFiles(xy::FileSystem::getResourcePath() + "assets/maps");
     m_mapNames.erase(std::remove_if(m_mapNames.begin(), m_mapNames.end(), 
@@ -120,17 +146,27 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
     }
     else if (evt.type == xy::NetEvent::ClientConnect)
     {
-        if (m_sharedData.lobbyData.playerCount == LobbyData::MaxPlayers)
+        /*if (m_sharedData.lobbyData.playerCount == LobbyData::MaxPlayers)
         {
             return;
-        }
+        }*/
+        LOG("MUST REJECT PLAYERS ON MAX HUMAN COUNT", xy::Logger::Type::Warning);
 
         //request info, like name - this is broadcast to other clients once it is received
         m_sharedData.netHost.sendPacket(evt.peer, PacketID::RequestPlayerName, std::uint8_t(0), xy::NetFlag::Reliable);
 
         m_sharedData.playerInfo[evt.peer.getID()].ready = false;
         m_sharedData.playerInfo[evt.peer.getID()].vehicle = 0;
-        m_sharedData.lobbyData.playerCount++;
+        //m_sharedData.lobbyData.playerCount++;
+
+        //remove a CPU player
+        for (auto r : CPUIDs)
+        {
+            if (m_sharedData.playerInfo.erase(r) != 0)
+            {
+                break;
+            }
+        }
     }
     else if (evt.type == xy::NetEvent::ClientDisconnect)
     {
@@ -151,6 +187,18 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
             m_sharedData.lobbyData.playerCount--;
 
             m_sharedData.netHost.broadcastPacket(PacketID::LeftLobby, id, xy::NetFlag::Reliable);
+
+            //replace with CPU player
+            for (auto c : CPUIDs)
+            {
+                if (m_sharedData.playerInfo.count(c) == 0)
+                {
+                    PlayerInfo info;
+                    info.ready = true;
+                    m_sharedData.playerInfo.insert(std::make_pair(c, info));
+                    break;
+                }
+            }
         }
     }
 };
@@ -183,8 +231,6 @@ void LobbyState::startGame()
         m_nextState = StateID::Race;
         break;
     }
-
-    //TODO ignore any further input in this state?
 }
 
 void LobbyState::setClientName(const xy::NetEvent& evt)
