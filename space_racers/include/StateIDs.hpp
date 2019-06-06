@@ -72,6 +72,7 @@ struct SharedData final
     LoadingScreen loadingScreen;
 
     xy::ResourceHandler resources;
+    std::size_t fontID = 0;
     std::array<LocalPlayer, 4u> localPlayers;
     
     GameData gameData;
@@ -81,7 +82,7 @@ struct SharedData final
     sf::String ip = "127.0.0.1";
     sf::String name = "Player";
 
-    std::string mapName;
+    std::string mapName = "AceOfSpace.tmx";
 
     std::map<std::uint64_t, PlayerInfo> playerInfo;
     std::array<std::uint64_t, 4u> racePositions = {};

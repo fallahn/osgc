@@ -31,6 +31,8 @@ namespace
     {
         return ((direction.x - position.x) * (point.y - position.y) - (direction.y - position.y) * (point.x - position.x));
     }
+
+    const std::array<float, 3u> skills = { 0.9f, 0.7f, 0.5f };
 }
 
 AIDriverSystem::AIDriverSystem(xy::MessageBus& mb)
@@ -88,7 +90,9 @@ void AIDriverSystem::process(float dt)
         {
             float distance = vehicle.totalDistance - vehicle.waypointDistance;
             distance /= ai.currentWaypoint.getComponent<WayPoint>().distance;
-            input.accelerationMultiplier = 0.5f + (0.5f * distance); //TODO modify this based on distance from human players?
+            //TODO modify the  skill amount depending on how near the front / back
+            //the AI is in relation to the pack
+            input.accelerationMultiplier = skills[ai.skill] + ((1.f - skills[ai.skill]) * distance);
         }
 
         //TODO sweep for collidable objects and steer away from? solids or space

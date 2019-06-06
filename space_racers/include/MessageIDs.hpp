@@ -25,7 +25,8 @@ namespace MessageID
 {
     enum
     {
-        VehicleMessage = xy::Message::Count
+        VehicleMessage = xy::Message::Count,
+        GameMessage
     };
 }
 
@@ -42,4 +43,12 @@ struct VehicleEvent final
     }type = RequestRespawn;
 
     xy::Entity entity;
+};
+
+struct GameEvent final
+{
+    enum
+    {
+        RaceStarted
+    }type = RaceStarted;
 };

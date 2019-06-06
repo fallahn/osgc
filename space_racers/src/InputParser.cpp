@@ -196,8 +196,6 @@ void InputParser::update(float dt)
         input.steeringMultiplier = std::min(1.f, m_steeringMultiplier);
         input.accelerationMultiplier = std::min(1.f, m_accelerationMultiplier);
 
-        DPRINT("acc", std::to_string(m_accelerationMultiplier));
-
         //update player input history
         vehicle.history[vehicle.currentInput] = input;
         vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();

@@ -1,0 +1,1 @@
+This directory contains the source of the original version of Space Racers. It has been included purely as reference when creating the remake, and has no gaurantee that it'll compile. Unless otherwise stated it has no license and can be considered released into the public domain.

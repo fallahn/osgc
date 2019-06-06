@@ -63,7 +63,6 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/TextSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
-#include <xyginext/graphics/postprocess/Bloom.hpp>
 #include <xyginext/util/Random.hpp>
 
 namespace
@@ -72,8 +71,6 @@ namespace
 #include "TrackShader.inl"
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
-
-    xy::Entity debugEnt;
 
     const sf::Time pingTime = sf::seconds(3.f);
 }
@@ -327,6 +324,7 @@ void RaceState::loadResources()
     auto& vehicleShader = m_shaders.get(ShaderID::Vehicle);
     vehicleShader.setUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNormal]));
 
+
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
     m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
@@ -365,8 +363,7 @@ void RaceState::buildWorld()
     //add a camera   
     auto camEnt = m_gameScene.createEntity();
     camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-    camEnt.addComponent<xy::Camera>().setView(/*view.getSize()*/xy::DefaultSceneSize);
-    //camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+    camEnt.addComponent<xy::Camera>().setView(xy::DefaultSceneSize);
     camEnt.getComponent<xy::Camera>().lockRotation(true);
     camEnt.addComponent<CameraTarget>();
     camEnt.addComponent<xy::AudioListener>();
@@ -447,10 +444,42 @@ void RaceState::addProps()
     for (const auto& b : barriers)
     {
         auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>(); //points are in world space. Should we change this to improve culling?
+        entity.addComponent<xy::Transform>(); //points are in world space.
         entity.addComponent<xy::Drawable>().setFilterFlags(GameConst::FilterFlags::All);
         entity.addComponent<Lightning>() = b;
     }
+
+    auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
+    m_resources.get<sf::Texture>(temp).setSmooth(true);
+    
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+    entity.addComponent<xy::Drawable>().setDepth(1000);
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
+
+    auto cameraEntity = m_gameScene.getActiveCamera();
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    sf::Color c(0, 0, 0);
+    auto texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
+
+    for (auto i = 0; i <= 255; i += 85)
+    {
+        c.r += i;
+
+        verts.emplace_back(-texSize, c, sf::Vector2f(0.f, 0.f));
+        verts.emplace_back(sf::Vector2f(texSize.x, -texSize.y), c, sf::Vector2f(texSize.x, 0.f));
+        verts.emplace_back(texSize, c, texSize);
+        verts.emplace_back(sf::Vector2f(-texSize.x, texSize.y), c, sf::Vector2f(0.f, texSize.y));
+    }
+
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
 }
 
 void RaceState::buildUI()
@@ -484,36 +513,7 @@ void RaceState::buildUI()
 
 void RaceState::buildTest()
 {
-    auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
-    m_resources.get<sf::Texture>(temp).setSmooth(true);
-    
-    auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
-    entity.addComponent<xy::Drawable>().setDepth(1000);
-    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
 
-    auto cameraEntity = m_gameScene.getActiveCamera();
-    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
-    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
-    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-
-    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-    sf::Color c(0, 0, 0);
-
-    for (auto i = 0; i <= 255; i += 85)
-    {
-        c.r += i;
-
-        verts.emplace_back(sf::Vector2f(-384.f, -384.f ), c, sf::Vector2f(0.f, 0.f));
-        verts.emplace_back(sf::Vector2f(384.f, -384.f), c, sf::Vector2f(384.f, 0.f));
-        verts.emplace_back(sf::Vector2f(384.f, 384.f ), c, sf::Vector2f(384.f, 384.f));
-        verts.emplace_back(sf::Vector2f(-384.f, 384.f ), c, sf::Vector2f(0.f, 384.f));
-    }
-
-    entity.getComponent<xy::Drawable>().updateLocalBounds();
 }
 
 void RaceState::handlePackets()
@@ -590,10 +590,10 @@ void RaceState::handlePackets()
                 updateActor(packet.as<VehicleActorUpdate>());
                 break;
             case PacketID::DebugPosition:
-                if (debugEnt.isValid())
+                /*if (debugEnt.isValid())
                 {
                     debugEnt.getComponent<xy::Transform>().setPosition(packet.as<sf::Vector2f>());
-                }
+                }*/
                 break;
             case PacketID::ClientUpdate:
                 reconcile(packet.as<ClientUpdate>());
@@ -702,7 +702,6 @@ void RaceState::spawnActor(const ActorData& data)
     entity.addComponent<xy::Drawable>();
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::All);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::NetActor;
-    entity.addComponent<CollisionObject>().type = CollisionObject::Type::NetActor;
 
     switch (data.actorID)
     {
@@ -713,7 +712,7 @@ void RaceState::spawnActor(const ActorData& data)
     {
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car];
         entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);       
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);       
+        entity.addComponent<CollisionObject>().applyVertices(GameConst::CarPoints);       
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
         entity.addComponent<Vehicle>().type = Vehicle::Car;
 
@@ -724,7 +723,7 @@ void RaceState::spawnActor(const ActorData& data)
     {        
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Bike];
         entity.getComponent<xy::Transform>().setOrigin(GameConst::BikeSize.width * GameConst::VehicleCentreOffset, GameConst::BikeSize.height / 2.f);
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);       
+        entity.addComponent<CollisionObject>().applyVertices(GameConst::BikePoints);       
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
         entity.addComponent<Vehicle>().type = Vehicle::Bike;
 
@@ -735,7 +734,7 @@ void RaceState::spawnActor(const ActorData& data)
     {
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Ship];
         entity.getComponent<xy::Transform>().setOrigin(GameConst::ShipSize.width * GameConst::VehicleCentreOffset, GameConst::ShipSize.height / 2.f);
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+        entity.addComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
         entity.addComponent<Vehicle>().type = Vehicle::Ship;
 
@@ -744,6 +743,7 @@ void RaceState::spawnActor(const ActorData& data)
         break;
 
     Vehicle:
+        entity.getComponent<CollisionObject>().type = CollisionObject::Type::Vehicle;
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
         entity.addComponent<xy::Callback>().function = ScaleCallback();
@@ -779,12 +779,25 @@ void RaceState::spawnActor(const ActorData& data)
                 thisTx.setRotation(thatTx.getRotation());
                 thisTx.setScale(thatTx.getScale());
             };
+
+            auto debugEnt = m_gameScene.createEntity();
+            debugEnt.addComponent<xy::Transform>();
+            debugEnt.addComponent<xy::Drawable>().setDepth(1000);
+            debugEnt.addComponent<xy::Callback>().active = true;
+            debugEnt.getComponent<xy::Callback>().function =
+                [entity](xy::Entity, float)
+            {
+                const auto& tx = entity.getComponent<xy::Transform>();
+                DPRINT("Position", std::to_string(tx.getPosition().x) + ", " + std::to_string(tx.getPosition().y));
+                DPRINT("Scale", std::to_string(tx.getScale().x) + ", " + std::to_string(tx.getScale().y));
+            };
         }
 
         break;
 
     case ActorID::Roid:
     {
+        entity.addComponent<CollisionObject>().type = CollisionObject::Type::NetActor;
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidDiffuse]));
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         auto radius = bounds.width / 2.f;
@@ -947,7 +960,7 @@ void RaceState::removeNetVehicle(std::uint32_t id)
 
 void RaceState::showTimer()
 {
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);

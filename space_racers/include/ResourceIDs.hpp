@@ -47,8 +47,6 @@ namespace FontID
 
         Count
     };
-
-    static std::array<std::size_t, Count> handles = {};
 }
 
 namespace TextureID

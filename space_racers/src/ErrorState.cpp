@@ -61,8 +61,11 @@ bool ErrorState::update(float dt)
 {
     //make sure any final packets are sent
     xy::NetEvent evt;
-    while (m_sharedData.netClient->pollEvent(evt))
+    if (m_sharedData.netClient)
     {
+        while (m_sharedData.netClient->pollEvent(evt))
+        {
+        }
     }
 
     m_scene.update(dt);
@@ -98,11 +101,11 @@ void ErrorState::initScene()
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     //message text
-    if (FontID::handles[FontID::Default] == 0)
+    if (m_sharedData.fontID == 0)
     {
-        FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     }
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -40.f);

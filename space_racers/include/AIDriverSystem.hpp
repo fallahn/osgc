@@ -25,6 +25,10 @@ struct AIDriver final
     xy::Entity currentWaypoint;
     sf::Vector2f target;
     std::int32_t timestamp = 0;
+    enum
+    {
+        Excellent, Good, Bad
+    }skill = Excellent;
 };
 
 class AIDriverSystem final : public xy::System

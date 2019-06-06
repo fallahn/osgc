@@ -122,7 +122,7 @@ void SummaryState::buildMenu()
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
     //make a copy of thte player info and erase any found in race positions...
     //those who are left didn't get a podium finish.

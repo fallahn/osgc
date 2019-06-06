@@ -216,6 +216,9 @@
     <ClInclude Include="include\AIDriverSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\TimeTrialDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -322,6 +325,9 @@
     </ClCompile>
     <ClCompile Include="src\AIDriverSystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TimeTrialDirector.cpp">
+      <Filter>Source Files\directors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -182,7 +182,7 @@ void MenuState::initScene()
 
 void MenuState::loadResources()
 {
-    FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+    m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     
     m_textureIDs[TextureID::Menu::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
     m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
@@ -317,7 +317,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::PlanetDiffuse]));
 
 
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
     auto rootNode = m_scene.createEntity();
     rootNode.addComponent<xy::Transform>();
@@ -527,7 +527,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     auto textEnt = m_scene.createEntity();
     textEnt.addComponent<xy::Transform>().setPosition(26.f, 10.f);
     textEnt.addComponent<xy::Drawable>().setDepth(MenuConst::TextDepth);

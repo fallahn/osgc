@@ -193,6 +193,7 @@
     <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\SummaryState.hpp" />
+    <ClInclude Include="include\TimeTrialDirector.hpp" />
     <ClInclude Include="include\TimeTrialState.hpp" />
     <ClInclude Include="include\TrailSystem.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
@@ -232,6 +233,7 @@
     <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\Sprite3DSystem.cpp" />
     <ClCompile Include="src\SummaryState.cpp" />
+    <ClCompile Include="src\TimeTrialDirector.cpp" />
     <ClCompile Include="src\TimeTrialState.cpp" />
     <ClCompile Include="src\TrailSystem.cpp" />
     <ClCompile Include="src\VehicleSelectSystem.cpp" />

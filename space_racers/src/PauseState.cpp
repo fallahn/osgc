@@ -57,7 +57,8 @@ bool PauseState::handleEvent(const sf::Event& evt)
             requestStackPop();
             break;
         case sf::Keyboard::Q:
-            if (m_sharedData.hosting)
+            if (m_sharedData.server
+                && m_sharedData.hosting)
             {
                 m_sharedData.server->quit();
             }
@@ -113,7 +114,7 @@ void PauseState::buildMenu()
     verts.emplace_back(sf::Vector2f(0.f, xy::DefaultSceneSize.y), c);
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -200.f);

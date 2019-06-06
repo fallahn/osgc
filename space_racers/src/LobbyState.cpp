@@ -167,9 +167,9 @@ void LobbyState::initScene()
 
 void LobbyState::loadResources()
 {
-    if (FontID::handles[FontID::Default] == 0)
+    if (m_sharedData.fontID == 0)
     {
-        FontID::handles[FontID::Default] = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     }
 
     m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select.png");
@@ -199,7 +199,7 @@ void LobbyState::loadResources()
 
 void LobbyState::buildMenu()
 {
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::Default]);
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
     //title
     auto entity = m_scene.createEntity();

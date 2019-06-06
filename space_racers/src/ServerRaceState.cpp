@@ -530,6 +530,7 @@ bool RaceState::createPlayers()
             auto entity = createVehicle(static_cast<Vehicle::Type>(playerInfo.second.vehicle));
             entity.addComponent<AIDriver>().timestamp = getServerTime();
             entity.getComponent<AIDriver>().target = m_mapParser.getStartPosition().first;
+            entity.getComponent<AIDriver>().skill = AIDriver::Bad;
 
             //map entity to peerID
             m_players[playerInfo.first].entity = entity;

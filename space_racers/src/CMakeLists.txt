@@ -32,6 +32,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TrailSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSelectSystem.cpp

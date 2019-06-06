@@ -23,7 +23,8 @@ namespace CommandID
     enum Game
     {
         NetActor = 0x1,
-        Trail = 0x2
+        Trail = 0x2,
+        Vehicle = 0x4
     };
 
     enum UI

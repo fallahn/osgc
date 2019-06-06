@@ -65,8 +65,9 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     data.launcher->launch();*/
 
     //return StateID::Debug;
-    return StateID::Lobby;
+    //return StateID::Lobby;
     //return StateID::MainMenu;
+    return StateID::TimeTrial;
 #else
     return StateID::MainMenu;
     //return StateID::Lobby;

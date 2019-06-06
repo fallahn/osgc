@@ -26,24 +26,14 @@ Copyright 2019 Matt Marchant
 
 namespace ft
 {
+
     static const std::int32_t MAX_CIRCLE_ANGLE = 512;
     static const std::int32_t HALF_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE / 2);
     static const std::int32_t QUARTER_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE / 4);
     static const std::int32_t MASK_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE - 1);
-    static const float PI = 3.14159265358979323846f;
+    static constexpr float PI = 3.14159265358979323846f;
 
     static std::vector<float> table;
-
-    static inline void init()
-    {
-        if (table.empty())
-        {
-            for (auto i = 0; i < MAX_CIRCLE_ANGLE; i++)
-            {
-                table.emplace_back(static_cast<float>(std::sin(static_cast<double>(i * PI / HALF_MAX_CIRCLE_ANGLE))));
-            }
-        }
-    }
 
     //copied from NVidia web site
     static inline void FloatToInt(int* int_pointer, float f)
@@ -56,6 +46,17 @@ namespace ft
         //I'm not going to pretend to understand it
         //so I'll do it this way.
         *int_pointer = static_cast<int>(f);
+    }
+
+    static inline void init()
+    {
+        if (table.empty())
+        {
+            for (auto i = 0; i < MAX_CIRCLE_ANGLE; i++)
+            {
+                table.emplace_back(static_cast<float>(std::sin(static_cast<double>(i * PI / HALF_MAX_CIRCLE_ANGLE))));
+            }
+        }
     }
 
     static inline float cos(float n)
