@@ -1,0 +1,19 @@
+spritesheet vehicle_select
+{
+    src="assets/images/vehicle_select.png"
+
+    sprite front
+    {
+        bounds = 0,364,220,364
+    }
+
+    sprite back
+    {
+        bounds = 0,0,220,364
+    }
+
+    sprite needle
+    {
+        bounds = 308,346,132,18
+    }
+}

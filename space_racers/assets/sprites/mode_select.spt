@@ -1,0 +1,24 @@
+spritesheet mode_select
+{
+    src="assets/images/mode_select.png"
+
+    sprite front
+    {
+        bounds = 186,0,118,118
+    }
+
+    sprite back
+    {
+        bounds = 0,0,186,200
+    }
+
+    sprite elimination
+    {
+        bounds = 186,118,115,115
+    }
+
+    sprite race
+    {
+        bounds = 186,233,138,138
+    }
+}
