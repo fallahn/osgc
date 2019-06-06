@@ -729,16 +729,19 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
 void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
 {
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+
+    //back button
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y * 1.25f);
+    entity.addComponent<xy::Transform>().setPosition(MenuConst::NavLeftPosition);
+    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NetBackButton];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NavLeft];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -750,6 +753,27 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                         e.getComponent<Slider>().active = true;
                     };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //next button
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(MenuConst::NavRightPosition);
+    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::NavRight];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    //TODO launch mode based on current selection
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
