@@ -32,6 +32,7 @@ source distribution.
 #include "RenderPath.hpp"
 #include "ResourceIDs.hpp"
 #include "MatrixPool.hpp"
+#include "InputParser.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -42,6 +43,7 @@ source distribution.
 #include <xyginext/ecs/components/Sprite.hpp>
 
 #include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/System/Clock.hpp>
 
 class TimeTrialState final : public xy::State
 {
@@ -76,6 +78,16 @@ private:
     MapParser m_mapParser;
     RenderPath m_renderPath;
     MatrixPool m_matrixPool;
+
+    InputParser m_playerInput;
+
+    sf::Clock m_stateTimer;
+    enum
+    {
+        Readying,
+        Counting,
+        Racing
+    }m_state;
 
     void initScene();
     void loadResources();

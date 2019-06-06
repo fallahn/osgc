@@ -395,6 +395,7 @@ void DebugState::addLocalPlayers()
     entity.getComponent<xy::Transform>().move(offset);
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
+    entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
     entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
@@ -445,6 +446,7 @@ void DebugState::addLocalPlayers()
     entity.getComponent<xy::Transform>().setOrigin(GameConst::CarSize.width * GameConst::VehicleCentreOffset, GameConst::CarSize.height / 2.f);
     entity.addComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.getComponent<Vehicle>().settings = Definition::car;
+    entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
     entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);

@@ -114,6 +114,11 @@ void PauseState::buildMenu()
     verts.emplace_back(sf::Vector2f(0.f, xy::DefaultSceneSize.y), c);
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
+    if (m_sharedData.fontID == 0)
+    {
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggeyClean.ttf");
+    }
+
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);

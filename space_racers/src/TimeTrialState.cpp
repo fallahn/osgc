@@ -31,6 +31,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "VFXDirector.hpp"
 #include "TimeTrialDirector.hpp"
+#include "WayPoint.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -75,7 +76,9 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_uiScene           (ctx.appInstance.getMessageBus()),
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
-    m_renderPath        (m_resources)
+    m_renderPath        (m_resources),
+    m_playerInput       (sd.localPlayers[0].inputBinding),
+    m_state             (Readying)
 {
     launchLoadingScreen();
     initScene();
@@ -108,6 +111,7 @@ bool TimeTrialState::handleEvent(const sf::Event& evt)
         }
     }
 
+    m_playerInput.handleEvent(evt);
     m_backgroundScene.forwardEvent(evt);
     m_gameScene.forwardEvent(evt);
     m_uiScene.forwardEvent(evt);
@@ -131,6 +135,81 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
     }
+    else if (msg.id == MessageID::VehicleMessage)
+    {
+        const auto& data = msg.getData<VehicleEvent>();
+        if (data.type == VehicleEvent::RequestRespawn)
+        {
+            auto entity = data.entity;
+
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Trail;
+            cmd.action = [entity](xy::Entity e, float)
+            {
+                if (e.getComponent<Trail>().parent == entity)
+                {
+                    e.getComponent<Trail>().parent = {};
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            auto& vehicle = entity.getComponent<Vehicle>();
+            auto& tx = entity.getComponent<xy::Transform>();
+
+            vehicle.velocity = {};
+            vehicle.anglularVelocity = {};
+            vehicle.stateFlags = (1 << Vehicle::Normal);
+            vehicle.invincibleTime = GameConst::InvincibleTime;
+
+            if (vehicle.currentWaypoint.isValid())
+            {
+                tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
+                tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
+                auto& wp = vehicle.currentWaypoint.getComponent<WayPoint>();
+            }
+            else
+            {
+                auto [position, rotation] = m_mapParser.getStartPosition();
+                tx.setPosition(position);
+                tx.setRotation(rotation);
+            }
+
+            tx.setScale(1.f, 1.f);
+
+            auto* respawnMsg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+            respawnMsg->type = VehicleEvent::Respawned;
+            respawnMsg->entity = entity;
+        }
+        else if (data.type == VehicleEvent::Exploded)
+        {
+            //detatch the current trail
+            auto entity = data.entity;
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Trail;
+            cmd.action = [entity](xy::Entity e, float)
+            {
+                if (e.getComponent<Trail>().parent == entity)
+                {
+                    e.getComponent<Trail>().parent = {};
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        else if (data.type == VehicleEvent::Respawned)
+        {
+            spawnTrail(data.entity, GameConst::PlayerColour::Light[data.entity.getComponent<Vehicle>().colourID]);
+        }
+        else if (data.type == VehicleEvent::Fell)
+        {
+            auto entity = data.entity;
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 1);
+
+            m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
+        }
+    }
 
     m_backgroundScene.forwardMessage(msg);
     m_gameScene.forwardMessage(msg);
@@ -139,6 +218,45 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
 
 bool TimeTrialState::update(float dt)
 {
+    switch (m_state)
+    {
+    default: break;
+    case Readying:
+        if (m_stateTimer.getElapsedTime() > sf::seconds(3.f))
+        {
+            m_state = Counting;
+            m_stateTimer.restart();
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::UI::StartLights;
+            cmd.action = [](xy::Entity e, float dt)
+            {
+                e.getComponent<xy::SpriteAnimation>().play(0);
+                e.getComponent<xy::AudioEmitter>().play();
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        break;
+    case Counting:
+        if (m_stateTimer.getElapsedTime() > sf::seconds(4.f))
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::UI::StartLights;
+            cmd.action = [](xy::Entity e, float dt)
+            {
+                e.getComponent<xy::Callback>().active = true;
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+            msg->type = GameEvent::RaceStarted;
+
+            m_state = Racing;
+        }
+        break;
+    }
+
+    m_playerInput.update(dt);
     m_backgroundScene.update(dt);
     m_gameScene.update(dt);
     m_uiScene.update(dt);
@@ -463,15 +581,15 @@ void TimeTrialState::spawnVehicle()
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
     entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
     entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
-    entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[/*data.colourID*/0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car/* + data.vehicleType*/];
-    entity.addComponent<Vehicle>().type = Vehicle::Type::Car;// static_cast<Vehicle::Type>(data.vehicleType);
-    entity.getComponent<Vehicle>().colourID = /*data.colourID*/0;
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[0].vehicle];
+    entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[0].vehicle);
+    entity.getComponent<Vehicle>().colourID = 0;
     //TODO we should probably get this from the server, but it might not matter
     //as the server is the final arbiter in laps counted anyway
     entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
-    entity.getComponent<Vehicle>().client = true;
+    entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
 
     entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
     entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
@@ -516,13 +634,12 @@ void TimeTrialState::spawnVehicle()
         thisTx.setScale(thatTx.getScale());
     };
 
-    //m_playerInput.setPlayerEntity(entity);
-    entity.addComponent<AIDriver>().target = position;
+    m_playerInput.setPlayerEntity(entity);
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;
 
-    spawnTrail(entity, GameConst::PlayerColour::Light[/*data.colourID*/0]);
+    spawnTrail(entity, GameConst::PlayerColour::Light[0]);
 }
 
 void TimeTrialState::spawnTrail(xy::Entity parent, sf::Color colour)

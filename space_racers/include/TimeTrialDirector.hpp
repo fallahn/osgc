@@ -20,8 +20,6 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 
-#include <SFML/System/Clock.hpp>
-
 class TimeTrialDirector final : public xy::Director
 {
 public:
@@ -32,12 +30,5 @@ public:
     void process(float) override;
 
 private:
-    sf::Clock m_stateTimer;
 
-    enum
-    {
-        Readying,
-        Counting,
-        Racing
-    }m_state;
 };
