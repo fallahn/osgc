@@ -256,10 +256,20 @@ bool TimeTrialState::update(float dt)
         break;
     }
 
+    static float shaderTime = 0.f;
+    shaderTime += dt;
+    m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
+    m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
+
     m_playerInput.update(dt);
     m_backgroundScene.update(dt);
     m_gameScene.update(dt);
     m_uiScene.update(dt);
+
+    auto camPosition = m_gameScene.getActiveCamera().getComponent<xy::Transform>().getPosition();
+    m_backgroundScene.getActiveCamera().getComponent<xy::Transform>().setPosition(camPosition);
+    m_renderPath.updateView(camPosition);
+
     return true;
 }
 

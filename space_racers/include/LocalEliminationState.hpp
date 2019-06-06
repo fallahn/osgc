@@ -28,9 +28,22 @@ source distribution.
 #pragma once
 
 #include "StateIDs.hpp"
+#include "MapParser.hpp"
+#include "RenderPath.hpp"
+#include "ResourceIDs.hpp"
+#include "MatrixPool.hpp"
+#include "InputParser.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/resources/Resource.hpp>
+#include <xyginext/audio/AudioScape.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/System/Clock.hpp>
 
 class LocalEliminationState final : public xy::State
 {
@@ -49,8 +62,41 @@ public:
 
 private:
     SharedData& m_sharedData;
-    xy::Scene m_scene;
+    xy::Scene m_backgroundScene;
+    xy::Scene m_gameScene;
+    xy::Scene m_uiScene;
+
+    std::array<std::size_t, TextureID::Game::Count> m_textureIDs;
+    std::array<xy::Sprite, SpriteID::Game::Count> m_sprites;
+    std::array<sf::RenderTexture, 2u> m_trackTextures;
+    xy::ResourceHandler m_resources;
+    xy::ShaderResource m_shaders;
+
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_uiSounds;
+
+    MapParser m_mapParser;
+    RenderPath m_renderPath;
+    MatrixPool m_matrixPool;
+
+    InputParser m_playerInput;
+
+    sf::Clock m_stateTimer;
+    enum
+    {
+        Readying,
+        Counting,
+        Racing
+    }m_state;
 
     void initScene();
     void loadResources();
+
+    bool loadMap();
+    void addProps();
+    void buildUI();
+    void spawnVehicle();
+    void spawnTrail(xy::Entity, sf::Color);
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };
