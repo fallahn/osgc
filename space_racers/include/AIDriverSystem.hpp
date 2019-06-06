@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 
 struct AIDriver final
 {
+    xy::Entity currentWaypoint;
     sf::Vector2f target;
     std::int32_t timestamp = 0;
 };

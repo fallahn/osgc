@@ -18,14 +18,28 @@ Copyright 2019 Matt Marchant
 
 #include "AIDriverSystem.hpp"
 #include "VehicleSystem.hpp"
+#include "WayPoint.hpp"
+#include "InputBinding.hpp"
+#include "InverseRotationSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
+
+namespace
+{
+    //calculates cross product https://en.wikipedia.org/wiki/Cross_product
+    float lineSide(sf::Vector2f position, sf::Vector2f direction, sf::Vector2f point) 
+    {
+        return ((direction.x - position.x) * (point.y - position.y) - (direction.y - position.y) * (point.x - position.x));
+    }
+}
 
 AIDriverSystem::AIDriverSystem(xy::MessageBus& mb)
     : xy::System(mb, typeid(AIDriverSystem))
 {
     requireComponent<AIDriver>();
     requireComponent<Vehicle>();
+
+    ft::init();
 }
 
 //public
@@ -40,19 +54,50 @@ void AIDriverSystem::process(float dt)
         ai.timestamp += frameTime;
 
         //get target
+        auto& vehicle = entity.getComponent<Vehicle>();
+        if (vehicle.currentWaypoint != ai.currentWaypoint)
+        {
+            const auto& waypoint = vehicle.currentWaypoint.getComponent<WayPoint>();
+            ai.target += (waypoint.nextPoint * waypoint.distance);
+            ai.currentWaypoint = vehicle.currentWaypoint;
+        }
 
         //get forward vector
-        sf::Transform tx; //TODO use our LUT transform
-        tx.rotate(entity.getComponent<xy::Transform>().getRotation());
-        sf::Vector2f forwardVec = tx.transformPoint({ 1.f, 0.f });
+        const auto& tx = entity.getComponent<xy::Transform>();
+
+        Transform tf;
+        tf.setRotation(tx.getRotation());
+        sf::Vector2f forwardVec = tf.transformPoint(1.f, 0.f);
 
         //adjust steering based on which side of forward ray target is on
+        static const float threshold = 90.f;
+        Input input;
+        float side = lineSide(tx.getPosition(), tx.getPosition() + forwardVec, ai.target);
+        if (side > threshold)
+        {
+            input.flags |= InputFlag::Right;
+        }
+        else if (side < -threshold)
+        {
+            input.flags |= InputFlag::Left;
+        }
 
         //adjust acceleration multiplier based on distance to target (ie slow down when nearer)
+        input.flags |= InputFlag::Accelerate;
+        if (ai.currentWaypoint.isValid())
+        {
+            float distance = vehicle.totalDistance - vehicle.waypointDistance;
+            distance /= ai.currentWaypoint.getComponent<WayPoint>().distance;
+            input.accelerationMultiplier = 0.5f + (0.5f * distance); //TODO modify this based on distance from human players?
+        }
 
         //TODO sweep for collidable objects and steer away from? solids or space
         //TODO faux acceleration by modifying input? Could use this for differing types of AI
 
         //update timestamp and apply input to vehicle
+        input.timestamp = ai.timestamp;
+
+        vehicle.history[vehicle.currentInput] = input;
+        vehicle.currentInput = (vehicle.currentInput + 1) % vehicle.history.size();
     }
 }

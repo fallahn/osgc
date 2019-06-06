@@ -164,6 +164,7 @@ void LobbyState::handleNetEvent(const xy::NetEvent& evt)
         {
             if (m_sharedData.playerInfo.erase(r) != 0)
             {
+                m_sharedData.netHost.broadcastPacket(PacketID::LeftLobby, r, xy::NetFlag::Reliable);
                 break;
             }
         }

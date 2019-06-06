@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 
 //uses the fast trig sin/cos lookup table
+//based on the source of sf::Transform
 class Transform final
 {
 public:
@@ -58,6 +59,12 @@ public:
         *this = Transform(cos, -sin, 0.f,
                           sin, cos, 0.f,
                           0.f, 0.f, 1.f);
+    }
+
+    sf::Vector2f transformPoint(float x, float y)
+    {
+        return sf::Vector2f(m_matrix[0] * x + m_matrix[4] * y + m_matrix[12],
+                            m_matrix[1] * x + m_matrix[5] * y + m_matrix[13]);
     }
 
     const float* getMatrix() const { return m_matrix.data(); }
