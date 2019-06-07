@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include "LightningSystem.hpp"
 #include "InverseRotationSystem.hpp"
 #include "TrailSystem.hpp"
+#include "LapDotSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -254,6 +255,7 @@ void RaceState::initScene()
     
     m_gameScene.addDirector<VFXDirector>(m_sprites);
 
+    m_uiScene.addSystem<LapDotSystem>(mb);
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
@@ -562,14 +564,8 @@ void RaceState::addLapPoint(xy::Entity vehicle, sf::Color colour)
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint])).setColour(colour);
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function =
-        [&,vehicle](xy::Entity e, float)
-    {
-        auto position = e.getComponent<xy::Transform>().getPosition();
-        position.x = (vehicle.getComponent<Vehicle>().totalDistance / m_mapParser.getTrackLength()) * xy::DefaultSceneSize.x;
-        e.getComponent<xy::Transform>().setPosition(position);
-    };
+    entity.addComponent<LapDot>().parent = vehicle;
+    entity.getComponent<LapDot>().trackLength = m_mapParser.getTrackLength();
 }
 
 void RaceState::buildTest()

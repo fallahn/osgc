@@ -219,6 +219,9 @@
     <ClInclude Include="include\TimeTrialDirector.hpp">
       <Filter>Header Files\directors</Filter>
     </ClInclude>
+    <ClInclude Include="include\LapDotSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -328,6 +331,9 @@
     </ClCompile>
     <ClCompile Include="src\TimeTrialDirector.cpp">
       <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LapDotSystem.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -14,6 +14,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationComponent.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LapDotSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LightningSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LocalEliminationState.cpp
