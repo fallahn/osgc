@@ -467,9 +467,13 @@ void RaceState::addProps()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
+        sf::Vector2f offset = xy::Util::Vector::normalise(b.end - b.start);
+        offset = { offset.y, -offset.x };
+        offset *= 40.f;
+
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        verts.emplace_back(sf::Vector2f(), sf::Color::White, sf::Vector2f());
-        verts.emplace_back(sf::Vector2f(b.end - b.start), sf::Color::White, sf::Vector2f(texSize.x, 0.f));
+        verts.emplace_back(sf::Vector2f() + offset, sf::Color::White, sf::Vector2f());
+        verts.emplace_back(sf::Vector2f(b.end - b.start) + offset, sf::Color::White, sf::Vector2f(texSize.x, 0.f));
         verts.emplace_back(sf::Vector2f(b.end - b.start), sf::Color::Black, texSize);
         verts.emplace_back(sf::Vector2f(), sf::Color::Black, sf::Vector2f(0.f, texSize.y));
 

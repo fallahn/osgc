@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="111">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="113">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="../images/tiles/diffuse.png" width="1024" height="640"/>
  </tileset>
@@ -154,7 +154,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup color="#000000" id="6" name="Space" locked="1">
+ <objectgroup color="#000000" id="6" name="Space" visible="0" locked="1">
   <object id="25" x="1620" y="1484">
    <polygon points="0,0 120,-116 1272,-100 1536,-380 1552,-1292 1388,-1448 1880,-1456 1740,-1304 1736,1124 1136,1740 1012,1736 16,740"/>
   </object>
@@ -171,7 +171,7 @@
    <polygon points="0,0 500,-21 502,-702 380,-841 384,-1148 920,-1648 5164,-1644 5436,-1368 5438,-710 5306,-545 5307,-73 5848,-64 5904,-1916 -16,-2040"/>
   </object>
  </objectgroup>
- <objectgroup color="#ff0000" id="7" name="KillZone">
+ <objectgroup color="#ff0000" id="7" name="KillZone" visible="0">
   <object id="33" x="-296" y="-552">
    <polygon points="0,0 48,416 5760,464 5736,32"/>
   </object>
@@ -263,18 +263,18 @@
   <object id="97" x="272" y="652" width="104" height="112"/>
   <object id="98" x="1416" y="136" width="124" height="112"/>
  </objectgroup>
- <objectgroup color="#ff5500" id="10" name="Fence" visible="0" locked="1">
-  <object id="99" x="1593" y="2283">
-   <polyline points="5,-81 4,-780"/>
-  </object>
-  <object id="100" x="3427" y="3905">
-   <polyline points="0,0 697,-3"/>
-  </object>
+ <objectgroup color="#ff5500" id="10" name="Fence">
   <object id="101" x="5056" y="348">
    <polyline points="3,0 0,579"/>
   </object>
   <object id="102" x="88" y="552">
    <polyline points="0,0 467,-460"/>
+  </object>
+  <object id="111" x="1597" y="1502">
+   <polyline points="0,0 -2,700"/>
+  </object>
+  <object id="112" x="4127" y="3899">
+   <polyline points="0,0 -704,3"/>
   </object>
  </objectgroup>
 </map>

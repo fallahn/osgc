@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "GameModes.hpp"
 #include "VehicleSystem.hpp"
 #include "CommandIDs.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -216,6 +217,24 @@ void LobbyState::buildMenu()
     entity.addComponent<xy::Text>(font).setString("No Players");
     entity.getComponent<xy::Text>().setCharacterSize(48);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Lobby::PlayerText;
+
+    //vehicle colours
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(100.f, 244.f);
+    entity.addComponent<xy::Drawable>();
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    float offset = 0.f;
+    const float size = 64.f;
+    for (auto i = 0; i < 4; i++)
+    {
+        verts.emplace_back(sf::Vector2f(0.f, offset), GameConst::PlayerColour::Light[i]);
+        verts.emplace_back(sf::Vector2f(size, offset), GameConst::PlayerColour::Light[i]);
+        verts.emplace_back(sf::Vector2f(size, size + offset), GameConst::PlayerColour::Light[i]);
+        verts.emplace_back(sf::Vector2f(0.f, size + offset), GameConst::PlayerColour::Light[i]);
+
+        offset += size + 52.f;
+    }
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     //lobby info
     entity = m_scene.createEntity();
