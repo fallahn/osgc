@@ -583,6 +583,8 @@ void LobbyState::updateLobbyData(const LobbyData& data)
         e.getComponent<xy::Text>().setString(str);
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    m_sharedData.gameData.lapCount = data.lapCount;
 }
 
 void LobbyState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

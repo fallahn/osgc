@@ -73,6 +73,8 @@ namespace TextureID
             VehicleNormal, VehicleSpecular, VehicleNeon,
             VehicleShadow, VehicleTrail,
 
+            LapProgress, LapPoint,
+
             Count
         };
     }

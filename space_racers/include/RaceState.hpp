@@ -84,6 +84,7 @@ private:
     void buildWorld();
     void addProps();
     void buildUI();
+    void addLapPoint(xy::Entity, sf::Color);
 
     void buildTest();
 
@@ -101,6 +102,7 @@ private:
 
     void showTimer();
     void spawnTrail(xy::Entity, sf::Color);
+    void updateLapLine(std::uint32_t);
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

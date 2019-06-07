@@ -288,6 +288,8 @@ void RaceState::loadResources()
     m_textureIDs[TextureID::Game::VehicleNeon] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_neon.png");
     m_textureIDs[TextureID::Game::VehicleShadow] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_shadow.png");
     m_textureIDs[TextureID::Game::VehicleTrail] = m_resources.load<sf::Texture>("assets/images/vehicles/trail.png");
+    m_textureIDs[TextureID::Game::LapProgress] = m_resources.load<sf::Texture>("assets/images/play_bar.png");
+    m_textureIDs[TextureID::Game::LapPoint] = m_resources.load<sf::Texture>("assets/images/ui_point.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -509,6 +511,43 @@ void RaceState::buildUI()
         }
     };
     entity.addComponent<xy::AudioEmitter>() = m_uiSounds.getEmitter("start");
+
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
+
+    //lap counter
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(40.f, 60.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
+    entity.getComponent<xy::Text>().setCharacterSize(36);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::LapText;
+
+    //lapline
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y - GameConst::LapLineOffset);
+    entity.addComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapProgress]));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    float scale = xy::DefaultSceneSize.x / bounds.width;
+    entity.getComponent<xy::Transform>().setScale(scale, 1.f);
+}
+
+void RaceState::addLapPoint(xy::Entity vehicle, sf::Color colour)
+{
+    auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y - (GameConst::LapLineOffset - 8.f));
+    entity.addComponent<xy::Drawable>().setDepth(1); //TODO each one needs own depth?
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint])).setColour(colour);
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&,vehicle](xy::Entity e, float)
+    {
+        auto position = e.getComponent<xy::Transform>().getPosition();
+        position.x = (vehicle.getComponent<Vehicle>().totalDistance / m_mapParser.getTrackLength()) * xy::DefaultSceneSize.x;
+        e.getComponent<xy::Transform>().setPosition(position);
+    };
 }
 
 void RaceState::buildTest()
@@ -528,6 +567,9 @@ void RaceState::handlePackets()
             switch (packet.getID())
             {
             default: break;
+            case PacketID::LapLine:
+                updateLapLine(packet.as<std::uint32_t>());
+                break;
             case PacketID::RaceTimerStarted:
                 showTimer();
                 break;
@@ -685,6 +727,7 @@ void RaceState::spawnVehicle(const VehicleData& data)
     cameraEntity.getComponent<CameraTarget>().target = entity;
 
     spawnTrail(entity, GameConst::PlayerColour::Light[data.colourID]);
+    addLapPoint(entity, GameConst::PlayerColour::Light[data.colourID]);
 
     //count spawned vehicles and tell server when all are spawned
     m_sharedData.gameData.actorCount--;
@@ -746,7 +789,6 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<CollisionObject>().type = CollisionObject::Type::Vehicle;
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-        //entity.addComponent<xy::Callback>().function = ScaleCallback();
         entity.addComponent<InverseRotation>();
 
         entity.getComponent<Vehicle>().colourID = data.colourID;
@@ -761,6 +803,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
 
         spawnTrail(entity, GameConst::PlayerColour::Light[data.colourID]);
+        addLapPoint(entity, GameConst::PlayerColour::Light[data.colourID]);
 
         {
             auto shadowEnt = m_gameScene.createEntity();
@@ -1001,6 +1044,24 @@ void RaceState::spawnTrail(xy::Entity parent, sf::Color colour)
     trailEnt.addComponent<Trail>().parent = parent;
     trailEnt.getComponent<Trail>().colour = colour;
     trailEnt.addComponent<xy::CommandTarget>().ID = CommandID::Game::Trail;
+}
+
+void RaceState::updateLapLine(std::uint32_t serverID)
+{
+    if (serverID == static_cast<std::uint32_t>(m_playerInput.getPlayerEntity().getComponent<std::int32_t>()))
+    {
+        m_sharedData.gameData.lapCount--;
+
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::LapText;
+        cmd.action = [&](xy::Entity e, float)
+        {
+            e.getComponent<xy::Text>().setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
+        };
+        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
+
+    //TODO play a sound when any vehicle crosses the line
 }
 
 void RaceState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

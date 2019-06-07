@@ -29,7 +29,8 @@ namespace CommandID
 
     enum UI
     {
-        StartLights = 0x1
+        StartLights = 0x1,
+        LapText = 0x2
     };
 
     enum Lobby

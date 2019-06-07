@@ -128,7 +128,6 @@ void RaceState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == VehicleEvent::LapLine)
         {
-            //TODO broadcast this to clients (?)
             for (auto& [peer, connection] : m_players)
             {
                 if (connection.entity == data.entity)
@@ -151,6 +150,9 @@ void RaceState::handleMessage(const xy::Message& msg)
                     break;
                 }
             }
+
+            //let clients know for UI update
+            m_sharedData.netHost.broadcastPacket(PacketID::LapLine, data.entity.getIndex(), xy::NetFlag::Reliable);
         }
     }
 

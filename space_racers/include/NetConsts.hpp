@@ -61,6 +61,7 @@ namespace PacketID
         VehicleExploded, //server id of exploded vehicle
         VehicleFell, //server id of falling vehicle
         VehicleSpawned, //server id of respawning vehicle
+        LapLine, //vehicle with this server ID crossed the ling (uint32)
 
         ErrorServerMap, //server failed to load map
         ErrorServerGeneric, //generic server error

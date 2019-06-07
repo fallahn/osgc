@@ -85,6 +85,11 @@ public:
         return m_barriers;
     }
 
+    float getTrackLength() const
+    {
+        return m_trackLength;
+    }
+
     void renderLayers(std::array<sf::RenderTexture, 2u>&) const;
 
 private:
@@ -93,6 +98,7 @@ private:
     std::int32_t m_waypointCount;
     sf::Vector2f m_startPosition;
     float m_startRotation;
+    float m_trackLength;
     sf::Vector2f m_size;
 
     std::vector<Lightning> m_barriers;

@@ -61,7 +61,9 @@ namespace
 
 MapParser::MapParser(xy::Scene& scene)
     : m_scene(scene),
-    m_waypointCount(0)
+    m_waypointCount(0),
+    m_startRotation(0.f),
+    m_trackLength(0.f)
 {
     m_layers = { nullptr, nullptr, nullptr, nullptr };
 }
@@ -160,6 +162,7 @@ bool MapParser::load(const std::string& path)
     std::vector<WayPoint*> waypoints;
 
     m_waypointCount = 0;
+    m_trackLength = 0.f;
     m_layers = { nullptr, nullptr, nullptr, nullptr };
     if (m_map.load(xy::FileSystem::getResourcePath() + path))
     {
@@ -337,11 +340,14 @@ bool MapParser::load(const std::string& path)
             waypoints[i]->nextPoint = waypoints[i + 1]->nextPoint - waypoints[i]->nextPoint;
             waypoints[i]->distance = xy::Util::Vector::length(waypoints[i]->nextPoint);
             waypoints[i]->nextPoint /= waypoints[i]->distance;
+
+            m_trackLength += waypoints[i]->distance;
         }
         waypoints.back()->nextPoint = m_startPosition - waypoints.back()->nextPoint;
         waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);
         waypoints.back()->nextPoint /= waypoints.back()->distance;
 
+        m_trackLength += waypoints.back()->distance;
         m_startRotation = waypoints.front()->rotation;
 
         //make sure we found all the image layers
