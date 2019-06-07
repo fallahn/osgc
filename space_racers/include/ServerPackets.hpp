@@ -79,6 +79,7 @@ struct VehicleActorUpdate final : ActorUpdate
 {
     float rotation = 0.f;
     std::uint16_t lastInput = 0;
+    std::uint8_t stateFlags = 1;
 
     VehicleActorUpdate() = default;
     VehicleActorUpdate(const ActorUpdate& other)
@@ -103,5 +104,5 @@ struct ClientUpdate final
     float velRot = 0.f;
     std::int32_t clientTimestamp = 0;
     std::uint16_t collisionFlags = 0;
-    std::uint16_t stateFlags = 1;
+    std::uint8_t stateFlags = 1;
 };

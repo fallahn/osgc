@@ -92,11 +92,12 @@ void DeadReckoningSystem::process(float dt)
             {
                 auto& vehicle = entity.getComponent<Vehicle>();
                 vehicle.velocity = newVel;
+                vehicle.stateFlags = dr.update.stateFlags;
                 
                 dr.lastExtrapolatedTimestamp = dr.update.timestamp + (dr.update.timestamp - dr.prevTimestamp);
                 tx.setRotation(dr.update.rotation);
 
-                //apply input - TODO pop this in a func so we don't repeat code below
+                //apply input
                 updateInput(vehicle, dr);
             }
         }

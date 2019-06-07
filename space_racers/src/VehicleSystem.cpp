@@ -280,7 +280,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
                     {
                         vehicle.collisionFlags |= (1 << type);
                         vehicle.stateFlags = (1 << Vehicle::Falling);
-                        vehicle.respawnTime = Vehicle::RespawnDuration;
+                        vehicle.respawnClock.restart();
 
                         auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
                         msg->type = VehicleEvent::Fell;
@@ -454,11 +454,9 @@ void VehicleSystem::updateFalling(xy::Entity entity, float dt)
     tx.rotate(rotation * dt);
     tx.scale(scaleFactor, scaleFactor);
 
-    vehicle.respawnTime -= dt;
-
-    if(vehicle.respawnTime < 0.f)
+    if(vehicle.respawnClock.getElapsedTime().asSeconds() > Vehicle::RespawnDuration)
     {
-        vehicle.respawnTime = Vehicle::RespawnDuration; //just gives a small buffer to prevent mutliple messages
+        vehicle.respawnClock.restart(); //just gives a small buffer to prevent mutliple messages
 
         //raise a message here so that the server can be the arbiter on resetting the vehicle
         auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
@@ -470,13 +468,12 @@ void VehicleSystem::updateFalling(xy::Entity entity, float dt)
 void VehicleSystem::updateExploding(xy::Entity entity, float dt)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
-    vehicle.respawnTime -= dt;
 
     entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
 
-    if (vehicle.respawnTime < 0.f)
+    if (vehicle.respawnClock.getElapsedTime().asSeconds() > Vehicle::RespawnDuration)
     {
-        vehicle.respawnTime = Vehicle::RespawnDuration; //just gives a small buffer to prevent mutliple messages
+        vehicle.respawnClock.restart(); //just gives a small buffer to prevent mutliple messages
 
         //raise a message here so that the server can be the arbiter on resetting the vehicle
         auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
@@ -488,7 +485,7 @@ void VehicleSystem::updateExploding(xy::Entity entity, float dt)
 void VehicleSystem::explode(xy::Entity entity)
 {
     entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
-    entity.getComponent<Vehicle>().respawnTime = Vehicle::RespawnDuration;
+    entity.getComponent<Vehicle>().respawnClock.restart();
     entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Exploding);
 
     auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);

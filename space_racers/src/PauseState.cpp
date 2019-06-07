@@ -83,7 +83,7 @@ bool PauseState::update(float dt)
     m_scene.update(dt);
 
     //TODO return false in non-network games
-    return true;
+    return m_sharedData.netClient != nullptr;
 }
 
 void PauseState::draw()
@@ -116,7 +116,7 @@ void PauseState::buildMenu()
 
     if (m_sharedData.fontID == 0)
     {
-        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggeyClean.ttf");
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
     }
 
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);

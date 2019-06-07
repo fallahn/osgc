@@ -84,7 +84,7 @@ struct Vehicle final
     float invincibleTime = 5.f;
 
     std::uint16_t collisionFlags = 0;
-    std::uint16_t stateFlags = (1 << Disabled);
+    std::uint8_t stateFlags = (1 << Disabled);
 
     xy::Entity currentWaypoint;
     std::int32_t waypointCount = 0;
@@ -97,7 +97,7 @@ struct Vehicle final
 
     //amount of time before respawning vehicle
     static constexpr float RespawnDuration = 1.5f;
-    float respawnTime = RespawnDuration;
+    sf::Clock respawnClock;
 
     bool client = false;
 };

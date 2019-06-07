@@ -77,11 +77,11 @@ void AIDriverSystem::process(float dt)
         float side = lineSide(tx.getPosition(), tx.getPosition() + forwardVec, ai.target);
         if (side > threshold)
         {
-            input.flags |= InputFlag::Right;
+            //input.flags |= InputFlag::Right;
         }
         else if (side < -threshold)
         {
-            input.flags |= InputFlag::Left;
+            //input.flags |= InputFlag::Left;
         }
 
         //adjust acceleration multiplier based on distance to target (ie slow down when nearer)
@@ -92,6 +92,7 @@ void AIDriverSystem::process(float dt)
             distance /= ai.currentWaypoint.getComponent<WayPoint>().distance;
             //TODO modify the  skill amount depending on how near the front / back
             //the AI is in relation to the pack
+            //TODO modify this if another car is close in front
             input.accelerationMultiplier = skills[ai.skill] + ((1.f - skills[ai.skill]) * distance);
         }
 

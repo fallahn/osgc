@@ -746,12 +746,12 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<CollisionObject>().type = CollisionObject::Type::Vehicle;
         entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-        entity.addComponent<xy::Callback>().function = ScaleCallback();
+        //entity.addComponent<xy::Callback>().function = ScaleCallback();
         entity.addComponent<InverseRotation>();
 
         entity.getComponent<Vehicle>().colourID = data.colourID;
         entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
-        //TODO do vehicles want to be properly colliding as vehicles, or net actors?
+        entity.getComponent<Vehicle>().client = true;
 
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
@@ -874,10 +874,10 @@ void RaceState::resetNetVehicle(const VehicleData& data)
         {
             if (e.getComponent<NetActor>().serverID == data.serverID)
             {
-                e.getComponent<xy::Callback>().active = false;
+                /*e.getComponent<xy::Callback>().active = false;*/
+                e.getComponent<xy::Transform>().setPosition(data.x, data.y);
                 e.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
                 e.getComponent<xy::Transform>().setScale(1.f, 1.f);
-                e.getComponent<xy::Transform>().setPosition(data.x, data.y);
 
                 auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
                 msg->type = VehicleEvent::Respawned;
@@ -904,7 +904,7 @@ void RaceState::explodeNetVehicle(std::uint32_t id)
         {
             if (e.getComponent<NetActor>().serverID == id)
             {
-                e.getComponent<xy::Transform>().setScale(0.f, 0.f);
+                //e.getComponent<xy::Transform>().setScale(0.f, 0.f);
 
                 auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
                 msg->type = VehicleEvent::Exploded;
@@ -932,12 +932,23 @@ void RaceState::fallNetVehicle(std::uint32_t id)
         {
             if (e.getComponent<NetActor>().serverID == id)
             {
-                e.getComponent<xy::Callback>().active = true; //performs scaling
+                //e.getComponent<xy::Callback>().active = true; //performs scaling
                 e.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
 
                 auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
                 msg->type = VehicleEvent::Fell;
                 msg->entity = e;
+
+                /*xy::Command cmd2;
+                cmd2.targetFlags = CommandID::Trail;
+                cmd2.action = [e](xy::Entity ent, float)
+                {
+                    if (ent.getComponent<Trail>().parent == e)
+                    {
+                        ent.getComponent<Trail>().parent = {};
+                    }
+                };
+                m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd2);*/
             }
         };
         m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
