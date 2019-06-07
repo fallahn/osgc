@@ -32,7 +32,7 @@ namespace
         return ((direction.x - position.x) * (point.y - position.y) - (direction.y - position.y) * (point.x - position.x));
     }
 
-    const std::array<float, 3u> skills = { 0.9f, 0.7f, 0.5f };
+    const std::array<float, 3u> skills = { 0.9f, 0.7f, 0.4f };
 }
 
 AIDriverSystem::AIDriverSystem(xy::MessageBus& mb)
@@ -77,19 +77,31 @@ void AIDriverSystem::process(float dt)
         float side = lineSide(tx.getPosition(), tx.getPosition() + forwardVec, ai.target);
         if (side > threshold)
         {
-            //input.flags |= InputFlag::Right;
+            input.flags |= InputFlag::Right;
         }
         else if (side < -threshold)
         {
-            //input.flags |= InputFlag::Left;
+            input.flags |= InputFlag::Left;
         }
 
         //adjust acceleration multiplier based on distance to target (ie slow down when nearer)
         input.flags |= InputFlag::Accelerate;
         if (ai.currentWaypoint.isValid())
         {
+            const auto& waypoint = ai.currentWaypoint.getComponent<WayPoint>();
+
             float distance = vehicle.totalDistance - vehicle.waypointDistance;
-            distance /= ai.currentWaypoint.getComponent<WayPoint>().distance;
+            float waypointDistance = waypoint.distance;
+
+            if (distance > waypointDistance / 2.f)
+            {
+                distance /= waypointDistance;
+                distance = 1.f - distance;
+            }
+            else
+            {
+                distance = 1.f;
+            }
             //TODO modify the  skill amount depending on how near the front / back
             //the AI is in relation to the pack
             //TODO modify this if another car is close in front

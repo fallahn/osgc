@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "GameModes.hpp"
 
 #include <xyginext/network/NetData.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <cstring>
 
@@ -70,6 +71,7 @@ LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
         //are always higher than that
         PlayerInfo info;
         info.ready = true;
+        info.vehicle = xy::Util::Random::value(0, 2);
         m_sharedData.playerInfo.insert(std::make_pair(std::numeric_limits<std::uint32_t>::max() + i + 1, info));
     }
 

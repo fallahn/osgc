@@ -85,9 +85,7 @@ void DeadReckoningSystem::process(float dt)
             {
                 entity.getComponent<Asteroid>().setVelocity(newVel);
             }
-            //else if vehicle set vel/rotVel
-            //TODO ideally we want to sync entire state? much like
-            //reconciliation only applying the last known input
+            //else if vehicle sync state and extrapolate
             else
             {
                 auto& vehicle = entity.getComponent<Vehicle>();
@@ -104,8 +102,8 @@ void DeadReckoningSystem::process(float dt)
         
         else
         {
-            //else if vehicle apply current input to vehicle system
-            //while updating timestamp
+            //else if vehicle apply current input to vehicle
+            //while updating timestamp, to allow system to process normally
 
             if (entity.getComponent<NetActor>().actorID != ActorID::Roid)
             {
