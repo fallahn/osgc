@@ -290,6 +290,7 @@ void RaceState::loadResources()
     m_textureIDs[TextureID::Game::VehicleTrail] = m_resources.load<sf::Texture>("assets/images/vehicles/trail.png");
     m_textureIDs[TextureID::Game::LapProgress] = m_resources.load<sf::Texture>("assets/images/play_bar.png");
     m_textureIDs[TextureID::Game::LapPoint] = m_resources.load<sf::Texture>("assets/images/ui_point.png");
+    m_textureIDs[TextureID::Game::Fence] = m_resources.load<sf::Texture>("assets/images/fence.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -442,6 +443,10 @@ void RaceState::buildWorld()
 void RaceState::addProps()
 {
     const auto& barriers = m_mapParser.getBarriers();
+    auto cameraEntity = m_gameScene.getActiveCamera();
+
+    const auto& barrierTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Fence]);
+    auto texSize = sf::Vector2f(barrierTexture.getSize());
 
     for (const auto& b : barriers)
     {
@@ -449,6 +454,25 @@ void RaceState::addProps()
         entity.addComponent<xy::Transform>(); //points are in world space.
         entity.addComponent<xy::Drawable>().setFilterFlags(GameConst::FilterFlags::All);
         entity.addComponent<Lightning>() = b;
+
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(b.start);
+        entity.addComponent<xy::Drawable>().setDepth(1000);
+        entity.getComponent<xy::Drawable>().setTexture(&barrierTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = 40.f;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+        verts.emplace_back(sf::Vector2f(), sf::Color::White, sf::Vector2f());
+        verts.emplace_back(sf::Vector2f(b.end - b.start), sf::Color::White, sf::Vector2f(texSize.x, 0.f));
+        verts.emplace_back(sf::Vector2f(b.end - b.start), sf::Color::Black, texSize);
+        verts.emplace_back(sf::Vector2f(), sf::Color::Black, sf::Vector2f(0.f, texSize.y));
+
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+
     }
 
     auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
@@ -459,17 +483,15 @@ void RaceState::addProps()
     entity.addComponent<xy::Drawable>().setDepth(1000);
     entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
-
-    auto cameraEntity = m_gameScene.getActiveCamera();
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = 50.f;
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     sf::Color c(0, 0, 0);
-    auto texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
+    texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
 
     for (auto i = 0; i <= 255; i += 85)
     {

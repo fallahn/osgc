@@ -72,7 +72,7 @@ namespace TextureID
             RoidShadow,
             VehicleNormal, VehicleSpecular, VehicleNeon,
             VehicleShadow, VehicleTrail,
-
+            Fence,
             LapProgress, LapPoint,
 
             Count

@@ -30,7 +30,7 @@ struct Camera3D final
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 viewProjectionMatrix;
-    static constexpr float depth = 2000.f;
+    static constexpr float depth = 400.f;
 
     static float calcFOV(float viewYHeight)
     {
