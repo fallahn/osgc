@@ -1078,7 +1078,14 @@ void RaceState::updateLapLine(std::uint32_t serverID)
         cmd.targetFlags = CommandID::LapText;
         cmd.action = [&](xy::Entity e, float)
         {
-            e.getComponent<xy::Text>().setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
+            if (m_sharedData.gameData.lapCount == 1)
+            {
+                e.getComponent<xy::Text>().setString("Final Lap");
+            }
+            else
+            {
+                e.getComponent<xy::Text>().setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
+            }
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }

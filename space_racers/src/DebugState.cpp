@@ -60,6 +60,8 @@ namespace
         float drag = 0.877f; //multiplier
         float acceleration = 84.f; //units per second
 
+        float accelStr = 2.f;
+
         float maxSpeed = 1010.f;
     };
     std::array<VehicleTest, 3> vehicles = { };
@@ -130,6 +132,7 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
             xy::Nim::separator();
             xy::Nim::slider("Angular Drag", vehicles[vehicleIndex].angularDrag, 0.f, 0.995f);
             xy::Nim::slider("Turn Speed", vehicles[vehicleIndex].turnSpeed, 0.1f, 1.5f);
+            xy::Nim::slider("Accel Strength", vehicles[vehicleIndex].accelStr, 1.f, 3.f);
 
             auto oldIndex = vehicleIndex;
             xy::Nim::simpleCombo("Vehicle", vehicleIndex, "Car\0Bike\0Ship\0\0");
@@ -155,7 +158,7 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
             if (xy::Nim::button("Generate"))
             {
-                auto output = xy::FileSystem::saveFileDialogue(xy::FileSystem::getResourcePath(), "hpp");
+                /*auto output = xy::FileSystem::saveFileDialogue(xy::FileSystem::getResourcePath(), "hpp");
                 if (!output.empty())
                 {
                     if (xy::FileSystem::getFileExtension(output) != ".hpp")
@@ -163,7 +166,8 @@ DebugState::DebugState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                         output += ".hpp";
                     }
                     writeHeader(output);
-                }
+                }*/
+                xy::Logger::log("I broke this don't use it!!");
             }
 
             xy::Nim::sameLine();
@@ -269,6 +273,7 @@ bool DebugState::update(float dt)
         v.settings.angularDrag = vehicles[vehicleIndex].angularDrag;
         v.settings.drag = vehicles[vehicleIndex].drag;
         v.settings.turnSpeed = vehicles[vehicleIndex].turnSpeed;
+        v.settings.accelStrength = vehicles[vehicleIndex].accelStr;
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 

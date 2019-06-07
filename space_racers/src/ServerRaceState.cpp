@@ -421,7 +421,7 @@ bool RaceState::loadMap()
     m_scene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
 
     //create some roids
-    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);
+    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 2);
     for (auto position : positions)
     {
         auto entity = m_scene.createEntity();

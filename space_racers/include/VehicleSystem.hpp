@@ -43,6 +43,8 @@ struct Vehicle final
     sf::Vector2f velocity;
     float anglularVelocity = 0.f; //rads
 
+    float accelerationMultiplier = 0.f; //from 0 - 1 in X seconds before reaching top speed
+
     //TODO we might have to sync these - but as they're
     //based on collision flags (which are sync'd) maybe not
     //float currentDrag = 0.f;
@@ -53,8 +55,8 @@ struct Vehicle final
     struct Settings final
     {
         Settings() {};
-        Settings(float ad, float ts, float d, float a)
-            : angularDrag(ad), turnSpeed(ts), drag(d), acceleration(a) {}
+        Settings(float ad, float ts, float d, float a, float as)
+            : angularDrag(ad), turnSpeed(ts), drag(d), acceleration(a), accelStrength(as) {}
 
         float angularDrag = 0.8f;
         float turnSpeed = 0.717f; //rads per second
@@ -65,6 +67,7 @@ struct Vehicle final
         float maxSpeedSqr() { auto speed = maxSpeed(); return speed * speed; }
 
         static constexpr float brakeStrength = 0.92f; //multiplier
+        float accelStrength = 2.f; //how quickly the acceleration reaches top speed
     }settings;
 
     enum Type
@@ -116,7 +119,7 @@ private:
 
     void processVehicle(xy::Entity, float);
 
-    void processInput(xy::Entity);
+    void processInput(xy::Entity, float);
     void applyInput(xy::Entity, float);
 
     float getDelta(const History&, std::size_t);

@@ -140,7 +140,7 @@ void VehicleSystem::processVehicle(xy::Entity entity, float delta)
     {
     default: break;
     case (1 << Vehicle::Normal):
-        processInput(entity);
+        processInput(entity, delta);
     //this is meant to fall through
     case (1 << Vehicle::Disabled):
         applyInput(entity, delta);
@@ -164,7 +164,7 @@ void VehicleSystem::processVehicle(xy::Entity entity, float delta)
     }
 }
 
-void VehicleSystem::processInput(xy::Entity entity)
+void VehicleSystem::processInput(xy::Entity entity, float delta)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
     auto input = vehicle.history[vehicle.lastUpdatedInput];
@@ -173,7 +173,12 @@ void VehicleSystem::processInput(xy::Entity entity)
     auto acceleration = 0.f;
     if (input.flags & InputFlag::Accelerate)
     {
-        acceleration += vehicle.settings.acceleration * input.accelerationMultiplier;
+        vehicle.accelerationMultiplier = std::min(1.f, vehicle.accelerationMultiplier + (delta * vehicle.settings.accelStrength));
+        acceleration += vehicle.settings.acceleration * input.accelerationMultiplier * vehicle.accelerationMultiplier;
+    }
+    else
+    {
+        vehicle.accelerationMultiplier = 0.f;
     }
 
     if (input.flags & InputFlag::Reverse)
@@ -449,6 +454,7 @@ void VehicleSystem::updateFalling(xy::Entity entity, float dt)
 
     tx.move(vehicle.velocity * dt);
     vehicle.velocity *= scaleFactor;
+    vehicle.accelerationMultiplier = 0.f;
 
     const float rotation = vehicle.anglularVelocity > 0 ? 840.f : -840.f;
     tx.rotate(rotation * dt);
@@ -468,6 +474,7 @@ void VehicleSystem::updateFalling(xy::Entity entity, float dt)
 void VehicleSystem::updateExploding(xy::Entity entity, float dt)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
+    vehicle.accelerationMultiplier = 0.f;
 
     entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
 

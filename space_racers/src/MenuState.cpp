@@ -713,7 +713,7 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
-    entity.addComponent<VehicleSelect>();
+    entity.addComponent<VehicleSelect>().index = m_sharedData.localPlayers[0].vehicle;
     entity.addComponent<xy::UIHitBox>().area = MenuConst::VehicleSelectArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
