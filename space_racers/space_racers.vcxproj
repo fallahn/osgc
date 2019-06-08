@@ -200,6 +200,7 @@
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSelectSystem.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
+    <ClInclude Include="include\VertexFunctions.hpp" />
     <ClInclude Include="include\VFXDirector.hpp" />
     <ClInclude Include="include\WayPoint.hpp" />
   </ItemGroup>
@@ -240,6 +241,7 @@
     <ClCompile Include="src\TrailSystem.cpp" />
     <ClCompile Include="src\VehicleSelectSystem.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
+    <ClCompile Include="src\VertexFunctions.cpp" />
     <ClCompile Include="src\VFXDirector.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,3 +1,5 @@
+**While this document holds mainly true some of the  data sstructures have since changed and this document has not been updated to reflect those changes**
+
 A few notes on things I'm bound to forget:
 
 ##### Lobby Initialisation

@@ -33,7 +33,7 @@ uniform mat4 u_modelMat;
 void main()
 {
     vec4 worldPos = u_modelMat * gl_Vertex;
-    worldPos.z *= gl_Color.r;
+    worldPos.z *= gl_Color.a;
 
     gl_Position = u_viewProjMat * worldPos;
 
@@ -59,5 +59,5 @@ R"(
 
 void main()
 {
-    gl_FragColor = vec4(0.4, 0.4, 0.4, 1.0);// gl_Color;
+    gl_FragColor = vec4(gl_Color.rgb, 1.0);
 })";

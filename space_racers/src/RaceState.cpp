@@ -38,6 +38,7 @@ Copyright 2019 Matt Marchant
 #include "InverseRotationSystem.hpp"
 #include "TrailSystem.hpp"
 #include "LapDotSystem.hpp"
+#include "VertexFunctions.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -467,16 +468,7 @@ void RaceState::addProps()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-        sf::Vector2f offset = xy::Util::Vector::normalise(b.end - b.start);
-        offset = { offset.y, -offset.x };
-        offset *= 40.f;
-
-        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        verts.emplace_back(sf::Vector2f() + offset, sf::Color::White, sf::Vector2f());
-        verts.emplace_back(sf::Vector2f(b.end - b.start) + offset, sf::Color::White, sf::Vector2f(texSize.x, 0.f));
-        verts.emplace_back(sf::Vector2f(b.end - b.start), sf::Color::Black, texSize);
-        verts.emplace_back(sf::Vector2f(), sf::Color::Black, sf::Vector2f(0.f, texSize.y));
-
+        entity.getComponent<xy::Drawable>().getVertices() = createBillboard(b.start, b.end, entity.getComponent<Sprite3D>().depth, texSize);
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     }
@@ -495,19 +487,8 @@ void RaceState::addProps()
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-    sf::Color c(0, 0, 0);
     texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
-
-    for (auto i = 0; i <= 255; i += 85)
-    {
-        c.r += i;
-
-        verts.emplace_back(-texSize, c, sf::Vector2f(0.f, 0.f));
-        verts.emplace_back(sf::Vector2f(texSize.x, -texSize.y), c, sf::Vector2f(texSize.x, 0.f));
-        verts.emplace_back(texSize, c, texSize);
-        verts.emplace_back(sf::Vector2f(-texSize.x, texSize.y), c, sf::Vector2f(0.f, texSize.y));
-    }
+    entity.getComponent<xy::Drawable>().getVertices() = createStartField(texSize.x, entity.getComponent<Sprite3D>().depth);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 }

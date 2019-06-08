@@ -8,6 +8,7 @@ OSGC is a frontend built with the [xygine](https://github.com/fallahn/xygine) li
 
 All games are open source, and come with the caveat that, well, most of them probably aren't very good. In fact they'll most likely be incomplete experiments. There may be a few gems, however, and I'm hoping that the open source nature will eventually encourage others to contribute to the games they like, or even write their own game plugins.
 
+**Binary downloads can be found on [itch.io](https://fallahn.itch.io/) !!**
 
 ##### Getting Started
 Dependencies: You'll need to have at least SFML 2.5.x built and installed as well as [xygine](https://github.com/fallahn/xygine) to build the frontend. Different plugins may require further libraries, for example the Drone Drop plugin also requires [tmxlite](https://github.com/fallahn/tmxlite). Use the `CMakeLists.txt` in the root of the repository to create project files for your build chain of choice - OSGC is frequently tested on Windows, linux and macOS with Visual Studio, gcc and Apple clang. Note that the cmake file will attempt to copy all of the assets folders to create the correct directory layout (below) and place the binary files in the correct directories, although this isn't gauranteed on all platforms. Symlinks (mklink on Windows) to asset directories can be used as effectively while developing a plugin.

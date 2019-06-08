@@ -38,5 +38,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/TrailSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSelectSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/VertexFunctions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VFXDirector.cpp
   PARENT_SCOPE)
