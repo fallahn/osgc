@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="106">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="114">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="../images/tiles/diffuse.png" width="1024" height="640"/>
  </tileset>
@@ -203,9 +203,9 @@
   <object id="104" x="1152" y="2752" width="2112" height="480"/>
   <object id="105" x="2624" y="3264" width="1472" height="96"/>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision" visible="0" locked="1">
+ <objectgroup color="#ffff00" id="8" name="Collision" locked="1">
   <object id="36" x="2434" y="3716" width="125" height="125"/>
-  <object id="38" x="1174" y="768" width="76" height="1483"/>
+  <object id="38" x="1144" y="768" width="76" height="1483"/>
   <object id="39" x="5022" y="3228" width="70" height="72"/>
   <object id="40" x="4258" y="4000" width="66" height="66"/>
   <object id="41" x="1163" y="3465" width="108" height="109"/>
@@ -216,6 +216,8 @@
   <object id="49" x="525" y="2825" width="104" height="104"/>
   <object id="54" x="2" y="754" width="60" height="76"/>
   <object id="55" x="574" y="750" width="74" height="88"/>
+  <object id="110" x="580" y="1407" width="52" height="583"/>
+  <object id="111" x="10" y="1731" width="52" height="583"/>
  </objectgroup>
  <objectgroup color="#ffffff" id="9" name="Jump" visible="0" locked="1">
   <object id="57" x="128" y="1796" width="380" height="112"/>
@@ -249,18 +251,36 @@
   <object id="85" x="268" y="2828" width="100" height="104"/>
   <object id="86" x="260" y="2564" width="120" height="120"/>
  </objectgroup>
- <objectgroup id="10" name="Fence" visible="0" locked="1">
-  <object id="87" x="1887" y="2111">
+ <objectgroup id="10" name="Props">
+  <object id="87" type="fence" x="1887" y="2111">
    <polyline points="0,0 583,3"/>
   </object>
-  <object id="88" x="572" y="2911">
+  <object id="88" type="fence" x="572" y="2911">
    <polyline points="0,0 4,449"/>
   </object>
-  <object id="89" x="675" y="3495">
-   <polyline points="0,0 -81,-77"/>
+  <object id="89" type="fence" x="675" y="3495">
+   <polyline points="-76,-76 7,3"/>
   </object>
-  <object id="90" x="733" y="3521">
+  <object id="90" type="fence" x="733" y="3521">
    <polyline points="0,0 447,-7"/>
+  </object>
+  <object id="106" type="barrier" x="1218" y="2252">
+   <polyline points="0,0 3,-1482"/>
+  </object>
+  <object id="107" type="chevron" x="2615" y="767">
+   <polyline points="0,0 467,-455"/>
+  </object>
+  <object id="108" type="chevron" x="4603" y="321">
+   <polyline points="0,0 406,409"/>
+  </object>
+  <object id="109" type="chevron" x="58" y="385">
+   <polyline points="0,0 339,-333"/>
+  </object>
+  <object id="112" type="barrier" x="63" y="2313">
+   <polyline points="0,0 0,-578"/>
+  </object>
+  <object id="113" type="barrier" x="579" y="1409">
+   <polyline points="0,0 1,572"/>
   </object>
  </objectgroup>
 </map>

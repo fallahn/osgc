@@ -80,7 +80,17 @@ public:
         return m_size;
     }
 
-    const std::vector<Lightning>& getBarriers() const
+    const std::vector<Lightning>& getFences() const
+    {
+        return m_fences;
+    }
+
+    const std::vector<std::pair<sf::Vector2f, sf::Vector2f>>& getChevrons() const
+    {
+        return m_chevrons;
+    }
+
+    const std::vector<std::pair<sf::Vector2f, sf::Vector2f>>& getBarriers() const
     {
         return m_barriers;
     }
@@ -101,7 +111,9 @@ private:
     float m_trackLength;
     sf::Vector2f m_size;
 
-    std::vector<Lightning> m_barriers;
+    std::vector<Lightning> m_fences;
+    std::vector<std::pair<sf::Vector2f, sf::Vector2f>> m_chevrons;
+    std::vector<std::pair<sf::Vector2f, sf::Vector2f>> m_barriers;
 
     tmx::Map m_map;
     enum LayerID

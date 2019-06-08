@@ -122,7 +122,7 @@ std::vector<sf::Vertex> createBillboard(sf::Vector2f start, sf::Vector2f end, fl
 
     sf::Vector2f offset = xy::Util::Vector::normalise(edge);
     offset = { offset.y, -offset.x };
-    offset *= 40.f;
+    offset *= (height * 2.f);
 
     std::vector<sf::Vector3f> positions;
     std::vector<sf::Vector2f> UVs;

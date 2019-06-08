@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="96">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="102">
  <tileset firstgid="1" name="neon" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="../images/tiles/neon.png" width="1024" height="640"/>
  </tileset>
@@ -200,7 +200,7 @@
    <polygon points="0,0 1312,1280 1312,0"/>
   </object>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision" visible="0" locked="1">
+ <objectgroup color="#ffff00" id="8" name="Collision" locked="1">
   <object id="41" x="2580" y="1027" width="108" height="110"/>
   <object id="42" x="2576" y="1550" width="104" height="104"/>
   <object id="43" x="1416" y="1034" width="114" height="118"/>
@@ -213,6 +213,8 @@
   <object id="56" x="3488" y="2335" width="64" height="63"/>
   <object id="57" x="3469" y="2442" width="102" height="105"/>
   <object id="58" x="2715" y="1566" width="71" height="67"/>
+  <object id="98" x="2430" y="4508" width="900" height="34"/>
+  <object id="99" x="2432" y="5054" width="896" height="34"/>
  </objectgroup>
  <objectgroup color="#ffffff" id="9" name="Jump" visible="0" locked="1">
   <object id="64" x="1024" y="124" width="132" height="260"/>
@@ -239,24 +241,36 @@
   <object id="85" x="780" y="4104" width="116" height="116"/>
   <object id="86" x="400" y="3852" width="104" height="116"/>
  </objectgroup>
- <objectgroup color="#00aaff" id="10" name="Fence" visible="0" locked="1">
-  <object id="87" x="861" y="447">
-   <polyline points="0,0 709,4"/>
+ <objectgroup color="#00aaff" id="10" name="Props">
+  <object id="87" type="fence" x="861" y="447">
+   <polyline points="688,1 24,-1"/>
   </object>
-  <object id="88" x="1621" y="467">
-   <polyline points="0,0 221,227"/>
+  <object id="88" type="fence" x="1621" y="467">
+   <polyline points="201,197 20,18"/>
   </object>
-  <object id="89" x="2681" y="1599">
-   <polyline points="0,0 43,1"/>
+  <object id="89" type="fence" x="2681" y="1599">
+   <polyline points="36,3 2,1"/>
   </object>
-  <object id="90" x="2776" y="1624">
-   <polyline points="0,0 719,717"/>
+  <object id="90" type="fence" x="2776" y="1624">
+   <polyline points="717,714 12,9"/>
   </object>
-  <object id="91" x="3515" y="2460">
-   <polyline points="0,0 3,-61"/>
+  <object id="91" type="fence" x="3515" y="2460">
+   <polyline points="7,-19 7,-57"/>
   </object>
-  <object id="92" x="595" y="678">
-   <polyline points="207,-213 -11,-3"/>
+  <object id="92" type="fence" x="595" y="678">
+   <polyline points="193,-200 20,-27"/>
+  </object>
+  <object id="96" type="chevron" x="150" y="4006">
+   <polyline points="0,0 2,-592"/>
+  </object>
+  <object id="97" type="chevron" x="4039" y="4821">
+   <polyline points="0,0 -231,240"/>
+  </object>
+  <object id="100" type="barrier" x="2432" y="4548">
+   <polyline points="0,0 896,-2"/>
+  </object>
+  <object id="101" type="barrier" x="3330" y="5056">
+   <polyline points="0,0 -898,2"/>
   </object>
  </objectgroup>
 </map>

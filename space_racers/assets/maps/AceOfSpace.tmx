@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="113">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="118">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="../images/tiles/diffuse.png" width="1024" height="640"/>
  </tileset>
@@ -206,7 +206,7 @@
    <polygon points="118,-4 544,0 538,-444"/>
   </object>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision" visible="0">
+ <objectgroup color="#ffff00" id="8" name="Collision" locked="1">
   <object id="41" x="2561" y="770" width="125" height="125"/>
   <object id="42" x="3203" y="3458" width="124" height="125"/>
   <object id="43" x="2049" y="3458" width="124" height="123"/>
@@ -263,18 +263,33 @@
   <object id="97" x="272" y="652" width="104" height="112"/>
   <object id="98" x="1416" y="136" width="124" height="112"/>
  </objectgroup>
- <objectgroup color="#ff5500" id="10" name="Fence">
-  <object id="101" x="5056" y="348">
+ <objectgroup color="#ff5500" id="10" name="Props">
+  <object id="101" type="fence" x="5056" y="348">
    <polyline points="3,0 0,579"/>
   </object>
-  <object id="102" x="88" y="552">
+  <object id="102" type="fence" x="88" y="552">
    <polyline points="0,0 467,-460"/>
   </object>
-  <object id="111" x="1597" y="1502">
+  <object id="111" type="fence" x="1597" y="1502">
    <polyline points="0,0 -2,700"/>
   </object>
-  <object id="112" x="4127" y="3899">
+  <object id="112" type="fence" x="4127" y="3899">
    <polyline points="0,0 -704,3"/>
+  </object>
+  <object id="113" type="chevron" x="3200" y="255">
+   <polyline points="0,0 0,703"/>
+  </object>
+  <object id="114" type="chevron" x="3845" y="2997">
+   <polyline points="0,0 -357,367"/>
+  </object>
+  <object id="115" type="barrier" x="1024" y="48">
+   <polyline points="-2,20 1412,19"/>
+  </object>
+  <object id="116" type="barrier" x="2430" y="585">
+   <polyline points="4,-21 -1407,-21"/>
+  </object>
+  <object id="117" type="barrier" x="321" y="4031">
+   <polyline points="0,0 -255,-256"/>
   </object>
  </objectgroup>
 </map>

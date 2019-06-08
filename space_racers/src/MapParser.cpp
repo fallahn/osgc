@@ -43,7 +43,7 @@ namespace
 {
     const std::array<std::string, CollisionObject::Type::Count> ObjectLayers =
     {
-        "collision", "killzone", "space", "waypoints", "jump", "fence", "vehicle", "roid"
+        "collision", "killzone", "space", "waypoints", "jump", "props", "vehicle", "roid"
     };
     
     const std::array<sf::Color, CollisionObject::Type::Count> colours =
@@ -184,19 +184,31 @@ bool MapParser::load(const std::string& path)
                             switch (i)
                             {
                             default: break;
-                            case CollisionObject::Fence:
+                            case CollisionObject::Prop:
                             {
                                 if (obj.getShape() == tmx::Object::Shape::Polyline)
                                 {
                                     const auto& points = obj.getPoints();
                                     if (points.size() == 2)
                                     {
-                                        Lightning lightning;
                                         auto start = obj.getPosition() + points[0];
                                         auto end = obj.getPosition() + points[1];
-                                        lightning.start = { start.x, start.y };
-                                        lightning.end = { end.x, end.y };
-                                        m_barriers.push_back(lightning);
+
+                                        if (obj.getType() == "fence")
+                                        {
+                                            Lightning lightning;
+                                            lightning.start = { start.x, start.y };
+                                            lightning.end = { end.x, end.y };
+                                            m_fences.push_back(lightning);
+                                        }
+                                        else if (obj.getType() == "chevron")
+                                        {
+                                            m_chevrons.emplace_back(std::make_pair(sf::Vector2f(start.x, start.y), sf::Vector2f(end.x, end.y)));
+                                        }
+                                        else if (obj.getType() == "barrier")
+                                        {
+                                            m_barriers.emplace_back(std::make_pair(sf::Vector2f(start.x, start.y), sf::Vector2f(end.x, end.y)));
+                                        }
                                     }
                                 }
                             }

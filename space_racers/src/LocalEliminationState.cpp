@@ -506,47 +506,7 @@ bool LocalEliminationState::loadMap()
 
 void LocalEliminationState::addProps()
 {
-    const auto& barriers = m_mapParser.getBarriers();
-
-    for (const auto& b : barriers)
-    {
-        auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>(); //points are in world space.
-        entity.addComponent<xy::Drawable>().setFilterFlags(GameConst::FilterFlags::All);
-        entity.addComponent<Lightning>() = b;
-    }
-
-    auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
-    m_resources.get<sf::Texture>(temp).setSmooth(true);
-
-    auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
-    entity.addComponent<xy::Drawable>().setDepth(1000);
-    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
-
-    auto cameraEntity = m_gameScene.getActiveCamera();
-    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.addComponent<Sprite3D>(m_matrixPool).depth = 200.f;
-    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
-    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-
-    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-    sf::Color c(0, 0, 0);
-    auto texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
-
-    for (auto i = 0; i <= 255; i += 85)
-    {
-        c.r += i;
-
-        verts.emplace_back(-texSize, c, sf::Vector2f(0.f, 0.f));
-        verts.emplace_back(sf::Vector2f(texSize.x, -texSize.y), c, sf::Vector2f(texSize.x, 0.f));
-        verts.emplace_back(texSize, c, texSize);
-        verts.emplace_back(sf::Vector2f(-texSize.x, texSize.y), c, sf::Vector2f(0.f, texSize.y));
-    }
-
-    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    
 }
 
 void LocalEliminationState::buildUI()
