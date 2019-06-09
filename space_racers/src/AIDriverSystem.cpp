@@ -40,8 +40,6 @@ AIDriverSystem::AIDriverSystem(xy::MessageBus& mb)
 {
     requireComponent<AIDriver>();
     requireComponent<Vehicle>();
-
-    ft::init();
 }
 
 //public

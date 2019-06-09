@@ -253,16 +253,16 @@
  </objectgroup>
  <objectgroup id="10" name="Props">
   <object id="87" type="fence" x="1887" y="2111">
-   <polyline points="0,0 583,3"/>
+   <polyline points="-27,0 608,2"/>
   </object>
   <object id="88" type="fence" x="572" y="2911">
-   <polyline points="0,0 4,449"/>
+   <polyline points="4,-31 5,480"/>
   </object>
   <object id="89" type="fence" x="675" y="3495">
-   <polyline points="-76,-76 7,3"/>
+   <polyline points="-97,-103 28,26"/>
   </object>
   <object id="90" type="fence" x="733" y="3521">
-   <polyline points="0,0 447,-7"/>
+   <polyline points="-27,-1 483,-2"/>
   </object>
   <object id="106" type="barrier" x="1218" y="2252">
    <polyline points="0,0 3,-1482"/>

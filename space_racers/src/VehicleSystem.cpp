@@ -48,10 +48,6 @@ VehicleSystem::VehicleSystem(xy::MessageBus& mb)
     requireComponent<Vehicle>();
     requireComponent<xy::Transform>();
     requireComponent<xy::BroadphaseComponent>();
-
-#ifdef FAST_SIN
-    ft::init();
-#endif
 }
 
 //public

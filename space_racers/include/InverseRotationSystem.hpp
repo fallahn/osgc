@@ -86,8 +86,6 @@ public:
     {
         requireComponent<xy::Transform>();
         requireComponent<InverseRotation>();
-
-        ft::init();
     }
 
     void process(float)

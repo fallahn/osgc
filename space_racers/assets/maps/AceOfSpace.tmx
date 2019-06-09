@@ -265,13 +265,13 @@
  </objectgroup>
  <objectgroup color="#ff5500" id="10" name="Props">
   <object id="101" type="fence" x="5056" y="348">
-   <polyline points="3,0 0,579"/>
+   <polyline points="1,-27 1,612"/>
   </object>
   <object id="102" type="fence" x="88" y="552">
-   <polyline points="0,0 467,-460"/>
+   <polyline points="-22,24 488,-485"/>
   </object>
   <object id="111" type="fence" x="1597" y="1502">
-   <polyline points="0,0 -2,700"/>
+   <polyline points="4,-28 4,739"/>
   </object>
   <object id="112" type="fence" x="4127" y="3899">
    <polyline points="0,0 -704,3"/>

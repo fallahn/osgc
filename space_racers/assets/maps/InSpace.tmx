@@ -243,22 +243,22 @@
  </objectgroup>
  <objectgroup color="#00aaff" id="10" name="Props">
   <object id="87" type="fence" x="861" y="447">
-   <polyline points="688,1 24,-1"/>
+   <polyline points="736,3 -27,1"/>
   </object>
   <object id="88" type="fence" x="1621" y="467">
-   <polyline points="201,197 20,18"/>
+   <polyline points="233,237 -23,-18"/>
   </object>
   <object id="89" type="fence" x="2681" y="1599">
-   <polyline points="36,3 2,1"/>
+   <polyline points="69,2 2,1"/>
   </object>
   <object id="90" type="fence" x="2776" y="1624">
-   <polyline points="717,714 12,9"/>
+   <polyline points="743,745 -24,-22"/>
   </object>
   <object id="91" type="fence" x="3515" y="2460">
-   <polyline points="7,-19 7,-57"/>
+   <polyline points="7,36 6,-88"/>
   </object>
   <object id="92" type="fence" x="595" y="678">
-   <polyline points="193,-200 20,-27"/>
+   <polyline points="235,-228 -19,26"/>
   </object>
   <object id="96" type="chevron" x="150" y="4006">
    <polyline points="0,0 2,-592"/>

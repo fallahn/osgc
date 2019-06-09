@@ -24,19 +24,47 @@ Copyright 2019 Matt Marchant
 #include <cstdint>
 #include <vector>
 
-namespace ft
+class ft
 {
+public:
 
-    static const std::int32_t MAX_CIRCLE_ANGLE = 512;
-    static const std::int32_t HALF_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE / 2);
-    static const std::int32_t QUARTER_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE / 4);
-    static const std::int32_t MASK_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE - 1);
-    static constexpr float PI = 3.14159265358979323846f;
+    static float sin(float n)
+    {
+        return instance().getSin(n);
+    }
 
-    static std::vector<float> table;
+    static float cos(float n)
+    {
+        return instance().getCos(n);
+    }
+
+    ft(const ft&) = delete;
+    ft(ft&&) = delete;
+
+    const ft& operator = (const ft&) = delete;
+    ft& operator = (ft&&) = delete;
+
+private:
+
+    ft() { init(); }
+
+    static ft& instance()
+    {
+        static ft instance;
+
+        return instance;
+    }
+
+    const std::int32_t MAX_CIRCLE_ANGLE = 512;
+    const std::int32_t HALF_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE / 2);
+    const std::int32_t QUARTER_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE / 4);
+    const std::int32_t MASK_MAX_CIRCLE_ANGLE = (MAX_CIRCLE_ANGLE - 1);
+    const float PI = 3.14159265358979323846f;
+
+    std::vector<float> m_table;
 
     //copied from NVidia web site
-    static inline void FloatToInt(int* int_pointer, float f)
+    inline void FloatToInt(int* int_pointer, float f) const
     {
         //__asm  fld  f
         //__asm  mov  edx, int_pointer
@@ -48,44 +76,44 @@ namespace ft
         *int_pointer = static_cast<int>(f);
     }
 
-    static inline void init()
+    void init()
     {
-        if (table.empty())
+        if (m_table.empty())
         {
             for (auto i = 0; i < MAX_CIRCLE_ANGLE; i++)
             {
-                table.emplace_back(static_cast<float>(std::sin(static_cast<double>(i * PI / HALF_MAX_CIRCLE_ANGLE))));
+                m_table.emplace_back(static_cast<float>(std::sin(static_cast<double>(i * PI / HALF_MAX_CIRCLE_ANGLE))));
             }
         }
     }
 
-    static inline float cos(float n)
+    float getCos(float n) const
     {
         float f = n * HALF_MAX_CIRCLE_ANGLE / PI;
         int i;
         FloatToInt(&i, f);
         if (i < 0)
         {
-            return table[((-i) + QUARTER_MAX_CIRCLE_ANGLE) & MASK_MAX_CIRCLE_ANGLE];
+            return m_table[((-i) + QUARTER_MAX_CIRCLE_ANGLE) & MASK_MAX_CIRCLE_ANGLE];
         }
         else
         {
-            return table[(i + QUARTER_MAX_CIRCLE_ANGLE) & MASK_MAX_CIRCLE_ANGLE];
+            return m_table[(i + QUARTER_MAX_CIRCLE_ANGLE) & MASK_MAX_CIRCLE_ANGLE];
         }
     }
 
-    static inline float sin(float n)
+    float getSin(float n) const
     {
         float f = n * HALF_MAX_CIRCLE_ANGLE / PI;
         int i;
         FloatToInt(&i, f);
         if (i < 0)
         {
-            return table[(-((-i) & MASK_MAX_CIRCLE_ANGLE)) + MAX_CIRCLE_ANGLE];
+            return m_table[(-((-i) & MASK_MAX_CIRCLE_ANGLE)) + MAX_CIRCLE_ANGLE];
         }
         else
         {
-            return table[i & MASK_MAX_CIRCLE_ANGLE];
+            return m_table[i & MASK_MAX_CIRCLE_ANGLE];
         }
     }
-}
+};
