@@ -140,4 +140,5 @@ namespace GameConst
     static const float ChevronHeight = 40.f;
     static const float BarrierHeight = 10.f;
     static const float PylonHeight = 35.f;
+    static const float BollardHeight = 42.f;
 }

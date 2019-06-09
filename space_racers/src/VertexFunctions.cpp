@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Vector.hpp>
 
 #include <algorithm>
+#include <cmath>
 
 std::vector<sf::Vertex> convertData(std::vector<sf::Vector3f>& positions, const std::vector<sf::Vector3f>& normals, const std::vector<sf::Vector2f>& UVs)
 {
@@ -194,6 +195,51 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
     UVs.emplace_back(texSize.x, 0.f);
     UVs.emplace_back(texSize);
 
+
+    return convertData(positions, {}, UVs);
+}
+
+std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float height)
+{
+    const float sides = 8.f;
+    const float step = xy::Util::Const::TAU / sides;
+
+    std::vector<sf::Vector2f> points;
+    for (auto i = 0.f; i < xy::Util::Const::TAU; i += step)
+    {
+        points.emplace_back(std::cos(i), std::sin(i));
+        points.back() *= radius;
+    }
+
+    std::vector<sf::Vector3f> positions;
+    std::vector<sf::Vector2f> UVs;
+
+    //create a base first to draw the shadow
+    positions.emplace_back(-texSize.x, -texSize.x, 0.f);
+    positions.emplace_back(texSize.x, -texSize.x, 0.f);
+    positions.emplace_back(texSize.x, texSize.x, 0.f);
+    positions.emplace_back(-texSize.x, texSize.x, 0.f);
+
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize.x, texSize.x);
+    UVs.emplace_back(0.f, texSize.x);
+
+    //then create the sides
+    for (auto i = 0u; i < points.size(); ++i)
+    {
+        std::size_t next = (i + 1) % points.size();
+
+        positions.emplace_back(points[i].x, points[i].y, height);
+        positions.emplace_back(points[next].x, points[next].y, height);
+        positions.emplace_back(points[next].x * 2.f, points[next].y * 2.f, 0.f);
+        positions.emplace_back(points[i].x * 2.f, points[i].y * 2.f, 0.f);
+
+        UVs.emplace_back(0.f, texSize.x);
+        UVs.emplace_back(texSize.x, texSize.x);
+        UVs.emplace_back(texSize.x, texSize.y);
+        UVs.emplace_back(0.f, texSize.y);
+    }
 
     return convertData(positions, {}, UVs);
 }

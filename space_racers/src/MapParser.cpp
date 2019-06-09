@@ -213,7 +213,14 @@ bool MapParser::load(const std::string& path)
                                 }
                                 else if (obj.getShape() == tmx::Object::Shape::Point)
                                 {
-                                    m_pylons.emplace_back(obj.getPosition().x, obj.getPosition().y);
+                                    if (obj.getType() == "bollard")
+                                    {
+                                        m_bollards.emplace_back(obj.getPosition().x, obj.getPosition().y);
+                                    }
+                                    else
+                                    {
+                                        m_pylons.emplace_back(obj.getPosition().x, obj.getPosition().y);
+                                    }
                                 }
                             }
                                 break;

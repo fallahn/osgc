@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
  <objecttype name="barrier" color="#ffff00"/>
+ <objecttype name="bollard" color="#00aa00"/>
  <objecttype name="chevron" color="#ffaa00"/>
  <objecttype name="fence" color="#0000ff"/>
 </objecttypes>

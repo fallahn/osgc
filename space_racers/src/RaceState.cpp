@@ -297,6 +297,7 @@ void RaceState::loadResources()
     m_textureIDs[TextureID::Game::Chevron] = m_resources.load<sf::Texture>("assets/images/chevron.png");
     m_textureIDs[TextureID::Game::Barrier] = m_resources.load<sf::Texture>("assets/images/barrier.png");
     m_textureIDs[TextureID::Game::Pylon] = m_resources.load<sf::Texture>("assets/images/pylon.png");
+    m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -537,12 +538,33 @@ void RaceState::addProps()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-        texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
         entity.getComponent<xy::Drawable>().getVertices() = createPylon(texSize);
 
         entity.getComponent<xy::Drawable>().updateLocalBounds();
     }
 
+
+    //bollards.
+    const auto& bollards = m_mapParser.getBollards();
+    auto& bollardTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Bollard]);
+    texSize = sf::Vector2f(bollardTexture.getSize());
+    for (auto b : bollards)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(b);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+        entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        entity.getComponent<xy::Drawable>().setTexture(&bollardTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::BollardHeight;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(6.f, texSize, GameConst::BollardHeight);
+
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
 
     auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
     m_resources.get<sf::Texture>(temp).setSmooth(true);

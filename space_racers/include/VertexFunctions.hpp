@@ -43,3 +43,7 @@ std::vector<sf::Vertex> createBillboard(sf::Vector2f start, sf::Vector2f end, fl
 
 //creates a pillar placed on the end of fences
 std::vector<sf::Vertex> createPylon(sf::Vector2f);
+
+//creates a cylinder, assumes the top square of the texture (using its width)
+//contains the shadow, and the rest is a vertical segment
+std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float height);
