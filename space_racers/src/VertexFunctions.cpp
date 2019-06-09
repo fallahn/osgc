@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "VertexFunctions.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/core/Assert.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -136,6 +137,63 @@ std::vector<sf::Vertex> createBillboard(sf::Vector2f start, sf::Vector2f end, fl
     UVs.emplace_back(textureSize.x, 0.f);
     UVs.emplace_back(textureSize);
     UVs.emplace_back(0.f, textureSize.y);
+
+    return convertData(positions, {}, UVs);
+}
+
+std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
+{
+    const float height = GameConst::PylonHeight;
+    const sf::Vector2f baseSize(15.f, 15.f);
+    const sf::Vector2f topSize(10.f, 10.f);
+
+    std::vector<sf::Vector3f> positions;
+    std::vector<sf::Vector2f> UVs;
+
+    //left
+    positions.emplace_back(-baseSize.x, -baseSize.y, 0.f);
+    positions.emplace_back(-topSize.x, -topSize.y, height);
+    positions.emplace_back(-topSize.x, topSize.y, height);
+    positions.emplace_back(-baseSize.x, baseSize.y, 0.f);
+
+    UVs.emplace_back(0.f, texSize.y);
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize);
+
+    //top
+    positions.emplace_back(baseSize.x, -baseSize.y, 0.f);
+    positions.emplace_back(topSize.x, -topSize.y, height);
+    positions.emplace_back(-topSize.x, -topSize.y, height);
+    positions.emplace_back(-baseSize.x, -baseSize.x, 0.f);
+
+    UVs.emplace_back(0.f, texSize.y);
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize);
+
+    //right
+    positions.emplace_back(baseSize.x, baseSize.y, 0.f);
+    positions.emplace_back(topSize.x, topSize.y, height);
+    positions.emplace_back(topSize.x, -topSize.y, height);
+    positions.emplace_back(baseSize.x, -baseSize.y, 0.f);
+
+    UVs.emplace_back(0.f, texSize.y);
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize);
+
+    //bottom
+    positions.emplace_back(-baseSize.x, baseSize.y, 0.f);
+    positions.emplace_back(-topSize.x, topSize.y, height);
+    positions.emplace_back(topSize.x, topSize.y, height);
+    positions.emplace_back(baseSize.x, baseSize.y, 0.f);
+
+    UVs.emplace_back(0.f, texSize.y);
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize);
+
 
     return convertData(positions, {}, UVs);
 }

@@ -95,6 +95,11 @@ public:
         return m_barriers;
     }
 
+    const std::vector<sf::Vector2f>& getPylons() const
+    {
+        return m_pylons;
+    }
+
     float getTrackLength() const
     {
         return m_trackLength;
@@ -114,6 +119,7 @@ private:
     std::vector<Lightning> m_fences;
     std::vector<std::pair<sf::Vector2f, sf::Vector2f>> m_chevrons;
     std::vector<std::pair<sf::Vector2f, sf::Vector2f>> m_barriers;
+    std::vector<sf::Vector2f> m_pylons;
 
     tmx::Map m_map;
     enum LayerID

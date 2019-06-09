@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -134,4 +135,9 @@ namespace GameConst
     static const sf::Vector2u SmallBufferSize(480u, 270u);
 
     static const float LapLineOffset = 40.f;
+
+    static const float FenceHeight = 20.f;
+    static const float ChevronHeight = 40.f;
+    static const float BarrierHeight = 10.f;
+    static const float PylonHeight = 35.f;
 }

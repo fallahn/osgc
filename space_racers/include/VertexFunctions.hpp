@@ -40,3 +40,6 @@ std::vector<sf::Vertex> createStartField(float radius, float height);
 
 //creates a billboard used for electric fences and chevrons
 std::vector<sf::Vertex> createBillboard(sf::Vector2f start, sf::Vector2f end, float height, sf::Vector2f textureSize);
+
+//creates a pillar placed on the end of fences
+std::vector<sf::Vertex> createPylon(sf::Vector2f);
