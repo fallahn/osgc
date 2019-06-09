@@ -44,7 +44,7 @@ bool RenderPath::init(bool useBloom)
         return false;
     }
 
-    if (!m_gameSceneBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y))
+    if (!m_gameSceneBuffer.create(GameConst::LargeBufferSize.x, GameConst::LargeBufferSize.y/*, sf::ContextSettings(8u)*/))
     {
         xy::Logger::log("Failed creating game scene buffer", xy::Logger::Type::Error);
         return false;
@@ -129,6 +129,9 @@ void RenderPath::renderPretty(xy::Scene& backgroundScene, xy::Scene& gameScene)
 
     //draws the full scene including distorted background
     m_gameSceneBuffer.clear();
+    //m_gameSceneBuffer.setActive(true);
+    //glClearColor(0.f, 0.f, 0.f, 0.f);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_gameSceneBuffer.draw(gameScene);
     m_gameSceneBuffer.display();
 

@@ -298,6 +298,7 @@ void RaceState::loadResources()
     m_textureIDs[TextureID::Game::Barrier] = m_resources.load<sf::Texture>("assets/images/barrier.png");
     m_textureIDs[TextureID::Game::Pylon] = m_resources.load<sf::Texture>("assets/images/pylon.png");
     m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
+    m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -582,6 +583,25 @@ void RaceState::addProps()
 
     texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
     entity.getComponent<xy::Drawable>().getVertices() = createStartField(texSize.x, entity.getComponent<Sprite3D>().depth);
+
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    //lap line
+    auto& lapTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapLine]);
+    texSize = sf::Vector2f(lapTexture.getSize());
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+    entity.addComponent<xy::Drawable>().setDepth(1000);
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+    entity.getComponent<xy::Drawable>().setTexture(&lapTexture);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = texSize.y / 4.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    entity.getComponent<xy::Drawable>().getVertices() = createLapLine(texSize);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 }

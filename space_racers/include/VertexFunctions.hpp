@@ -47,3 +47,6 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f);
 //creates a cylinder, assumes the top square of the texture (using its width)
 //contains the shadow, and the rest is a vertical segment
 std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float height);
+
+//creates the archway over the lap line
+std::vector<sf::Vertex> createLapLine(sf::Vector2f texSize);

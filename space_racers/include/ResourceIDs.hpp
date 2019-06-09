@@ -73,7 +73,7 @@ namespace TextureID
             VehicleNormal, VehicleSpecular, VehicleNeon,
             VehicleShadow, VehicleTrail,
             Fence, Chevron, Barrier, Pylon, Bollard,
-            LapProgress, LapPoint,
+            LapLine, LapProgress, LapPoint,
 
             Count
         };

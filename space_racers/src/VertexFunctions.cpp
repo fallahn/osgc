@@ -243,3 +243,31 @@ std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float
 
     return convertData(positions, {}, UVs);
 }
+
+std::vector<sf::Vertex> createLapLine(sf::Vector2f texSize)
+{
+    std::vector<sf::Vector3f> positions;
+    std::vector<sf::Vector2f> UVs;
+
+    positions.emplace_back(0.f, texSize.x / 2.f, texSize.y);
+    positions.emplace_back(0.f, -texSize.x / 2.f, texSize.y);
+    positions.emplace_back(0.f, -texSize.x / 2.f, 0.f);
+    positions.emplace_back(0.f, texSize.x / 2.f, 0.f);
+
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize);
+    UVs.emplace_back(0.f, texSize.y);
+
+    positions.emplace_back(-2.f, -texSize.x / 2.f, texSize.y);
+    positions.emplace_back(2.f, -texSize.x / 2.f, texSize.y);
+    positions.emplace_back(2.f, texSize.x / 2.f, texSize.y);
+    positions.emplace_back(-2.f, texSize.x / 2.f, texSize.y);
+
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize.x, 16.f);
+    UVs.emplace_back(0.f, 16.f);
+    UVs.emplace_back(0.f, 0.f);
+
+    return convertData(positions, {}, UVs);
+}
