@@ -27,6 +27,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
+#include <xyginext/gui/Gui.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 
@@ -46,6 +48,11 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 //public
 bool PauseState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)

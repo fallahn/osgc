@@ -199,6 +199,11 @@ DebugState::~DebugState()
 //public
 bool DebugState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)

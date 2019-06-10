@@ -66,6 +66,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/gui/Gui.hpp>
 
 #include <SFML/OpenGL.hpp>
 
@@ -105,6 +106,11 @@ RaceState::RaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool RaceState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)

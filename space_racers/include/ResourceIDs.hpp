@@ -58,6 +58,7 @@ namespace TextureID
             MainMenu, VehicleSelect, Podium,
             Stars, StarsFar, StarsMid, StarsNear,
             PlanetDiffuse, PlanetNormal,
+            MenuBackground,
 
             Count
         };

@@ -37,7 +37,6 @@ source distribution.
 #include "LocalRaceState.hpp"
 #include "LocalEliminationState.hpp"
 #include "TimeTrialState.hpp"
-#include "DummyClient.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -61,12 +60,10 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<TimeTrialState>(StateID::TimeTrial, data);
 
 #ifdef XY_DEBUG
-    /*data.launcher = std::make_unique<ClientLauncher>();
-    data.launcher->launch();*/
 
     //return StateID::Debug;
-    return StateID::Lobby;
-    //return StateID::MainMenu;
+    //return StateID::Lobby;
+    return StateID::MainMenu;
     //return StateID::TimeTrial;
 #else
     return StateID::MainMenu;

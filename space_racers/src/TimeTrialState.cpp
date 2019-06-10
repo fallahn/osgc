@@ -57,6 +57,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Window/Event.hpp>
 
@@ -98,6 +99,11 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
 //public
 bool TimeTrialState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)

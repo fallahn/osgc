@@ -30,6 +30,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
+#include <xyginext/gui/Gui.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 
@@ -52,6 +54,11 @@ SummaryState::SummaryState(xy::StateStack& ss, xy::State::Context ctx, SharedDat
 //public
 bool SummaryState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     if (evt.type == sf::Event::KeyPressed
         && m_delayClock.getElapsedTime() > delayTime)
     {

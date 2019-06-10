@@ -393,6 +393,7 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         if (vehicle.stateFlags == (1 << Vehicle::Disabled)
             || vehicle.invincibleTime > 0)
         {
+            other.getComponent<xy::Transform>().move(-manifold.penetration * manifold.normal);
             roid.setVelocity(xy::Util::Vector::reflect(roid.getVelocity(), -manifold.normal));
         }
         else if (manifold.penetration < -14)

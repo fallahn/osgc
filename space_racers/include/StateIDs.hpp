@@ -98,6 +98,4 @@ struct SharedData final
     std::shared_ptr<xy::NetClient> netClient;
     //only used if we're hosting, else nullptr
     std::shared_ptr<sv::Server> server;
-
-    //std::shared_ptr<ClientLauncher> launcher;
 };
