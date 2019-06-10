@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="102">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="114">
  <tileset firstgid="1" name="neon" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="../images/tiles/neon.png" width="1024" height="640"/>
  </tileset>
@@ -243,22 +243,22 @@
  </objectgroup>
  <objectgroup color="#00aaff" id="10" name="Props">
   <object id="87" type="fence" x="861" y="447">
-   <polyline points="736,3 -27,1"/>
+   <polyline points="716,3 5,1"/>
   </object>
   <object id="88" type="fence" x="1621" y="467">
-   <polyline points="233,237 -23,-18"/>
+   <polyline points="215,221 -8,-2"/>
   </object>
   <object id="89" type="fence" x="2681" y="1599">
-   <polyline points="69,2 2,1"/>
+   <polyline points="49,2 2,1"/>
   </object>
   <object id="90" type="fence" x="2776" y="1624">
-   <polyline points="743,745 -24,-22"/>
+   <polyline points="723,726 -9,-9"/>
   </object>
   <object id="91" type="fence" x="3515" y="2460">
-   <polyline points="7,36 6,-88"/>
+   <polyline points="7,14 6,-69"/>
   </object>
   <object id="92" type="fence" x="595" y="678">
-   <polyline points="235,-228 -19,26"/>
+   <polyline points="215,-207 -1,9"/>
   </object>
   <object id="96" type="chevron" x="150" y="4006">
    <polyline points="0,0 2,-592"/>
@@ -271,6 +271,42 @@
   </object>
   <object id="101" type="barrier" x="3330" y="5056">
    <polyline points="0,0 -898,2"/>
+  </object>
+  <object id="102" x="574" y="705">
+   <point/>
+  </object>
+  <object id="103" x="831" y="447">
+   <point/>
+  </object>
+  <object id="104" x="1598" y="448">
+   <point/>
+  </object>
+  <object id="105" x="1856" y="705">
+   <point/>
+  </object>
+  <object id="106" x="2752" y="1599">
+   <point/>
+  </object>
+  <object id="107" x="3520" y="2368">
+   <point/>
+  </object>
+  <object id="108" x="3520" y="2497">
+   <point/>
+  </object>
+  <object id="109" type="bollard" x="1472" y="1600">
+   <point/>
+  </object>
+  <object id="110" type="bollard" x="1472" y="1092">
+   <point/>
+  </object>
+  <object id="111" type="bollard" x="2623" y="1089">
+   <point/>
+  </object>
+  <object id="112" type="bollard" x="2623" y="1602">
+   <point/>
+  </object>
+  <object id="113" type="bollard" x="3775" y="3137">
+   <point/>
   </object>
  </objectgroup>
 </map>

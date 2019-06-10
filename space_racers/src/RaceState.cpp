@@ -601,6 +601,7 @@ void RaceState::addProps()
 
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+    entity.getComponent<xy::Transform>().setRotation(m_mapParser.getStartPosition().second);
     entity.addComponent<xy::Drawable>().setDepth(1000);
     entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
     entity.getComponent<xy::Drawable>().setTexture(&lapTexture);
