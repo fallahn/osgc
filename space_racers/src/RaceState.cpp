@@ -67,6 +67,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Random.hpp>
 
+#include <SFML/OpenGL.hpp>
+
 namespace
 {
 #include "Sprite3DShader.inl"
@@ -452,7 +454,7 @@ void RaceState::addProps()
 {
     auto cameraEntity = m_gameScene.getActiveCamera();
 
-    //electric fencecs
+    //electric fences
     const auto& fences = m_mapParser.getFences();
     const auto& fenceTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Fence]);
     auto texSize = sf::Vector2f(fenceTexture.getSize());
@@ -467,6 +469,7 @@ void RaceState::addProps()
         entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(f.start);
         entity.addComponent<xy::Drawable>().setDepth(1000);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().setTexture(&fenceTexture);
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -531,7 +534,7 @@ void RaceState::addProps()
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(p);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
-        entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().setTexture(&pylonTexture);
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -554,7 +557,7 @@ void RaceState::addProps()
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(b);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
-        entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().setTexture(&bollardTexture);
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -593,7 +596,7 @@ void RaceState::addProps()
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
     entity.addComponent<xy::Drawable>().setDepth(1000);
-    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+    entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
     entity.getComponent<xy::Drawable>().setTexture(&lapTexture);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
