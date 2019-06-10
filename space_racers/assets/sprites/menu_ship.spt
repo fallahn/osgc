@@ -1,0 +1,28 @@
+spritesheet menu_ship
+{
+    src="assets/images/menu_ship_diffuse.png"
+
+    sprite ship
+    {
+        bounds = 0,0,280,258
+
+        animation idle
+        {
+            loop=true
+            framerate = 25
+
+            frame=0,0,280,158
+            frame=0,158,280,158
+            frame=0,316,280,158
+            frame=0,474,280,158
+            frame=0,632,280,158
+            frame=0,790,280,158
+            frame=0,948,280,158
+            frame=0,1106,280,158
+            frame=0,1264,280,158
+            frame=0,1422,280,158
+            frame=0,1580,280,158
+            frame=0,1738,280,158
+        }
+    }
+}
