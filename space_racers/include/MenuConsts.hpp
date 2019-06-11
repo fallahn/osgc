@@ -34,6 +34,11 @@ namespace MenuConst
     static const sf::Vector2f NavLeftPosition(180.f, 980.f);
     static const sf::Vector2f NavRightPosition(xy::DefaultSceneSize.x - NavLeftPosition.x, NavLeftPosition.y);
 
+    static const sf::Vector2f ThumbnailPosition(46.f, 56.f);
+    static const sf::Vector2f PrevTrackPosition(80.f, 332.f);
+    static const sf::Vector2f NextTrackPosition(262.f, 332.f);
+    static const sf::Vector2f TrackButtonSize(66.f, 24.f);
+
     static const std::int32_t BackgroundDepth = -20;
     static const std::int32_t MenuDepth = 0;
     static const std::int32_t ButtonDepth = 1;

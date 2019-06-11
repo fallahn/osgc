@@ -69,6 +69,9 @@ private:
     std::array<xy::Sprite, SpriteID::Menu::Count> m_sprites;
     std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
 
+    std::vector<std::pair<std::string, std::size_t>> m_mapInfo;
+    std::size_t m_mapIndex;
+
     void initScene();
     void loadResources();
     void buildMenu();

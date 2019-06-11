@@ -64,6 +64,7 @@ namespace
 {
 #include "MenuShader.inl"
 #include "GlobeShader.inl"
+#include "MonitorShader.inl"
 
     const std::string AppName("space_racers");
     const std::string CfgName("settings.cfg");
@@ -73,7 +74,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_sharedData    (sd),
     m_scene         (ctx.appInstance.getMessageBus()),
-    m_activeString  (nullptr)
+    m_activeString  (nullptr),
+    m_mapIndex      (0)
 {
     ctx.appInstance.setMouseCursorVisible(true);
 
@@ -148,6 +150,7 @@ bool MenuState::update(float dt)
     currTime += dt;
     m_shaders.get(ShaderID::Stars).setUniform("u_time", currTime / 100.f);
     m_shaders.get(ShaderID::Globe).setUniform("u_time", currTime / 10.f);
+    m_shaders.get(ShaderID::MonitorScreen).setUniform("u_time", currTime / 100.f);
 
     m_scene.update(dt);
     return true;
@@ -188,6 +191,7 @@ void MenuState::loadResources()
     m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
     m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select_large.png");
     m_textureIDs[TextureID::Menu::MenuBackground] = m_resources.load<sf::Texture>("assets/images/player_select.png");
+    m_textureIDs[TextureID::Menu::TrackSelect] = m_resources.load<sf::Texture>("assets/images/track_select.png");
 
     m_textureIDs[TextureID::Menu::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
     m_textureIDs[TextureID::Menu::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
@@ -203,6 +207,7 @@ void MenuState::loadResources()
 
     m_shaders.preload(ShaderID::Stars, StarsFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::MonitorScreen, MonitorFragment, sf::Shader::Fragment);
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/menu_buttons.spt", m_resources);
@@ -268,6 +273,37 @@ void MenuState::loadResources()
         m_settings.addProperty("ip", m_sharedData.ip.toAnsiString());
     }
     m_settings.save(xy::FileSystem::getConfigDirectory(AppName) + CfgName);
+
+    //load map names and map them to the thumb texture IDs
+    auto mapNames = xy::FileSystem::listFiles(xy::FileSystem::getResourcePath() + "assets/maps");
+    mapNames.erase(std::remove_if(mapNames.begin(), mapNames.end(),
+        [](const std::string& str)
+        {
+            return xy::FileSystem::getFileExtension(str) != ".tmx";
+        }), mapNames.end());
+
+    auto defaultThumb = m_resources.load<sf::Texture>("assets/images/thumbs/None.png");
+    for (const auto& name : mapNames)
+    {
+        auto str = name.substr(0, name.find(".tmx"));
+        if (xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + "assets/images/thumbs/" + str + ".png"))
+        {
+            m_mapInfo.emplace_back(std::make_pair(name, m_resources.load<sf::Texture>("assets/images/thumbs/" + str + ".png")));
+        }
+        else
+        {
+            m_mapInfo.emplace_back(std::make_pair(name, defaultThumb));
+        }
+    }
+    if (m_mapInfo.empty())
+    {
+        m_sharedData.errorMessage = "No maps were found!";
+        requestStackPush(StateID::Error);
+    }
+    else
+    {
+        m_sharedData.mapName = m_mapInfo[m_mapIndex].first;
+    }
 }
 
 void MenuState::buildMenu()
@@ -718,9 +754,75 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //map select
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y * 0.88f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TrackSelect]));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    auto thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::ThumbnailPosition);
+    thumbEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
+    thumbEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::MonitorScreen));
+    thumbEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    thumbEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendMultiply);
+    thumbEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_mapInfo[m_mapIndex].second));
+    thumbEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::TrackThumb;
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
+    thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::PrevTrackPosition);
+    thumbEnt.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), MenuConst::TrackButtonSize };
+    thumbEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_mapIndex = (m_mapIndex + (m_mapInfo.size() - 1)) % m_mapInfo.size();
+                    m_sharedData.mapName = m_mapInfo[m_mapIndex].first;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::TrackThumb;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Sprite>().setTexture(m_resources.get<sf::Texture>(m_mapInfo[m_mapIndex].second));
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
+    thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::NextTrackPosition);
+    thumbEnt.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), MenuConst::TrackButtonSize };
+    thumbEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_mapIndex = (m_mapIndex + 1) % m_mapInfo.size();
+                    m_sharedData.mapName = m_mapInfo[m_mapIndex].first;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::TrackThumb;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Sprite>().setTexture(m_resources.get<sf::Texture>(m_mapInfo[m_mapIndex].second));
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
     //vehicle select
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, 220.f);
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, 180.f);
     entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
@@ -800,6 +902,72 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //map select
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y * 1.2f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TrackSelect]));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    auto thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::ThumbnailPosition);
+    thumbEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
+    thumbEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::MonitorScreen));
+    thumbEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    thumbEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendMultiply);
+    thumbEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_mapInfo[m_mapIndex].second));
+    thumbEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::TrackThumb;
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
+    thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::PrevTrackPosition);
+    thumbEnt.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), MenuConst::TrackButtonSize };
+    thumbEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_mapIndex = (m_mapIndex + (m_mapInfo.size() - 1)) % m_mapInfo.size();
+                    m_sharedData.mapName = m_mapInfo[m_mapIndex].first;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::TrackThumb;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Sprite>().setTexture(m_resources.get<sf::Texture>(m_mapInfo[m_mapIndex].second));
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
+    thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::NextTrackPosition);
+    thumbEnt.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), MenuConst::TrackButtonSize };
+    thumbEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_mapIndex = (m_mapIndex + 1) % m_mapInfo.size();
+                    m_sharedData.mapName = m_mapInfo[m_mapIndex].first;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Menu::TrackThumb;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Sprite>().setTexture(m_resources.get<sf::Texture>(m_mapInfo[m_mapIndex].second));
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
 }
 
 void MenuState::updateTextInput(const sf::Event& evt)

@@ -18,33 +18,32 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace CommandID
+#include <string>
+
+static const std::string MonitorFragment =
+R"(
+#version 120
+
+uniform sampler2D u_texture;
+uniform float u_time;
+
+const float scanlineCount = 125.0 * 6.28; //line count * approx tau
+const vec3 tintColour = vec3(0.42, 0.4, 0.96);
+
+void main()
 {
-    enum Game
-    {
-        NetActor = 0x1,
-        Trail = 0x2,
-        Vehicle = 0x4
-    };
+    vec2 coord = gl_TexCoord[0].xy;
+    vec4 colour = texture2D(u_texture, coord);
 
-    enum UI
-    {
-        StartLights = 0x1,
-        LapText = 0x2
-    };
+    float scanline = sin((coord.y + u_time) * scanlineCount);
+    scanline += 1.0;
+    scanline /= 2.0;
+    scanline *= 0.8;
+    scanline += 0.2;
+    colour *= scanline;
 
-    enum Lobby
-    {
-        PlayerText = 0x1,
-        LobbyText = 0x2,
-    };
+    //colour.rgb = vec3(1.0) - colour.rgb;
+    colour.rgb *= tintColour;
 
-
-    enum Menu
-    {
-        RootNode = 0x1,
-        NameText = 0x2,
-        IPText = 0x4,
-        TrackThumb = 0x8
-    };
-}
+    gl_FragColor = colour;
+})";

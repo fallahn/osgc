@@ -248,6 +248,7 @@
     <None Include="src\BlurShader.inl" />
     <None Include="src\GlobeShader.inl" />
     <None Include="src\MenuShader.inl" />
+    <None Include="src\MonitorShader.inl" />
     <None Include="src\NeonBlendShader.inl" />
     <None Include="src\Sprite3DShader.inl" />
     <None Include="src\TrackShader.inl" />

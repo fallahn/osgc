@@ -35,7 +35,8 @@ namespace ShaderID
         NeonExtract,
         Vehicle,
         Trail,
-        Stars
+        Stars,
+        MonitorScreen
     };
 }
 
@@ -58,7 +59,7 @@ namespace TextureID
             MainMenu, VehicleSelect, Podium,
             Stars, StarsFar, StarsMid, StarsNear,
             PlanetDiffuse, PlanetNormal,
-            MenuBackground,
+            MenuBackground, TrackSelect,
 
             Count
         };
