@@ -77,6 +77,8 @@ namespace TextureID
             Fence, Chevron, Barrier, Pylon, Bollard,
             LapLine, LapProgress, LapPoint,
 
+            NixieSheet,
+
             Count
         };
     }

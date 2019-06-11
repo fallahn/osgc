@@ -24,6 +24,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NetActorSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NixieDisplay.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RaceState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RenderPath.cpp

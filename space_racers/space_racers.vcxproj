@@ -178,6 +178,7 @@
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NetActor.hpp" />
     <ClInclude Include="include\NetConsts.hpp" />
+    <ClInclude Include="include\NixieDisplay.hpp" />
     <ClInclude Include="include\PauseState.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\RaceState.hpp" />
@@ -227,6 +228,7 @@
     <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\NetActorSystem.cpp" />
+    <ClCompile Include="src\NixieDisplay.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\RaceState.cpp" />
     <ClCompile Include="src\RenderPath.cpp" />

@@ -34,6 +34,7 @@ Copyright 2019 Matt Marchant
 #include "WayPoint.hpp"
 #include "VertexFunctions.hpp"
 #include "SliderSystem.hpp"
+#include "NixieDisplay.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -330,6 +331,7 @@ void TimeTrialState::initScene()
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<SliderSystem>(mb);
+    m_uiScene.addSystem<NixieSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
@@ -370,6 +372,7 @@ void TimeTrialState::loadResources()
     m_textureIDs[TextureID::Game::Pylon] = m_resources.load<sf::Texture>("assets/images/pylon.png");
     m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
+    m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -712,18 +715,27 @@ void TimeTrialState::buildUI()
     entity.addComponent<xy::Transform>().setPosition(GameConst::LapTimePosition);
     entity.addComponent<xy::Text>(font).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("00:00:0000");
-    entity.getComponent<xy::Text>().setCharacterSize(62);
+    entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::TimeText;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 
+    //fastest lap time
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(GameConst::BestTimePosition);
     entity.addComponent<xy::Text>(font).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("00:00:0000");
-    entity.getComponent<xy::Text>().setCharacterSize(62);
+    entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::BestTimeText;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
     entity.addComponent<Slider>().speed = 10.f;
+
+    //lap counter
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(220.f, 10.f);
+    entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::NixieSheet]));
+    entity.addComponent<Nixie>().lowerValue = 10;
+    entity.getComponent<Nixie>().upperValue = 23;
+    entity.getComponent<Nixie>().digitCount = 6;
 }
 
 void TimeTrialState::spawnVehicle()

@@ -18,36 +18,20 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace CommandID
+#include <xyginext/ecs/System.hpp>
+
+struct Nixie final
 {
-    enum Game
-    {
-        NetActor = 0x1,
-        Trail = 0x2,
-        Vehicle = 0x4,
-    };
+    std::uint16_t upperValue = 0;
+    std::uint16_t lowerValue = 0;
+    std::uint32_t digitCount = 2;
+    std::uint32_t dirtyFlags = 0;
+};
 
-    enum UI
-    {
-        StartLights = 0x1,
-        LapText = 0x2,
+class NixieSystem final : public xy::System
+{
+public:
+    explicit NixieSystem(xy::MessageBus&);
 
-        TimeText = 0x8,
-        BestTimeText = 0x10
-    };
-
-    enum Lobby
-    {
-        PlayerText = 0x1,
-        LobbyText = 0x2,
-    };
-
-
-    enum Menu
-    {
-        RootNode = 0x1,
-        NameText = 0x2,
-        IPText = 0x4,
-        TrackThumb = 0x8
-    };
-}
+    void process(float) override;
+};

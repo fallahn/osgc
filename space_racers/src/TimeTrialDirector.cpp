@@ -29,6 +29,25 @@ Copyright 2019 Matt Marchant
 #include <cmath>
 #include <sstream>
 
+namespace
+{
+    std::string formatTimeString(float t)
+    {
+        float whole = 0.f;
+        float remain = std::modf(t, &whole);
+
+        int min = static_cast<int>(whole) / 60;
+        int sec = static_cast<int>(whole) % 60;
+
+        std::stringstream ss;
+        ss << std::setw(2) << std::setfill('0') << min << ":";
+        ss << std::setw(2) << std::setfill('0') << sec << ":";
+        ss << std::setw(4) << std::setfill('0') << static_cast<int>(remain * 10000.f);
+
+        return ss.str();
+    }
+}
+
 TimeTrialDirector::TimeTrialDirector()
     : m_updateDisplay(false),
     m_fastestLap(0.f)
@@ -59,21 +78,10 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
                 m_fastestLap = lapTime;
 
                 xy::Command cmd;
-                cmd.targetFlags = CommandID::Game::BestTimeText;
+                cmd.targetFlags = CommandID::UI::BestTimeText;
                 cmd.action = [lapTime](xy::Entity entity, float)
                 {
-                    float whole = 0.f;
-                    float remain = std::modf(lapTime, &whole);
-
-                    int min = static_cast<int>(whole) / 60;
-                    int sec = static_cast<int>(whole) % 60;
-
-                    std::stringstream ss;
-                    ss << std::setw(2) << std::setfill('0') << min << ":";
-                    ss << std::setw(2) << std::setfill('0') << sec << ":";
-                    ss << std::setw(4) << std::setfill('0') << static_cast<int>(remain * 10000.f);
-
-                    entity.getComponent<xy::Text>().setString(ss.str());
+                    entity.getComponent<xy::Text>().setString(formatTimeString(lapTime));
                     entity.getComponent<xy::Transform>().setPosition(GameConst::LapTimePosition);
                     entity.getComponent<Slider>().target = GameConst::BestTimePosition;
                     entity.getComponent<Slider>().active = true;
@@ -94,22 +102,10 @@ void TimeTrialDirector::process(float)
         //send command to display
         float currTime = m_lapClock.getElapsedTime().asSeconds();
         xy::Command cmd;
-        cmd.targetFlags = CommandID::Game::TimeText;
+        cmd.targetFlags = CommandID::UI::TimeText;
         cmd.action = [currTime](xy::Entity entity, float)
         {
-            float whole = 0.f;
-            float remain = std::modf(currTime, &whole);
-
-            int min = static_cast<int>(whole) / 60;
-            int sec = static_cast<int>(whole) % 60;
-            
-            std::stringstream ss;
-            ss << std::setw(2) << std::setfill('0') << min << ":";
-            ss << std::setw(2) << std::setfill('0') << sec << ":";
-            ss << std::setw(4) << std::setfill('0') << static_cast<int>(remain * 10000.f);
-
-            entity.getComponent<xy::Text>().setString(ss.str());
-
+            entity.getComponent<xy::Text>().setString(formatTimeString(currTime));
         };
         sendCommand(cmd);
     }
