@@ -24,7 +24,9 @@ namespace CommandID
     {
         NetActor = 0x1,
         Trail = 0x2,
-        Vehicle = 0x4
+        Vehicle = 0x4,
+        TimeText = 0x8,
+        BestTimeText = 0x10
     };
 
     enum UI

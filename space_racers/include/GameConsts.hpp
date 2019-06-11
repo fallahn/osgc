@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/Config.hpp>
+
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
 
@@ -141,4 +143,7 @@ namespace GameConst
     static const float BarrierHeight = 10.f;
     static const float PylonHeight = 35.f;
     static const float BollardHeight = 12.f;
+
+    static sf::Vector2f LapTimePosition(xy::DefaultSceneSize.x / 2.f, 1000.f);
+    static sf::Vector2f BestTimePosition(1700.f, 20.f);
 }

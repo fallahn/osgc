@@ -32,6 +32,7 @@ Copyright 2019 Matt Marchant
 #include "VFXDirector.hpp"
 #include "TimeTrialDirector.hpp"
 #include "WayPoint.hpp"
+#include "VertexFunctions.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -60,6 +61,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/OpenGL.hpp>
 
 namespace
 {
@@ -332,8 +334,6 @@ void LocalRaceState::initScene()
     m_uiScene.addSystem<xy::RenderSystem>(mb);
     m_uiScene.addSystem<xy::AudioSystem>(mb);
 
-    m_uiScene.addDirector<TimeTrialDirector>();
-
     auto view = getContext().defaultView;
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(view.getViewport());
@@ -360,6 +360,12 @@ void LocalRaceState::loadResources()
     m_textureIDs[TextureID::Game::VehicleNeon] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_neon.png");
     m_textureIDs[TextureID::Game::VehicleShadow] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_shadow.png");
     m_textureIDs[TextureID::Game::VehicleTrail] = m_resources.load<sf::Texture>("assets/images/vehicles/trail.png");
+    m_textureIDs[TextureID::Game::Fence] = m_resources.load<sf::Texture>("assets/images/fence.png");
+    m_textureIDs[TextureID::Game::Chevron] = m_resources.load<sf::Texture>("assets/images/chevron.png");
+    m_textureIDs[TextureID::Game::Barrier] = m_resources.load<sf::Texture>("assets/images/barrier.png");
+    m_textureIDs[TextureID::Game::Pylon] = m_resources.load<sf::Texture>("assets/images/pylon.png");
+    m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
+    m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -512,7 +518,162 @@ bool LocalRaceState::loadMap()
 
 void LocalRaceState::addProps()
 {
-    
+    auto cameraEntity = m_gameScene.getActiveCamera();
+
+    //electric fences
+    const auto& fences = m_mapParser.getFences();
+    const auto& fenceTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Fence]);
+    auto texSize = sf::Vector2f(fenceTexture.getSize());
+
+    for (const auto& f : fences)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>(); //points are in world space.
+        entity.addComponent<xy::Drawable>().setFilterFlags(GameConst::FilterFlags::All);
+        entity.addComponent<Lightning>() = f;
+
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(f.start);
+        entity.addComponent<xy::Drawable>().setDepth(1000);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().setTexture(&fenceTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::FenceHeight;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Drawable>().getVertices() = createBillboard(f.start, f.end, entity.getComponent<Sprite3D>().depth, texSize);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    }
+
+    //chevrons
+    const auto& chevrons = m_mapParser.getChevrons();
+    const auto& chevronTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Chevron]);
+    texSize = sf::Vector2f(chevronTexture.getSize());
+
+    for (const auto& [start, end] : chevrons)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(start);
+        entity.addComponent<xy::Drawable>().setDepth(1000);
+        entity.getComponent<xy::Drawable>().setTexture(&chevronTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::ChevronHeight;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Drawable>().getVertices() = createBillboard(start, end, entity.getComponent<Sprite3D>().depth, texSize);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
+
+    //race barriers
+    const auto& barriers = m_mapParser.getBarriers();
+    auto& barrierTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Barrier]);
+    barrierTexture.setRepeated(true);
+    texSize = sf::Vector2f(barrierTexture.getSize());
+
+    for (const auto& [start, end] : barriers)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(start);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+        entity.getComponent<xy::Drawable>().setTexture(&barrierTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::BarrierHeight;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Drawable>().getVertices() = createBillboard(start, end, entity.getComponent<Sprite3D>().depth, { xy::Util::Vector::length(end - start), texSize.y });
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
+
+    //electric pylons
+    const auto& pylons = m_mapParser.getPylons();
+    auto& pylonTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Pylon]);
+    texSize = sf::Vector2f(pylonTexture.getSize());
+    for (auto p : pylons)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(p);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().setTexture(&pylonTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::PylonHeight;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Drawable>().getVertices() = createPylon(texSize);
+
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
+
+
+    //bollards.
+    const auto& bollards = m_mapParser.getBollards();
+    auto& bollardTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Bollard]);
+    texSize = sf::Vector2f(bollardTexture.getSize());
+    for (auto b : bollards)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(b);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 1);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().setTexture(&bollardTexture);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::BollardHeight;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(6.f, texSize, GameConst::BollardHeight);
+
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
+
+    auto temp = m_resources.load<sf::Texture>("assets/images/start_field.png");
+    m_resources.get<sf::Texture>(temp).setSmooth(true);
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+    entity.addComponent<xy::Drawable>().setDepth(1000);
+    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(temp));
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = 50.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
+    entity.getComponent<xy::Drawable>().getVertices() = createStartField(texSize.x, entity.getComponent<Sprite3D>().depth);
+
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    //lap line
+    auto& lapTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapLine]);
+    texSize = sf::Vector2f(lapTexture.getSize());
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+    entity.getComponent<xy::Transform>().setRotation(m_mapParser.getStartPosition().second);
+    entity.addComponent<xy::Drawable>().setDepth(1000);
+    entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+    entity.getComponent<xy::Drawable>().setTexture(&lapTexture);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = texSize.y / 4.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    entity.getComponent<xy::Drawable>().getVertices() = createLapLine(texSize);
+
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
 }
 
 void LocalRaceState::buildUI()

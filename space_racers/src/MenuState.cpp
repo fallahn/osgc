@@ -56,6 +56,7 @@ source distribution.
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/graphics/postprocess/ChromeAb.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -181,6 +182,8 @@ void MenuState::initScene()
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+
+    m_scene.addPostProcess<xy::PostChromeAb>();
 }
 
 void MenuState::loadResources()

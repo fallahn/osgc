@@ -24,11 +24,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/resources/ResourceHandler.hpp>
 
 #include <SFML/OpenGL.hpp>
+#include <SFML/System/Clock.hpp>
 
 namespace
 {
 #include "BlurShader.inl"
 #include "NeonBlendShader.inl"
+
+    sf::Clock shaderClock;
 }
 
 RenderPath::RenderPath(xy::ResourceHandler& rh)
@@ -112,6 +115,8 @@ void RenderPath::updateView(sf::Vector2f camPosition)
     auto view = m_backgroundBuffer.getDefaultView();
     view.setCenter(camPosition);
     m_normalBuffer.setView(view);
+
+    //m_blendShader->setUniform("u_time", shaderClock.getElapsedTime().asSeconds());
 }
 
 //private

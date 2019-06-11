@@ -20,6 +20,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 
+#include <SFML/System/Clock.hpp>
+
 class TimeTrialDirector final : public xy::Director
 {
 public:
@@ -30,5 +32,7 @@ public:
     void process(float) override;
 
 private:
-
+    sf::Clock m_lapClock;
+    bool m_updateDisplay;
+    float m_fastestLap;
 };

@@ -43,6 +43,8 @@ R"(
 uniform sampler2D u_sceneTexture;
 uniform sampler2D u_neonTexture;
 
+uniform float u_time;
+
 float blend(float bg, float fg)
 {
     //overlay mode
@@ -65,6 +67,10 @@ const float sceneIntensity = 1.2;
 const float neonSaturation = 2.8;
 const float sceneSaturation = 2.0;
 
+const float maxOffset = 1.0 / 450.0; //abberation sample offset
+const float noiseStrength = 0.7;
+const float lineCount = 500.0;
+
 vec4 adjustSaturation(vec4 colour, float saturation)
 {
     float grey = dot(colour.rgb, vec3(0.299, 0.587, 0.114));
@@ -73,8 +79,9 @@ vec4 adjustSaturation(vec4 colour, float saturation)
 
 void main()
 {
-    vec4 sceneColour = texture2D(u_sceneTexture, gl_TexCoord[0].xy);
-    vec4 neonColour = texture2D(u_neonTexture, gl_TexCoord[0].xy);
+    vec2 coord = gl_TexCoord[0].xy;
+    vec4 sceneColour = texture2D(u_sceneTexture, coord);
+    vec4 neonColour = texture2D(u_neonTexture, coord);
 
     sceneColour = adjustSaturation(sceneColour, sceneSaturation) * sceneIntensity;
     neonColour = adjustSaturation(neonColour, neonSaturation) * neonIntensity;
@@ -82,4 +89,37 @@ void main()
     sceneColour *= (1.0 - clamp(neonColour, 0.0, 1.0));
 
     gl_FragColor = sceneColour + neonColour;
+
+//------------------------------------------------------------------//
+    /*vec2 coord = gl_TexCoord[0].xy;
+    vec4 neonColour = texture2D(u_neonTexture, coord);*/
+
+    //offset sample to create chromatic abberation   
+    /*vec4 sceneColour = vec4(1.0);
+    vec2 offset = vec2((maxOffset / 2.0) - (coord.x * maxOffset), (maxOffset / 2.0) - (coord.y * maxOffset));
+
+    sceneColour.r = texture2D(u_sceneTexture, coord + offset).r;
+    sceneColour.g = texture2D(u_sceneTexture, coord).g;
+    sceneColour.b = texture2D(u_sceneTexture, coord - offset).b;
+
+    sceneColour = adjustSaturation(sceneColour, sceneSaturation) * sceneIntensity;
+    neonColour = adjustSaturation(neonColour, neonSaturation) * neonIntensity;
+
+    sceneColour *= (1.0 - clamp(neonColour, 0.0, 1.0));
+
+    vec4 colour = sceneColour + neonColour;*/
+
+    //noise
+    /*float x = (coord.x + 4.0) * coord.y * u_time * 10.0;
+    x = mod(x, 13.0) * mod(x, 123.0);
+    float grain = mod(x, 0.01) - 0.005;
+
+    vec3 result = colour.rgb + vec3(clamp(grain * 100.0, 0.0, 0.07));*/
+
+    //scanlines
+    /*vec2 sinCos = vec2(sin(coord.y * lineCount), cos(coord.y * lineCount + u_time));
+    result += colour.rgb * vec3(sinCos.x, sinCos.y, sinCos.x) * (noiseStrength * 0.08);
+    colour.rgb += (result - colour.rgb) * noiseStrength;
+
+    gl_FragColor = vec4(colour.rgb, 1.0);*/
 })";
