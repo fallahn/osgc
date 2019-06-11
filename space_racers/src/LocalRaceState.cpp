@@ -631,7 +631,7 @@ void LocalRaceState::addProps()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(6.f, texSize, GameConst::BollardHeight);
+        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(GameConst::BollardRadius, texSize, GameConst::BollardHeight);
 
         entity.getComponent<xy::Drawable>().updateLocalBounds();
     }

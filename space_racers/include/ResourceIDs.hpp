@@ -75,7 +75,7 @@ namespace TextureID
             VehicleNormal, VehicleSpecular, VehicleNeon,
             VehicleShadow, VehicleTrail,
             Fence, Chevron, Barrier, Pylon, Bollard,
-            LapLine, LapProgress, LapPoint,
+            LapLine, LapProgress, LapPoint, LapCounter,
 
             NixieSheet,
 

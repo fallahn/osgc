@@ -50,7 +50,7 @@ namespace
 
 TimeTrialDirector::TimeTrialDirector()
     : m_updateDisplay(false),
-    m_fastestLap(0.f)
+    m_fastestLap(99.f*60.f)
 {
 
 }
@@ -73,7 +73,7 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
         if (data.type == VehicleEvent::LapLine)
         {
             auto lapTime = m_lapClock.restart().asSeconds();
-            if (lapTime > m_fastestLap)
+            if (lapTime < m_fastestLap)
             {
                 m_fastestLap = lapTime;
 

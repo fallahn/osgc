@@ -54,8 +54,8 @@ void NixieSystem::process(float)
 
             static auto getFrame = [&](std::uint32_t val)->sf::FloatRect
             {
-                auto left = (val % static_cast<std::uint32_t>(frameCount.y)) * frameSize.x;
-                auto top = (val / static_cast<std::uint32_t>(frameCount.y)) * frameSize.y;
+                auto left = (val % static_cast<std::uint32_t>(frameCount.x)) * frameSize.x;
+                auto top = (val / static_cast<std::uint32_t>(frameCount.x)) * frameSize.y;
                 return { left, top, frameSize.x, frameSize.y };
             };
 

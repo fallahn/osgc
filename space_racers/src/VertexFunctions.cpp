@@ -215,10 +215,11 @@ std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float
     std::vector<sf::Vector2f> UVs;
 
     //create a base first to draw the shadow
-    positions.emplace_back(-texSize.x, -texSize.x, 0.f);
-    positions.emplace_back(texSize.x, -texSize.x, 0.f);
-    positions.emplace_back(texSize.x, texSize.x, 0.f);
-    positions.emplace_back(-texSize.x, texSize.x, 0.f);
+    const float width = radius * 2.f;
+    positions.emplace_back(-width, -width, 0.f);
+    positions.emplace_back(width, -width, 0.f);
+    positions.emplace_back(width, width, 0.f);
+    positions.emplace_back(-width, width, 0.f);
 
     UVs.emplace_back(0.f, 0.f);
     UVs.emplace_back(texSize.x, 0.f);

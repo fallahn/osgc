@@ -39,6 +39,7 @@ Copyright 2019 Matt Marchant
 #include "TrailSystem.hpp"
 #include "LapDotSystem.hpp"
 #include "VertexFunctions.hpp"
+#include "NixieDisplay.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -266,6 +267,7 @@ void RaceState::initScene()
 
     m_uiScene.addSystem<LapDotSystem>(mb);
     m_uiScene.addSystem<xy::CommandSystem>(mb);
+    m_uiScene.addSystem<NixieSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
@@ -307,6 +309,8 @@ void RaceState::loadResources()
     m_textureIDs[TextureID::Game::Pylon] = m_resources.load<sf::Texture>("assets/images/pylon.png");
     m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
+    m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
+    m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -571,7 +575,7 @@ void RaceState::addProps()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(6.f, texSize, GameConst::BollardHeight);
+        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(GameConst::BollardRadius, texSize, GameConst::BollardHeight);
 
         entity.getComponent<xy::Drawable>().updateLocalBounds();
     }
@@ -646,12 +650,26 @@ void RaceState::buildUI()
 
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
+    ////lap counter
+    //entity = m_uiScene.createEntity();
+    //entity.addComponent<xy::Transform>().setPosition(40.f, 60.f);
+    //entity.addComponent<xy::Drawable>();
+    //entity.addComponent<xy::Text>(font).setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
+    //entity.getComponent<xy::Text>().setCharacterSize(36);
+    //entity.addComponent<xy::CommandTarget>().ID = CommandID::LapText;
+
+        //lap counter frame
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(-1);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapCounter]));
+
     //lap counter
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(40.f, 60.f);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(font).setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
-    entity.getComponent<xy::Text>().setCharacterSize(36);
+    entity.addComponent<xy::Transform>().setPosition(GameConst::LapCounterPosition);
+    entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::NixieSheet]));
+    entity.addComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+    entity.getComponent<Nixie>().digitCount = 2;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::LapText;
 
     //lapline
@@ -1182,14 +1200,7 @@ void RaceState::updateLapLine(std::uint32_t serverID)
         cmd.targetFlags = CommandID::LapText;
         cmd.action = [&](xy::Entity e, float)
         {
-            if (m_sharedData.gameData.lapCount == 1)
-            {
-                e.getComponent<xy::Text>().setString("Final Lap");
-            }
-            else
-            {
-                e.getComponent<xy::Text>().setString("Laps: " + std::to_string(m_sharedData.gameData.lapCount));
-            }
+            e.getComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }

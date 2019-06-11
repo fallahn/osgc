@@ -373,6 +373,7 @@ void TimeTrialState::loadResources()
     m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
     m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
+    m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -636,7 +637,7 @@ void TimeTrialState::addProps()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(6.f, texSize, GameConst::BollardHeight);
+        entity.getComponent<xy::Drawable>().getVertices() = createCylinder(GameConst::BollardRadius, texSize, GameConst::BollardHeight);
 
         entity.getComponent<xy::Drawable>().updateLocalBounds();
     }
@@ -729,13 +730,18 @@ void TimeTrialState::buildUI()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
     entity.addComponent<Slider>().speed = 10.f;
 
+    //lap counter frame
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(-1);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapCounter]));
+
     //lap counter
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(220.f, 10.f);
+    entity.addComponent<xy::Transform>().setPosition(GameConst::LapCounterPosition);
     entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::NixieSheet]));
     entity.addComponent<Nixie>().lowerValue = 10;
-    entity.getComponent<Nixie>().upperValue = 23;
-    entity.getComponent<Nixie>().digitCount = 6;
+    entity.getComponent<Nixie>().digitCount = 2;
 }
 
 void TimeTrialState::spawnVehicle()

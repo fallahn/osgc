@@ -43,7 +43,7 @@ void main()
     colour *= scanline;
 
     //colour.rgb = vec3(1.0) - colour.rgb;
-    colour.rgb *= tintColour;
+    colour.rgb *= tintColour * 1.5;
 
     gl_FragColor = colour;
 })";

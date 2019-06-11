@@ -143,7 +143,9 @@ namespace GameConst
     static const float BarrierHeight = 10.f;
     static const float PylonHeight = 35.f;
     static const float BollardHeight = 12.f;
+    static const float BollardRadius = 14.f;
 
     static sf::Vector2f LapTimePosition(xy::DefaultSceneSize.x / 2.f, 1000.f);
     static sf::Vector2f BestTimePosition(1700.f, 20.f);
+    static const sf::Vector2f LapCounterPosition(155.f, 13.f);
 }
