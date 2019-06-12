@@ -65,6 +65,7 @@ struct LocalPlayer final
 {
     std::uint32_t vehicle = 0;
     InputBinding inputBinding;
+    bool cpu = false;
 };
 
 class ClientLauncher;

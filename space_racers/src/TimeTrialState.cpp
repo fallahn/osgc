@@ -219,6 +219,24 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
 
             m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
         }
+        else if (data.type == VehicleEvent::LapLine)
+        {
+            //count laps and end time trial when done
+            m_sharedData.gameData.lapCount--;
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::UI::LapText;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            if (m_sharedData.gameData.lapCount == 0)
+            {
+                requestStackPush(StateID::Summary);
+            }
+        }
     }
 
     m_backgroundScene.forwardMessage(msg);
@@ -740,8 +758,9 @@ void TimeTrialState::buildUI()
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(GameConst::LapCounterPosition);
     entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::NixieSheet]));
-    entity.addComponent<Nixie>().lowerValue = 10;
+    entity.addComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
     entity.getComponent<Nixie>().digitCount = 2;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LapText;
 }
 
 void TimeTrialState::spawnVehicle()

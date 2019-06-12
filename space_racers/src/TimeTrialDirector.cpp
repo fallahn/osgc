@@ -49,8 +49,8 @@ namespace
 }
 
 TimeTrialDirector::TimeTrialDirector()
-    : m_updateDisplay(false),
-    m_fastestLap(99.f*60.f)
+    :  m_updateDisplay (false),
+    m_fastestLap    (99.f*60.f)
 {
 
 }
@@ -88,9 +88,6 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
                 };
                 sendCommand(cmd);
             }
-
-            //TODO count laps and end time trial when done
-
         }
     }
 }

@@ -920,7 +920,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //map select
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(-140.f, xy::DefaultSceneSize.y * 1.2f);
+    entity.getComponent<xy::Transform>().move(-140.f, xy::DefaultSceneSize.y * 1.26f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TrackSelect]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -989,7 +989,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(160.f, xy::DefaultSceneSize.y * 1.05f);
+    entity.getComponent<xy::Transform>().move(160.f, xy::DefaultSceneSize.y * 1.09f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("back");
     entity.addComponent<xy::SpriteAnimation>().play(0);
@@ -1084,6 +1084,86 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                     thumbEnt.getComponent<xy::Callback>().active = true;
                 }
             });
+
+    //vehicle select
+    //player one
+    const float xOffset = 0.5f;
+    float yOffset = 30.f;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, yOffset);
+    entity.getComponent<xy::Transform>().move(-MenuConst::VehicleSelectArea.width * xOffset, xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
+    entity.addComponent<VehicleSelect>().index = m_sharedData.localPlayers[0].vehicle;
+    entity.addComponent<xy::UIHitBox>().area = MenuConst::VehicleSelectArea;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    e.getComponent<VehicleSelect>().index = (e.getComponent<VehicleSelect>().index + 1) % 3;
+                    m_sharedData.localPlayers[0].vehicle = static_cast<std::uint32_t>(e.getComponent<VehicleSelect>().index);
+                }
+            });
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //player two
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, yOffset);
+    entity.getComponent<xy::Transform>().move(MenuConst::VehicleSelectArea.width * xOffset, xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
+    entity.addComponent<VehicleSelect>().index = m_sharedData.localPlayers[1].vehicle;
+    entity.addComponent<xy::UIHitBox>().area = MenuConst::VehicleSelectArea;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    e.getComponent<VehicleSelect>().index = (e.getComponent<VehicleSelect>().index + 1) % 3;
+                    m_sharedData.localPlayers[1].vehicle = static_cast<std::uint32_t>(e.getComponent<VehicleSelect>().index);
+                }
+            });
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //player three
+    yOffset += 284.f;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, yOffset);
+    entity.getComponent<xy::Transform>().move(-MenuConst::VehicleSelectArea.width * xOffset, xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
+    entity.addComponent<VehicleSelect>().index = m_sharedData.localPlayers[2].vehicle;
+    entity.addComponent<xy::UIHitBox>().area = MenuConst::VehicleSelectArea;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    e.getComponent<VehicleSelect>().index = (e.getComponent<VehicleSelect>().index + 1) % 3;
+                    m_sharedData.localPlayers[2].vehicle = static_cast<std::uint32_t>(e.getComponent<VehicleSelect>().index);
+                }
+            });
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //player four
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, yOffset);
+    entity.getComponent<xy::Transform>().move(MenuConst::VehicleSelectArea.width* xOffset, xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
+    entity.addComponent<VehicleSelect>().index = m_sharedData.localPlayers[3].vehicle;
+    entity.addComponent<xy::UIHitBox>().area = MenuConst::VehicleSelectArea;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    e.getComponent<VehicleSelect>().index = (e.getComponent<VehicleSelect>().index + 1) % 3;
+                    m_sharedData.localPlayers[3].vehicle = static_cast<std::uint32_t>(e.getComponent<VehicleSelect>().index);
+                }
+            });
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::updateTextInput(const sf::Event& evt)

@@ -33,6 +33,7 @@ Copyright 2019 Matt Marchant
 #include "TimeTrialDirector.hpp"
 #include "WayPoint.hpp"
 #include "VertexFunctions.hpp"
+#include "NixieDisplay.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -217,6 +218,24 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
 
             m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
         }
+        else if (data.type == VehicleEvent::LapLine)
+        {
+            //count laps and end time trial when done
+            m_sharedData.gameData.lapCount--;
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::UI::LapText;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            if (m_sharedData.gameData.lapCount == 0)
+            {
+                requestStackPush(StateID::Summary);
+            }
+        }
     }
 
     m_backgroundScene.forwardMessage(msg);
@@ -328,6 +347,7 @@ void LocalEliminationState::initScene()
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
+    m_uiScene.addSystem<NixieSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
@@ -366,6 +386,8 @@ void LocalEliminationState::loadResources()
     m_textureIDs[TextureID::Game::Pylon] = m_resources.load<sf::Texture>("assets/images/pylon.png");
     m_textureIDs[TextureID::Game::Bollard] = m_resources.load<sf::Texture>("assets/images/bollard.png");
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
+    m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
+    m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -703,6 +725,20 @@ void LocalEliminationState::buildUI()
         }
     };
     entity.addComponent<xy::AudioEmitter>() = m_uiSounds.getEmitter("start");
+
+    //lap counter frame
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(-1);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapCounter]));
+
+    //lap counter
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(GameConst::LapCounterPosition);
+    entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::NixieSheet]));
+    entity.addComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+    entity.getComponent<Nixie>().digitCount = 2;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LapText;
 }
 
 void LocalEliminationState::spawnVehicle()
