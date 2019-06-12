@@ -60,6 +60,7 @@ namespace TextureID
             Stars, StarsFar, StarsMid, StarsNear,
             PlanetDiffuse, PlanetNormal,
             MenuBackground, TrackSelect,
+            LapFrame, LapCounter, LightBar,
 
             Count
         };
@@ -101,6 +102,7 @@ namespace SpriteID::Menu
         NetBackButton,
 
         NavLeft, NavRight,
+        Toggle,
 
         Count
     };

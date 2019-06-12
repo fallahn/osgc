@@ -1,0 +1,9 @@
+spritesheet menu_toggle
+{
+    src="assets/images/toggle.png"
+
+    sprite toggle
+    {
+        bounds = 0,0,220,80
+    }
+}

@@ -33,6 +33,7 @@ source distribution.
 #include "SliderSystem.hpp"
 #include "NetConsts.hpp"
 #include "VehicleSelectSystem.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -197,6 +198,9 @@ void MenuState::loadResources()
     m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select_large.png");
     m_textureIDs[TextureID::Menu::MenuBackground] = m_resources.load<sf::Texture>("assets/images/player_select.png");
     m_textureIDs[TextureID::Menu::TrackSelect] = m_resources.load<sf::Texture>("assets/images/track_select.png");
+    m_textureIDs[TextureID::Menu::LapCounter] = m_resources.load<sf::Texture>("assets/images/counter.png");
+    m_textureIDs[TextureID::Menu::LapFrame] = m_resources.load<sf::Texture>("assets/images/lap_selector.png");
+    m_textureIDs[TextureID::Menu::LightBar] = m_resources.load<sf::Texture>("assets/images/lightbar.png");
 
     m_textureIDs[TextureID::Menu::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
     m_textureIDs[TextureID::Menu::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
@@ -232,6 +236,9 @@ void MenuState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/menu_arrows.spt", m_resources);
     m_sprites[SpriteID::Menu::NavLeft] = spriteSheet.getSprite("left");
     m_sprites[SpriteID::Menu::NavRight] = spriteSheet.getSprite("right");
+
+    spriteSheet.loadFromFile("assets/sprites/menu_toggle.spt", m_resources);
+    m_sprites[SpriteID::Menu::Toggle] = spriteSheet.getSprite("toggle");
 
     if (spriteSheet.loadFromFile("assets/sprites/cursor.spt", m_resources))
     {
@@ -843,6 +850,14 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 }
             });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //lap select
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(114.f, -(xy::DefaultSceneSize.y - 238.f));
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LapFrame]));
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
@@ -1052,6 +1067,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     };
     entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
 
+
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     auto textEnt = m_scene.createEntity();
     textEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f, 156.f);
@@ -1078,14 +1094,24 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                     {
                         std::any_cast<float&>(elimEnt.getComponent<xy::Callback>().userData) = 90.f;
                         std::any_cast<float&>(thumbEnt.getComponent<xy::Callback>().userData) = 0.f;
-                        textEnt.getComponent<xy::Text>().setString("Race");
+                        textEnt.getComponent<xy::Text>().setString("Split Screen");
                     }
                     elimEnt.getComponent<xy::Callback>().active = true;
                     thumbEnt.getComponent<xy::Callback>().active = true;
                 }
             });
 
+    //lap select
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(176.f, (xy::DefaultSceneSize.y + 308.f));
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LapFrame]));
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+
     //vehicle select
+    LOG("COMPACT THIS INTO A LOOP", xy::Logger::Type::Info);
     //player one
     const float xOffset = 0.5f;
     float yOffset = 30.f;
@@ -1107,6 +1133,19 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
             });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    auto toggleEnt = m_scene.createEntity();
+    toggleEnt.addComponent<xy::Transform>().setPosition(MenuConst::TogglePosition);
+    toggleEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    toggleEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::Toggle];
+    entity.getComponent<xy::Transform>().addChild(toggleEnt.getComponent<xy::Transform>());
+
+    auto lightEnt = m_scene.createEntity();
+    lightEnt.addComponent<xy::Transform>().setPosition(MenuConst::LightbarPosition);
+    lightEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    lightEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LightBar]));
+    lightEnt.getComponent<xy::Sprite>().setColour(GameConst::PlayerColour::Light[0]);
+    entity.getComponent<xy::Transform>().addChild(lightEnt.getComponent<xy::Transform>());
+
     //player two
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, yOffset);
@@ -1125,6 +1164,19 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 }
             });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    toggleEnt = m_scene.createEntity();
+    toggleEnt.addComponent<xy::Transform>().setPosition(MenuConst::TogglePosition);
+    toggleEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    toggleEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::Toggle];
+    entity.getComponent<xy::Transform>().addChild(toggleEnt.getComponent<xy::Transform>());
+
+    lightEnt = m_scene.createEntity();
+    lightEnt.addComponent<xy::Transform>().setPosition(MenuConst::LightbarPosition);
+    lightEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    lightEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LightBar]));
+    lightEnt.getComponent<xy::Sprite>().setColour(GameConst::PlayerColour::Light[1]);
+    entity.getComponent<xy::Transform>().addChild(lightEnt.getComponent<xy::Transform>());
 
     //player three
     yOffset += 284.f;
@@ -1146,6 +1198,19 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
             });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    toggleEnt = m_scene.createEntity();
+    toggleEnt.addComponent<xy::Transform>().setPosition(MenuConst::TogglePosition);
+    toggleEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    toggleEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::Toggle];
+    entity.getComponent<xy::Transform>().addChild(toggleEnt.getComponent<xy::Transform>());
+
+    lightEnt = m_scene.createEntity();
+    lightEnt.addComponent<xy::Transform>().setPosition(MenuConst::LightbarPosition);
+    lightEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    lightEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LightBar]));
+    lightEnt.getComponent<xy::Sprite>().setColour(GameConst::PlayerColour::Light[2]);
+    entity.getComponent<xy::Transform>().addChild(lightEnt.getComponent<xy::Transform>());
+
     //player four
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, yOffset);
@@ -1164,6 +1229,19 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 }
             });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    toggleEnt = m_scene.createEntity();
+    toggleEnt.addComponent<xy::Transform>().setPosition(MenuConst::TogglePosition);
+    toggleEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    toggleEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::Menu::Toggle];
+    entity.getComponent<xy::Transform>().addChild(toggleEnt.getComponent<xy::Transform>());
+
+    lightEnt = m_scene.createEntity();
+    lightEnt.addComponent<xy::Transform>().setPosition(MenuConst::LightbarPosition);
+    lightEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    lightEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LightBar]));
+    lightEnt.getComponent<xy::Sprite>().setColour(GameConst::PlayerColour::Light[3]);
+    entity.getComponent<xy::Transform>().addChild(lightEnt.getComponent<xy::Transform>());
 }
 
 void MenuState::updateTextInput(const sf::Event& evt)
