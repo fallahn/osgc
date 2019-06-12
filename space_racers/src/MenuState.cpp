@@ -57,6 +57,7 @@ source distribution.
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/graphics/postprocess/ChromeAb.hpp>
+#include <xyginext/util/Math.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -72,11 +73,12 @@ namespace
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State     (ss, ctx),
-    m_sharedData    (sd),
-    m_scene         (ctx.appInstance.getMessageBus()),
-    m_activeString  (nullptr),
-    m_mapIndex      (0)
+    : xy::State         (ss, ctx),
+    m_sharedData        (sd),
+    m_scene             (ctx.appInstance.getMessageBus()),
+    m_activeString      (nullptr),
+    m_mapIndex          (0),
+    m_eliminationMode   (true)
 {
     ctx.appInstance.setMouseCursorVisible(true);
 
@@ -889,7 +891,16 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    //TODO launch mode based on current selection
+                    //launch mode based on current selection
+                    requestStackClear();
+                    if (m_eliminationMode)
+                    {
+                        requestStackPush(StateID::LocalElimination);
+                    }
+                    else
+                    {
+                        requestStackPush(StateID::LocalRace);
+                    }
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
@@ -909,7 +920,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //map select
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y * 1.2f);
+    entity.getComponent<xy::Transform>().move(-140.f, xy::DefaultSceneSize.y * 1.2f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TrackSelect]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -971,6 +982,108 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
             });
 
     entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
+    //mode select
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/mode_select.spt", m_resources);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(160.f, xy::DefaultSceneSize.y * 1.05f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("back");
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::ModeSelectDialPosition);
+    thumbEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
+    thumbEnt.addComponent<xy::Sprite>() = spriteSheet.getSprite("elimination");
+    bounds = thumbEnt.getComponent<xy::Sprite>().getTextureBounds();
+    thumbEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    thumbEnt.addComponent<xy::Callback>().userData = std::make_any<float>(0.f);
+    thumbEnt.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float dt)
+    {
+        const auto& target = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        auto& tx = e.getComponent<xy::Transform>();
+        tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), target)* dt * MenuConst::ModeSelectSpeed);
+
+        float alpha = xy::Util::Math::clamp(1.f - (tx.getRotation() / 90.f), 0.f, 1.f);
+
+        sf::Color c(255, 255, 255, static_cast<sf::Uint8>(alpha * 255.f));
+        e.getComponent<xy::Sprite>().setColour(c);
+
+        if (std::abs(target - tx.getRotation()) < 0.5f)
+        {
+            tx.setRotation(target);
+            e.getComponent<xy::Callback>().active = false;
+        }
+    };
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+    auto elimEnt = thumbEnt;
+
+    thumbEnt = m_scene.createEntity();
+    thumbEnt.addComponent<xy::Transform>().setPosition(MenuConst::ModeSelectDialPosition);
+    thumbEnt.getComponent<xy::Transform>().setRotation(-90.f);
+    thumbEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 2);
+    thumbEnt.addComponent<xy::Sprite>() = spriteSheet.getSprite("race");
+    thumbEnt.getComponent<xy::Sprite>().setColour({ 255,255,255,0 });
+    bounds = thumbEnt.getComponent<xy::Sprite>().getTextureBounds();
+    thumbEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    thumbEnt.addComponent<xy::Callback>().userData = std::make_any<float>(-90.f);
+    thumbEnt.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float dt)
+    {
+        const auto& target = std::any_cast<float&>(e.getComponent<xy::Callback>().userData);
+        auto& tx = e.getComponent<xy::Transform>();
+        tx.rotate(xy::Util::Math::shortestRotation(tx.getRotation(), target) * dt * MenuConst::ModeSelectSpeed);
+
+        float alpha = xy::Util::Math::clamp(1.f - ((360.f - tx.getRotation()) / 90.f), 0.f, 1.f);
+
+        sf::Color c(255, 255, 255, static_cast<sf::Uint8>(alpha * 255.f));
+        e.getComponent<xy::Sprite>().setColour(c);
+
+        if (std::abs(target - tx.getRotation()) < 0.5f)
+        {
+            tx.setRotation(target);
+            e.getComponent<xy::Callback>().active = false;
+        }
+    };
+    entity.getComponent<xy::Transform>().addChild(thumbEnt.getComponent<xy::Transform>());
+
+    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
+    auto textEnt = m_scene.createEntity();
+    textEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f, 156.f);
+    textEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
+    textEnt.addComponent<xy::Text>(font).setString("Elimination");
+    textEnt.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    textEnt.getComponent<xy::Text>().setCharacterSize(24);
+    entity.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
+
+    entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(30.f, 47.f), {bounds.width, bounds.height} };
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&, elimEnt, thumbEnt, textEnt](xy::Entity, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_eliminationMode = !m_eliminationMode;
+                    if (m_eliminationMode)
+                    {
+                        std::any_cast<float&>(elimEnt.getComponent<xy::Callback>().userData) = 0.f;
+                        std::any_cast<float&>(thumbEnt.getComponent<xy::Callback>().userData) = -90.f;
+                        textEnt.getComponent<xy::Text>().setString("Elimination");
+                    }
+                    else
+                    {
+                        std::any_cast<float&>(elimEnt.getComponent<xy::Callback>().userData) = 90.f;
+                        std::any_cast<float&>(thumbEnt.getComponent<xy::Callback>().userData) = 0.f;
+                        textEnt.getComponent<xy::Text>().setString("Race");
+                    }
+                    elimEnt.getComponent<xy::Callback>().active = true;
+                    thumbEnt.getComponent<xy::Callback>().active = true;
+                }
+            });
 }
 
 void MenuState::updateTextInput(const sf::Event& evt)

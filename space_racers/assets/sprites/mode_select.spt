@@ -10,6 +10,15 @@ spritesheet mode_select
     sprite back
     {
         bounds = 0,0,186,200
+
+        animation idle
+        {
+            loop=true
+            framerate = 4
+
+            frame = 0, 0, 186, 200
+            frame = 0, 200, 186, 200
+        }
     }
 
     sprite elimination
@@ -19,6 +28,6 @@ spritesheet mode_select
 
     sprite race
     {
-        bounds = 186,233,138,138
+        bounds = 197,272,116,116
     }
 }

@@ -39,6 +39,9 @@ namespace MenuConst
     static const sf::Vector2f NextTrackPosition(262.f, 332.f);
     static const sf::Vector2f TrackButtonSize(66.f, 24.f);
 
+    static const sf::Vector2f ModeSelectDialPosition(93.5f, 97.5f);
+    static const float ModeSelectSpeed = 6.f;
+
     static const std::int32_t BackgroundDepth = -20;
     static const std::int32_t MenuDepth = 0;
     static const std::int32_t ButtonDepth = 1;

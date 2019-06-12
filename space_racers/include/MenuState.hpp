@@ -72,6 +72,8 @@ private:
     std::vector<std::pair<std::string, std::size_t>> m_mapInfo;
     std::size_t m_mapIndex;
 
+    bool m_eliminationMode;
+
     void initScene();
     void loadResources();
     void buildMenu();
