@@ -234,7 +234,7 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
 
             if (m_sharedData.gameData.lapCount == 0)
             {
-                requestStackPush(StateID::Summary);
+                requestStackPush(StateID::TimeTrialSummary);
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             }
         }

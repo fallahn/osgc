@@ -51,7 +51,8 @@ namespace StateID
         Summary,
         LocalRace,
         LocalElimination,
-        TimeTrial
+        TimeTrial,
+        TimeTrialSummary
     };
 }
 

@@ -37,6 +37,7 @@ source distribution.
 #include "LocalRaceState.hpp"
 #include "LocalEliminationState.hpp"
 #include "TimeTrialState.hpp"
+#include "TimeTrialEndState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -58,6 +59,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<LocalEliminationState>(StateID::LocalElimination, data);
     ss->registerState<LocalRaceState>(StateID::LocalRace, data);
     ss->registerState<TimeTrialState>(StateID::TimeTrial, data);
+    ss->registerState<TimeTrialSummaryState>(StateID::TimeTrialSummary, data);
 
 #ifdef XY_DEBUG
 
@@ -83,4 +85,5 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::LocalElimination);
     ss->unregisterState(StateID::LocalRace);
     ss->unregisterState(StateID::TimeTrial);
+    ss->unregisterState(StateID::TimeTrialSummary);
 }

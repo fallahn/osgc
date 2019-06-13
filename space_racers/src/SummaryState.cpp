@@ -108,6 +108,7 @@ void SummaryState::initScene()
 
 void SummaryState::buildMenu()
 {
+    //background
     sf::Color c(0, 0, 0, 220);
 
     auto entity = m_scene.createEntity();
@@ -122,6 +123,7 @@ void SummaryState::buildMenu()
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
+    //podium
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>().setDepth(-5);
