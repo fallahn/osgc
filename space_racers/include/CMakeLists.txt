@@ -12,6 +12,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DeadReckoningSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DebugState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DigitSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DummyClient.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp

@@ -157,6 +157,7 @@
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\DeadReckoningSystem.hpp" />
     <ClInclude Include="include\DebugState.hpp" />
+    <ClInclude Include="include\DigitSystem.hpp" />
     <ClInclude Include="include\DummyClient.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
@@ -214,6 +215,7 @@
     <ClCompile Include="src\CollisionObject.cpp" />
     <ClCompile Include="src\DeadReckoningSystem.cpp" />
     <ClCompile Include="src\DebugState.cpp" />
+    <ClCompile Include="src\DigitSystem.cpp" />
     <ClCompile Include="src\DummyClient.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\ErrorState.cpp" />

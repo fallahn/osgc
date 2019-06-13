@@ -18,37 +18,24 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace CommandID
+#include <xyginext/ecs/System.hpp>
+
+struct Digit final
 {
-    enum Game
-    {
-        NetActor = 0x1,
-        Trail = 0x2,
-        Vehicle = 0x4,
-    };
+    std::uint16_t value = 1;
+    std::uint16_t lastValue = 0;
 
-    enum UI
-    {
-        StartLights = 0x1,
-        LapText = 0x2,
+    float targetTenPosition = 0.f;
+    float targetUnitPosition = 0.f;
+};
 
-        TimeText = 0x8,
-        BestTimeText = 0x10
-    };
+class DigitSystem final : public xy::System
+{
+public:
+    explicit DigitSystem(xy::MessageBus&);
 
-    enum Lobby
-    {
-        PlayerText = 0x1,
-        LobbyText = 0x2,
-    };
+    void process(float) override;
 
-
-    enum Menu
-    {
-        RootNode = 0x1,
-        NameText = 0x2,
-        IPText = 0x4,
-        TrackThumb = 0x8,
-        LapCounter = 0x10
-    };
-}
+private:
+    void onEntityAdded(xy::Entity) override;
+};

@@ -36,3 +36,26 @@ void main()
 
     gl_FragColor = texture2D(u_texture, coord);
 })";
+
+static const std::string LightbarFragment =
+R"(
+#version 120
+
+uniform sampler2D u_texture;
+
+float blend(float bg, float fg)
+{
+    //overlay mode
+    return bg < 0.5 ? (2.0 * bg * fg) : (1.0 - 2.0 * (1.0 - bg) * (1.0 - fg));
+}
+
+void main()
+{
+    vec4 colour = texture2D(u_texture, gl_TexCoord[0].xy);
+
+    colour.r = blend(colour.r, gl_Color.r);
+    colour.g = blend(colour.g, gl_Color.g);
+    colour.b = blend(colour.b, gl_Color.b);
+
+    gl_FragColor = colour;
+})";

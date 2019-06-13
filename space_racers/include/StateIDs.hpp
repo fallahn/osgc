@@ -58,7 +58,7 @@ namespace StateID
 struct GameData final
 {
     std::uint8_t actorCount = 1;
-    std::uint8_t lapCount = 1;
+    std::uint8_t lapCount = 3;
 };
 
 struct LocalPlayer final

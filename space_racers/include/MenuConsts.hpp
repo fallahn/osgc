@@ -30,7 +30,8 @@ namespace MenuConst
     static const sf::Vector2f LocalPlayMenuPosition(0.f, -xy::DefaultSceneSize.y);
     static const sf::Vector2f ItemRootPosition(402.f, 380.f);
 
-    static const sf::FloatRect VehicleSelectArea(0.f, 0.f, 517.f, 268.f);
+    static const sf::FloatRect VehicleSelectArea(0.f, 0.f, 517.f, 268.f);// (22.f, 50.f, 471.f, 186.f);
+    static const sf::FloatRect VehicleButtonArea(22.f, 50.f, 471.f, 186.f);
     static const sf::Vector2f NavLeftPosition(180.f, 980.f);
     static const sf::Vector2f NavRightPosition(xy::DefaultSceneSize.x - NavLeftPosition.x, NavLeftPosition.y);
 
@@ -39,11 +40,16 @@ namespace MenuConst
     static const sf::Vector2f NextTrackPosition(262.f, 332.f);
     static const sf::Vector2f TrackButtonSize(66.f, 24.f);
 
+    static const sf::Vector2f LapPrevPosition(18.f, 18.f);
+    static const sf::Vector2f LapNextPosition(108.f, 18.f);
+    static const sf::Vector2f LapButtonSize(32.f, 32.f);
+
     static const sf::Vector2f ModeSelectDialPosition(93.5f, 97.5f);
     static const float ModeSelectSpeed = 6.f;
 
     static const sf::Vector2f TogglePosition(280.f, 238.f);
     static const sf::Vector2f LightbarPosition(30.f, 248.f);
+    static const sf::Vector2f LapDigitPosition(50.f, 12.f);
 
     static const std::int32_t BackgroundDepth = -20;
     static const std::int32_t MenuDepth = 0;

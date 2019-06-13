@@ -8,6 +8,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/CollisionObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DeadReckoningSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DebugState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DigitSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DummyClient.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp

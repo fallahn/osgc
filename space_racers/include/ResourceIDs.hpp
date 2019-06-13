@@ -36,7 +36,8 @@ namespace ShaderID
         Vehicle,
         Trail,
         Stars,
-        MonitorScreen
+        MonitorScreen,
+        Lightbar
     };
 }
 
