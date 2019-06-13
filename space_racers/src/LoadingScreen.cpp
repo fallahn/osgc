@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "LoadingScreen.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -29,6 +30,30 @@ namespace
 {
 #include "GlobeShader.inl"
     constexpr float frametime = 1.f / 60.f;
+
+    const std::array<std::string, 20> randomMessages = 
+    {
+        "exec COMMAND.COM",
+        "Smuggling Raisins since 1903",
+        "Pay no attention to the man behind the curtain",
+        "Who cut the cheese?",
+        "You are not reading this",
+        "Always assume a wink is suspicious",
+        "Mauve is the new purple",
+        "Pet your kitty",
+        "There are no pork pies in the Netherlands",
+        "Sponsored by Powdered Toast",
+        "Please stop looking at me",
+        "Now with added Bosons!",
+        "Goes great with Salmon",
+        "Wouldn't you like to be a racer too?",
+        "Not tested on animals",
+        "Any bugs you may encounter should be considered a feature",
+        "You may have read this before",
+        "The chances are the odds of something happening",
+        "Mustard is underrated",
+        "Nothing up our sleeves" 
+    };
 }
 
 LoadingScreen::LoadingScreen()
@@ -54,13 +79,27 @@ LoadingScreen::LoadingScreen()
 
     m_backgroundTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/stars.png");
     m_backgroundSprite.setTexture(m_backgroundTexture, true);
+
+    m_font.loadFromFile(xy::FileSystem::getResourcePath() + "assets/fonts/VeraMono.ttf");
+    m_text.setFont(m_font);
+    updateMessage();
 }
 
 //public
 void LoadingScreen::update(float dt)
 {
+    float oldTime = m_currentFrameTime;
+
     m_currentFrameTime += dt;
     m_shader->setUniform("u_time", m_currentFrameTime);
+
+    //pick a new message every 3 seconds or so
+    auto prev = static_cast<std::int32_t>(oldTime) % 3;
+    auto next = static_cast<std::int32_t>(m_currentFrameTime) % 3;
+    if (prev == 0 && next == 1)
+    {
+        updateMessage();
+    }
 }
 
 //private
@@ -68,4 +107,12 @@ void LoadingScreen::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     rt.draw(m_backgroundSprite);
     rt.draw(m_roidSprite, m_shader.get());
+    rt.draw(m_text);
+}
+
+void LoadingScreen::updateMessage()
+{
+    m_text.setString(randomMessages[xy::Util::Random::value(0, randomMessages.size() - 1)]);
+    m_text.setOrigin(m_text.getLocalBounds().width / 2.f, m_text.getLocalBounds().height / 2.f);
+    m_text.setPosition(xy::DefaultSceneSize.x / 2.f, 980.f);
 }

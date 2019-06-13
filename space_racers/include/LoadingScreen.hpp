@@ -22,6 +22,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <memory>
 
@@ -39,6 +41,9 @@ private:
     sf::Sprite m_roidSprite;
     sf::Sprite m_backgroundSprite;
 
+    sf::Font m_font;
+    sf::Text m_text;
+
     //this is a kludge to prevent the LoadingScreen from becoming non-copyable
     //don't tell anyone!!
     std::shared_ptr<sf::Shader> m_shader;
@@ -46,4 +51,5 @@ private:
     float m_currentFrameTime;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    void updateMessage();
 };
