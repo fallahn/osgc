@@ -114,3 +114,45 @@ void main()
 {
     gl_FragColor = texture2D(u_texture, gl_TexCoord[0].xy) + gl_Color;
 })";
+
+static const std::string GhostFrag =
+R"(
+uniform sampler2D u_diffuseMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_specularMap;
+uniform float u_time;
+
+varying vec3 v_cameraTanDirection;
+varying vec3 v_lightTanDirection;
+
+void main()
+{
+    vec2 coord = gl_TexCoord[0].xy;
+    vec4 diffuseColour = texture2D(u_diffuseMap, coord);
+    vec3 normalColour = texture2D(u_normalMap, coord).rgb;
+
+    vec3 normal = normalize(normalColour * 2.0 - 1.0);
+
+    float colourAmount = max(dot(normal, normalize(v_lightTanDirection)), 0.0);
+    float specularMultiplier = texture2D(u_specularMap, coord).r;
+    
+    vec3 specular = vec3(0.0);
+    vec3 diffuse = vec3(0.0);
+
+    vec3 halfVec = normalize(v_lightTanDirection + v_cameraTanDirection);
+    float specAmount = max(dot(normal, halfVec), 0.0);
+    specular = vec3(pow(specAmount, 120.0)) * specularMultiplier;
+    diffuse = diffuseColour.rgb * colourAmount;
+
+    vec3 outColour = specular + diffuse;
+    outColour *= vec3(0.67, 0.87, 0.93);
+
+    //noise
+    float x = (coord.x + 4.0) * coord.y * u_time * 10.0;
+    x = mod(x, 13.0) * mod(x, 123.0);
+    float grain = mod(x, 0.01) - 0.005;
+
+    outColour = outColour + vec3(clamp(grain * 100.0, 0.0, 0.07));
+
+    gl_FragColor = vec4(outColour, diffuseColour.a * gl_Color.a);
+})";

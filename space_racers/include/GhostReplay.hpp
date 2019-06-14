@@ -26,8 +26,6 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Entity.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 
-#include <SFML/Graphics/Shader.hpp>
-
 #include <vector>
 #include <array>
 
@@ -36,14 +34,25 @@ namespace xy
     class Message;
     class Scene;
     class ResourceHandler;
+    class ShaderResource;
 }
+
+struct ResourceCollection final
+{
+    xy::ResourceHandler* resources = nullptr;
+    xy::ShaderResource* shaders = nullptr;
+    const std::array<xy::Sprite, SpriteID::Game::Count>* sprites = nullptr;
+    const std::array<std::size_t, TextureID::Game::Count>* textureIDs = nullptr;
+};
 
 class GhostReplay final
 {
 public:
-    GhostReplay(xy::Scene&, xy::ResourceHandler&, std::array<xy::Sprite, SpriteID::Game::Count>&);
+    GhostReplay(xy::Scene&);
 
     void setPlayerEntity(xy::Entity);
+
+    void setResources(ResourceCollection rc) { m_resources = rc; }
 
     void handleMessage(const xy::Message&);
 
@@ -52,8 +61,7 @@ public:
 private:
 
     xy::Scene& m_scene;
-    xy::ResourceHandler& m_resources;
-    std::array<xy::Sprite, SpriteID::Game::Count>& m_sprites;
+    ResourceCollection m_resources;
 
     struct Point final
     {
@@ -77,8 +85,6 @@ private:
     xy::Entity m_playerEntity;
 
     bool m_enabled;
-
-    sf::Shader m_shader;
 
     void createGhost();
 };

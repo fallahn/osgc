@@ -79,7 +79,7 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_backgroundScene   (ctx.appInstance.getMessageBus()),
     m_gameScene         (ctx.appInstance.getMessageBus()),
     m_uiScene           (ctx.appInstance.getMessageBus()),
-    m_replay            (m_gameScene, m_resources, m_sprites),
+    m_replay            (m_gameScene),
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
@@ -89,6 +89,13 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     launchLoadingScreen();
     initScene();
     loadResources();
+
+    ResourceCollection rc;
+    rc.resources = &m_resources;
+    rc.shaders = &m_shaders;
+    rc.sprites = &m_sprites;
+    rc.textureIDs = &m_textureIDs;
+    m_replay.setResources(rc);
 
     if (!loadMap())
     {
@@ -303,6 +310,7 @@ bool TimeTrialState::update(float dt)
     shaderTime += dt;
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
+    m_shaders.get(ShaderID::Ghost).setUniform("u_time", -shaderTime / 10.f);
 
     m_replay.update();
 
@@ -437,6 +445,7 @@ void TimeTrialState::loadResources()
     m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
+    m_shaders.preload(ShaderID::Ghost, VehicleVertex, GhostFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs

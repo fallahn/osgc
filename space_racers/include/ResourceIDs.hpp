@@ -35,6 +35,7 @@ namespace ShaderID
         NeonBlend,
         NeonExtract,
         Vehicle,
+        Ghost,
         Trail,
         Stars,
         MonitorScreen,

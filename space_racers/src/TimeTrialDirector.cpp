@@ -91,6 +91,9 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
                     entity.getComponent<Slider>().active = true;
                 };
                 sendCommand(cmd);
+
+                auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+                msg->type = GameEvent::NewBestTime;
             }
         }
     }

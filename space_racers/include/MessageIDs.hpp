@@ -51,6 +51,7 @@ struct GameEvent final
     {
         RaceStarted,
         RaceEnded,
-        TimedOut
+        TimedOut,
+        NewBestTime
     }type = RaceStarted;
 };

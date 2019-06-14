@@ -20,43 +20,29 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "GameConsts.hpp"
 #include "VehicleSystem.hpp"
+#include "InverseRotationSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 #include <string>
 
 namespace
 {
-    const std::string GhostFragment =
-        R"(
-            #version 120
-
-            uniform sampler2D u_texture;
-
-            void main()
-            {
-                vec4 colour = texture2D(u_texture, gl_TexCoord[0].xy) * gl_Color;
-                gl_FragColor = colour;
-            }
-        )";
 }
 
-GhostReplay::GhostReplay(xy::Scene& scene, xy::ResourceHandler& resources,
-                            std::array<xy::Sprite, SpriteID::Game::Count>& sprites)
+GhostReplay::GhostReplay(xy::Scene& scene)
     : m_scene           (scene),
-    m_resources         (resources),
-    m_sprites           (sprites),
     m_recordedPoints    (MaxPoints),
     m_recordingIndex    (0),
     m_playbackPoints    (MaxPoints),
     m_playbackIndex     (0),
     m_enabled           (false)
 {
-    m_shader.loadFromMemory(GhostFragment, sf::Shader::Fragment);
 }
 
 //public
@@ -78,6 +64,10 @@ void GhostReplay::handleMessage(const xy::Message& msg)
         {
             m_enabled = false;
         }
+        else if (data.type == GameEvent::NewBestTime)
+        {
+            m_playbackPoints.swap(m_recordedPoints);
+        }
     }
     else if (msg.id == MessageID::VehicleMessage)
     {
@@ -86,7 +76,6 @@ void GhostReplay::handleMessage(const xy::Message& msg)
         {
         default: break;
         case VehicleEvent::LapLine:
-            m_playbackPoints.swap(m_recordedPoints);
             m_playbackIndex = 0;
             m_recordingIndex = 0;
 
@@ -130,22 +119,25 @@ void GhostReplay::createGhost()
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(m_playbackPoints[0].x, m_playbackPoints[0].y);
     entity.getComponent<xy::Transform>().setRotation(m_playbackPoints[0].rotation);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-    entity.getComponent<xy::Drawable>().setShader(&m_shader);
-    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendMultiply);
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<InverseRotation>();
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth+1);
+    entity.getComponent<xy::Drawable>().setShader(&m_resources.shaders->get(ShaderID::Ghost));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.resources->get<sf::Texture>(m_resources.textureIDs->at(TextureID::Game::VehicleNormal)));
+    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.resources->get<sf::Texture>(m_resources.textureIDs->at(TextureID::Game::VehicleSpecular)));
+    entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
 
     switch (m_playerEntity.getComponent<Vehicle>().type)
     {
     default:
     case Vehicle::Car:
-        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car];
+        entity.addComponent<xy::Sprite>() = m_resources.sprites->at(SpriteID::Game::Car);
         break;
     case Vehicle::Bike:
-        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Bike];
+        entity.addComponent<xy::Sprite>() = m_resources.sprites->at(SpriteID::Game::Bike);
         break;
     case Vehicle::Ship:
-        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Ship];
+        entity.addComponent<xy::Sprite>() = m_resources.sprites->at(SpriteID::Game::Ship);
         break;
     }
 
