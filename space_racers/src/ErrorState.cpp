@@ -103,7 +103,7 @@ void ErrorState::initScene()
     //message text
     if (m_sharedData.fontID == 0)
     {
-        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/" + FontID::DefaultFont);
     }
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     entity = m_scene.createEntity();

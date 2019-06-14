@@ -181,10 +181,12 @@ void VehicleSystem::processInput(xy::Entity entity, float delta)
     {
         acceleration -= vehicle.settings.acceleration * 0.3f;
     }
+    //this makes sure we turn in the correct direction when reversing
+    float sign = (acceleration < 0) ? -360.f : 0.f;
 
     //rotation
     const auto& tx = entity.getComponent<xy::Transform>();
-    auto rotation = tx.getRotation() * xy::Util::Const::degToRad;
+    auto rotation = (tx.getRotation() - sign) * xy::Util::Const::degToRad;
 
 #ifdef FAST_SIN
     //TODO if the table is pre-baked it would also be more consistent across platforms

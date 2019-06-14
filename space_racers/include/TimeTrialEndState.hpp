@@ -49,6 +49,8 @@ private:
 
     sf::Clock m_delayClock;
 
+    bool m_shown;
+
     void initScene();
     void buildMenu();
 };

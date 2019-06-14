@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "LoadingScreen.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
 #include <xyginext/util/Random.hpp>
@@ -80,7 +81,7 @@ LoadingScreen::LoadingScreen()
     m_backgroundTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/stars.png");
     m_backgroundSprite.setTexture(m_backgroundTexture, true);
 
-    m_font.loadFromFile(xy::FileSystem::getResourcePath() + "assets/fonts/VeraMono.ttf");
+    m_font.loadFromFile(xy::FileSystem::getResourcePath() + "assets/fonts/" + FontID::DefaultFont);
     m_text.setFont(m_font);
     updateMessage();
 }

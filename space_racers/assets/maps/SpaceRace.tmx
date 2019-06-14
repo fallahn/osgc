@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="123">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="123">
  <tileset firstgid="1" name="diffuse" tilewidth="128" tileheight="128" tilecount="40" columns="8">
   <image source="../images/tiles/diffuse.png" width="1024" height="640"/>
  </tileset>
@@ -203,7 +203,7 @@
   <object id="104" x="1152" y="2752" width="2112" height="480"/>
   <object id="105" x="2624" y="3264" width="1472" height="96"/>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision" locked="1">
+ <objectgroup color="#ffff00" id="8" name="Collision">
   <object id="36" x="2434" y="3716" width="125" height="125"/>
   <object id="38" x="1144" y="768" width="76" height="1483"/>
   <object id="39" x="5022" y="3228" width="70" height="72"/>
@@ -214,8 +214,6 @@
   <object id="47" x="649" y="3465" width="106" height="107"/>
   <object id="48" x="525" y="3337" width="100" height="106"/>
   <object id="49" x="525" y="2825" width="104" height="104"/>
-  <object id="54" x="2" y="754" width="60" height="76"/>
-  <object id="55" x="574" y="750" width="74" height="88"/>
   <object id="110" x="580" y="1407" width="52" height="583"/>
   <object id="111" x="10" y="1731" width="52" height="583"/>
  </objectgroup>

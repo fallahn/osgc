@@ -45,10 +45,11 @@ namespace
 TimeTrialSummaryState::TimeTrialSummaryState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
     m_sharedData(sd),
-    m_scene     (ctx.appInstance.getMessageBus())
+    m_scene     (ctx.appInstance.getMessageBus()),
+    m_shown     (false)
 {
     initScene();
-    buildMenu();
+    //buildMenu();
 }
 
 //public
@@ -77,6 +78,12 @@ void TimeTrialSummaryState::handleMessage(const xy::Message& msg)
 
 bool TimeTrialSummaryState::update(float dt)
 {
+    if (!m_shown && m_delayClock.getElapsedTime().asSeconds() > 2.f)
+    {
+        buildMenu();
+        m_shown = true;
+    }
+
     m_scene.update(dt);
     return true;
 }

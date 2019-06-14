@@ -52,16 +52,6 @@ void DigitSystem::process(float dt)
             float lastUnits = static_cast<float>(digit.lastValue % 10);
 
             digit.targetUnitPosition = (frame.height * units) + ((frame.height * 10.f) * tens);
-            //if (diff > 0 && units < lastUnits)
-            //{
-            //    //rolled over incrementing
-            //    digit.targetUnitPosition += (frame.height * 10.f);
-            //}
-            //else if (diff < 0 && units > lastUnits)
-            //{
-            //    //rolled over decrementing
-            //    digit.targetUnitPosition -= (frame.height * 10.f);
-            //}
         }
         digit.lastValue = digit.value;
 

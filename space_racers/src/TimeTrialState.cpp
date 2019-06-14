@@ -79,6 +79,7 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_backgroundScene   (ctx.appInstance.getMessageBus()),
     m_gameScene         (ctx.appInstance.getMessageBus()),
     m_uiScene           (ctx.appInstance.getMessageBus()),
+    m_replay            (m_gameScene, m_resources, m_sprites),
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
@@ -143,6 +144,14 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
                 e.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
             };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        else if (data.type == GameEvent::TimedOut)
+        {
+            requestStackPush(StateID::TimeTrialSummary);
+            m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+
+            auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+            msg->type = GameEvent::RaceEnded;
         }
     }
     else if (msg.id == MessageID::VehicleMessage)
@@ -236,9 +245,14 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
             {
                 requestStackPush(StateID::TimeTrialSummary);
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+
+                auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+                msg->type = GameEvent::RaceEnded;
             }
         }
     }
+
+    m_replay.handleMessage(msg);
 
     m_backgroundScene.forwardMessage(msg);
     m_gameScene.forwardMessage(msg);
@@ -289,6 +303,8 @@ bool TimeTrialState::update(float dt)
     shaderTime += dt;
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
+
+    m_replay.update();
 
     m_playerInput.update(dt);
     m_backgroundScene.update(dt);
@@ -436,7 +452,7 @@ void TimeTrialState::loadResources()
 
     if (m_sharedData.fontID == 0)
     {
-        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/" + FontID::DefaultFont);
     }
 }
 
@@ -736,6 +752,8 @@ void TimeTrialState::buildUI()
     entity.addComponent<xy::Text>(font).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("00:00:0000");
     entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 
@@ -745,6 +763,8 @@ void TimeTrialState::buildUI()
     entity.addComponent<xy::Text>(font).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("00:00:0000");
     entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
     entity.addComponent<Slider>().speed = 10.f;
@@ -832,6 +852,7 @@ void TimeTrialState::spawnVehicle()
         thisTx.setScale(thatTx.getScale());
     };
 
+    m_replay.setPlayerEntity(entity);
     m_playerInput.setPlayerEntity(entity);
 
     auto cameraEntity = m_gameScene.getActiveCamera();

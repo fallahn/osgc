@@ -66,6 +66,10 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
             m_lapClock.restart();
             m_updateDisplay = true;
         }
+        else if (data.type == GameEvent::RaceEnded)
+        {
+            m_updateDisplay = false;
+        }
     }
     else if (msg.id == MessageID::VehicleMessage)
     {
@@ -105,5 +109,12 @@ void TimeTrialDirector::process(float)
             entity.getComponent<xy::Text>().setString(formatTimeString(currTime));
         };
         sendCommand(cmd);
+    }
+
+    //check the time to see if the player idled and quit if more than 2 minutes
+    if (m_lapClock.getElapsedTime().asSeconds() > 120.f)
+    {
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::TimedOut;
     }
 }

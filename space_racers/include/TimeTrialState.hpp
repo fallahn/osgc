@@ -33,6 +33,7 @@ source distribution.
 #include "ResourceIDs.hpp"
 #include "MatrixPool.hpp"
 #include "InputParser.hpp"
+#include "GhostReplay.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -71,6 +72,7 @@ private:
     std::array<sf::RenderTexture, 2u> m_trackTextures;
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
+    GhostReplay m_replay;
 
     xy::AudioResource m_audioResource;
     xy::AudioScape m_uiSounds;

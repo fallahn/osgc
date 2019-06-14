@@ -432,7 +432,7 @@ void LocalEliminationState::loadResources()
 
     if (m_sharedData.fontID == 0)
     {
-        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
+        m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/" + FontID::DefaultFont);
     }
 }
 

@@ -49,6 +49,8 @@ struct GameEvent final
 {
     enum
     {
-        RaceStarted
+        RaceStarted,
+        RaceEnded,
+        TimedOut
     }type = RaceStarted;
 };
