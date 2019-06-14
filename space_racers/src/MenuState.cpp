@@ -117,6 +117,14 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
             requestStackPush(StateID::Debug);
         });
 
+    LOG("PROPERLY RESTORE LAP COUNT", xy::Logger::Type::Info);
+    m_sharedData.gameData.lapCount = 3;
+
+    for (auto i = 0; i < 4; ++i)
+    {
+        m_sharedData.localPlayers[i].inputBinding.controllerID = i;
+    }
+
     quitLoadingScreen();
 }
 
@@ -1250,7 +1258,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
         if (m_sharedData.localPlayers[i].cpu)
         {
             auto bounds = toggleEnt.getComponent<xy::Sprite>().getTextureRect();
-            bounds.top = 0.f;
+            bounds.top = bounds.height;
             toggleEnt.getComponent<xy::Sprite>().setTextureRect(bounds);
         }
         toggleEnt.addComponent<xy::UIHitBox>().area = toggleEnt.getComponent<xy::Sprite>().getTextureBounds();
@@ -1261,7 +1269,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                     {
                         m_sharedData.localPlayers[i].cpu = !m_sharedData.localPlayers[i].cpu;
                         auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
-                        bounds.top = (m_sharedData.localPlayers[i].cpu) ? 0.f : bounds.height;
+                        bounds.top = (m_sharedData.localPlayers[i].cpu) ? bounds.height : 0.f;
                         e.getComponent<xy::Sprite>().setTextureRect(bounds);
                     }
                 });

@@ -34,6 +34,7 @@ Copyright 2019 Matt Marchant
 #include "WayPoint.hpp"
 #include "VertexFunctions.hpp"
 #include "NixieDisplay.hpp"
+#include "AIDriverSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -60,6 +61,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
@@ -81,7 +83,7 @@ LocalEliminationState::LocalEliminationState(xy::StateStack& ss, xy::State::Cont
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
-    m_playerInput       (sd.localPlayers[0].inputBinding),
+    m_playerInputs      ({ sd.localPlayers[0].inputBinding,sd.localPlayers[1].inputBinding,sd.localPlayers[2].inputBinding,sd.localPlayers[3].inputBinding }),
     m_state             (Readying)
 {
     launchLoadingScreen();
@@ -120,7 +122,10 @@ bool LocalEliminationState::handleEvent(const sf::Event& evt)
         }
     }
 
-    m_playerInput.handleEvent(evt);
+    for (auto& input : m_playerInputs)
+    {
+        input.handleEvent(evt);
+    }
     m_backgroundScene.forwardEvent(evt);
     m_gameScene.forwardEvent(evt);
     m_uiScene.forwardEvent(evt);
@@ -140,6 +145,16 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Normal);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        else if (data.type == GameEvent::RaceEnded)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Game::Vehicle;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -232,9 +247,10 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
             if (m_sharedData.gameData.lapCount == 0)
-            {
-                requestStackPush(StateID::Summary);
-                m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+            {                
+                //TODO this should set sudden death mode if not already
+                auto ent = data.entity;
+                ent.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             }
         }
     }
@@ -289,7 +305,11 @@ bool LocalEliminationState::update(float dt)
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
 
-    m_playerInput.update(dt);
+    for (auto& input : m_playerInputs)
+    {
+        input.update(dt);
+    }
+
     m_backgroundScene.update(dt);
     m_gameScene.update(dt);
     m_uiScene.update(dt);
@@ -325,6 +345,7 @@ void LocalEliminationState::initScene()
     m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setView(xy::DefaultSceneSize);
     m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
 
+    m_gameScene.addSystem<AIDriverSystem>(mb);
     m_gameScene.addSystem<VehicleSystem>(mb);
     m_gameScene.addSystem<AsteroidSystem>(mb);
     m_gameScene.addSystem<LightningSystem>(mb);
@@ -746,76 +767,96 @@ void LocalEliminationState::spawnVehicle()
 {
     auto [position, rotation] = m_mapParser.getStartPosition();
 
+    xy::Entity temp;
+
     //spawn vehicle
-    auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(position);
-    entity.getComponent<xy::Transform>().setRotation(rotation);
-    entity.addComponent<InverseRotation>();
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
-    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
-    entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
-    entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[0]);
-    entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[0].vehicle];
-    entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[0].vehicle);
-    entity.getComponent<Vehicle>().colourID = 0;
-    //TODO we should probably get this from the server, but it might not matter
-    //as the server is the final arbiter in laps counted anyway
-    entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
-    entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
-
-    entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
-    entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::Vehicle;
-
-    switch (entity.getComponent<Vehicle>().type)
+    for (auto i = 0u; i < 4u; ++i)
     {
-    default:
-    case Vehicle::Car:
-        entity.getComponent<Vehicle>().settings = Definition::car;
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
-        break;
-    case Vehicle::Bike:
-        entity.getComponent<Vehicle>().settings = Definition::bike;
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
-        break;
-    case Vehicle::Ship:
-        entity.getComponent<Vehicle>().settings = Definition::ship;
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
-        break;
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.getComponent<xy::Transform>().setRotation(rotation);
+
+        sf::Transform offsetTransform;
+        offsetTransform.rotate(rotation);
+        auto offset = offsetTransform.transformPoint(GameConst::SpawnPositions[i]);
+        entity.getComponent<xy::Transform>().move(offset);
+
+        entity.addComponent<InverseRotation>();
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+        entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+        entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[i]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[i].vehicle];
+        entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[i].vehicle);
+        entity.getComponent<Vehicle>().colourID = i;
+        //TODO we should probably get this from the server, but it might not matter
+        //as the server is the final arbiter in laps counted anyway
+        entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
+        entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
+
+        entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::Vehicle;
+
+        switch (entity.getComponent<Vehicle>().type)
+        {
+        default:
+        case Vehicle::Car:
+            entity.getComponent<Vehicle>().settings = Definition::car;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+            break;
+        case Vehicle::Bike:
+            entity.getComponent<Vehicle>().settings = Definition::bike;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+            break;
+        case Vehicle::Ship:
+            entity.getComponent<Vehicle>().settings = Definition::ship;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+            break;
+        }
+        auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
+
+        auto shadowEnt = m_gameScene.createEntity();
+        shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
+        shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 2); //make sure renders below trail
+        shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleShadow]));
+        shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
+        shadowEnt.addComponent<xy::Callback>().active = true;
+        shadowEnt.getComponent<xy::Callback>().function =
+            [entity](xy::Entity thisEnt, float)
+        {
+            auto& thisTx = thisEnt.getComponent<xy::Transform>();
+            const auto& thatTx = entity.getComponent<xy::Transform>();
+
+            thisTx.setPosition(thatTx.getPosition() + sf::Vector2f(-10.f, 10.f)); //TODO larger shadow dist for ships
+            thisTx.setRotation(thatTx.getRotation());
+            thisTx.setScale(thatTx.getScale());
+        };
+
+        spawnTrail(entity, GameConst::PlayerColour::Light[i]);
+
+        if (m_sharedData.localPlayers[i].cpu)
+        {
+            entity.addComponent<AIDriver>().target = m_mapParser.getStartPosition().first;
+            entity.getComponent<AIDriver>().skill = static_cast<AIDriver::Skill>(xy::Util::Random::value(AIDriver::Excellent, AIDriver::Bad));
+        }
+        else
+        {
+            m_playerInputs[i].setPlayerEntity(entity);
+        }
+        temp = entity;
     }
-    auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
-
-    auto shadowEnt = m_gameScene.createEntity();
-    shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
-    shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 2); //make sure renders below trail
-    shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleShadow]));
-    shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
-    shadowEnt.addComponent<xy::Callback>().active = true;
-    shadowEnt.getComponent<xy::Callback>().function =
-        [entity](xy::Entity thisEnt, float)
-    {
-        auto& thisTx = thisEnt.getComponent<xy::Transform>();
-        const auto& thatTx = entity.getComponent<xy::Transform>();
-
-        thisTx.setPosition(thatTx.getPosition() + sf::Vector2f(-10.f, 10.f)); //TODO larger shadow dist for ships
-        thisTx.setRotation(thatTx.getRotation());
-        thisTx.setScale(thatTx.getScale());
-    };
-
-    m_playerInput.setPlayerEntity(entity);
 
     auto cameraEntity = m_gameScene.getActiveCamera();
-    cameraEntity.getComponent<CameraTarget>().target = entity;
-
-    spawnTrail(entity, GameConst::PlayerColour::Light[0]);
+    cameraEntity.getComponent<CameraTarget>().target = temp;// m_playerInputs[0].getPlayerEntity();
 }
 
 void LocalEliminationState::spawnTrail(xy::Entity parent, sf::Color colour)

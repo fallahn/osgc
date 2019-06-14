@@ -79,7 +79,7 @@ private:
     RenderPath m_renderPath;
     MatrixPool m_matrixPool;
 
-    InputParser m_playerInput;
+    std::array<InputParser, 4u> m_playerInputs;
 
     sf::Clock m_stateTimer;
     enum

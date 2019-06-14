@@ -25,7 +25,7 @@ struct AIDriver final
     xy::Entity currentWaypoint;
     sf::Vector2f target;
     std::int32_t timestamp = 0;
-    enum
+    enum Skill
     {
         Excellent, Good, Bad
     }skill = Excellent;
