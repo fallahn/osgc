@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include <cstdint>
 #include <vector>
 #include <array>
+#include <string>
 
 namespace GameConst
 {
@@ -148,4 +149,6 @@ namespace GameConst
     static sf::Vector2f LapTimePosition(xy::DefaultSceneSize.x / 2.f, 1000.f);
     static sf::Vector2f BestTimePosition(1700.f, 20.f);
     static const sf::Vector2f LapCounterPosition(155.f, 13.f);
+
+    const std::string AppName("space_racers");
 }

@@ -231,17 +231,17 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
         else if (data.type == VehicleEvent::LapLine)
         {
             //count laps and end time trial when done
-            m_sharedData.gameData.lapCount--;
+            m_sharedData.localPlayers[0].lapCount--;
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::LapText;
             cmd.action = [&](xy::Entity e, float)
             {
-                e.getComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+                e.getComponent<Nixie>().lowerValue = m_sharedData.localPlayers[0].lapCount;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            if (m_sharedData.gameData.lapCount == 0)
+            if (m_sharedData.localPlayers[0].lapCount == 0)
             {
                 requestStackPush(StateID::TimeTrialSummary);
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
@@ -377,7 +377,7 @@ void TimeTrialState::initScene()
     rc.sprites = &m_sprites;
     rc.textureIDs = &m_textureIDs;
 
-    m_uiScene.addDirector<TimeTrialDirector>(rc);
+    m_uiScene.addDirector<TimeTrialDirector>(rc, m_sharedData.mapName, m_sharedData.localPlayers[0].vehicle);
 
     auto view = getContext().defaultView;
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -858,6 +858,7 @@ void TimeTrialState::spawnVehicle()
     };
 
     m_playerInput.setPlayerEntity(entity);
+    m_sharedData.localPlayers[0].lapCount = m_sharedData.gameData.lapCount;
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;

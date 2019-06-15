@@ -102,9 +102,6 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         m_sharedData.hosting = false;
     }
 
-    LOG("PROPERLY RESTORE LAP COUNT", xy::Logger::Type::Info);
-    m_sharedData.gameData.lapCount = 3;
-
     initScene();
     loadResources();
     buildMenu();

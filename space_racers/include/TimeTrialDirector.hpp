@@ -46,7 +46,7 @@ struct ResourceCollection final
 class TimeTrialDirector final : public xy::Director
 {
 public:
-    explicit TimeTrialDirector(ResourceCollection);
+    TimeTrialDirector(ResourceCollection, const std::string&, std::int32_t);
 
     void handleMessage(const xy::Message &) override;
 
@@ -58,6 +58,8 @@ private:
     float m_fastestLap;
 
     ResourceCollection m_resources;
+    std::string m_mapName;
+    std::int32_t m_vehicleType;
 
     struct Point final
     {
@@ -83,4 +85,8 @@ private:
     bool m_ghostEnabled;
 
     void createGhost();
+
+    void loadGhost();
+    void saveGhost();
+    std::string getGhostPath() const;
 };

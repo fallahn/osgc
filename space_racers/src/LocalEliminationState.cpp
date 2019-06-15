@@ -235,20 +235,21 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == VehicleEvent::LapLine)
         {
+            auto id = data.entity.getComponent<Vehicle>().colourID;
+            
             //count laps and end time trial when done
-            m_sharedData.gameData.lapCount--;
+            m_sharedData.localPlayers[id].lapCount--;
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::LapText;
-            cmd.action = [&](xy::Entity e, float)
+            cmd.action = [&, id](xy::Entity e, float)
             {
-                e.getComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+                e.getComponent<Nixie>().lowerValue = m_sharedData.localPlayers[id].lapCount;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            if (m_sharedData.gameData.lapCount == 0)
+            if (m_sharedData.localPlayers[id].lapCount == 0)
             {                
-                //TODO this should set sudden death mode if not already
                 auto ent = data.entity;
                 ent.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             }
@@ -298,6 +299,7 @@ bool LocalEliminationState::update(float dt)
             m_state = Racing;
         }
         break;
+        //TODO count how many players have crossed the line to set sudden death mode
     }
 
     static float shaderTime = 0.f;
@@ -842,6 +844,8 @@ void LocalEliminationState::spawnVehicle()
         };
 
         spawnTrail(entity, GameConst::PlayerColour::Light[i]);
+
+        m_sharedData.localPlayers[i].lapCount = m_sharedData.gameData.lapCount;
 
         if (m_sharedData.localPlayers[i].cpu)
         {

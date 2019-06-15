@@ -33,8 +33,12 @@ Copyright 2019 Matt Marchant
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
+#include <xyginext/core/FileSystem.hpp>
+
 #include <cmath>
+#include <cstring>
 #include <sstream>
+#include <fstream>
 
 namespace
 {
@@ -55,17 +59,19 @@ namespace
     }
 }
 
-TimeTrialDirector::TimeTrialDirector(ResourceCollection rc)
+TimeTrialDirector::TimeTrialDirector(ResourceCollection rc, const std::string& mapName, std::int32_t vt)
     :  m_updateDisplay (false),
     m_fastestLap    (99.f*60.f),
     m_resources     (rc),
+    m_mapName       (mapName),
+    m_vehicleType   (vt),
     m_recordedPoints(MaxPoints),
     m_recordingIndex(0),
     m_playbackPoints(MaxPoints),
     m_playbackIndex (0),
     m_ghostEnabled  (false)
 {
-
+    m_mapName = m_mapName.substr(0, m_mapName.find(".tmx"));
 }
 
 //public
@@ -79,6 +85,8 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
             m_lapClock.restart();
             m_updateDisplay = true;
             m_ghostEnabled = true;
+
+            loadGhost();
         }
         else if (data.type == GameEvent::RaceEnded)
         {
@@ -115,6 +123,7 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
                 msg->type = GameEvent::NewBestTime;
 
                 m_playbackPoints.swap(m_recordedPoints);
+                saveGhost();
             }
 
             m_playbackIndex = 0;
@@ -191,8 +200,8 @@ void TimeTrialDirector::createGhost()
     entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.resources->get<sf::Texture>(m_resources.textureIDs->at(TextureID::Game::VehicleNormal)));
     entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.resources->get<sf::Texture>(m_resources.textureIDs->at(TextureID::Game::VehicleSpecular)));
     entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
-
-    switch (m_playerEntity.getComponent<Vehicle>().type)
+    
+    switch (m_vehicleType)
     {
     default:
     case Vehicle::Car:
@@ -211,4 +220,82 @@ void TimeTrialDirector::createGhost()
     entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
 
     m_ghostEntity = entity;
+}
+
+void TimeTrialDirector::loadGhost()
+{
+    auto path = getGhostPath();
+    if (xy::FileSystem::fileExists(path))
+    {
+        std::ifstream file(path, std::ios::binary);
+        if (file.is_open() && file.good())
+        {
+            auto expectedSize = MaxPoints * sizeof(Point);
+            expectedSize += sizeof(float);
+
+            //cos I find myself doing it a lot
+            LOG("MAKE THIS A XYGINE UTIL", xy::Logger::Type::Info);
+
+            file.seekg(0, file.end);
+            auto fileSize = file.tellg();
+            if (fileSize != expectedSize)
+            {
+                file.close();
+                return;
+            }
+            file.seekg(file.beg);
+
+            std::vector<char> buffer(fileSize);
+            file.read(buffer.data(), fileSize);
+            file.close();
+
+            std::memcpy(&m_fastestLap, buffer.data(), sizeof(float));
+            std::memcpy(m_playbackPoints.data(), buffer.data() + sizeof(float), MaxPoints * sizeof(Point));
+
+            createGhost();
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::UI::BestTimeText;
+            cmd.action = [&](xy::Entity entity, float)
+            {
+                entity.getComponent<xy::Text>().setString(formatTimeString(m_fastestLap));
+            };
+            sendCommand(cmd);
+        }
+    }
+    else
+    {
+        xy::FileSystem::createDirectory(xy::FileSystem::getConfigDirectory(GameConst::AppName) + m_mapName);
+    }
+}
+
+void TimeTrialDirector::saveGhost()
+{
+    auto path = getGhostPath();
+
+    auto fileSize = MaxPoints * sizeof(Point);
+    fileSize += sizeof(float);
+
+    std::vector<char> buffer(fileSize);
+    std::memcpy(buffer.data(), &m_fastestLap, sizeof(float));
+    std::memcpy(buffer.data() + sizeof(float), m_playbackPoints.data(), sizeof(Point) * MaxPoints);
+
+    std::ofstream file(path, std::ios::binary);
+    if (file.is_open() && file.good())
+    {
+        file.write(buffer.data(), buffer.size());
+    }
+    else
+    {
+        xy::Logger::log("Failed writing ghost to " + path, xy::Logger::Type::Error);
+    }
+    file.close();
+}
+
+std::string TimeTrialDirector::getGhostPath() const
+{
+    auto path = xy::FileSystem::getConfigDirectory(GameConst::AppName);
+    path += m_mapName;
+    path += "/" + std::to_string(m_vehicleType) + ".gst";
+    return path;
 }
