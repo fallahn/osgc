@@ -12,7 +12,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/DummyClient.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/GhostReplay.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationComponent.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp

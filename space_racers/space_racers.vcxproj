@@ -163,7 +163,6 @@
     <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\GameModes.hpp" />
-    <ClInclude Include="include\GhostReplay.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\InverseRotationSystem.hpp" />
@@ -221,7 +220,6 @@
     <ClCompile Include="src\DummyClient.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\ErrorState.cpp" />
-    <ClCompile Include="src\GhostReplay.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\LapDotSystem.cpp" />
     <ClCompile Include="src\LightningSystem.cpp" />

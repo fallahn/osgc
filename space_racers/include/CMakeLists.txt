@@ -18,7 +18,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameModes.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/GhostReplay.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.hpp

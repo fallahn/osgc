@@ -66,6 +66,7 @@ struct LocalPlayer final
 {
     std::uint32_t vehicle = 0;
     InputBinding inputBinding;
+    std::uint8_t lapCount = 0;
     bool cpu = true;
 };
 

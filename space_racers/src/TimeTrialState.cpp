@@ -79,7 +79,7 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_backgroundScene   (ctx.appInstance.getMessageBus()),
     m_gameScene         (ctx.appInstance.getMessageBus()),
     m_uiScene           (ctx.appInstance.getMessageBus()),
-    m_replay            (m_gameScene),
+    m_director          (nullptr),
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
@@ -89,13 +89,6 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     launchLoadingScreen();
     initScene();
     loadResources();
-
-    ResourceCollection rc;
-    rc.resources = &m_resources;
-    rc.shaders = &m_shaders;
-    rc.sprites = &m_sprites;
-    rc.textureIDs = &m_textureIDs;
-    m_replay.setResources(rc);
 
     if (!loadMap())
     {
@@ -259,8 +252,6 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
         }
     }
 
-    m_replay.handleMessage(msg);
-
     m_backgroundScene.forwardMessage(msg);
     m_gameScene.forwardMessage(msg);
     m_uiScene.forwardMessage(msg);
@@ -311,8 +302,6 @@ bool TimeTrialState::update(float dt)
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
     m_shaders.get(ShaderID::Ghost).setUniform("u_time", -shaderTime / 10.f);
-
-    m_replay.update();
 
     m_playerInput.update(dt);
     m_backgroundScene.update(dt);
@@ -381,7 +370,14 @@ void TimeTrialState::initScene()
     m_uiScene.addSystem<xy::RenderSystem>(mb);
     m_uiScene.addSystem<xy::AudioSystem>(mb);
 
-    m_uiScene.addDirector<TimeTrialDirector>();
+    ResourceCollection rc;
+    rc.gameScene = &m_gameScene;
+    rc.resources = &m_resources;
+    rc.shaders = &m_shaders;
+    rc.sprites = &m_sprites;
+    rc.textureIDs = &m_textureIDs;
+
+    m_uiScene.addDirector<TimeTrialDirector>(rc);
 
     auto view = getContext().defaultView;
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -861,13 +857,16 @@ void TimeTrialState::spawnVehicle()
         thisTx.setScale(thatTx.getScale());
     };
 
-    m_replay.setPlayerEntity(entity);
     m_playerInput.setPlayerEntity(entity);
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;
 
     spawnTrail(entity, GameConst::PlayerColour::Light[0]);
+
+    auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+    msg->type = VehicleEvent::Respawned;
+    msg->entity = entity;
 }
 
 void TimeTrialState::spawnTrail(xy::Entity parent, sf::Color colour)

@@ -21,10 +21,17 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "SliderSystem.hpp"
 #include "GameConsts.hpp"
+#include "VehicleSystem.hpp"
+#include "InverseRotationSystem.hpp"
 
+#include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
+
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 #include <cmath>
 #include <sstream>
@@ -48,9 +55,15 @@ namespace
     }
 }
 
-TimeTrialDirector::TimeTrialDirector()
+TimeTrialDirector::TimeTrialDirector(ResourceCollection rc)
     :  m_updateDisplay (false),
-    m_fastestLap    (99.f*60.f)
+    m_fastestLap    (99.f*60.f),
+    m_resources     (rc),
+    m_recordedPoints(MaxPoints),
+    m_recordingIndex(0),
+    m_playbackPoints(MaxPoints),
+    m_playbackIndex (0),
+    m_ghostEnabled  (false)
 {
 
 }
@@ -65,11 +78,17 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
         {
             m_lapClock.restart();
             m_updateDisplay = true;
+            m_ghostEnabled = true;
         }
         else if (data.type == GameEvent::RaceEnded)
         {
             m_updateDisplay = false;
+            m_ghostEnabled = false;
         }
+        /*else if (data.type == GameEvent::NewBestTime)
+        {
+            m_playbackPoints.swap(m_recordedPoints);
+        }*/
     }
     else if (msg.id == MessageID::VehicleMessage)
     {
@@ -94,7 +113,22 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
 
                 auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
                 msg->type = GameEvent::NewBestTime;
+
+                m_playbackPoints.swap(m_recordedPoints);
             }
+
+            m_playbackIndex = 0;
+            m_recordingIndex = 0;
+
+            if (!m_ghostEntity.isValid())
+            {
+                createGhost();
+            }
+        }
+        else if (data.type == VehicleEvent::Respawned
+            && !m_playerEntity.isValid())
+        {
+            m_playerEntity = data.entity;
         }
     }
 }
@@ -120,4 +154,61 @@ void TimeTrialDirector::process(float)
         auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
         msg->type = GameEvent::TimedOut;
     }
+
+    //update the ghost data
+    if (m_ghostEnabled)
+    {
+        //record position
+        const auto& tx = m_playerEntity.getComponent<xy::Transform>();
+        m_recordedPoints[m_recordingIndex] = { tx.getPosition(), tx.getRotation(), tx.getScale().x };
+        m_recordingIndex = (m_recordingIndex + 1) % MaxPoints;
+
+        //update any active ghost
+        if (m_ghostEntity.isValid())
+        {
+            auto& ghostTx = m_ghostEntity.getComponent<xy::Transform>();
+            const auto& point = m_playbackPoints[m_playbackIndex];
+
+            ghostTx.setPosition(point.x, point.y);
+            ghostTx.setRotation(point.rotation);
+            ghostTx.setScale(point.scale, point.scale);
+
+            m_playbackIndex = (m_playbackIndex + 1) % MaxPoints;
+        }
+    }
+}
+
+//private
+void TimeTrialDirector::createGhost()
+{
+    auto entity = m_resources.gameScene->createEntity();
+    entity.addComponent<xy::Transform>().setPosition(m_playbackPoints[0].x, m_playbackPoints[0].y);
+    entity.getComponent<xy::Transform>().setRotation(m_playbackPoints[0].rotation);
+    entity.addComponent<InverseRotation>();
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
+    entity.getComponent<xy::Drawable>().setShader(&m_resources.shaders->get(ShaderID::Ghost));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.resources->get<sf::Texture>(m_resources.textureIDs->at(TextureID::Game::VehicleNormal)));
+    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.resources->get<sf::Texture>(m_resources.textureIDs->at(TextureID::Game::VehicleSpecular)));
+    entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
+
+    switch (m_playerEntity.getComponent<Vehicle>().type)
+    {
+    default:
+    case Vehicle::Car:
+        entity.addComponent<xy::Sprite>() = m_resources.sprites->at(SpriteID::Game::Car);
+        break;
+    case Vehicle::Bike:
+        entity.addComponent<xy::Sprite>() = m_resources.sprites->at(SpriteID::Game::Bike);
+        break;
+    case Vehicle::Ship:
+        entity.addComponent<xy::Sprite>() = m_resources.sprites->at(SpriteID::Game::Ship);
+        break;
+    }
+
+    entity.getComponent<xy::Sprite>().setColour({ 255,255,255,120 });
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
+
+    m_ghostEntity = entity;
 }
