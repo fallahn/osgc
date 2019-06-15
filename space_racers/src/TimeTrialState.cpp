@@ -863,8 +863,9 @@ void TimeTrialState::spawnVehicle()
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = entity;
 
-    spawnTrail(entity, GameConst::PlayerColour::Light[0]);
+    //spawnTrail(entity, GameConst::PlayerColour::Light[0]);
 
+    //this triggers a trail spawn so no need to do it manually
     auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
     msg->type = VehicleEvent::Respawned;
     msg->entity = entity;
