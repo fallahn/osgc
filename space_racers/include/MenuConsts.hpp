@@ -49,7 +49,7 @@ namespace MenuConst
 
     static const sf::Vector2f TogglePosition(280.f, 238.f);
     static const sf::Vector2f LightbarPosition(30.f, 248.f);
-    static const sf::Vector2f LapDigitPosition(50.f, 12.f);
+    static const sf::Vector2f LapDigitPosition(51.f, 13.f);
 
     static const std::int32_t BackgroundDepth = -20;
     static const std::int32_t MenuDepth = 0;

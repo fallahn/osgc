@@ -208,6 +208,8 @@ void MenuState::loadResources()
     m_textureIDs[TextureID::Menu::LapCounter] = m_resources.load<sf::Texture>("assets/images/counter.png");
     m_textureIDs[TextureID::Menu::LapFrame] = m_resources.load<sf::Texture>("assets/images/lap_selector.png");
     m_textureIDs[TextureID::Menu::LightBar] = m_resources.load<sf::Texture>("assets/images/lightbar.png");
+    m_textureIDs[TextureID::Menu::TimeTrialText] = m_resources.load<sf::Texture>("assets/images/time_trial_text.png");
+    m_textureIDs[TextureID::Menu::LocalPlayText] = m_resources.load<sf::Texture>("assets/images/local_play_text.png");
 
     m_textureIDs[TextureID::Menu::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
     m_textureIDs[TextureID::Menu::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
@@ -778,7 +780,7 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //map select
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y * 0.88f);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y * 0.98f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TrackSelect]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -843,7 +845,7 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
     //vehicle select
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, 180.f);
+    entity.addComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - MenuConst::VehicleSelectArea.width) / 2.f, 110.f);
     entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::VehicleSelect]));
@@ -863,7 +865,7 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //lap select
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(114.f, -(xy::DefaultSceneSize.y - 238.f));
+    entity.getComponent<xy::Transform>().move(114.f, -(xy::DefaultSceneSize.y - 134.f));
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LapFrame]));
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -917,6 +919,17 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 }
             });
     entity.getComponent<xy::Transform>().addChild(buttonEnt.getComponent<xy::Transform>());
+
+    //text entity
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 900.f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TimeTrialText]));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -xy::DefaultSceneSize.y);
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
 }
 
 void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)
@@ -994,7 +1007,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //map select
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(-140.f, xy::DefaultSceneSize.y * 1.26f);
+    entity.getComponent<xy::Transform>().move(-120.f, xy::DefaultSceneSize.y * 0.96f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::TrackSelect]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -1063,7 +1076,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(160.f, xy::DefaultSceneSize.y * 1.09f);
+    entity.getComponent<xy::Transform>().move(180.f, xy::DefaultSceneSize.y * 0.84f);
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("back");
     entity.addComponent<xy::SpriteAnimation>().play(0);
@@ -1129,11 +1142,11 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     auto textEnt = m_scene.createEntity();
-    textEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f, 156.f);
+    textEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f, 158.f);
     textEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
     textEnt.addComponent<xy::Text>(font).setString("Elimination");
     textEnt.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    textEnt.getComponent<xy::Text>().setCharacterSize(24);
+    textEnt.getComponent<xy::Text>().setCharacterSize(20);
     entity.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
 
     entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(30.f, 47.f), {bounds.width, bounds.height} };
@@ -1163,7 +1176,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //lap select
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(176.f, (xy::DefaultSceneSize.y + 308.f));
+    entity.getComponent<xy::Transform>().move(-6.f, (xy::DefaultSceneSize.y + 66.f));
     entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LapFrame]));
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -1222,10 +1235,10 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     //vehicle select
     const std::array<sf::Vector2f, 4u> positions =
     {
-        sf::Vector2f(443.f, 1110.f),
-        sf::Vector2f(960.f, 1110.f),
-        sf::Vector2f(443.f, 1394.f),
-        sf::Vector2f(960.f, 1394.f)
+        sf::Vector2f(63.f, 1110.f),
+        sf::Vector2f(1320.f, 1110.f),
+        sf::Vector2f(63.f, 1594.f),
+        sf::Vector2f(1320.f, 1594.f)
     };
 
     for (auto i = 0; i < 4; ++i)
@@ -1288,6 +1301,16 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
         lightEnt.getComponent<xy::Sprite>().setColour(GameConst::PlayerColour::Light[i]);
         entity.getComponent<xy::Transform>().addChild(lightEnt.getComponent<xy::Transform>());
     }
+
+    //text entity
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 900.f);
+    entity.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LocalPlayText]));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y);
+    rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::updateTextInput(const sf::Event& evt)

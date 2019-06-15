@@ -67,6 +67,8 @@ namespace TextureID
             MenuBackground, TrackSelect,
             LapFrame, LapCounter, LightBar,
 
+            TimeTrialText, LocalPlayText,
+
             Count
         };
     }
