@@ -72,6 +72,7 @@ namespace
 #include "TrackShader.inl"
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
+#include "TextShader.inl"
 }
 
 TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -303,6 +304,7 @@ bool TimeTrialState::update(float dt)
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
     m_shaders.get(ShaderID::Ghost).setUniform("u_time", -shaderTime / 10.f);
+    m_shaders.get(ShaderID::Text).setUniform("u_time", shaderTime / 10.f);
 
     m_playerInput.update(dt);
     m_backgroundScene.update(dt);
@@ -446,6 +448,7 @@ void TimeTrialState::loadResources()
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Ghost, VehicleVertex, GhostFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Text, TextFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -764,7 +767,9 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>();/*.setShader(&m_shaders.get(ShaderID::Text));
+    entity.getComponent<xy::Drawable>().setTexture(&font.getTexture(64));
+    entity.getComponent<xy::Drawable>().bindUniform("u_texture", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Barrier]));*/
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 
     //fastest lap time

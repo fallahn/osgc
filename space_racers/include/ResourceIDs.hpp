@@ -39,7 +39,8 @@ namespace ShaderID
         Trail,
         Stars,
         MonitorScreen,
-        Lightbar
+        Lightbar,
+        Text
     };
 }
 

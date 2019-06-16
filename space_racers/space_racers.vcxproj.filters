@@ -385,5 +385,8 @@
     <None Include="src\MonitorShader.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
+    <None Include="src\TextShader.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
