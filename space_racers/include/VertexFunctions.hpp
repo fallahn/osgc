@@ -49,4 +49,4 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f);
 std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float height);
 
 //creates the archway over the lap line
-std::vector<sf::Vertex> createLapLine(sf::Vector2f texSize);
+std::vector<sf::Vertex> createLapLine(/*sf::Vector2f texSize*/);

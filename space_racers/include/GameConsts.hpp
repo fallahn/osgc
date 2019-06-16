@@ -150,5 +150,7 @@ namespace GameConst
     static sf::Vector2f BestTimePosition(1700.f, 20.f);
     static const sf::Vector2f LapCounterPosition(155.f, 13.f);
 
+    static const float LapArchOffset = 512.f;
+
     const std::string AppName("space_racers");
 }

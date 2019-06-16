@@ -60,6 +60,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/graphics/postprocess/ChromeAb.hpp>
 #include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Window/Event.hpp>
@@ -707,19 +708,21 @@ void TimeTrialState::addProps()
     auto& lapTexture = m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapLine]);
     texSize = sf::Vector2f(lapTexture.getSize());
 
+    sf::Vector2f offset = xy::Util::Vector::rotate({ GameConst::LapArchOffset, 0.f }, m_mapParser.getStartPosition().second);
+
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+    entity.addComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first + offset);
     entity.getComponent<xy::Transform>().setRotation(m_mapParser.getStartPosition().second);
     entity.addComponent<xy::Drawable>().setDepth(1000);
     entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
     entity.getComponent<xy::Drawable>().setTexture(&lapTexture);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.addComponent<Sprite3D>(m_matrixPool).depth = texSize.y / 4.f;
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = texSize.y / 2.f;
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
-    entity.getComponent<xy::Drawable>().getVertices() = createLapLine(texSize);
+    entity.getComponent<xy::Drawable>().getVertices() = createLapLine(/*texSize*/);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 }

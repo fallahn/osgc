@@ -271,30 +271,68 @@ std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float
     return convertData(positions, {}, UVs);
 }
 
-std::vector<sf::Vertex> createLapLine(sf::Vector2f texSize)
+std::vector<sf::Vertex> createLapLine(/*sf::Vector2f texSize*/)
 {
     std::vector<sf::Vector3f> positions;
     std::vector<sf::Vector2f> UVs;
 
-    positions.emplace_back(0.f, texSize.x / 2.f, texSize.y);
-    positions.emplace_back(0.f, -texSize.x / 2.f, texSize.y);
-    positions.emplace_back(0.f, -texSize.x / 2.f, 0.f);
-    positions.emplace_back(0.f, texSize.x / 2.f, 0.f);
+    //order of quads is important because we're effectively
+    //performaing manual depth sorting (lots of transparency)
 
+    //first side
+    positions.emplace_back(-32.f, -256.f, 128.f);
+    positions.emplace_back(32.f, -256.f, 128.f);
+    positions.emplace_back(32.f, -256.f, 0.f);
+    positions.emplace_back(-32.f, -256.f, 0.f);
+
+    UVs.emplace_back(0.f, 64.f);
     UVs.emplace_back(0.f, 0.f);
-    UVs.emplace_back(texSize.x, 0.f);
-    UVs.emplace_back(texSize);
-    UVs.emplace_back(0.f, texSize.y);
+    UVs.emplace_back(128.f, 0.f);
+    UVs.emplace_back(128.f, 64.f);
 
-    positions.emplace_back(-2.f, -texSize.x / 2.f, texSize.y);
-    positions.emplace_back(2.f, -texSize.x / 2.f, texSize.y);
-    positions.emplace_back(2.f, texSize.x / 2.f, texSize.y);
-    positions.emplace_back(-2.f, texSize.x / 2.f, texSize.y);
+    //second side
+    positions.emplace_back(-32.f, 256.f, 128.f);
+    positions.emplace_back(32.f, 256.f, 128.f);
+    positions.emplace_back(32.f, 256.f, 0.f);
+    positions.emplace_back(-32.f, 256.f, 0.f);
 
-    UVs.emplace_back(texSize.x, 0.f);
-    UVs.emplace_back(texSize.x, 16.f);
-    UVs.emplace_back(0.f, 16.f);
+    UVs.emplace_back(0.f, 64.f);
     UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(128.f, 0.f);
+    UVs.emplace_back(128.f, 64.f);
+
+    //lights
+    positions.emplace_back(-24.f, 96.f, 128.f);
+    positions.emplace_back(-24.f, -96.f, 128.f);
+    positions.emplace_back(-24.f, -96.f, 96.f);
+    positions.emplace_back(-24.f, 96.f, 96.f);
+
+    UVs.emplace_back(0.f, 64.f);
+    UVs.emplace_back(192.f, 64.f);
+    UVs.emplace_back(192.f, 128.f);
+    UVs.emplace_back(0.f, 128.f);
+
+    //lights
+    positions.emplace_back(24.f, 96.f, 128.f);
+    positions.emplace_back(24.f, -96.f, 128.f);
+    positions.emplace_back(24.f, -96.f, 96.f);
+    positions.emplace_back(24.f, 96.f, 96.f);
+
+    UVs.emplace_back(0.f, 64.f);
+    UVs.emplace_back(192.f, 64.f);
+    UVs.emplace_back(192.f, 128.f);
+    UVs.emplace_back(0.f, 128.f);
+
+    //top beam
+    positions.emplace_back(-32.f, -256.f, 128.f);
+    positions.emplace_back(32.f, -256.f, 128.f);
+    positions.emplace_back(32.f, 256.f, 128.f);
+    positions.emplace_back(-32.f, 256.f, 128.f);
+
+    UVs.emplace_back(0.f, 64.f);
+    UVs.emplace_back(0.f, 0.f);
+    UVs.emplace_back(512.f, 0.f);
+    UVs.emplace_back(512.f, 64.f);
 
     return convertData(positions, {}, UVs);
 }
