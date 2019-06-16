@@ -767,9 +767,9 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>();/*.setShader(&m_shaders.get(ShaderID::Text));
-    entity.getComponent<xy::Drawable>().setTexture(&font.getTexture(64));
-    entity.getComponent<xy::Drawable>().bindUniform("u_texture", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Barrier]));*/
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Text));
+    //entity.getComponent<xy::Drawable>().setTexture(&font.getTexture(64));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 
     //fastest lap time
