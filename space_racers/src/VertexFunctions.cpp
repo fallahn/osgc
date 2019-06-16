@@ -147,6 +147,7 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
     const float height = GameConst::PylonHeight;
     const sf::Vector2f baseSize(15.f, 15.f);
     const sf::Vector2f topSize(10.f, 10.f);
+    sf::Vector2f ringSize(32.f, 32.f);
 
     std::vector<sf::Vector3f> positions;
     std::vector<sf::Vector2f> UVs;
@@ -159,8 +160,8 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
 
     UVs.emplace_back(0.f, texSize.y);
     UVs.emplace_back(0.f, 0.f);
-    UVs.emplace_back(texSize.x, 0.f);
-    UVs.emplace_back(texSize);
+    UVs.emplace_back(texSize.x / 3.f, 0.f);
+    UVs.emplace_back(texSize.x / 3.f, texSize.y);
 
     //top
     positions.emplace_back(baseSize.x, -baseSize.y, 0.f);
@@ -170,8 +171,8 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
 
     UVs.emplace_back(0.f, texSize.y);
     UVs.emplace_back(0.f, 0.f);
-    UVs.emplace_back(texSize.x, 0.f);
-    UVs.emplace_back(texSize);
+    UVs.emplace_back(texSize.x / 3.f, 0.f);
+    UVs.emplace_back(texSize.x / 3.f, texSize.y);
 
     //right
     positions.emplace_back(baseSize.x, baseSize.y, 0.f);
@@ -181,8 +182,8 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
 
     UVs.emplace_back(0.f, texSize.y);
     UVs.emplace_back(0.f, 0.f);
-    UVs.emplace_back(texSize.x, 0.f);
-    UVs.emplace_back(texSize);
+    UVs.emplace_back(texSize.x / 3.f, 0.f);
+    UVs.emplace_back(texSize.x / 3.f, texSize.y);
 
     //bottom
     positions.emplace_back(-baseSize.x, baseSize.y, 0.f);
@@ -192,16 +193,41 @@ std::vector<sf::Vertex> createPylon(sf::Vector2f texSize)
 
     UVs.emplace_back(0.f, texSize.y);
     UVs.emplace_back(0.f, 0.f);
-    UVs.emplace_back(texSize.x, 0.f);
-    UVs.emplace_back(texSize);
+    UVs.emplace_back(texSize.x / 3.f, 0.f);
+    UVs.emplace_back(texSize.x / 3.f, texSize.y);
 
+    //rings
+    positions.emplace_back(-ringSize.x, -ringSize.y, height / 3.f);
+    positions.emplace_back(ringSize.x, -ringSize.y, height / 3.f);
+    positions.emplace_back(ringSize.x, ringSize.y, height / 3.f);
+    positions.emplace_back(-ringSize.x, ringSize.y, height / 3.f);
+
+    UVs.emplace_back(texSize.x / 3.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize.x, texSize.y);
+    UVs.emplace_back(texSize.x / 3.f, texSize.y);
+
+    ringSize /= 1.2f;
+
+    positions.emplace_back(-ringSize.x, -ringSize.y, height * 0.66f);
+    positions.emplace_back(ringSize.x, -ringSize.y, height * 0.66f);
+    positions.emplace_back(ringSize.x, ringSize.y, height * 0.66f);
+    positions.emplace_back(-ringSize.x, ringSize.y, height * 0.66f);
+
+    UVs.emplace_back(texSize.x / 3.f, 0.f);
+    UVs.emplace_back(texSize.x, 0.f);
+    UVs.emplace_back(texSize.x, texSize.y);
+    UVs.emplace_back(texSize.x / 3.f, texSize.y);
 
     return convertData(positions, {}, UVs);
 }
 
 std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float height)
 {
-    const float sides = 8.f;
+    //TODO this would be a good candidate for normals
+    //to use smooth lighting (ie make the sides look less flat)
+
+    const float sides = 16.f;
     const float step = xy::Util::Const::TAU / sides;
 
     std::vector<sf::Vector2f> points;
@@ -231,10 +257,10 @@ std::vector<sf::Vertex> createCylinder(float radius, sf::Vector2f texSize, float
     {
         std::size_t next = (i + 1) % points.size();
 
-        positions.emplace_back(points[i].x, points[i].y, height);
-        positions.emplace_back(points[next].x, points[next].y, height);
-        positions.emplace_back(points[next].x * 2.f, points[next].y * 2.f, 0.f);
-        positions.emplace_back(points[i].x * 2.f, points[i].y * 2.f, 0.f);
+        positions.emplace_back(points[i].x * 0.4f, points[i].y * 0.4f, height);
+        positions.emplace_back(points[next].x * 0.4f, points[next].y * 0.4f, height);
+        positions.emplace_back(points[next].x * 1.4f, points[next].y * 1.4f, 0.f);
+        positions.emplace_back(points[i].x * 1.4f, points[i].y * 1.4f, 0.f);
 
         UVs.emplace_back(0.f, texSize.x);
         UVs.emplace_back(texSize.x, texSize.x);
