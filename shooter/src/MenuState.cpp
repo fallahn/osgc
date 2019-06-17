@@ -242,6 +242,17 @@ void MenuState::handleMessage(const xy::Message& msg)
             m_menuActive = true;
         }
     }
+    else if (msg.id == xy::Message::WindowMessage)
+    {
+        const auto& data = msg.getData<xy::Message::WindowEvent>();
+        if (data.type == xy::Message::WindowEvent::Resized)
+        {
+            if (m_sharedData.cursor)
+            {
+                xy::App::getRenderWindow()->setMouseCursor(*m_sharedData.cursor);
+            }
+        }
+    }
 
     m_scene.forwardMessage(msg);
 }

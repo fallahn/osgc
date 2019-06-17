@@ -210,6 +210,11 @@ void GameState::handleMessage(const xy::Message& msg)
         if (data.type == xy::Message::WindowEvent::Resized)
         {
             recalcViews();
+
+            if (m_sharedData.cursor)
+            {
+                xy::App::getRenderWindow()->setMouseCursor(*m_sharedData.cursor);
+            }
         }
     }
     else if (msg.id == MessageID::BombMessage)
