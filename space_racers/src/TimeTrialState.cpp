@@ -34,6 +34,7 @@ Copyright 2019 Matt Marchant
 #include "WayPoint.hpp"
 #include "SliderSystem.hpp"
 #include "NixieDisplay.hpp"
+#include "SkidEffectSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -47,6 +48,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
@@ -57,6 +59,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
+#include <xyginext/ecs/systems/ParticleSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/graphics/postprocess/ChromeAb.hpp>
@@ -358,6 +361,7 @@ void TimeTrialState::initScene()
     m_gameScene.addSystem<LightningSystem>(mb);
     m_gameScene.addSystem<InverseRotationSystem>(mb);
     m_gameScene.addSystem<TrailSystem>(mb);
+    m_gameScene.addSystem<SkidEffectSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -368,6 +372,7 @@ void TimeTrialState::initScene()
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+    m_gameScene.addSystem<xy::ParticleSystem>(mb);
     m_gameScene.addSystem<AIDriverSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
@@ -666,7 +671,7 @@ void TimeTrialState::buildUI()
 void TimeTrialState::spawnVehicle()
 {
     auto [position, rotation] = m_mapParser.getStartPosition();
-
+    
     //spawn vehicle
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(position);
@@ -699,11 +704,17 @@ void TimeTrialState::spawnVehicle()
         entity.getComponent<Vehicle>().settings = Definition::car;
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+        entity.addComponent<xy::ParticleEmitter>().settings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
+        //entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.y = GameConst::CarSize.height / 2.f;
+        entity.addComponent<SkidEffect>();
         break;
     case Vehicle::Bike:
         entity.getComponent<Vehicle>().settings = Definition::bike;
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+        entity.addComponent<xy::ParticleEmitter>().settings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
+        //entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.y = GameConst::BikeSize.height / 2.f;
+        entity.addComponent<SkidEffect>().wheelCount = 1;
         break;
     case Vehicle::Ship:
         entity.getComponent<Vehicle>().settings = Definition::ship;

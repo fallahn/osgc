@@ -32,6 +32,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRaceState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SkidEffectSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.cpp

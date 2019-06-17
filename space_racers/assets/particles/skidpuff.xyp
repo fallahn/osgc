@@ -1,0 +1,27 @@
+particle_system skidpuff
+{
+    src = "assets/images/skid_puff.png"
+    blendmode = add
+    gravity = 0.000000,0.000000
+    velocity = 82.192001,-100.000000
+    spread = 29.590000
+    lifetime = 0.710000
+    lifetime_variance = 1.096000
+    colour = 107,107,107,255
+    random_initial_rotation = true
+    rotation_speed = 5.000000
+    scale_affector = 1.271200
+    size = 40.000000
+    emit_rate = 16.986000
+    emit_count = 1
+    spawn_radius = 10.000000
+    spawn_offset = 0.000000,0.000000
+    release_count = 0
+    forces 
+    {
+        force = 0.000000,0.000000
+        force = 0.000000,0.000000
+        force = 0.000000,0.000000
+        force = 0.000000,0.000000
+    }
+}

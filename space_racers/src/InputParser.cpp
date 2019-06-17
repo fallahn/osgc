@@ -23,7 +23,7 @@ Copyright 2019 Matt Marchant
 #include "NetConsts.hpp"
 
 #include <xyginext/network/NetClient.hpp>
-#include <xyginext/core/App.hpp> //remove this when done logging!
+//#include <xyginext/core/App.hpp> //remove this when done logging!
 
 #include <SFML/Window/Event.hpp>
 
