@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "LightningSystem.hpp"
+#include "ResourceIDs.hpp"
 
 #include <tmxlite/Map.hpp>
 
@@ -42,6 +43,7 @@ namespace MapConst
     };
 }
 
+class MatrixPool;
 namespace sf
 {
     class RenderTarget;
@@ -51,6 +53,8 @@ namespace sf
 namespace xy
 {
     class Scene;
+    class ShaderResource;
+    class ResourceHandler;
 }
 
 namespace tmx
@@ -80,37 +84,14 @@ public:
         return m_size;
     }
 
-    const std::vector<Lightning>& getFences() const
-    {
-        return m_fences;
-    }
-
-    const std::vector<std::pair<sf::Vector2f, sf::Vector2f>>& getChevrons() const
-    {
-        return m_chevrons;
-    }
-
-    const std::vector<std::pair<sf::Vector2f, sf::Vector2f>>& getBarriers() const
-    {
-        return m_barriers;
-    }
-
-    const std::vector<sf::Vector2f>& getPylons() const
-    {
-        return m_pylons;
-    }
-
-    const std::vector<sf::Vector2f>& getBollards() const 
-    {
-        return m_bollards;
-    }
-
     float getTrackLength() const
     {
         return m_trackLength;
     }
 
     void renderLayers(std::array<sf::RenderTexture, 2u>&) const;
+
+    void addProps(MatrixPool&, xy::ShaderResource&, xy::ResourceHandler&, const std::array<std::size_t, TextureID::Game::Count>&);
 
 private:
     xy::Scene& m_scene;
