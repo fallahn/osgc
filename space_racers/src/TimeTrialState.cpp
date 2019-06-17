@@ -688,8 +688,6 @@ void TimeTrialState::spawnVehicle()
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[0].vehicle];
     entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[0].vehicle);
     entity.getComponent<Vehicle>().colourID = 0;
-    //TODO we should probably get this from the server, but it might not matter
-    //as the server is the final arbiter in laps counted anyway
     entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
     entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
 
@@ -705,7 +703,6 @@ void TimeTrialState::spawnVehicle()
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
         entity.addComponent<xy::ParticleEmitter>().settings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
-        //entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.y = GameConst::CarSize.height / 2.f;
         entity.addComponent<SkidEffect>();
         break;
     case Vehicle::Bike:
@@ -713,7 +710,6 @@ void TimeTrialState::spawnVehicle()
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
         entity.addComponent<xy::ParticleEmitter>().settings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
-        //entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.y = GameConst::BikeSize.height / 2.f;
         entity.addComponent<SkidEffect>().wheelCount = 1;
         break;
     case Vehicle::Ship:
