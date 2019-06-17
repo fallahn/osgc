@@ -17,6 +17,8 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "TimeTrialEndState.hpp"
+#include "Util.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -130,12 +132,45 @@ void TimeTrialSummaryState::buildMenu()
 
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -480.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString("Track Record: " + formatTimeString(m_sharedData.trackRecord));
+    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+
+    std::string str("Lap Times\n");
+    for (auto i = 0u; i < m_sharedData.lapTimes.size(); ++i)
+    {
+        str += std::to_string(i + 1) + ". " + formatTimeString(m_sharedData.lapTimes[i]) + "\n";
+    }
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -370.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(font).setString(str);
+    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+
+    if (m_sharedData.trackRecord == m_sharedData.lapTimes[0])
+    {
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, 220.f);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font).setString("New Track Record!");
+        entity.getComponent<xy::Text>().setCharacterSize(76);
+        entity.getComponent<xy::Text>().setFillColour(GameConst::PlayerColour::Light[1]);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    }
+
     //quit message
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 380.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("Press Any Key To Continue");
-    entity.getComponent<xy::Text>().setCharacterSize(96);
+    entity.getComponent<xy::Text>().setCharacterSize(92);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 }

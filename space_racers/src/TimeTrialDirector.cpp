@@ -23,6 +23,8 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "VehicleSystem.hpp"
 #include "InverseRotationSystem.hpp"
+#include "StateIDs.hpp"
+#include "Util.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
@@ -35,36 +37,21 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/FileSystem.hpp>
 
-#include <cmath>
 #include <cstring>
-#include <sstream>
 #include <fstream>
 
 namespace
 {
-    std::string formatTimeString(float t)
-    {
-        float whole = 0.f;
-        float remain = std::modf(t, &whole);
-
-        int min = static_cast<int>(whole) / 60;
-        int sec = static_cast<int>(whole) % 60;
-
-        std::stringstream ss;
-        ss << std::setw(2) << std::setfill('0') << min << ":";
-        ss << std::setw(2) << std::setfill('0') << sec << ":";
-        ss << std::setw(4) << std::setfill('0') << static_cast<int>(remain * 10000.f);
-
-        return ss.str();
-    }
+    const std::size_t MaxLapTimes = 5;
 }
 
-TimeTrialDirector::TimeTrialDirector(ResourceCollection rc, const std::string& mapName, std::int32_t vt)
+TimeTrialDirector::TimeTrialDirector(ResourceCollection rc, const std::string& mapName, std::int32_t vt, SharedData& sd)
     :  m_updateDisplay (false),
     m_fastestLap    (99.f*60.f),
     m_resources     (rc),
     m_mapName       (mapName),
     m_vehicleType   (vt),
+    m_sharedData    (sd),
     m_recordedPoints(MaxPoints),
     m_recordingIndex(0),
     m_playbackPoints(MaxPoints),
@@ -72,6 +59,7 @@ TimeTrialDirector::TimeTrialDirector(ResourceCollection rc, const std::string& m
     m_ghostEnabled  (false)
 {
     m_mapName = m_mapName.substr(0, m_mapName.find(".tmx"));
+    sd.lapTimes.clear();
 }
 
 //public
@@ -126,6 +114,7 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
                 saveGhost();
             }
 
+            //update ghost
             m_playbackIndex = 0;
             m_recordingIndex = 0;
 
@@ -133,6 +122,20 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
             {
                 createGhost();
             }
+
+            //update scoreboard
+            if (m_sharedData.lapTimes.size() < MaxLapTimes)
+            {
+                m_sharedData.lapTimes.push_back(lapTime);
+                std::sort(m_sharedData.lapTimes.begin(), m_sharedData.lapTimes.end());
+            }
+            else if (lapTime < m_sharedData.lapTimes.back())
+            {
+                m_sharedData.lapTimes.back() = lapTime;
+                std::sort(m_sharedData.lapTimes.begin(), m_sharedData.lapTimes.end());
+            }
+            m_sharedData.trackRecord = m_fastestLap;
+            updateScoreboard();
         }
         else if (data.type == VehicleEvent::Respawned
             && !m_playerEntity.isValid())
@@ -298,4 +301,20 @@ std::string TimeTrialDirector::getGhostPath() const
     path += m_mapName;
     path += "/" + std::to_string(m_vehicleType) + ".gst";
     return path;
+}
+
+void TimeTrialDirector::updateScoreboard()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::UI::TopTimesText;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        std::string str("Lap Times\n");
+        for (auto i = 0u; i < m_sharedData.lapTimes.size(); ++i)
+        {
+            str += std::to_string(i + 1) + ". " + formatTimeString(m_sharedData.lapTimes[i]) + "\n";
+        }
+        e.getComponent<xy::Text>().setString(str);
+    };
+    sendCommand(cmd);
 }

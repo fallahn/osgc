@@ -18,38 +18,6 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace CommandID
-{
-    enum Game
-    {
-        NetActor = 0x1,
-        Trail = 0x2,
-        Vehicle = 0x4,
-    };
+#include <string>
 
-    enum UI
-    {
-        StartLights = 0x1,
-        LapText = 0x2,
-
-        TimeText = 0x8,
-        BestTimeText = 0x10,
-        TopTimesText = 0x20
-    };
-
-    enum Lobby
-    {
-        PlayerText = 0x1,
-        LobbyText = 0x2,
-    };
-
-
-    enum Menu
-    {
-        RootNode = 0x1,
-        NameText = 0x2,
-        IPText = 0x4,
-        TrackThumb = 0x8,
-        LapCounter = 0x10
-    };
-}
+std::string formatTimeString(float t);

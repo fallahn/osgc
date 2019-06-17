@@ -200,6 +200,7 @@
     <ClInclude Include="include\TimeTrialEndState.hpp" />
     <ClInclude Include="include\TimeTrialState.hpp" />
     <ClInclude Include="include\TrailSystem.hpp" />
+    <ClInclude Include="include\Util.hpp" />
     <ClInclude Include="include\VehicleDefs.hpp" />
     <ClInclude Include="include\VehicleSelectSystem.hpp" />
     <ClInclude Include="include\VehicleSystem.hpp" />
@@ -245,6 +246,7 @@
     <ClCompile Include="src\TimeTrialEndState.cpp" />
     <ClCompile Include="src\TimeTrialState.cpp" />
     <ClCompile Include="src\TrailSystem.cpp" />
+    <ClCompile Include="src\Util.cpp" />
     <ClCompile Include="src\VehicleSelectSystem.cpp" />
     <ClCompile Include="src\VehicleSystem.cpp" />
     <ClCompile Include="src\VertexFunctions.cpp" />

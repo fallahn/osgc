@@ -39,6 +39,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialEndState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TrailSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSelectSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VertexFunctions.cpp

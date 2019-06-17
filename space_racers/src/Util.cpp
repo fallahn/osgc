@@ -16,40 +16,24 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#pragma once
+#include "Util.hpp"
 
-namespace CommandID
+#include <sstream>
+#include <cmath>
+#include <iomanip>
+
+std::string formatTimeString(float t)
 {
-    enum Game
-    {
-        NetActor = 0x1,
-        Trail = 0x2,
-        Vehicle = 0x4,
-    };
+    float whole = 0.f;
+    float remain = std::modf(t, &whole);
 
-    enum UI
-    {
-        StartLights = 0x1,
-        LapText = 0x2,
+    int min = static_cast<int>(whole) / 60;
+    int sec = static_cast<int>(whole) % 60;
 
-        TimeText = 0x8,
-        BestTimeText = 0x10,
-        TopTimesText = 0x20
-    };
+    std::stringstream ss;
+    ss << std::setw(2) << std::setfill('0') << min << ":";
+    ss << std::setw(2) << std::setfill('0') << sec << ":";
+    ss << std::setw(4) << std::setfill('0') << static_cast<int>(remain * 10000.f);
 
-    enum Lobby
-    {
-        PlayerText = 0x1,
-        LobbyText = 0x2,
-    };
-
-
-    enum Menu
-    {
-        RootNode = 0x1,
-        NameText = 0x2,
-        IPText = 0x4,
-        TrackThumb = 0x8,
-        LapCounter = 0x10
-    };
+    return ss.str();
 }

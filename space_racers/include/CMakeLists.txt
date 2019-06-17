@@ -56,6 +56,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialEndState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TimeTrialState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TrailSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Util.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleDefs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSelectSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VehicleSystem.hpp

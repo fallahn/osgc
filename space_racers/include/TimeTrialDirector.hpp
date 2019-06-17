@@ -43,10 +43,11 @@ struct ResourceCollection final
     const std::array<std::size_t, TextureID::Game::Count>* textureIDs = nullptr;
 };
 
+struct SharedData;
 class TimeTrialDirector final : public xy::Director
 {
 public:
-    TimeTrialDirector(ResourceCollection, const std::string&, std::int32_t);
+    TimeTrialDirector(ResourceCollection, const std::string&, std::int32_t, SharedData&);
 
     void handleMessage(const xy::Message &) override;
 
@@ -60,6 +61,7 @@ private:
     ResourceCollection m_resources;
     std::string m_mapName;
     std::int32_t m_vehicleType;
+    SharedData& m_sharedData;
 
     struct Point final
     {
@@ -89,4 +91,6 @@ private:
     void loadGhost();
     void saveGhost();
     std::string getGhostPath() const;
+
+    void updateScoreboard();
 };

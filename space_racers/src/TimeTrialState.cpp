@@ -380,7 +380,7 @@ void TimeTrialState::initScene()
     rc.sprites = &m_sprites;
     rc.textureIDs = &m_textureIDs;
 
-    m_uiScene.addDirector<TimeTrialDirector>(rc, m_sharedData.mapName, m_sharedData.localPlayers[0].vehicle);
+    m_uiScene.addDirector<TimeTrialDirector>(rc, m_sharedData.mapName, m_sharedData.localPlayers[0].vehicle, m_sharedData);
 
     auto view = getContext().defaultView;
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -768,7 +768,6 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Text));
-    //entity.getComponent<xy::Drawable>().setTexture(&font.getTexture(64));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 
@@ -783,6 +782,17 @@ void TimeTrialState::buildUI()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
     entity.addComponent<Slider>().speed = 10.f;
+
+    //top 5 laps
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(GameConst::TopTimesPosition);
+    entity.addComponent<xy::Text>(font);// .setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Lap Times");
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TopTimesText;
 
     //lap counter frame
     entity = m_uiScene.createEntity();

@@ -799,8 +799,6 @@ void LocalEliminationState::spawnVehicle()
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[i].vehicle];
         entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[i].vehicle);
         entity.getComponent<Vehicle>().colourID = i;
-        //TODO we should probably get this from the server, but it might not matter
-        //as the server is the final arbiter in laps counted anyway
         entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
         entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
 

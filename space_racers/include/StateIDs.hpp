@@ -70,32 +70,40 @@ struct LocalPlayer final
     bool cpu = true;
 };
 
-class ClientLauncher;
 struct SharedData final
 {
     LoadingScreen loadingScreen;
-
-    xy::ResourceHandler resources;
-    std::size_t fontID = 0;
-    std::array<LocalPlayer, 4u> localPlayers;
-    
-    GameData gameData;
-    std::string errorMessage;
-
-    bool hosting = true;
-    sf::String ip = "127.0.0.1";
-    sf::String name = "Player";
-
-    std::string mapName = "AceOfSpace.tmx";
-
-    std::map<std::uint64_t, PlayerInfo> playerInfo;
-    std::array<std::uint64_t, 4u> racePositions = {};
 
 #ifdef LO_SPEC
     bool useBloom = false;
 #else
     bool useBloom = true; //for disabling expensive gfx processing
 #endif
+
+    xy::ResourceHandler resources;
+    std::size_t fontID = 0;
+
+    //used in all game modes
+    std::string errorMessage;
+    GameData gameData;
+
+    std::string mapName = "AceOfSpace.tmx";
+    std::array<std::uint64_t, 4u> racePositions = {};
+
+    //local game data
+    std::array<LocalPlayer, 4u> localPlayers;
+    
+    //time trial data
+    std::vector<float> lapTimes;
+    float trackRecord = 0.f;
+
+    //netgame data
+    bool hosting = true;
+    sf::String ip = "127.0.0.1";
+    sf::String name = "Player";
+    //used in lobby
+    std::map<std::uint64_t, PlayerInfo> playerInfo;
+    
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...
     std::shared_ptr<xy::NetClient> netClient;
