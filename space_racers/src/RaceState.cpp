@@ -622,6 +622,7 @@ void RaceState::addProps()
     entity.getComponent<xy::Drawable>().getVertices() = createLapLine(/*texSize*/);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::LapLine;
 }
 
 void RaceState::buildUI()
@@ -748,6 +749,18 @@ void RaceState::handlePackets()
                         e.getComponent<xy::Callback>().active = true; 
                     };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = CommandID::Game::LapLine;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        //a bit kludgy but it makes the lights turn green! :P
+                        auto& verts = e.getComponent<xy::Drawable>().getVertices();
+                        for (auto i = 8u; i < 16u; ++i)
+                        {
+                            verts[i].texCoords.x -= 192.f;
+                        }
+                    };
+                    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
                 break;
             case PacketID::VehicleExploded:

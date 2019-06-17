@@ -25,6 +25,7 @@ namespace CommandID
         NetActor = 0x1,
         Trail = 0x2,
         Vehicle = 0x4,
+        LapLine = 0x8
     };
 
     enum UI

@@ -307,10 +307,10 @@ std::vector<sf::Vertex> createLapLine(/*sf::Vector2f texSize*/)
     positions.emplace_back(-24.f, -96.f, 96.f);
     positions.emplace_back(-24.f, 96.f, 96.f);
 
-    UVs.emplace_back(0.f, 64.f);
     UVs.emplace_back(192.f, 64.f);
+    UVs.emplace_back(384.f, 64.f);
+    UVs.emplace_back(384.f, 128.f);
     UVs.emplace_back(192.f, 128.f);
-    UVs.emplace_back(0.f, 128.f);
 
     //lights
     positions.emplace_back(24.f, 96.f, 128.f);
@@ -318,10 +318,10 @@ std::vector<sf::Vertex> createLapLine(/*sf::Vector2f texSize*/)
     positions.emplace_back(24.f, -96.f, 96.f);
     positions.emplace_back(24.f, 96.f, 96.f);
 
-    UVs.emplace_back(0.f, 64.f);
     UVs.emplace_back(192.f, 64.f);
+    UVs.emplace_back(384.f, 64.f);
+    UVs.emplace_back(384.f, 128.f);
     UVs.emplace_back(192.f, 128.f);
-    UVs.emplace_back(0.f, 128.f);
 
     //top beam
     positions.emplace_back(-32.f, -256.f, 128.f);

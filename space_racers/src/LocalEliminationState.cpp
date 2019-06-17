@@ -296,6 +296,18 @@ bool LocalEliminationState::update(float dt)
             auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
             msg->type = GameEvent::RaceStarted;
 
+            cmd.targetFlags = CommandID::Game::LapLine;
+            cmd.action = [](xy::Entity e, float)
+            {
+                //a bit kludgy but it makes the lights turn green! :P
+                auto& verts = e.getComponent<xy::Drawable>().getVertices();
+                for (auto i = 8u; i < 16u; ++i)
+                {
+                    verts[i].texCoords.x -= 192.f;
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
             m_state = Racing;
         }
         break;
@@ -724,6 +736,7 @@ void LocalEliminationState::addProps()
     entity.getComponent<xy::Drawable>().getVertices() = createLapLine(/*texSize*/);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::LapLine;
 }
 
 void LocalEliminationState::buildUI()

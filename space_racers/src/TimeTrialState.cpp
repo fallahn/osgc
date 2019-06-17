@@ -291,6 +291,18 @@ bool TimeTrialState::update(float dt)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+            cmd.targetFlags = CommandID::Game::LapLine;
+            cmd.action = [](xy::Entity e, float)
+            {
+                //a bit kludgy but it makes the lights turn green! :P
+                auto& verts = e.getComponent<xy::Drawable>().getVertices();
+                for (auto i = 8u; i < 16u; ++i)
+                {
+                    verts[i].texCoords.x -= 192.f;
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
             auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
             msg->type = GameEvent::RaceStarted;
 
@@ -728,6 +740,7 @@ void TimeTrialState::addProps()
     entity.getComponent<xy::Drawable>().getVertices() = createLapLine(/*texSize*/);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::LapLine;
 }
 
 void TimeTrialState::buildUI()
@@ -767,8 +780,8 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Text));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::Drawable>();// .setShader(&m_shaders.get(ShaderID::Text));
+    //entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 
     //fastest lap time
