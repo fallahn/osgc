@@ -128,6 +128,11 @@ namespace SpriteID::Game
         Bike,
         Ship,
 
+        LapCounter,
+        FastestTime,
+        CurrentTime,
+        TopLaps,
+
         Count
     };
 }

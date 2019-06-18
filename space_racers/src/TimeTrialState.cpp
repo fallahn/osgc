@@ -329,7 +329,6 @@ bool TimeTrialState::update(float dt)
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
     m_shaders.get(ShaderID::Ghost).setUniform("u_time", -shaderTime / 10.f);
-    m_shaders.get(ShaderID::Text).setUniform("u_time", shaderTime / 10.f);
 
     m_playerInput.update(dt);
     m_backgroundScene.update(dt);
@@ -444,7 +443,6 @@ void TimeTrialState::loadResources()
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Bollard]).setSmooth(true);
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
     m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
-    m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -466,6 +464,12 @@ void TimeTrialState::loadResources()
     m_sprites[SpriteID::Game::Car] = spriteSheet.getSprite("car");
     m_sprites[SpriteID::Game::Bike] = spriteSheet.getSprite("bike");
     m_sprites[SpriteID::Game::Ship] = spriteSheet.getSprite("ship");
+
+    spriteSheet.loadFromFile("assets/sprites/ui_game.spt", m_resources);
+    m_sprites[SpriteID::Game::LapCounter] = spriteSheet.getSprite("laps");
+    m_sprites[SpriteID::Game::FastestTime] = spriteSheet.getSprite("fastest_time");
+    m_sprites[SpriteID::Game::CurrentTime] = spriteSheet.getSprite("current_time");
+    m_sprites[SpriteID::Game::TopLaps] = spriteSheet.getSprite("top_laps");
 
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertex, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
@@ -635,9 +639,18 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>();// .setShader(&m_shaders.get(ShaderID::Text));
-    //entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Text));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().setDepth(1);
+    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::CurrentTime];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, xy::DefaultSceneSize.y - bounds.height);
 
     //fastest lap time
     entity = m_uiScene.createEntity();
@@ -648,16 +661,24 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Text));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().setDepth(1);
+    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
     entity.addComponent<Slider>().speed = 10.f;
 
-    auto temp = m_resources.load<sf::Texture>("assets/images/top_laps.png");
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::FastestTime];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - bounds.width, 0.f);
 
     //top 5 laps
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x, GameConst::TopTimesPosition.y);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::TopLaps];
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TopTimesBoard;
     entity.addComponent<xy::Callback>().userData = std::make_any<PopUp>();
@@ -718,7 +739,10 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>().setDepth(1);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Text));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().setDepth(1);
+    entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TopTimesText;
     backEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
@@ -726,7 +750,7 @@ void TimeTrialState::buildUI()
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(-1);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapCounter]));
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::LapCounter];
 
     //lap counter
     entity = m_uiScene.createEntity();
