@@ -20,9 +20,26 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/System.hpp>
 
+#include <SFML/System/Clock.hpp>
+
+#include <vector>
+
+struct Skidmark final
+{
+    sf::Vector2f position;
+    float rotation = 0.f;
+    float lifetime = 0.f;
+    static constexpr float DefaultLifeTime = 4.f;
+};
+
 struct SkidEffect final
 {
     std::size_t wheelCount = 2;
+    xy::Entity parent;
+    sf::Clock releaseTimer;
+    std::vector<Skidmark> skidmarks;
+    std::size_t currentSkidmark;
+    static constexpr std::size_t MaxSkids = 56;
 };
 
 class SkidEffectSystem final : public xy::System 
@@ -31,4 +48,7 @@ public:
     explicit SkidEffectSystem(xy::MessageBus&);
 
     void process(float) override;
+
+private:
+    void onEntityAdded(xy::Entity) override;
 };

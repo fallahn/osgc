@@ -772,14 +772,25 @@ void TimeTrialState::spawnVehicle()
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
         entity.addComponent<xy::ParticleEmitter>().settings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
-        entity.addComponent<SkidEffect>();
+        {
+            auto skidEntity = m_gameScene.createEntity();
+            skidEntity.addComponent<xy::Transform>();
+            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+            skidEntity.addComponent<SkidEffect>().parent = entity;
+        }
         break;
     case Vehicle::Bike:
         entity.getComponent<Vehicle>().settings = Definition::bike;
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
         entity.addComponent<xy::ParticleEmitter>().settings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
-        entity.addComponent<SkidEffect>().wheelCount = 1;
+        {
+            auto skidEntity = m_gameScene.createEntity();
+            skidEntity.addComponent<xy::Transform>();
+            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+            skidEntity.addComponent<SkidEffect>().parent = entity;
+            skidEntity.getComponent<SkidEffect>().wheelCount = 1;
+        }
         break;
     case Vehicle::Ship:
         entity.getComponent<Vehicle>().settings = Definition::ship;

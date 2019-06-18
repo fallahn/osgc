@@ -5,8 +5,8 @@ particle_system skidpuff
     gravity = 0.000000,0.000000
     velocity = 0.000000,0.000000
     spread = 29.590000
-    lifetime = 0.710000
-    lifetime_variance = 1.096000
+    lifetime = 0.610000
+    lifetime_variance = 0.096000
     colour = 107,107,107,255
     random_initial_rotation = true
     rotation_speed = 0.925000
