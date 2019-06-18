@@ -95,7 +95,6 @@ private:
     void loadResources();
 
     bool loadMap();
-    void addProps();
     void buildUI();
     void spawnVehicle();
     void spawnTrail(xy::Entity, sf::Color);

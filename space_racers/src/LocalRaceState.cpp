@@ -62,6 +62,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
@@ -550,16 +551,68 @@ bool LocalRaceState::loadMap()
     entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetDiffuse]));
 
-    addProps();
+    m_mapParser.addProps(m_matrixPool, m_shaders, m_resources, m_textureIDs);
 
-    LOG("ROIDS ROIDS ROIDS", xy::Logger::Type::Warning);
+    createRoids();
 
     return true;
 }
 
-void LocalRaceState::addProps()
+void LocalRaceState::createRoids()
 {
-    m_mapParser.addProps(m_matrixPool, m_shaders, m_resources, m_textureIDs);
+    sf::FloatRect bounds = { sf::Vector2f(), m_mapParser.getSize() };
+    bounds.left -= 100.f;
+    bounds.top -= 100.f;
+    bounds.width += 200.f;
+    bounds.height += 200.f;
+    m_gameScene.getSystem<AsteroidSystem>().setMapSize(bounds);
+
+    m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
+
+    auto cameraEntity = m_gameScene.getActiveCamera();
+
+    auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);
+    for (auto position : positions)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth);
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidDiffuse]));
+
+        sf::Vector2f velocity =
+        {
+            xy::Util::Random::value(-1.f, 1.f),
+            xy::Util::Random::value(-1.f, 1.f)
+        };
+        entity.addComponent<Asteroid>().setVelocity(xy::Util::Vector::normalise(velocity) * xy::Util::Random::value(200.f, 500.f));
+
+        auto aabb = entity.getComponent<xy::Sprite>().getTextureBounds();
+        auto radius = aabb.width / 2.f;
+        entity.getComponent<xy::Transform>().setOrigin(radius, radius);
+        auto scale = xy::Util::Random::value(0.5f, 2.5f);
+        entity.getComponent<xy::Transform>().setScale(scale, scale);
+        entity.getComponent<Asteroid>().setRadius(radius * scale);
+
+        auto collisionVerts = createCollisionCircle(radius * 0.9f, { radius, radius });
+        entity.addComponent<CollisionObject>().type = CollisionObject::Type::Roid;
+        entity.getComponent<CollisionObject>().applyVertices(collisionVerts);
+
+        entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
+
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Asteroid));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = radius * scale;
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        auto shadowEnt = m_gameScene.createEntity();
+        shadowEnt.addComponent<xy::Transform>().setPosition(sf::Vector2f(-18.f, 18.f));
+        shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth - 1);
+        shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidShadow]));
+        entity.getComponent<xy::Transform>().addChild(shadowEnt.getComponent<xy::Transform>());
+    }
 }
 
 void LocalRaceState::buildUI()
