@@ -40,6 +40,7 @@ Copyright 2019 Matt Marchant
 #include "LapDotSystem.hpp"
 #include "VertexFunctions.hpp"
 #include "NixieDisplay.hpp"
+#include "SkidEffectSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -54,6 +55,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
 #include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
@@ -64,6 +66,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/ParticleSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Random.hpp>
@@ -251,6 +254,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<LightningSystem>(mb);
     m_gameScene.addSystem<InverseRotationSystem>(mb);
     m_gameScene.addSystem<TrailSystem>(mb);
+    m_gameScene.addSystem<SkidEffectSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -261,6 +265,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+    m_gameScene.addSystem<xy::ParticleSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
     
     m_gameScene.addDirector<VFXDirector>(m_sprites);
@@ -355,6 +360,8 @@ void RaceState::loadResources()
     m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
 
     m_uiSounds.loadFromFile("assets/sound/ui.xas");
+
+    m_skidSettings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
 }
 
 void RaceState::buildWorld()
@@ -692,11 +699,26 @@ void RaceState::spawnVehicle(const VehicleData& data)
         entity.getComponent<Vehicle>().settings = Definition::car;
         entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+        entity.addComponent<xy::ParticleEmitter>().settings = m_skidSettings;
+        {
+            auto skidEntity = m_gameScene.createEntity();
+            skidEntity.addComponent<xy::Transform>();
+            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+            skidEntity.addComponent<SkidEffect>().parent = entity;
+        }
         break;
     case Vehicle::Bike:
         entity.getComponent<Vehicle>().settings = Definition::bike;
         entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
         entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+        entity.addComponent<xy::ParticleEmitter>().settings = m_skidSettings;
+        {
+            auto skidEntity = m_gameScene.createEntity();
+            skidEntity.addComponent<xy::Transform>();
+            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+            skidEntity.addComponent<SkidEffect>().parent = entity;
+            skidEntity.getComponent<SkidEffect>().wheelCount = 1;
+        }
         break;
     case Vehicle::Ship:
         entity.getComponent<Vehicle>().settings = Definition::ship;
@@ -762,6 +784,14 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
         entity.addComponent<Vehicle>().type = Vehicle::Car;
 
+        entity.addComponent<xy::ParticleEmitter>().settings = m_skidSettings;
+        {
+            auto skidEntity = m_gameScene.createEntity();
+            skidEntity.addComponent<xy::Transform>();
+            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+            skidEntity.addComponent<SkidEffect>().parent = entity;
+        }
+
         goto Vehicle;
     }
         break;
@@ -772,6 +802,15 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<CollisionObject>().applyVertices(GameConst::BikePoints);       
         entity.addComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
         entity.addComponent<Vehicle>().type = Vehicle::Bike;
+
+        entity.addComponent<xy::ParticleEmitter>().settings = m_skidSettings;
+        {
+            auto skidEntity = m_gameScene.createEntity();
+            skidEntity.addComponent<xy::Transform>();
+            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+            skidEntity.addComponent<SkidEffect>().parent = entity;
+            skidEntity.getComponent<SkidEffect>().wheelCount = 1;
+        }
 
         goto Vehicle;
     }

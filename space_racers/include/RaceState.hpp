@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 #include <xyginext/audio/AudioScape.hpp>
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
@@ -78,6 +79,8 @@ private:
 
     InputParser m_playerInput;
     sf::Clock m_pingClock;
+
+    xy::EmitterSettings m_skidSettings;
 
     void initScene();
     void loadResources();
