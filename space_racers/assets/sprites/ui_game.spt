@@ -1,0 +1,24 @@
+spritesheet ui_game
+{
+    src = "assets/images/ui_game.png"
+
+    sprite laps
+    {
+        bounds = 0,0,240,134
+    }
+
+    sprite fastest_time
+    {
+        bounds = 240,0,518,186
+    }
+
+    sprite current_time
+    {
+        bounds = 0, 186, 710, 126
+    }
+
+    sprite top_laps
+    {
+        bounds = 0, 312, 336, 278
+    }
+}

@@ -34,6 +34,9 @@ namespace
 
     //area around start point to avoid
     const float StartRadius = 384.f;
+
+    const float MaxVelocity = 1000.f;
+    const float MaxVelSqr = MaxVelocity * MaxVelocity;
 }
 
 AsteroidSystem::AsteroidSystem(xy::MessageBus& mb)
@@ -121,6 +124,14 @@ void AsteroidSystem::process(float dt)
                     m_collisionPairs.insert(std::minmax(other, entity));
                 }
             }
+        }
+
+        //attempt to clamp velocity
+        auto vel = xy::Util::Vector::lengthSquared(roid.getVelocity());
+        if (vel > MaxVelSqr)
+        {
+            vel = MaxVelSqr / vel;
+            roid.setVelocity(roid.getVelocity() * vel);
         }
     }
 

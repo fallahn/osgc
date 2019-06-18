@@ -597,6 +597,8 @@ bool TimeTrialState::loadMap()
 
 void TimeTrialState::buildUI()
 {
+    sf::Color textColour(219, 184, 83, 110);
+
     //startlights
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 0.f);
@@ -631,6 +633,7 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setString("00:00:0000");
     entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>();// .setShader(&m_shaders.get(ShaderID::Text));
     //entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -643,6 +646,7 @@ void TimeTrialState::buildUI()
     entity.getComponent<xy::Text>().setString("00:00:0000");
     entity.getComponent<xy::Text>().setCharacterSize(64);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
@@ -707,11 +711,12 @@ void TimeTrialState::buildUI()
     auto backEnt = entity;
     
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(16.f, 18.f);
+    entity.addComponent<xy::Transform>().setPosition(36.f, 18.f);
     entity.addComponent<xy::Text>(font);
     entity.getComponent<xy::Text>().setString("Lap Times");
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setFillColour(textColour);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.addComponent<xy::Drawable>().setDepth(1);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TopTimesText;
