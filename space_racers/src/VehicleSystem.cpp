@@ -156,6 +156,7 @@ void VehicleSystem::processVehicle(xy::Entity entity, float delta)
     {
         auto relPosition = entity.getComponent<xy::Transform>().getPosition() - vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition();
         float dist = xy::Util::Vector::dot(relPosition, vehicle.currentWaypoint.getComponent<WayPoint>().nextPoint);
+
         vehicle.totalDistance = vehicle.waypointDistance + dist;
     }
 }
@@ -313,7 +314,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
                         if(expectedID == waypoint.id)
                         {
                             vehicle.currentWaypoint = other;
-                            vehicle.waypointDistance += waypoint.distance;
+                            vehicle.waypointDistance += vehicleWaypoint.distance;// waypoint.distance;
                             
                             if (waypoint.id == 0)
                             {
@@ -322,6 +323,7 @@ void VehicleSystem::doCollision(xy::Entity entity)
                                 msg->type = VehicleEvent::LapLine;
                                 msg->entity = entity;
 
+                                vehicle.lapDistance += vehicle.waypointDistance;
                                 vehicle.waypointDistance = 0.f;
                             }
                         }

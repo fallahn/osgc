@@ -18,20 +18,14 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/System.hpp>
+#include <xyginext/ecs/Director.hpp>
 
-struct CameraTarget final
-{
-    xy::Entity target;
-    bool active = true;
-    bool lockedOn = false;
-    float speed = 10.f;
-};
-
-class CameraTargetSystem final : public xy::System
+class EliminationDirector final : public xy::Director
 {
 public:
-    explicit CameraTargetSystem(xy::MessageBus& mb);
+    EliminationDirector();
+
+    void handleMessage(const xy::Message&) override;
 
     void process(float) override;
 };

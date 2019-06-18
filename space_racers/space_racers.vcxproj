@@ -159,6 +159,7 @@
     <ClInclude Include="include\DebugState.hpp" />
     <ClInclude Include="include\DigitSystem.hpp" />
     <ClInclude Include="include\DummyClient.hpp" />
+    <ClInclude Include="include\EliminationDirector.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
@@ -220,6 +221,7 @@
     <ClCompile Include="src\DebugState.cpp" />
     <ClCompile Include="src\DigitSystem.cpp" />
     <ClCompile Include="src\DummyClient.cpp" />
+    <ClCompile Include="src\EliminationDirector.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\ErrorState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />

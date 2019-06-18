@@ -91,6 +91,7 @@ struct Vehicle final
 
     xy::Entity currentWaypoint;
     std::int32_t waypointCount = 0;
+    float lapDistance = 0.f; //increased by track length each lap
     float waypointDistance = 0.f; //total of current passed waypoints
     float totalDistance = 0.f; //above plus distance toward next waypoint
 

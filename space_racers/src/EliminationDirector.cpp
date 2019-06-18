@@ -16,22 +16,20 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#pragma once
+#include "EliminationDirector.hpp"
 
-#include <xyginext/ecs/System.hpp>
-
-struct CameraTarget final
+EliminationDirector::EliminationDirector()
 {
-    xy::Entity target;
-    bool active = true;
-    bool lockedOn = false;
-    float speed = 10.f;
-};
 
-class CameraTargetSystem final : public xy::System
+}
+
+//public
+void EliminationDirector::handleMessage(const xy::Message&)
 {
-public:
-    explicit CameraTargetSystem(xy::MessageBus& mb);
 
-    void process(float) override;
-};
+}
+
+void EliminationDirector::process(float)
+{
+
+}

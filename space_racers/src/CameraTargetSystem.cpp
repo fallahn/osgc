@@ -60,7 +60,7 @@ void CameraTargetSystem::process(float dt)
                 /*float multiplier = 1.f - (std::min(SpeedUpDistance, len2) / SpeedUpDistance);
                 multiplier *= 2.f;*/
 
-                tx.move(movement * (CameraSpeed /** (1.f + multiplier)*/) * dt);
+                tx.move(movement * camera.speed /*(CameraSpeed * (1.f + multiplier))*/ * dt);
 
                 if (len2 < 15.f)
                 {

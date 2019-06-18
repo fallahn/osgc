@@ -45,6 +45,8 @@ source distribution.
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/System/Clock.hpp>
 
+#include <array>
+
 class LocalEliminationState final : public xy::State
 {
 public:
@@ -80,6 +82,7 @@ private:
     MatrixPool m_matrixPool;
 
     std::array<InputParser, 4u> m_playerInputs;
+    std::array<xy::Entity, 4u> m_playerEntities;
 
     sf::Clock m_stateTimer;
     enum

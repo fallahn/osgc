@@ -35,6 +35,7 @@ Copyright 2019 Matt Marchant
 #include "NixieDisplay.hpp"
 #include "AIDriverSystem.hpp"
 #include "SkidEffectSystem.hpp"
+#include "EliminationDirector.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -313,7 +314,19 @@ bool LocalEliminationState::update(float dt)
             m_state = Racing;
         }
         break;
-        //TODO count how many players have crossed the line to set sudden death mode
+    case Racing:
+    {        //TODO count how many players have crossed the line to set sudden death mode
+
+        //sort the play positions and tell the camera to target leader
+        std::sort(m_playerEntities.begin(), m_playerEntities.end(),
+            [](xy::Entity a, xy::Entity b)
+            {
+                return a.getComponent<Vehicle>().totalDistance + a.getComponent<Vehicle>().lapDistance >
+                    b.getComponent<Vehicle>().totalDistance + b.getComponent<Vehicle>().lapDistance;
+            });
+        m_gameScene.getActiveCamera().getComponent<CameraTarget>().target = m_playerEntities[0];
+    }
+        break;
     }
 
     static float shaderTime = 0.f;
@@ -383,7 +396,7 @@ void LocalEliminationState::initScene()
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
     m_gameScene.addDirector<VFXDirector>(m_sprites);
-
+    m_gameScene.addDirector<EliminationDirector>();
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -687,8 +700,6 @@ void LocalEliminationState::spawnVehicle()
     xy::EmitterSettings smokeSettings;
     smokeSettings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
 
-    xy::Entity temp;
-
     //spawn vehicle
     for (auto i = 0u; i < 4u; ++i)
     {
@@ -787,11 +798,14 @@ void LocalEliminationState::spawnVehicle()
         {
             m_playerInputs[i].setPlayerEntity(entity);
         }
-        temp = entity;
+        
+        m_playerEntities[i] = entity;
     }
 
     auto cameraEntity = m_gameScene.getActiveCamera();
-    cameraEntity.getComponent<CameraTarget>().target = temp;// m_playerInputs[0].getPlayerEntity();
+    cameraEntity.getComponent<CameraTarget>().target = m_playerEntities[0];
+    cameraEntity.getComponent<CameraTarget>().speed = 5.f;
+    cameraEntity.getComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
 }
 
 void LocalEliminationState::spawnTrail(xy::Entity parent, sf::Color colour)
