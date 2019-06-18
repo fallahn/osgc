@@ -148,7 +148,7 @@ namespace GameConst
 
     static sf::Vector2f LapTimePosition(xy::DefaultSceneSize.x / 2.f, 1000.f);
     static sf::Vector2f BestTimePosition(1700.f, 20.f);
-    static sf::Vector2f TopTimesPosition(1600.f, 820.f);
+    static sf::Vector2f TopTimesPosition(1584.f, 802.f);
     static const sf::Vector2f LapCounterPosition(155.f, 13.f);
 
     static const float LapArchOffset = 512.f;

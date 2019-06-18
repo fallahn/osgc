@@ -31,6 +31,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
@@ -315,6 +316,13 @@ void TimeTrialDirector::updateScoreboard()
             str += std::to_string(i + 1) + ". " + formatTimeString(m_sharedData.lapTimes[i]) + "\n";
         }
         e.getComponent<xy::Text>().setString(str);
+    };
+    sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::UI::TopTimesBoard;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        e.getComponent<xy::Callback>().active = true;
     };
     sendCommand(cmd);
 }

@@ -75,6 +75,17 @@ namespace
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
 #include "TextShader.inl"
+
+    struct PopUp final
+    {
+        enum
+        {
+            In, Pause, Out
+        }mode = In;
+        float target = GameConst::TopTimesPosition.x;
+        float pauseTime = 0.f;
+        static constexpr float DefaultTime = 3.f;
+    };
 }
 
 TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -642,16 +653,74 @@ void TimeTrialState::buildUI()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::BestTimeText;
     entity.addComponent<Slider>().speed = 10.f;
 
+    auto temp = m_resources.load<sf::Texture>("assets/images/top_laps.png");
+
     //top 5 laps
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(GameConst::TopTimesPosition);
-    entity.addComponent<xy::Text>(font);// .setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x, GameConst::TopTimesPosition.y);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(temp));
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TopTimesBoard;
+    entity.addComponent<xy::Callback>().userData = std::make_any<PopUp>();
+    entity.getComponent<xy::Callback>().function = [](xy::Entity e, float dt)
+    {
+        const float Speed = 7.f;
+        auto& popup = std::any_cast<PopUp&>(e.getComponent<xy::Callback>().userData);
+        auto& tx = e.getComponent<xy::Transform>();
+        switch (popup.mode)
+        {
+        case PopUp::In:
+        {
+            popup.pauseTime = PopUp::DefaultTime;
+            float dist = popup.target - tx.getPosition().x;
+            if (dist < -2)
+            {
+                tx.move(dist * dt * Speed, 0.f);
+            }
+            else
+            {
+                tx.move(dist, 0.f);
+                popup.mode = PopUp::Pause;
+            }
+            break;
+        }
+        case PopUp::Pause:
+            popup.pauseTime -= dt;
+            if (popup.pauseTime < 0)
+            {
+                popup.mode = PopUp::Out;
+            }
+            break;
+        case PopUp::Out:
+        {
+            float dist = xy::DefaultSceneSize.x - tx.getPosition().x;
+            if (dist > 2)
+            {
+                tx.move(dist * dt * Speed, 0.f);
+            }
+            else
+            {
+                tx.move(dist, 0.f);
+                popup.mode = PopUp::In;
+                e.getComponent<xy::Callback>().active = false;
+            }
+            break;
+        }
+        }
+    };
+
+    auto backEnt = entity;
+    
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(16.f, 18.f);
+    entity.addComponent<xy::Text>(font);
     entity.getComponent<xy::Text>().setString("Lap Times");
     entity.getComponent<xy::Text>().setCharacterSize(32);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(1);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TopTimesText;
+    backEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //lap counter frame
     entity = m_uiScene.createEntity();
