@@ -212,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AIDriverSystem.cpp" />
+    <ClCompile Include="src\AnimationCallbacks.cpp" />
     <ClCompile Include="src\AsteroidSystem.cpp" />
     <ClCompile Include="src\Camera3D.cpp" />
     <ClCompile Include="src\CameraTargetSystem.cpp" />

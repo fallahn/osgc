@@ -43,6 +43,7 @@ void VFXDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case VehicleEvent::Exploded:
+        case VehicleEvent::Eliminated:
             spawnAnimatedSprite(SpriteID::Game::Explosion, data.entity.getComponent<xy::Transform>().getPosition());
             break;
         }

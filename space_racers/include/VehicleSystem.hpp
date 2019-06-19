@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/System.hpp>
 
 #include <array>
+#include <vector>
 
 struct Input final
 {
@@ -81,6 +82,8 @@ struct Vehicle final
         Normal = 0,
         Falling,
         Exploding,
+        Eliminated,
+        Celebrating,
         Disabled, //input is ignored, we're on the starting grid
         AFK //idled too long
     };
@@ -131,6 +134,9 @@ private:
     void updateFalling(xy::Entity, float);
     void updateExploding(xy::Entity, float);
     void explode(xy::Entity);
+
+    std::vector<float> m_waveTable;
+    void updateCelebrating(xy::Entity, float);
 
     void onEntityAdded(xy::Entity) override;
 };

@@ -58,7 +58,7 @@ void AIDriverSystem::process(float dt)
         if (vehicle.currentWaypoint != ai.currentWaypoint)
         {
             const auto& waypoint = vehicle.currentWaypoint.getComponent<WayPoint>();
-            ai.target += (waypoint.nextPoint * waypoint.distance);
+            ai.target = vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition() +  (waypoint.nextPoint * waypoint.nextDistance);
             ai.currentWaypoint = vehicle.currentWaypoint;
         }
 
@@ -89,7 +89,7 @@ void AIDriverSystem::process(float dt)
             const auto& waypoint = ai.currentWaypoint.getComponent<WayPoint>();
 
             float distance = vehicle.totalDistance - vehicle.waypointDistance;
-            float waypointDistance = waypoint.distance;
+            float waypointDistance = waypoint.nextDistance;
 
             if (distance > waypointDistance / 2.f)
             {

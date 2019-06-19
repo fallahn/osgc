@@ -377,6 +377,9 @@
     <ClCompile Include="src\EliminationDirector.cpp">
       <Filter>Source Files\directors</Filter>
     </ClCompile>
+    <ClCompile Include="src\AnimationCallbacks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Sprite3DShader.inl">

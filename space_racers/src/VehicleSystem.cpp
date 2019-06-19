@@ -38,6 +38,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Const.hpp>
 #include <xyginext/util/Vector.hpp>
+#include <xyginext/util/Wavetable.hpp>
 #include <xyginext/gui/Gui.hpp>
 
 #include <cmath>
@@ -48,6 +49,14 @@ VehicleSystem::VehicleSystem(xy::MessageBus& mb)
     requireComponent<Vehicle>();
     requireComponent<xy::Transform>();
     requireComponent<xy::BroadphaseComponent>();
+
+    m_waveTable = xy::Util::Wavetable::sine(2.f);
+    for (auto& f : m_waveTable)
+    {
+        f += 1.f;
+        f /= 2.f;
+        f *= 0.1f;
+    }
 }
 
 //public
@@ -147,6 +156,12 @@ void VehicleSystem::processVehicle(xy::Entity entity, float delta)
         break;
     case (1 << Vehicle::Exploding):
         updateExploding(entity, delta);
+        break;
+    case (1 << Vehicle::Eliminated):
+        break; //do nothing
+    case (1 << Vehicle::Celebrating):
+        //dance for me baby!
+        updateCelebrating(entity, delta);
         break;
     }
     vehicle.invincibleTime -= delta;
@@ -295,10 +310,10 @@ void VehicleSystem::doCollision(xy::Entity entity)
                 {
                     vehicle.collisionFlags |= (1 << type);
 
-                    const auto& waypoint = other.getComponent<WayPoint>();
+                    const auto& newWaypoint = other.getComponent<WayPoint>();
                     if (!vehicle.currentWaypoint.isValid())
                     {
-                        if (waypoint.id == 0)
+                        if (newWaypoint.id == 0)
                         {
                             vehicle.currentWaypoint = other;
                         }
@@ -307,27 +322,27 @@ void VehicleSystem::doCollision(xy::Entity entity)
                             explode(entity);
                         }
                     }
-                    else if (waypoint.id != vehicle.currentWaypoint.getComponent<WayPoint>().id)
+                    else if (newWaypoint.id != vehicle.currentWaypoint.getComponent<WayPoint>().id)
                     {
-                        auto& vehicleWaypoint = vehicle.currentWaypoint.getComponent<WayPoint>();
-                        auto expectedID = ((vehicleWaypoint.id + 1) % vehicle.waypointCount);
-                        if(expectedID == waypoint.id)
+                        auto& oldWaypoint = vehicle.currentWaypoint.getComponent<WayPoint>();
+                        auto expectedID = ((oldWaypoint.id + 1) % vehicle.waypointCount);
+                        if(expectedID == newWaypoint.id)
                         {
                             vehicle.currentWaypoint = other;
-                            vehicle.waypointDistance += vehicleWaypoint.distance;// waypoint.distance;
+                            vehicle.waypointDistance = newWaypoint.trackDistance;// += vehicleWaypoint.distance;// waypoint.distance;
                             
-                            if (waypoint.id == 0)
+                            if (newWaypoint.id == 0)
                             {
                                 //we did a lap so raise a message
                                 auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
                                 msg->type = VehicleEvent::LapLine;
                                 msg->entity = entity;
 
-                                vehicle.lapDistance += vehicle.waypointDistance;
-                                vehicle.waypointDistance = 0.f;
+                                vehicle.lapDistance += oldWaypoint.trackDistance + oldWaypoint.nextDistance;
+                                //vehicle.waypointDistance = 0.f;
                             }
                         }
-                        else if(waypoint.id > expectedID % vehicle.waypointCount)
+                        else if(newWaypoint.id > expectedID % vehicle.waypointCount)
                         {
                             explode(entity); //taking shortcuts or going backwards
                         }
@@ -499,6 +514,16 @@ void VehicleSystem::explode(xy::Entity entity)
     auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
     msg->type = VehicleEvent::Exploded;
     msg->entity = entity;
+}
+
+void VehicleSystem::updateCelebrating(xy::Entity entity, float dt)
+{
+    static size_t index = 0; //yes yes, static var will bite me in the butt eventually.
+    auto& tx = entity.getComponent<xy::Transform>();
+    tx.setScale(1.f + m_waveTable[index], 1.f + m_waveTable[index]);
+    index = (index + 1) % m_waveTable.size();
+
+    tx.rotate(220.f * dt);
 }
 
 //we'll use this just to do some debug assertions that our vehicles are valid

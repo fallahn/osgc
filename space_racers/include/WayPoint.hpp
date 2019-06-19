@@ -27,7 +27,9 @@ struct WayPoint final
 {
     std::int32_t id = 0;
     sf::Vector2f nextPoint; //points to next waypoint
-    float distance = 0.f; //length of above
+    float nextDistance = 0.f; //length of above
     //which way should the vehicle point if it spawns here?
     float rotation = 0.f;
+    //how far around the track we are if this is our node
+    float trackDistance = 0.f;
 };

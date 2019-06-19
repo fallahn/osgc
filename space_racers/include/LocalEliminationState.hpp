@@ -89,8 +89,11 @@ private:
     {
         Readying,
         Counting,
-        Racing
+        Racing,
+        Celebrating
     }m_state;
+    bool m_suddenDeath;
+    sf::Clock m_celebrationTimer;
 
     void initScene();
     void loadResources();
@@ -98,8 +101,11 @@ private:
     bool loadMap();
     void createRoids();
     void buildUI();
+    void addLapPoint(xy::Entity, sf::Color);
     void spawnVehicle();
     void spawnTrail(xy::Entity, sf::Color);
+
+    void eliminate(xy::Entity);
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/Entity.hpp>
 
+#include <vector>
+
 class ScaleCallback final
 {
 public:
@@ -30,4 +32,16 @@ public:
         e.getComponent<xy::Transform>().scale(scaleFactor, scaleFactor);
     }
 private:
+};
+
+class StartRingAnimator final
+{
+public:
+    StartRingAnimator();
+
+    void operator() (xy::Entity, float);
+
+private:
+    std::vector<float> m_waveTable;
+    std::vector<std::size_t> m_indices;
 };

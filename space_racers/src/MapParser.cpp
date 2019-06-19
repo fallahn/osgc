@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "VertexFunctions.hpp"
 #include "MatrixPool.hpp"
+#include "AnimationCallbacks.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -33,6 +34,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
@@ -364,6 +366,7 @@ bool MapParser::load(const std::string& path)
         //each one - this is how we know how far around the
         //track a player is.
         std::sort(waypoints.begin(), waypoints.end(), [](const WayPoint* a, const WayPoint* b) {return a->id < b->id; });
+
         for (auto i = 0u; i < waypoints.size() - 1; ++i)
         {
             if (waypoints[i + 1]->id - waypoints[i]->id != 1)
@@ -373,17 +376,20 @@ bool MapParser::load(const std::string& path)
             }
 
             waypoints[i]->nextPoint = waypoints[i + 1]->nextPoint - waypoints[i]->nextPoint;
-            waypoints[i]->distance = xy::Util::Vector::length(waypoints[i]->nextPoint);
-            waypoints[i]->nextPoint /= waypoints[i]->distance;
+            waypoints[i]->nextDistance = xy::Util::Vector::length(waypoints[i]->nextPoint);
+            waypoints[i]->nextPoint /= waypoints[i]->nextDistance;
+            waypoints[i]->trackDistance = m_trackLength;
 
-            m_trackLength += waypoints[i]->distance;
+            m_trackLength += waypoints[i]->nextDistance;
         }
         waypoints.back()->nextPoint = m_startPosition - waypoints.back()->nextPoint;
-        waypoints.back()->distance = xy::Util::Vector::length(waypoints.back()->nextPoint);
-        waypoints.back()->nextPoint /= waypoints.back()->distance;
+        waypoints.back()->nextDistance = xy::Util::Vector::length(waypoints.back()->nextPoint);
+        waypoints.back()->nextPoint /= waypoints.back()->nextDistance;
+        waypoints.back()->trackDistance = m_trackLength;
 
-        m_trackLength += waypoints.back()->distance;
+        m_trackLength += waypoints.back()->nextDistance;
         m_startRotation = waypoints.front()->rotation;
+
 
         //make sure we found all the image layers
         for (auto l : m_layers)
@@ -565,6 +571,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::ShaderResource& shaders, xy
         entity.getComponent<xy::Drawable>().updateLocalBounds();
     }
 
+    //rings around start area
     auto temp = resources.load<sf::Texture>("assets/images/start_field.png");
     resources.get<sf::Texture>(temp).setSmooth(true);
 
@@ -583,6 +590,8 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::ShaderResource& shaders, xy
     entity.getComponent<xy::Drawable>().getVertices() = createStartField(texSize.x, entity.getComponent<Sprite3D>().depth);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = StartRingAnimator();
 
     //lap line
     auto& lapTexture = resources.get<sf::Texture>(textureIDs[TextureID::Game::LapLine]);

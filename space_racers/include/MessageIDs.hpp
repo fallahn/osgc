@@ -38,6 +38,7 @@ struct VehicleEvent final
         Respawned,
         Fell,
         Exploded,
+        Eliminated,
         LapLine,
         WentAfk
     }type = RequestRespawn;
