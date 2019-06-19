@@ -260,7 +260,7 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             //we'll go to sudden death mode instead
             if (m_sharedData.localPlayers[id].lapCount == 0)
             {                
-                LOG("RASISE SUDDEN DEATH EVENT", xy::Logger::Type::Info);
+                LOG("RAISE SUDDEN DEATH EVENT", xy::Logger::Type::Info);
                 m_suddenDeath = true;
             }
         }
@@ -358,11 +358,24 @@ bool LocalEliminationState::update(float dt)
         }
 
         //if eliminated count == 3 switch to celebration state and award player point
-        if (count == 3)
+        if (count == 3
+            && m_playerEntities[0].getComponent<Vehicle>().stateFlags == (1 << Vehicle::Normal))
         {
             m_celebrationTimer.restart();
             m_playerEntities[0].getComponent<Vehicle>().stateFlags = (1 << Vehicle::Celebrating);
             m_state = Celebrating;
+
+            auto entity = m_playerEntities[0];
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Trail;
+            cmd.action = [entity](xy::Entity e, float)
+            {
+                if (e.getComponent<Trail>().parent == entity)
+                {
+                    e.getComponent<Trail>().parent = {};
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
             //TODO award point to player
         }
@@ -393,6 +406,7 @@ bool LocalEliminationState::update(float dt)
                 vehicle.currentWaypoint = wp;
                 vehicle.lapDistance = lapDistance;
                 vehicle.waypointDistance = wp.getComponent<WayPoint>().trackDistance;
+                vehicle.totalDistance = vehicle.waypointDistance;
                 
                 auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
                 msg->type = VehicleEvent::RequestRespawn;
@@ -928,6 +942,7 @@ void LocalEliminationState::eliminate(xy::Entity entity)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
     vehicle.stateFlags = (1 << Vehicle::Eliminated);
+    vehicle.accelerationMultiplier = 0.f;
 
     entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
 

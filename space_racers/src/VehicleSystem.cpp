@@ -523,7 +523,7 @@ void VehicleSystem::updateCelebrating(xy::Entity entity, float dt)
     tx.setScale(1.f + m_waveTable[index], 1.f + m_waveTable[index]);
     index = (index + 1) % m_waveTable.size();
 
-    tx.rotate(220.f * dt);
+    tx.rotate(420.f * dt);
 }
 
 //we'll use this just to do some debug assertions that our vehicles are valid
