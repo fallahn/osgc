@@ -78,6 +78,16 @@ namespace
 #include "VehicleShader.inl"
 
     sf::Time CelebrationTime = sf::seconds(3.f);
+
+    //arranged so that players in a lower position
+    //are respawned further forward
+    std::array<sf::Vector2f, 4u> SpawnOffsets =
+    {
+        sf::Vector2f(-GameConst::ShipSize.width / 2.f, -GameConst::ShipSize.height / 2.f),
+        sf::Vector2f(-GameConst::ShipSize.width / 2.f, GameConst::ShipSize.height / 2.f),
+        sf::Vector2f(GameConst::ShipSize.width / 2.f, -GameConst::ShipSize.height / 2.f),
+        sf::Vector2f(GameConst::ShipSize.width / 2.f, GameConst::ShipSize.height / 2.f),
+    };
 }
 
 LocalEliminationState::LocalEliminationState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -196,8 +206,14 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
 
             if (vehicle.currentWaypoint.isValid())
             {
-                tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
-                tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
+                auto rotation = vehicle.currentWaypoint.getComponent<WayPoint>().rotation;
+                Transform t;
+                t.setRotation(rotation);
+                auto offset = SpawnOffsets[m_sharedData.localPlayers[vehicle.colourID].position];
+                offset = t.transformPoint(offset.x, offset.y);
+
+                tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition() + offset);
+                tx.setRotation(rotation);
             }
             else
             {
@@ -336,12 +352,17 @@ bool LocalEliminationState::update(float dt)
             });
         m_gameScene.getActiveCamera().getComponent<CameraTarget>().target = m_playerEntities[0];
 
+        m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].position = 0;
+
         //check non-leading vehicles and eliminate if out of view
         sf::FloatRect viewRect(camPosition - (xy::DefaultSceneSize / 2.f), xy::DefaultSceneSize);
         
         auto count = 0;
         for (auto i = 1; i < 4; ++i)
         {
+            //update race position
+            m_sharedData.localPlayers[m_playerEntities[i].getComponent<Vehicle>().colourID].position = i;
+
             if (m_playerEntities[i].getComponent<Vehicle>().stateFlags == (1 << Vehicle::Eliminated))
             {
                 count++;
