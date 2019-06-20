@@ -63,7 +63,15 @@ bool SummaryState::handleEvent(const sf::Event& evt)
         && m_delayClock.getElapsedTime() > delayTime)
     {
         requestStackClear();
-        requestStackPush(StateID::Lobby);
+
+        if (m_sharedData.netClient)
+        {
+            requestStackPush(StateID::Lobby);
+        }
+        else
+        {
+            requestStackPush(StateID::MainMenu);
+        }
     }
 
     m_scene.forwardEvent(evt);

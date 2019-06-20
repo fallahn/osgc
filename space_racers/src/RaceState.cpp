@@ -80,6 +80,7 @@ namespace
 #include "TrackShader.inl"
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
+#include "MenuShader.inl"
 
     const sf::Time pingTime = sf::seconds(3.f);
 }
@@ -346,6 +347,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Lightbar, LightbarFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -538,7 +540,9 @@ void RaceState::addLapPoint(xy::Entity vehicle, sf::Color colour)
 {
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y - (GameConst::LapLineOffset - 8.f));
-    entity.addComponent<xy::Drawable>().setDepth(1); //TODO each one needs own depth?
+    entity.addComponent<xy::Drawable>().setDepth(1);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Lightbar));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint])).setColour(colour);
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);

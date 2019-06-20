@@ -65,7 +65,7 @@ namespace TextureID
             MainMenu, VehicleSelect, Podium,
             Stars, StarsFar, StarsMid, StarsNear,
             PlanetDiffuse, PlanetNormal,
-            MenuBackground, TrackSelect,
+            MenuBackground, MenuBackgroundWide, TrackSelect,
             LapFrame, LapCounter, LightBar,
 
             TimeTrialText, LocalPlayText,

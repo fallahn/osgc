@@ -88,7 +88,7 @@ void EliminationPointSystem::onEntityAdded(xy::Entity entity)
     auto size = sf::Vector2f(drawable.getTexture()->getSize());
     auto& verts = drawable.getVertices();
 
-    const float spacing = size.y + 4.f;
+    const float spacing = size.y -8.f;
     float position = 0.f;
 
     for (auto i = 0; i < 4; ++i)

@@ -845,8 +845,8 @@ void LocalEliminationState::buildUI()
     {
         sf::Vector2f(20.f, 120.f),
         sf::Vector2f(xy::DefaultSceneSize.x - (20.f + pointSize.x), 120.f),
-        sf::Vector2f(20.f, 880.f),
-        sf::Vector2f(xy::DefaultSceneSize.x - (20.f + pointSize.x), 880.f)
+        sf::Vector2f(20.f, 820.f),
+        sf::Vector2f(xy::DefaultSceneSize.x - (20.f + pointSize.x), 820.f)
     };
 
     for (auto i = 0u; i < 4u; ++i)
@@ -866,6 +866,8 @@ void LocalEliminationState::addLapPoint(xy::Entity vehicle, sf::Color colour)
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y - (GameConst::LapLineOffset - 8.f));
     entity.addComponent<xy::Drawable>().setDepth(1); //TODO each one needs own depth?
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Lightbar));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint])).setColour(colour);
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);

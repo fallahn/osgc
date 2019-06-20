@@ -204,10 +204,11 @@ void MenuState::loadResources()
     m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
     m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select_large.png");
     m_textureIDs[TextureID::Menu::MenuBackground] = m_resources.load<sf::Texture>("assets/images/player_select.png");
+    m_textureIDs[TextureID::Menu::MenuBackgroundWide] = m_resources.load<sf::Texture>("assets/images/background_wide.png");
     m_textureIDs[TextureID::Menu::TrackSelect] = m_resources.load<sf::Texture>("assets/images/track_select.png");
     m_textureIDs[TextureID::Menu::LapCounter] = m_resources.load<sf::Texture>("assets/images/counter.png");
     m_textureIDs[TextureID::Menu::LapFrame] = m_resources.load<sf::Texture>("assets/images/lap_selector.png");
-    m_textureIDs[TextureID::Menu::LightBar] = m_resources.load<sf::Texture>("assets/images/lightbar.png");
+    m_textureIDs[TextureID::Menu::LightBar] = m_resources.load<sf::Texture>("assets/images/vehicle_select_highlight.png");
     m_textureIDs[TextureID::Menu::TimeTrialText] = m_resources.load<sf::Texture>("assets/images/time_trial_text.png");
     m_textureIDs[TextureID::Menu::LocalPlayText] = m_resources.load<sf::Texture>("assets/images/local_play_text.png");
 
@@ -999,7 +1000,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::MenuBackground]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::MenuBackgroundWide]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -1142,7 +1143,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
     auto textEnt = m_scene.createEntity();
-    textEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f, 158.f);
+    textEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Sprite>().getTextureBounds().width / 2.f, 160.f);
     textEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
     textEnt.addComponent<xy::Text>(font).setString("Elimination");
     textEnt.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -1293,8 +1294,8 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
         toggleEnt.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
 
         auto lightEnt = m_scene.createEntity();
-        lightEnt.addComponent<xy::Transform>().setPosition(MenuConst::LightbarPosition);
-        lightEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth);
+        lightEnt.addComponent<xy::Transform>();// .setPosition(MenuConst::LightbarPosition);
+        lightEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
         lightEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Lightbar));
         lightEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         lightEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LightBar]));
