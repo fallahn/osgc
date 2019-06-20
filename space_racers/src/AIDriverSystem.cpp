@@ -91,10 +91,10 @@ void AIDriverSystem::process(float dt)
             float distance = vehicle.totalDistance - vehicle.waypointDistance;
             float waypointDistance = waypoint.nextDistance;
 
-            if (distance > waypointDistance / 2.f)
+            if (distance > waypointDistance * 0.8f)
             {
-                distance /= waypointDistance;
-                distance = 1.f - distance;
+                distance = waypointDistance * 0.2f;
+                distance = 1.f - (distance / waypointDistance);
             }
             else
             {
@@ -104,6 +104,14 @@ void AIDriverSystem::process(float dt)
             //the AI is in relation to the pack
             //TODO modify this if another car is close in front
             input.accelerationMultiplier = skills[ai.skill] + ((1.f - skills[ai.skill]) * distance);
+
+            //look to see how sharp a turn is coming up and slow down if needed
+            if (vehicle.waypointDistance > 0)
+            {
+                float sharpness = 1.f - (xy::Util::Vector::dot(forwardVec, ai.target - tx.getPosition()) / vehicle.waypointDistance);
+                sharpness = 0.8f + (0.2f * sharpness);
+                input.accelerationMultiplier *= sharpness;
+            }
         }
 
         //TODO sweep for collidable objects and steer away from? solids or space

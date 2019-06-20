@@ -68,6 +68,7 @@ struct LocalPlayer final
     InputBinding inputBinding;
     std::uint8_t lapCount = 0;
     std::uint8_t position = 0;
+    std::uint8_t points = 0;
     bool cpu = true;
 };
 

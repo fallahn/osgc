@@ -243,6 +243,9 @@
     <ClInclude Include="include\EliminationDirector.hpp">
       <Filter>Header Files\directors</Filter>
     </ClInclude>
+    <ClInclude Include="include\EliminationDotSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -379,6 +382,9 @@
     </ClCompile>
     <ClCompile Include="src\AnimationCallbacks.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EliminationDotSystem.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

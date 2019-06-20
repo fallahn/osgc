@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include "SkidEffectSystem.hpp"
 #include "EliminationDirector.hpp"
 #include "LapDotSystem.hpp"
+#include "EliminationDotSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -76,6 +77,7 @@ namespace
 #include "TrackShader.inl"
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
+#include "MenuShader.inl"
 
     sf::Time CelebrationTime = sf::seconds(3.f);
 
@@ -276,7 +278,9 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             //we'll go to sudden death mode instead
             if (m_sharedData.localPlayers[id].lapCount == 0)
             {                
-                LOG("RAISE SUDDEN DEATH EVENT", xy::Logger::Type::Info);
+                auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+                msg->type = GameEvent::SuddenDeath;
+
                 m_suddenDeath = true;
             }
         }
@@ -398,7 +402,17 @@ bool LocalEliminationState::update(float dt)
             };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            //TODO award point to player
+            //award point to player
+            if (!m_suddenDeath)
+            {
+                auto playerID = m_playerEntities[0].getComponent<Vehicle>().colourID;
+                m_sharedData.localPlayers[playerID].points++;
+
+                auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+                msg->type = GameEvent::PlayerScored;
+                msg->playerID = playerID;
+                msg->score = m_sharedData.localPlayers[playerID].points;
+            }
         }
     }
         break;
@@ -408,6 +422,13 @@ bool LocalEliminationState::update(float dt)
         {
             //on time out check scores - if player won, end the game
             //either 4 points or if sudden death is active
+            if (m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].points == 4
+                || m_suddenDeath)
+            {
+                m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].points = 4; //forces this player to win if sudden death
+                requestStackPush(StateID::Summary);
+                break;
+            }
 
             //else respawn all at leader's respawn point and return to race state
             const auto& leaderVehicle = m_playerEntities[0].getComponent<Vehicle>();
@@ -514,6 +535,7 @@ void LocalEliminationState::initScene()
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<NixieSystem>(mb);
     m_uiScene.addSystem<LapDotSystem>(mb);
+    m_uiScene.addSystem<EliminationPointSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
@@ -587,6 +609,7 @@ void LocalEliminationState::loadResources()
     m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Lightbar, LightbarFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -815,6 +838,27 @@ void LocalEliminationState::buildUI()
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     float scale = xy::DefaultSceneSize.x / bounds.width;
     entity.getComponent<xy::Transform>().setScale(scale, 1.f);
+
+    //elimination points
+    sf::Vector2f pointSize(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint]).getSize());
+    std::array<sf::Vector2f, 4u> positions =
+    {
+        sf::Vector2f(20.f, 120.f),
+        sf::Vector2f(xy::DefaultSceneSize.x - (20.f + pointSize.x), 120.f),
+        sf::Vector2f(20.f, 880.f),
+        sf::Vector2f(xy::DefaultSceneSize.x - (20.f + pointSize.x), 880.f)
+    };
+
+    for (auto i = 0u; i < 4u; ++i)
+    {
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(positions[i]);
+        entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint]));
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Lightbar));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<EliminationDot>().ID = static_cast<std::uint8_t>(i);
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::EliminationDot;
+    }
 }
 
 void LocalEliminationState::addLapPoint(xy::Entity vehicle, sf::Color colour)

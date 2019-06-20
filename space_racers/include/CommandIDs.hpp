@@ -36,7 +36,9 @@ namespace CommandID
         TimeText = 0x8,
         BestTimeText = 0x10,
         TopTimesText = 0x20,
-        TopTimesBoard = 0x40
+        TopTimesBoard = 0x40,
+
+        EliminationDot = 0x80
     };
 
     enum Lobby

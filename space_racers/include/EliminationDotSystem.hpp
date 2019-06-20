@@ -18,45 +18,25 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include <xyginext/ecs/System.hpp>
 
-namespace MessageID
+struct EliminationDot final
 {
-    enum
-    {
-        VehicleMessage = xy::Message::Count,
-        GameMessage
-    };
-}
-
-struct VehicleEvent final
-{
-    enum
-    {
-        RequestRespawn,
-        Respawned,
-        Fell,
-        Exploded,
-        Eliminated,
-        LapLine,
-        WentAfk
-    }type = RequestRespawn;
-
-    xy::Entity entity;
+    std::uint8_t ID = 0;
+    //std::uint8_t points = 0;
+    //std::uint8_t lastPoints = 0;
 };
 
-struct GameEvent final
+class EliminationPointSystem final : public xy::System
 {
-    enum
-    {
-        RaceStarted,
-        RaceEnded,
-        TimedOut,
-        NewBestTime,
-        PlayerScored,
-        SuddenDeath
-    }type = RaceStarted;
-    std::uint8_t playerID = 0;
-    std::uint8_t score = 0;
+public:
+    explicit EliminationPointSystem(xy::MessageBus&);
+
+    void handleMessage(const xy::Message&) override;
+
+    void process(float) override;
+
+private:
+
+    void onEntityAdded(xy::Entity) override;
 };
