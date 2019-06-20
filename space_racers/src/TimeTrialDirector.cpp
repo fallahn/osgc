@@ -237,9 +237,6 @@ void TimeTrialDirector::loadGhost()
             auto expectedSize = MaxPoints * sizeof(Point);
             expectedSize += sizeof(float);
 
-            //cos I find myself doing it a lot
-            LOG("MAKE THIS A XYGINE UTIL", xy::Logger::Type::Info);
-
             file.seekg(0, file.end);
             auto fileSize = file.tellg();
             if (fileSize != expectedSize)

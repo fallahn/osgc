@@ -254,8 +254,6 @@ void DebugState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == VehicleEvent::Fell)
         {
-            m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
-
             auto entity = data.entity;
             entity.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 1);
         }

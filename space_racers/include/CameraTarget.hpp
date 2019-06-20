@@ -22,10 +22,9 @@ Copyright 2019 Matt Marchant
 
 struct CameraTarget final
 {
+    xy::Entity lastTarget;
     xy::Entity target;
-    bool active = true;
-    bool lockedOn = false;
-    float speed = 10.f;
+    sf::Vector2f velocity;
 };
 
 class CameraTargetSystem final : public xy::System

@@ -253,7 +253,7 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             auto entity = data.entity;
             entity.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 1);
 
-            m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
+            //m_gameScene.getActiveCamera().getComponent<CameraTarget>().lockedOn = false;
         }
         else if (data.type == VehicleEvent::LapLine)
         {
@@ -942,7 +942,6 @@ void LocalEliminationState::spawnVehicle()
 
     auto cameraEntity = m_gameScene.getActiveCamera();
     cameraEntity.getComponent<CameraTarget>().target = m_playerEntities[0];
-    cameraEntity.getComponent<CameraTarget>().speed = 5.f;
     cameraEntity.getComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
 }
 
