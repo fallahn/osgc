@@ -23,8 +23,8 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float SmoothTime = 0.13f;
-    const float MaxSpeed = 500.f;
+    const float SmoothTime = 0.28f;
+    const float MaxSpeed = 5000.f;
 
     //smoothing based on game programming gems 4, chapter 1.10
     float smoothMotion(float from, float to, float& vel, float dt)
@@ -64,18 +64,39 @@ void CameraTargetSystem::process(float dt)
         auto& tx = entity.getComponent<xy::Transform>();
         auto& camera = entity.getComponent<CameraTarget>();
         
-        if (camera.target != camera.lastTarget)
-        {
-            camera.lastTarget = camera.target;
-            camera.velocity = {};
-        }
-
         if (camera.target.isValid())
         {
-            auto destPosition = camera.target.getComponent<xy::Transform>().getPosition();
-            auto txPosition = tx.getPosition();
+            //smooth the target points should the target change
+            if (camera.target != camera.lastTarget)
+            {
+                if (camera.lastTarget.isValid())
+                {
+                    auto targetPosition = camera.target.getComponent<xy::Transform>().getPosition();
 
-            tx.setPosition(smoothMotion(txPosition, destPosition, camera.velocity, dt));
+                    auto diff = targetPosition - camera.lastTarget.getComponent<xy::Transform>().getPosition();
+                    float len2 = xy::Util::Vector::lengthSquared(diff);
+
+                    if (len2 > 25)
+                    {
+                        camera.targetPosition = smoothMotion(camera.targetPosition, targetPosition, camera.targetVelocity, dt);
+                    }
+                    else
+                    {
+                        camera.lastTarget = camera.target;
+                        camera.targetPosition = targetPosition;
+                    }
+                }
+                else
+                {
+                    camera.lastTarget = camera.target;
+                }
+            }
+            else
+            {
+                camera.targetPosition = camera.target.getComponent<xy::Transform>().getPosition();
+            }
+
+            tx.setPosition(smoothMotion(tx.getPosition(), camera.targetPosition, camera.velocity, dt));
         }
     }
 }

@@ -24,6 +24,11 @@ struct CameraTarget final
 {
     xy::Entity lastTarget;
     xy::Entity target;
+
+    //when switching targets we can smooth between those too...
+    sf::Vector2f targetPosition;
+    sf::Vector2f targetVelocity;
+
     sf::Vector2f velocity;
 };
 
