@@ -88,10 +88,8 @@ struct SharedData final
     //used in all game modes
     std::string errorMessage;
     GameData gameData;
-
     std::string mapName = "AceOfSpace.tmx";
-    std::array<std::uint64_t, 4u> racePositions = {};
-
+    
     //local game data
     std::array<LocalPlayer, 4u> localPlayers;
     
@@ -105,6 +103,7 @@ struct SharedData final
     sf::String name = "Player";
     //used in lobby
     std::map<std::uint64_t, PlayerInfo> playerInfo;
+    std::array<std::uint64_t, 4u> racePositions = {};
     
     //hack to allow non-copyable member in std::any
     //please don't pass copies of this around...

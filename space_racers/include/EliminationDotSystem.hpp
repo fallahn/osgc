@@ -23,8 +23,6 @@ Copyright 2019 Matt Marchant
 struct EliminationDot final
 {
     std::uint8_t ID = 0;
-    //std::uint8_t points = 0;
-    //std::uint8_t lastPoints = 0;
 };
 
 class EliminationPointSystem final : public xy::System
@@ -37,6 +35,6 @@ public:
     void process(float) override;
 
 private:
-
+    bool m_suddenDeath;
     void onEntityAdded(xy::Entity) override;
 };

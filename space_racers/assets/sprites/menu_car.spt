@@ -9,7 +9,7 @@ spritesheet menu_car
         animation idle
         {
             loop=true
-            framerate = 16
+            framerate = 12
 
             frame=0,0,280,158
             frame=0,158,280,158

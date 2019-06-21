@@ -42,7 +42,7 @@ namespace
 EliminationDirector::EliminationDirector(SharedData& sd, xy::Scene& uiScene)
     : m_sharedData  (sd),
     m_uiScene       (uiScene),
-    m_state         (Counting),
+    m_state         (Readying),
     m_suddenDeath   (false)
 {
 
@@ -170,7 +170,7 @@ void EliminationDirector::process(float)
             sendCommand(cmd);
 
             //award point to player
-            if (!m_suddenDeath)
+            //if (!m_suddenDeath)
             {
                 auto playerID = m_playerEntities[0].getComponent<Vehicle>().colourID;
                 m_sharedData.localPlayers[playerID].points++;
@@ -259,7 +259,9 @@ void EliminationDirector::process(float)
         }
         break;
     case GameOver:
+    {
         //do nothing
+    }
         break;
     }
 }

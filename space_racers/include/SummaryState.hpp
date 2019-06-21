@@ -49,7 +49,7 @@ private:
 
     enum Textures
     {
-        Podium,
+        Podium, Title,
         CarNeon, BikeNeon, ShipNeon,
         Size
     };

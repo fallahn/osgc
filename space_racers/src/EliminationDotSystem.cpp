@@ -28,7 +28,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Texture.hpp>
 
 EliminationPointSystem::EliminationPointSystem(xy::MessageBus& mb)
-    : xy::System(mb, typeid(EliminationPointSystem))
+    : xy::System(mb, typeid(EliminationPointSystem)),
+    m_suddenDeath(false)
 {
     requireComponent<EliminationDot>();
     requireComponent<xy::Drawable>();
@@ -40,7 +41,8 @@ void EliminationPointSystem::handleMessage(const xy::Message& msg)
     if (msg.id == MessageID::GameMessage)
     {
         const auto& data = msg.getData<GameEvent>();
-        if (data.type == GameEvent::PlayerScored)
+        if (data.type == GameEvent::PlayerScored
+            && !m_suddenDeath)
         {
             xy::Command cmd;
             cmd.targetFlags = CommandID::EliminationDot;
@@ -59,6 +61,8 @@ void EliminationPointSystem::handleMessage(const xy::Message& msg)
         }
         else if (data.type == GameEvent::SuddenDeath)
         {
+            m_suddenDeath = true;
+
             xy::Command cmd;
             cmd.targetFlags = CommandID::EliminationDot;
             cmd.action = [](xy::Entity e, float)
@@ -66,7 +70,7 @@ void EliminationPointSystem::handleMessage(const xy::Message& msg)
                 auto& verts = e.getComponent<xy::Drawable>().getVertices();
                 for (auto i = 0u; i < verts.size(); ++i)
                 {
-                    verts[i].color = sf::Color::White;
+                    verts[i].color = sf::Color(127, 127, 127);
                 }
             };
             getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
