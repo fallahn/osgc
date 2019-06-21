@@ -19,13 +19,39 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <xyginext/ecs/Director.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
+#include <vector>
+
+struct SharedData;
 class EliminationDirector final : public xy::Director
 {
 public:
-    EliminationDirector();
+    EliminationDirector(SharedData&, xy::Scene&);
 
     void handleMessage(const xy::Message&) override;
 
     void process(float) override;
+
+    void addPlayerEntity(xy::Entity);
+
+private:
+
+    SharedData& m_sharedData;
+    xy::Scene& m_uiScene;
+
+    std::vector<xy::Entity> m_playerEntities;
+
+    sf::Clock m_stateTimer;
+    enum
+    {
+        Readying,
+        Counting,
+        Racing,
+        Celebrating
+    }m_state;
+    bool m_suddenDeath;
+    sf::Clock m_celebrationTimer;
+
+    void eliminate(xy::Entity);
 };

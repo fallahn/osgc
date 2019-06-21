@@ -79,8 +79,6 @@ namespace
 #include "VehicleShader.inl"
 #include "MenuShader.inl"
 
-    sf::Time CelebrationTime = sf::seconds(3.f);
-
     //arranged so that players in a lower position
     //are respawned further forward
     std::array<sf::Vector2f, 4u> SpawnOffsets =
@@ -101,9 +99,7 @@ LocalEliminationState::LocalEliminationState(xy::StateStack& ss, xy::State::Cont
     m_uiSounds          (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
-    m_playerInputs      ({ sd.localPlayers[0].inputBinding,sd.localPlayers[1].inputBinding,sd.localPlayers[2].inputBinding,sd.localPlayers[3].inputBinding }),
-    m_state             (Readying),
-    m_suddenDeath       (false)
+    m_playerInputs      ({ sd.localPlayers[0].inputBinding,sd.localPlayers[1].inputBinding,sd.localPlayers[2].inputBinding,sd.localPlayers[3].inputBinding })
 {
     launchLoadingScreen();
     initScene();
@@ -281,8 +277,19 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
                 auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
                 msg->type = GameEvent::SuddenDeath;
 
-                m_suddenDeath = true;
+                //m_suddenDeath = true;
             }
+        }
+    }
+    else if (msg.id == MessageID::StateMessage)
+    {
+        const auto& data = msg.getData<StateEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case StateEvent::RequestPush:
+            requestStackPush(data.id);
+            break;
         }
     }
 
@@ -293,175 +300,6 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
 
 bool LocalEliminationState::update(float dt)
 {
-    auto camera = m_gameScene.getActiveCamera();
-    auto camPosition = camera.getComponent<xy::Transform>().getPosition();
-
-    //TODO state specific stuff probably wants moving to director
-    switch (m_state)
-    {
-    default: break;
-    case Readying:
-        if (m_stateTimer.getElapsedTime() > sf::seconds(3.f))
-        {
-            m_state = Counting;
-            m_stateTimer.restart();
-
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
-            {
-                e.getComponent<xy::SpriteAnimation>().play(0);
-                e.getComponent<xy::AudioEmitter>().play();
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-        }
-        break;
-    case Counting:
-        if (m_stateTimer.getElapsedTime() > sf::seconds(4.f))
-        {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
-            {
-                e.getComponent<xy::Callback>().active = true;
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
-            msg->type = GameEvent::RaceStarted;
-
-            cmd.targetFlags = CommandID::Game::LapLine;
-            cmd.action = [](xy::Entity e, float)
-            {
-                //a bit kludgy but it makes the lights turn green! :P
-                auto& verts = e.getComponent<xy::Drawable>().getVertices();
-                for (auto i = 8u; i < 16u; ++i)
-                {
-                    verts[i].texCoords.x -= 192.f;
-                }
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            m_state = Racing;
-        }
-        break;
-    case Racing:
-    {
-        //sort the play positions and tell the camera to target leader
-        std::sort(m_playerEntities.begin(), m_playerEntities.end(),
-            [](xy::Entity a, xy::Entity b)
-            {
-                return a.getComponent<Vehicle>().totalDistance + a.getComponent<Vehicle>().lapDistance >
-                    b.getComponent<Vehicle>().totalDistance + b.getComponent<Vehicle>().lapDistance;
-            });
-        m_gameScene.getActiveCamera().getComponent<CameraTarget>().target = m_playerEntities[0];
-
-        m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].position = 0;
-
-        //check non-leading vehicles and eliminate if out of view
-        sf::FloatRect viewRect(camPosition - (xy::DefaultSceneSize / 2.f), xy::DefaultSceneSize);
-        
-        auto count = 0;
-        for (auto i = 1; i < 4; ++i)
-        {
-            //update race position
-            m_sharedData.localPlayers[m_playerEntities[i].getComponent<Vehicle>().colourID].position = i;
-
-            if (m_playerEntities[i].getComponent<Vehicle>().stateFlags == (1 << Vehicle::Eliminated))
-            {
-                count++;
-            }
-            else
-            {
-                if (!viewRect.contains(m_playerEntities[i].getComponent<xy::Transform>().getPosition())
-                    && m_playerEntities[i].getComponent<Vehicle>().invincibleTime < 0)
-                {
-                    eliminate(m_playerEntities[i]);
-                    count++;
-                }
-            }
-        }
-
-        //if eliminated count == 3 switch to celebration state and award player point
-        if (count == 3
-            && m_playerEntities[0].getComponent<Vehicle>().stateFlags == (1 << Vehicle::Normal))
-        {
-            m_celebrationTimer.restart();
-            m_playerEntities[0].getComponent<Vehicle>().stateFlags = (1 << Vehicle::Celebrating);
-            m_state = Celebrating;
-
-            auto entity = m_playerEntities[0];
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::Trail;
-            cmd.action = [entity](xy::Entity e, float)
-            {
-                if (e.getComponent<Trail>().parent == entity)
-                {
-                    e.getComponent<Trail>().parent = {};
-                }
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            //award point to player
-            if (!m_suddenDeath)
-            {
-                auto playerID = m_playerEntities[0].getComponent<Vehicle>().colourID;
-                m_sharedData.localPlayers[playerID].points++;
-
-                auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
-                msg->type = GameEvent::PlayerScored;
-                msg->playerID = playerID;
-                msg->score = m_sharedData.localPlayers[playerID].points;
-            }
-        }
-    }
-        break;
-    case Celebrating:
-        //count celebration time
-        if (m_celebrationTimer.getElapsedTime() > CelebrationTime)
-        {
-            //on time out check scores - if player won, end the game
-            //either 4 points or if sudden death is active
-            if (m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].points == 4
-                || m_suddenDeath)
-            {
-                m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].points = 4; //forces this player to win if sudden death
-                requestStackPush(StateID::Summary);
-                break;
-            }
-
-            //else respawn all at leader's respawn point and return to race state
-            const auto& leaderVehicle = m_playerEntities[0].getComponent<Vehicle>();
-            auto wp = leaderVehicle.currentWaypoint;
-            auto lapDistance = leaderVehicle.lapDistance;
-            auto lapCount = m_sharedData.localPlayers[leaderVehicle.colourID].lapCount;
-
-            for (auto& player : m_sharedData.localPlayers)
-            {
-                player.lapCount = lapCount;
-            }
-
-            for (auto e : m_playerEntities)
-            {
-                auto& vehicle = e.getComponent<Vehicle>();
-
-                vehicle.currentWaypoint = wp;
-                vehicle.lapDistance = lapDistance;
-                vehicle.waypointDistance = wp.getComponent<WayPoint>().trackDistance;
-                vehicle.totalDistance = vehicle.waypointDistance;
-                
-                auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
-                msg->type = VehicleEvent::RequestRespawn;
-                msg->entity = e;
-            }
-
-            //TODO if the camera moves a long way (it shouldn't) it might eliminate players
-            //as they respawn?? Tried to mitigate this by not eliminating players who have an invincibility time
-            m_state = Racing;
-        }
-        break;
-    }
-
     static float shaderTime = 0.f;
     shaderTime += dt;
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
@@ -476,7 +314,8 @@ bool LocalEliminationState::update(float dt)
     m_gameScene.update(dt);
     m_uiScene.update(dt);
 
-    
+    auto camera = m_gameScene.getActiveCamera();
+    auto camPosition = camera.getComponent<xy::Transform>().getPosition();
     m_backgroundScene.getActiveCamera().getComponent<xy::Transform>().setPosition(camPosition);
     m_renderPath.updateView(camPosition);
 
@@ -529,7 +368,7 @@ void LocalEliminationState::initScene()
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
     m_gameScene.addDirector<VFXDirector>(m_sprites);
-    m_gameScene.addDirector<EliminationDirector>();
+    m_gameScene.addDirector<EliminationDirector>(m_sharedData, m_uiScene);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -879,6 +718,9 @@ void LocalEliminationState::spawnVehicle()
 {
     auto [position, rotation] = m_mapParser.getStartPosition();
 
+    auto cameraEntity = m_gameScene.getActiveCamera();
+    cameraEntity.getComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
+
     xy::EmitterSettings smokeSettings;
     smokeSettings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
 
@@ -981,14 +823,11 @@ void LocalEliminationState::spawnVehicle()
             m_playerInputs[i].setPlayerEntity(entity);
         }
         
-        m_playerEntities[i] = entity;
+        cameraEntity.getComponent<CameraTarget>().target = entity;
+        m_gameScene.getDirector<EliminationDirector>().addPlayerEntity(entity);
 
         addLapPoint(entity, GameConst::PlayerColour::Light[i]);
     }
-
-    auto cameraEntity = m_gameScene.getActiveCamera();
-    cameraEntity.getComponent<CameraTarget>().target = m_playerEntities[0];
-    cameraEntity.getComponent<xy::Transform>().setPosition(m_mapParser.getStartPosition().first);
 }
 
 void LocalEliminationState::spawnTrail(xy::Entity parent, sf::Color colour)
@@ -1002,30 +841,6 @@ void LocalEliminationState::spawnTrail(xy::Entity parent, sf::Color colour)
     trailEnt.addComponent<Trail>().parent = parent;
     trailEnt.getComponent<Trail>().colour = colour;
     trailEnt.addComponent<xy::CommandTarget>().ID = CommandID::Game::Trail;
-}
-
-void LocalEliminationState::eliminate(xy::Entity entity)
-{
-    auto& vehicle = entity.getComponent<Vehicle>();
-    vehicle.stateFlags = (1 << Vehicle::Eliminated);
-    vehicle.accelerationMultiplier = 0.f;
-
-    entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
-
-    auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
-    msg->type = VehicleEvent::Eliminated;
-    msg->entity = entity;
-
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::Trail;
-    cmd.action = [entity](xy::Entity e, float)
-    {
-        if (e.getComponent<Trail>().parent == entity)
-        {
-            e.getComponent<Trail>().parent = {};
-        }
-    };
-    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
 void LocalEliminationState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

@@ -26,7 +26,8 @@ namespace MessageID
     enum
     {
         VehicleMessage = xy::Message::Count,
-        GameMessage
+        GameMessage,
+        StateMessage
     };
 }
 
@@ -59,4 +60,15 @@ struct GameEvent final
     }type = RaceStarted;
     std::uint8_t playerID = 0;
     std::uint8_t score = 0;
+};
+
+struct StateEvent final
+{
+    enum
+    {
+        RequestPush,
+        RequestChange
+    }type = RequestPush;
+
+    std::int32_t id = -1;
 };
