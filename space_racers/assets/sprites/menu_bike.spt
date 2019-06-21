@@ -9,7 +9,7 @@ spritesheet menu_bike
         animation idle
         {
             loop=true
-            framerate = 25
+            framerate = 16
 
             frame=0,0,280,158
             frame=0,158,280,158

@@ -344,7 +344,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
     m_shaders.preload(ShaderID::TrackDistortion, TrackFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Globe, GlobeFragment, sf::Shader::Fragment);
-    m_shaders.preload(ShaderID::Asteroid, SpriteVertex, GlobeFragment);
+    m_shaders.preload(ShaderID::Asteroid, GlobeFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Lightbar, LightbarFragment, sf::Shader::Fragment);
@@ -901,9 +901,6 @@ void RaceState::spawnActor(const ActorData& data)
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Asteroid));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
-        entity.addComponent<Sprite3D>(m_matrixPool).depth = radius * data.scale;
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
-        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
         //TODO I'd quite like to mask these with the track alpha channel but.. meh. Maybe later.
         auto shadowEnt = m_gameScene.createEntity();

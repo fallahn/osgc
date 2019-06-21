@@ -48,7 +48,8 @@ private:
         Readying,
         Counting,
         Racing,
-        Celebrating
+        Celebrating,
+        GameOver
     }m_state;
     bool m_suddenDeath;
     sf::Clock m_celebrationTimer;

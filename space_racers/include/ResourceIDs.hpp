@@ -62,7 +62,7 @@ namespace TextureID
     {
         enum
         {
-            MainMenu, VehicleSelect, Podium,
+            MainMenu, VehicleSelect,
             Stars, StarsFar, StarsMid, StarsNear,
             PlanetDiffuse, PlanetNormal,
             MenuBackground, MenuBackgroundWide, TrackSelect,

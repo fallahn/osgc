@@ -70,14 +70,15 @@ void AIDriverSystem::process(float dt)
         sf::Vector2f forwardVec = tf.transformPoint(1.f, 0.f);
 
         //adjust steering based on which side of forward ray target is on
-        static const float threshold = 90.f;
+        static const float threshold = 80.f;
         Input input;
         float side = lineSide(tx.getPosition(), tx.getPosition() + forwardVec, ai.target);
-        if (side > threshold)
+        float thresholdAmount = threshold + (10.f * skills[ai.skill]);
+        if (side > thresholdAmount)
         {
             input.flags |= InputFlag::Right;
         }
-        else if (side < -threshold)
+        else if (side < -thresholdAmount)
         {
             input.flags |= InputFlag::Left;
         }

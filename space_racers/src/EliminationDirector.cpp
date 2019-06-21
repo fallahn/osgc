@@ -193,10 +193,33 @@ void EliminationDirector::process(float)
                 || m_suddenDeath)
             {
                 m_sharedData.localPlayers[m_playerEntities[0].getComponent<Vehicle>().colourID].points = 4; //forces this player to win if sudden death
-                //requestStackPush(StateID::Summary);
+                
+                //sort final position by score
+                auto localPlayers = m_sharedData.localPlayers;
+                std::sort(localPlayers.begin(), localPlayers.end(),
+                    [](const LocalPlayer& a, const LocalPlayer& b)
+                    {
+                        return a.points > b.points;
+                    });
+
+                for (auto& player : m_sharedData.localPlayers)
+                {
+                    for (auto i = 0u; i < localPlayers.size(); ++i)
+                    {
+                        if (player.inputBinding.controllerID == localPlayers[i].inputBinding.controllerID)
+                        {
+                            player.position = i;
+                            break;
+                        }
+                    }
+                }
+
                 auto* msg = postMessage<StateEvent>(MessageID::StateMessage);
                 msg->type = StateEvent::RequestPush;
                 msg->id = StateID::Summary;
+
+                m_state = GameOver; //prevents this being sent more than once
+
                 break;
             }
 
@@ -225,10 +248,17 @@ void EliminationDirector::process(float)
                 msg->entity = e;
             }
 
+            auto& camTarget = getScene().getActiveCamera().getComponent<CameraTarget>();
+            camTarget.lastTarget = m_playerEntities[0];
+            camTarget.target = m_playerEntities[0];
+
             //TODO if the camera moves a long way (it shouldn't) it might eliminate players
             //as they respawn?? Tried to mitigate this by not eliminating players who have an invincibility time
             m_state = Racing;
         }
+        break;
+    case GameOver:
+        //do nothing
         break;
     }
 }

@@ -19,12 +19,13 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "StateIDs.hpp"
-#include "ResourceIDs.hpp"
-
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 
 #include <SFML/System/Clock.hpp>
+#include <SFML/Graphics/Shader.hpp>
 
 class SummaryState final : public xy::State
 {
@@ -43,12 +44,31 @@ public:
 
 private:
     SharedData& m_sharedData;
-    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
+
+    xy::ResourceHandler m_resources;
+
+    enum Textures
+    {
+        Podium,
+        CarNeon, BikeNeon, ShipNeon,
+        Size
+    };
+    std::array<std::size_t, Textures::Size> m_textureIDs;
+
+    enum Sprites
+    {
+        Car, Bike, Ship, Count
+    };
+    std::array<xy::Sprite, Sprites::Count> m_sprites;
 
     xy::Scene m_scene;
 
     sf::Clock m_delayClock;
+    sf::Shader m_neonShader;
 
     void initScene();
     void buildMenu();
+
+    void buildLocalPlayers();
+    void buildNetworkPlayers();
 };
