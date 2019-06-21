@@ -16,7 +16,7 @@ particle_system success
     emit_count = 1
     spawn_radius = 10.000000
     spawn_offset = 0.000000,0.000000
-    release_count = 0
+    release_count = 20
     forces 
     {
         force = 0.000000,0.000000

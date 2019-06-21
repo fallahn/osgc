@@ -367,7 +367,7 @@ void LocalEliminationState::initScene()
     m_gameScene.addSystem<AIDriverSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
-    m_gameScene.addDirector<VFXDirector>(m_sprites);
+    m_gameScene.addDirector<VFXDirector>(m_sprites, m_resources);
     m_gameScene.addDirector<EliminationDirector>(m_sharedData, m_uiScene);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);

@@ -28,10 +28,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
 
-VFXDirector::VFXDirector(const SpriteArray& sprites)
+VFXDirector::VFXDirector(const SpriteArray& sprites, xy::ResourceHandler& rh)
     : m_sprites(sprites)
-{}
+{
+    m_particles[ParticleID::Win].loadFromFile("assets/particles/success.xyp", rh);
+}
 
 //public
 void VFXDirector::handleMessage(const xy::Message& msg)
@@ -48,9 +51,38 @@ void VFXDirector::handleMessage(const xy::Message& msg)
             break;
         }
     }
+    else if (msg.id == MessageID::GameMessage)
+    {
+        const auto& data = msg.getData<GameEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case GameEvent::PlayerScored:
+        case GameEvent::NewBestTime:
+            spawnParticles(ParticleID::Win, data.position);
+            break;
+        }
+    }
 }
 
 //private
+void VFXDirector::spawnParticles(std::int32_t id, sf::Vector2f position)
+{
+    auto entity = getScene().createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.addComponent<xy::ParticleEmitter>().settings = m_particles[id];
+    entity.getComponent<xy::ParticleEmitter>().start();
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float)
+    {
+        if (e.getComponent<xy::ParticleEmitter>().stopped())
+        {
+            getScene().destroyEntity(e);
+        }
+    };
+}
+
 void VFXDirector::spawnAnimatedSprite(std::int32_t id, sf::Vector2f position)
 {
     auto entity = getScene().createEntity();

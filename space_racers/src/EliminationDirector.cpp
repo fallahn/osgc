@@ -179,6 +179,7 @@ void EliminationDirector::process(float)
                 msg->type = GameEvent::PlayerScored;
                 msg->playerID = playerID;
                 msg->score = m_sharedData.localPlayers[playerID].points;
+                msg->position = m_playerEntities[0].getComponent<xy::Transform>().getPosition();
             }
         }
     }

@@ -22,19 +22,34 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 
 #include <array>
 
 using SpriteArray = std::array<xy::Sprite, SpriteID::Game::Count>;
 
+namespace xy
+{
+    class ResourceHandler;
+}
+
 class VFXDirector final : public xy::Director
 {
 public:
-    explicit VFXDirector(const SpriteArray&);
+    VFXDirector(const SpriteArray&, xy::ResourceHandler&);
 
     void handleMessage(const xy::Message&) override;
 
 private:
+
+    enum ParticleID
+    {
+        Win,
+
+        Count
+    };
+    std::array<xy::EmitterSettings, ParticleID::Count> m_particles;
+    void spawnParticles(std::int32_t, sf::Vector2f);
 
     const SpriteArray& m_sprites;
     void spawnAnimatedSprite(std::int32_t, sf::Vector2f);

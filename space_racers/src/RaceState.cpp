@@ -267,7 +267,7 @@ void RaceState::initScene()
     m_gameScene.addSystem<xy::ParticleSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
     
-    m_gameScene.addDirector<VFXDirector>(m_sprites);
+    m_gameScene.addDirector<VFXDirector>(m_sprites, m_resources);
 
     m_uiScene.addSystem<LapDotSystem>(mb);
     m_uiScene.addSystem<xy::CommandSystem>(mb);

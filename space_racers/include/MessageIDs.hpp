@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/Message.hpp>
 #include <xyginext/ecs/Entity.hpp>
 
+#include <SFML/System/Vector2.hpp>
+
 namespace MessageID
 {
     enum
@@ -60,6 +62,7 @@ struct GameEvent final
     }type = RaceStarted;
     std::uint8_t playerID = 0;
     std::uint8_t score = 0;
+    sf::Vector2f position;
 };
 
 struct StateEvent final
