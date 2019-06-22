@@ -162,6 +162,7 @@ void EliminationDirector::process(float)
         {
             m_celebrationTimer.restart();
             m_playerEntities[0].getComponent<Vehicle>().stateFlags = (1 << Vehicle::Celebrating);
+            m_playerEntities[0].getComponent<Vehicle>().accelerationMultiplier = 0.f;
             m_state = Celebrating;
 
             auto entity = m_playerEntities[0];
@@ -271,6 +272,10 @@ void EliminationDirector::process(float)
     case GameOver:
     {
         //do nothing
+        for (auto entity : m_playerEntities)
+        {
+            entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+        }
     }
         break;
     }

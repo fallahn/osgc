@@ -48,6 +48,7 @@ struct Trail final
     //we stop resetting points, and start counting sleeping
     //points.
     xy::Entity parent;
+    sf::Vector2f parentLastPosition;
 
     sf::Color colour = sf::Color::White;
 };

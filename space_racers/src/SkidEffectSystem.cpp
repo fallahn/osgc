@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "VehicleSystem.hpp"
 #include "InputBinding.hpp"
 #include "Util.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/ParticleEmitter.hpp>
@@ -34,6 +35,7 @@ namespace
     const float MinVelocitySqr = MinVelocity * MinVelocity;
 
     const sf::Time releaseTime = sf::seconds(0.01f);
+    const sf::Time soundTime = sf::seconds(0.6f);
     const sf::Vector2f skidSize(14.f, 6.f);
 
     const std::array<sf::Vector2f, 4u> quad =
@@ -87,12 +89,12 @@ void SkidEffectSystem::process(float dt)
                         skid.currentSkidmark = (skid.currentSkidmark + 1) % SkidEffect::MaxSkids;
                     }
                 }
-
-                //TODO spawn a new sound with each skid rather than play one in a chain...
-                if (skid.audioEffect.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Stopped)
+                if (skid.soundTimer.getElapsedTime() > soundTime)
                 {
-                    skid.audioEffect.getComponent<xy::Transform>().setPosition(skid.parent.getComponent<xy::Transform>().getPosition());
-                    skid.audioEffect.getComponent<xy::AudioEmitter>().play();
+                    skid.soundTimer.restart();
+                    auto* msg = postMessage<VehicleEvent>(MessageID::VehicleMessage);
+                    msg->type = VehicleEvent::Skid;
+                    msg->entity = skid.parent;
                 }
             }
             else

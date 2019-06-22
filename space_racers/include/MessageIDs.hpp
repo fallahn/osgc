@@ -43,7 +43,8 @@ struct VehicleEvent final
         Exploded,
         Eliminated,
         LapLine,
-        WentAfk
+        WentAfk,
+        Skid
     }type = RequestRespawn;
 
     xy::Entity entity;

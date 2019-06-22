@@ -39,6 +39,11 @@ void TrailSystem::process(float dt)
         auto& drawable = entity.getComponent<xy::Drawable>();
         auto& verts = drawable.getVertices();
 
+        if (trail.parent.isValid())
+        {
+            trail.parentLastPosition = trail.parent.getComponent<xy::Transform>().getPosition();
+        }
+
         for (auto i = 0u; i < trail.points.size(); ++i)
         {
             trail.points[i].lifetime = std::max(0.f, trail.points[i].lifetime - dt);
@@ -46,9 +51,9 @@ void TrailSystem::process(float dt)
             {
                 if (trail.points[i].lifetime == 0)
                 {
+                    trail.points[i].position = trail.parentLastPosition;
                     if (trail.parent.isValid())
                     {
-                        trail.points[i].position = trail.parent.getComponent<xy::Transform>().getPosition();
                         trail.points[i].lifetime = Trail::Point::MaxLifetime;
                     }
                     else

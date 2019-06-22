@@ -45,7 +45,7 @@ namespace
         Collide, Explode,
         Lap, RoundEnd,
         Success, SuddenDeath,
-
+        Skid,
         Count
     };
 
@@ -59,6 +59,7 @@ namespace
         "assets/sound/fx/round_end.wav",
         "assets/sound/fx/success.wav",
         "assets/sound/fx/sudden_death.wav",
+        "assets/sound/fx/skid.wav",
     };
 
     std::array<std::size_t, AudioID::Count> audioHandles;
@@ -91,6 +92,9 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             break;
         case VehicleEvent::LapLine:
             playSound(AudioID::Lap, data.entity.getComponent<xy::Transform>().getPosition());
+            break;
+        case VehicleEvent::Skid:
+            playSound(AudioID::Skid, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.2f);
             break;
         }
     }

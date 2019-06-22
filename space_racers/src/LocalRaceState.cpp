@@ -722,9 +722,6 @@ void LocalRaceState::spawnVehicle()
             skidEntity.addComponent<xy::Transform>();
             skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
             skidEntity.addComponent<SkidEffect>().parent = entity;
-            skidEntity.getComponent<SkidEffect>().audioEffect = m_gameScene.createEntity();
-            skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("skid");
-            skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::Transform>();
         }
         break;
     case Vehicle::Bike:
@@ -739,9 +736,6 @@ void LocalRaceState::spawnVehicle()
             skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
             skidEntity.addComponent<SkidEffect>().parent = entity;
             skidEntity.getComponent<SkidEffect>().wheelCount = 1;
-            skidEntity.getComponent<SkidEffect>().audioEffect = m_gameScene.createEntity();
-            skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("skid");
-            skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::Transform>();
         }
         break;
     case Vehicle::Ship:

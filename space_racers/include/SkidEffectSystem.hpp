@@ -36,8 +36,8 @@ struct SkidEffect final
 {
     std::size_t wheelCount = 2;
     xy::Entity parent;
-    xy::Entity audioEffect;
     sf::Clock releaseTimer;
+    sf::Clock soundTimer;
     std::vector<Skidmark> skidmarks;
     std::size_t currentSkidmark = 0;
     static constexpr std::size_t MaxSkids = 56;
