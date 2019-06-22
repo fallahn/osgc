@@ -87,7 +87,7 @@ struct Vehicle final
         Disabled, //input is ignored, we're on the starting grid
         AFK //idled too long
     };
-    float invincibleTime = 5.f;
+    float invincibleTime = 0.f;
 
     std::uint16_t collisionFlags = 0;
     std::uint8_t stateFlags = (1 << Disabled);

@@ -40,7 +40,8 @@ namespace ShaderID
         Stars,
         MonitorScreen,
         Lightbar,
-        Text
+        Text,
+        Shield
     };
 }
 
@@ -82,7 +83,7 @@ namespace TextureID
             RoidDiffuse, PlanetDiffuse, PlanetNormal,
             RoidShadow,
             VehicleNormal, VehicleSpecular, VehicleNeon,
-            VehicleShadow, VehicleTrail,
+            VehicleShadow, VehicleTrail, Shield,
             Fence, Chevron, Barrier, Pylon, Bollard,
             LapLine, LapProgress, LapPoint, LapCounter,
 

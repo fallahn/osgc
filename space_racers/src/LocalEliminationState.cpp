@@ -80,6 +80,7 @@ namespace
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
 #include "MenuShader.inl"
+#include "ShieldShader.inl"
 
     //arranged so that players in a lower position
     //are respawned further forward
@@ -309,6 +310,7 @@ bool LocalEliminationState::update(float dt)
     shaderTime += dt;
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
+    m_shaders.get(ShaderID::Shield).setUniform("u_time", shaderTime / 10.f);
 
     for (auto& input : m_playerInputs)
     {
@@ -425,6 +427,8 @@ void LocalEliminationState::loadResources()
     m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
     m_textureIDs[TextureID::Game::LapProgress] = m_resources.load<sf::Texture>("assets/images/play_bar.png");
     m_textureIDs[TextureID::Game::LapPoint] = m_resources.load<sf::Texture>("assets/images/ui_point.png");
+    m_textureIDs[TextureID::Game::Shield] = m_resources.load<sf::Texture>("assets/images/shield.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]).setRepeated(true);
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -455,6 +459,7 @@ void LocalEliminationState::loadResources()
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Lightbar, LightbarFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Shield, ShieldFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -827,6 +832,32 @@ void LocalEliminationState::spawnVehicle()
             thisTx.setRotation(thatTx.getRotation());
             thisTx.setScale(thatTx.getScale());
         };
+
+        auto shieldEnt = m_gameScene.createEntity();
+        shieldEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        shieldEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
+        shieldEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+        shieldEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Shield));
+        shieldEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        shieldEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]));
+        bounds = shieldEnt.getComponent<xy::Sprite>().getTextureBounds();
+        shieldEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        shieldEnt.addComponent<xy::Callback>().active = true;
+        shieldEnt.getComponent<xy::Callback>().function =
+            [entity](xy::Entity e, float)
+        {
+            const auto& vehicle = entity.getComponent<Vehicle>();
+            float amount = std::min(std::max(0.f, vehicle.invincibleTime / GameConst::InvincibleTime), 1.f);
+
+            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(amount * 255.f));
+            e.getComponent<xy::Sprite>().setColour(c);
+            e.getComponent<xy::Transform>().setScale(amount, amount);
+            e.getComponent<xy::Transform>().setRotation(-entity.getComponent<xy::Transform>().getRotation());
+        };
+        
+        entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
+        
+
 
         spawnTrail(entity, GameConst::PlayerColour::Light[i]);
 

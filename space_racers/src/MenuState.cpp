@@ -162,7 +162,7 @@ bool MenuState::update(float dt)
     static float currTime = 0.f;
     currTime += dt;
     m_shaders.get(ShaderID::Stars).setUniform("u_time", currTime / 100.f);
-    m_shaders.get(ShaderID::Globe).setUniform("u_time", currTime / 800.f);
+    m_shaders.get(ShaderID::Globe).setUniform("u_time", currTime / 300.f);
     m_shaders.get(ShaderID::MonitorScreen).setUniform("u_time", currTime / 100.f);
 
     m_scene.update(dt);
