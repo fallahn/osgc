@@ -82,6 +82,7 @@ LocalRaceState::LocalRaceState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_gameScene         (ctx.appInstance.getMessageBus()),
     m_uiScene           (ctx.appInstance.getMessageBus()),
     m_uiSounds          (m_audioResource),
+    m_raceSounds        (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources),
     m_playerInput       (sd.localPlayers[0].inputBinding),
@@ -441,6 +442,8 @@ void LocalRaceState::loadResources()
     auto& vehicleShader = m_shaders.get(ShaderID::Vehicle);
     vehicleShader.setUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNormal]));
 
+    m_raceSounds.loadFromFile("assets/sound/race.xas");
+
     //ui scene assets
     spriteSheet.loadFromFile("assets/sprites/lights.spt", m_resources);
     m_sprites[SpriteID::Game::UIStartLights] = spriteSheet.getSprite("lights");
@@ -552,6 +555,11 @@ bool LocalRaceState::loadMap()
     m_mapParser.addProps(m_matrixPool, m_shaders, m_resources, m_textureIDs);
 
     createRoids();
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("ambience0" + std::to_string(xy::Util::Random::value(1, 5)));
+    entity.getComponent<xy::AudioEmitter>().play();
 
     return true;
 }

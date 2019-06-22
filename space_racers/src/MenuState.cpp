@@ -48,6 +48,7 @@ source distribution.
 #include <xyginext/ecs/components/UIHitBox.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
@@ -56,6 +57,7 @@ source distribution.
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/graphics/postprocess/ChromeAb.hpp>
@@ -78,6 +80,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
     m_scene             (ctx.appInstance.getMessageBus()),
+    m_audioScape        (m_audioResource),
     m_activeString      (nullptr),
     m_mapIndex          (0),
     m_eliminationMode   (true)
@@ -192,6 +195,7 @@ void MenuState::initScene()
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+    m_scene.addSystem<xy::AudioSystem>(mb);
 
     m_scene.addPostProcess<xy::PostChromeAb>();
 
@@ -290,6 +294,8 @@ void MenuState::loadResources()
 
         xy::App::getActiveInstance()->setMouseCursorVisible(false);
     }
+
+    m_audioScape.loadFromFile("assets/sound/menu.xas");
 
     if (m_settings.loadFromFile(xy::FileSystem::getConfigDirectory(AppName) + CfgName))
     {
@@ -562,6 +568,11 @@ void MenuState::buildMenu()
     buildNetworkMenu(rootNode, mouseEnter, mouseExit);
     buildTimeTrialMenu(rootNode, mouseEnter, mouseExit);
     buildLocalPlayMenu(rootNode, mouseEnter, mouseExit);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("music");
+    entity.getComponent<xy::AudioEmitter>().play();
 }
 
 void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf::Uint32 mouseExit)

@@ -74,6 +74,7 @@ private:
 
     xy::AudioResource m_audioResource;
     xy::AudioScape m_uiSounds;
+    xy::AudioScape m_raceSounds;
 
     MapParser m_mapParser;
     RenderPath m_renderPath;

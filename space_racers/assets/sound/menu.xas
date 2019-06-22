@@ -1,0 +1,10 @@
+audioscape menu
+{
+    emitter music
+    {
+        path = "assets/sound/menu.ogg"
+        streaming = true
+        looped = true
+        volume=0.5
+    }
+}

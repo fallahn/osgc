@@ -1,0 +1,42 @@
+audioscape race
+{
+    emitter ambience01
+    {
+        path = "assets/sound/map01.ogg"
+        streaming = true
+        looped = true
+        volume=0.2
+    }
+
+    emitter ambience02
+    {
+        path = "assets/sound/map02.ogg"
+        streaming = true
+        looped = true
+        volume=0.2
+    }
+
+    emitter ambience03
+    {
+        path = "assets/sound/map03.ogg"
+        streaming = true
+        looped = true
+        volume=0.2
+    }
+
+    emitter ambience04
+    {
+        path = "assets/sound/map04.ogg"
+        streaming = true
+        looped = true
+        volume=0.2
+    }
+
+    emitter ambience05
+    {
+        path = "assets/sound/map05.ogg"
+        streaming = true
+        looped = true
+        volume=0.2
+    }                
+}

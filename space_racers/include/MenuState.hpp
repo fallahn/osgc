@@ -36,6 +36,8 @@ source distribution.
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/resources/Resource.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <array>
 
@@ -62,6 +64,9 @@ private:
     xy::Scene m_scene;
     xy::ResourceHolder m_resources;
     xy::ShaderResource m_shaders;
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_audioScape;
+
     xy::ConfigFile m_settings;
 
     sf::String* m_activeString;
