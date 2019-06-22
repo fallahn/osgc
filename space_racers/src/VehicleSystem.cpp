@@ -165,6 +165,11 @@ void VehicleSystem::processVehicle(xy::Entity entity, float delta)
         break;
     }
     vehicle.invincibleTime -= delta;
+    //if (delta <= 0)
+    //{
+    //    static int bu = 0;
+    //    std::cout << bu++  << " flaps\n";
+    //}
 
     //checks where we are along the track
     if (vehicle.currentWaypoint.isValid())

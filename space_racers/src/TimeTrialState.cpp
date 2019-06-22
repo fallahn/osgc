@@ -78,6 +78,7 @@ namespace
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
 #include "TextShader.inl"
+#include "ShieldShader.inl"
 
     struct PopUp final
     {
@@ -439,6 +440,7 @@ void TimeTrialState::loadResources()
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidDiffuse]).setRepeated(true);
     m_textureIDs[TextureID::Game::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]).setRepeated(true);
+    
     m_textureIDs[TextureID::Game::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
     m_textureIDs[TextureID::Game::VehicleNormal] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_normal.png");
     m_textureIDs[TextureID::Game::VehicleSpecular] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_specular.png");
@@ -454,6 +456,8 @@ void TimeTrialState::loadResources()
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Bollard]).setSmooth(true);
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
     m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
+    m_textureIDs[TextureID::Game::Shield] = m_resources.load<sf::Texture>("assets/images/shield.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]).setRepeated(true);
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -491,6 +495,7 @@ void TimeTrialState::loadResources()
     m_shaders.preload(ShaderID::Ghost, VehicleVertex, GhostFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Text, TextFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Shield, ShieldFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -868,6 +873,30 @@ void TimeTrialState::spawnVehicle()
         thisTx.setRotation(thatTx.getRotation());
         thisTx.setScale(thatTx.getScale());
     };
+
+    auto shieldEnt = m_gameScene.createEntity();
+    shieldEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    shieldEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
+    shieldEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    shieldEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Shield));
+    shieldEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    shieldEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]));
+    bounds = shieldEnt.getComponent<xy::Sprite>().getTextureBounds();
+    shieldEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    shieldEnt.addComponent<xy::Callback>().active = true;
+    shieldEnt.getComponent<xy::Callback>().function =
+        [entity](xy::Entity e, float)
+    {
+        const auto& vehicle = entity.getComponent<Vehicle>();
+        float amount = std::min(std::max(0.f, vehicle.invincibleTime / GameConst::InvincibleTime), 1.f);
+
+        sf::Color c(255, 255, 255, static_cast<sf::Uint8>(amount * 255.f));
+        e.getComponent<xy::Sprite>().setColour(c);
+        e.getComponent<xy::Transform>().setScale(amount, amount);
+        e.getComponent<xy::Transform>().setRotation(-entity.getComponent<xy::Transform>().getRotation());
+    };
+
+    entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
 
     m_playerInput.setPlayerEntity(entity);
     m_sharedData.localPlayers[0].lapCount = m_sharedData.gameData.lapCount;

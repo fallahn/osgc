@@ -83,6 +83,7 @@ namespace
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
 #include "MenuShader.inl"
+#include "ShieldShader.inl"
 
     const sf::Time pingTime = sf::seconds(3.f);
 }
@@ -304,6 +305,7 @@ void RaceState::loadResources()
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidDiffuse]).setRepeated(true);
     m_textureIDs[TextureID::Game::PlanetNormal] = m_resources.load<sf::Texture>("assets/images/crater_normal.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]).setRepeated(true);
+    
     m_textureIDs[TextureID::Game::RoidShadow] = m_resources.load<sf::Texture>("assets/images/roid_shadow.png");
     m_textureIDs[TextureID::Game::VehicleNormal] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_normal.png");
     m_textureIDs[TextureID::Game::VehicleSpecular] = m_resources.load<sf::Texture>("assets/images/vehicles/vehicles_specular.png");
@@ -322,6 +324,8 @@ void RaceState::loadResources()
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
     m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
     m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
+    m_textureIDs[TextureID::Game::Shield] = m_resources.load<sf::Texture>("assets/images/shield.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]).setRepeated(true);
 
     //init render path
     if (!m_renderPath.init(m_sharedData.useBloom))
@@ -353,6 +357,7 @@ void RaceState::loadResources()
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Lightbar, LightbarFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Shield, ShieldFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
     //in SFML means lots of string look-ups setting uniforms :(
@@ -775,6 +780,30 @@ void RaceState::spawnVehicle(const VehicleData& data)
         thisTx.setScale(thatTx.getScale());
     };
 
+    auto shieldEnt = m_gameScene.createEntity();
+    shieldEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    shieldEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
+    shieldEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    shieldEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Shield));
+    shieldEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    shieldEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]));
+    bounds = shieldEnt.getComponent<xy::Sprite>().getTextureBounds();
+    shieldEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    shieldEnt.addComponent<xy::Callback>().active = true;
+    shieldEnt.getComponent<xy::Callback>().function =
+        [entity](xy::Entity e, float)
+    {
+        const auto& vehicle = entity.getComponent<Vehicle>();
+        float amount = std::min(std::max(0.f, vehicle.invincibleTime / GameConst::InvincibleTime), 1.f);
+
+        sf::Color c(255, 255, 255, static_cast<sf::Uint8>(amount * 255.f));
+        e.getComponent<xy::Sprite>().setColour(c);
+        e.getComponent<xy::Transform>().setScale(amount, amount);
+        e.getComponent<xy::Transform>().setRotation(-entity.getComponent<xy::Transform>().getRotation());
+    };
+
+    entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
+
     m_playerInput.setPlayerEntity(entity);
 
     auto cameraEntity = m_gameScene.getActiveCamera();
@@ -900,6 +929,30 @@ void RaceState::spawnActor(const ActorData& data)
                 thisTx.setScale(thatTx.getScale());
             };
 
+            auto shieldEnt = m_gameScene.createEntity();
+            shieldEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+            shieldEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
+            shieldEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+            shieldEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Shield));
+            shieldEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+            shieldEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]));
+            auto bounds = shieldEnt.getComponent<xy::Sprite>().getTextureBounds();
+            shieldEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+            shieldEnt.addComponent<xy::Callback>().active = true;
+            shieldEnt.getComponent<xy::Callback>().function =
+                [entity](xy::Entity e, float)
+            {
+                const auto& vehicle = entity.getComponent<Vehicle>();
+                float amount = std::min(std::max(0.f, vehicle.invincibleTime / GameConst::InvincibleTime), 1.f);
+
+                sf::Color c(255, 255, 255, static_cast<sf::Uint8>(amount * 255.f));
+                e.getComponent<xy::Sprite>().setColour(c);
+                e.getComponent<xy::Transform>().setScale(amount, amount);
+                e.getComponent<xy::Transform>().setRotation(-entity.getComponent<xy::Transform>().getRotation());
+            };
+
+            entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
+
             /*auto debugEnt = m_gameScene.createEntity();
             debugEnt.addComponent<xy::Transform>();
             debugEnt.addComponent<xy::Drawable>().setDepth(1000);
@@ -984,6 +1037,7 @@ void RaceState::resetNetVehicle(const VehicleData& data)
         msg->entity = e;
 
         e.getComponent<xy::AudioEmitter>().play();
+        e.getComponent<Vehicle>().invincibleTime = GameConst::InvincibleTime;
     }
     else
     {
@@ -997,6 +1051,7 @@ void RaceState::resetNetVehicle(const VehicleData& data)
                 e.getComponent<xy::Transform>().setPosition(data.x, data.y);
                 e.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
                 e.getComponent<xy::Transform>().setScale(1.f, 1.f);
+                e.getComponent<Vehicle>().invincibleTime = GameConst::InvincibleTime;
 
                 auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
                 msg->type = VehicleEvent::Respawned;
