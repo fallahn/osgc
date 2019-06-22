@@ -77,9 +77,16 @@ void EliminationDirector::process(float)
             cmd.action = [](xy::Entity e, float dt)
             {
                 e.getComponent<xy::SpriteAnimation>().play(0);
-                e.getComponent<xy::AudioEmitter>().play();
+                
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            cmd.targetFlags = CommandID::Game::StartLights;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<xy::AudioEmitter>().play();
+            };
+            sendCommand(cmd);
         }
         break;
     case Counting:
@@ -159,7 +166,7 @@ void EliminationDirector::process(float)
 
             auto entity = m_playerEntities[0];
             xy::Command cmd;
-            cmd.targetFlags = CommandID::Trail;
+            cmd.targetFlags = CommandID::Game::Trail;
             cmd.action = [entity](xy::Entity e, float)
             {
                 if (e.getComponent<Trail>().parent == entity)
@@ -285,7 +292,7 @@ void EliminationDirector::eliminate(xy::Entity entity)
     msg->entity = entity;
 
     xy::Command cmd;
-    cmd.targetFlags = CommandID::Trail;
+    cmd.targetFlags = CommandID::Game::Trail;
     cmd.action = [entity](xy::Entity e, float)
     {
         if (e.getComponent<Trail>().parent == entity)

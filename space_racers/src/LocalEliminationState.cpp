@@ -38,6 +38,7 @@ Copyright 2019 Matt Marchant
 #include "EliminationDirector.hpp"
 #include "LapDotSystem.hpp"
 #include "EliminationDotSystem.hpp"
+#include "EngineAudioSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -185,7 +186,7 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             entity.getComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
 
             xy::Command cmd;
-            cmd.targetFlags = CommandID::Trail;
+            cmd.targetFlags = CommandID::Game::Trail;
             cmd.action = [entity](xy::Entity e, float)
             {
                 if (e.getComponent<Trail>().parent == entity)
@@ -223,6 +224,8 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
 
             tx.setScale(1.f, 1.f);
 
+            entity.getComponent<xy::AudioEmitter>().play();
+
             auto* respawnMsg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
             respawnMsg->type = VehicleEvent::Respawned;
             respawnMsg->entity = entity;
@@ -233,7 +236,7 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             auto entity = data.entity;
 
             xy::Command cmd;
-            cmd.targetFlags = CommandID::Trail;
+            cmd.targetFlags = CommandID::Game::Trail;
             cmd.action = [entity](xy::Entity e, float)
             {
                 if (e.getComponent<Trail>().parent == entity)
@@ -354,6 +357,7 @@ void LocalEliminationState::initScene()
     m_gameScene.addSystem<InverseRotationSystem>(mb);
     m_gameScene.addSystem<TrailSystem>(mb);
     m_gameScene.addSystem<SkidEffectSystem>(mb);
+    m_gameScene.addSystem<EngineAudioSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -380,7 +384,6 @@ void LocalEliminationState::initScene()
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
-    m_uiScene.addSystem<xy::AudioSystem>(mb);
 
     auto view = getContext().defaultView;
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(view.getSize());
@@ -658,7 +661,11 @@ void LocalEliminationState::buildUI()
             }
         }
     };
+    
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
     entity.addComponent<xy::AudioEmitter>() = m_uiSounds.getEmitter("start");
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::StartLights;
 
     //lap counter frame
     entity = m_uiScene.createEntity();
@@ -701,7 +708,7 @@ void LocalEliminationState::buildUI()
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Lightbar));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<EliminationDot>().ID = static_cast<std::uint8_t>(i);
-        entity.addComponent<xy::CommandTarget>().ID = CommandID::EliminationDot;
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::EliminationDot;
     }
 }
 
@@ -768,11 +775,15 @@ void LocalEliminationState::spawnVehicle()
             entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
             entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
             entity.addComponent<xy::ParticleEmitter>().settings = smokeSettings;
+            entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("car");
             {
                 auto skidEntity = m_gameScene.createEntity();
                 skidEntity.addComponent<xy::Transform>();
                 skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
                 skidEntity.addComponent<SkidEffect>().parent = entity;
+                skidEntity.getComponent<SkidEffect>().audioEffect = m_gameScene.createEntity();
+                skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("skid");
+                skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::Transform>();
             }
             break;
         case Vehicle::Bike:
@@ -780,22 +791,29 @@ void LocalEliminationState::spawnVehicle()
             entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
             entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
             entity.addComponent<xy::ParticleEmitter>().settings = smokeSettings;
+            entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("bike");
             {
                 auto skidEntity = m_gameScene.createEntity();
                 skidEntity.addComponent<xy::Transform>();
                 skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
                 skidEntity.addComponent<SkidEffect>().parent = entity;
                 skidEntity.getComponent<SkidEffect>().wheelCount = 1;
+                skidEntity.getComponent<SkidEffect>().audioEffect = m_gameScene.createEntity();
+                skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("skid");
+                skidEntity.getComponent<SkidEffect>().audioEffect.addComponent<xy::Transform>();
             }
             break;
         case Vehicle::Ship:
             entity.getComponent<Vehicle>().settings = Definition::ship;
             entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
             entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+            entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("ship");
             break;
         }
         auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
+        entity.getComponent<xy::AudioEmitter>().play();
+        entity.addComponent<EngineAudio>();
 
         auto shadowEnt = m_gameScene.createEntity();
         shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());

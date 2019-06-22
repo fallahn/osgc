@@ -45,7 +45,7 @@ void EliminationPointSystem::handleMessage(const xy::Message& msg)
             && !m_suddenDeath)
         {
             xy::Command cmd;
-            cmd.targetFlags = CommandID::EliminationDot;
+            cmd.targetFlags = CommandID::UI::EliminationDot;
             cmd.action = [data](xy::Entity e, float)
             {
                 if (e.getComponent<EliminationDot>().ID == data.playerID)
@@ -64,7 +64,7 @@ void EliminationPointSystem::handleMessage(const xy::Message& msg)
             m_suddenDeath = true;
 
             xy::Command cmd;
-            cmd.targetFlags = CommandID::EliminationDot;
+            cmd.targetFlags = CommandID::UI::EliminationDot;
             cmd.action = [](xy::Entity e, float)
             {
                 auto& verts = e.getComponent<xy::Drawable>().getVertices();

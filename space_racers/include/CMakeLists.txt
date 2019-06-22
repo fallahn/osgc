@@ -16,6 +16,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/DummyClient.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EliminationDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EliminationDotSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EngineAudioSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FastTrig.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp

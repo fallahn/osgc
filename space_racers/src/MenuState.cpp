@@ -408,7 +408,7 @@ void MenuState::buildMenu()
 
     auto rootNode = m_scene.createEntity();
     rootNode.addComponent<xy::Transform>();
-    rootNode.addComponent<xy::CommandTarget>().ID = CommandID::RootNode;
+    rootNode.addComponent<xy::CommandTarget>().ID = CommandID::Menu::RootNode;
     rootNode.addComponent<Slider>().speed = 7.f;
 
     //title
@@ -605,12 +605,12 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
                     m_activeString = &m_sharedData.name;
 
                     xy::Command cmd;
-                    cmd.targetFlags = CommandID::NameText;
+                    cmd.targetFlags = CommandID::Menu::NameText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
 
-                    cmd.targetFlags = CommandID::IPText;
+                    cmd.targetFlags = CommandID::Menu::IPText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
@@ -626,7 +626,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     //TODO set drawable cropping area
     textEnt.addComponent<xy::Text>(font).setString(m_sharedData.name);
     textEnt.getComponent<xy::Text>().setCharacterSize(36);
-    textEnt.addComponent<xy::CommandTarget>().ID = CommandID::NameText;
+    textEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::NameText;
     entity.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
 
     itemPosition.y += bounds.height;
@@ -670,11 +670,11 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
                     m_activeString = &m_sharedData.ip;
 
                     xy::Command cmd;
-                    cmd.targetFlags = CommandID::IPText;
+                    cmd.targetFlags = CommandID::Menu::IPText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-                    cmd.targetFlags = CommandID::NameText;
+                    cmd.targetFlags = CommandID::Menu::NameText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
@@ -690,7 +690,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
     //TODO set drawable cropping area
     textEnt.addComponent<xy::Text>(font).setString(m_sharedData.ip);
     textEnt.getComponent<xy::Text>().setCharacterSize(36);
-    textEnt.addComponent<xy::CommandTarget>().ID = CommandID::IPText;
+    textEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::IPText;
     entity.getComponent<xy::Transform>().addChild(textEnt.getComponent<xy::Transform>());
 
     itemPosition.y += bounds.height;
@@ -731,7 +731,7 @@ void MenuState::buildNetworkMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, sf:
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     xy::Command cmd;
-                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
                     cmd.action = [](xy::Entity e, float)
                     {
                         e.getComponent<Slider>().target = MenuConst::MainMenuPosition;
@@ -764,7 +764,7 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     xy::Command cmd;
-                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
                     cmd.action = [](xy::Entity e, float)
                     {
                         e.getComponent<Slider>().target = MenuConst::MainMenuPosition;
@@ -983,7 +983,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     xy::Command cmd;
-                    cmd.targetFlags = CommandID::RootNode;
+                    cmd.targetFlags = CommandID::Menu::RootNode;
                     cmd.action = [](xy::Entity e, float)
                     {
                         e.getComponent<Slider>().target = MenuConst::MainMenuPosition;
@@ -1353,7 +1353,7 @@ void MenuState::updateTextInput(const sf::Event& evt)
             ? 15 : NetConst::MaxNameSize / sizeof(sf::Uint32);
 
         std::uint32_t targetFlags = (m_activeString == &m_sharedData.ip)
-            ? CommandID::IPText : CommandID::NameText;
+            ? CommandID::Menu::IPText : CommandID::Menu::NameText;
 
         auto updateText = [&, targetFlags]()
         {
@@ -1391,7 +1391,7 @@ void MenuState::updateTextInput(const sf::Event& evt)
                 m_activeString = nullptr;
 
                 xy::Command cmd;
-                cmd.targetFlags = CommandID::NameText | CommandID::IPText;
+                cmd.targetFlags = CommandID::Menu::NameText | CommandID::Menu::IPText;
                 cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                 m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }

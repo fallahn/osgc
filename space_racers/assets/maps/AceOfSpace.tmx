@@ -206,13 +206,13 @@
    <polygon points="118,-4 544,0 538,-444"/>
   </object>
  </objectgroup>
- <objectgroup color="#ffff00" id="8" name="Collision" locked="1">
+ <objectgroup color="#ffff00" id="8" name="Collision">
   <object id="41" x="2561" y="770" width="125" height="125"/>
   <object id="42" x="3203" y="3458" width="124" height="125"/>
   <object id="43" x="2049" y="3458" width="124" height="123"/>
   <object id="44" x="3458" y="1160" width="124" height="120"/>
   <object id="45" x="2050" y="2820" width="128" height="120"/>
-  <object id="46" x="1020" y="32" width="1417" height="36"/>
+  <object id="46" x="1020" y="59" width="1417" height="9"/>
   <object id="47" x="1022" y="563" width="1412" height="40"/>
   <object id="50" x="97" y="3763">
    <polygon points="-31,-40 277,271 -31,268"/>

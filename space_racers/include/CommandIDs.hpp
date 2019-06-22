@@ -20,40 +20,52 @@ Copyright 2019 Matt Marchant
 
 namespace CommandID
 {
-    enum Game
+    namespace Game
     {
-        NetActor = 0x1,
-        Trail = 0x2,
-        Vehicle = 0x4,
-        LapLine = 0x8
-    };
+        enum
+        {
+            NetActor = 0x1,
+            Trail = 0x2,
+            Vehicle = 0x4,
+            LapLine = 0x8,
+            StartLights = 0x10
+        };
+    }
 
-    enum UI
+    namespace UI
     {
-        StartLights = 0x1,
-        LapText = 0x2,
+        enum
+        {
+            StartLights = 0x1,
+            LapText = 0x2,
 
-        TimeText = 0x8,
-        BestTimeText = 0x10,
-        TopTimesText = 0x20,
-        TopTimesBoard = 0x40,
+            TimeText = 0x8,
+            BestTimeText = 0x10,
+            TopTimesText = 0x20,
+            TopTimesBoard = 0x40,
 
-        EliminationDot = 0x80
-    };
+            EliminationDot = 0x80
+        };
+    }
 
-    enum Lobby
+    namespace Lobby
     {
-        PlayerText = 0x1,
-        LobbyText = 0x2,
-    };
+        enum
+        {
+            PlayerText = 0x1,
+            LobbyText = 0x2,
+        };
+    }
 
-
-    enum Menu
+    namespace Menu
     {
-        RootNode = 0x1,
-        NameText = 0x2,
-        IPText = 0x4,
-        TrackThumb = 0x8,
-        LapCounter = 0x10
-    };
+        enum
+        {
+            RootNode = 0x1,
+            NameText = 0x2,
+            IPText = 0x4,
+            TrackThumb = 0x8,
+            LapCounter = 0x10
+        };
+    }
 }

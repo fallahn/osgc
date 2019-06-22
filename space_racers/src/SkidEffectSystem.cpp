@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/ParticleEmitter.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
 
 #include <xyginext/util/Vector.hpp>
 
@@ -85,6 +86,13 @@ void SkidEffectSystem::process(float dt)
                         skid.skidmarks[skid.currentSkidmark].rotation = skid.parent.getComponent<xy::Transform>().getRotation();
                         skid.currentSkidmark = (skid.currentSkidmark + 1) % SkidEffect::MaxSkids;
                     }
+                }
+
+                //TODO spawn a new sound with each skid rather than play one in a chain...
+                if (skid.audioEffect.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Stopped)
+                {
+                    skid.audioEffect.getComponent<xy::Transform>().setPosition(skid.parent.getComponent<xy::Transform>().getPosition());
+                    skid.audioEffect.getComponent<xy::AudioEmitter>().play();
                 }
             }
             else

@@ -161,6 +161,7 @@
     <ClInclude Include="include\DummyClient.hpp" />
     <ClInclude Include="include\EliminationDirector.hpp" />
     <ClInclude Include="include\EliminationDotSystem.hpp" />
+    <ClInclude Include="include\EngineAudioSystem.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
     <ClInclude Include="include\FastTrig.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />

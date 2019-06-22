@@ -39,4 +39,52 @@ audioscape race
         looped = true
         volume=0.2
     }                
+
+    emitter car
+    {
+        path = "assets/sound/fx/car_engine.wav"
+        streaming = false
+        looped = true
+        volume=0.18
+        attenuation = 1
+        falloff = 0
+        mixer_channel = 1
+        min_distance = 200
+    } 
+
+    emitter bike
+    {
+        path = "assets/sound/fx/bike_engine.wav"
+        streaming = false
+        looped = true
+        volume=0.18
+        attenuation = 1
+        falloff = 0
+        mixer_channel = 1
+        min_distance = 200
+    } 
+
+    emitter ship
+    {
+        path = "assets/sound/fx/ship_engine.wav"
+        streaming = false
+        looped = true
+        volume=0.18
+        attenuation = 1
+        falloff = 0
+        mixer_channel = 1
+        min_distance = 200
+    } 
+
+    emitter skid
+    {
+        path = "assets/sound/fx/skid.wav"
+        streaming = false
+        looped = false
+        volume=0.1
+        attenuation = 1
+        falloff = 0
+        mixer_channel = 1
+        min_distance = 200
+    }
 }
