@@ -423,11 +423,15 @@ void VehicleSystem::resolveCollision(xy::Entity entity, xy::Entity other, Manifo
         break;
     case CollisionObject::Vehicle:
     {
-        tx.move(manifold.penetration * manifold.normal);
-
         auto& otherVehicle = other.getComponent<Vehicle>();
-        vehicle.velocity *= 0.5f;
-        otherVehicle.velocity += vehicle.velocity;
+
+        if (otherVehicle.stateFlags & ((1 << Vehicle::Normal) | (1 << Vehicle::Disabled)))
+        {
+            vehicle.velocity *= 0.5f;
+            otherVehicle.velocity += vehicle.velocity;
+
+            tx.move(manifold.penetration * manifold.normal);
+        }
         //TODO other vehicle should probably rotate when not hit square
         //something like (1- dot(vel, norm(otherForwardVec) * someForce)
 

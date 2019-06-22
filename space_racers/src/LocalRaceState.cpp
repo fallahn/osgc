@@ -35,6 +35,7 @@ Copyright 2019 Matt Marchant
 #include "NixieDisplay.hpp"
 #include "SkidEffectSystem.hpp"
 #include "EngineAudioSystem.hpp"
+#include "SoundEffectsDirector.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -370,7 +371,7 @@ void LocalRaceState::initScene()
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
     m_gameScene.addDirector<VFXDirector>(m_sprites, m_resources);
-
+    m_gameScene.addDirector<SFXDirector>(m_resources);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);

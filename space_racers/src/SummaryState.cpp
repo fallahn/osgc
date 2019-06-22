@@ -216,7 +216,7 @@ void SummaryState::buildMenu()
     //quit message
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 380.f);
+    entity.getComponent<xy::Transform>().move(0.f, 320.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(font).setString("Press Any Key To Continue");
     entity.getComponent<xy::Text>().setCharacterSize(96);
@@ -270,7 +270,7 @@ void SummaryState::buildLocalPlayers()
 void SummaryState::buildNetworkPlayers()
 {
     auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
-    const std::array<std::size_t, 3u> scores = { 50, 30, 10 };
+    const std::array<std::uint32_t, 3u> scores = { 50, 30, 10 };
 
     //make a copy of thte player info and erase any found in race positions...
     //those who are left didn't get a podium finish.

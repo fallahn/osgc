@@ -226,6 +226,9 @@ void EliminationDirector::process(float)
                 msg->type = StateEvent::RequestPush;
                 msg->id = StateID::Summary;
 
+                auto* msg2 = postMessage<GameEvent>(MessageID::GameMessage);
+                msg2->type = GameEvent::RaceEnded;
+
                 m_state = GameOver; //prevents this being sent more than once
 
                 break;

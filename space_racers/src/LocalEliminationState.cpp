@@ -39,6 +39,7 @@ Copyright 2019 Matt Marchant
 #include "LapDotSystem.hpp"
 #include "EliminationDotSystem.hpp"
 #include "EngineAudioSystem.hpp"
+#include "SoundEffectsDirector.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -374,6 +375,7 @@ void LocalEliminationState::initScene()
 
     m_gameScene.addDirector<VFXDirector>(m_sprites, m_resources);
     m_gameScene.addDirector<EliminationDirector>(m_sharedData, m_uiScene);
+    m_gameScene.addDirector<SFXDirector>(m_resources);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
