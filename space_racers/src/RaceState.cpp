@@ -487,7 +487,7 @@ void RaceState::buildWorld()
 
 void RaceState::addProps()
 {
-    m_mapParser.addProps(m_matrixPool, m_shaders, m_resources, m_textureIDs);
+    m_mapParser.addProps(m_matrixPool, m_audioResource, m_shaders, m_resources, m_textureIDs);
 }
 
 void RaceState::buildUI()

@@ -613,7 +613,7 @@ bool LocalRaceState::loadMap()
     entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetDiffuse]));
 
-    m_mapParser.addProps(m_matrixPool, m_shaders, m_resources, m_textureIDs);
+    m_mapParser.addProps(m_matrixPool, m_audioResource, m_shaders, m_resources, m_textureIDs);
 
     createRoids();
 

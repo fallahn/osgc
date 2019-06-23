@@ -40,6 +40,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/resources/ShaderResource.hpp>
 
 #include <xyginext/util/String.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/TileLayer.hpp>
@@ -451,9 +452,12 @@ void MapParser::renderLayers(std::array<sf::RenderTexture, 2u>& targets) const
     targets[1].display();
 }
 
-void MapParser::addProps(MatrixPool& matrixPool, xy::ShaderResource& shaders, xy::ResourceHandler& resources, const std::array<std::size_t, TextureID::Game::Count>& textureIDs)
+void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::ShaderResource& shaders, xy::ResourceHandler& resources, const std::array<std::size_t, TextureID::Game::Count>& textureIDs)
 {
     auto cameraEntity = m_scene.getActiveCamera();
+
+    xy::AudioScape audioScape(ar);
+    audioScape.loadFromFile("assets/sound/map.xas");
 
     //electric fences
     const auto& fences = m_fences;
@@ -481,6 +485,9 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::ShaderResource& shaders, xy
         entity.getComponent<xy::Drawable>().getVertices() = createBillboard(f.start, f.end, entity.getComponent<Sprite3D>().depth, texSize);
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
+        entity.addComponent<xy::AudioEmitter>() = audioScape.getEmitter("fence");
+        entity.getComponent<xy::AudioEmitter>().play();
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::Audio;
     }
 
     //chevrons

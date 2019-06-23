@@ -1,0 +1,15 @@
+audioscape race
+{
+    emitter fence
+    {
+        path = "assets/sound/fx/fence_loop.wav"
+        streaming = true
+        looped = true
+        volume=0.2
+        mixer_channel = 1
+        attenuation = 1
+        falloff = 0
+        mixer_channel = 1
+        min_distance = 200
+    }
+}

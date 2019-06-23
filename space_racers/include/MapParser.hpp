@@ -53,6 +53,7 @@ namespace sf
 namespace xy
 {
     class Scene;
+    class AudioResource;
     class ShaderResource;
     class ResourceHandler;
 }
@@ -91,7 +92,7 @@ public:
 
     void renderLayers(std::array<sf::RenderTexture, 2u>&) const;
 
-    void addProps(MatrixPool&, xy::ShaderResource&, xy::ResourceHandler&, const std::array<std::size_t, TextureID::Game::Count>&);
+    void addProps(MatrixPool&, xy::AudioResource&, xy::ShaderResource&, xy::ResourceHandler&, const std::array<std::size_t, TextureID::Game::Count>&);
 
 private:
     xy::Scene& m_scene;
