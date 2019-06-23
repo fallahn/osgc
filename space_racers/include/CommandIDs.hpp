@@ -28,7 +28,8 @@ namespace CommandID
             Trail = 0x2,
             Vehicle = 0x4,
             LapLine = 0x8,
-            StartLights = 0x10
+            StartLights = 0x10,
+            Audio = 0x20 //audio which needs to be paused
         };
     }
 

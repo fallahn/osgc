@@ -122,7 +122,24 @@ bool LocalRaceState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
-            requestStackPush(StateID::Pause);
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Game::Audio | CommandID::Game::Vehicle;
+            cmd.action = [](xy::Entity e, float)
+            {
+                if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Playing)
+                {
+                    e.getComponent<xy::AudioEmitter>().pause();
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            //makes sure there's enough time to pause audio
+            //by delaying the pause state by one frame
+            auto* msg = getContext().appInstance.getMessageBus().post<StateEvent>(MessageID::StateMessage);
+            msg->type = StateEvent::RequestPush;
+            msg->id = StateID::Pause;
+        }
             break;
         }
     }
@@ -244,6 +261,35 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             }
         }
+    }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Popped
+            && data.id == StateID::Pause)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Game::Audio | CommandID::Game::Vehicle;
+            cmd.action = [](xy::Entity e, float)
+            {
+                if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Paused)
+                {
+                    e.getComponent<xy::AudioEmitter>().play();
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+    }
+    else if (msg.id == MessageID::StateMessage)
+    {
+    const auto& data = msg.getData<StateEvent>();
+    switch (data.type)
+    {
+    default: break;
+    case StateEvent::RequestPush:
+        requestStackPush(data.id);
+        break;
+    }
     }
 
     m_backgroundScene.forwardMessage(msg);
@@ -575,6 +621,7 @@ bool LocalRaceState::loadMap()
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("ambience0" + std::to_string(xy::Util::Random::value(1, 5)));
     entity.getComponent<xy::AudioEmitter>().play();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::Audio;
 
     return true;
 }
