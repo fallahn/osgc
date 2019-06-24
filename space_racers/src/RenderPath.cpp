@@ -208,13 +208,19 @@ void RenderPath::renderBasic(xy::Scene& backgroundScene, xy::Scene& gameScene)
         m_backgroundBuffer.draw(backgroundScene);
         m_backgroundBuffer.display();
 
-        m_gameSceneBuffer.clear();
+        m_gameSceneBuffer.setActive(true);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m_gameSceneBuffer.draw(gameScene);
         m_gameSceneBuffer.display();
     }
     else
     {
         m_gameSceneBuffer.setView(m_gameSceneBuffer.getDefaultView());
+
+        m_gameSceneBuffer.setActive(true);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m_gameSceneBuffer.draw(m_backgroundSprite);
         m_gameSceneBuffer.draw(backgroundScene);
 
@@ -225,6 +231,7 @@ void RenderPath::renderBasic(xy::Scene& backgroundScene, xy::Scene& gameScene)
             gameScene.setActiveCamera(cam);
             m_gameSceneBuffer.draw(gameScene);
         }
+        m_gameSceneBuffer.display();
     }
 }
 

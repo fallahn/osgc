@@ -949,7 +949,7 @@ void LocalRaceState::spawnVehicle()
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         entity.getComponent<xy::Drawable>().updateLocalBounds();
     }
@@ -1008,7 +1008,7 @@ void LocalRaceState::spawnVehicle()
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
 
         verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
