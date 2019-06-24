@@ -92,7 +92,9 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<VehicleEvent>();
         if (data.type == VehicleEvent::LapLine)
         {
-            auto lapTime = m_lapClock.restart().asSeconds();
+            auto lapTime = (m_lapClock.restart() + m_pauseTime).asSeconds();
+            m_pauseTime = {};
+
             if (lapTime < m_fastestLap)
             {
                 m_fastestLap = lapTime;
@@ -145,6 +147,23 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
             m_playerEntity = data.entity;
         }
     }
+    else if (msg.id == MessageID::StateMessage)
+    {
+        const auto& data = msg.getData<StateEvent>();
+        if (data.id == StateID::Pause)
+        {
+            m_pauseTime += m_lapClock.getElapsedTime();
+        }
+    }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Popped
+            && data.id == StateID::Pause)
+        {
+            m_lapClock.restart();
+        }
+    }
 }
 
 void TimeTrialDirector::process(float)
@@ -152,7 +171,7 @@ void TimeTrialDirector::process(float)
     if (m_updateDisplay)
     {
         //send command to display
-        float currTime = m_lapClock.getElapsedTime().asSeconds();
+        float currTime = (m_lapClock.getElapsedTime() + m_pauseTime).asSeconds();
         xy::Command cmd;
         cmd.targetFlags = CommandID::UI::TimeText;
         cmd.action = [currTime](xy::Entity entity, float)

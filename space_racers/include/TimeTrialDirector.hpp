@@ -58,6 +58,8 @@ private:
     bool m_updateDisplay;
     float m_fastestLap;
 
+    sf::Time m_pauseTime;
+
     ResourceCollection m_resources;
     std::string m_mapName;
     std::int32_t m_vehicleType;
