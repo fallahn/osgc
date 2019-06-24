@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include "EngineAudioSystem.hpp"
 #include "SoundEffectsDirector.hpp"
 #include "LapDotSystem.hpp"
+#include "SplitScreenDirector.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -104,8 +105,7 @@ LocalRaceState::LocalRaceState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_raceSounds        (m_audioResource),
     m_mapParser         (m_gameScene),
     m_renderPath        (m_resources, m_shaders),
-    m_playerInputs      ({ sd.localPlayers[0].inputBinding, sd.localPlayers[1].inputBinding, sd.localPlayers[2].inputBinding, sd.localPlayers[3].inputBinding }),
-    m_state             (Readying)
+    m_playerInputs      ({ sd.localPlayers[0].inputBinding, sd.localPlayers[1].inputBinding, sd.localPlayers[2].inputBinding, sd.localPlayers[3].inputBinding })
 {
     launchLoadingScreen();
     initScene();
@@ -266,6 +266,7 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
         {
             //count laps and disable vehicle when done
             auto id = data.entity.getComponent<Vehicle>().colourID;
+            auto entity = data.entity;
 
             if (m_sharedData.localPlayers[id].lapCount)
             {
@@ -274,7 +275,7 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::LapText;
-            cmd.action = [&, id](xy::Entity e, float)
+            cmd.action = [&, id, entity](xy::Entity e, float)
             {
                 e.getComponent<Nixie>().lowerValue = m_sharedData.localPlayers[id].lapCount;
             };
@@ -282,7 +283,7 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
 
             if (m_sharedData.localPlayers[id].lapCount == 0)
             {
-                m_playerInputs[id].getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+                entity.getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             }
         }
     }
@@ -306,14 +307,14 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
     }
     else if (msg.id == MessageID::StateMessage)
     {
-    const auto& data = msg.getData<StateEvent>();
-    switch (data.type)
-    {
-    default: break;
-    case StateEvent::RequestPush:
-        requestStackPush(data.id);
-        break;
-    }
+        const auto& data = msg.getData<StateEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case StateEvent::RequestPush:
+            requestStackPush(data.id);
+            break;
+        }
     }
 
     m_backgroundScene.forwardMessage(msg);
@@ -323,62 +324,6 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
 
 bool LocalRaceState::update(float dt)
 {
-    switch (m_state)
-    {
-    default: break;
-    case Readying:
-        if (m_stateTimer.getElapsedTime() > sf::seconds(3.f))
-        {
-            m_state = Counting;
-            m_stateTimer.restart();
-
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
-            {
-                e.getComponent<xy::SpriteAnimation>().play(0);
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            cmd.targetFlags = CommandID::Game::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
-            {
-                e.getComponent<xy::AudioEmitter>().play();
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-        }
-        break;
-    case Counting:
-        if (m_stateTimer.getElapsedTime() > sf::seconds(4.f))
-        {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
-            {
-                e.getComponent<xy::Callback>().active = true;
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
-            msg->type = GameEvent::RaceStarted;
-
-            cmd.targetFlags = CommandID::Game::LapLine;
-            cmd.action = [](xy::Entity e, float)
-            {
-                //a bit kludgy but it makes the lights turn green! :P
-                auto& verts = e.getComponent<xy::Drawable>().getVertices();
-                for (auto i = 8u; i < 16u; ++i)
-                {
-                    verts[i].texCoords.x -= 192.f;
-                }
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            m_state = Racing;
-        }
-        break;
-    }
-
     static float shaderTime = 0.f;
     shaderTime += dt;
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
@@ -447,6 +392,7 @@ void LocalRaceState::initScene()
 
     m_gameScene.addDirector<VFXDirector>(m_sprites, m_resources);
     m_gameScene.addDirector<SFXDirector>(m_resources);
+    m_gameScene.addDirector<SplitScreenDirector>(m_uiScene, m_sharedData);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -659,6 +605,7 @@ void LocalRaceState::createRoids()
     m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
 
     auto cameraEntity = m_gameScene.getActiveCamera();
+    sf::BlendMode blendMode(sf::BlendMode::DstAlpha, sf::BlendMode::OneMinusSrcAlpha);
 
     auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);
     for (auto position : positions)
@@ -696,6 +643,7 @@ void LocalRaceState::createRoids()
         auto shadowEnt = m_gameScene.createEntity();
         shadowEnt.addComponent<xy::Transform>().setPosition(sf::Vector2f(-18.f, 18.f));
         shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::RoidRenderDepth - 1);
+        //shadowEnt.getComponent<xy::Drawable>().setBlendMode(blendMode);
         shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidShadow]));
         entity.getComponent<xy::Transform>().addChild(shadowEnt.getComponent<xy::Transform>());
     }
@@ -922,6 +870,8 @@ void LocalRaceState::spawnVehicle()
         msg->entity = entity;
 
         addLapPoint(entity, GameConst::PlayerColour::Light[i]);
+
+        m_gameScene.getDirector<SplitScreenDirector>().addPlayerEntity(entity);
     }
 
     //see how many cameras we got for human players

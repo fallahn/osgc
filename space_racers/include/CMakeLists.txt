@@ -54,6 +54,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SkidEffectSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SplitScreenDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.hpp

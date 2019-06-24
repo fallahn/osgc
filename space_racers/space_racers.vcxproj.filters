@@ -252,6 +252,9 @@
     <ClInclude Include="include\SoundEffectsDirector.hpp">
       <Filter>Header Files\directors</Filter>
     </ClInclude>
+    <ClInclude Include="include\SplitScreenDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -393,6 +396,9 @@
       <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\SoundEffectsDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SplitScreenDirector.cpp">
       <Filter>Source Files\directors</Filter>
     </ClCompile>
   </ItemGroup>

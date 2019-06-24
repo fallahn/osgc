@@ -73,14 +73,6 @@ private:
 
     std::array<InputParser, 4u> m_playerInputs;
 
-    sf::Clock m_stateTimer;
-    enum
-    {
-        Readying,
-        Counting,
-        Racing
-    }m_state;
-
     void initScene();
     void loadResources();
 

@@ -198,6 +198,7 @@
     <ClInclude Include="include\SkidEffectSystem.hpp" />
     <ClInclude Include="include\SliderSystem.hpp" />
     <ClInclude Include="include\SoundEffectsDirector.hpp" />
+    <ClInclude Include="include\SplitScreenDirector.hpp" />
     <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\SummaryState.hpp" />
@@ -250,6 +251,7 @@
     <ClCompile Include="src\SkidEffectSystem.cpp" />
     <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\SoundEffectsDirector.cpp" />
+    <ClCompile Include="src\SplitScreenDirector.cpp" />
     <ClCompile Include="src\Sprite3DSystem.cpp" />
     <ClCompile Include="src\SummaryState.cpp" />
     <ClCompile Include="src\TimeTrialDirector.cpp" />
