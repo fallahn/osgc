@@ -75,6 +75,18 @@ bool PauseState::handleEvent(const sf::Event& evt)
             break;
         }
     }
+    else if (evt.type == sf::Event::JoystickButtonReleased)
+    {
+        switch (evt.joystickButton.button)
+        {
+        default: break;
+        case 1:
+        case 6:
+        case 7:
+            requestStackPop();
+            break;
+        }
+    }
 
     m_scene.forwardEvent(evt);
     return false;

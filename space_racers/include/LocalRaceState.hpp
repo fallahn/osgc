@@ -78,6 +78,7 @@ private:
 
     bool loadMap();
     void createRoids();
+    void createBackground(xy::Scene&);
     void buildUI();
     void addLapPoint(xy::Entity, sf::Color);
     void spawnVehicle();

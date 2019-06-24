@@ -24,6 +24,9 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
+#include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Camera.hpp>
+
 #include <SFML/OpenGL.hpp>
 #include <SFML/System/Clock.hpp>
 
@@ -140,7 +143,6 @@ void RenderPath::renderPretty(xy::Scene& backgroundScene, xy::Scene& gameScene)
     }
 
     //draws the full scene including distorted background
-    //m_gameSceneBuffer.clear();
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
 
     m_gameSceneBuffer.setActive(true);
@@ -156,7 +158,6 @@ void RenderPath::renderPretty(xy::Scene& backgroundScene, xy::Scene& gameScene)
     {
         m_gameSceneBuffer.setView(m_gameSceneBuffer.getDefaultView());
         m_gameSceneBuffer.draw(m_backgroundSprite);
-        m_gameSceneBuffer.draw(backgroundScene);
 
         for (auto cam : m_cameras)
         {
@@ -222,7 +223,6 @@ void RenderPath::renderBasic(xy::Scene& backgroundScene, xy::Scene& gameScene)
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m_gameSceneBuffer.draw(m_backgroundSprite);
-        m_gameSceneBuffer.draw(backgroundScene);
 
         for (auto cam : m_cameras)
         {

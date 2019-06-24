@@ -98,7 +98,7 @@ bool SummaryState::handleEvent(const sf::Event& evt)
         return true;
     }
 
-    if (evt.type == sf::Event::KeyPressed
+    if ((evt.type == sf::Event::KeyPressed || evt.type == sf::Event::JoystickButtonPressed)
         && m_delayClock.getElapsedTime() > delayTime)
     {
         requestStackClear();

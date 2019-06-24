@@ -206,18 +206,21 @@ void MenuState::initScene()
     binding.keys[InputBinding::Brake] = sf::Keyboard::Down;
     binding.keys[InputBinding::Left] = sf::Keyboard::Left;
     binding.keys[InputBinding::Right] = sf::Keyboard::Right;
+    binding.keys[InputBinding::Reverse] = sf::Keyboard::Down;
 
     auto& bindingTwo = m_sharedData.localPlayers[2].inputBinding;
     bindingTwo.keys[InputBinding::Accelerate] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Brake] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Left] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Right] = sf::Keyboard::Unknown;
+    bindingTwo.keys[InputBinding::Reverse] = sf::Keyboard::Unknown;
 
     auto& bindingThree = m_sharedData.localPlayers[3].inputBinding;
     bindingThree.keys[InputBinding::Accelerate] = sf::Keyboard::Unknown;
     bindingThree.keys[InputBinding::Brake] = sf::Keyboard::Unknown;
     bindingThree.keys[InputBinding::Left] = sf::Keyboard::Unknown;
     bindingThree.keys[InputBinding::Right] = sf::Keyboard::Unknown;
+    bindingThree.keys[InputBinding::Reverse] = sf::Keyboard::Unknown;
 }
 
 void MenuState::loadResources()

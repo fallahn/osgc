@@ -129,6 +129,26 @@ bool TimeTrialState::handleEvent(const sf::Event& evt)
         return true;
     }
 
+    auto pause = [&]()
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Game::Audio | CommandID::Game::Vehicle;
+        cmd.action = [](xy::Entity e, float)
+        {
+            if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Playing)
+            {
+                e.getComponent<xy::AudioEmitter>().pause();
+            }
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        //makes sure there's enough time to pause audio
+        //by delaying the pause state by one frame
+        auto* msg = getContext().appInstance.getMessageBus().post<StateEvent>(MessageID::StateMessage);
+        msg->type = StateEvent::RequestPush;
+        msg->id = StateID::Pause;
+    };
+
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)
@@ -137,25 +157,15 @@ bool TimeTrialState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
-        {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::Game::Audio | CommandID::Game::Vehicle;
-            cmd.action = [](xy::Entity e, float)
-            {
-                if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Playing)
-                {
-                    e.getComponent<xy::AudioEmitter>().pause();
-                }
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            //makes sure there's enough time to pause audio
-            //by delaying the pause state by one frame
-            auto* msg = getContext().appInstance.getMessageBus().post<StateEvent>(MessageID::StateMessage);
-            msg->type = StateEvent::RequestPush;
-            msg->id = StateID::Pause;
-        }
+            pause();
             break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickButtonReleased)
+    {
+        if (evt.joystickButton.button == 7)
+        {
+            pause();
         }
     }
 

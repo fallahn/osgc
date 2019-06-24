@@ -138,6 +138,26 @@ bool LocalRaceState::handleEvent(const sf::Event& evt)
         return true;
     }
 
+    auto pause = [&]()
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Game::Audio | CommandID::Game::Vehicle;
+        cmd.action = [](xy::Entity e, float)
+        {
+            if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Playing)
+            {
+                e.getComponent<xy::AudioEmitter>().pause();
+            }
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        //makes sure there's enough time to pause audio
+        //by delaying the pause state by one frame
+        auto* msg = getContext().appInstance.getMessageBus().post<StateEvent>(MessageID::StateMessage);
+        msg->type = StateEvent::RequestPush;
+        msg->id = StateID::Pause;
+    };
+
     if (evt.type == sf::Event::KeyReleased)
     {
         switch (evt.key.code)
@@ -146,25 +166,15 @@ bool LocalRaceState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
-        {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::Game::Audio | CommandID::Game::Vehicle;
-            cmd.action = [](xy::Entity e, float)
-            {
-                if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Playing)
-                {
-                    e.getComponent<xy::AudioEmitter>().pause();
-                }
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            //makes sure there's enough time to pause audio
-            //by delaying the pause state by one frame
-            auto* msg = getContext().appInstance.getMessageBus().post<StateEvent>(MessageID::StateMessage);
-            msg->type = StateEvent::RequestPush;
-            msg->id = StateID::Pause;
-        }
+            pause();
             break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickButtonReleased)
+    {
+        if (evt.joystickButton.button == 7)
+        {
+            pause();
         }
     }
 
@@ -534,7 +544,6 @@ bool LocalRaceState::loadMap()
     auto camEnt = m_gameScene.createEntity();
     camEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
     camEnt.addComponent<xy::Camera>().setView(/*view.getSize()*/xy::DefaultSceneSize);
-    //camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
     camEnt.getComponent<xy::Camera>().lockRotation(true);
     camEnt.addComponent<CameraTarget>();
     camEnt.addComponent<xy::AudioListener>();
@@ -549,47 +558,7 @@ bool LocalRaceState::loadMap()
     m_gameScene.setActiveCamera(camEnt);
     m_gameScene.setActiveListener(camEnt);
 
-    //dem starrs
-    std::array<std::size_t, 3u> IDs =
-    {
-        m_textureIDs[TextureID::Game::StarsNear],
-        m_textureIDs[TextureID::Game::StarsMid],
-        m_textureIDs[TextureID::Game::StarsFar],
-    };
-    for (auto i = 0; i < 3; ++i)
-    {
-        entity = m_backgroundScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(bounds.left, bounds.top);
-        entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - (2 + i));
-        entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
-        entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(IDs[i]));
-
-        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-
-        verts.emplace_back(sf::Vector2f(bounds.left, bounds.top), sf::Vector2f(bounds.left, bounds.top));
-        verts.emplace_back(sf::Vector2f(bounds.left + bounds.width, bounds.top), sf::Vector2f(bounds.left + bounds.width, bounds.top));
-        verts.emplace_back(sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height));
-        verts.emplace_back(sf::Vector2f(bounds.left, bounds.top + bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height));
-
-        entity.getComponent<xy::Drawable>().updateLocalBounds();
-
-
-        entity.addComponent<Sprite3D>(m_matrixPool).depth = -(1500.f + (i * 500.f));
-        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
-        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-    }
-
-    //planet
-    entity = m_backgroundScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Globe));
-    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetDiffuse]));
+    //background stars / planets are also added to the corresponding scene based on cam count (below)
 
     m_mapParser.addProps(m_matrixPool, m_audioResource, m_shaders, m_resources, m_textureIDs);
 
@@ -658,6 +627,57 @@ void LocalRaceState::createRoids()
         shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::RoidShadow]));
         entity.getComponent<xy::Transform>().addChild(shadowEnt.getComponent<xy::Transform>());
     }
+}
+
+void LocalRaceState::createBackground(xy::Scene& scene)
+{
+    sf::FloatRect bounds(sf::Vector2f(), m_mapParser.getSize());
+    bounds.left -= 1000.f;
+    bounds.top -= 1000.f;
+    bounds.width += 2000.f;
+    bounds.height += 2000.f;
+
+    std::array<std::size_t, 3u> IDs =
+    {
+        m_textureIDs[TextureID::Game::StarsNear],
+        m_textureIDs[TextureID::Game::StarsMid],
+        m_textureIDs[TextureID::Game::StarsFar],
+    };
+    for (auto i = 0; i < 3; ++i)
+    {
+        auto entity = scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(bounds.left, bounds.top);
+        entity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - (2 + i));
+        entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+        entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(IDs[i]));
+
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+
+        verts.emplace_back(sf::Vector2f(bounds.left, bounds.top), sf::Vector2f(bounds.left, bounds.top));
+        verts.emplace_back(sf::Vector2f(bounds.left + bounds.width, bounds.top), sf::Vector2f(bounds.left + bounds.width, bounds.top));
+        verts.emplace_back(sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height), sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height));
+        verts.emplace_back(sf::Vector2f(bounds.left, bounds.top + bounds.height), sf::Vector2f(bounds.left, bounds.top + bounds.height));
+
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = -(1500.f + (i * 500.f));
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    }
+
+    //planet
+    auto entity = scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Globe));
+    entity.getComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth - 2);
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetDiffuse]));
+
 }
 
 void LocalRaceState::buildUI()
@@ -922,6 +942,16 @@ void LocalRaceState::spawnVehicle()
         }
     };
 
+    auto setListener = [&]()
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(m_mapParser.getSize() / 2.f);
+        entity.addComponent<xy::AudioListener>().setDepth(1000.f);
+        //entity.getComponent<xy::AudioListener>().setVolume(10.f);
+        //if we make this louder we need to make the music quieter
+        m_gameScene.setActiveListener(entity);
+    };
+
     if (cameras.size() == 2)
     {
         //view split vertically
@@ -952,6 +982,9 @@ void LocalRaceState::spawnVehicle()
         verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
         entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        createBackground(m_gameScene);
+        setListener();
     }
     else if (cameras.size() > 2)
     {
@@ -1016,6 +1049,9 @@ void LocalRaceState::spawnVehicle()
         verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f,  GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
         verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
         entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        createBackground(m_gameScene);
+        setListener();
     }
     else
     {
@@ -1032,6 +1068,8 @@ void LocalRaceState::spawnVehicle()
         }
         backgroundEnt.addComponent<xy::Sprite>(m_renderPath.getBackgroundBuffer());
         
+        createBackground(m_backgroundScene);
+
         auto camEnt = m_gameScene.getActiveCamera();
         camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
 
