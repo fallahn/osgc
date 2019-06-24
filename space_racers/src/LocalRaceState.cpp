@@ -970,7 +970,7 @@ void LocalRaceState::spawnVehicle()
     {
         //split into quads. for 3 players
         //the 4th camera gives a map overview.
-        auto viewSize = xy::DefaultSceneSize / 2.f;
+        auto viewSize = xy::DefaultSceneSize / 1.5f;
         float fov = Camera3D::calcFOV(viewSize.y);
         float ratio = viewSize.x / viewSize.y;
 
@@ -983,6 +983,33 @@ void LocalRaceState::spawnVehicle()
             camEnt.getComponent<CameraTarget>().target = cameras[i];
             camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
             cameras[i] = camEnt;
+        }
+
+        //map view
+        if (cameras.size() == 3)
+        {
+            //ideally we want to move further away
+            //but the 3D sprite system has a fixed cam distance...
+            auto mapSize = m_mapParser.getSize();
+            if (mapSize.x > mapSize.y)
+            {
+                viewSize.x = mapSize.x + 1500.f;
+                viewSize.y = viewSize.x / ratio;
+            }
+            else
+            {
+                viewSize.y = mapSize.y + 1500.f;
+                viewSize.x = viewSize.y * ratio;
+            }
+
+            fov = Camera3D::calcFOV(viewSize.y);
+
+            auto camEnt = createCamera();
+            camEnt.getComponent<xy::Transform>().setPosition(mapSize / 2.f);
+            camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
+            camEnt.getComponent<xy::Camera>().setView(viewSize);
+            camEnt.getComponent<xy::Camera>().setViewport(quadViewports[3]);
+            cameras.push_back(camEnt);
         }
 
         //add some borders to the UI
