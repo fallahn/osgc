@@ -93,6 +93,14 @@ namespace
         sf::FloatRect(0.f, 0.5f, 0.5f, 0.5f),
         sf::FloatRect(0.5f, 0.5f, 0.5f, 0.5f)
     };
+
+    std::array<sf::Vector2f, 4u> lapCounterPositions =
+    {
+        sf::Vector2f(),
+        sf::Vector2f(xy::DefaultSceneSize.x / 2.f, 0.f),
+        sf::Vector2f(0.f, xy::DefaultSceneSize.y / 2.f),
+        xy::DefaultSceneSize / 2.f
+    };
 }
 
 LocalRaceState::LocalRaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -277,7 +285,10 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
             cmd.targetFlags = CommandID::UI::LapText;
             cmd.action = [&, id, entity](xy::Entity e, float)
             {
-                e.getComponent<Nixie>().lowerValue = m_sharedData.localPlayers[id].lapCount;
+                if (e.getComponent<std::int32_t>() == id)
+                {
+                    e.getComponent<Nixie>().lowerValue = m_sharedData.localPlayers[id].lapCount;
+                }
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -654,7 +665,7 @@ void LocalRaceState::buildUI()
     //startlights
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 0.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(100);
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::UIStartLights];
     entity.addComponent<xy::SpriteAnimation>();
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -695,6 +706,7 @@ void LocalRaceState::buildUI()
     entity.addComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
     entity.getComponent<Nixie>().digitCount = 2;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LapText;
+    entity.addComponent<std::int32_t>() = 0; //so we can ID this when there are multiple players
 
     //lapline
     entity = m_uiScene.createEntity();
@@ -887,6 +899,29 @@ void LocalRaceState::spawnVehicle()
         return entity;
     };
 
+    auto addLapCounter = [&](std::int32_t id)
+    {
+        if (id > 0)
+        {
+            //lap counter frame
+            auto entity = m_uiScene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(lapCounterPositions[id]);
+            entity.addComponent<xy::Drawable>().setDepth(-1);
+            entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapCounter]));
+            auto frameEnt = entity;
+
+            //lap counter
+            entity = m_uiScene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(GameConst::LapCounterPosition);
+            entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::NixieSheet]));
+            entity.addComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+            entity.getComponent<Nixie>().digitCount = 2;
+            entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LapText;
+            entity.addComponent<std::int32_t>() = id; //so we can ID this when there are multiple players
+            frameEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        }
+    };
+
     if (cameras.size() == 2)
     {
         //view split vertically
@@ -903,6 +938,8 @@ void LocalRaceState::spawnVehicle()
             camEnt.getComponent<CameraTarget>().target = cameras[i];
             camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
             cameras[i] = camEnt;
+
+            addLapCounter(i);
         }
 
         //add some borders to the UI
@@ -933,6 +970,8 @@ void LocalRaceState::spawnVehicle()
             camEnt.getComponent<CameraTarget>().target = cameras[i];
             camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
             cameras[i] = camEnt;
+
+            addLapCounter(i);
         }
 
         //map view
