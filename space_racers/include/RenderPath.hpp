@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 //encapsulates the rendering path for multi-pass processes - simpler to shared between game modes
 
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -37,7 +38,7 @@ namespace xy
 class RenderPath final : public sf::Drawable
 {
 public:
-    explicit RenderPath(xy::ResourceHandler&);
+    RenderPath(xy::ResourceHandler&, xy::ShaderResource&);
 
     bool init(bool);
 
@@ -49,6 +50,8 @@ public:
     const sf::Texture& getBackgroundBuffer() const { return m_backgroundBuffer.getTexture(); }
 
     void setNormalTexture(const sf::Texture& t) { m_normalSprite.setTexture(t, true); }
+
+    void setCameras(std::vector<xy::Entity> cameras) { m_cameras = cameras; }
 
 private:
 
@@ -65,7 +68,9 @@ private:
     sf::RenderTexture m_gameSceneBuffer;
     sf::Sprite m_gameSceneSprite;
 
-    xy::ShaderResource m_shaders;
+    xy::ShaderResource& m_shaders;
+
+    std::vector<xy::Entity> m_cameras;
 
     void renderPretty(xy::Scene&, xy::Scene&);
     void renderBasic(xy::Scene&, xy::Scene&);

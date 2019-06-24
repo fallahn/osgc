@@ -102,7 +102,7 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_uiSounds          (m_audioResource),
     m_raceSounds        (m_audioResource),
     m_mapParser         (m_gameScene),
-    m_renderPath        (m_resources),
+    m_renderPath        (m_resources, m_shaders),
     m_playerInput       (sd.localPlayers[0].inputBinding),
     m_state             (Readying)
 {

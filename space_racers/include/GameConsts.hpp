@@ -137,6 +137,11 @@ namespace GameConst
     static const sf::Vector2u MediumBufferSize(960, 540);
     static const sf::Vector2u SmallBufferSize(480u, 270u);
 
+    static const float CamNear = 10.f;
+    static const float CamFar = 2600.f;
+    static const sf::Color SplitScreenBorderColour(255, 255, 255, 100);
+    static const float SplitScreenBorderThickness = 3.f;
+
     static const float LapLineOffset = 40.f;
 
     static const float FenceHeight = 20.f;

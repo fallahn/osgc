@@ -102,7 +102,7 @@ LocalEliminationState::LocalEliminationState(xy::StateStack& ss, xy::State::Cont
     m_uiSounds          (m_audioResource),
     m_raceSounds        (m_audioResource),
     m_mapParser         (m_gameScene),
-    m_renderPath        (m_resources),
+    m_renderPath        (m_resources, m_shaders),
     m_playerInputs      ({ sd.localPlayers[0].inputBinding,sd.localPlayers[1].inputBinding,sd.localPlayers[2].inputBinding,sd.localPlayers[3].inputBinding })
 {
     launchLoadingScreen();
@@ -280,7 +280,7 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
         {
             auto id = data.entity.getComponent<Vehicle>().colourID;
             
-            //count laps and end time trial when done
+            //count laps and end when done
             if (m_sharedData.localPlayers[id].lapCount)
             {
                 m_sharedData.localPlayers[id].lapCount--;
@@ -893,9 +893,10 @@ void LocalEliminationState::spawnVehicle()
         
         entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
         
-
-
-        spawnTrail(entity, GameConst::PlayerColour::Light[i]);
+        //this triggers trail creation
+        auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::Respawned;
+        msg->entity = entity;
 
         m_sharedData.localPlayers[i].lapCount = m_sharedData.gameData.lapCount;
 

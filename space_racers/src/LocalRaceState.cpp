@@ -36,6 +36,7 @@ Copyright 2019 Matt Marchant
 #include "SkidEffectSystem.hpp"
 #include "EngineAudioSystem.hpp"
 #include "SoundEffectsDirector.hpp"
+#include "LapDotSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -76,6 +77,21 @@ namespace
 #include "GlobeShader.inl"
 #include "VehicleShader.inl"
 #include "ShieldShader.inl"
+#include "MenuShader.inl"
+
+    std::array<sf::FloatRect, 2u> splitViewports = 
+    { 
+        sf::FloatRect(0.f, 0.f, 0.5f, 1.f),
+        sf::FloatRect(0.5f, 0.f, 0.5f, 1.f)
+    };
+
+    std::array<sf::FloatRect, 4u> quadViewports =
+    {
+        sf::FloatRect(0.f, 0.f, 0.5f, 0.5f),
+        sf::FloatRect(0.5f, 0.f, 0.5f, 0.5f),
+        sf::FloatRect(0.f, 0.5f, 0.5f, 0.5f),
+        sf::FloatRect(0.5f, 0.5f, 0.5f, 0.5f)
+    };
 }
 
 LocalRaceState::LocalRaceState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -87,8 +103,8 @@ LocalRaceState::LocalRaceState(xy::StateStack& ss, xy::State::Context ctx, Share
     m_uiSounds          (m_audioResource),
     m_raceSounds        (m_audioResource),
     m_mapParser         (m_gameScene),
-    m_renderPath        (m_resources),
-    m_playerInput       (sd.localPlayers[0].inputBinding),
+    m_renderPath        (m_resources, m_shaders),
+    m_playerInputs      ({ sd.localPlayers[0].inputBinding, sd.localPlayers[1].inputBinding, sd.localPlayers[2].inputBinding, sd.localPlayers[3].inputBinding }),
     m_state             (Readying)
 {
     launchLoadingScreen();
@@ -144,7 +160,11 @@ bool LocalRaceState::handleEvent(const sf::Event& evt)
         }
     }
 
-    m_playerInput.handleEvent(evt);
+    for (auto& ip : m_playerInputs)
+    {
+        ip.handleEvent(evt);
+    }
+
     m_backgroundScene.forwardEvent(evt);
     m_gameScene.forwardEvent(evt);
     m_uiScene.forwardEvent(evt);
@@ -244,21 +264,25 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == VehicleEvent::LapLine)
         {
-            //count laps and end time trial when done
-            m_sharedData.gameData.lapCount--;
+            //count laps and disable vehicle when done
+            auto id = data.entity.getComponent<Vehicle>().colourID;
+
+            if (m_sharedData.localPlayers[id].lapCount)
+            {
+                m_sharedData.localPlayers[id].lapCount--;
+            }
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::LapText;
-            cmd.action = [&](xy::Entity e, float)
+            cmd.action = [&, id](xy::Entity e, float)
             {
-                e.getComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
+                e.getComponent<Nixie>().lowerValue = m_sharedData.localPlayers[id].lapCount;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            if (m_sharedData.gameData.lapCount == 0)
+            if (m_sharedData.localPlayers[id].lapCount == 0)
             {
-                requestStackPush(StateID::Summary);
-                m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
+                m_playerInputs[id].getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
             }
         }
     }
@@ -360,7 +384,11 @@ bool LocalRaceState::update(float dt)
     m_shaders.get(ShaderID::Globe).setUniform("u_time", shaderTime / 100.f);
     m_shaders.get(ShaderID::Asteroid).setUniform("u_time", -shaderTime / 10.f);
 
-    m_playerInput.update(dt);
+    for (auto& ip : m_playerInputs)
+    {
+        ip.update(dt);
+    }
+
     m_backgroundScene.update(dt);
     m_gameScene.update(dt);
     m_uiScene.update(dt);
@@ -423,6 +451,7 @@ void LocalRaceState::initScene()
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<NixieSystem>(mb);
+    m_uiScene.addSystem<LapDotSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
@@ -465,6 +494,8 @@ void LocalRaceState::loadResources()
     m_textureIDs[TextureID::Game::LapLine] = m_resources.load<sf::Texture>("assets/images/lapline.png");
     m_textureIDs[TextureID::Game::NixieSheet] = m_resources.load<sf::Texture>("assets/images/nixie_sheet.png");
     m_textureIDs[TextureID::Game::LapCounter] = m_resources.load<sf::Texture>("assets/images/laps.png");
+    m_textureIDs[TextureID::Game::LapProgress] = m_resources.load<sf::Texture>("assets/images/play_bar.png");
+    m_textureIDs[TextureID::Game::LapPoint] = m_resources.load<sf::Texture>("assets/images/ui_point.png");
     m_textureIDs[TextureID::Game::Shield] = m_resources.load<sf::Texture>("assets/images/shield.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]).setRepeated(true);
 
@@ -496,6 +527,7 @@ void LocalRaceState::loadResources()
     m_shaders.preload(ShaderID::Asteroid, GlobeFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Vehicle, VehicleVertex, VehicleFrag);
     m_shaders.preload(ShaderID::Trail, VehicleTrail, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Lightbar, LightbarFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Shield, ShieldFragment, sf::Shader::Fragment);
 
     //only set these once if we can help it - no access to uniform IDs
@@ -550,23 +582,12 @@ bool LocalRaceState::loadMap()
     camEnt.addComponent<CameraTarget>();
     camEnt.addComponent<xy::AudioListener>();
 
-    auto backgroundEnt = m_gameScene.createEntity();
-    backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
-    backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
-    backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    if (m_sharedData.useBloom)
-    {
-        backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
-        backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_renderPath.getNormalBuffer());
-        backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    }
-    backgroundEnt.addComponent<xy::Sprite>(m_renderPath.getBackgroundBuffer());
-    camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
+    //background entity isn't created until we know how many cameras will exist (see spawnVehicle())
 
     auto view = getContext().defaultView;
     float fov = Camera3D::calcFOV(view.getSize().y);
     float ratio = view.getSize().x / view.getSize().y;
-    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 10.f, Camera3D::depth + 2600.f);
+    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
 
     m_gameScene.setActiveCamera(camEnt);
     m_gameScene.setActiveListener(camEnt);
@@ -726,6 +747,29 @@ void LocalRaceState::buildUI()
     entity.addComponent<Nixie>().lowerValue = m_sharedData.gameData.lapCount;
     entity.getComponent<Nixie>().digitCount = 2;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LapText;
+
+    //lapline
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y - GameConst::LapLineOffset);
+    entity.addComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapProgress]));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    float scale = xy::DefaultSceneSize.x / bounds.width;
+    entity.getComponent<xy::Transform>().setScale(scale, 1.f);
+}
+
+void LocalRaceState::addLapPoint(xy::Entity vehicle, sf::Color colour)
+{
+    auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y - (GameConst::LapLineOffset - 8.f));
+    entity.addComponent<xy::Drawable>().setDepth(1); //TODO each one needs own depth?
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Lightbar));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::LapPoint])).setColour(colour);
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<LapDot>().parent = vehicle;
+    entity.getComponent<LapDot>().trackLength = m_mapParser.getTrackLength();
 }
 
 void LocalRaceState::spawnVehicle()
@@ -735,120 +779,250 @@ void LocalRaceState::spawnVehicle()
     xy::EmitterSettings smokeSettings;
     smokeSettings.loadFromFile("assets/particles/skidpuff.xyp", m_resources);
 
+    std::vector<xy::Entity> cameras; //this holds any camera ents created for human players
+
     //spawn vehicle
-    auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(position);
-    entity.getComponent<xy::Transform>().setRotation(rotation);
-    entity.addComponent<InverseRotation>();
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
-    entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
-    entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
-    entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
-    entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[0]);
-    entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[0].vehicle];
-    entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[0].vehicle);
-    entity.getComponent<Vehicle>().colourID = 0;
-    //TODO we should probably get this from the server, but it might not matter
-    //as the server is the final arbiter in laps counted anyway
-    entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
-    entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
-
-    entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
-    entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::Vehicle;
-
-    switch (entity.getComponent<Vehicle>().type)
+    for (auto i = 0u; i < 4u; ++i)
     {
-    default:
-    case Vehicle::Car:
-        entity.getComponent<Vehicle>().settings = Definition::car;
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
-        entity.addComponent<xy::ParticleEmitter>().settings = smokeSettings;
-        entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("car");
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.getComponent<xy::Transform>().setRotation(rotation);
+
+        sf::Transform offsetTransform;
+        offsetTransform.rotate(rotation);
+        auto offset = offsetTransform.transformPoint(GameConst::SpawnPositions[i]);
+        entity.getComponent<xy::Transform>().move(offset);
+
+        entity.addComponent<InverseRotation>();
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth);
+        entity.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Vehicle));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseMap");
+        entity.getComponent<xy::Drawable>().bindUniform("u_specularMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleSpecular]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleNeon]));
+        entity.getComponent<xy::Drawable>().bindUniform("u_neonColour", GameConst::PlayerColour::Light[i]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_lightRotationMatrix", entity.getComponent<InverseRotation>().matrix.getMatrix());
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Game::Car + m_sharedData.localPlayers[i].vehicle];
+        entity.addComponent<Vehicle>().type = static_cast<Vehicle::Type>(m_sharedData.localPlayers[i].vehicle);
+        entity.getComponent<Vehicle>().colourID = i;
+        entity.getComponent<Vehicle>().waypointCount = m_mapParser.getWaypointCount();
+        entity.getComponent<Vehicle>().client = false; //technically true but we want to be authorative as there's no server
+
+        entity.addComponent<CollisionObject>().type = CollisionObject::Vehicle;
+        entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Vehicle);
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::Vehicle;
+
+        switch (entity.getComponent<Vehicle>().type)
         {
-            auto skidEntity = m_gameScene.createEntity();
-            skidEntity.addComponent<xy::Transform>();
-            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
-            skidEntity.addComponent<SkidEffect>().parent = entity;
+        default:
+        case Vehicle::Car:
+            entity.getComponent<Vehicle>().settings = Definition::car;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::CarPoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::CarSize);
+            entity.addComponent<xy::ParticleEmitter>().settings = smokeSettings;
+            entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("car");
+            {
+                auto skidEntity = m_gameScene.createEntity();
+                skidEntity.addComponent<xy::Transform>();
+                skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+                skidEntity.addComponent<SkidEffect>().parent = entity;
+            }
+            break;
+        case Vehicle::Bike:
+            entity.getComponent<Vehicle>().settings = Definition::bike;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
+            entity.addComponent<xy::ParticleEmitter>().settings = smokeSettings;
+            entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("bike");
+            {
+                auto skidEntity = m_gameScene.createEntity();
+                skidEntity.addComponent<xy::Transform>();
+                skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
+                skidEntity.addComponent<SkidEffect>().parent = entity;
+                skidEntity.getComponent<SkidEffect>().wheelCount = 1;
+            }
+            break;
+        case Vehicle::Ship:
+            entity.getComponent<Vehicle>().settings = Definition::ship;
+            entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
+            entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
+            entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("ship");
+            break;
         }
-        break;
-    case Vehicle::Bike:
-        entity.getComponent<Vehicle>().settings = Definition::bike;
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::BikePoints);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::BikeSize);
-        entity.addComponent<xy::ParticleEmitter>().settings = smokeSettings;
-        entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("bike");
+        auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
+        entity.getComponent<xy::AudioEmitter>().play();
+        entity.addComponent<EngineAudio>();
+
+        auto shadowEnt = m_gameScene.createEntity();
+        shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
+        shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 2); //make sure renders below trail
+        shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleShadow]));
+        shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
+        shadowEnt.addComponent<xy::Callback>().active = true;
+        shadowEnt.getComponent<xy::Callback>().function =
+            [entity](xy::Entity thisEnt, float)
         {
-            auto skidEntity = m_gameScene.createEntity();
-            skidEntity.addComponent<xy::Transform>();
-            skidEntity.addComponent<xy::Drawable>().setDepth(GameConst::TrackRenderDepth + 1);
-            skidEntity.addComponent<SkidEffect>().parent = entity;
-            skidEntity.getComponent<SkidEffect>().wheelCount = 1;
+            auto& thisTx = thisEnt.getComponent<xy::Transform>();
+            const auto& thatTx = entity.getComponent<xy::Transform>();
+
+            thisTx.setPosition(thatTx.getPosition() + sf::Vector2f(-10.f, 10.f)); //TODO larger shadow dist for ships
+            thisTx.setRotation(thatTx.getRotation());
+            thisTx.setScale(thatTx.getScale());
+        };
+
+        auto shieldEnt = m_gameScene.createEntity();
+        shieldEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        shieldEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
+        shieldEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+        shieldEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Shield));
+        shieldEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        shieldEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]));
+        bounds = shieldEnt.getComponent<xy::Sprite>().getTextureBounds();
+        shieldEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        shieldEnt.addComponent<xy::Callback>().active = true;
+        shieldEnt.getComponent<xy::Callback>().function =
+            [entity](xy::Entity e, float)
+        {
+            const auto& vehicle = entity.getComponent<Vehicle>();
+            float amount = std::min(std::max(0.f, vehicle.invincibleTime / GameConst::InvincibleTime), 1.f);
+
+            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(amount * 255.f));
+            e.getComponent<xy::Sprite>().setColour(c);
+            e.getComponent<xy::Transform>().setScale(amount, amount);
+            e.getComponent<xy::Transform>().setRotation(-entity.getComponent<xy::Transform>().getRotation());
+        };
+
+        entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
+
+        m_sharedData.localPlayers[i].lapCount = m_sharedData.gameData.lapCount;
+
+        if (m_sharedData.localPlayers[i].cpu)
+        {
+            entity.addComponent<AIDriver>().target = m_mapParser.getStartPosition().first;
+            entity.getComponent<AIDriver>().skill = static_cast<AIDriver::Skill>(xy::Util::Random::value(AIDriver::Excellent, AIDriver::Bad));
         }
-        break;
-    case Vehicle::Ship:
-        entity.getComponent<Vehicle>().settings = Definition::ship;
-        entity.getComponent<CollisionObject>().applyVertices(GameConst::ShipPoints);
-        entity.getComponent<xy::BroadphaseComponent>().setArea(GameConst::ShipSize);
-        entity.addComponent<xy::AudioEmitter>() = m_raceSounds.getEmitter("ship");
-        break;
+        else
+        {
+            m_playerInputs[i].setPlayerEntity(entity);
+            cameras.push_back(entity);
+        }
+        //cameras.push_back(entity); //TODO move this to human only, above
+
+        //default camera for single player
+        if (i == 0)
+        {
+            auto cameraEntity = m_gameScene.getActiveCamera();
+            cameraEntity.getComponent<CameraTarget>().target = entity;
+        }
+
+        //this triggers trail creation
+        auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
+        msg->type = VehicleEvent::Respawned;
+        msg->entity = entity;
+
+        addLapPoint(entity, GameConst::PlayerColour::Light[i]);
     }
-    auto bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width * GameConst::VehicleCentreOffset, bounds.height / 2.f);
-    entity.getComponent<xy::AudioEmitter>().play();
-    entity.addComponent<EngineAudio>();
 
-    auto shadowEnt = m_gameScene.createEntity();
-    shadowEnt.addComponent<xy::Transform>().setOrigin(entity.getComponent<xy::Transform>().getOrigin());
-    shadowEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth - 2); //make sure renders below trail
-    shadowEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::VehicleShadow]));
-    shadowEnt.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<xy::Sprite>().getTextureRect());
-    shadowEnt.addComponent<xy::Callback>().active = true;
-    shadowEnt.getComponent<xy::Callback>().function =
-        [entity](xy::Entity thisEnt, float)
+    //see how many cameras we got for human players
+    //if there's only one then we don't need to do anything.
+    auto createCamera = [&]()->xy::Entity
     {
-        auto& thisTx = thisEnt.getComponent<xy::Transform>();
-        const auto& thatTx = entity.getComponent<xy::Transform>();
+        xy::Entity entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Camera>().lockRotation(true);
+        entity.addComponent<CameraTarget>();
+        entity.addComponent<Camera3D>();
 
-        thisTx.setPosition(thatTx.getPosition() + sf::Vector2f(-10.f, 10.f)); //TODO larger shadow dist for ships
-        thisTx.setRotation(thatTx.getRotation());
-        thisTx.setScale(thatTx.getScale());
+        return entity;
     };
 
-    auto shieldEnt = m_gameScene.createEntity();
-    shieldEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
-    shieldEnt.addComponent<xy::Drawable>().setDepth(GameConst::VehicleRenderDepth + 1);
-    shieldEnt.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
-    shieldEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Shield));
-    shieldEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    shieldEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Shield]));
-    bounds = shieldEnt.getComponent<xy::Sprite>().getTextureBounds();
-    shieldEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    shieldEnt.addComponent<xy::Callback>().active = true;
-    shieldEnt.getComponent<xy::Callback>().function =
-        [entity](xy::Entity e, float)
+    if (cameras.size() == 2)
     {
-        const auto& vehicle = entity.getComponent<Vehicle>();
-        float amount = std::min(std::max(0.f, vehicle.invincibleTime / GameConst::InvincibleTime), 1.f);
+        //view split vertically
+        sf::Vector2f viewSize(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y);
+        float fov = Camera3D::calcFOV(viewSize.y);
+        float ratio = viewSize.x / viewSize.y;
 
-        sf::Color c(255, 255, 255, static_cast<sf::Uint8>(amount * 255.f));
-        e.getComponent<xy::Sprite>().setColour(c);
-        e.getComponent<xy::Transform>().setScale(amount, amount);
-        e.getComponent<xy::Transform>().setRotation(-entity.getComponent<xy::Transform>().getRotation());
-    };
+        for (auto i = 0u; i < cameras.size(); ++i)
+        {
+            auto camEnt = createCamera();
+            camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
+            camEnt.getComponent<xy::Camera>().setView(viewSize);
+            camEnt.getComponent<xy::Camera>().setViewport(splitViewports[i]);
+            camEnt.getComponent<CameraTarget>().target = cameras[i];
+            camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
+            cameras[i] = camEnt;
+        }
 
-    entity.getComponent<xy::Transform>().addChild(shieldEnt.getComponent<xy::Transform>());
+        //add some borders to the UI
+        auto entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Drawable>().setDepth(-10);
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
+    else if (cameras.size() > 2)
+    {
+        //split into quads. for 3 players
+        //the 4th camera gives a map overview.
+        auto viewSize = xy::DefaultSceneSize / 2.f;
+        float fov = Camera3D::calcFOV(viewSize.y);
+        float ratio = viewSize.x / viewSize.y;
 
-    m_playerInput.setPlayerEntity(entity);
+        for (auto i = 0u; i < cameras.size(); ++i)
+        {
+            auto camEnt = createCamera();
+            camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
+            camEnt.getComponent<xy::Camera>().setView(viewSize);
+            camEnt.getComponent<xy::Camera>().setViewport(quadViewports[i]);
+            camEnt.getComponent<CameraTarget>().target = cameras[i];
+            camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
+            cameras[i] = camEnt;
+        }
 
-    auto cameraEntity = m_gameScene.getActiveCamera();
-    cameraEntity.getComponent<CameraTarget>().target = entity;
+        //add some borders to the UI
+        auto entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Drawable>().setDepth(-10);
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
 
-    spawnTrail(entity, GameConst::PlayerColour::Light[0]);
+        verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f,  GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+        verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
+    else
+    {
+        //there's only one camera so draw fancy background
+        auto backgroundEnt = m_gameScene.createEntity();
+        backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
+        backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
+        backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        if (m_sharedData.useBloom)
+        {
+            backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
+            backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_renderPath.getNormalBuffer());
+            backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        }
+        backgroundEnt.addComponent<xy::Sprite>(m_renderPath.getBackgroundBuffer());
+        
+        auto camEnt = m_gameScene.getActiveCamera();
+        camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
+
+        cameras.clear();
+    }
+
+    m_renderPath.setCameras(cameras);
 }
 
 void LocalRaceState::spawnTrail(xy::Entity parent, sf::Color colour)

@@ -459,6 +459,8 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
     xy::AudioScape audioScape(ar);
     audioScape.loadFromFile("assets/sound/map.xas");
 
+    //NOTE viewProj matrices are now set in the render path class
+
     //electric fences
     const auto& fences = m_fences;
     const auto& fenceTexture = resources.get<sf::Texture>(textureIDs[TextureID::Game::Fence]);
@@ -479,7 +481,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
         entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Sprite3D>(matrixPool).depth = GameConst::FenceHeight;
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
         entity.getComponent<xy::Drawable>().getVertices() = createBillboard(f.start, f.end, entity.getComponent<Sprite3D>().depth, texSize);
@@ -504,7 +506,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
         entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Sprite3D>(matrixPool).depth = GameConst::ChevronHeight;
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
         entity.getComponent<xy::Drawable>().getVertices() = createBillboard(start, end, entity.getComponent<Sprite3D>().depth, texSize);
@@ -526,7 +528,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
         entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Sprite3D>(matrixPool).depth = GameConst::BarrierHeight;
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
         entity.getComponent<xy::Drawable>().getVertices() = createBillboard(start, end, entity.getComponent<Sprite3D>().depth, { xy::Util::Vector::length(end - start), texSize.y });
@@ -547,7 +549,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
         entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Sprite3D>(matrixPool).depth = GameConst::PylonHeight;
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
         entity.getComponent<xy::Drawable>().getVertices() = createPylon(texSize);
@@ -570,7 +572,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
         entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Sprite3D>(matrixPool).depth = GameConst::BollardHeight;
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
         entity.getComponent<xy::Drawable>().getVertices() = createCylinder(GameConst::BollardRadius, texSize, GameConst::BollardHeight);
@@ -590,7 +592,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
     entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<Sprite3D>(matrixPool).depth = 50.f;
-    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     texSize = sf::Vector2f(entity.getComponent<xy::Drawable>().getTexture()->getSize());
@@ -615,7 +617,7 @@ void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::Shad
     entity.getComponent<xy::Drawable>().setShader(&shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<Sprite3D>(matrixPool).depth = texSize.y / 2.f;
-    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    //entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     entity.getComponent<xy::Drawable>().getVertices() = createLapLine();

@@ -124,7 +124,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     {
         m_sharedData.localPlayers[i].inputBinding.controllerID = i;
     }
-
+    //m_sharedData.useBloom = false;
     quitLoadingScreen();
 }
 

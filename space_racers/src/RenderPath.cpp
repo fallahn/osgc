@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "RenderPath.hpp"
 #include "GameConsts.hpp"
 #include "ResourceIDs.hpp"
+#include "Camera3D.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
@@ -34,8 +35,9 @@ namespace
     sf::Clock shaderClock;
 }
 
-RenderPath::RenderPath(xy::ResourceHandler& rh)
-    : m_blendShader(nullptr)
+RenderPath::RenderPath(xy::ResourceHandler& rh, xy::ShaderResource& sr)
+    : m_shaders     (sr),
+    m_blendShader   (nullptr)
 {
     auto stars = rh.load<sf::Texture>("assets/images/stars.png");
     m_backgroundSprite.setTexture(rh.get<sf::Texture>(stars), true);
@@ -122,24 +124,48 @@ void RenderPath::updateView(sf::Vector2f camPosition)
 //private
 void RenderPath::renderPretty(xy::Scene& backgroundScene, xy::Scene& gameScene)
 {
-    //draw the background first for distort effect
-    m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
-    m_backgroundBuffer.clear();
-    m_backgroundBuffer.draw(m_backgroundSprite);
-    m_backgroundBuffer.draw(backgroundScene);
-    m_backgroundBuffer.display();
+    if (m_cameras.empty())
+    {
+        //draw the background first for distort effect
+        m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
+        m_backgroundBuffer.clear();
+        m_backgroundBuffer.draw(m_backgroundSprite);
+        m_backgroundBuffer.draw(backgroundScene);
+        m_backgroundBuffer.display();
 
-    //normal map for distortion of background
-    m_normalBuffer.clear({ 127,127,255 });
-    m_normalBuffer.draw(m_normalSprite);
-    m_normalBuffer.display();
+        //normal map for distortion of background
+        m_normalBuffer.clear({ 127,127,255 });
+        m_normalBuffer.draw(m_normalSprite);
+        m_normalBuffer.display();
+    }
 
     //draws the full scene including distorted background
     //m_gameSceneBuffer.clear();
+    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+
     m_gameSceneBuffer.setActive(true);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_gameSceneBuffer.draw(gameScene);
+    if (m_cameras.empty())
+    {
+        auto cam = gameScene.getActiveCamera();
+        shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+        m_gameSceneBuffer.draw(gameScene);
+    }
+    else
+    {
+        m_gameSceneBuffer.setView(m_gameSceneBuffer.getDefaultView());
+        m_gameSceneBuffer.draw(m_backgroundSprite);
+        m_gameSceneBuffer.draw(backgroundScene);
+
+        for (auto cam : m_cameras)
+        {
+            shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+
+            gameScene.setActiveCamera(cam);
+            m_gameSceneBuffer.draw(gameScene);
+        }
+    }
     m_gameSceneBuffer.display();
 
     //extract the brightest points to the neon buffer
@@ -170,15 +196,36 @@ void RenderPath::renderPretty(xy::Scene& backgroundScene, xy::Scene& gameScene)
 
 void RenderPath::renderBasic(xy::Scene& backgroundScene, xy::Scene& gameScene)
 {
-    m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
-    m_backgroundBuffer.clear();
-    m_backgroundBuffer.draw(m_backgroundSprite);
-    m_backgroundBuffer.draw(backgroundScene);
-    m_backgroundBuffer.display();
+    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+    if (m_cameras.empty())
+    {
+        auto cam = gameScene.getActiveCamera();
+        shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
 
-    m_gameSceneBuffer.clear();
-    m_gameSceneBuffer.draw(gameScene);
-    m_gameSceneBuffer.display();
+        m_backgroundBuffer.setView(m_backgroundBuffer.getDefaultView());
+        m_backgroundBuffer.clear();
+        m_backgroundBuffer.draw(m_backgroundSprite);
+        m_backgroundBuffer.draw(backgroundScene);
+        m_backgroundBuffer.display();
+
+        m_gameSceneBuffer.clear();
+        m_gameSceneBuffer.draw(gameScene);
+        m_gameSceneBuffer.display();
+    }
+    else
+    {
+        m_gameSceneBuffer.setView(m_gameSceneBuffer.getDefaultView());
+        m_gameSceneBuffer.draw(m_backgroundSprite);
+        m_gameSceneBuffer.draw(backgroundScene);
+
+        for (auto cam : m_cameras)
+        {
+            shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+
+            gameScene.setActiveCamera(cam);
+            m_gameSceneBuffer.draw(gameScene);
+        }
+    }
 }
 
 void RenderPath::draw(sf::RenderTarget& rt, sf::RenderStates states) const
