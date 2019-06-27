@@ -80,15 +80,21 @@ void InputPreviewSystem::process(float dt)
     {
         auto& preview = entity.getComponent<InputPreview>();
 
-        if (sf::Joystick::isConnected(preview.inputBinding.controllerID))
+        if (sf::Joystick::isConnected(preview.inputBinding.controllerID)
+            && !((sf::Keyboard::isKeyPressed(preview.inputBinding.keys[InputBinding::Left]) || sf::Keyboard::isKeyPressed(preview.inputBinding.keys[InputBinding::Right]))))
         {
-            preview.targetRotation = 
-                std::min(RotationAmount, 
-                    std::max(preview.targetRotation + (RotationAmount * sf::Joystick::getAxisPosition(preview.inputBinding.controllerID, sf::Joystick::X)), -RotationAmount));
+            float stick = RotationAmount * (sf::Joystick::getAxisPosition(preview.inputBinding.controllerID, sf::Joystick::X) / 100.f);
 
-            preview.targetRotation =
-                std::min(RotationAmount,
-                    std::max(preview.targetRotation + (RotationAmount * sf::Joystick::getAxisPosition(preview.inputBinding.controllerID, sf::Joystick::PovX)), -RotationAmount));
+            preview.targetRotation = 
+                -std::min(RotationAmount, preview.targetRotation -
+                    std::max(preview.targetRotation + stick, -RotationAmount));
+
+            //float hat = RotationAmount * (sf::Joystick::getAxisPosition(preview.inputBinding.controllerID, sf::Joystick::PovX) / 100.f);
+            //std::cout << stick << "\n";
+
+            /*preview.targetRotation =
+                std::min(RotationAmount, preview.targetRotation -
+                    std::max(preview.targetRotation + hat, -RotationAmount));*/
         }
 
         auto& tx = entity.getComponent<xy::Transform>();

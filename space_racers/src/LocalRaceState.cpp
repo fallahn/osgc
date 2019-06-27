@@ -889,13 +889,6 @@ void LocalRaceState::spawnVehicle()
         }
         //cameras.push_back(entity); //TODO move this to human only, above
 
-        //default camera for single player
-        if (i == 0)
-        {
-            auto cameraEntity = m_gameScene.getActiveCamera();
-            cameraEntity.getComponent<CameraTarget>().target = entity;
-        }
-
         //this triggers trail creation
         auto* msg = getContext().appInstance.getMessageBus().post<VehicleEvent>(MessageID::VehicleMessage);
         msg->type = VehicleEvent::Respawned;
@@ -952,7 +945,34 @@ void LocalRaceState::spawnVehicle()
         m_gameScene.setActiveListener(entity);
     };
 
-    if (cameras.size() == 2)
+    switch (cameras.size())
+    {
+    default: break;
+    case 1:
+    {
+        //there's only one camera so draw fancy background
+        auto backgroundEnt = m_gameScene.createEntity();
+        backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
+        backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
+        backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
+        if (m_sharedData.useBloom)
+        {
+            backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
+            backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_renderPath.getNormalBuffer());
+            backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        }
+        backgroundEnt.addComponent<xy::Sprite>(m_renderPath.getBackgroundBuffer());
+
+        createBackground(m_backgroundScene);
+
+        auto camEnt = m_gameScene.getActiveCamera();
+        camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
+        camEnt.getComponent<CameraTarget>().target = cameras[0];
+
+        cameras.clear();
+    }
+    break;
+    case 2:
     {
         //view split vertically
         sf::Vector2f viewSize(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y);
@@ -985,97 +1005,79 @@ void LocalRaceState::spawnVehicle()
 
         createBackground(m_gameScene);
         setListener();
+        break;
     }
-    else if (cameras.size() > 2)
-    {
-        //split into quads. for 3 players
-        //the 4th camera gives a map overview.
-        auto viewSize = xy::DefaultSceneSize / 1.5f;
-        float fov = Camera3D::calcFOV(viewSize.y);
-        float ratio = viewSize.x / viewSize.y;
-
-        for (auto i = 0u; i < cameras.size(); ++i)
+    case 3:
+    case 4:
         {
-            auto camEnt = createCamera();
-            camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
-            camEnt.getComponent<xy::Camera>().setView(viewSize);
-            camEnt.getComponent<xy::Camera>().setViewport(quadViewports[i]);
-            camEnt.getComponent<CameraTarget>().target = cameras[i];
-            camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
-            cameras[i] = camEnt;
+            //split into quads. for 3 players
+            //the 4th camera gives a map overview.
+            auto viewSize = xy::DefaultSceneSize / 1.5f;
+            float fov = Camera3D::calcFOV(viewSize.y);
+            float ratio = viewSize.x / viewSize.y;
 
-            addLapCounter(i);
-        }
+            for (auto i = 0u; i < cameras.size(); ++i)
+            {
+                auto camEnt = createCamera();
+                camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
+                camEnt.getComponent<xy::Camera>().setView(viewSize);
+                camEnt.getComponent<xy::Camera>().setViewport(quadViewports[i]);
+                camEnt.getComponent<CameraTarget>().target = cameras[i];
+                camEnt.getComponent<CameraTarget>().lastTarget = cameras[i];
+                cameras[i] = camEnt;
 
-        //map view
-        if (cameras.size() == 3)
-        {
-            //ideally we want to move further away
-            //but the 3D sprite system has a fixed cam distance...
-            auto mapSize = m_mapParser.getSize();
-            if (mapSize.x > mapSize.y)
-            {
-                viewSize.x = mapSize.x + 1500.f;
-                viewSize.y = viewSize.x / ratio;
-            }
-            else
-            {
-                viewSize.y = mapSize.y + 1500.f;
-                viewSize.x = viewSize.y * ratio;
+                addLapCounter(i);
             }
 
-            fov = Camera3D::calcFOV(viewSize.y);
+            //map view
+            if (cameras.size() == 3)
+            {
+                //ideally we want to move further away
+                //but the 3D sprite system has a fixed cam distance...
+                auto mapSize = m_mapParser.getSize();
+                if (mapSize.x > mapSize.y)
+                {
+                    viewSize.x = mapSize.x + 1500.f;
+                    viewSize.y = viewSize.x / ratio;
+                }
+                else
+                {
+                    viewSize.y = mapSize.y + 1500.f;
+                    viewSize.x = viewSize.y * ratio;
+                }
 
-            auto camEnt = createCamera();
-            camEnt.getComponent<xy::Transform>().setPosition(mapSize / 2.f);
-            camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
-            camEnt.getComponent<xy::Camera>().setView(viewSize);
-            camEnt.getComponent<xy::Camera>().setViewport(quadViewports[3]);
-            cameras.push_back(camEnt);
+                fov = Camera3D::calcFOV(viewSize.y);
+
+                auto camEnt = createCamera();
+                camEnt.getComponent<xy::Transform>().setPosition(mapSize / 2.f);
+                camEnt.getComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, GameConst::CamNear, Camera3D::depth + GameConst::CamFar);
+                camEnt.getComponent<xy::Camera>().setView(viewSize);
+                camEnt.getComponent<xy::Camera>().setViewport(quadViewports[3]);
+                cameras.push_back(camEnt);
+            }
+
+            //add some borders to the UI
+            auto entity = m_uiScene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+            entity.addComponent<xy::Drawable>().setDepth(-10);
+            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+            verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+            verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+            verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
+
+            verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+            verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+            verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f, GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+            verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
+            entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+            createBackground(m_gameScene);
+            setListener();
         }
+        break;
 
-        //add some borders to the UI
-        auto entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.addComponent<xy::Drawable>().setDepth(-10);
-        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, -xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(-GameConst::SplitScreenBorderThickness, xy::DefaultSceneSize.y / 2.f), GameConst::SplitScreenBorderColour);
-
-        verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f, -GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / 2.f,  GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
-        verts.emplace_back(sf::Vector2f(-xy::DefaultSceneSize.x / 2.f, GameConst::SplitScreenBorderThickness), GameConst::SplitScreenBorderColour);
-        entity.getComponent<xy::Drawable>().updateLocalBounds();
-
-        createBackground(m_gameScene);
-        setListener();
     }
-    else
-    {
-        //there's only one camera so draw fancy background
-        auto backgroundEnt = m_gameScene.createEntity();
-        backgroundEnt.addComponent<xy::Transform>().setOrigin(sf::Vector2f(GameConst::LargeBufferSize) / 2.f);
-        backgroundEnt.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundRenderDepth);
-        backgroundEnt.getComponent<xy::Drawable>().setFilterFlags(GameConst::Normal);
-        if (m_sharedData.useBloom)
-        {
-            backgroundEnt.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TrackDistortion));
-            backgroundEnt.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_renderPath.getNormalBuffer());
-            backgroundEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-        }
-        backgroundEnt.addComponent<xy::Sprite>(m_renderPath.getBackgroundBuffer());
-        
-        createBackground(m_backgroundScene);
-
-        auto camEnt = m_gameScene.getActiveCamera();
-        camEnt.getComponent<xy::Transform>().addChild(backgroundEnt.getComponent<xy::Transform>());
-
-        cameras.clear();
-    }
-
     m_renderPath.setCameras(cameras);
 }
 

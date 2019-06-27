@@ -90,6 +90,11 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     launchLoadingScreen();
 
+    for (auto i = 0; i < 4; ++i)
+    {
+        m_sharedData.localPlayers[i].inputBinding.controllerID = i;
+    }
+
     //make sure any previous sessions are tidied up
     m_sharedData.playerInfo.clear();
     if (sd.netClient)
@@ -121,10 +126,6 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         });
 
 
-    for (auto i = 0; i < 4; ++i)
-    {
-        m_sharedData.localPlayers[i].inputBinding.controllerID = i;
-    }
     //m_sharedData.useBloom = false;
     quitLoadingScreen();
 }
@@ -203,22 +204,24 @@ void MenuState::initScene()
     m_scene.addPostProcess<xy::PostChromeAb>();
 
     //this will do until we get off our arse and make
-    //a proper keybind menu
-    auto& binding = m_sharedData.localPlayers[1].inputBinding;
+    //a proper keybind menu - as controllers are defaulted
+    //to players one and two let's bind keys to 3 and 4
+    auto& binding = m_sharedData.localPlayers[3].inputBinding;
     binding.keys[InputBinding::Accelerate] = sf::Keyboard::Up;
-    binding.keys[InputBinding::Brake] = sf::Keyboard::Down;
+    binding.keys[InputBinding::Brake] = sf::Keyboard::Num0;
     binding.keys[InputBinding::Left] = sf::Keyboard::Left;
     binding.keys[InputBinding::Right] = sf::Keyboard::Right;
     binding.keys[InputBinding::Reverse] = sf::Keyboard::Down;
 
-    auto& bindingTwo = m_sharedData.localPlayers[2].inputBinding;
+    //and set these to nothing for now
+    auto& bindingTwo = m_sharedData.localPlayers[0].inputBinding;
     bindingTwo.keys[InputBinding::Accelerate] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Brake] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Left] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Right] = sf::Keyboard::Unknown;
     bindingTwo.keys[InputBinding::Reverse] = sf::Keyboard::Unknown;
 
-    auto& bindingThree = m_sharedData.localPlayers[3].inputBinding;
+    auto& bindingThree = m_sharedData.localPlayers[1].inputBinding;
     bindingThree.keys[InputBinding::Accelerate] = sf::Keyboard::Unknown;
     bindingThree.keys[InputBinding::Brake] = sf::Keyboard::Unknown;
     bindingThree.keys[InputBinding::Left] = sf::Keyboard::Unknown;
@@ -800,6 +803,9 @@ void MenuState::buildTimeTrialMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
                 {
                     requestStackClear();
                     requestStackPush(StateID::TimeTrial);
+
+                    //there's only one vehicle so default the keys just in case
+                    m_sharedData.localPlayers[0].inputBinding = {};
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
