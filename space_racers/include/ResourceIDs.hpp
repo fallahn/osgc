@@ -67,7 +67,7 @@ namespace TextureID
             Stars, StarsFar, StarsMid, StarsNear,
             PlanetDiffuse, PlanetNormal,
             MenuBackground, MenuBackgroundWide, TrackSelect,
-            LapFrame, LapCounter, LightBar,
+            LapFrame, LapCounter, LightBar, CockWheel,
 
             TimeTrialText, LocalPlayText,
 

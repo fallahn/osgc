@@ -16,6 +16,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/InputPreviewSystem.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationComponent.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LapDotSystem.cpp

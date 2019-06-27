@@ -35,6 +35,7 @@ source distribution.
 #include "VehicleSelectSystem.hpp"
 #include "GameConsts.hpp"
 #include "DigitSystem.hpp"
+#include "InputPreviewSystem.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -146,6 +147,7 @@ bool MenuState::handleEvent(const sf::Event& evt)
 
     updateTextInput(evt);
 
+    m_scene.getSystem<InputPreviewSystem>().handleEvent(evt);
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
 
@@ -190,6 +192,7 @@ void MenuState::initScene()
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<VehicleSelectSystem>(mb);
     m_scene.addSystem<DigitSystem>(mb);
+    m_scene.addSystem<InputPreviewSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
@@ -238,6 +241,7 @@ void MenuState::loadResources()
     m_textureIDs[TextureID::Menu::LightBar] = m_resources.load<sf::Texture>("assets/images/vehicle_select_highlight.png");
     m_textureIDs[TextureID::Menu::TimeTrialText] = m_resources.load<sf::Texture>("assets/images/time_trial_text.png");
     m_textureIDs[TextureID::Menu::LocalPlayText] = m_resources.load<sf::Texture>("assets/images/local_play_text.png");
+    m_textureIDs[TextureID::Menu::CockWheel] = m_resources.load<sf::Texture>("assets/images/cock_wheel.png");
 
     m_textureIDs[TextureID::Menu::StarsFar] = m_resources.load<sf::Texture>("assets/images/stars_far.png");
     m_textureIDs[TextureID::Menu::StarsMid] = m_resources.load<sf::Texture>("assets/images/stars_mid.png");
@@ -1335,6 +1339,15 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
         lightEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::LightBar]));
         lightEnt.getComponent<xy::Sprite>().setColour(GameConst::PlayerColour::Light[i]);
         entity.getComponent<xy::Transform>().addChild(lightEnt.getComponent<xy::Transform>());
+
+        auto wheelEnt = m_scene.createEntity();
+        wheelEnt.addComponent<xy::Transform>().setPosition(120.f, 300.f);
+        wheelEnt.addComponent<xy::Drawable>().setDepth(MenuConst::ButtonDepth + 1);
+        wheelEnt.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::CockWheel]));
+        wheelEnt.addComponent<InputPreview>().inputBinding = m_sharedData.localPlayers[i].inputBinding;
+        bounds = wheelEnt.getComponent<xy::Sprite>().getTextureBounds();
+        wheelEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        entity.getComponent<xy::Transform>().addChild(wheelEnt.getComponent<xy::Transform>());
     }
 
     //text entity

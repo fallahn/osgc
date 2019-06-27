@@ -255,6 +255,9 @@
     <ClInclude Include="include\SplitScreenDirector.hpp">
       <Filter>Header Files\directors</Filter>
     </ClInclude>
+    <ClInclude Include="include\InputPreviewSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -400,6 +403,9 @@
     </ClCompile>
     <ClCompile Include="src\SplitScreenDirector.cpp">
       <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputPreviewSystem.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

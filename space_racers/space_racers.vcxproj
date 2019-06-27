@@ -168,6 +168,7 @@
     <ClInclude Include="include\GameModes.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
+    <ClInclude Include="include\InputPreviewSystem.hpp" />
     <ClInclude Include="include\InverseRotationSystem.hpp" />
     <ClInclude Include="include\LapDotSystem.hpp" />
     <ClInclude Include="include\LightningSystem.hpp" />
@@ -231,6 +232,7 @@
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\ErrorState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
+    <ClCompile Include="src\InputPreviewSystem.cpp" />
     <ClCompile Include="src\LapDotSystem.cpp" />
     <ClCompile Include="src\LightningSystem.cpp" />
     <ClCompile Include="src\LoadingScreen.cpp" />
