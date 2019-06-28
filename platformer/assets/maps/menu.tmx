@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" name="gearboy" tilewidth="16" tileheight="16" tilecount="45" columns="9">
+  <image source="../images/tiles/gearboy.png" width="144" height="80"/>
+ </tileset>
+ <layer id="1" name="Tile Layer 1" width="30" height="17">
+  <data encoding="base64" compression="zlib">
+   eJzNlMsOgyAQRVl1oa2aoK7Urmqr//+BHRNJxhscBqmmixMMoxwuD0tjTJnInahWHspvZqImGsIyatZizUKtYN6bp95C3wRerDdmOweck3vO1sxL1vwEL/rRncPa/NKL44ZajXfPIfVpvNj3z97Zw5V5pTOW6sVcGq9re2JQvn80L85rYSTenjXALJI39oxxr+ZupXonAemuO6+72x3bp6fCG/qnaL0vtl6fg9420msjvb7xpLw2sC9X8QWaYy6y
+  </data>
+ </layer>
+</map>
