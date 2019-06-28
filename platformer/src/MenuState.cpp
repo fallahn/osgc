@@ -111,7 +111,13 @@ void MenuState::loadResources()
 
 void MenuState::buildBackground()
 {
-    //TODO check progress and load background correspondingly
+    //TODO check player/game progress and load background correspondingly
+    if (m_mapLoader.load("menu.tmx"))
+    {
+        const auto& layers = m_mapLoader.getLayers();
+
+        //for each layer create a drawable in the scene
+    }
 }
 
 void MenuState::buildMenu()

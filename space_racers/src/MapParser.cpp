@@ -413,6 +413,9 @@ bool MapParser::load(const std::string& path)
 
 void MapParser::renderLayers(std::array<sf::RenderTexture, 2u>& targets) const
 {
+    //TODO instead of rendering HUGE textures which eat all the VRAM, use the
+    //tilemap shader implemented in the platformer project
+
     //tileset data
     TilesetInfo tsi;
     tsi.tileSets = &m_map.getTilesets();

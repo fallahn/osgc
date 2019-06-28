@@ -27,6 +27,8 @@ source distribution.
 
 #pragma once
 
+#include "MapLoader.hpp"
+
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
@@ -53,6 +55,8 @@ private:
 
     xy::ShaderResource m_shaders;
     xy::ResourceHandler m_resources;
+
+    MapLoader m_mapLoader;
 
     void initScene();
     void loadResources();
