@@ -27,6 +27,8 @@ Copyright 2019 Matt Marchant
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/TileLayer.hpp>
 
+#include <map>
+
 MapLoader::MapLoader()
 {
 
@@ -58,7 +60,7 @@ bool MapLoader::load(const std::string& file)
                 else
                 {
                     std::unique_ptr<sf::Texture> texture = std::make_unique<sf::Texture>();
-                    if (texture->loadFromFile(/*xy::FileSystem::getResourcePath() + */path))
+                    if (texture->loadFromFile(path))
                     {
                         tsTextures.insert(std::make_pair(&ts, texture.get()));
                         m_tilesets.insert(std::make_pair(path, std::move(texture)));
@@ -83,10 +85,67 @@ bool MapLoader::load(const std::string& file)
                 auto& mapLayer = m_mapLayers.emplace_back();
 
                 //create the index map for the layer
+                std::uint32_t firstID = std::numeric_limits<std::uint32_t>::max();
+
+                const auto& tiles = tileLayer.getTiles();
+                std::vector<sf::Uint8> tileIDs(tiles.size());
+
+                for (auto i = 0u; i < tiles.size(); ++i)
+                {
+                    //REMEMBER tmx tile IDs start at 1 (0 is an empty tile)
+                    //we'll account for this in the tile shader.
+                    tileIDs[i] = static_cast<sf::Uint8>(tiles[i].ID);
+
+                    if (tiles[i].ID < firstID)
+                    {
+                        firstID = std::max(1u, tiles[i].ID);
+                    }
+                }
 
                 //find the tile set and its associated texture
+                auto result = std::find_if(tsTextures.begin(), tsTextures.end(),
+                    [firstID](const std::pair<const tmx::Tileset*, sf::Texture*>& p)
+                    {
+                        return (firstID >= p.first->getFirstGID() && firstID <= p.first->getLastGID());
+                    });
+
+                if (result == tsTextures.end())
+                {
+                    xy::Logger::log("Missing tile set for layer..?", xy::Logger::Type::Error);
+                    return false;
+                }
+
+                auto [tileset, texture] = *result;
+
+
+                //correct the tile ID is necessary and load into a texture via an image
+                auto layerSize = map.getTileCount();
+
+                sf::Image indexImage;
+                indexImage.create(layerSize.x, layerSize.y);
+
+                for (auto i = 0u; i < tileIDs.size(); ++i)
+                {
+                    //if the layer tile set ID doesn't start at 1 we need to subtract the
+                    //min ID from the tile ID before uploading it to the index texture
+                    tileIDs[i] -= (tileset->getFirstGID() - 1);
+
+                    auto x = i % layerSize.x;
+                    auto y = i / layerSize.x;
+
+                    indexImage.setPixel(x, y, { tileIDs[i], 255,255 });
+                }
+
+                m_indexMaps.emplace_back() = std::make_unique<sf::Texture>();
+                m_indexMaps.back()->loadFromImage(indexImage);
+                mapLayer.indexMap = m_indexMaps.back().get();
+                mapLayer.tileSet = texture;
 
                 //fill out other layer data
+                mapLayer.layerSize = sf::Vector2f(static_cast<float>(layerSize.x * tileset->getTileSize().x),
+                    static_cast<float>(layerSize.y * tileset->getTileSize().y));
+                mapLayer.tileSetSize = { static_cast<float>(texture->getSize().x / tileset->getTileSize().x),
+                    static_cast<float>(texture->getSize().y / tileset->getTileSize().y) };
             }
         }
 

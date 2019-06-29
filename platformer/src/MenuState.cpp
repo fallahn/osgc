@@ -27,6 +27,7 @@ source distribution.
 
 #include "MenuState.hpp"
 #include "StateIDs.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -36,6 +37,7 @@ source distribution.
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/detail/Operators.hpp>
 
 namespace
 {
@@ -106,17 +108,42 @@ void MenuState::initScene()
 
 void MenuState::loadResources()
 {
-
+    m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
 }
 
 void MenuState::buildBackground()
 {
     //TODO check player/game progress and load background correspondingly
     if (m_mapLoader.load("menu.tmx"))
+    //m_mapLoader.load("menu.tmx");
     {
         const auto& layers = m_mapLoader.getLayers();
 
         //for each layer create a drawable in the scene
+        std::int32_t startDepth = -50;
+        for (const auto& layer : layers)
+        {
+            auto entity = m_backgroundScene.createEntity();
+            entity.addComponent<xy::Transform>();
+            entity.addComponent<xy::Drawable>().setDepth(startDepth++);
+            entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);
+            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileMap));
+            entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_indexMap");
+            entity.getComponent<xy::Drawable>().bindUniform("u_tileSet", *layer.tileSet);
+            entity.getComponent<xy::Drawable>().bindUniform("u_indexSize", sf::Vector2f(layer.indexMap->getSize()));
+            entity.getComponent<xy::Drawable>().bindUniform("u_tileCount", layer.tileSetSize);
+
+            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            sf::Vector2f texCoords(layer.indexMap->getSize());
+
+            verts.emplace_back(sf::Vector2f(), sf::Vector2f());
+            verts.emplace_back(sf::Vector2f(layer.layerSize.x, 0.f), sf::Vector2f(texCoords.x, 0.f));
+            verts.emplace_back(layer.layerSize, texCoords);
+            verts.emplace_back(sf::Vector2f(0.f, layer.layerSize.y), sf::Vector2f(0.f, texCoords.y));
+
+            entity.getComponent<xy::Drawable>().updateLocalBounds();
+            entity.getComponent<xy::Transform>().setScale(xy::DefaultSceneSize / layer.layerSize);
+        }
     }
 }
 

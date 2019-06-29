@@ -20,10 +20,20 @@ void main()
 
   float index = floor(texture2D(u_indexMap, tilePos).r * 256.0);
 
-  vec2 normalisedTileSize = vec2(1.0) / u_tileCount;
-  vec2 baseTilePos = normalisedTileSize * floor(vec2(mod(index,u_tileCount.x),index / u_tileCount.x)); 
+  //tmx maps start at index 1, 0 is no tile
+  if(index == 0)
+  {
+    gl_FragColor = vec4(0.0);
+  }
+  else
+  {
+    index -= 1.0;
 
-  vec2 internalPos = normalisedTileSize * mod(gl_TexCoord[0].xy * u_indexSize, vec2(1.0));
+    vec2 normalisedTileSize = vec2(1.0) / u_tileCount;
+    vec2 baseTilePos = normalisedTileSize * floor(vec2(mod(index,u_tileCount.x),index / u_tileCount.x)); 
 
-  gl_FragColor = texture2D(u_tileSet, baseTilePos + internalPos);
+    vec2 internalPos = normalisedTileSize * mod(gl_TexCoord[0].xy * u_indexSize, vec2(1.0));
+
+    gl_FragColor = texture2D(u_tileSet, baseTilePos + internalPos);
+  }
 })";

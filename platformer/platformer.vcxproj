@@ -144,6 +144,7 @@
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
+    <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
