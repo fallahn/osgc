@@ -1,0 +1,21 @@
+spritesheet smoke_puff
+{
+    src="assets/images/gearboy/smoke_puff.png"
+
+    sprite smoke_puff
+    {
+        bounds=0,0,16,16
+
+        animation idle
+        {
+            frame=0,0,16,16
+            frame=16,0,16,16
+            frame=32,0,16,16
+            frame=48,0,16,16
+            frame=64,0,16,16
+
+            loop=false
+            framerate = 16
+        }
+    }
+}

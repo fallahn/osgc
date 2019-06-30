@@ -1,0 +1,26 @@
+spritesheet squidger
+{
+    src="assets/images/gearboy/squidger.png"
+
+    sprite squidger
+    {
+        bounds = 0,0,16,16
+
+        animation idle
+        {
+            frame=48,0,16,16
+            frame=64,0,16,16
+            frame=80,0,16,16
+            frame=64,0,16,16
+            frame=48,0,16,16
+            frame=32,0,16,16
+            frame=16,0,16,16
+            frame=0,0,16,16
+            frame=16,0,16,16
+            frame=32,0,16,16
+
+            framerate = 20
+            loop=true
+        }
+    }
+}

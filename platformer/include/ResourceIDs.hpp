@@ -25,3 +25,16 @@ namespace ShaderID
         TileMap
     };
 }
+
+namespace TextureID
+{
+    namespace Menu
+    {
+        enum
+        {
+            Background,
+
+            Count
+        };
+    }
+}

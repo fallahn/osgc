@@ -27,12 +27,13 @@ source distribution.
 
 #include "MenuState.hpp"
 #include "StateIDs.hpp"
-#include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 
@@ -102,28 +103,41 @@ void MenuState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
+    m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
 }
 
 void MenuState::loadResources()
 {
+    m_textureIDs[TextureID::Menu::Background] = m_resources.load<sf::Texture>("assets/images/gearboy/background.png");
+
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
 }
 
 void MenuState::buildBackground()
 {
+    auto entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(4.f, 4.f); //TODO programmatic way of calc scale
+    entity.addComponent<xy::Drawable>().setDepth(-51); //TODO constify
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
+
+    entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(4.f, 4.f); //TODO programmatic way of calc scale
+    entity.addComponent<xy::Drawable>().setDepth(-50); //TODO constify
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
+    entity.getComponent<xy::Sprite>().setTextureRect({ 0.f, 272.f, 480.f, 82.f });
+
     //TODO check player/game progress and load background correspondingly
     if (m_mapLoader.load("menu.tmx"))
-    //m_mapLoader.load("menu.tmx");
     {
         const auto& layers = m_mapLoader.getLayers();
 
         //for each layer create a drawable in the scene
-        std::int32_t startDepth = -50;
+        std::int32_t startDepth = -49;
         for (const auto& layer : layers)
         {
-            auto entity = m_backgroundScene.createEntity();
+            entity = m_backgroundScene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Drawable>().setDepth(startDepth++);
             entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);

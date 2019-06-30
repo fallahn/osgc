@@ -28,6 +28,7 @@ source distribution.
 #pragma once
 
 #include "MapLoader.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -55,6 +56,8 @@ private:
 
     xy::ShaderResource m_shaders;
     xy::ResourceHandler m_resources;
+
+    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
 
     MapLoader m_mapLoader;
 
