@@ -141,6 +141,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Collision.hpp" />
+    <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />

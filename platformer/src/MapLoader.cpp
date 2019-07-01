@@ -26,10 +26,12 @@ Copyright 2019 Matt Marchant
 #include <tmxlite/Map.hpp>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/TileLayer.hpp>
+#include <tmxlite/ObjectGroup.hpp>
 
 #include <map>
 
 MapLoader::MapLoader()
+    : m_tileSize    (0.f)
 {
 
 }
@@ -45,6 +47,8 @@ bool MapLoader::load(const std::string& file)
 
     if (map.load(xy::FileSystem::getResourcePath() + "assets/maps/" + file))
     {
+        m_tileSize = static_cast<float>(map.getTileSize().x);
+
         //load the tile sets and associated textures
         std::map<const tmx::Tileset*, sf::Texture*> tsTextures;
         const auto& tileSets = map.getTilesets();
@@ -146,6 +150,34 @@ bool MapLoader::load(const std::string& file)
                     static_cast<float>(layerSize.y * tileset->getTileSize().y));
                 mapLayer.tileSetSize = { static_cast<float>(texture->getSize().x / tileset->getTileSize().x),
                     static_cast<float>(texture->getSize().y / tileset->getTileSize().y) };
+            }
+
+            //get the shapes which make up the map
+            else if (layer->getType() == tmx::Layer::Type::Object)
+            {
+                auto toFloatRect = [](tmx::FloatRect rect)->sf::FloatRect
+                {
+                    return { rect.left, rect.top, rect.width, rect.height };
+                };
+
+                const auto& objects = layer->getLayerAs<tmx::ObjectGroup>().getObjects();
+                for (const auto& object : objects)
+                {
+                    auto shape = object.getShape();
+                    switch (shape)
+                    {
+                    default: break;
+                    case tmx::Object::Shape::Rectangle:
+                    {
+                        auto& collision = m_collisionShapes.emplace_back();
+                        collision.type = CollisionShape::Solid;
+                        collision.shape = CollisionShape::Rectangle;
+                        collision.aabb = toFloatRect(object.getAABB());
+                        collision.collisionFlags = CollisionShape::Player | CollisionShape::Sensor;
+                    }
+                        break;
+                    }
+                }
             }
         }
 

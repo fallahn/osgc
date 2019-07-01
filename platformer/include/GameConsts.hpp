@@ -18,39 +18,18 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace ShaderID
+#include <SFML/Graphics/Rect.hpp>
+
+#include <cstdint>
+
+namespace GameConst
 {
-    enum
+    static const std::int32_t BackgroundDepth = -50;
+    static const float PixelsPerTile = 64.f; //world pixels per game tile - eg tiles are scaled up to this
+
+    namespace Gearboy
     {
-        TileMap
-    };
-}
-
-namespace TextureID
-{
-    namespace Menu
-    {
-        enum
-        {
-            Background,
-
-            Count
-        };
-    }
-}
-
-namespace SpriteID
-{
-    namespace GearBoy
-    {
-        enum
-        {
-            Player,
-            Star,
-            SmokePuff,
-            Squidger,
-
-            Count
-        };
+        static const sf::FloatRect PlayerBounds(-6.f, -10.f, 12.f, 10.f); //relative to player origin
+        static const sf::FloatRect PlayerFoot(-6.f, 0.f, 12.f, 4.f);
     }
 }

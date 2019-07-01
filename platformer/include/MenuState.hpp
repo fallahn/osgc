@@ -32,6 +32,7 @@ source distribution.
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
@@ -58,6 +59,7 @@ private:
     xy::ResourceHandler m_resources;
 
     std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
+    std::array<xy::Sprite, SpriteID::GearBoy::Count> m_sprites;
 
     MapLoader m_mapLoader;
 

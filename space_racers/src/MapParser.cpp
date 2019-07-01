@@ -414,7 +414,10 @@ bool MapParser::load(const std::string& path)
 void MapParser::renderLayers(std::array<sf::RenderTexture, 2u>& targets) const
 {
     //TODO instead of rendering HUGE textures which eat all the VRAM, use the
-    //tilemap shader implemented in the platformer project
+    //tilemap shader implemented in the platformer project? This will save considerably
+    //on VRAM but will actually increase the complexity and number of draw calls...
+    //for example the track layer will have to be rendered 3 times, and carry the
+    //overhead of texture switching and extra shader binding
 
     //tileset data
     TilesetInfo tsi;

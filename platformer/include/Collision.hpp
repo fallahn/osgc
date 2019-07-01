@@ -18,39 +18,34 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace ShaderID
+#include <SFML/Graphics/Rect.hpp>
+
+#include <array>
+
+struct CollisionShape final
 {
-    enum
+    //also used as flags for collision filtering
+    enum Type
     {
-        TileMap
-    };
-}
+        Solid = 0x1,
+        Water = 0x2,
+        Player = 0x4,
+        Sensor = 0x8
+    }type = Solid;
 
-namespace TextureID
+    //these are the types this shape collides with
+    std::uint16_t collisionFlags = Player | Sensor;
+
+    enum Shape
+    {
+        Rectangle, Polygon, Segment
+    }shape = Rectangle;
+
+    sf::FloatRect aabb;
+};
+
+struct CollisionBody final
 {
-    namespace Menu
-    {
-        enum
-        {
-            Background,
-
-            Count
-        };
-    }
-}
-
-namespace SpriteID
-{
-    namespace GearBoy
-    {
-        enum
-        {
-            Player,
-            Star,
-            SmokePuff,
-            Squidger,
-
-            Count
-        };
-    }
-}
+    std::array<CollisionShape, 4u> shapes;
+    std::size_t shapeCount = 0;
+};

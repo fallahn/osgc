@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "Collision.hpp"
+
 #include <SFML/Graphics/Texture.hpp>
 
 #include <vector>
@@ -44,6 +46,10 @@ public:
 
     const std::vector<MapLayer>& getLayers() const { return m_mapLayers; }
 
+    float getTileSize() const { return m_tileSize; }
+
+    const std::vector<CollisionShape>& getCollisionShapes() const { return m_collisionShapes; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -56,4 +62,8 @@ private:
     //holds all the info needed to feed the layer drawable component
     //this is in bottom up order.
     std::vector<MapLayer> m_mapLayers;
+
+    float m_tileSize;
+
+    std::vector<CollisionShape> m_collisionShapes;
 };
