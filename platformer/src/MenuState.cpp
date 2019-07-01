@@ -30,6 +30,8 @@ source distribution.
 #include "GameConsts.hpp"
 #include "ShapeUtils.hpp"
 #include "Collision.hpp"
+#include "Player.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -53,9 +55,11 @@ namespace
 #include "tilemap.inl"
 }
 
-MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
+MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
-    m_backgroundScene   (ctx.appInstance.getMessageBus())
+    m_sharedData        (sd),
+    m_backgroundScene   (ctx.appInstance.getMessageBus()),
+    m_playerInput       (sd.inputBinding)
 {
     launchLoadingScreen();
 
@@ -79,6 +83,7 @@ bool MenuState::handleEvent(const sf::Event& evt)
         return true;
     }
 
+    m_playerInput.handleEvent(evt);
     m_backgroundScene.forwardEvent(evt);
 
     return true;
@@ -91,6 +96,7 @@ void MenuState::handleMessage(const xy::Message& msg)
 
 bool MenuState::update(float dt)
 {
+    m_playerInput.update();
     m_backgroundScene.update(dt);
     return true;
 }
@@ -111,6 +117,7 @@ void MenuState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
+    m_backgroundScene.addSystem<PlayerSystem>(mb);
     m_backgroundScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
@@ -196,6 +203,8 @@ void MenuState::buildBackground()
         collision.shapeCount = 2;
         entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Util::Rectangle::combine(GameConst::Gearboy::PlayerBounds, GameConst::Gearboy::PlayerFoot));
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Player | CollisionShape::Sensor);
+        entity.addComponent<Player>();
+        m_playerInput.setPlayerEntity(entity);
 
 #ifdef XY_DEBUG
         //player debug bounds
@@ -219,11 +228,12 @@ void MenuState::buildBackground()
         {
             entity = m_backgroundScene.createEntity();
             entity.addComponent<xy::Transform>().setPosition(shape.aabb.left * pixelScale, shape.aabb.top * pixelScale);
-            entity.getComponent<xy::Transform>().setScale(pixelScale, pixelScale);
             entity.addComponent<CollisionBody>().shapes[0] = shape;
             //convert from world to local
             entity.getComponent<CollisionBody>().shapes[0].aabb.left = 0;
             entity.getComponent<CollisionBody>().shapes[0].aabb.top = 0;
+            entity.getComponent<CollisionBody>().shapes[0].aabb.width *= pixelScale;
+            entity.getComponent<CollisionBody>().shapes[0].aabb.height *= pixelScale;
             entity.getComponent<CollisionBody>().shapeCount = 1;
             entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<CollisionBody>().shapes[0].aabb);
             entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(shape.type);
@@ -231,7 +241,7 @@ void MenuState::buildBackground()
 #ifdef XY_DEBUG
             debugEnt = m_backgroundScene.createEntity();
             debugEnt.addComponent<xy::Transform>();
-            Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { shape.aabb.width, shape.aabb.height }, sf::Color::Red);
+            Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { shape.aabb.width * pixelScale, shape.aabb.height * pixelScale }, sf::Color::Red);
             entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
         }

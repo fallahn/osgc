@@ -28,6 +28,7 @@ source distribution.
 #include "PluginExport.hpp"
 #include "StateIDs.hpp"
 #include "MenuState.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -35,7 +36,10 @@ source distribution.
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
-    ss->registerState<MenuState>(StateID::MainMenu);
+    *sharedData = std::make_any<SharedData>();
+    auto& sd = std::any_cast<SharedData&>(*sharedData);
+
+    ss->registerState<MenuState>(StateID::MainMenu, sd);
     return StateID::MainMenu;
 }
 

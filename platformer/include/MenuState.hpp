@@ -29,6 +29,7 @@ source distribution.
 
 #include "MapLoader.hpp"
 #include "ResourceIDs.hpp"
+#include "InputParser.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -36,10 +37,11 @@ source distribution.
 #include <xyginext/resources/ShaderResource.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
+struct SharedData;
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context);
+    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -52,7 +54,7 @@ public:
     xy::StateID stateID() const override;
 
 private:
-
+    SharedData& m_sharedData;
     xy::Scene m_backgroundScene;
 
     xy::ShaderResource m_shaders;
@@ -62,6 +64,7 @@ private:
     std::array<xy::Sprite, SpriteID::GearBoy::Count> m_sprites;
 
     MapLoader m_mapLoader;
+    InputParser m_playerInput;
 
     void initScene();
     void loadResources();

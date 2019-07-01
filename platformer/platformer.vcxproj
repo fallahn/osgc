@@ -143,16 +143,23 @@
   <ItemGroup>
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
+    <ClInclude Include="include\InputBinding.hpp" />
+    <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\Player.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\SharedStateData.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\PlayerSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\tilemap.inl" />

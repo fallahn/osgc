@@ -18,9 +18,12 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/ecs/Entity.hpp>
+
 #include <SFML/Graphics/Rect.hpp>
 
 #include <array>
+#include <optional>
 
 struct CollisionShape final
 {
@@ -49,3 +52,13 @@ struct CollisionBody final
     std::array<CollisionShape, 4u> shapes;
     std::size_t shapeCount = 0;
 };
+
+struct Manifold final
+{
+    sf::Vector2f normal;
+    float penetration = 0.f;
+};
+
+std::optional<Manifold> intersectsAABB(sf::FloatRect, sf::FloatRect);
+
+std::optional<Manifold> intersectsSAT(xy::Entity, xy::Entity);
