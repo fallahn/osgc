@@ -51,6 +51,7 @@ struct CollisionBody final
 {
     std::array<CollisionShape, 4u> shapes;
     std::size_t shapeCount = 0;
+    std::uint16_t collisionFlags = 0; //types colliding with this body
 };
 
 struct Manifold final

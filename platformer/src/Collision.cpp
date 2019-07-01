@@ -22,26 +22,28 @@ Copyright 2019 Matt Marchant
 std::optional<Manifold> intersectsAABB(sf::FloatRect a, sf::FloatRect b)
 {
     sf::FloatRect overlap;
-    a.intersects(b, overlap);
-
-    sf::Vector2f centreA(a.left + (a.width / 2.f), a.top + (a.height / 2.f));
-    sf::Vector2f centreB(b.left + (b.width / 2.f), b.top + (b.height / 2.f));
-    sf::Vector2f collisionNormal = centreB - centreA;
-
-    Manifold manifold;
-
-    if (overlap.width < overlap.height)
+    if (a.intersects(b, overlap))
     {
-        manifold.normal.x = (collisionNormal.x < 0) ? 1.f : -1.f;
-        manifold.penetration = overlap.width;
-    }
-    else
-    {
-        manifold.normal.y = (collisionNormal.y < 0) ? 1.f : -1.f;
-        manifold.penetration = overlap.height;
-    }
+        sf::Vector2f centreA(a.left + (a.width / 2.f), a.top + (a.height / 2.f));
+        sf::Vector2f centreB(b.left + (b.width / 2.f), b.top + (b.height / 2.f));
+        sf::Vector2f collisionNormal = centreB - centreA;
 
-    return manifold;
+        Manifold manifold;
+
+        if (overlap.width < overlap.height)
+        {
+            manifold.normal.x = (collisionNormal.x < 0) ? 1.f : -1.f;
+            manifold.penetration = overlap.width;
+        }
+        else
+        {
+            manifold.normal.y = (collisionNormal.y < 0) ? 1.f : -1.f;
+            manifold.penetration = overlap.height;
+        }
+
+        return manifold;
+    }
+    return std::nullopt;
 }
 
 std::optional<Manifold> intersectsSAT(xy::Entity, xy::Entity)

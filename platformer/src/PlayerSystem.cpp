@@ -29,6 +29,25 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Vector.hpp>
 
+namespace
+{
+    sf::FloatRect boundsToWorldspace(sf::FloatRect bounds, const xy::Transform& tx)
+    {
+        auto scale = tx.getScale();
+        bounds.left *= scale.x;
+        bounds.width *= scale.x;
+        bounds.top *= scale.y;
+        bounds.height *= scale.y;
+        bounds.left += tx.getPosition().x;
+        bounds.top += tx.getPosition().y;
+
+        return bounds;
+    }
+
+    const float Gravity = 5999.9f;
+    const float JumpImpulse = 2200.f;
+}
+
 PlayerSystem::PlayerSystem(xy::MessageBus& mb)
     : xy::System(mb, typeid(PlayerSystem))
 {
@@ -65,10 +84,17 @@ void PlayerSystem::process(float dt)
 void PlayerSystem::processFalling(xy::Entity entity, float dt)
 {
     doInput(entity);
-    //TODO apply gravity
-    applyVelocity(entity, dt);
+    //apply gravity
+    entity.getComponent<Player>().velocity.y += Gravity * dt;
 
+    applyVelocity(entity, dt);
     doCollision(entity, dt);
+
+    //check collision flags and change state if necessary
+    if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Sensor))
+    {
+        entity.getComponent<Player>().state = Player::Running;
+    }
 }
 
 void PlayerSystem::processRunning(xy::Entity entity, float dt)
@@ -77,6 +103,11 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
     applyVelocity(entity, dt);
 
     doCollision(entity, dt);
+
+    if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Sensor) == 0)
+    {
+        entity.getComponent<Player>().state = Player::Falling;
+    }
 }
 
 void PlayerSystem::processDying(xy::Entity entity, float dt)
@@ -88,16 +119,22 @@ void PlayerSystem::doCollision(xy::Entity entity, float)
 {
     auto& player = entity.getComponent<Player>();
     auto& tx = entity.getComponent<xy::Transform>();
+    entity.getComponent<CollisionBody>().collisionFlags = 0;
 
     //broad phase
-    auto queryArea = tx.getTransform().transformRect(entity.getComponent<xy::BroadphaseComponent>().getArea());
+    auto area = entity.getComponent<xy::BroadphaseComponent>().getArea();
+
+    auto queryArea = boundsToWorldspace(area, tx);
     auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionShape::Water | CollisionShape::Solid);
 
     for (auto other : nearby)
     {
         if (other != entity)
         {
-            auto otherBounds = other.getComponent<xy::Transform>().getTransform().transformRect(other.getComponent<xy::BroadphaseComponent>().getArea());
+            other.getComponent<CollisionBody>().collisionFlags = 0; //TODO remove this
+
+            auto otherBounds = boundsToWorldspace(other.getComponent<xy::BroadphaseComponent>().getArea(), other.getComponent<xy::Transform>());
+
             if (otherBounds.intersects(queryArea))
             {
                 resolveCollision(entity, other, otherBounds);
@@ -109,25 +146,38 @@ void PlayerSystem::doCollision(xy::Entity entity, float)
 void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::FloatRect otherBounds)
 {
     auto& tx = entity.getComponent<xy::Transform>();
-    const auto& collisionBody = entity.getComponent<CollisionBody>();
+    auto& collisionBody = entity.getComponent<CollisionBody>();
     auto& player = entity.getComponent<Player>();
-    player.footSense = false;
     
     //in theory we need to test all the shapes in the other entity, not its global
     //AABB, but for now assume we're only colliding with platforms
     for (auto i = 0u; i < collisionBody.shapeCount; ++i)
     {
-        auto bounds = tx.getTransform().transformRect(collisionBody.shapes[i].aabb);
+        auto bounds = collisionBody.shapes[i].aabb;
+        bounds = boundsToWorldspace(bounds, tx);
+
         if (auto manifold = intersectsAABB(bounds, otherBounds); manifold)
         {
+            auto& otherBody = other.getComponent<CollisionBody>();
+            collisionBody.collisionFlags |= collisionBody.shapes[i].type;
+            otherBody.collisionFlags |= collisionBody.shapes[i].type; //TODO remove this, we shouldn't be mutating the other object's state - just using for debug draw atm
+
             if (collisionBody.shapes[i].type == CollisionShape::Player)
             {
                 tx.move(manifold->normal * manifold->penetration);
-                player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal) * 0.7f;
+
+                if (manifold->normal.y < 0)
+                {
+                    player.velocity = {};
+                }
+                else
+                {
+                    player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal) * 0.17f;
+                }
             }
             else if (collisionBody.shapes[i].type == CollisionShape::Sensor)
             {
-                player.footSense = true;
+
             }
         }
     }
@@ -145,6 +195,21 @@ void PlayerSystem::doInput(xy::Entity entity/*, float dt*/)
     {
         player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
     }
+
+    if ((player.input & InputFlag::Jump)
+        && (player.prevInput & InputFlag::Jump) == 0
+        && player.state != Player::Falling)
+    {
+        player.velocity.y -= JumpImpulse;
+        player.state = Player::Falling;
+    }
+
+    if (player.input & InputFlag::Shoot)
+    {
+        //player.velocity.y += Player::Acceleration;
+    }
+
+    player.prevInput = player.input;
 }
 
 void PlayerSystem::applyVelocity(xy::Entity entity, float dt)

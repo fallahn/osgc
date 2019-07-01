@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 struct Player final
 {
     std::uint16_t input = 0;
+    std::uint16_t prevInput = 0;
     float accelerationMultiplier = 0.f;
 
     enum
@@ -30,11 +31,10 @@ struct Player final
         Running, Falling,
         Dying, Dead
     }state = Falling;
-    bool footSense = false;
-
+    
     sf::Vector2f velocity;
     static constexpr float Acceleration = 120.f;
-    static constexpr float Drag = 0.89f;
+    static constexpr float Drag = 0.79f;
 };
 
 class PlayerSystem final : public xy::System

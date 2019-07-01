@@ -38,12 +38,14 @@ source distribution.
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/detail/Operators.hpp>
@@ -118,6 +120,7 @@ void MenuState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_backgroundScene.addSystem<PlayerSystem>(mb);
+    m_backgroundScene.addSystem<xy::CallbackSystem>(mb);
     m_backgroundScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
@@ -242,6 +245,20 @@ void MenuState::buildBackground()
             debugEnt = m_backgroundScene.createEntity();
             debugEnt.addComponent<xy::Transform>();
             Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { shape.aabb.width * pixelScale, shape.aabb.height * pixelScale }, sf::Color::Red);
+            debugEnt.addComponent<xy::Callback>().active = true;
+            debugEnt.getComponent<xy::Callback>().function =
+                [entity](xy::Entity e, float)
+            {
+                auto& verts = e.getComponent<xy::Drawable>().getVertices();
+                if (entity.getComponent<CollisionBody>().collisionFlags == 0)
+                {
+                    for (auto& v : verts) v.color = sf::Color::Red;
+                }
+                else
+                {
+                    for (auto& v : verts) v.color = sf::Color::Yellow;
+                }
+            };
             entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
         }
