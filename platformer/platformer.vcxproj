@@ -147,6 +147,8 @@
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\NinjaStarSystem.hpp" />
     <ClInclude Include="include\Player.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
@@ -159,6 +161,7 @@
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\NinjaStarSystem.cpp" />
     <ClCompile Include="src\PlayerSystem.cpp" />
   </ItemGroup>
   <ItemGroup>

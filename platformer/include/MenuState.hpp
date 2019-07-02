@@ -70,4 +70,7 @@ private:
     void loadResources();
     void buildBackground();
     void buildMenu();
+
+    void spawnStar(xy::Entity);
+    void spawnPuff(sf::Vector2f);
 };

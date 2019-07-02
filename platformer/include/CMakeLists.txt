@@ -6,6 +6,8 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Player.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp

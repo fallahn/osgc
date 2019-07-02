@@ -18,24 +18,32 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/System/Vector2.hpp>
+#include <xyginext/core/Message.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
-#include <cstdint>
-
-namespace GameConst
+namespace MessageID
 {
-    static const std::int32_t BackgroundDepth = -50;
-    static const float PixelsPerTile = 64.f; //world pixels per game tile - eg tiles are scaled up to this
-
-    namespace Gearboy
+    enum
     {
-        static const sf::FloatRect PlayerBounds(-6.f, -10.f, 12.f, 10.f); //relative to player origin
-        static const sf::FloatRect PlayerFoot(-5.5f, 0.f, 11.f, 4.f);
-        static const sf::FloatRect PlayerLeftHand(-9.f, -10.f, 1.f, 12.f);
-        static const sf::FloatRect PlayerRightHand(6.f, -10.f, 1.f, 12.f);
-
-        static const sf::Vector2f StarOffset(0.f, -20.f);
-        static const float StarSpeed = 400.f;
-    }
+        PlayerMessage = xy::Message::Count,
+        StarMessage
+    };
 }
+
+struct PlayerEvent final
+{
+    enum
+    {
+        Jumped, Shot, Died
+    }type = Shot;
+    xy::Entity entity;
+};
+
+struct StarEvent final
+{
+    enum
+    {
+        Despawned
+    }type = Despawned;
+    sf::Vector2f position;
+};

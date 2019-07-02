@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "Player.hpp"
 #include "InputBinding.hpp"
 #include "Collision.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -118,9 +119,12 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
         player.velocity.y *= 0.3f;
     }
 
-    if (player.input & InputFlag::Shoot)
+    if ((player.input & InputFlag::Shoot)
+        && (player.prevInput & InputFlag::Shoot) == 0)
     {
-        //TODO - shoot
+        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+        msg->type = PlayerEvent::Shot;
+        msg->entity = entity;
     }
 
     player.prevInput = player.input;
@@ -171,11 +175,18 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
         player.state = Player::Falling;
 
         entity.getComponent<xy::SpriteAnimation>().play(2);
+
+        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+        msg->type = PlayerEvent::Jumped;
+        msg->entity = entity;
     }
 
-    if (player.input & InputFlag::Shoot)
+    if ((player.input & InputFlag::Shoot)
+        && (player.prevInput & InputFlag::Shoot) == 0)
     {
-        
+        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+        msg->type = PlayerEvent::Shot;
+        msg->entity = entity;
     }
 
     player.prevInput = player.input;
