@@ -201,11 +201,25 @@ void MenuState::buildBackground()
         collision.shapes[0].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
 
         collision.shapes[1].aabb = GameConst::Gearboy::PlayerFoot;
-        collision.shapes[1].type = CollisionShape::Sensor;
+        collision.shapes[1].type = CollisionShape::Foot;
         collision.shapes[1].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
-        collision.shapeCount = 2;
-        entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Util::Rectangle::combine(GameConst::Gearboy::PlayerBounds, GameConst::Gearboy::PlayerFoot));
-        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Player | CollisionShape::Sensor);
+
+        collision.shapes[2].aabb = GameConst::Gearboy::PlayerLeftHand;
+        collision.shapes[2].type = CollisionShape::LeftHand;
+        collision.shapes[2].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+
+        collision.shapes[3].aabb = GameConst::Gearboy::PlayerRightHand;
+        collision.shapes[3].type = CollisionShape::RightHand;
+        collision.shapes[4].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+
+        collision.shapeCount = 4;
+
+        auto aabb = xy::Util::Rectangle::combine(GameConst::Gearboy::PlayerBounds, GameConst::Gearboy::PlayerFoot);
+        aabb = xy::Util::Rectangle::combine(GameConst::Gearboy::PlayerLeftHand, aabb);
+        aabb = xy::Util::Rectangle::combine(GameConst::Gearboy::PlayerRightHand, aabb);
+
+        entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand);
         entity.addComponent<Player>();
         m_playerInput.setPlayerEntity(entity);
 
@@ -221,6 +235,18 @@ void MenuState::buildBackground()
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerFoot.left, GameConst::Gearboy::PlayerFoot.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerFoot.width, GameConst::Gearboy::PlayerFoot.height }, sf::Color::Blue);
+        entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
+
+        debugEnt = m_backgroundScene.createEntity();
+        debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerLeftHand.left, GameConst::Gearboy::PlayerLeftHand.top);
+        Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerLeftHand.width, GameConst::Gearboy::PlayerLeftHand.height }, sf::Color::Blue);
+        entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
+
+        debugEnt = m_backgroundScene.createEntity();
+        debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerRightHand.left, GameConst::Gearboy::PlayerRightHand.top);
+        Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerRightHand.width, GameConst::Gearboy::PlayerRightHand.height }, sf::Color::Blue);
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
 
@@ -245,7 +271,7 @@ void MenuState::buildBackground()
             debugEnt = m_backgroundScene.createEntity();
             debugEnt.addComponent<xy::Transform>();
             Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { shape.aabb.width * pixelScale, shape.aabb.height * pixelScale }, sf::Color::Red);
-            debugEnt.addComponent<xy::Callback>().active = true;
+            /*debugEnt.addComponent<xy::Callback>().active = true;
             debugEnt.getComponent<xy::Callback>().function =
                 [entity](xy::Entity e, float)
             {
@@ -258,7 +284,7 @@ void MenuState::buildBackground()
                 {
                     for (auto& v : verts) v.color = sf::Color::Yellow;
                 }
-            };
+            };*/
             entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
         }

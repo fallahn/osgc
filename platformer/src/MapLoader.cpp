@@ -173,7 +173,7 @@ bool MapLoader::load(const std::string& file)
                         collision.type = CollisionShape::Solid;
                         collision.shape = CollisionShape::Rectangle;
                         collision.aabb = toFloatRect(object.getAABB());
-                        collision.collisionFlags = CollisionShape::Player | CollisionShape::Sensor;
+                        collision.collisionFlags = CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand;
                     }
                         break;
                     }

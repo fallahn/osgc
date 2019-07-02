@@ -45,7 +45,8 @@ namespace
     }
 
     const float Gravity = 5999.9f;
-    const float JumpImpulse = 2200.f;
+    const float JumpImpulse = 1500.f;
+    //const float MaxJump = -1500.f;
 }
 
 PlayerSystem::PlayerSystem(xy::MessageBus& mb)
@@ -69,9 +70,11 @@ void PlayerSystem::process(float dt)
         default: break;
         case Player::Falling:
             processFalling(entity, dt);
+            DPRINT("State", "Falling");
             break;
         case Player::Running:
             processRunning(entity, dt);
+            DPRINT("State", "Running");
             break;
         case Player::Dying:
             processDying(entity, dt);
@@ -83,15 +86,44 @@ void PlayerSystem::process(float dt)
 //private
 void PlayerSystem::processFalling(xy::Entity entity, float dt)
 {
-    doInput(entity);
+    //parse input
+    auto& player = entity.getComponent<Player>();
+    const auto& collision = entity.getComponent<CollisionBody>();
+    if ((player.input & InputFlag::Left)
+        && (collision.collisionFlags & CollisionShape::LeftHand) == 0)
+    {
+        player.velocity.x -= Player::Acceleration * player.accelerationMultiplier;
+    }
+
+    if ((player.input & InputFlag::Right)
+        && (collision.collisionFlags & CollisionShape::RightHand) == 0)
+    {
+        player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
+    }
+
+    if((player.prevInput & InputFlag::Jump)
+        && (player.input & InputFlag::Jump) == 0)
+    {
+        player.velocity.y *= 0.3f;
+    }
+
+    if (player.input & InputFlag::Shoot)
+    {
+        //TODO - shoot
+    }
+
+    player.prevInput = player.input;
+
+
     //apply gravity
-    entity.getComponent<Player>().velocity.y += Gravity * dt;
+    float multiplier = (entity.getComponent<Player>().velocity.y < 0) ? 0.7f : 1.2f;
+    entity.getComponent<Player>().velocity.y += Gravity * multiplier * dt;
 
     applyVelocity(entity, dt);
     doCollision(entity, dt);
 
     //check collision flags and change state if necessary
-    if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Sensor))
+    if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Foot))
     {
         entity.getComponent<Player>().state = Player::Running;
     }
@@ -99,12 +131,38 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
 
 void PlayerSystem::processRunning(xy::Entity entity, float dt)
 {
-    doInput(entity);
+    //parse input
+    auto& player = entity.getComponent<Player>();
+    if ((player.input & InputFlag::Left))
+    {
+        player.velocity.x -= Player::Acceleration * player.accelerationMultiplier;
+    }
+
+    if ((player.input & InputFlag::Right))
+    {
+        player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
+    }
+
+    if ((player.input & InputFlag::Jump)
+        && (player.prevInput & InputFlag::Jump) == 0)
+    {
+        player.velocity.y -= JumpImpulse;
+        player.state = Player::Falling;
+    }
+
+    if (player.input & InputFlag::Shoot)
+    {
+        
+    }
+
+    player.prevInput = player.input;
+
+    //apply the state
     applyVelocity(entity, dt);
 
     doCollision(entity, dt);
 
-    if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Sensor) == 0)
+    if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
     {
         entity.getComponent<Player>().state = Player::Falling;
     }
@@ -131,8 +189,6 @@ void PlayerSystem::doCollision(xy::Entity entity, float)
     {
         if (other != entity)
         {
-            other.getComponent<CollisionBody>().collisionFlags = 0; //TODO remove this
-
             auto otherBounds = boundsToWorldspace(other.getComponent<xy::BroadphaseComponent>().getArea(), other.getComponent<xy::Transform>());
 
             if (otherBounds.intersects(queryArea))
@@ -160,13 +216,12 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
         {
             auto& otherBody = other.getComponent<CollisionBody>();
             collisionBody.collisionFlags |= collisionBody.shapes[i].type;
-            otherBody.collisionFlags |= collisionBody.shapes[i].type; //TODO remove this, we shouldn't be mutating the other object's state - just using for debug draw atm
 
             if (collisionBody.shapes[i].type == CollisionShape::Player)
             {
                 tx.move(manifold->normal * manifold->penetration);
 
-                if (manifold->normal.y < 0)
+                if (player.state == Player::Running)
                 {
                     player.velocity = {};
                 }
@@ -175,7 +230,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal) * 0.17f;
                 }
             }
-            else if (collisionBody.shapes[i].type == CollisionShape::Sensor)
+            else if (collisionBody.shapes[i].type == CollisionShape::Foot)
             {
 
             }
@@ -183,34 +238,37 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
     }
 }
 
-void PlayerSystem::doInput(xy::Entity entity/*, float dt*/)
-{
-    auto& player = entity.getComponent<Player>();
-    if (player.input & InputFlag::Left)
-    {
-        player.velocity.x -= Player::Acceleration * player.accelerationMultiplier;
-    }
-
-    if (player.input & InputFlag::Right)
-    {
-        player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
-    }
-
-    if ((player.input & InputFlag::Jump)
-        && (player.prevInput & InputFlag::Jump) == 0
-        && player.state != Player::Falling)
-    {
-        player.velocity.y -= JumpImpulse;
-        player.state = Player::Falling;
-    }
-
-    if (player.input & InputFlag::Shoot)
-    {
-        //player.velocity.y += Player::Acceleration;
-    }
-
-    player.prevInput = player.input;
-}
+//void PlayerSystem::doInput(xy::Entity entity)
+//{
+//    auto& player = entity.getComponent<Player>();
+//    const auto& collision = entity.getComponent<CollisionBody>();
+//    if ((player.input & InputFlag::Left) 
+//        && (collision.collisionFlags & CollisionShape::LeftHand) == 0)
+//    {
+//        player.velocity.x -= Player::Acceleration * player.accelerationMultiplier;
+//    }
+//
+//    if ((player.input & InputFlag::Right)
+//        && (collision.collisionFlags & CollisionShape::RightHand) == 0)
+//    {
+//        player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
+//    }
+//
+//    if ((player.input & InputFlag::Jump)
+//        && (player.prevInput & InputFlag::Jump) == 0
+//        && player.state != Player::Falling)
+//    {
+//        player.velocity.y -= JumpImpulse;
+//        player.state = Player::Falling;
+//    }
+//
+//    if (player.input & InputFlag::Shoot)
+//    {
+//        //player.velocity.y += Player::Acceleration;
+//    }
+//
+//    player.prevInput = player.input;
+//}
 
 void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
 {
@@ -218,5 +276,5 @@ void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
     auto& player = entity.getComponent<Player>();
 
     tx.move(player.velocity * dt);
-    player.velocity *= Player::Drag;
+    player.velocity.x *= Player::Drag;
 }

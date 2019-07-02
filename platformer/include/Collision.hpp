@@ -33,11 +33,13 @@ struct CollisionShape final
         Solid = 0x1,
         Water = 0x2,
         Player = 0x4,
-        Sensor = 0x8
+        Foot = 0x8,
+        LeftHand = 0x10,
+        RightHand = 0x20
     }type = Solid;
 
     //these are the types this shape collides with
-    std::uint16_t collisionFlags = Player | Sensor;
+    std::uint16_t collisionFlags = Player | Foot | LeftHand | RightHand;
 
     enum Shape
     {

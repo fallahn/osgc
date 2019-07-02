@@ -52,6 +52,6 @@ private:
 
     void doCollision(xy::Entity, float);
     void resolveCollision(xy::Entity, xy::Entity, sf::FloatRect);
-    void doInput(xy::Entity/*, float*/);
+    //void doInput(xy::Entity);
     void applyVelocity(xy::Entity, float);
 };
