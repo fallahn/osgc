@@ -118,6 +118,15 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
     {
         player.velocity.y *= 0.3f;
     }
+    //walljump?
+    /*else if ((player.prevInput & InputFlag::Jump) == 0
+        && (player.input & InputFlag::Jump))
+    {
+        if (collision.collisionFlags & (CollisionShape::LeftHand | CollisionShape::RightHand))
+        {
+            player.velocity.y -= JumpImpulse;
+        }
+    }*/
 
     if ((player.input & InputFlag::Shoot)
         && (player.prevInput & InputFlag::Shoot) == 0)
@@ -277,13 +286,14 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
             {
                 tx.move(manifold->normal * manifold->penetration);
 
-                if (player.state == Player::Running)
+                if (player.state == Player::Running
+                    || other.getComponent<xy::Transform>().getPosition().y >= tx.getPosition().y) //TODO make sure this is a solid BELOW PLAYER result
                 {
                     player.velocity = {};
                 }
                 else
                 {
-                    player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal) * 0.17f;
+                    player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal);// *0.17f;
                 }
             }
             else if (collisionBody.shapes[i].type == CollisionShape::Foot)
