@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
@@ -88,18 +90,27 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
 {
     //parse input
     auto& player = entity.getComponent<Player>();
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto scale = tx.getScale();
     const auto& collision = entity.getComponent<CollisionBody>();
     if ((player.input & InputFlag::Left)
         && (collision.collisionFlags & CollisionShape::LeftHand) == 0)
     {
         player.velocity.x -= Player::Acceleration * player.accelerationMultiplier;
+        scale.x = -scale.y;
     }
 
     if ((player.input & InputFlag::Right)
         && (collision.collisionFlags & CollisionShape::RightHand) == 0)
     {
         player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
+        
+        if ((player.input & InputFlag::Left) == 0)
+        {
+            scale.x = scale.y;
+        }
     }
+    tx.setScale(scale);
 
     if((player.prevInput & InputFlag::Jump)
         && (player.input & InputFlag::Jump) == 0)
@@ -126,6 +137,7 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
     if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Foot))
     {
         entity.getComponent<Player>().state = Player::Running;
+        entity.getComponent<xy::SpriteAnimation>().play(0); //TODO get proper index map for sprite animation
     }
 }
 
@@ -133,21 +145,32 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
 {
     //parse input
     auto& player = entity.getComponent<Player>();
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto scale = tx.getScale();
     if ((player.input & InputFlag::Left))
     {
         player.velocity.x -= Player::Acceleration * player.accelerationMultiplier;
+        scale.x = -scale.y;
     }
 
     if ((player.input & InputFlag::Right))
     {
         player.velocity.x += Player::Acceleration * player.accelerationMultiplier;
+        
+        if ((player.input & InputFlag::Left) == 0)
+        {
+            scale.x = scale.y;
+        }
     }
+    tx.setScale(scale);
 
     if ((player.input & InputFlag::Jump)
         && (player.prevInput & InputFlag::Jump) == 0)
     {
         player.velocity.y -= JumpImpulse;
         player.state = Player::Falling;
+
+        entity.getComponent<xy::SpriteAnimation>().play(2);
     }
 
     if (player.input & InputFlag::Shoot)
@@ -160,11 +183,33 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
     //apply the state
     applyVelocity(entity, dt);
 
+    //update the animation based on velocity - TODO properly map animation indices
+    float len2 = xy::Util::Vector::lengthSquared(player.velocity);
+    const float MaxVel = 203000.f;
+    DPRINT("Animation", std::to_string(entity.getComponent<xy::SpriteAnimation>().getAnimationIndex()));
+    if (len2 > 100.f)
+    {
+        if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() == 0)
+        {
+            entity.getComponent<xy::SpriteAnimation>().play(1);
+        }
+        //entity.getComponent<xy::Sprite>().getAnimations()[1].framerate = 20.f * std::min((len2 / MaxVel), 1.f);
+    }
+    else
+    {
+        //idle
+        if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() != 0)
+        {
+            entity.getComponent<xy::SpriteAnimation>().play(0);
+        }
+    }
+
     doCollision(entity, dt);
 
     if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
     {
         entity.getComponent<Player>().state = Player::Falling;
+        entity.getComponent<xy::SpriteAnimation>().play(2);
     }
 }
 

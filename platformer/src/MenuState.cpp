@@ -122,6 +122,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<PlayerSystem>(mb);
     m_backgroundScene.addSystem<xy::CallbackSystem>(mb);
     m_backgroundScene.addSystem<xy::DynamicTreeSystem>(mb);
+    m_backgroundScene.addSystem<xy::SpriteAnimator>(mb);
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
@@ -192,6 +193,7 @@ void MenuState::buildBackground()
         entity.getComponent<xy::Transform>().setScale(pixelScale, pixelScale);
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Player];
+        entity.addComponent<xy::SpriteAnimation>().play(0);
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
         
