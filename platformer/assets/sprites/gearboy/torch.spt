@@ -1,0 +1,40 @@
+spritesheet torch
+{
+    src="assets/images/gearboy/torch.png"
+
+    sprite torch_front
+    {
+        bounds = 0,0,16,32
+
+        animation idle
+        {
+            frame=0,0,16,32
+            frame=0,16,16,32
+            frame=0,32,16,32
+            frame=0,48,16,32
+            frame=0,64,16,32
+            frame=0,80,16,32
+
+            loop=true
+            framerate=24
+        }
+    }
+
+    sprite torch_side
+    {
+        bounds = 3,0,16,32
+
+        animation idle
+        {
+            frame=32,0,16,32
+            frame=32,16,16,32
+            frame=32,32,16,32
+            frame=32,48,16,32
+            frame=32,64,16,32
+            frame=32,80,16,32
+
+            loop=true
+            framerate=24
+        }
+    }
+}

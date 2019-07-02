@@ -34,7 +34,7 @@ struct Player final
     
     sf::Vector2f velocity;
     static constexpr float Acceleration = 120.f;
-    static constexpr float Drag = 0.79f;
+    static constexpr float Drag = 0.82f;
 };
 
 class PlayerSystem final : public xy::System
@@ -52,6 +52,5 @@ private:
 
     void doCollision(xy::Entity, float);
     void resolveCollision(xy::Entity, xy::Entity, sf::FloatRect);
-    //void doInput(xy::Entity);
     void applyVelocity(xy::Entity, float);
 };

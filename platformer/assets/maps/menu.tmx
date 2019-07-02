@@ -10,10 +10,10 @@
  </layer>
  <layer id="4" name="detail" width="30" height="17">
   <data encoding="base64" compression="zlib">
-   eJxjYBh5wI2OZlHTrlEwCkYacMPBpjcYLO4YBaOAGgAA7rgB6w==
+   eJxjYBgFo2AUjIJRMApGwUgBAAf4AAE=
   </data>
  </layer>
- <objectgroup color="#aa0000" id="3" name="collision" visible="0">
+ <objectgroup color="#aa0000" id="3" name="collision">
   <object id="1" x="192" y="224" width="128" height="48"/>
   <object id="2" x="336" y="192" width="64" height="16"/>
   <object id="3" x="272" y="144" width="48" height="16"/>

@@ -46,7 +46,7 @@ void NinjaStarSystem::process(float dt)
 
         //check surrounding area for collision
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-        auto scale = tx.getScale();
+        auto scale = tx.getScale() / 2.f;
         bounds.left = tx.getPosition().x;
         bounds.top = tx.getPosition().y;
         bounds.left -= tx.getOrigin().x * scale.x;

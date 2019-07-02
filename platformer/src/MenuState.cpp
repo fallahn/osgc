@@ -202,12 +202,12 @@ void MenuState::buildBackground()
             verts.emplace_back(sf::Vector2f(0.f, layer.layerSize.y), sf::Vector2f(0.f, texCoords.y));
 
             entity.getComponent<xy::Drawable>().updateLocalBounds();
-            entity.getComponent<xy::Transform>().setScale(xy::DefaultSceneSize / layer.layerSize);
+            entity.getComponent<xy::Transform>().setScale(pixelScale, pixelScale);
         }
 
         //background
         auto entity = m_backgroundScene.createEntity();
-        entity.addComponent<xy::Transform>().setScale(pixelScale,pixelScale);
+        entity.addComponent<xy::Transform>().setScale(pixelScale, pixelScale);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
 

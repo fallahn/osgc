@@ -32,7 +32,7 @@ namespace GameConst
     {
         static const sf::FloatRect PlayerBounds(-6.f, -10.f, 12.f, 10.f); //relative to player origin
         static const sf::FloatRect PlayerFoot(-5.5f, 0.f, 11.f, 4.f);
-        static const sf::FloatRect PlayerLeftHand(-9.f, -10.f, 1.f, 12.f);
+        static const sf::FloatRect PlayerLeftHand(-7.f, -10.f, 1.f, 12.f);
         static const sf::FloatRect PlayerRightHand(6.f, -10.f, 1.f, 12.f);
 
         static const sf::Vector2f StarOffset(0.f, -20.f);
