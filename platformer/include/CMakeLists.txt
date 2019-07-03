@@ -13,7 +13,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/NauseState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Player.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
