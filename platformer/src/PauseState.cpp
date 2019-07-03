@@ -72,7 +72,7 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 //public
 bool PauseState::handleEvent(const sf::Event& evt)
 {
-    static auto execSelection = [&]()
+    auto execSelection = [&]()
     {
         switch (m_selectedIndex)
         {
@@ -90,7 +90,7 @@ bool PauseState::handleEvent(const sf::Event& evt)
         }
     };
 
-    static auto selectNext = [&](bool prev = false)
+    auto selectNext = [&](bool prev = false)
     {
         if (prev)
         {

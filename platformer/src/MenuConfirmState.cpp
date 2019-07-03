@@ -64,7 +64,7 @@ MenuConfirmState::MenuConfirmState(xy::StateStack& ss, xy::State::Context ctx, S
 //public
 bool MenuConfirmState::handleEvent(const sf::Event& evt)
 {
-    static auto execSelection = [&]()
+    auto execSelection = [&]()
     {
         if (m_selectedIndex == 0)
         {
@@ -89,9 +89,9 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
         }
     };
 
-    static auto selectNext = [&]()
+    auto selectNext = [&]()
     {
-        m_selectedIndex = (m_selectedIndex + 1) % 2;
+        m_selectedIndex = (m_selectedIndex + 1) % selection.size();
         
         xy::Command cmd;
         cmd.targetFlags = CommandID::Menu::MenuCursor;
