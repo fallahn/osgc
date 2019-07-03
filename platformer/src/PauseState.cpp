@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#include "MenuConfirmState.hpp"
+#include "PauseState.hpp"
 #include "SharedStateData.hpp"
 #include "GameConsts.hpp"
 #include "CommandIDs.hpp"
@@ -42,14 +42,22 @@ namespace
     sf::Clock delayClock;
     const sf::Time delayTime = sf::seconds(1.f);
 
-    const std::array<sf::Vector2f, 2u> selection =
+    const std::array<sf::Vector2f, 3u> selection =
     {
         sf::Vector2f(780.f, 504.f),
-        sf::Vector2f(780.f, 604.f)
+        sf::Vector2f(780.f, 604.f),
+        sf::Vector2f(780.f, 704.f)
+    };
+
+    const std::array<std::string, 3u> messages =
+    {
+        "Continue Playing",
+        "Open The Settings Menu",
+        "Unsaved Progress Will Be Lost!"
     };
 }
 
-MenuConfirmState::MenuConfirmState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
+PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_scene         (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
@@ -62,42 +70,49 @@ MenuConfirmState::MenuConfirmState(xy::StateStack& ss, xy::State::Context ctx, S
 }
 
 //public
-bool MenuConfirmState::handleEvent(const sf::Event& evt)
+bool PauseState::handleEvent(const sf::Event& evt)
 {
     static auto execSelection = [&]()
     {
-        if (m_selectedIndex == 0)
+        switch (m_selectedIndex)
         {
-            switch (m_sharedData.menuID)
-            {
-            default: break;
-            case MenuID::NewGame:
-                requestStackClear();
-                requestStackPush(StateID::Game);
-                break;
-            case MenuID::Continue:
-                //TODO load some sort of state into shared data
-                
-                requestStackClear();
-                requestStackPush(StateID::Game);
-                break;
-            }
-        }
-        else
-        {
+        default: break;
+        case 0:
             requestStackPop();
+            break;
+        case 1:
+            xy::Console::show();
+            break;
+        case 2:
+            requestStackClear();
+            requestStackPush(StateID::MainMenu);
+            break;
         }
     };
 
-    static auto selectNext = [&]()
+    static auto selectNext = [&](bool prev = false)
     {
-        m_selectedIndex = (m_selectedIndex + 1) % 2;
-        
+        if (prev)
+        {
+            m_selectedIndex = (m_selectedIndex + (selection.size() - 1)) % selection.size();
+        }
+        else
+        {
+            m_selectedIndex = (m_selectedIndex + 1) % selection.size();
+        }
+
         xy::Command cmd;
         cmd.targetFlags = CommandID::Menu::MenuCursor;
         cmd.action = [&](xy::Entity e, float)
         {
             e.getComponent<xy::Transform>().setPosition(selection[m_selectedIndex]);
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::MenuMessage;
+        cmd.action = [&](xy::Entity e, float)
+        {
+            e.getComponent<xy::Text>().setString(messages[m_selectedIndex]);
         };
         m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     };
@@ -111,8 +126,10 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
             {
             default: break;
             case sf::Keyboard::Up:
-            case sf::Keyboard::Down:
             case sf::Keyboard::W:
+                selectNext(true);
+                break;
+            case sf::Keyboard::Down:
             case sf::Keyboard::S:
                 selectNext();
                 break;
@@ -138,7 +155,14 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
             default: break;
             case sf::Joystick::Y:
             case sf::Joystick::PovY:
-                selectNext();
+#ifdef _WIN32
+                //POVY is inverted on windows
+                bool prev = ((evt.joystickMove.position < 0 && evt.joystickMove.axis == sf::Joystick::Y)
+                    || (evt.joystickMove.position > 0 && evt.joystickMove.axis == sf::Joystick::PovY));
+                selectNext(prev);
+#else
+                selectNext((evt.joystickMove.position < 0));
+#endif //_WIN32
                 break;
             }
         }
@@ -149,26 +173,28 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
     return false;
 }
 
-void MenuConfirmState::handleMessage(const xy::Message& msg)
+void PauseState::handleMessage(const xy::Message& msg)
 {
     m_scene.forwardMessage(msg);
 }
 
-bool MenuConfirmState::update(float dt)
+bool PauseState::update(float dt)
 {
     m_scene.update(dt);
-    return true;
+    return false;
 }
 
-void MenuConfirmState::draw()
+void PauseState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
 }
 
 //private
-void MenuConfirmState::build()
+void PauseState::build()
 {
+    //TODO load correct graphics / colours basedon current theme
+
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
@@ -206,19 +232,10 @@ void MenuConfirmState::build()
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Paused");
 
-    switch (m_sharedData.menuID)
-    {
-    default: break;
-    case MenuID::NewGame:
-        entity.getComponent<xy::Text>().setString("Overwrite Save Game?");
-        break;
-    case MenuID::Continue:
-        entity.getComponent<xy::Text>().setString("Continue From Save Game?");
-        break;
-    }
 
-    //yes
+    //continue
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
@@ -228,9 +245,9 @@ void MenuConfirmState::build()
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setString("Yes");
+    entity.getComponent<xy::Text>().setString("Continue");
 
-    //no
+    //options
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 60.f);
@@ -240,7 +257,31 @@ void MenuConfirmState::build()
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setString("No");
+    entity.getComponent<xy::Text>().setString("Options");
+
+    //quit
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 160.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Quit");
+
+    //selection message
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 460.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::MenuMessage;
 
     auto arrow = m_resources.load<sf::Texture>("assets/images/gearboy/menu_cursor.png");
     entity = m_scene.createEntity();

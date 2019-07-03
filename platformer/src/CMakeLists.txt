@@ -2,12 +2,14 @@ set(PROJECT_SRC
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.cpp
   PARENT_SCOPE)

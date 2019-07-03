@@ -29,6 +29,7 @@ source distribution.
 #include "StateIDs.hpp"
 #include "MenuState.hpp"
 #include "MenuConfirmState.hpp"
+#include "GameState.hpp"
 #include "SharedStateData.hpp"
 
 #include <xyginext/core/StateStack.hpp>
@@ -42,11 +43,18 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
     ss->registerState<MenuState>(StateID::MainMenu, sd);
     ss->registerState<MenuConfirmState>(StateID::MenuConfirm, sd);
+    ss->registerState<GameState>(StateID::Game, sd);
+
+#ifdef XY_DEBUG
+    return StateID::Game;
+#else
     return StateID::MainMenu;
+#endif //XY_DEBUG
 }
 
 void end(xy::StateStack* ss)
 {
     ss->unregisterState(StateID::MainMenu);
     ss->unregisterState(StateID::MenuConfirm);
+    ss->unregisterState(StateID::Game);
 }

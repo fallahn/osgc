@@ -4,6 +4,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.hpp
@@ -12,6 +13,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NauseState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Player.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp

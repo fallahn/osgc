@@ -145,6 +145,7 @@
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
+    <ClInclude Include="include\GameState.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NinjaDirector.hpp" />
     <ClInclude Include="include\NinjaStarSystem.hpp" />
+    <ClInclude Include="include\PauseState.hpp" />
     <ClInclude Include="include\Player.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
@@ -163,12 +165,14 @@
   <ItemGroup>
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuConfirmState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\NinjaDirector.cpp" />
     <ClCompile Include="src\NinjaStarSystem.cpp" />
+    <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerSystem.cpp" />
     <ClCompile Include="src\ShakerSystem.cpp" />
   </ItemGroup>

@@ -84,6 +84,12 @@
     <ClInclude Include="include\MenuConfirmState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PauseState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -114,6 +120,12 @@
       <Filter>Source Files\states</Filter>
     </ClCompile>
     <ClCompile Include="src\MenuConfirmState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PauseState.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>

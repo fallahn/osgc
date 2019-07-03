@@ -18,15 +18,31 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-namespace CommandID
+#include "StateIDs.hpp"
+
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+
+struct SharedData;
+class PauseState final : public xy::State
 {
-    namespace Menu
-    {
-        enum
-        {
-            DebugItem = 0x1,
-            MenuCursor = 0x2,
-            MenuMessage = 0x4
-        };
-    }
-}
+public:
+    PauseState(xy::StateStack&, xy::State::Context, SharedData&);
+
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
+
+    xy::StateID stateID() const override { return StateID::Pause; }
+
+private:
+    xy::Scene m_scene;
+    SharedData& m_sharedData;
+    xy::ResourceHandler m_resources;
+
+    std::size_t m_selectedIndex;
+
+    void build();
+};

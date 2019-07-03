@@ -32,6 +32,8 @@ namespace StateID
     enum
     {
         MainMenu,
-        MenuConfirm
+        MenuConfirm,
+        Game,
+        Pause
     };
 }
