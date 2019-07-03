@@ -2,6 +2,7 @@ set(PROJECT_SRC
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/AnimationMap.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
@@ -13,6 +14,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Player.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShapeUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp

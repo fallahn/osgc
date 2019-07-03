@@ -35,7 +35,8 @@ struct CollisionShape final
         Player = 0x4,
         Foot = 0x8,
         LeftHand = 0x10,
-        RightHand = 0x20
+        RightHand = 0x20,
+        Text = 0x40
     }type = Solid;
 
     //these are the types this shape collides with

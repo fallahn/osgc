@@ -8,4 +8,5 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.cpp
   PARENT_SCOPE)

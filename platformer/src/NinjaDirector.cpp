@@ -56,7 +56,7 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
         switch (data.type)
         {
         default: break;
-        case StarEvent::Despawned:
+        case StarEvent::HitItem:
             spawnPuff(data.position);
             break;
         }

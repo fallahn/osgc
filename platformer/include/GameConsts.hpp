@@ -19,13 +19,16 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <cstdint>
+#include <array>
 
 namespace GameConst
 {
     static const std::int32_t BackgroundDepth = -50;
+    static const std::int32_t TextDepth = 10;
     static const float PixelsPerTile = 64.f; //world pixels per game tile - eg tiles are scaled up to this
 
     namespace Gearboy
@@ -37,5 +40,13 @@ namespace GameConst
 
         static const sf::Vector2f StarOffset(0.f, -20.f);
         static const float StarSpeed = 400.f;
+
+        static const std::array<sf::Color, 4u> colours =
+        {
+            sf::Color(215,232,148),
+            sf::Color(174,196,64),
+            sf::Color(82,127,57),
+            sf::Color(32,70,49)
+        };
     }
 }

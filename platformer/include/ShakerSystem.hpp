@@ -18,34 +18,24 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include <xyginext/ecs/System.hpp>
 
-namespace MessageID
+struct Shaker final
 {
-    enum
-    {
-        PlayerMessage = xy::Message::Count,
-        StarMessage
-    };
-}
-
-struct PlayerEvent final
-{
-    enum
-    {
-        Jumped, Shot, Died
-    }type = Shot;
-    xy::Entity entity;
+    std::size_t index = 0;
+    float magnitude = 0.f;
+    sf::Vector2f basePosition;
 };
 
-struct StarEvent final
+class ShakerSystem final : public xy::System
 {
-    enum
-    {
-        HitItem
-    }type = HitItem;
-    sf::Vector2f position;
-    xy::Entity entityHit;
-    std::int32_t collisionShape;
+public:
+    explicit ShakerSystem(xy::MessageBus&);
+
+    void handleMessage(const xy::Message&) override;
+
+    void process(float) override;
+private:
+
+    void onEntityAdded(xy::Entity);
 };

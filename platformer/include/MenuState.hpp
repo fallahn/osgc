@@ -64,6 +64,7 @@ private:
     std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
     SpriteArray<SpriteID::GearBoy::Count> m_sprites;
     AnimationMap<AnimID::Player::Count> m_playerAnimations;
+    std::size_t m_fontID;
 
     MapLoader m_mapLoader;
     InputParser m_playerInput;

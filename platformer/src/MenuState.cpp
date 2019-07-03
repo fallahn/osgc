@@ -36,25 +36,33 @@ source distribution.
 #include "NinjaStarSystem.hpp"
 #include "MessageIDs.hpp"
 #include "NinjaDirector.hpp"
+#include "CommandIDs.hpp"
+#include "ShakerSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
+#include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/detail/Operators.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Rectangle.hpp>
+
+#include <SFML/Graphics/Font.hpp>
 
 namespace
 {
@@ -65,6 +73,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
     m_backgroundScene   (ctx.appInstance.getMessageBus()),
+    m_fontID            (0),
     m_playerInput       (sd.inputBinding)
 {
     launchLoadingScreen();
@@ -87,6 +96,34 @@ bool MenuState::handleEvent(const sf::Event& evt)
 	if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
     {
         return true;
+    }
+
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::F2:
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Menu::DebugItem;
+            cmd.action = [](xy::Entity e, float)
+            {
+                auto scale = e.getComponent<xy::Transform>().getScale();
+                if (scale.x == 0)
+                {
+                    scale = { 1.f, 1.f };
+                }
+                else
+                {
+                    scale = {};
+                }
+                e.getComponent<xy::Transform>().setScale(scale);
+            };
+            m_backgroundScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        break;
+        }
     }
 
     m_playerInput.handleEvent(evt);
@@ -124,9 +161,12 @@ void MenuState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_backgroundScene.addSystem<xy::CallbackSystem>(mb);
+    m_backgroundScene.addSystem<xy::CommandSystem>(mb);
     m_backgroundScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_backgroundScene.addSystem<PlayerSystem>(mb);
     m_backgroundScene.addSystem<NinjaStarSystem>(mb);
+    m_backgroundScene.addSystem<ShakerSystem>(mb);
+    m_backgroundScene.addSystem<xy::TextSystem>(mb);
     m_backgroundScene.addSystem<xy::SpriteAnimator>(mb);
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
@@ -154,6 +194,8 @@ void MenuState::loadResources()
     m_sprites[SpriteID::GearBoy::SmokePuff] = spriteSheet.getSprite("smoke_puff");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
+
+    m_fontID = m_resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
 }
 
 void MenuState::buildBackground()
@@ -286,22 +328,10 @@ void MenuState::buildBackground()
 
 #ifdef XY_DEBUG
             debugEnt = m_backgroundScene.createEntity();
+            debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
             debugEnt.addComponent<xy::Transform>();
             Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { shape.aabb.width * pixelScale, shape.aabb.height * pixelScale }, sf::Color::Red);
-            /*debugEnt.addComponent<xy::Callback>().active = true;
-            debugEnt.getComponent<xy::Callback>().function =
-                [entity](xy::Entity e, float)
-            {
-                auto& verts = e.getComponent<xy::Drawable>().getVertices();
-                if (entity.getComponent<CollisionBody>().collisionFlags == 0)
-                {
-                    for (auto& v : verts) v.color = sf::Color::Red;
-                }
-                else
-                {
-                    for (auto& v : verts) v.color = sf::Color::Yellow;
-                }
-            };*/
+            debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f); //press F2 to toggle visibility
             entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
         }
@@ -310,5 +340,62 @@ void MenuState::buildBackground()
 
 void MenuState::buildMenu()
 {
+    auto& font = m_resources.get<sf::Font>(m_fontID);
 
+    auto entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(340.f, 100.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setString("TITLE!");
+    entity.getComponent<xy::Text>().setCharacterSize(128);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(4.f);
+
+    entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(1100.f, 300.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setString("New Game");
+    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
+    entity.addComponent<Shaker>();
+
+    entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(1200.f, 390.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setString("Continue");
+    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
+    entity.addComponent<Shaker>();
+
+    entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(800.f, 700.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setString("Options");
+    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
+    entity.addComponent<Shaker>();
+
+    entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(220.f, 770.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setString("Quit");
+    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
+    entity.addComponent<Shaker>();
 }

@@ -43,6 +43,17 @@ namespace TextureID
     }
 }
 
+namespace FontID
+{
+    enum
+    {
+        Menu,
+
+
+        Count 
+    };
+}
+
 namespace SpriteID
 {
     namespace GearBoy

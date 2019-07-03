@@ -18,34 +18,13 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
-
-namespace MessageID
+namespace CommandID
 {
-    enum
+    namespace Menu
     {
-        PlayerMessage = xy::Message::Count,
-        StarMessage
-    };
+        enum
+        {
+            DebugItem = 0x1
+        };
+    }
 }
-
-struct PlayerEvent final
-{
-    enum
-    {
-        Jumped, Shot, Died
-    }type = Shot;
-    xy::Entity entity;
-};
-
-struct StarEvent final
-{
-    enum
-    {
-        HitItem
-    }type = HitItem;
-    sf::Vector2f position;
-    xy::Entity entityHit;
-    std::int32_t collisionShape;
-};

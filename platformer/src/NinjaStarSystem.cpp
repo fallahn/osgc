@@ -54,7 +54,7 @@ void NinjaStarSystem::process(float dt)
         bounds.width *= scale.x;
         bounds.height *= scale.y;
 
-        auto query = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds, CollisionShape::Solid | CollisionShape::Water);
+        auto query = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds, CollisionShape::Solid | CollisionShape::Water | CollisionShape::Text);
         for (auto other : query)
         {
             if (other != entity)
@@ -65,8 +65,10 @@ void NinjaStarSystem::process(float dt)
                     getScene()->destroyEntity(entity);
                     
                     auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
-                    msg->type = StarEvent::Despawned;
+                    msg->type = StarEvent::HitItem;
                     msg->position = tx.getPosition();
+                    msg->entityHit = other;
+                    msg->collisionShape = other.getComponent<xy::BroadphaseComponent>().getFilterFlags();
 
                     break;
                 }
