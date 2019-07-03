@@ -1,0 +1,248 @@
+/*********************************************************************
+
+Copyright 2019 Matt Marchant
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*********************************************************************/
+
+#include "MenuConfirmState.hpp"
+#include "SharedStateData.hpp"
+#include "GameConsts.hpp"
+#include "CommandIDs.hpp"
+
+#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Camera.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
+
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/RenderSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
+
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/System/Clock.hpp>
+
+namespace
+{
+    sf::Clock delayClock;
+    const sf::Time delayTime = sf::seconds(1.f);
+
+    std::array<sf::Vector2f, 2u> selection =
+    {
+        sf::Vector2f(780.f, 504.f),
+        sf::Vector2f(780.f, 604.f)
+    };
+}
+
+MenuConfirmState::MenuConfirmState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
+    : xy::State     (ss, ctx),
+    m_scene         (ctx.appInstance.getMessageBus()),
+    m_sharedData    (sd),
+    m_selectedIndex (0)
+{
+    build();
+
+    m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
+    m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+}
+
+//public
+bool MenuConfirmState::handleEvent(const sf::Event& evt)
+{
+    static auto execSelection = [&]()
+    {
+        if (m_selectedIndex == 0)
+        {
+            switch (m_sharedData.menuID)
+            {
+            default: break;
+            case MenuID::NewGame:
+
+                break;
+            case MenuID::Continue:
+
+                break;
+            }
+        }
+        else
+        {
+            requestStackPop();
+        }
+    };
+
+    static auto selectNext = [&]()
+    {
+        m_selectedIndex = (m_selectedIndex + 1) % 2;
+        
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::MenuCursor;
+        cmd.action = [&](xy::Entity e, float)
+        {
+            e.getComponent<xy::Transform>().setPosition(selection[m_selectedIndex]);
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    };
+
+    //slight delay before accepting input
+    if (delayClock.getElapsedTime() > delayTime)
+    {
+        if (evt.type == sf::Event::KeyReleased)
+        {
+            switch (evt.key.code)
+            {
+            default: break;
+            case sf::Keyboard::Up:
+            case sf::Keyboard::Down:
+            case sf::Keyboard::W:
+            case sf::Keyboard::S:
+                selectNext();
+                break;
+            case sf::Keyboard::Space:
+            case sf::Keyboard::Enter:
+                execSelection();
+                break;
+            }
+        }
+        else if (evt.type == sf::Event::JoystickButtonReleased
+            && evt.joystickButton.joystickId == 0)
+        {
+            if (evt.joystickButton.button == 0)
+            {
+                execSelection();
+            }
+        }
+        else if (evt.type == sf::Event::JoystickMoved
+            && evt.joystickMove.joystickId == 0)
+        {
+            switch (evt.joystickMove.axis)
+            {
+            default: break;
+            case sf::Joystick::Y:
+            case sf::Joystick::PovY:
+                selectNext();
+                break;
+            }
+        }
+    }
+
+    m_scene.forwardEvent(evt);
+
+    return false;
+}
+
+void MenuConfirmState::handleMessage(const xy::Message& msg)
+{
+    m_scene.forwardMessage(msg);
+}
+
+bool MenuConfirmState::update(float dt)
+{
+    m_scene.update(dt);
+    return true;
+}
+
+void MenuConfirmState::draw()
+{
+    auto& rw = getContext().renderWindow;
+    rw.draw(m_scene);
+}
+
+//private
+void MenuConfirmState::build()
+{
+    auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::CommandSystem>(mb);
+    m_scene.addSystem<xy::SpriteSystem>(mb);
+    m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::RenderSystem>(mb);
+
+
+    auto background = m_resources.load<sf::Texture>("assets/images/gearboy/menu_background.png");
+    m_resources.get<sf::Texture>(background).setRepeated(true);
+
+    const float scale = 4.f; //kludge.
+
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(background));
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+
+    verts.emplace_back(sf::Vector2f(), sf::Vector2f());
+    verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / scale, 0.f), sf::Vector2f(xy::DefaultSceneSize.x / scale, 0.f));
+    verts.emplace_back(xy::DefaultSceneSize / scale, xy::DefaultSceneSize / scale);
+    verts.emplace_back(sf::Vector2f(0.f, xy::DefaultSceneSize.y / scale), sf::Vector2f(0.f, xy::DefaultSceneSize.y / scale));
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+
+    auto fontID = m_resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
+    auto& font = m_resources.get<sf::Font>(fontID);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -180.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+
+    switch (m_sharedData.menuID)
+    {
+    default: break;
+    case MenuID::NewGame:
+        entity.getComponent<xy::Text>().setString("Overwrite Save Game?");
+        break;
+    case MenuID::Continue:
+        entity.getComponent<xy::Text>().setString("Continue From Save Game?");
+        break;
+    }
+
+    //yes
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -40.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("Yes");
+
+    //no
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 60.f);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setString("No");
+
+    auto arrow = m_resources.load<sf::Texture>("assets/images/gearboy/menu_cursor.png");
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(selection[0]);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(arrow));
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::MenuCursor;
+}

@@ -148,6 +148,7 @@
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
+    <ClInclude Include="include\MenuConfirmState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NinjaDirector.hpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
+    <ClCompile Include="src\MenuConfirmState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\NinjaDirector.cpp" />
     <ClCompile Include="src\NinjaStarSystem.cpp" />

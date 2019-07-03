@@ -6,6 +6,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp

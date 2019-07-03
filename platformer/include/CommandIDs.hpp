@@ -24,7 +24,8 @@ namespace CommandID
     {
         enum
         {
-            DebugItem = 0x1
+            DebugItem = 0x1,
+            MenuCursor = 0x2
         };
     }
 }

@@ -38,6 +38,7 @@ source distribution.
 #include "NinjaDirector.hpp"
 #include "CommandIDs.hpp"
 #include "ShakerSystem.hpp"
+#include "PluginExport.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -67,6 +68,20 @@ source distribution.
 namespace
 {
 #include "tilemap.inl"
+
+    struct MenuItem final
+    {
+        std::int32_t ID = -1;
+        float coolDown = 0.f;
+    };
+
+    struct MenuCallback final
+    {
+        void operator () (xy::Entity e, float dt)
+        {
+            e.getComponent<MenuItem>().coolDown -= dt;
+        }
+    };
 }
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -134,6 +149,42 @@ bool MenuState::handleEvent(const sf::Event& evt)
 
 void MenuState::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == MessageID::StarMessage)
+    {
+        const auto& data = msg.getData<StarEvent>();
+        if (data.type == StarEvent::HitItem &&
+            data.entityHit.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionShape::Text)
+        {
+            auto entity = data.entityHit;
+            auto& item = entity.getComponent<MenuItem>();
+            
+            switch (item.ID)
+            {
+            default:break;
+            case MenuID::NewGame:
+            case MenuID::Continue:
+                if (item.coolDown < 0)
+                {
+                    m_sharedData.menuID = item.ID;
+                    item.coolDown = 5.f;
+                    requestStackPush(StateID::MenuConfirm);
+                }
+                break;
+            case MenuID::Options:
+                if (item.coolDown < 0)
+                {
+                    xy::Console::show();
+                    item.coolDown = 5.f;
+                }
+                break;
+            case MenuID::Quit:
+                requestStackClear();
+                requestStackPush(StateID::ParentState);
+                break;
+            }
+        }
+    }
+
     m_backgroundScene.forwardMessage(msg);
 }
 
@@ -288,24 +339,32 @@ void MenuState::buildBackground()
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerBounds.left, GameConst::Gearboy::PlayerBounds.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerBounds.width, GameConst::Gearboy::PlayerBounds.height }, sf::Color::Red);
+        debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 
         debugEnt = m_backgroundScene.createEntity();
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerFoot.left, GameConst::Gearboy::PlayerFoot.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerFoot.width, GameConst::Gearboy::PlayerFoot.height }, sf::Color::Blue);
+        debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 
         debugEnt = m_backgroundScene.createEntity();
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerLeftHand.left, GameConst::Gearboy::PlayerLeftHand.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerLeftHand.width, GameConst::Gearboy::PlayerLeftHand.height }, sf::Color::Blue);
+        debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 
         debugEnt = m_backgroundScene.createEntity();
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerRightHand.left, GameConst::Gearboy::PlayerRightHand.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerRightHand.width, GameConst::Gearboy::PlayerRightHand.height }, sf::Color::Blue);
+        debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
 
@@ -362,6 +421,9 @@ void MenuState::buildMenu()
     entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
     entity.addComponent<Shaker>();
+    entity.addComponent<MenuItem>().ID = MenuID::NewGame;
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = MenuCallback();
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(1200.f, 390.f);
@@ -374,6 +436,9 @@ void MenuState::buildMenu()
     entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
     entity.addComponent<Shaker>();
+    entity.addComponent<MenuItem>().ID = MenuID::Continue;
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = MenuCallback();
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(800.f, 700.f);
@@ -386,6 +451,9 @@ void MenuState::buildMenu()
     entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
     entity.addComponent<Shaker>();
+    entity.addComponent<MenuItem>().ID = MenuID::Options;
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = MenuCallback();
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(220.f, 770.f);
@@ -398,4 +466,5 @@ void MenuState::buildMenu()
     entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Text::getLocalBounds(entity));
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
     entity.addComponent<Shaker>();
+    entity.addComponent<MenuItem>().ID = MenuID::Quit;
 }

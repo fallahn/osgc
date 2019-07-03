@@ -22,11 +22,14 @@
     <Filter Include="Source Files\systems">
       <UniqueIdentifier>{f953e779-2671-4d50-b8f7-d373afaa2700}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\states">
+      <UniqueIdentifier>{4f307d76-b8fb-4940-8ebf-fb5d9a99a9b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\states">
+      <UniqueIdentifier>{7298dc2c-fdc5-48e0-a7fb-ad122cf921eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\MenuState.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\PluginExport.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,12 +78,15 @@
     <ClInclude Include="include\ShakerSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\MenuState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MenuConfirmState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MenuState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MapLoader.cpp">
@@ -103,6 +109,12 @@
     </ClCompile>
     <ClCompile Include="src\ShakerSystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuConfirmState.cpp">
+      <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

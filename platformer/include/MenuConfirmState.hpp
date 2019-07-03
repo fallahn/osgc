@@ -18,18 +18,31 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include "InputBinding.hpp"
+#include "StateIDs.hpp"
 
-namespace MenuID
-{
-    enum
-    {
-        NewGame = 0, Continue, Options, Quit
-    };
-};
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
 
-struct SharedData final
+struct SharedData;
+class MenuConfirmState final : public xy::State
 {
-    InputBinding inputBinding;
-    std::int32_t menuID = -1;
+public:
+    MenuConfirmState(xy::StateStack&, xy::State::Context, SharedData&);
+
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
+
+    xy::StateID stateID() const override { return StateID::MenuConfirm; }
+
+private:
+    xy::Scene m_scene;
+    SharedData& m_sharedData;
+    xy::ResourceHandler m_resources;
+
+    std::size_t m_selectedIndex;
+
+    void build();
 };
