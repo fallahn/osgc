@@ -18,46 +18,27 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/components/Sprite.hpp>
+#include "ResourceIDs.hpp"
 
-#include <array>
+#include <xyginext/ecs/Director.hpp>
+#include <xyginext/ecs/Entity.hpp>
 
-namespace ShaderID
+#include <SFML/System/Vector2.hpp>
+
+class NinjaDirector final : public xy::Director
 {
-    enum
-    {
-        TileMap
-    };
-}
+public:
+    explicit NinjaDirector(SpriteArray<SpriteID::GearBoy::Count>&);
 
-namespace TextureID
-{
-    namespace Menu
-    {
-        enum
-        {
-            Background,
+    void handleMessage(const xy::Message&) override;
 
-            Count
-        };
-    }
-}
+    void setSpriteScale(float scale) { m_spriteScale = scale; }
 
-namespace SpriteID
-{
-    namespace GearBoy
-    {
-        enum
-        {
-            Player,
-            Star,
-            SmokePuff,
-            Squidger,
+private:
 
-            Count
-        };
-    }
-}
+    SpriteArray<SpriteID::GearBoy::Count>& m_sprites;
+    float m_spriteScale;
 
-template <std::size_t size>
-using SpriteArray = std::array<xy::Sprite, size>;
+    void spawnStar(xy::Entity);
+    void spawnPuff(sf::Vector2f);
+};

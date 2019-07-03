@@ -18,41 +18,15 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/components/Sprite.hpp>
-
 #include <array>
 
-namespace ShaderID
+namespace AnimID
 {
-    enum
-    {
-        TileMap
-    };
-}
-
-namespace TextureID
-{
-    namespace Menu
+    namespace Player
     {
         enum
         {
-            Background,
-
-            Count
-        };
-    }
-}
-
-namespace SpriteID
-{
-    namespace GearBoy
-    {
-        enum
-        {
-            Player,
-            Star,
-            SmokePuff,
-            Squidger,
+            Idle, Jump, Run,
 
             Count
         };
@@ -60,4 +34,4 @@ namespace SpriteID
 }
 
 template <std::size_t size>
-using SpriteArray = std::array<xy::Sprite, size>;
+using AnimationMap = std::array<std::size_t, size>;

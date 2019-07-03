@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "AnimationMap.hpp"
+
 #include <xyginext/ecs/System.hpp>
 
 struct Player final
@@ -35,6 +37,8 @@ struct Player final
     sf::Vector2f velocity;
     static constexpr float Acceleration = 120.f;
     static constexpr float Drag = 0.82f;
+
+    AnimationMap<AnimID::Player::Count> animations;
 };
 
 class PlayerSystem final : public xy::System

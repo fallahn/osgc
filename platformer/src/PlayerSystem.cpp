@@ -150,7 +150,7 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
     if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Foot))
     {
         entity.getComponent<Player>().state = Player::Running;
-        entity.getComponent<xy::SpriteAnimation>().play(0); //TODO get proper index map for sprite animation
+        entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Idle]);
     }
 }
 
@@ -203,24 +203,24 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
     //apply the state
     applyVelocity(entity, dt);
 
-    //update the animation based on velocity - TODO properly map animation indices
+    //update the animation based on velocity
     float len2 = xy::Util::Vector::lengthSquared(player.velocity);
     const float MaxVel = 203000.f;
 
     if (len2 > 100.f)
     {
-        if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() == 0)
+        if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() == player.animations[AnimID::Player::Idle])
         {
-            entity.getComponent<xy::SpriteAnimation>().play(1);
+            entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Run]);
         }
         //entity.getComponent<xy::Sprite>().getAnimations()[1].framerate = 20.f * std::min((len2 / MaxVel), 1.f);
     }
     else
     {
         //idle
-        if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() != 0)
+        if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() != player.animations[AnimID::Player::Idle])
         {
-            entity.getComponent<xy::SpriteAnimation>().play(0);
+            entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Idle]);
         }
     }
 
@@ -229,7 +229,7 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
     if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
     {
         entity.getComponent<Player>().state = Player::Falling;
-        entity.getComponent<xy::SpriteAnimation>().play(2);
+        entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
     }
 }
 

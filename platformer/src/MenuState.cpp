@@ -35,6 +35,7 @@ source distribution.
 #include "SharedStateData.hpp"
 #include "NinjaStarSystem.hpp"
 #include "MessageIDs.hpp"
+#include "NinjaDirector.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -96,29 +97,6 @@ bool MenuState::handleEvent(const sf::Event& evt)
 
 void MenuState::handleMessage(const xy::Message& msg)
 {
-    if (msg.id == MessageID::PlayerMessage)
-    {
-        const auto& data = msg.getData<PlayerEvent>();
-        switch (data.type)
-        {
-        default: break;
-        case PlayerEvent::Shot:
-            spawnStar(data.entity);
-            break;
-        }
-    }
-    else if (msg.id == MessageID::StarMessage)
-    {
-        const auto& data = msg.getData<StarEvent>();
-        switch (data.type)
-        {
-        default: break;
-        case StarEvent::Despawned:
-            spawnPuff(data.position);
-            break;
-        }
-    }
-
     m_backgroundScene.forwardMessage(msg);
 }
 
@@ -153,6 +131,8 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
+
+    m_backgroundScene.addDirector<NinjaDirector>(m_sprites);
 }
 
 void MenuState::loadResources()
@@ -162,6 +142,10 @@ void MenuState::loadResources()
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/gearboy/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
+
+    m_playerAnimations[AnimID::Player::Idle] = spriteSheet.getAnimationIndex("idle", "player");
+    m_playerAnimations[AnimID::Player::Jump] = spriteSheet.getAnimationIndex("jump", "player");
+    m_playerAnimations[AnimID::Player::Run] = spriteSheet.getAnimationIndex("run", "player");
 
     spriteSheet.loadFromFile("assets/sprites/gearboy/star.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Star] = spriteSheet.getSprite("star");
@@ -177,6 +161,7 @@ void MenuState::buildBackground()
     if (m_mapLoader.load("menu.tmx"))
     {
         const float pixelScale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+        m_backgroundScene.getDirector<NinjaDirector>().setSpriteScale(pixelScale);
         const auto& layers = m_mapLoader.getLayers();
 
         //for each layer create a drawable in the scene
@@ -242,7 +227,7 @@ void MenuState::buildBackground()
 
         collision.shapes[3].aabb = GameConst::Gearboy::PlayerRightHand;
         collision.shapes[3].type = CollisionShape::RightHand;
-        collision.shapes[4].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+        collision.shapes[3].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
 
         collision.shapeCount = 4;
 
@@ -252,7 +237,7 @@ void MenuState::buildBackground()
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand);
-        entity.addComponent<Player>();
+        entity.addComponent<Player>().animations = m_playerAnimations;
         m_playerInput.setPlayerEntity(entity);
 
 #ifdef XY_DEBUG
@@ -326,46 +311,4 @@ void MenuState::buildBackground()
 void MenuState::buildMenu()
 {
 
-}
-
-void MenuState::spawnStar(xy::Entity entity)
-{
-    //TODO this is probably better off encapsulated elsewhere
-    //such as a director hich can also spawn dust puffs etc
-    float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
-
-    auto starEnt = m_backgroundScene.createEntity();
-    starEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition() + GameConst::Gearboy::StarOffset);
-    starEnt.getComponent<xy::Transform>().setScale(scale, scale);
-    starEnt.addComponent<xy::Drawable>();
-    starEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
-    auto bounds = starEnt.getComponent<xy::Sprite>().getTextureBounds();
-    starEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    starEnt.addComponent<xy::SpriteAnimation>().play(0);
-    starEnt.addComponent<NinjaStar>().velocity.x = entity.getComponent<xy::Transform>().getScale().x * GameConst::Gearboy::StarSpeed;
-
-}
-
-void MenuState::spawnPuff(sf::Vector2f position)
-{
-    //TODO move to a director with star spawning, above
-    float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
-
-    auto entity = m_backgroundScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(position);
-    entity.getComponent<xy::Transform>().setScale(scale, scale);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::SmokePuff];
-    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.addComponent<xy::SpriteAnimation>().play(0);
-    entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function =
-        [&](xy::Entity e, float)
-    {
-        if (e.getComponent<xy::SpriteAnimation>().stopped())
-        {
-            m_backgroundScene.destroyEntity(e);
-        }
-    };
 }

@@ -30,6 +30,7 @@ source distribution.
 #include "MapLoader.hpp"
 #include "ResourceIDs.hpp"
 #include "InputParser.hpp"
+#include "AnimationMap.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -61,7 +62,8 @@ private:
     xy::ResourceHandler m_resources;
 
     std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
-    std::array<xy::Sprite, SpriteID::GearBoy::Count> m_sprites;
+    SpriteArray<SpriteID::GearBoy::Count> m_sprites;
+    AnimationMap<AnimID::Player::Count> m_playerAnimations;
 
     MapLoader m_mapLoader;
     InputParser m_playerInput;
@@ -70,7 +72,4 @@ private:
     void loadResources();
     void buildBackground();
     void buildMenu();
-
-    void spawnStar(xy::Entity);
-    void spawnPuff(sf::Vector2f);
 };

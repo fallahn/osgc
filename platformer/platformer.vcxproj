@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\AnimationMap.hpp" />
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\InputBinding.hpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\NinjaDirector.hpp" />
     <ClInclude Include="include\NinjaStarSystem.hpp" />
     <ClInclude Include="include\Player.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
@@ -161,6 +163,7 @@
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\NinjaDirector.cpp" />
     <ClCompile Include="src\NinjaStarSystem.cpp" />
     <ClCompile Include="src\PlayerSystem.cpp" />
   </ItemGroup>

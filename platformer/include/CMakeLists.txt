@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/AnimationMap.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp
@@ -7,6 +8,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Player.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
