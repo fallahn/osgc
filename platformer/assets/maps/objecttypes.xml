@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
- <objecttype name="lethal" color="#ff0000"/>
- <objecttype name="solid" color="#0000ff"/>
- <objecttype name="spawn" color="#00f8ff"/>
- <objecttype name="enemy" color="#e0ff0e"/>
- <objecttype name="exit" color="#ffff00"/>
+ <objecttype name="checkpoint" color="#d0f8ff">
+  <property name="id" type="int" default="0"/>
+ </objecttype>
+ <objecttype name="collectible" color="#4ff8a0">
+  <property name="id" type="int" default="0"/>
+ </objecttype>
+ <objecttype name="enemy" color="#ff00ff">
+  <property name="id" type="int" default="0"/>
+ </objecttype>
+ <objecttype name="exit" color="#ffff00">
+  <property name="next_map" type="string"/>
+ </objecttype>
+ <objecttype name="fluid" color="#000ffe">
+  <property name="id" type="int" default="0"/>
+ </objecttype>
+ <objecttype name="solid" color="#00003f"/>
+ <objecttype name="spikes" color="#ff0000"/>
 </objecttypes>

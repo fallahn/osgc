@@ -308,19 +308,19 @@ void MenuState::buildBackground()
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = GameConst::Gearboy::PlayerBounds;
         collision.shapes[0].type = CollisionShape::Player;
-        collision.shapes[0].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+        collision.shapes[0].collisionFlags = CollisionGroup::PlayerFlags;
 
         collision.shapes[1].aabb = GameConst::Gearboy::PlayerFoot;
         collision.shapes[1].type = CollisionShape::Foot;
-        collision.shapes[1].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+        collision.shapes[1].collisionFlags = CollisionGroup::PlayerFlags;
 
         collision.shapes[2].aabb = GameConst::Gearboy::PlayerLeftHand;
         collision.shapes[2].type = CollisionShape::LeftHand;
-        collision.shapes[2].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+        collision.shapes[2].collisionFlags = CollisionGroup::PlayerFlags;
 
         collision.shapes[3].aabb = GameConst::Gearboy::PlayerRightHand;
         collision.shapes[3].type = CollisionShape::RightHand;
-        collision.shapes[3].collisionFlags = CollisionShape::Solid | CollisionShape::Water;
+        collision.shapes[3].collisionFlags = CollisionGroup::PlayerFlags;
 
         collision.shapeCount = 4;
 

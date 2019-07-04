@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/FileSystem.hpp>
 #include <xyginext/core/Log.hpp>
 
+#include <xyginext/util/String.hpp>
+
 #include <SFML/Graphics/Image.hpp>
 
 #include <tmxlite/Map.hpp>
@@ -171,10 +173,49 @@ bool MapLoader::load(const std::string& file)
                     case tmx::Object::Shape::Rectangle:
                     {
                         auto& collision = m_collisionShapes.emplace_back();
-                        collision.type = CollisionShape::Solid;
                         collision.shape = CollisionShape::Rectangle;
                         collision.aabb = toFloatRect(object.getAABB());
-                        collision.collisionFlags = CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand;
+
+                        auto type = xy::Util::String::toLower(object.getType());
+                        if (type == "solid")
+                        {
+                            collision.collisionFlags = CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand;
+                            collision.type = CollisionShape::Solid;
+                        }
+                        else if (type == "fluid")
+                        {
+                            //TODO check for ID property
+                            collision.type = CollisionShape::Fluid;
+                        }
+                        else if (type == "spikes")
+                        {
+                            collision.type = CollisionShape::Spikes;
+                        }
+                        else if (type == "checkpoint")
+                        {
+                            //TODO check for ID
+                            collision.type = CollisionShape::Checkpoint;
+                        }
+                        else if (type == "enemy")
+                        {
+                            //TODO check for ID
+                            collision.type = CollisionShape::Enemy;
+                        }
+                        else if (type == "exit")
+                        {
+                            //TODO check for next map. Store this as map loader property.
+                            collision.type = CollisionShape::Exit;
+                        }
+                        else if (type == "collectible")
+                        {
+                            //TODO check for ID
+                            collision.type = CollisionShape::Collectible;
+                        }
+                        else
+                        {
+                            //not valid, remove
+                            m_collisionShapes.pop_back();
+                        }
                     }
                         break;
                     }

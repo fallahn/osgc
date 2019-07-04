@@ -31,16 +31,23 @@ struct CollisionShape final
     enum Type
     {
         Solid = 0x1,
-        Water = 0x2,
-        Player = 0x4,
-        Foot = 0x8,
-        LeftHand = 0x10,
-        RightHand = 0x20,
-        Text = 0x40
+        Fluid = 0x2,
+        Spikes = 0x4,
+        Checkpoint = 0x8,
+        Enemy = 0x10,
+        Exit = 0x20,
+        Collectible = 0x40,
+
+        Player = 0x80,
+        Foot = 0x100,
+        LeftHand = 0x200,
+        RightHand = 0x400,
+
+        Text = 0x800
     }type = Solid;
 
     //these are the types this shape collides with
-    std::uint16_t collisionFlags = Player | Foot | LeftHand | RightHand;
+    std::uint64_t collisionFlags = Player | Foot | LeftHand | RightHand;
 
     enum Shape
     {
@@ -48,6 +55,8 @@ struct CollisionShape final
     }shape = Rectangle;
 
     sf::FloatRect aabb;
+
+    std::int32_t ID = -1; //used for map objects with properties such as NPC/Collectible type
 };
 
 struct CollisionBody final
@@ -62,6 +71,18 @@ struct Manifold final
     sf::Vector2f normal;
     float penetration = 0.f;
 };
+
+namespace CollisionGroup
+{
+    static const std::uint64_t PlayerFlags = 
+        CollisionShape::Fluid | CollisionShape::Solid | CollisionShape::Spikes | 
+        CollisionShape::Collectible | CollisionShape::Checkpoint | CollisionShape::Enemy |
+        CollisionShape::Exit;
+
+    static const std::uint64_t StarFlags =
+        CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes |
+        CollisionShape::Enemy | CollisionShape::Text;
+}
 
 std::optional<Manifold> intersectsAABB(sf::FloatRect, sf::FloatRect);
 

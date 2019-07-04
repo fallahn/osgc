@@ -47,5 +47,5 @@ struct StarEvent final
     }type = HitItem;
     sf::Vector2f position;
     xy::Entity entityHit;
-    std::int32_t collisionShape;
+    std::uint64_t collisionShape = 0;
 };

@@ -248,7 +248,7 @@ void PlayerSystem::doCollision(xy::Entity entity, float)
     auto area = entity.getComponent<xy::BroadphaseComponent>().getArea();
 
     auto queryArea = boundsToWorldspace(area, tx);
-    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionShape::Water | CollisionShape::Solid);
+    auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionGroup::PlayerFlags);
 
     for (auto other : nearby)
     {
@@ -284,20 +284,22 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
 
             if (collisionBody.shapes[i].type == CollisionShape::Player)
             {
-                tx.move(manifold->normal * manifold->penetration);
-
-                if (manifold->normal.y != 0)
+                switch (otherBody.shapes[0].type)
                 {
-                    player.velocity = {};
-                }
-                else
-                {
-                    player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal);
-                }
-            }
-            else if (collisionBody.shapes[i].type == CollisionShape::Foot)
-            {
+                default: break;
+                case CollisionShape::Solid:
+                    tx.move(manifold->normal * manifold->penetration);
 
+                    if (manifold->normal.y != 0)
+                    {
+                        player.velocity = {};
+                    }
+                    else
+                    {
+                        player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal);
+                    }
+                    break;
+                }
             }
         }
     }

@@ -54,7 +54,7 @@ void NinjaStarSystem::process(float dt)
         bounds.width *= scale.x;
         bounds.height *= scale.y;
 
-        auto query = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds, CollisionShape::Solid | CollisionShape::Water | CollisionShape::Text);
+        auto query = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds, CollisionGroup::StarFlags);
         for (auto other : query)
         {
             if (other != entity)

@@ -37,5 +37,5 @@ public:
     void process(float) override;
 private:
 
-    void onEntityAdded(xy::Entity);
+    void onEntityAdded(xy::Entity) override;
 };
