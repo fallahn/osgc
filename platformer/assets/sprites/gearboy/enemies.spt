@@ -1,0 +1,62 @@
+spritesheet enemies
+{
+    src="assets/images/gearboy/enemies.png"
+
+    sprite poopsnail
+    {
+        bounds = 0,0,32,16
+
+        animation walk
+        {
+            frame=0,0,32,16
+            frame=32,0,32,16
+            frame=0,0,32,16
+            frame=64,0,32,16
+
+            loop=true
+            framerate=16
+        }
+    }
+
+    sprite bird
+    {
+        bounds = 0,16,16,16
+
+        animation fly
+        {
+            frame  = 0,16,16,16
+            frame  = 16,16,16,16
+            frame  = 32,16,16,16
+            frame  = 16,16,16,16
+
+            loop=true
+            framerate=16
+        }
+
+        animation die
+        {
+            frame=48,16,16,16
+            frame=64,16,16,16
+
+            loop=true
+            framerate=16
+        }
+    }
+
+    sprite squatmo
+    {
+        bounds = 0,32,16,16
+
+        animation walk
+        {
+            frame=0,32,16,16
+            frame=16,32,16,16
+            frame=32,32,16,16
+            frame=48,32,16,16
+            frame=64,32,16,16
+
+            loop=true
+            framerate=16
+        }
+    }
+}

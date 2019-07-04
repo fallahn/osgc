@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="78">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="100">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -17,14 +17,22 @@
   <object id="6" type="solid" x="448" y="272" width="96" height="48"/>
   <object id="7" type="solid" x="432" y="288" width="16" height="32"/>
   <object id="8" type="solid" x="416" y="304" width="16" height="16"/>
-  <object id="9" type="lethal" x="192" y="336" width="112" height="48"/>
-  <object id="10" type="lethal" x="544" y="288" width="80" height="96"/>
+  <object id="9" type="fluid" x="192" y="336" width="112" height="48"/>
+  <object id="10" type="fluid" x="544" y="288" width="80" height="96">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
   <object id="11" type="solid" x="624" y="272" width="128" height="48"/>
   <object id="12" type="solid" x="800" y="336" width="96" height="48"/>
-  <object id="13" type="lethal" x="896" y="352" width="176" height="32"/>
+  <object id="13" type="fluid" x="896" y="352" width="176" height="32">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
   <object id="14" type="solid" x="1072" y="272" width="288" height="96"/>
   <object id="15" type="solid" x="1360" y="320" width="96" height="64"/>
-  <object id="16" type="lethal" x="1456" y="336" width="112" height="48"/>
+  <object id="16" type="fluid" x="1456" y="336" width="112" height="48"/>
   <object id="17" type="solid" x="1568" y="304" width="344" height="48"/>
   <object id="18" type="solid" x="1696" y="272" width="216" height="32"/>
   <object id="19" type="solid" x="752" y="288" width="16" height="32"/>
@@ -50,15 +58,15 @@
   <object id="39" type="solid" x="448" y="80" width="16" height="32"/>
   <object id="40" type="solid" x="480" y="48" width="48" height="160"/>
   <object id="41" type="solid" x="400" y="128" width="32" height="64"/>
-  <object id="42" type="lethal" x="432" y="144" width="48" height="56"/>
+  <object id="42" type="spikes" x="432" y="144" width="48" height="56"/>
   <object id="43" type="solid" x="544" y="176" width="64" height="32"/>
-  <object id="44" type="lethal" x="584" y="72" width="32" height="32"/>
+  <object id="44" type="spikes" x="584" y="72" width="32" height="32"/>
   <object id="45" type="solid" x="688" y="16" width="32" height="48"/>
   <object id="46" type="solid" x="704" y="112" width="48" height="16"/>
   <object id="47" type="solid" x="640" y="144" width="16" height="16"/>
   <object id="48" type="solid" x="688" y="192" width="16" height="16"/>
   <object id="49" type="solid" x="576" y="240" width="16" height="16"/>
-  <object id="50" type="lethal" x="528" y="168" width="16" height="40"/>
+  <object id="50" type="spikes" x="528" y="168" width="16" height="40"/>
   <object id="51" type="solid" x="848" y="64" width="32" height="144"/>
   <object id="52" type="solid" x="800" y="64" width="32" height="192"/>
   <object id="53" type="solid" x="928" y="16" width="64" height="96"/>
@@ -73,18 +81,64 @@
   <object id="62" type="solid" x="832" y="224" width="64" height="32"/>
   <object id="63" type="solid" x="752" y="160" width="32" height="48"/>
   <object id="64" type="solid" x="784" y="128" width="16" height="128"/>
-  <object id="65" type="lethal" x="32" y="112" width="32" height="8"/>
-  <object id="66" type="lethal" x="32" y="152" width="32" height="8"/>
-  <object id="67" type="lethal" x="96" y="152" width="16" height="8"/>
-  <object id="68" type="lethal" x="0" y="112" width="8" height="48"/>
-  <object id="69" type="lethal" x="0" y="16" width="8" height="32"/>
-  <object id="70" type="lethal" x="400" y="192" width="32" height="8"/>
-  <object id="71" type="lethal" x="480" y="208" width="128" height="8"/>
-  <object id="72" type="lethal" x="400" y="120" width="16" height="8"/>
-  <object id="73" type="lethal" x="880" y="168" width="16" height="8"/>
-  <object id="74" type="lethal" x="960" y="224" width="16" height="8"/>
-  <object id="75" type="lethal" x="992" y="176" width="16" height="8"/>
-  <object id="76" type="lethal" x="776" y="208" width="8" height="48"/>
-  <object id="77" type="lethal" x="1360" y="312" width="32" height="8"/>
+  <object id="65" type="spikes" x="32" y="112" width="32" height="8"/>
+  <object id="66" type="spikes" x="32" y="152" width="32" height="8"/>
+  <object id="67" type="spikes" x="96" y="152" width="16" height="8"/>
+  <object id="68" type="spikes" x="0" y="112" width="8" height="48"/>
+  <object id="69" type="spikes" x="0" y="16" width="8" height="32"/>
+  <object id="70" type="spikes" x="400" y="192" width="32" height="8"/>
+  <object id="71" type="spikes" x="480" y="208" width="128" height="8"/>
+  <object id="72" type="spikes" x="400" y="120" width="16" height="8"/>
+  <object id="73" type="spikes" x="880" y="168" width="16" height="8"/>
+  <object id="74" type="spikes" x="960" y="224" width="16" height="8"/>
+  <object id="75" type="spikes" x="992" y="176" width="16" height="8"/>
+  <object id="76" type="spikes" x="776" y="208" width="8" height="48"/>
+  <object id="77" type="spikes" x="1360" y="312" width="32" height="8"/>
+  <object id="78" type="solid" x="1712" y="112" width="80" height="16"/>
+  <object id="79" type="solid" x="1776" y="128" width="80" height="16"/>
+  <object id="80" type="solid" x="1840" y="144" width="72" height="16"/>
+  <object id="81" type="solid" x="1776" y="224" width="64" height="16"/>
+  <object id="82" type="solid" x="1696" y="208" width="96" height="16"/>
+  <object id="83" type="solid" x="1600" y="176" width="96" height="16"/>
+  <object id="84" type="solid" x="1680" y="192" width="32" height="16"/>
+  <object id="85" type="spikes" x="1728" y="200" width="16" height="8"/>
+  <object id="86" type="spikes" x="1808" y="216" width="16" height="8"/>
+  <object id="87" type="spikes" x="1728" y="128" width="48" height="8"/>
+  <object id="88" type="spikes" x="1776" y="144" width="64" height="8"/>
+  <object id="89" type="spikes" x="1840" y="160" width="48" height="8"/>
+  <object id="90" type="spikes" x="1896" y="176" width="8" height="48"/>
+  <object id="91" type="exit" x="1640" y="112" width="20" height="36">
+   <properties>
+    <property name="next_map" value="gb01"/>
+   </properties>
+  </object>
+  <object id="92" type="checkpoint" x="40" y="272" width="20" height="32"/>
+  <object id="93" type="checkpoint" x="1008" y="128" width="24" height="28">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="94" type="collectible" x="104" y="284" width="16" height="16"/>
+  <object id="95" type="collectible" x="132" y="284" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="96" type="collectible" x="160" y="284" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="97" type="enemy" x="320" y="304" width="80" height="16"/>
+  <object id="98" type="enemy" x="456" y="256" width="80" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="99" type="enemy" x="308" y="172" width="80" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
