@@ -19,10 +19,15 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "StateIDs.hpp"
+#include "ResourceIDs.hpp"
+#include "MapLoader.hpp"
+#include "InputParser.hpp"
+#include "AnimationMap.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 struct SharedData;
 class GameState final : public xy::State
@@ -41,6 +46,14 @@ private:
     xy::Scene m_gameScene;
     SharedData& m_sharedData;
     xy::ResourceHandler m_resources;
+    xy::ShaderResource m_shaders;
+
+    std::array<std::size_t, TextureID::Game::Count> m_textureIDs;
+    SpriteArray<SpriteID::GearBoy::Count> m_sprites;
+    AnimationMap<AnimID::Player::Count> m_playerAnimations;
+
+    MapLoader m_mapLoader;
+    InputParser m_playerInput;
 
     void initScene();
     void loadResources();

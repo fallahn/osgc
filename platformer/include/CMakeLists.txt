@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/AnimationMap.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CameraTarget.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp

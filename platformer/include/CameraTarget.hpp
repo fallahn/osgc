@@ -18,67 +18,30 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/System.hpp>
 
-#include <array>
-
-namespace ShaderID
+struct CameraTarget final
 {
-    enum
-    {
-        TileMap
-    };
-}
+    xy::Entity lastTarget;
+    xy::Entity target;
 
-namespace TextureID
+    //when switching targets we can smooth between those too...
+    sf::Vector2f targetPosition;
+    sf::Vector2f targetVelocity;
+
+    sf::Vector2f velocity;
+};
+
+class CameraTargetSystem final : public xy::System
 {
-    namespace Menu
-    {
-        enum
-        {
-            Background,
+public:
+    explicit CameraTargetSystem(xy::MessageBus& mb);
 
-            Count
-        };
-    }
+    void process(float) override;
 
-    namespace Game
-    {
-        enum
-        {
-            Background,
+    void setBounds(sf::FloatRect bounds) { m_bounds = bounds; }
 
-            Count
-        };
-    }
-}
+private:
 
-namespace FontID
-{
-    enum
-    {
-        Menu,
-
-
-        Count 
-    };
-}
-
-namespace SpriteID
-{
-    namespace GearBoy
-    {
-        enum
-        {
-            Player,
-            Star,
-            SmokePuff,
-            Squidger,
-
-            Count
-        };
-    }
-}
-
-template <std::size_t size>
-using SpriteArray = std::array<xy::Sprite, size>;
+    sf::FloatRect m_bounds;
+};

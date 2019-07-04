@@ -193,7 +193,7 @@ void PauseState::draw()
 //private
 void PauseState::build()
 {
-    //TODO load correct graphics / colours basedon current theme
+    //TODO load correct graphics / colours based on current theme
 
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(mb);

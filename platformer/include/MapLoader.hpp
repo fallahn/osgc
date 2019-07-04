@@ -50,6 +50,8 @@ public:
 
     const std::vector<CollisionShape>& getCollisionShapes() const { return m_collisionShapes; }
 
+    sf::Vector2f getMapSize() const { return m_mapSize; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -64,6 +66,7 @@ private:
     std::vector<MapLayer> m_mapLayers;
 
     float m_tileSize;
+    sf::Vector2f m_mapSize;
 
     std::vector<CollisionShape> m_collisionShapes;
 };

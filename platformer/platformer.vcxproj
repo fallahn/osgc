@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\AnimationMap.hpp" />
+    <ClInclude Include="include\CameraTarget.hpp" />
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CameraTargetSystem.cpp" />
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\GameState.cpp" />

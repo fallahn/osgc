@@ -31,6 +31,8 @@ namespace GameConst
     static const std::int32_t TextDepth = 10;
     static const float PixelsPerTile = 64.f; //world pixels per game tile - eg tiles are scaled up to this
 
+    static const float VerticalTileCount = 17.f; //only true for 16px tiles :/
+
     namespace Gearboy
     {
         static const sf::FloatRect PlayerBounds(-6.f, -10.f, 12.f, 10.f); //relative to player origin

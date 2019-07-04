@@ -48,6 +48,7 @@ bool MapLoader::load(const std::string& file)
     if (map.load(xy::FileSystem::getResourcePath() + "assets/maps/" + file))
     {
         m_tileSize = static_cast<float>(map.getTileSize().x);
+        m_mapSize = { float(map.getTileCount().x * map.getTileSize().x), float(map.getTileCount().y * map.getTileSize().y) };
 
         //load the tile sets and associated textures
         std::map<const tmx::Tileset*, sf::Texture*> tsTextures;

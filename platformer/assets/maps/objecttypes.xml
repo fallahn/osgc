@@ -2,4 +2,7 @@
 <objecttypes>
  <objecttype name="lethal" color="#ff0000"/>
  <objecttype name="solid" color="#0000ff"/>
+ <objecttype name="spawn" color="#00f8ff"/>
+ <objecttype name="enemy" color="#e0ff0e"/>
+ <objecttype name="exit" color="#ffff00"/>
 </objecttypes>
