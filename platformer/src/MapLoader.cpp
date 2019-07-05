@@ -44,6 +44,8 @@ bool MapLoader::load(const std::string& file)
     m_indexMaps.clear();
     m_mapLayers.clear();
     m_tilesets.clear();
+    m_tileSize = 64.f;
+    m_spawnPoint = {};
 
     tmx::Map map;
 
@@ -80,6 +82,9 @@ bool MapLoader::load(const std::string& file)
                 }
             }
         }
+
+        //need to make sure this is filled and has correct IDs
+        std::vector<std::pair<sf::Vector2f, std::int32_t>> checkpoints;
 
         //this makes some basic assumptions such as a layer only uses a single
         //tile set, and that all tiles within the set are the same size.
@@ -163,6 +168,23 @@ bool MapLoader::load(const std::string& file)
                     return { rect.left, rect.top, rect.width, rect.height };
                 };
 
+                auto getID = [](const tmx::Object obj)->std::optional<std::int32_t>
+                {
+                    const auto& properties = obj.getProperties();
+                    auto result = std::find_if(properties.begin(), properties.end(),
+                        [](const tmx::Property& prop)
+                        {
+                            return prop.getName() == "id";
+                        });
+
+                    if (result == properties.end())
+                    {
+                        return std::nullopt;
+                    }
+
+                    return { result->getIntValue() };
+                };
+
                 const auto& objects = layer->getLayerAs<tmx::ObjectGroup>().getObjects();
                 for (const auto& object : objects)
                 {
@@ -184,8 +206,13 @@ bool MapLoader::load(const std::string& file)
                         }
                         else if (type == "fluid")
                         {
-                            //TODO check for ID property
-                            collision.type = CollisionShape::Fluid;
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                collision.type = CollisionShape::Fluid;
+                                collision.collisionFlags = CollisionShape::Player;
+                                collision.ID = *id;
+                            }
                         }
                         else if (type == "spikes")
                         {
@@ -193,8 +220,19 @@ bool MapLoader::load(const std::string& file)
                         }
                         else if (type == "checkpoint")
                         {
-                            //TODO check for ID
-                            collision.type = CollisionShape::Checkpoint;
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                collision.type = CollisionShape::Checkpoint;
+                                collision.collisionFlags = CollisionShape::Player;
+                                collision.ID = *id;
+
+                                checkpoints.emplace_back(std::make_pair(sf::Vector2f(object.getPosition().x, object.getPosition().y), *id));
+                            }
+                            else
+                            {
+                                m_collisionShapes.pop_back();
+                            }
                         }
                         else if (type == "enemy")
                         {
@@ -222,6 +260,17 @@ bool MapLoader::load(const std::string& file)
                 }
             }
         }
+
+        //check valid check points and at least one spawn
+        if (checkpoints.empty())
+        {
+            xy::Logger::log("No Checkpoints found", xy::Logger::Type::Error);
+            return false;
+        }
+        std::sort(checkpoints.begin(), checkpoints.end(),
+            [](const std::pair<sf::Vector2f, std::int32_t>& a, const std::pair<sf::Vector2f, std::int32_t>& b)
+            {return a.second < b.second; });
+        m_spawnPoint = checkpoints[0].first;
 
         return true;
     }

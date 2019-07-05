@@ -1,0 +1,20 @@
+spritesheet lava
+{
+    src="assets/images/gearboy/lava.png"
+
+    sprite lava
+    {
+        bounds = 0,0,64,128
+
+        animation idle
+        {
+            frame = 0,0,64,128
+            frame = 0,128,64,128
+            frame = 0,256,64,128
+            frame = 0,384,64,128
+
+            loop=true
+            framerate = 12
+        }
+    }
+}

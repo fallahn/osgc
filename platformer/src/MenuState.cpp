@@ -39,6 +39,7 @@ source distribution.
 #include "CommandIDs.hpp"
 #include "ShakerSystem.hpp"
 #include "PluginExport.hpp"
+#include "FluidAnimationSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -121,7 +122,7 @@ bool MenuState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::F2:
         {
             xy::Command cmd;
-            cmd.targetFlags = CommandID::Menu::DebugItem;
+            cmd.targetFlags = CommandID::World::DebugItem;
             cmd.action = [](xy::Entity e, float)
             {
                 auto scale = e.getComponent<xy::Transform>().getScale();
@@ -217,6 +218,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<PlayerSystem>(mb);
     m_backgroundScene.addSystem<NinjaStarSystem>(mb);
     m_backgroundScene.addSystem<ShakerSystem>(mb);
+    m_backgroundScene.addSystem<FluidAnimationSystem>(mb);
     m_backgroundScene.addSystem<xy::TextSystem>(mb);
     m_backgroundScene.addSystem<xy::SpriteAnimator>(mb);
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
@@ -229,7 +231,7 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     m_textureIDs[TextureID::Menu::Background] = m_resources.load<sf::Texture>("assets/images/gearboy/background.png");
-
+    
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/gearboy/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
@@ -243,6 +245,14 @@ void MenuState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/gearboy/smoke_puff.spt", m_resources);
     m_sprites[SpriteID::GearBoy::SmokePuff] = spriteSheet.getSprite("smoke_puff");
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/lava.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
+    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/water.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
+    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
 
@@ -297,7 +307,7 @@ void MenuState::buildBackground()
 
         //player
         entity = m_backgroundScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Transform>().setPosition(m_mapLoader.getSpawnPoint() * pixelScale);
         entity.getComponent<xy::Transform>().setScale(pixelScale, pixelScale);
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Player];
@@ -340,7 +350,7 @@ void MenuState::buildBackground()
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerBounds.left, GameConst::Gearboy::PlayerBounds.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerBounds.width, GameConst::Gearboy::PlayerBounds.height }, sf::Color::Red);
         debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
-        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 
         debugEnt = m_backgroundScene.createEntity();
@@ -348,7 +358,7 @@ void MenuState::buildBackground()
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerFoot.left, GameConst::Gearboy::PlayerFoot.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerFoot.width, GameConst::Gearboy::PlayerFoot.height }, sf::Color::Blue);
         debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
-        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 
         debugEnt = m_backgroundScene.createEntity();
@@ -356,7 +366,7 @@ void MenuState::buildBackground()
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerLeftHand.left, GameConst::Gearboy::PlayerLeftHand.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerLeftHand.width, GameConst::Gearboy::PlayerLeftHand.height }, sf::Color::Blue);
         debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
-        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 
         debugEnt = m_backgroundScene.createEntity();
@@ -364,7 +374,7 @@ void MenuState::buildBackground()
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerRightHand.left, GameConst::Gearboy::PlayerRightHand.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerRightHand.width, GameConst::Gearboy::PlayerRightHand.height }, sf::Color::Blue);
         debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
-        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
 
@@ -385,9 +395,50 @@ void MenuState::buildBackground()
             entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<CollisionBody>().shapes[0].aabb);
             entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(shape.type);
 
+            if (shape.ID > -1)
+            {
+                switch (shape.type)
+                {
+                default: break;
+                case CollisionShape::Fluid:
+                {
+                    sf::Vector2f size(shape.aabb.width, shape.aabb.height);
+                    size *= pixelScale;
+
+                    entity.addComponent<xy::Drawable>();
+                    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+                    verts.emplace_back(sf::Vector2f());
+                    verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));
+                    verts.emplace_back(size, size);
+                    verts.emplace_back(sf::Vector2f(0.f, size.y), sf::Vector2f(0.f, size.y));
+
+                    entity.getComponent<xy::Drawable>().updateLocalBounds();
+                    std::int32_t spriteID;
+                    if (shape.ID == 0)
+                    {
+                        spriteID = SpriteID::GearBoy::Lava;
+                    }
+                    else
+                    {
+                        spriteID = SpriteID::GearBoy::Water;
+                    }
+                    entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
+                    entity.addComponent<Fluid>().frameHeight = m_sprites[spriteID].getTextureBounds().height;
+                    if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
+                    {
+                        entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;
+                    }
+                }
+                    break;
+                case CollisionShape::Checkpoint:
+                    entity.addComponent<xy::CommandTarget>().ID = CommandID::World::CheckPoint;
+                    break;
+                }
+            }
+
 #ifdef XY_DEBUG
             debugEnt = m_backgroundScene.createEntity();
-            debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::Menu::DebugItem;
+            debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
             debugEnt.addComponent<xy::Transform>();
             Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { shape.aabb.width * pixelScale, shape.aabb.height * pixelScale }, sf::Color::Red);
             debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f); //press F2 to toggle visibility

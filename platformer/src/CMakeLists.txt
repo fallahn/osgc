@@ -3,6 +3,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTargetSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/FluidAnimationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp

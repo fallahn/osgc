@@ -74,6 +74,8 @@ namespace SpriteID
             Star,
             SmokePuff,
             Squidger,
+            Lava,
+            Water,
 
             Count
         };

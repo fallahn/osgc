@@ -4,6 +4,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTarget.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/FluidAnimationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputBinding.hpp

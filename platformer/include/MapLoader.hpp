@@ -52,6 +52,8 @@ public:
 
     sf::Vector2f getMapSize() const { return m_mapSize; }
 
+    sf::Vector2f getSpawnPoint() const { return m_spawnPoint; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -67,6 +69,7 @@ private:
 
     float m_tileSize;
     sf::Vector2f m_mapSize;
+    sf::Vector2f m_spawnPoint;
 
     std::vector<CollisionShape> m_collisionShapes;
 };

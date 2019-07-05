@@ -282,4 +282,10 @@ void GameState::buildWorld()
             entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(shape.type);
         }
     }
+    else
+    {
+        //TODO create an error message state
+        requestStackClear();
+        requestStackPush(StateID::MainMenu);
+    }
 }

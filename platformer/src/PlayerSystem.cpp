@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "InputBinding.hpp"
 #include "Collision.hpp"
 #include "MessageIDs.hpp"
+#include "CommandIDs.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -73,14 +74,19 @@ void PlayerSystem::process(float dt)
         default: break;
         case Player::Falling:
             processFalling(entity, dt);
-            //DPRINT("State", "Falling");
+            DPRINT("State", "Falling");
             break;
         case Player::Running:
             processRunning(entity, dt);
-            //DPRINT("State", "Running");
+            DPRINT("State", "Running");
             break;
         case Player::Dying:
             processDying(entity, dt);
+            DPRINT("State", "Dying");
+            break;
+        case Player::Dead:
+            processDead(entity, dt);
+            DPRINT("State", "Dead");
             break;
         }
     }
@@ -147,10 +153,13 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
     doCollision(entity, dt);
 
     //check collision flags and change state if necessary
-    if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Foot))
+    if (player.state != Player::Dying) //collision may have killed player
     {
-        entity.getComponent<Player>().state = Player::Running;
-        entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Idle]);
+        if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Foot))
+        {
+            entity.getComponent<Player>().state = Player::Running;
+            entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Idle]);
+        }
     }
 }
 
@@ -226,16 +235,60 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
 
     doCollision(entity, dt);
 
-    if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
+    if (player.state != Player::Dying)//collision may have killed player
     {
-        entity.getComponent<Player>().state = Player::Falling;
-        entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
+        if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
+        {
+            entity.getComponent<Player>().state = Player::Falling;
+            entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
+        }
     }
 }
 
 void PlayerSystem::processDying(xy::Entity entity, float dt)
 {
+    //gravity
+    auto& player = entity.getComponent<Player>();
+    player.velocity.y += Gravity * dt;
 
+    //state time
+    player.stateTime -= dt;
+    if (player.stateTime < 0)
+    {
+        player.stateTime = Player::DeadTime;
+        player.state = Player::Dead;
+
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+    }
+
+    applyVelocity(entity, dt);
+}
+
+void PlayerSystem::processDead(xy::Entity entity, float dt)
+{
+    auto& player = entity.getComponent<Player>();
+    player.stateTime -= dt;
+
+    if (player.stateTime < 0)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::World::CheckPoint;
+        cmd.action = [&, entity](xy::Entity e, float) mutable
+        {
+            auto& player = entity.getComponent<Player>();
+            if (player.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
+            {
+                player.state = Player::Falling;
+                entity.getComponent<xy::Transform>().setPosition(e.getComponent<xy::Transform>().getPosition());
+                entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
+
+                auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                msg->type = PlayerEvent::Respawned;
+                msg->entity = entity;
+            }
+        };
+        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void PlayerSystem::doCollision(xy::Entity entity, float)
@@ -299,6 +352,16 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                         player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal);
                     }
                     break;
+                case CollisionShape::Fluid:
+                case CollisionShape::Spikes:
+                    //TODO check if we have a shield first
+                    kill(entity);
+                    return;
+                case CollisionShape::Checkpoint:
+                    //we can assume we're alive at this point because
+                    //dead/dying states perform no collision
+                    player.lastCheckpoint = otherBody.shapes[0].ID;
+                    break;
                 }
             }
         }
@@ -312,4 +375,19 @@ void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
 
     tx.move(player.velocity * dt);
     player.velocity.x *= Player::Drag;
+}
+
+void PlayerSystem::kill(xy::Entity entity)
+{
+    auto& player = entity.getComponent<Player>();
+
+    player.velocity.y = -1200.f;
+    player.state = Player::Dying;
+    player.stateTime = Player::DyingTime;
+
+    auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+    msg->type = PlayerEvent::Died;
+    msg->entity = entity;
+
+    //TODO dying animation
 }

@@ -48,6 +48,9 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
         case PlayerEvent::Shot:
             spawnStar(data.entity);
             break;
+        case PlayerEvent::Respawned:
+            spawnPuff(data.entity.getComponent<xy::Transform>().getPosition());
+            break;
         }
     }
     else if (msg.id == MessageID::StarMessage)

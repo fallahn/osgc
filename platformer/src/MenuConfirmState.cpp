@@ -94,7 +94,7 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
         m_selectedIndex = (m_selectedIndex + 1) % selection.size();
         
         xy::Command cmd;
-        cmd.targetFlags = CommandID::Menu::MenuCursor;
+        cmd.targetFlags = CommandID::Menu::Cursor;
         cmd.action = [&](xy::Entity e, float)
         {
             e.getComponent<xy::Transform>().setPosition(selection[m_selectedIndex]);
@@ -248,5 +248,5 @@ void MenuConfirmState::build()
     entity.getComponent<xy::Transform>().setScale(scale, scale);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(arrow));
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::MenuCursor;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Cursor;
 }

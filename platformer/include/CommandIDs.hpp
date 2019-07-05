@@ -24,9 +24,17 @@ namespace CommandID
     {
         enum
         {
+            Cursor = 0x1,
+            Message = 0x2
+        };
+    }
+
+    namespace World
+    {
+        enum
+        {
             DebugItem = 0x1,
-            MenuCursor = 0x2,
-            MenuMessage = 0x4
+            CheckPoint = 0x2
         };
     }
 }

@@ -39,6 +39,12 @@ struct Player final
     static constexpr float Drag = 0.82f;
 
     AnimationMap<AnimID::Player::Count> animations;
+
+    std::int32_t lastCheckpoint = 0;
+
+    float stateTime = 0.f;
+    static constexpr float DyingTime = 1.f;
+    static constexpr float DeadTime = 2.f;
 };
 
 class PlayerSystem final : public xy::System
@@ -53,8 +59,11 @@ private:
     void processFalling(xy::Entity, float);
     void processRunning(xy::Entity, float);
     void processDying(xy::Entity, float);
+    void processDead(xy::Entity, float);
 
     void doCollision(xy::Entity, float);
     void resolveCollision(xy::Entity, xy::Entity, sf::FloatRect);
     void applyVelocity(xy::Entity, float);
+
+    void kill(xy::Entity);
 };

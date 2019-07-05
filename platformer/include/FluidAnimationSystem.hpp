@@ -18,34 +18,19 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include <xyginext/ecs/System.hpp>
 
-namespace MessageID
+struct Fluid final
 {
-    enum
-    {
-        PlayerMessage = xy::Message::Count,
-        StarMessage
-    };
-}
-
-struct PlayerEvent final
-{
-    enum
-    {
-        Jumped, Shot, Died, Respawned
-    }type = Shot;
-    xy::Entity entity;
+    float frameHeight = 0.f;
+    float frameTime = 1.f;
+    float currentTime = 0.f;
 };
 
-struct StarEvent final
+class FluidAnimationSystem final : public xy::System
 {
-    enum
-    {
-        HitItem
-    }type = HitItem;
-    sf::Vector2f position;
-    xy::Entity entityHit;
-    std::uint64_t collisionShape = 0;
+public:
+    explicit FluidAnimationSystem(xy::MessageBus&);
+
+    void process(float) override;
 };

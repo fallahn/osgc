@@ -102,14 +102,14 @@ bool PauseState::handleEvent(const sf::Event& evt)
         }
 
         xy::Command cmd;
-        cmd.targetFlags = CommandID::Menu::MenuCursor;
+        cmd.targetFlags = CommandID::Menu::Cursor;
         cmd.action = [&](xy::Entity e, float)
         {
             e.getComponent<xy::Transform>().setPosition(selection[m_selectedIndex]);
         };
         m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-        cmd.targetFlags = CommandID::Menu::MenuMessage;
+        cmd.targetFlags = CommandID::Menu::Message;
         cmd.action = [&](xy::Entity e, float)
         {
             e.getComponent<xy::Text>().setString(messages[m_selectedIndex]);
@@ -281,7 +281,7 @@ void PauseState::build()
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::MenuMessage;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Message;
 
     auto arrow = m_resources.load<sf::Texture>("assets/images/gearboy/menu_cursor.png");
     entity = m_scene.createEntity();
@@ -289,5 +289,5 @@ void PauseState::build()
     entity.getComponent<xy::Transform>().setScale(scale, scale);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(arrow));
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::MenuCursor;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Cursor;
 }
