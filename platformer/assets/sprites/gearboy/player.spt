@@ -31,5 +31,13 @@ spritesheet player
             loop=true
             framerate=30
         }
+
+        animation die
+        {
+            frame=96,0,16,16
+            frame=112,0,16,16
+            loop=true
+            framerate=12
+        }
     }
 }

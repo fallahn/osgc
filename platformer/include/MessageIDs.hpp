@@ -34,7 +34,7 @@ struct PlayerEvent final
 {
     enum
     {
-        Jumped, Shot, Died, Respawned
+        Jumped, Landed, Shot, Died, Respawned
     }type = Shot;
     xy::Entity entity;
 };

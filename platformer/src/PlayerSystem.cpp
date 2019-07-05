@@ -159,6 +159,10 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
         {
             entity.getComponent<Player>().state = Player::Running;
             entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Idle]);
+
+            auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+            msg->type = PlayerEvent::Landed;
+            msg->entity = entity;
         }
     }
 }
@@ -275,10 +279,10 @@ void PlayerSystem::processDead(xy::Entity entity, float dt)
         cmd.targetFlags = CommandID::World::CheckPoint;
         cmd.action = [&, entity](xy::Entity e, float) mutable
         {
-            auto& player = entity.getComponent<Player>();
-            if (player.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
+            auto& p = entity.getComponent<Player>();
+            if (p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
             {
-                player.state = Player::Falling;
+                p.state = Player::Falling;
                 entity.getComponent<xy::Transform>().setPosition(e.getComponent<xy::Transform>().getPosition());
                 entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
 
@@ -288,6 +292,8 @@ void PlayerSystem::processDead(xy::Entity entity, float dt)
             }
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
     }
 }
 
@@ -333,7 +339,13 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
         if (auto manifold = intersectsAABB(bounds, otherBounds); manifold)
         {
             auto& otherBody = other.getComponent<CollisionBody>();
-            collisionBody.collisionFlags |= collisionBody.shapes[i].type;
+
+            //registering foot/hand collisions should only affect state
+            //under certain collisions
+            if (otherBody.shapes[0].type & (CollisionShape::Solid | CollisionShape::Enemy))
+            {
+                collisionBody.collisionFlags |= collisionBody.shapes[i].type;
+            }
 
             if (collisionBody.shapes[i].type == CollisionShape::Player)
             {
@@ -381,7 +393,8 @@ void PlayerSystem::kill(xy::Entity entity)
 {
     auto& player = entity.getComponent<Player>();
 
-    player.velocity.y = -1200.f;
+    player.velocity.y = -1100.f;
+    player.velocity.x = 200.f;
     player.state = Player::Dying;
     player.stateTime = Player::DyingTime;
 
@@ -389,5 +402,5 @@ void PlayerSystem::kill(xy::Entity entity)
     msg->type = PlayerEvent::Died;
     msg->entity = entity;
 
-    //TODO dying animation
+    entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Die]);
 }

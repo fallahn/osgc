@@ -131,6 +131,7 @@ void GameState::loadResources()
     m_playerAnimations[AnimID::Player::Idle] = spriteSheet.getAnimationIndex("idle", "player");
     m_playerAnimations[AnimID::Player::Jump] = spriteSheet.getAnimationIndex("jump", "player");
     m_playerAnimations[AnimID::Player::Run] = spriteSheet.getAnimationIndex("run", "player");
+    m_playerAnimations[AnimID::Player::Die] = spriteSheet.getAnimationIndex("die", "player");
 
     spriteSheet.loadFromFile("assets/sprites/gearboy/star.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Star] = spriteSheet.getSprite("star");

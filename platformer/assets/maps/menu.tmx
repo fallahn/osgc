@@ -5,7 +5,7 @@
  </tileset>
  <layer id="2" name="foreground" width="30" height="17">
   <data encoding="base64" compression="zlib">
-   eJy908luwjAQBmCXTYgCTXIAChzaQrm18AjcgCOIR2C7leWWLrw6vyVHmlr2JI4sRvqUEDvzG8UOhRAh0YQn7RmHmy/HIsu4XgFUDM9txc0PVG6Wfq65dWh4yOX6uJbsFXrs56NqyuOdcyOlxcx5gLJS8Jw7Feb/LTOLZF7JU/6L5lUbT/akzmXP5ymaS88/3aO/8AdXpk8bOvAM3Qy5yVlIOw+9lD5vMIAhvOdYR976gE8Yw8SwDh81g7mysOTqv2n1xf9vNyJja8e17OFAcLmm+oKjxYl57wwXwrVHDN8WP7CBLey0e5lLzyHXYwkrdU3uY2E+z5F6p2qh594Az5AnRA==
+   eJy9k0tPwzAQhJdCeyjQJjmUtwSl7a2Fn8ANuHNC4gw3ILklpf3rHQtb3Vj25lGrI31S4l3POIo3JqKYMQBDa01C6le1xFO3FYGeY90nqT/SuXX8muaegNMAuZJPUymvOKBfCPU1x3vOzej/H4yEngPQ1XQC5SaaJ3J/t8o8ZH1HgfJvLe6surmTBcuue0d3kcm155/f0T+wAmvB5wycgwtwWSPXzELVPFxV+IzBPZiAaYtztNUcLMADeHScI4SewYvm1ZNrv3NdU/nfzVjtreFZPsEXQ8p16Rv8ePgV9qW0vZ9FC4+cyvPEZ2wJ3j2kjn2GjD37PHJyz7PZc+NB5X6w3g13RyRN
   </data>
  </layer>
  <layer id="4" name="detail" width="30" height="17">
@@ -33,12 +33,12 @@
   <object id="17" type="solid" x="48" y="112" width="32" height="32"/>
   <object id="18" type="fluid" x="112" y="256" width="80" height="16">
    <properties>
-    <property name="id" type="int" value="0"/>
+    <property name="id" type="int" value="1"/>
    </properties>
   </object>
   <object id="19" type="fluid" x="320" y="240" width="96" height="32">
    <properties>
-    <property name="id" type="int" value="1"/>
+    <property name="id" type="int" value="0"/>
    </properties>
   </object>
   <object id="20" type="checkpoint" x="288" y="112" width="16" height="16">
