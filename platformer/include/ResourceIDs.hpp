@@ -79,6 +79,10 @@ namespace SpriteID
             Water,
             Checkpoint,
 
+            Coin,
+            Shield,
+            Ammo,
+
             Count
         };
     }

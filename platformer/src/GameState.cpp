@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include "NinjaStarSystem.hpp"
 #include "FluidAnimationSystem.hpp"
 #include "MessageIDs.hpp"
+#include "BobAnimationSystem.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -137,6 +138,7 @@ void GameState::initScene()
     m_gameScene.addSystem<PlayerSystem>(mb);
     m_gameScene.addSystem<NinjaStarSystem>(mb);
     m_gameScene.addSystem<FluidAnimationSystem>(mb);
+    m_gameScene.addSystem<BobAnimationSystem>(mb);
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
@@ -178,6 +180,11 @@ void GameState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/gearboy/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/collectibles.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Coin] = spriteSheet.getSprite("coin");
+    m_sprites[SpriteID::GearBoy::Shield] = spriteSheet.getSprite("shield");
+    m_sprites[SpriteID::GearBoy::Ammo] = spriteSheet.getSprite("ammo");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
@@ -381,6 +388,32 @@ void GameState::buildWorld()
                         };
                     }
 
+                    break;
+                case CollisionShape::Collectible:
+                {
+                    std::int32_t spriteID = 0;
+                    switch (shape.ID)
+                    {
+                    default:
+                    case 0:
+                        spriteID = SpriteID::GearBoy::Coin;
+                        break;
+                    case 1:
+                        spriteID = SpriteID::GearBoy::Shield;
+                        break;
+                    case 2:
+                        spriteID = SpriteID::GearBoy::Ammo;
+                        break;
+                    }
+
+                    auto cEnt = m_gameScene.createEntity();
+                    cEnt.addComponent<xy::Transform>().setScale(scale, scale);
+                    cEnt.addComponent<xy::Drawable>();
+                    cEnt.addComponent<xy::Sprite>() = m_sprites[spriteID];
+                    cEnt.addComponent<xy::SpriteAnimation>().play(0);
+                    cEnt.addComponent<BobAnimation>().parent = entity;
+                    entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
+                }
                     break;
                 }
             }

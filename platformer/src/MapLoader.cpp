@@ -263,9 +263,17 @@ bool MapLoader::load(const std::string& file)
                         }
                         else if (type == "collectible")
                         {
-                            //TODO check for ID
-                            collision.type = CollisionShape::Collectible;
-                            collision.collisionFlags = CollisionShape::Player;
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                collision.type = CollisionShape::Collectible;
+                                collision.collisionFlags = CollisionShape::Player;
+                                collision.ID = *id;
+                            }
+                            else
+                            {
+                                m_collisionShapes.pop_back();
+                            }
                         }
                         else
                         {

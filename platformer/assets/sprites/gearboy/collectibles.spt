@@ -6,17 +6,17 @@ spritesheet collectibles
     {
         bounds = 0,0,16,16
 
-        animiation idle
+        animation idle
         {
             frame = 0,0,16,16
-            frame = 0,16,16,16
-            frame = 0,32,16,16
-            frame = 0,48,16,16
-            frame = 0,32,16,16
-            frame = 0,16,16,16
+            frame = 16,0,16,16
+            frame = 32,0,16,16
+            frame = 48,0,16,16
+            frame = 32,0,16,16
+            frame = 16,0,16,16
 
             loop=true
-            framerate = 20
+            framerate = 14
         }
     }
 
@@ -24,17 +24,17 @@ spritesheet collectibles
     {
         bounds = 16,0,16,16
 
-        animiation idle
+        animation idle
         {
-            frame = 16,0,16,16
+            frame = 0,16,16,16
             frame = 16,16,16,16
-            frame = 16,32,16,16
-            frame = 16,48,16,16
-            frame = 16,32,16,16
+            frame = 32,16,16,16
+            frame = 48,16,16,16
+            frame = 32,16,16,16
             frame = 16,16,16,16
 
             loop=true
-            framerate = 20
+            framerate = 14
         }
     }
 
@@ -42,17 +42,17 @@ spritesheet collectibles
     {
         bounds = 32,0,16,16
 
-        animiation idle
+        animation idle
         {
-            frame = 32,0,16,16
-            frame = 32,16,16,16
+            frame = 0,32,16,16
+            frame = 16,32,16,16
             frame = 32,32,16,16
-            frame = 32,48,16,16
+            frame = 48,32,16,16
             frame = 32,32,16,16
-            frame = 32,16,16,16
+            frame = 16,32,16,16
 
             loop=true
-            framerate = 20
+            framerate = 14
         }
     }
 }

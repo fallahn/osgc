@@ -283,8 +283,11 @@ void PlayerSystem::processDead(xy::Entity entity, float dt)
             auto& p = entity.getComponent<Player>();
             if (p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
             {
+                auto bounds = e.getComponent<xy::BroadphaseComponent>().getArea();
+                auto position = e.getComponent<xy::Transform>().getPosition();
+
                 p.state = Player::Falling;
-                entity.getComponent<xy::Transform>().setPosition(e.getComponent<xy::Transform>().getPosition());
+                entity.getComponent<xy::Transform>().setPosition(position.x + (bounds.width / 2.f), position.y + (bounds.height / 2.f));
                 entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
 
                 auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
@@ -390,6 +393,28 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     player.state = Player::Dead; //just prevents further collisions
                     return;
                 }
+                case CollisionShape::Collectible:
+                {
+                    auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                    msg->entity = entity;
+
+                    switch (otherBody.shapes[0].ID)
+                    {
+                    default:
+                    case 0:
+                        msg->type = PlayerEvent::GotCoin;
+                        break;
+                    case 1:
+                        msg->type = PlayerEvent::GotShield;
+                        break;
+                    case 2:
+                        msg->type = PlayerEvent::GotAmmo;
+                        break;
+                    }
+
+                    getScene()->destroyEntity(other);
+                }
+                    break;
                 }
             }
         }

@@ -25,8 +25,8 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float SmoothTime = 0.12f; //this is quite sensitive - anything more than .15 is pretty sloppy
-    const float MaxSpeed = 4000.f;
+    const float SmoothTime = 0.13f; //this is quite sensitive - anything more than .15 is pretty sloppy
+    const float MaxSpeed = 8000.f;
 
     //smoothing based on game programming gems 4, chapter 1.10
     float smoothMotion(float from, float to, float& vel, float dt)

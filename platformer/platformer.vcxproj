@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\AnimationMap.hpp" />
+    <ClInclude Include="include\BobAnimationSystem.hpp" />
     <ClInclude Include="include\CameraTarget.hpp" />
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />

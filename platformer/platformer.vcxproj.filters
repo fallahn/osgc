@@ -99,6 +99,9 @@
     <ClInclude Include="include\TransitionState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\BobAnimationSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
