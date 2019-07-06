@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "Player.hpp"
 #include "CameraTarget.hpp"
 #include "NinjaStarSystem.hpp"
+#include "FluidAnimationSystem.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -110,6 +111,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<PlayerSystem>(mb);
     m_gameScene.addSystem<NinjaStarSystem>(mb);
+    m_gameScene.addSystem<FluidAnimationSystem>(mb);
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
@@ -138,6 +140,19 @@ void GameState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/gearboy/smoke_puff.spt", m_resources);
     m_sprites[SpriteID::GearBoy::SmokePuff] = spriteSheet.getSprite("smoke_puff");
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/checkpoint.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Checkpoint] = spriteSheet.getSprite("checkpoint");
+    m_checkpointAnimations[AnimID::Checkpoint::Idle] = spriteSheet.getAnimationIndex("idle", "checkpoint");
+    m_checkpointAnimations[AnimID::Checkpoint::Activate] = spriteSheet.getAnimationIndex("activate", "checkpoint");
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/lava.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
+    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/water.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
+    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
 }
@@ -223,10 +238,9 @@ void GameState::buildWorld()
             entity.getComponent<xy::Transform>().setScale(scale, scale);
         }
 
-        //TODO read spawn point from map
         //create player
         entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Transform>().setPosition(m_mapLoader.getSpawnPoint() * scale);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Player];
@@ -281,6 +295,69 @@ void GameState::buildWorld()
             entity.getComponent<CollisionBody>().shapeCount = 1;
             entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<CollisionBody>().shapes[0].aabb);
             entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(shape.type);
+
+            if (shape.ID > -1)
+            {
+                switch (shape.type)
+                {
+                default: break;
+                case CollisionShape::Fluid:
+                {
+                    sf::Vector2f size(shape.aabb.width, shape.aabb.height);
+                    size *= scale;
+
+                    entity.addComponent<xy::Drawable>();
+                    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+                    verts.emplace_back(sf::Vector2f());
+                    verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));
+                    verts.emplace_back(size, size);
+                    verts.emplace_back(sf::Vector2f(0.f, size.y), sf::Vector2f(0.f, size.y));
+
+                    entity.getComponent<xy::Drawable>().updateLocalBounds();
+                    std::int32_t spriteID;
+                    if (shape.ID == 0)
+                    {
+                        spriteID = SpriteID::GearBoy::Lava;
+                    }
+                    else
+                    {
+                        spriteID = SpriteID::GearBoy::Water;
+                    }
+                    entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
+                    entity.addComponent<Fluid>().frameHeight = m_sprites[spriteID].getTextureBounds().height;
+                    if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
+                    {
+                        entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;
+                    }
+                }
+                break;
+                case CollisionShape::Checkpoint:
+                    entity.addComponent<xy::CommandTarget>().ID = CommandID::World::CheckPoint;
+
+                    if (shape.ID > 0)
+                    {
+                        auto checkpointEnt = m_gameScene.createEntity();
+                        checkpointEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                        checkpointEnt.getComponent<xy::Transform>().setScale(scale, scale);
+                        checkpointEnt.addComponent<xy::Drawable>().setDepth(-1);
+                        checkpointEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Checkpoint];
+                        checkpointEnt.addComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Idle]);
+
+                        entity.addComponent<xy::Callback>().function =
+                            [&,checkpointEnt](xy::Entity e, float) mutable
+                        {
+                            if (checkpointEnt.getComponent<xy::SpriteAnimation>().getAnimationIndex() ==
+                                m_checkpointAnimations[AnimID::Checkpoint::Idle])
+                            {
+                                checkpointEnt.getComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Activate]);
+                            }
+                            e.getComponent<xy::Callback>().active = false;
+                        };
+                    }
+
+                    break;
+                }
+            }
         }
     }
     else

@@ -179,6 +179,7 @@ bool MapLoader::load(const std::string& file)
 
                     if (result == properties.end())
                     {
+                        xy::Logger::log("object " + obj.getType() + " found with no ID", xy::Logger::Type::Warning);
                         return std::nullopt;
                     }
 
@@ -217,6 +218,7 @@ bool MapLoader::load(const std::string& file)
                         else if (type == "spikes")
                         {
                             collision.type = CollisionShape::Spikes;
+                            collision.collisionFlags = CollisionShape::Player;
                         }
                         else if (type == "checkpoint")
                         {
@@ -238,16 +240,19 @@ bool MapLoader::load(const std::string& file)
                         {
                             //TODO check for ID
                             collision.type = CollisionShape::Enemy;
+                            collision.collisionFlags = CollisionShape::Player | CollisionShape::LeftHand | CollisionShape::RightHand;
                         }
                         else if (type == "exit")
                         {
                             //TODO check for next map. Store this as map loader property.
                             collision.type = CollisionShape::Exit;
+                            collision.collisionFlags = CollisionShape::Player;
                         }
                         else if (type == "collectible")
                         {
                             //TODO check for ID
                             collision.type = CollisionShape::Collectible;
+                            collision.collisionFlags = CollisionShape::Player;
                         }
                         else
                         {

@@ -46,8 +46,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<GameState>(StateID::Game, sd);
 
 #ifdef XY_DEBUG
-    //return StateID::Game;
-    return StateID::MainMenu;
+    return StateID::Game;
+    //return StateID::MainMenu;
 #else
     return StateID::MainMenu;
 #endif //XY_DEBUG

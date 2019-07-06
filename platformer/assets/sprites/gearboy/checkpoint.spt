@@ -1,0 +1,48 @@
+spritesheet checkpoint
+{
+    src="assets/images/gearboy/checkpoint.png"
+
+    sprite checkpoint
+    {
+        bounds = 0,0,32,80
+
+        animation idle
+        {
+            frame = 512,0,32,80
+
+            loop=true
+            framerate=30
+        }
+
+        animation activate
+        {
+            frame=0,0,32,80
+            frame=32,0,32,80
+            frame=64,0,32,80
+            frame=96,0,32,80
+            frame=128,0,32,80
+            frame=160,0,32,80
+            frame=192,0,32,80
+            frame=224,0,32,80
+            frame=256,0,32,80
+
+            //loop=false
+            //framerate=12
+        //}
+
+        //animation active
+        //{
+            frame=288,0,32,80
+            frame=320,0,32,80
+            frame=352,0,32,80
+            frame=384,0,32,80
+            frame=416,0,32,80
+            frame=448,0,32,80
+            frame=480,0,32,80
+
+            loop=true
+            framerate=12
+            loop_start=9
+        }        
+    }
+}

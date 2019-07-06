@@ -44,7 +44,7 @@ struct Player final
 
     float stateTime = 0.f;
     static constexpr float DyingTime = 1.f;
-    static constexpr float DeadTime = 2.f;
+    static constexpr float DeadTime = 1.f;
 };
 
 class PlayerSystem final : public xy::System

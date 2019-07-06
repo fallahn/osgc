@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
@@ -342,7 +343,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
 
             //registering foot/hand collisions should only affect state
             //under certain collisions
-            if (otherBody.shapes[0].type & (CollisionShape::Solid | CollisionShape::Enemy))
+            if (otherBody.shapes[0].type & (CollisionShape::Solid/* | CollisionShape::Enemy*/))
             {
                 collisionBody.collisionFlags |= collisionBody.shapes[i].type;
             }
@@ -373,6 +374,12 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     //we can assume we're alive at this point because
                     //dead/dying states perform no collision
                     player.lastCheckpoint = otherBody.shapes[0].ID;
+
+                    //trigger the animation on the checkpoint
+                    if (player.lastCheckpoint > 0)
+                    {
+                        other.getComponent<xy::Callback>().active = true;
+                    }
                     break;
                 }
             }

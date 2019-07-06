@@ -31,6 +31,16 @@ namespace AnimID
             Count
         };
     }
+
+    namespace Checkpoint
+    {
+        enum
+        {
+            Idle, Activate,
+
+            Count
+        };
+    }
 }
 
 template <std::size_t size>

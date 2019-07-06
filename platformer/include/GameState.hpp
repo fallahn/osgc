@@ -51,6 +51,7 @@ private:
     std::array<std::size_t, TextureID::Game::Count> m_textureIDs;
     SpriteArray<SpriteID::GearBoy::Count> m_sprites;
     AnimationMap<AnimID::Player::Count> m_playerAnimations;
+    AnimationMap<AnimID::Checkpoint::Count> m_checkpointAnimations;
 
     MapLoader m_mapLoader;
     InputParser m_playerInput;

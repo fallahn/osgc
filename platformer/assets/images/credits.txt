@@ -2,3 +2,4 @@ https://opengameart.org/content/gameboy-platformer-art
 https://opengameart.org/content/game-boy-platformer-tileset-character
 https://opengameart.org/content/tile-set-pack-1-gbe
 https://opengameart.org/content/various-creatures
+https://opengameart.org/content/2d-pixel-fire-sprite-strip

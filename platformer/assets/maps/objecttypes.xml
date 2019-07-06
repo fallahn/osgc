@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
  <objecttype name="checkpoint" color="#d0f8ff">
-  <property name="id" type="int" default="0"/>
+  <property name="id" type="int" default="-1"/>
  </objecttype>
  <objecttype name="collectible" color="#4ff8a0">
-  <property name="id" type="int" default="0"/>
+  <property name="id" type="int" default="-1"/>
  </objecttype>
  <objecttype name="enemy" color="#ff00ff">
-  <property name="id" type="int" default="0"/>
+  <property name="id" type="int" default="-1"/>
  </objecttype>
  <objecttype name="exit" color="#ffff00">
   <property name="next_map" type="string"/>
  </objecttype>
  <objecttype name="fluid" color="#000ffe">
-  <property name="id" type="int" default="0"/>
+  <property name="id" type="int" default="-1"/>
  </objecttype>
  <objecttype name="solid" color="#00003f"/>
  <objecttype name="spikes" color="#ff0000"/>

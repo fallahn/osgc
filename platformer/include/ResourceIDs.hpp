@@ -76,6 +76,7 @@ namespace SpriteID
             Squidger,
             Lava,
             Water,
+            Checkpoint,
 
             Count
         };
