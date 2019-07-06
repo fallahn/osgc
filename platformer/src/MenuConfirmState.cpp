@@ -33,6 +33,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
+#include <xyginext/gui/Gui.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Clock.hpp>
@@ -64,22 +66,32 @@ MenuConfirmState::MenuConfirmState(xy::StateStack& ss, xy::State::Context ctx, S
 //public
 bool MenuConfirmState::handleEvent(const sf::Event& evt)
 {
+    //prevents events being forwarded if the console wishes to consume them
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return false;
+    }
+
     auto execSelection = [&]()
     {
         if (m_selectedIndex == 0)
         {
+            //set up transition
+            auto& window = getContext().renderWindow;
+            m_sharedData.transitionContext.texture.create(window.getSize().x, window.getSize().y);
+            m_sharedData.transitionContext.texture.update(window);
+
             switch (m_sharedData.menuID)
             {
             default: break;
             case MenuID::NewGame:
-                requestStackClear();
-                requestStackPush(StateID::Game);
+                
+                requestStackPush(StateID::Transition);
                 break;
             case MenuID::Continue:
                 //TODO load some sort of state into shared data
                 
-                requestStackClear();
-                requestStackPush(StateID::Game);
+                requestStackPush(StateID::Transition);
                 break;
             }
         }

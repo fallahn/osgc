@@ -33,6 +33,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
+#include <xyginext/gui/Gui.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Clock.hpp>
@@ -44,9 +46,9 @@ namespace
 
     const std::array<sf::Vector2f, 3u> selection =
     {
-        sf::Vector2f(780.f, 504.f),
-        sf::Vector2f(780.f, 604.f),
-        sf::Vector2f(780.f, 704.f)
+        sf::Vector2f(480.f, 504.f),
+        sf::Vector2f(480.f, 604.f),
+        sf::Vector2f(480.f, 704.f)
     };
 
     const std::array<std::string, 3u> messages =
@@ -72,6 +74,12 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 //public
 bool PauseState::handleEvent(const sf::Event& evt)
 {
+    //prevents events being forwarded if the console wishes to consume them
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return false;
+    }
+
     auto execSelection = [&]()
     {
         switch (m_selectedIndex)
@@ -274,12 +282,13 @@ void PauseState::build()
     //selection message
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 460.f);
+    entity.getComponent<xy::Transform>().move(0.f, 360.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(64);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setString("Continue Playing");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Message;
 

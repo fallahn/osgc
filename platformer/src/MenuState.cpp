@@ -69,6 +69,7 @@ source distribution.
 namespace
 {
 #include "tilemap.inl"
+#include "transition.inl"
 
     struct MenuItem final
     {
@@ -256,6 +257,8 @@ void MenuState::loadResources()
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
+    m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
 
     m_fontID = m_resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
 }

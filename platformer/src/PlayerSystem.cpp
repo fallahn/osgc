@@ -381,6 +381,15 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                         other.getComponent<xy::Callback>().active = true;
                     }
                     break;
+                case CollisionShape::Exit:
+                {
+                    auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                    msg->type = PlayerEvent::Exited;
+                    msg->entity = entity;
+
+                    player.state = Player::Dead; //just prevents further collisions
+                    return;
+                }
                 }
             }
         }

@@ -244,7 +244,20 @@ bool MapLoader::load(const std::string& file)
                         }
                         else if (type == "exit")
                         {
-                            //TODO check for next map. Store this as map loader property.
+                            const auto& properties = object.getProperties();
+                            auto result = std::find_if(properties.begin(), properties.end(),
+                                [](const tmx::Property& p)
+                                {
+                                    return p.getName() == "next_map";
+                                });
+
+                            if (result == properties.end())
+                            {
+                                xy::Logger::log("No next map property found", xy::Logger::Type::Error);
+                                return false;
+                            }
+                            m_nextMap = result->getStringValue();
+
                             collision.type = CollisionShape::Exit;
                             collision.collisionFlags = CollisionShape::Player;
                         }

@@ -26,7 +26,8 @@ namespace ShaderID
 {
     enum
     {
-        TileMap
+        TileMap,
+        PixelTransition
     };
 }
 

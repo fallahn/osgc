@@ -18,34 +18,22 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include <string>
 
-namespace MessageID
-{
-    enum
-    {
-        PlayerMessage = xy::Message::Count,
-        StarMessage
-    };
-}
+static const std::string PixelateFrag = R"(
+#version 120
 
-struct PlayerEvent final
-{
-    enum
-    {
-        Jumped, Landed, Shot, Died, Respawned, Exited
-    }type = Shot;
-    xy::Entity entity;
-};
+uniform sampler2D u_texture;
 
-struct StarEvent final
+uniform float u_time;
+uniform vec2 u_screenSize;
+
+void main()
 {
-    enum
-    {
-        HitItem
-    }type = HitItem;
-    sf::Vector2f position;
-    xy::Entity entityHit;
-    std::uint64_t collisionShape = 0;
-};
+	vec2 pixelSize = vec2((u_time * 50.0) + 1.0);
+
+	vec2 coord = gl_TexCoord[0].xy;
+	coord = floor(coord * u_screenSize / pixelSize) / u_screenSize * pixelSize;
+	
+	gl_FragColor = mix(texture2D(u_texture, coord), vec4(vec3(0.0), 1.0), u_time);
+})";

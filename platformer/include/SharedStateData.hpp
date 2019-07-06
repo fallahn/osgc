@@ -19,6 +19,14 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "InputBinding.hpp"
+#include "StateIDs.hpp"
+
+#include <SFML/Graphics/Texture.hpp>
+
+namespace sf
+{
+    class Shader;
+}
 
 namespace MenuID
 {
@@ -28,8 +36,19 @@ namespace MenuID
     };
 };
 
+struct TransitionContext final
+{
+    sf::Texture texture;
+    sf::Shader* shader = nullptr;
+    float duration = 1.f;
+    std::int32_t nextState = StateID::Game;
+};
+
 struct SharedData final
 {
     InputBinding inputBinding;
     std::int32_t menuID = -1;
+    std::string nextMap = "gb01.tmx";
+
+    TransitionContext transitionContext;
 };

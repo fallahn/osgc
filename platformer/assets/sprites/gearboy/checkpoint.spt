@@ -26,12 +26,6 @@ spritesheet checkpoint
             frame=224,0,32,80
             frame=256,0,32,80
 
-            //loop=false
-            //framerate=12
-        //}
-
-        //animation active
-        //{
             frame=288,0,32,80
             frame=320,0,32,80
             frame=352,0,32,80

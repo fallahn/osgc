@@ -14,4 +14,5 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TransitionState.cpp
   PARENT_SCOPE)

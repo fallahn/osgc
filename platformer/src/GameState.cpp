@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "CameraTarget.hpp"
 #include "NinjaStarSystem.hpp"
 #include "FluidAnimationSystem.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -48,6 +49,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Rectangle.hpp>
+#include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -55,6 +57,7 @@ Copyright 2019 Matt Marchant
 namespace
 {
 #include "tilemap.inl"
+#include "transition.inl"
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -78,6 +81,11 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool GameState::handleEvent(const sf::Event& evt)
 {
+    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    {
+        return true;
+    }
+
     m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
     return true;
@@ -85,6 +93,23 @@ bool GameState::handleEvent(const sf::Event& evt)
 
 void GameState::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == MessageID::PlayerMessage)
+    {
+        const auto& data = msg.getData<PlayerEvent>();
+        if (data.type == PlayerEvent::Exited)
+        {
+            m_sharedData.nextMap = m_mapLoader.getNextMap() + ".tmx";
+
+            //copy the window to a texture so we can do wibbly things with it
+            auto* window = xy::App::getRenderWindow();
+            m_sharedData.transitionContext.texture.create(window->getSize().x, window->getSize().y);
+            m_sharedData.transitionContext.texture.update(*window);
+            m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
+
+            requestStackPush(StateID::Transition);
+        }
+    }
+
     m_gameScene.forwardMessage(msg);
 }
 
@@ -155,11 +180,12 @@ void GameState::loadResources()
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
 }
 
 void GameState::buildWorld()
 {
-    if (m_mapLoader.load("gb01.tmx"))
+    if (m_mapLoader.load(m_sharedData.nextMap))
     {
         const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
         m_gameScene.getDirector<NinjaDirector>().setSpriteScale(scale);

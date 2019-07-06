@@ -115,7 +115,7 @@
   <object id="88" type="spikes" x="1776" y="144" width="64" height="8"/>
   <object id="89" type="spikes" x="1840" y="160" width="48" height="8"/>
   <object id="90" type="spikes" x="1896" y="176" width="8" height="48"/>
-  <object id="91" type="exit" x="1640" y="112" width="20" height="36">
+  <object id="91" type="exit" x="240" y="220" width="20" height="36">
    <properties>
     <property name="next_map" value="gb01"/>
    </properties>

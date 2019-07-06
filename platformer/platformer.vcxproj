@@ -163,6 +163,7 @@
     <ClInclude Include="include\ShakerSystem.hpp" />
     <ClInclude Include="include\SharedStateData.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\TransitionState.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CameraTargetSystem.cpp" />
@@ -179,9 +180,11 @@
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerSystem.cpp" />
     <ClCompile Include="src\ShakerSystem.cpp" />
+    <ClCompile Include="src\TransitionState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\tilemap.inl" />
+    <None Include="src\transition.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

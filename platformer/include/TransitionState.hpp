@@ -18,34 +18,28 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/core/Message.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include "StateIDs.hpp"
 
-namespace MessageID
-{
-    enum
-    {
-        PlayerMessage = xy::Message::Count,
-        StarMessage
-    };
-}
+#include <xyginext/core/State.hpp>
 
-struct PlayerEvent final
-{
-    enum
-    {
-        Jumped, Landed, Shot, Died, Respawned, Exited
-    }type = Shot;
-    xy::Entity entity;
-};
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/System/Clock.hpp>
 
-struct StarEvent final
+struct SharedData;
+class TransitionState final : public xy::State
 {
-    enum
-    {
-        HitItem
-    }type = HitItem;
-    sf::Vector2f position;
-    xy::Entity entityHit;
-    std::uint64_t collisionShape = 0;
+public:
+    TransitionState(xy::StateStack&, xy::State::Context, SharedData&);
+
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float dt) override;
+    void draw() override;
+
+    xy::StateID stateID() const override { return StateID::Transition; }
+
+private:
+    SharedData& m_sharedData;
+    sf::Sprite m_sprite;
+    sf::Clock m_transitionClock;
 };

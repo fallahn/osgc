@@ -96,6 +96,9 @@
     <ClInclude Include="include\FluidAnimationSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\TransitionState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -140,9 +143,15 @@
     <ClCompile Include="src\FluidAnimationSystem.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\TransitionState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\tilemap.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
+    <None Include="src\transition.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
   </ItemGroup>

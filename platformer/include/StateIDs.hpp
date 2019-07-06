@@ -34,6 +34,7 @@ namespace StateID
         MainMenu,
         MenuConfirm,
         Game,
-        Pause
+        Pause,
+        Transition
     };
 }

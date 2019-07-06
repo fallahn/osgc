@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <string>
 
 struct MapLayer final
 {
@@ -54,6 +55,8 @@ public:
 
     sf::Vector2f getSpawnPoint() const { return m_spawnPoint; }
 
+    const std::string& getNextMap() const { return m_nextMap; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -70,6 +73,7 @@ private:
     float m_tileSize;
     sf::Vector2f m_mapSize;
     sf::Vector2f m_spawnPoint;
+    std::string m_nextMap;
 
     std::vector<CollisionShape> m_collisionShapes;
 };
