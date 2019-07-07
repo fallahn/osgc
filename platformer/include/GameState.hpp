@@ -56,6 +56,8 @@ private:
     MapLoader m_mapLoader;
     InputParser m_playerInput;
 
+    std::string m_theme;
+
     void initScene();
     void loadResources();
     void buildWorld();

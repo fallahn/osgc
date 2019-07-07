@@ -1,0 +1,28 @@
+spritesheet crack
+{
+    src="assets/images/crack.png"
+
+    sprite crack
+    {
+        bounds = 0,0,64,64
+
+        animation idle
+        {
+            frame = 0,0,64,64
+            frame = 64,0,64,64
+            frame = 128,0,64,64
+            frame = 0,64,64,64
+            frame = 64,64,64,64
+            frame = 128,64,64,64
+            frame = 0,128,64,64
+            frame = 64,128,64,64
+            frame = 128,128,64,64
+            frame = 0,192,64,64
+            frame = 64,192,64,64
+            frame = 128,192,64,64
+
+            loop=true
+            framerate = 18
+        }
+    }
+}

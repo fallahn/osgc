@@ -65,7 +65,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_gameScene     (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
-    m_playerInput   (sd.inputBinding)
+    m_playerInput   (sd.inputBinding),
+    m_theme         ("gearboy")
 {
     launchLoadingScreen();
 
@@ -150,11 +151,11 @@ void GameState::initScene()
 
 void GameState::loadResources() 
 {
-    m_textureIDs[TextureID::Game::Background] = m_resources.load<sf::Texture>("assets/images/gearboy/background.png");
+    m_textureIDs[TextureID::Game::Background] = m_resources.load<sf::Texture>("assets/images/"+m_theme+"/background.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Background]).setRepeated(true);
 
     xy::SpriteSheet spriteSheet;
-    spriteSheet.loadFromFile("assets/sprites/gearboy/player.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
 
     m_playerAnimations[AnimID::Player::Idle] = spriteSheet.getAnimationIndex("idle", "player");
@@ -162,26 +163,26 @@ void GameState::loadResources()
     m_playerAnimations[AnimID::Player::Run] = spriteSheet.getAnimationIndex("run", "player");
     m_playerAnimations[AnimID::Player::Die] = spriteSheet.getAnimationIndex("die", "player");
 
-    spriteSheet.loadFromFile("assets/sprites/gearboy/projectile.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/projectile.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Star] = spriteSheet.getSprite("projectile");
 
-    spriteSheet.loadFromFile("assets/sprites/gearboy/smoke_puff.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/smoke_puff.spt", m_resources);
     m_sprites[SpriteID::GearBoy::SmokePuff] = spriteSheet.getSprite("smoke_puff");
 
-    spriteSheet.loadFromFile("assets/sprites/gearboy/checkpoint.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/checkpoint.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Checkpoint] = spriteSheet.getSprite("checkpoint");
     m_checkpointAnimations[AnimID::Checkpoint::Idle] = spriteSheet.getAnimationIndex("idle", "checkpoint");
     m_checkpointAnimations[AnimID::Checkpoint::Activate] = spriteSheet.getAnimationIndex("activate", "checkpoint");
 
-    spriteSheet.loadFromFile("assets/sprites/gearboy/lava.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/lava.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
 
-    spriteSheet.loadFromFile("assets/sprites/gearboy/water.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
 
-    spriteSheet.loadFromFile("assets/sprites/gearboy/collectibles.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/collectibles.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Coin] = spriteSheet.getSprite("coin");
     m_sprites[SpriteID::GearBoy::Shield] = spriteSheet.getSprite("shield");
     m_sprites[SpriteID::GearBoy::Ammo] = spriteSheet.getSprite("ammo");
