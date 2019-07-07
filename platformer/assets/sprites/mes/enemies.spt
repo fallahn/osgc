@@ -1,0 +1,65 @@
+spritesheet enemies
+{
+    src="assets/images/mes/enemies.png"
+
+    sprite poopslug
+    {
+        bounds = 0,0,16,16
+
+        animation walk
+        {
+            frame=0,0,16,16
+            frame=16,0,16,16
+            frame=32,0,16,16
+
+            loop=true
+            framerate=16
+        }
+    }
+
+    sprite bird
+    {
+        bounds = 0,16,16,16
+
+        animation fly
+        {
+            frame  = 0,16,16,16
+            frame  = 16,16,16,16
+            frame  = 32,16,16,16
+
+            loop=true
+            framerate=16
+        }
+
+        animation die
+        {
+            frame=48,16,16,16
+
+            loop=true
+            framerate=16
+        }
+    }
+
+    sprite blorp
+    {
+        bounds = 0,32,16,16
+
+        animation walk
+        {
+            frame=0,32,16,16
+            frame=16,32,16,16
+            frame=32,32,16,16
+
+            loop=true
+            framerate=16
+        }
+
+        animation shoot
+        {
+            frame=48,32,16,16
+
+            loop=true
+            framerate=30
+        }
+    }
+}

@@ -1,8 +1,8 @@
-spritesheet star
+spritesheet fireball
 {
-    src="assets/images/gearboy/star.png"
+    src="assets/images/mes/fireball.png"
 
-    sprite star
+    sprite projectile
     {
         bounds = 0,0,16,16
 
@@ -11,10 +11,9 @@ spritesheet star
             frame=0,0,16,16
             frame=16,0,16,16
             frame=32,0,16,16
-            frame=48,0,16,16
 
             loop=true
-            framerate=30
+            framerate=24
         }
     }
 }

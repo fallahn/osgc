@@ -1,0 +1,58 @@
+spritesheet collectibles
+{
+    src="assets/images/mes/collectibles.png"
+
+    sprite coin
+    {
+        bounds = 0,0,16,16
+
+        animation idle
+        {
+            frame = 0,0,16,16
+            frame = 16,0,16,16
+            frame = 32,0,16,16
+            frame = 48,0,16,16
+            frame = 32,0,16,16
+            frame = 16,0,16,16
+
+            loop=true
+            framerate = 14
+        }
+    }
+
+    sprite shield
+    {
+        bounds = 16,0,16,16
+
+        animation idle
+        {
+            frame = 0,16,16,16
+            frame = 16,16,16,16
+            frame = 32,16,16,16
+            frame = 48,16,16,16
+            frame = 32,16,16,16
+            frame = 16,16,16,16
+
+            loop=true
+            framerate = 14
+        }
+    }
+
+    sprite ammo
+    {
+        bounds = 32,0,16,16
+
+        animation idle
+        {
+            frame = 0,32,16,16
+            frame = 16,32,16,16
+            frame = 32,32,16,16
+            frame = 48,32,16,16
+            frame = 32,32,16,16
+            frame = 16,32,16,16
+
+            loop=true
+            framerate = 14
+        }
+    }
+}

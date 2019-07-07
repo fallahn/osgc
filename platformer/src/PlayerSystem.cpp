@@ -221,13 +221,15 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
     float len2 = xy::Util::Vector::lengthSquared(player.velocity);
     const float MaxVel = 203000.f;
 
-    if (len2 > 100.f)
+    if (len2 > 10.f)
     {
         if (entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() == player.animations[AnimID::Player::Idle])
         {
             entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Run]);
         }
-        //entity.getComponent<xy::Sprite>().getAnimations()[1].framerate = 20.f * std::min((len2 / MaxVel), 1.f);
+
+        float animSpeed = std::min((len2 / MaxVel), 1.f);
+        entity.getComponent<xy::Sprite>().getAnimations()[player.animations[AnimID::Player::Run]].framerate = (14.f * animSpeed) + 6.f;
     }
     else
     {

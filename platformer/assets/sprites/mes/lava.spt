@@ -1,0 +1,19 @@
+spritesheet lava
+{
+    src="assets/images/mes/lava.png"
+
+    sprite lava
+    {
+        bounds = 0,0,128,128
+
+        animation idle
+        {
+            frame = 0,0,128,128
+            frame = 0,128,128,128
+            frame = 0,256,128,128
+
+            loop=true
+            framerate = 12
+        }
+    }
+}

@@ -72,8 +72,7 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
 void NinjaDirector::spawnStar(xy::Entity entity)
 {
     auto starEnt = getScene().createEntity();
-    starEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition() + GameConst::Gearboy::StarOffset);
-    starEnt.getComponent<xy::Transform>().setScale(m_spriteScale, m_spriteScale);
+    starEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition() + GameConst::Gearboy::StarOffset);   
     starEnt.addComponent<xy::Drawable>();
     starEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
     auto bounds = starEnt.getComponent<xy::Sprite>().getTextureBounds();
@@ -81,6 +80,8 @@ void NinjaDirector::spawnStar(xy::Entity entity)
     starEnt.addComponent<xy::SpriteAnimation>().play(0);
     starEnt.addComponent<NinjaStar>().velocity.x = entity.getComponent<xy::Transform>().getScale().x * GameConst::Gearboy::StarSpeed;
 
+    auto scale = starEnt.getComponent<NinjaStar>().velocity.x > 0 ? m_spriteScale : -m_spriteScale;
+    starEnt.getComponent<xy::Transform>().setScale(scale, m_spriteScale);
 }
 
 void NinjaDirector::spawnPuff(sf::Vector2f position)

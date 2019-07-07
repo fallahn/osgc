@@ -1,0 +1,19 @@
+spritesheet torch
+{
+    src="assets/images/mes/torch.png"
+
+    sprite torch
+    {
+        bounds = 0,0,16,32
+
+        animation idle
+        {
+            frame=0,0,16,32
+            frame=0,16,16,32
+            frame=0,32,16,32
+
+            loop=true
+            framerate=16
+        }
+    }
+}
