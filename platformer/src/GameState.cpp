@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include "FluidAnimationSystem.hpp"
 #include "MessageIDs.hpp"
 #include "BobAnimationSystem.hpp"
+#include "EnemySystem.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -140,6 +141,7 @@ void GameState::initScene()
     m_gameScene.addSystem<NinjaStarSystem>(mb);
     m_gameScene.addSystem<FluidAnimationSystem>(mb);
     m_gameScene.addSystem<BobAnimationSystem>(mb);
+    m_gameScene.addSystem<EnemySystem>(mb);
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
@@ -187,7 +189,12 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Shield] = spriteSheet.getSprite("shield");
     m_sprites[SpriteID::GearBoy::Ammo] = spriteSheet.getSprite("ammo");
 
-    m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
+    spriteSheet.loadFromFile("assets/sprites/" + m_theme + "/enemies.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Bird] = spriteSheet.getSprite("bird");
+    m_sprites[SpriteID::GearBoy::Walker] = spriteSheet.getSprite("walker");
+    m_sprites[SpriteID::GearBoy::Crawler] = spriteSheet.getSprite("crawler");
+
+    m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
 }
 
@@ -259,9 +266,11 @@ void GameState::buildWorld()
             entity.getComponent<xy::Drawable>().bindUniform("u_tileSet", *layer.tileSet);
             entity.getComponent<xy::Drawable>().bindUniform("u_indexSize", sf::Vector2f(layer.indexMap->getSize()));
             entity.getComponent<xy::Drawable>().bindUniform("u_tileCount", layer.tileSetSize);
+            entity.getComponent<xy::Drawable>().bindUniform("u_tileSize", sf::Vector2f(m_mapLoader.getTileSize(), m_mapLoader.getTileSize()));
 
             auto& verts = entity.getComponent<xy::Drawable>().getVertices();
             sf::Vector2f texCoords(layer.indexMap->getSize());
+            //texCoords *= m_mapLoader.getTileSize();
 
             verts.emplace_back(sf::Vector2f(), sf::Vector2f());
             verts.emplace_back(sf::Vector2f(layer.layerSize.x, 0.f), sf::Vector2f(texCoords.x, 0.f));
@@ -419,11 +428,66 @@ void GameState::buildWorld()
                 }
             }
         }
+
+        loadEnemies();
     }
     else
     {
         //TODO create an error message state
         requestStackClear();
         requestStackPush(StateID::MainMenu);
+    }
+}
+
+void GameState::loadEnemies()
+{
+    const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+
+    const auto& enemies = m_mapLoader.getEnemySpawns();
+    for (auto& [path, id] : enemies)
+    {
+        auto position = (path.second * scale) - (path.first * scale);
+        position /= 2.f;
+        position += (path.first * scale);
+        
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.getComponent<xy::Transform>().setScale(scale, scale);
+        entity.addComponent<xy::Drawable>();
+        
+        switch (id)
+        {
+        default:
+        case 0:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crawler];
+            entity.addComponent<Enemy>().type = Enemy::Crawler;
+            break;
+        case 1:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Bird];
+            entity.addComponent<Enemy>().type = Enemy::Bird;
+            break;
+        case 2:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Walker];
+            entity.addComponent<Enemy>().type = Enemy::Walker;
+            break;
+        }
+        entity.getComponent<Enemy>().start = path.first * scale;
+        entity.getComponent<Enemy>().end = path.second * scale;
+
+        entity.addComponent<xy::SpriteAnimation>().play(0);
+
+        auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+        bounds.left -= bounds.width / 2.f;
+        bounds.top -= bounds.height / 2.f;
+
+        auto& collision = entity.addComponent<CollisionBody>();
+        collision.shapes[0].aabb = bounds;
+        collision.shapes[0].type = CollisionShape::Enemy;
+        collision.shapes[0].collisionFlags = CollisionShape::Player;
+
+        entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
     }
 }

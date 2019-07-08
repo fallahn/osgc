@@ -99,6 +99,8 @@ void CameraTargetSystem::process(float dt)
             }
 
             sf::Vector2f targetPos(smoothMotion(tx.getPosition(), camera.targetPosition, camera.velocity, dt));
+            //targetPos.x = xy::Util::Math::round(targetPos.x);
+            //targetPos.y = xy::Util::Math::round(targetPos.y);
 
             //clamp to bounds
             auto offset = entity.getComponent<xy::Camera>().getView() / 2.f;

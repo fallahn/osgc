@@ -41,4 +41,5 @@ private:
 
     void spawnStar(xy::Entity);
     void spawnPuff(sf::Vector2f);
+    void spawnEgg(sf::Vector2f);
 };

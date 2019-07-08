@@ -20,6 +20,8 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "GameConsts.hpp"
 #include "NinjaStarSystem.hpp"
+#include "EnemySystem.hpp"
+#include "Collision.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -27,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 
 NinjaDirector::NinjaDirector(SpriteArray<SpriteID::GearBoy::Count>& sa)
@@ -66,6 +69,20 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
             break;
         }
     }
+    else if (msg.id == MessageID::EnemyMessage)
+    {
+        const auto& data = msg.getData<EnemyEvent>();
+        if (data.type == EnemyEvent::Died)
+        {
+            auto position = data.entity.getComponent<xy::Transform>().getPosition();
+            spawnPuff(position);
+        }
+        else if (data.type == EnemyEvent::SpawnEgg)
+        {
+            auto position = data.entity.getComponent<xy::Transform>().getPosition();
+            spawnEgg(position);
+        }
+    }
 }
 
 //private
@@ -103,4 +120,29 @@ void NinjaDirector::spawnPuff(sf::Vector2f position)
             getScene().destroyEntity(e);
         }
     };
+}
+
+void NinjaDirector::spawnEgg(sf::Vector2f position)
+{
+    auto entity = getScene().createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().setScale(m_spriteScale, m_spriteScale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Coin];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<Enemy>().type = Enemy::Egg;
+
+    bounds.left -= bounds.width / 2.f;
+    bounds.top -= bounds.height / 2.f;
+
+    auto& collision = entity.addComponent<CollisionBody>();
+    collision.shapes[0].aabb = bounds;
+    collision.shapes[0].type = CollisionShape::Enemy;
+    collision.shapes[0].collisionFlags = CollisionShape::Player;
+
+    entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
+
+    //TODO use correct sprite
 }

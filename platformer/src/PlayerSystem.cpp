@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "Collision.hpp"
 #include "MessageIDs.hpp"
 #include "CommandIDs.hpp"
+#include "EnemySystem.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -372,7 +373,6 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     break;
                 case CollisionShape::Fluid:
                 case CollisionShape::Spikes:
-                    //TODO check if we have a shield first
                     kill(entity);
                     return;
                 case CollisionShape::Checkpoint:
@@ -417,6 +417,30 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     getScene()->destroyEntity(other);
                 }
                     break;
+                case CollisionShape::Enemy:
+                    if (other.getComponent<Enemy>().state == Enemy::Normal)
+                    {
+                        if (manifold->normal.y < 0)
+                        {
+                            //we landed on top, so kill enemy
+                            tx.move(manifold->normal * manifold->penetration);
+                            player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal) * 0.5f;
+
+                            //TODO should rely on sending a player action message
+                            //and allow enemy system to kill enemy instead
+                            auto* msg = postMessage<EnemyEvent>(MessageID::EnemyMessage);
+                            msg->entity = other;
+                            msg->type = EnemyEvent::Died;
+
+                            other.getComponent<Enemy>().kill();
+                        }
+                        else
+                        {
+                            kill(entity);
+                            return;
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -434,6 +458,8 @@ void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
 
 void PlayerSystem::kill(xy::Entity entity)
 {
+    //TODO check if we have an active shield first
+
     auto& player = entity.getComponent<Player>();
 
     player.velocity.y = -1100.f;

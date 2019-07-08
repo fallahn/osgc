@@ -2,6 +2,7 @@ set(PROJECT_SRC
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTargetSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EnemySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FluidAnimationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp

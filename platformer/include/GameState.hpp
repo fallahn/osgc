@@ -61,4 +61,5 @@ private:
     void initScene();
     void loadResources();
     void buildWorld();
+    void loadEnemies();
 };

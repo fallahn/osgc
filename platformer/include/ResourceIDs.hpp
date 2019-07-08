@@ -83,6 +83,10 @@ namespace SpriteID
             Shield,
             Ammo,
 
+            Crawler,
+            Bird,
+            Walker,
+
             Count
         };
     }

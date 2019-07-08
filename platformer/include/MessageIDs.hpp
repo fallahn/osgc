@@ -26,7 +26,8 @@ namespace MessageID
     enum
     {
         PlayerMessage = xy::Message::Count,
-        StarMessage
+        StarMessage,
+        EnemyMessage
     };
 }
 
@@ -49,4 +50,13 @@ struct StarEvent final
     sf::Vector2f position;
     xy::Entity entityHit;
     std::uint64_t collisionShape = 0;
+};
+
+struct EnemyEvent final
+{
+    enum
+    {
+        Died, SpawnEgg
+    }type = Died;
+    xy::Entity entity;
 };

@@ -2,7 +2,7 @@ spritesheet enemies
 {
     src="assets/images/gearboy/enemies.png"
 
-    sprite poopsnail
+    sprite crawler
     {
         bounds = 0,0,32,16
 
@@ -43,7 +43,7 @@ spritesheet enemies
         }
     }
 
-    sprite squatmo
+    sprite walker
     {
         bounds = 0,32,16,16
 

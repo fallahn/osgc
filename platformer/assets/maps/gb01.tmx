@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="103">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="106">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -145,27 +145,30 @@
     <property name="id" type="int" value="2"/>
    </properties>
   </object>
-  <object id="97" type="enemy" x="320" y="304" width="80" height="16">
-   <properties>
-    <property name="id" type="int" value="0"/>
-   </properties>
-  </object>
-  <object id="98" type="enemy" x="456" y="256" width="80" height="16">
-   <properties>
-    <property name="id" type="int" value="1"/>
-   </properties>
-  </object>
-  <object id="99" type="enemy" x="308" y="172" width="80" height="16">
-   <properties>
-    <property name="id" type="int" value="2"/>
-   </properties>
-  </object>
   <object id="100" type="spikes" x="920" y="20" width="8" height="60"/>
   <object id="101" type="solid" x="1904" y="160" width="16" height="112"/>
   <object id="102" type="checkpoint" x="1000" y="80" width="32" height="80">
    <properties>
     <property name="id" type="int" value="2"/>
    </properties>
+  </object>
+  <object id="103" type="enemy" x="320" y="304">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+   <polyline points="0,0 80,0"/>
+  </object>
+  <object id="104" type="enemy" x="280" y="184">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+   <polyline points="0,0 104,0"/>
+  </object>
+  <object id="105" type="enemy" x="464" y="256">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+   <polyline points="0,0 72,0"/>
   </object>
  </objectgroup>
 </map>

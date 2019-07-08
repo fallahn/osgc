@@ -2,7 +2,7 @@ spritesheet enemies
 {
     src="assets/images/mes/enemies.png"
 
-    sprite poopslug
+    sprite crawler
     {
         bounds = 0,0,16,16
 
@@ -40,7 +40,7 @@ spritesheet enemies
         }
     }
 
-    sprite blorp
+    sprite walker
     {
         bounds = 0,32,16,16
 

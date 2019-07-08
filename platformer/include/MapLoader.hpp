@@ -27,6 +27,9 @@ Copyright 2019 Matt Marchant
 #include <unordered_map>
 #include <string>
 
+using Path = std::pair<sf::Vector2f, sf::Vector2f>;
+using EnemySpawn = std::pair<Path, std::int32_t>;
+
 struct MapLayer final
 {
     sf::Texture* indexMap = nullptr;
@@ -57,6 +60,8 @@ public:
 
     const std::string& getNextMap() const { return m_nextMap; }
 
+    const std::vector<EnemySpawn>& getEnemySpawns() const { return m_enemySpawns; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -76,4 +81,5 @@ private:
     std::string m_nextMap;
 
     std::vector<CollisionShape> m_collisionShapes;
+    std::vector<EnemySpawn> m_enemySpawns;
 };

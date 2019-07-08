@@ -193,6 +193,31 @@ bool MapLoader::load(const std::string& file)
                     switch (shape)
                     {
                     default: break;
+                    case tmx::Object::Shape::Polyline:
+                    {
+                        auto type = xy::Util::String::toLower(object.getType());
+                        if (type == "enemy")
+                        {
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                const auto& points = object.getPoints();
+                                if (points.size() > 1)
+                                {
+                                    auto pos = object.getPosition();
+                                    sf::Vector2f start(pos.x + points[0].x, pos.y + points[0].y);
+                                    sf::Vector2f end(pos.x + points.back().x, pos.y + points.back().y);
+
+                                    m_enemySpawns.emplace_back(
+                                        std::make_pair(
+                                            std::make_pair(start, end), 
+                                            *id)
+                                    );
+                                }
+                            }
+                        }
+                    }
+                        break;
                     case tmx::Object::Shape::Rectangle:
                     {
                         auto& collision = m_collisionShapes.emplace_back();
@@ -235,12 +260,6 @@ bool MapLoader::load(const std::string& file)
                             {
                                 m_collisionShapes.pop_back();
                             }
-                        }
-                        else if (type == "enemy")
-                        {
-                            //TODO check for ID
-                            collision.type = CollisionShape::Enemy;
-                            collision.collisionFlags = CollisionShape::Player | CollisionShape::LeftHand | CollisionShape::RightHand;
                         }
                         else if (type == "exit")
                         {
