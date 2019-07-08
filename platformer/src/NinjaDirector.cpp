@@ -128,7 +128,7 @@ void NinjaDirector::spawnEgg(sf::Vector2f position)
     entity.addComponent<xy::Transform>().setPosition(position);
     entity.getComponent<xy::Transform>().setScale(m_spriteScale, m_spriteScale);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Coin];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Bomb];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<Enemy>().type = Enemy::Egg;
@@ -143,6 +143,5 @@ void NinjaDirector::spawnEgg(sf::Vector2f position)
 
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
-
-    //TODO use correct sprite
+    entity.addComponent<xy::SpriteAnimation>().play(0);
 }

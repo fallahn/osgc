@@ -86,6 +86,7 @@ namespace SpriteID
             Crawler,
             Bird,
             Walker,
+            Bomb,
 
             Count
         };

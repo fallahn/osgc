@@ -4,17 +4,25 @@ spritesheet enemies
 
     sprite crawler
     {
-        bounds = 0,0,32,16
+        bounds = 6,3,20,13
 
         animation walk
         {
-            frame=0,0,32,16
-            frame=32,0,32,16
-            frame=0,0,32,16
-            frame=64,0,32,16
+            frame=6,3,20,13
+            frame=38,3,20,13
+            frame=6,3,20,13
+            frame=70,3,20,13
 
             loop=true
             framerate=16
+        }
+
+        animation die
+        {
+            frame  = 80,16,16,16
+
+            loop=true
+            framerate=30
         }
     }
 
@@ -57,6 +65,32 @@ spritesheet enemies
 
             loop=true
             framerate=16
+        }
+
+        animation die
+        {
+            frame=80,32,16,16
+
+            loop=true
+            framerate=30
+        }
+    }
+
+    sprite bomb
+    {
+        bounds=0,48,16,16
+
+        animation drop
+        {
+            frame=0,48,16,16
+            frame=16,48,16,16
+            frame=32,48,16,16
+            frame=16,48,16,16
+            frame=0,48,16,16
+            frame=16,48,16,16
+
+            loop=false
+            framerate = 16
         }
     }
 }

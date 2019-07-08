@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="106">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="106">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -152,7 +152,7 @@
     <property name="id" type="int" value="2"/>
    </properties>
   </object>
-  <object id="103" type="enemy" x="320" y="304">
+  <object id="103" type="enemy" x="319" y="315">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>
@@ -164,7 +164,7 @@
    </properties>
    <polyline points="0,0 104,0"/>
   </object>
-  <object id="105" type="enemy" x="464" y="256">
+  <object id="105" type="enemy" x="464" y="264">
    <properties>
     <property name="id" type="int" value="2"/>
    </properties>

@@ -193,6 +193,7 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Bird] = spriteSheet.getSprite("bird");
     m_sprites[SpriteID::GearBoy::Walker] = spriteSheet.getSprite("walker");
     m_sprites[SpriteID::GearBoy::Crawler] = spriteSheet.getSprite("crawler");
+    m_sprites[SpriteID::GearBoy::Bomb] = spriteSheet.getSprite("bomb");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
