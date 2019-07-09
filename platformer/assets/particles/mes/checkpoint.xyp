@@ -1,22 +1,22 @@
 particle_system checkpoint
 {
-    src = ""
+    src = "assets/images/mes/spark.png"
     blendmode = add
-    gravity = 0.000000,328.766998
-    velocity = 0.000000,-479.451996
+    gravity = 0.000000,219.177994
+    velocity = 0.000000,-260.273987
     spread = 9.864000
-    lifetime = 3.355000
+    lifetime = 2.405000
     lifetime_variance = 0.274000
-    colour = 231,125,28,255
+    colour = 255,255,255,255
     random_initial_rotation = true
-    rotation_speed = 0.000000
+    rotation_speed = 10.000000
     scale_affector = 0.000000
-    size = 4.890000
+    size = 12.258000
     emit_rate = 10.000000
     emit_count = 5
     spawn_radius = 3.425000
     spawn_offset = 0.000000,0.000000
-    release_count = 125
+    release_count = 75
     forces 
     {
         force = 0.000000,0.000000

@@ -166,7 +166,7 @@ void NinjaDirector::spawnEgg(sf::Vector2f position)
 
 void NinjaDirector::spawnShield(xy::Entity playerEnt)
 {
-    auto bounds = playerEnt.getComponent<xy::Sprite>().getTextureBounds();
+    auto bounds = m_sprites[SpriteID::GearBoy::ShieldAvatar].getTextureBounds();
 
     auto entity = getScene().createEntity();
     entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
@@ -174,6 +174,9 @@ void NinjaDirector::spawnShield(xy::Entity playerEnt)
     entity.getComponent<xy::ParticleEmitter>().start();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::World::ShieldParticle;
     entity.addComponent<ShieldAnim>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::ShieldAvatar];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.addComponent<xy::Drawable>().setDepth(1);
 
     playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

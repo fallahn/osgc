@@ -216,6 +216,9 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Shield] = spriteSheet.getSprite("shield");
     m_sprites[SpriteID::GearBoy::Ammo] = spriteSheet.getSprite("ammo");
 
+    spriteSheet.loadFromFile("assets/sprites/" + m_theme + "/shield.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::ShieldAvatar] = spriteSheet.getSprite("shield");
+
     spriteSheet.loadFromFile("assets/sprites/" + m_theme + "/enemies.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Bird] = spriteSheet.getSprite("bird");
     m_sprites[SpriteID::GearBoy::Walker] = spriteSheet.getSprite("walker");

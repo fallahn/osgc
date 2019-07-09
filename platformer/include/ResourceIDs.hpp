@@ -93,6 +93,7 @@ namespace SpriteID
             Coin,
             Shield,
             Ammo,
+            ShieldAvatar,
 
             Crawler,
             Bird,

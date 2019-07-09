@@ -40,7 +40,7 @@ public:
         requireComponent<xy::Transform>();
         requireComponent<ShieldAnim>();
 
-        m_wavetable = xy::Util::Wavetable::sine(3.f);
+        m_wavetable = xy::Util::Wavetable::sine(1.f);
     }
 
     void process(float dt) override
@@ -52,7 +52,6 @@ public:
             auto& tx = entity.getComponent<xy::Transform>();
 
             tx.setPosition((m_wavetable[shield.indexX] * ShieldAnim::Width), m_wavetable[shield.indexY] * ShieldAnim::Height);
-            tx.move(tx.getOrigin());
 
             shield.indexX = (shield.indexX + 1) % m_wavetable.size();
             shield.indexY = (shield.indexY + 1) % m_wavetable.size();

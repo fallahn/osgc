@@ -1,0 +1,26 @@
+spritesheet shield
+{
+    src="assets/images/mes/shield.png"
+
+    sprite shield
+    {
+        bounds = 0,0,8,8
+
+        animation idle
+        {
+            frame = 0,0,8,8
+            frame = 8,0,8,8
+            frame = 16,0,8,8
+            frame = 24,0,8,8
+            frame = 32,0,8,8
+            frame = 40,0,8,8
+            frame = 48,0,8,8
+            frame = 56,0,8,8
+            frame = 64,0,8,8
+            frame = 72,0,8,8
+
+            loop=true
+            framerate=18
+        }
+    }
+}
