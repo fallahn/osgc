@@ -408,6 +408,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                         break;
                     case 1:
                         msg->type = PlayerEvent::GotShield;
+                        player.hasShield = true;
                         break;
                     case 2:
                         msg->type = PlayerEvent::GotAmmo;

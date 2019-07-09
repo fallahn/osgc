@@ -34,7 +34,8 @@ namespace CommandID
         enum
         {
             DebugItem = 0x1,
-            CheckPoint = 0x2
+            CheckPoint = 0x2,
+            ShieldParticle = 0x4
         };
     }
 }

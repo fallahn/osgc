@@ -38,13 +38,15 @@ struct Player final
     static constexpr float Acceleration = 120.f;
     static constexpr float Drag = 0.82f;
 
-    AnimationMap<AnimID::Player::Count> animations;
+    AnimationMap<AnimID::Player::Count> animations = {};
 
     std::int32_t lastCheckpoint = 0;
 
     float stateTime = 0.f;
     static constexpr float DyingTime = 1.f;
     static constexpr float DeadTime = 1.f;
+
+    bool hasShield = false;
 };
 
 class PlayerSystem final : public xy::System

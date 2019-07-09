@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "BobAnimationSystem.hpp"
 #include "EnemySystem.hpp"
+#include "ShieldAnimationSystem.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -48,6 +49,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
+#include <xyginext/ecs/systems/ParticleSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Rectangle.hpp>
@@ -111,6 +113,10 @@ void GameState::handleMessage(const xy::Message& msg)
 
             requestStackPush(StateID::Transition);
         }
+        else if (data.type == PlayerEvent::GotShield)
+        {
+            spawnShield(data.entity); //TODO this should be a director function
+        }
     }
 
     m_gameScene.forwardMessage(msg);
@@ -138,6 +144,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<PlayerSystem>(mb);
+    m_gameScene.addSystem<ShieldAnimationSystem>(mb);
     m_gameScene.addSystem<NinjaStarSystem>(mb);
     m_gameScene.addSystem<FluidAnimationSystem>(mb);
     m_gameScene.addSystem<BobAnimationSystem>(mb);
@@ -147,6 +154,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
+    m_gameScene.addSystem<xy::ParticleSystem>(mb);
 
     m_gameScene.addDirector<NinjaDirector>(m_sprites);
 }
@@ -197,6 +205,8 @@ void GameState::loadResources()
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
+
+    m_shieldSettings.loadFromFile("assets/particles/" + m_theme + "/shield.xyp", m_resources);
 }
 
 void GameState::buildWorld()
@@ -491,4 +501,18 @@ void GameState::loadEnemies()
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
     }
+}
+
+void GameState::spawnShield(xy::Entity playerEnt)
+{
+    auto bounds = playerEnt.getComponent<xy::Sprite>().getTextureBounds();
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::ParticleEmitter>().settings = m_shieldSettings;
+    entity.getComponent<xy::ParticleEmitter>().start();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::World::ShieldParticle;
+    entity.addComponent<ShieldAnim>();
+
+    playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

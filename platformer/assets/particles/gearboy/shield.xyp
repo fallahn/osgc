@@ -12,7 +12,7 @@ particle_system shield
     rotation_speed = 0.000000
     scale_affector = 0.000000
     size = 4.205000
-    emit_rate = 10.274000
+    emit_rate = 20.274000
     emit_count = 1
     spawn_radius = 20.548000
     spawn_offset = 0.000000,0.000000

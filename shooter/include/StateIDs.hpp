@@ -92,7 +92,7 @@ struct SharedData final
     enum
     {
         Win, Lose
-    }gameoverType;
+    }gameoverType = Win;
 
     enum
     {

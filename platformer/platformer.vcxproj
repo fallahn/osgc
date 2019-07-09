@@ -164,6 +164,7 @@
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\ShakerSystem.hpp" />
     <ClInclude Include="include\SharedStateData.hpp" />
+    <ClInclude Include="include\ShieldAnimationSystem.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\TransitionState.hpp" />
   </ItemGroup>

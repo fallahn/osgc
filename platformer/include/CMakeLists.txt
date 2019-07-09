@@ -24,6 +24,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShapeUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ShieldAnimationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TransitionState.hpp
   PARENT_SCOPE)

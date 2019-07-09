@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
@@ -57,9 +58,12 @@ private:
     InputParser m_playerInput;
 
     std::string m_theme;
+    xy::EmitterSettings m_shieldSettings;
 
     void initScene();
     void loadResources();
     void buildWorld();
     void loadEnemies();
+
+    void spawnShield(xy::Entity);
 };

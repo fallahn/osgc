@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/util/Random.hpp>
 
@@ -205,7 +206,12 @@ void EnemySystem::processDying(xy::Entity entity, float dt)
         getScene()->destroyEntity(entity);
     }
 
-    //TODO death animations if available on current sprite
+    //death animations if available on current sprite
+    if (entity.getComponent<xy::Sprite>().getAnimationCount() > 1
+        && entity.getComponent<xy::SpriteAnimation>().getAnimationIndex() == 0)
+    {
+        entity.getComponent<xy::SpriteAnimation>().play(1);
+    }
 }
 
 void EnemySystem::processEgg(xy::Entity entity, float dt)
