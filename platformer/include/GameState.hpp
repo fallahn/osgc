@@ -53,17 +53,15 @@ private:
     SpriteArray<SpriteID::GearBoy::Count> m_sprites;
     AnimationMap<AnimID::Player::Count> m_playerAnimations;
     AnimationMap<AnimID::Checkpoint::Count> m_checkpointAnimations;
+    std::array<xy::EmitterSettings, ParticleID::Count> m_particleEmitters;
 
     MapLoader m_mapLoader;
     InputParser m_playerInput;
 
     std::string m_theme;
-    xy::EmitterSettings m_shieldSettings;
 
     void initScene();
     void loadResources();
     void buildWorld();
     void loadEnemies();
-
-    void spawnShield(xy::Entity);
 };

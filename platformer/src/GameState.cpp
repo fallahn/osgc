@@ -136,20 +136,6 @@ void GameState::handleMessage(const xy::Message& msg)
 
             requestStackPush(StateID::Transition);
         }
-        else if (data.type == PlayerEvent::GotShield)
-        {
-            spawnShield(data.entity); //TODO this should be a director function
-        }
-        else if (data.type == PlayerEvent::LostShield)
-        {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::World::ShieldParticle;
-            cmd.action = [&](xy::Entity e, float)
-            {
-                m_gameScene.destroyEntity(e);
-            };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-        }
     }
 
     m_gameScene.forwardMessage(msg);
@@ -189,7 +175,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::RenderSystem>(mb);
     m_gameScene.addSystem<xy::ParticleSystem>(mb);
 
-    m_gameScene.addDirector<NinjaDirector>(m_sprites);
+    m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters);
 }
 
 void GameState::loadResources() 
@@ -239,7 +225,8 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
 
-    m_shieldSettings.loadFromFile("assets/particles/" + m_theme + "/shield.xyp", m_resources);
+    m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_theme + "/shield.xyp", m_resources);
+    m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_theme + "/checkpoint.xyp", m_resources);
 }
 
 void GameState::buildWorld()
@@ -430,13 +417,24 @@ void GameState::buildWorld()
                         checkpointEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Checkpoint];
                         checkpointEnt.addComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Idle]);
 
+                        bounds = m_sprites[SpriteID::GearBoy::Checkpoint].getTextureBounds();
+                        bounds.width *= scale;
+                        bounds.height *= scale;
+
+                        auto particleEnt = m_gameScene.createEntity();
+                        particleEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                        particleEnt.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 2.f);
+                        particleEnt.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Checkpoint];
+                        //TODO could add callback to destroy end when particles finished?
+
                         entity.addComponent<xy::Callback>().function =
-                            [&,checkpointEnt](xy::Entity e, float) mutable
+                            [&,checkpointEnt, particleEnt](xy::Entity e, float) mutable
                         {
                             if (checkpointEnt.getComponent<xy::SpriteAnimation>().getAnimationIndex() ==
                                 m_checkpointAnimations[AnimID::Checkpoint::Idle])
                             {
                                 checkpointEnt.getComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Activate]);
+                                particleEnt.getComponent<xy::ParticleEmitter>().start();
                             }
                             e.getComponent<xy::Callback>().active = false;
                         };
@@ -534,18 +532,4 @@ void GameState::loadEnemies()
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
     }
-}
-
-void GameState::spawnShield(xy::Entity playerEnt)
-{
-    auto bounds = playerEnt.getComponent<xy::Sprite>().getTextureBounds();
-
-    auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.addComponent<xy::ParticleEmitter>().settings = m_shieldSettings;
-    entity.getComponent<xy::ParticleEmitter>().start();
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::World::ShieldParticle;
-    entity.addComponent<ShieldAnim>();
-
-    playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

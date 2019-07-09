@@ -22,9 +22,12 @@ Copyright 2019 Matt Marchant
 #include "NinjaStarSystem.hpp"
 #include "EnemySystem.hpp"
 #include "Collision.hpp"
+#include "ShieldAnimationSystem.hpp"
+#include "CommandIDs.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -32,9 +35,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 
-NinjaDirector::NinjaDirector(SpriteArray<SpriteID::GearBoy::Count>& sa)
-    : m_sprites     (sa),
-    m_spriteScale   (1.f)
+NinjaDirector::NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>& sa, const std::array<xy::EmitterSettings, ParticleID::Count>& es)
+    : m_sprites         (sa),
+    m_particleEmitters  (es),
+    m_spriteScale       (1.f)
 {
 
 }
@@ -56,6 +60,20 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
         case PlayerEvent::Landed:
             spawnPuff(data.entity.getComponent<xy::Transform>().getPosition());
             break;
+        case PlayerEvent::GotShield:
+            spawnShield(data.entity);
+            break;
+        case PlayerEvent::LostShield:
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::World::ShieldParticle;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                getScene().destroyEntity(e);
+            };
+            sendCommand(cmd);
+        }
+        break;
         }
     }
     else if (msg.id == MessageID::StarMessage)
@@ -144,4 +162,18 @@ void NinjaDirector::spawnEgg(sf::Vector2f position)
     entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
     entity.addComponent<xy::SpriteAnimation>().play(0);
+}
+
+void NinjaDirector::spawnShield(xy::Entity playerEnt)
+{
+    auto bounds = playerEnt.getComponent<xy::Sprite>().getTextureBounds();
+
+    auto entity = getScene().createEntity();
+    entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Shield];
+    entity.getComponent<xy::ParticleEmitter>().start();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::World::ShieldParticle;
+    entity.addComponent<ShieldAnim>();
+
+    playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

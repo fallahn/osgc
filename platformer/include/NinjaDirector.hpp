@@ -22,13 +22,14 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Director.hpp>
 #include <xyginext/ecs/Entity.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 
 #include <SFML/System/Vector2.hpp>
 
 class NinjaDirector final : public xy::Director
 {
 public:
-    explicit NinjaDirector(SpriteArray<SpriteID::GearBoy::Count>&);
+    NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>&, const std::array<xy::EmitterSettings, ParticleID::Count>&);
 
     void handleMessage(const xy::Message&) override;
 
@@ -36,10 +37,12 @@ public:
 
 private:
 
-    SpriteArray<SpriteID::GearBoy::Count>& m_sprites;
+    const SpriteArray<SpriteID::GearBoy::Count>& m_sprites;
+    const std::array<xy::EmitterSettings, ParticleID::Count>& m_particleEmitters;
     float m_spriteScale;
 
     void spawnStar(xy::Entity);
     void spawnPuff(sf::Vector2f);
     void spawnEgg(sf::Vector2f);
+    void spawnShield(xy::Entity);
 };

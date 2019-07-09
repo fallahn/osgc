@@ -65,6 +65,17 @@ namespace FontID
     };
 }
 
+namespace ParticleID
+{
+    enum
+    {
+        Shield,
+        Checkpoint,
+
+        Count
+    };
+}
+
 namespace SpriteID
 {
     namespace GearBoy

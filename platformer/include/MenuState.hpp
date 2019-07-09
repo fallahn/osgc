@@ -35,6 +35,7 @@ source distribution.
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
@@ -65,6 +66,7 @@ private:
     SpriteArray<SpriteID::GearBoy::Count> m_sprites;
     AnimationMap<AnimID::Player::Count> m_playerAnimations;
     std::size_t m_fontID;
+    std::array<xy::EmitterSettings, ParticleID::Count> m_particleEmitters;
 
     MapLoader m_mapLoader;
     InputParser m_playerInput;
