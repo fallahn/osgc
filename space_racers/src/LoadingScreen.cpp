@@ -104,7 +104,7 @@ void LoadingScreen::update(float dt)
 }
 
 //private
-void LoadingScreen::draw(sf::RenderTarget& rt, sf::RenderStates states) const
+void LoadingScreen::draw(sf::RenderTarget& rt, sf::RenderStates) const
 {
     rt.draw(m_backgroundSprite);
     rt.draw(m_roidSprite, m_shader.get());

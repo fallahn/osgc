@@ -238,7 +238,6 @@ void LocalRaceState::handleMessage(const xy::Message& msg)
             {
                 tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
                 tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
-                auto& wp = vehicle.currentWaypoint.getComponent<WayPoint>();
             }
             else
             {
@@ -584,7 +583,7 @@ void LocalRaceState::createRoids()
 
     m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
 
-    auto cameraEntity = m_gameScene.getActiveCamera();
+    //auto cameraEntity = m_gameScene.getActiveCamera();
     sf::BlendMode blendMode(sf::BlendMode::DstAlpha, sf::BlendMode::OneMinusSrcAlpha);
 
     auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);

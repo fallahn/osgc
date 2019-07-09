@@ -99,7 +99,6 @@ void RaceState::handleMessage(const xy::Message& msg)
             {
                 tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
                 tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
-                auto& wp = vehicle.currentWaypoint.getComponent<WayPoint>();
             }
             else
             {

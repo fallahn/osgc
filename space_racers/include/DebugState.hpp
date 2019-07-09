@@ -52,9 +52,9 @@ private:
     xy::ResourceHolder m_resources;
 
     InputParser m_playerInput;
-    MapParser m_mapParser;
-
     InputParser m_otherInput;
+
+    MapParser m_mapParser;
 
     void initScene();
     void loadResources();

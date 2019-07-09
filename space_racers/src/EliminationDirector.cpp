@@ -74,7 +74,7 @@ void EliminationDirector::process(float)
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::SpriteAnimation>().play(0);
                 
@@ -94,7 +94,7 @@ void EliminationDirector::process(float)
         {
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::Callback>().active = true;
             };

@@ -37,7 +37,7 @@ Camera3DSystem::Camera3DSystem(xy::MessageBus& mb)
 }
 
 //public
-void Camera3DSystem::process(float dt)
+void Camera3DSystem::process(float)
 {
     auto& entities = getEntities();
     for (auto entity : entities)

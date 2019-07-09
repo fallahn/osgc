@@ -235,7 +235,7 @@ void RenderPath::renderBasic(xy::Scene& backgroundScene, xy::Scene& gameScene)
     }
 }
 
-void RenderPath::draw(sf::RenderTarget& rt, sf::RenderStates states) const
+void RenderPath::draw(sf::RenderTarget& rt, sf::RenderStates) const
 {
     rt.draw(m_gameSceneSprite, m_blendShader);
 }

@@ -522,7 +522,7 @@ void RaceState::buildUI()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Game::StartLights;
     entity.addComponent<xy::AudioEmitter>() = m_uiSounds.getEmitter("start");
 
-    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
+    //auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
     ////lap counter
     //entity = m_uiScene.createEntity();
@@ -602,14 +602,14 @@ void RaceState::handlePackets()
             {
                 xy::Command cmd;
                 cmd.targetFlags = CommandID::UI::StartLights;
-                cmd.action = [](xy::Entity e, float dt) 
+                cmd.action = [](xy::Entity e, float) 
                 {
                     e.getComponent<xy::SpriteAnimation>().play(0); 
                 };
                 m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
                 cmd.targetFlags = CommandID::Game::StartLights;
-                cmd.action = [](xy::Entity e, float dt)
+                cmd.action = [](xy::Entity e, float)
                 {
                     e.getComponent<xy::AudioEmitter>().play();
                 };
@@ -621,7 +621,7 @@ void RaceState::handlePackets()
                 {
                     xy::Command cmd;
                     cmd.targetFlags = CommandID::UI::StartLights;
-                    cmd.action = [](xy::Entity e, float dt)
+                    cmd.action = [](xy::Entity e, float)
                     {
                         e.getComponent<xy::Callback>().active = true; 
                     };
@@ -983,7 +983,7 @@ void RaceState::spawnActor(const ActorData& data)
         entity.addComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionFlags::Asteroid);
         entity.getComponent<xy::BroadphaseComponent>().setArea(bounds);
 
-        auto cameraEntity = m_gameScene.getActiveCamera();
+        //auto cameraEntity = m_gameScene.getActiveCamera();
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Asteroid));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::PlanetNormal]));

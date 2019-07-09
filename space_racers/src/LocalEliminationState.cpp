@@ -645,7 +645,7 @@ void LocalEliminationState::createRoids()
 
     m_gameScene.getSystem<AsteroidSystem>().setSpawnPosition(m_mapParser.getStartPosition().first);
 
-    auto cameraEntity = m_gameScene.getActiveCamera();
+    //auto cameraEntity = m_gameScene.getActiveCamera();
 
     auto positions = xy::Util::Random::poissonDiscDistribution(bounds, 1200, 8);
     for (auto position : positions)

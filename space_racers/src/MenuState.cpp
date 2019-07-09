@@ -414,7 +414,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::PlanetDiffuse]));
 
 
-    auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
+    //auto& font = m_sharedData.resources.get<sf::Font>(m_sharedData.fontID);
 
     auto rootNode = m_scene.createEntity();
     rootNode.addComponent<xy::Transform>();

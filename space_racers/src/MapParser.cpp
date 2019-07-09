@@ -460,7 +460,7 @@ void MapParser::renderLayers(std::array<sf::RenderTexture, 2u>& targets) const
 
 void MapParser::addProps(MatrixPool& matrixPool, xy::AudioResource& ar, xy::ShaderResource& shaders, xy::ResourceHandler& resources, const std::array<std::size_t, TextureID::Game::Count>& textureIDs)
 {
-    auto cameraEntity = m_scene.getActiveCamera();
+    //auto cameraEntity = m_scene.getActiveCamera();
 
     xy::AudioScape audioScape(ar);
     audioScape.loadFromFile("assets/sound/map.xas");
