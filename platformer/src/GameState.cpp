@@ -91,6 +91,29 @@ bool GameState::handleEvent(const sf::Event& evt)
         return true;
     }
 
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::P:
+        case sf::Keyboard::Pause:
+        case sf::Keyboard::Escape:
+            requestStackPush(StateID::Pause);
+            break;
+        }
+    }
+    else if (evt.type == sf::Event::JoystickButtonReleased)
+    {
+        switch (evt.joystickButton.button)
+        {
+        default: break;
+        case 7:
+            requestStackPush(StateID::Pause);
+            break;
+        }
+    }
+
     m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
     return true;
@@ -116,6 +139,16 @@ void GameState::handleMessage(const xy::Message& msg)
         else if (data.type == PlayerEvent::GotShield)
         {
             spawnShield(data.entity); //TODO this should be a director function
+        }
+        else if (data.type == PlayerEvent::LostShield)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::World::ShieldParticle;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                m_gameScene.destroyEntity(e);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
     }
 

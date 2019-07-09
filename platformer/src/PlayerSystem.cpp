@@ -166,6 +166,22 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
             msg->type = PlayerEvent::Landed;
             msg->entity = entity;
         }
+
+        //decrease the state time (used for invincibility in this state)
+        player.stateTime -= dt;
+
+        if (player.stateTime > 0)
+        {
+            //flash
+            auto& sprite = entity.getComponent<xy::Sprite>();
+            auto c = sprite.getColour();
+            c.a = (c.a == 0) ? 255 : 0;
+            sprite.setColour(c);
+        }
+        else
+        {
+            entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
+        }
     }
 }
 
@@ -250,6 +266,22 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
             entity.getComponent<Player>().state = Player::Falling;
             entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
         }
+    
+        //decrease the state time (used for invincibility in this state)
+        player.stateTime -= dt;
+
+        if (player.stateTime > 0)
+        {
+            //flash
+            auto& sprite = entity.getComponent<xy::Sprite>();
+            auto c = sprite.getColour();
+            c.a = (c.a == 0) ? 255 : 0;
+            sprite.setColour(c);
+        }
+        else
+        {
+            entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
+        }    
     }
 }
 
@@ -270,6 +302,9 @@ void PlayerSystem::processDying(xy::Entity entity, float dt)
     }
 
     applyVelocity(entity, dt);
+
+    //reset colour just in case
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
 }
 
 void PlayerSystem::processDead(xy::Entity entity, float dt)
@@ -373,7 +408,15 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     break;
                 case CollisionShape::Fluid:
                 case CollisionShape::Spikes:
-                    kill(entity);
+                    if (player.stateTime < 0) //used for invincibility
+                    {
+                        kill(entity);
+                    }
+                    else
+                    {
+                        tx.move(manifold->normal * manifold->penetration);
+                        player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal);
+                    }
                     return;
                 case CollisionShape::Checkpoint:
                     //we can assume we're alive at this point because
@@ -421,10 +464,10 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                 case CollisionShape::Enemy:
                     if (other.getComponent<Enemy>().state == Enemy::Normal)
                     {
+                        tx.move(manifold->normal * manifold->penetration);
                         if (manifold->normal.y < 0)
                         {
                             //we landed on top, so kill enemy
-                            tx.move(manifold->normal * manifold->penetration);
                             player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal) * 0.5f;
 
                             //TODO should rely on sending a player action message
@@ -435,7 +478,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
 
                             other.getComponent<Enemy>().kill();
                         }
-                        else
+                        else if (player.stateTime < 0) //state time is used for invincibility
                         {
                             kill(entity);
                             return;
@@ -459,18 +502,29 @@ void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
 
 void PlayerSystem::kill(xy::Entity entity)
 {
-    //TODO check if we have an active shield first
-
     auto& player = entity.getComponent<Player>();
 
-    player.velocity.y = -1100.f;
-    player.velocity.x = 200.f;
-    player.state = Player::Dying;
-    player.stateTime = Player::DyingTime;
+    if (player.hasShield)
+    {
+        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+        msg->type = PlayerEvent::LostShield;
+        msg->entity = entity;
 
-    auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
-    msg->type = PlayerEvent::Died;
-    msg->entity = entity;
+        player.hasShield = false;
+        player.velocity = -player.velocity * 0.5f;
+        player.stateTime = Player::InvincibleTime;
+    }
+    else
+    {
+        player.velocity.y = -1100.f;
+        player.velocity.x = 200.f;
+        player.state = Player::Dying;
+        player.stateTime = Player::DyingTime;
 
-    entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Die]);
+        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+        msg->type = PlayerEvent::Died;
+        msg->entity = entity;
+
+        entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Die]);
+    }
 }
