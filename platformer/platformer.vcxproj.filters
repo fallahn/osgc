@@ -108,6 +108,9 @@
     <ClInclude Include="include\ShieldAnimationSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\ErrorState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="src\EnemySystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ErrorState.cpp">
+      <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

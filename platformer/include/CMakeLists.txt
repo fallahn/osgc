@@ -6,6 +6,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EnemySystem.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FluidAnimationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.hpp

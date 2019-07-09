@@ -4,6 +4,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EnemySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FluidAnimationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp

@@ -423,7 +423,7 @@ void GameState::buildWorld()
 
                         auto particleEnt = m_gameScene.createEntity();
                         particleEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
-                        particleEnt.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 2.f);
+                        particleEnt.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 3.f);
                         particleEnt.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Checkpoint];
                         //TODO could add callback to destroy end when particles finished?
 
@@ -475,9 +475,7 @@ void GameState::buildWorld()
     }
     else
     {
-        //TODO create an error message state
-        requestStackClear();
-        requestStackPush(StateID::MainMenu);
+        requestStackPush(StateID::Error);
     }
 }
 
