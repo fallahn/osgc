@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "ErrorState.hpp"
 #include "SharedStateData.hpp"
 #include "GameConsts.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Text.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -111,7 +112,7 @@ void ErrorState::build()
     m_scene.addSystem<xy::RenderSystem>(mb);
 
 
-    auto background = m_resources.load<sf::Texture>("assets/images/gearboy/menu_background.png");
+    auto background = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_background.png");
     m_resources.get<sf::Texture>(background).setRepeated(true);
 
     const float scale = 4.f; //kludge.
@@ -129,14 +130,14 @@ void ErrorState::build()
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
 
-    auto fontID = m_resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
+    auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -180.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -144,12 +145,11 @@ void ErrorState::build()
     entity.getComponent<xy::Text>().setString("Error");
 
 
-    //continue
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);

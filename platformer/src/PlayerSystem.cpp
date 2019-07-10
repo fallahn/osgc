@@ -416,13 +416,13 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     break;
                 case CollisionShape::Fluid:
                 case CollisionShape::Spikes:
+                    tx.move(manifold->normal * manifold->penetration);
                     if (player.stateTime < 0) //used for invincibility
                     {
                         kill(entity);
                     }
                     else
                     {
-                        tx.move(manifold->normal * manifold->penetration);
                         player.velocity = xy::Util::Vector::reflect(player.velocity, manifold->normal);
                     }
                     return;
@@ -519,7 +519,7 @@ void PlayerSystem::kill(xy::Entity entity)
         msg->entity = entity;
 
         player.hasShield = false;
-        player.velocity = -player.velocity * 0.5f;
+        player.velocity = -player.velocity * 0.25f;
         player.stateTime = Player::InvincibleTime;
     }
     else

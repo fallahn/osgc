@@ -33,7 +33,8 @@ Copyright 2019 Matt Marchant
 #include <map>
 
 MapLoader::MapLoader()
-    : m_tileSize    (0.f)
+    : m_tileSize    (0.f),
+    m_nextTheme     ("gearboy")
 {
 
 }
@@ -276,6 +277,8 @@ bool MapLoader::load(const std::string& file)
                                 return false;
                             }
                             m_nextMap = result->getStringValue();
+
+                            LOG("Parse next map theme", xy::Logger::Type::Info);
 
                             collision.type = CollisionShape::Exit;
                             collision.collisionFlags = CollisionShape::Player;

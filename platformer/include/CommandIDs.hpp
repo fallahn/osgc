@@ -38,4 +38,14 @@ namespace CommandID
             ShieldParticle = 0x4
         };
     }
+    namespace UI
+    {
+        enum
+        {
+            CoinText = 0x1,
+            ScoreText = 0x2,
+            LivesText = 0x4,
+            TimeText = 0x8
+        };
+    }
 }

@@ -32,7 +32,7 @@ namespace MenuID
 {
     enum
     {
-        NewGame = 0, Continue, Options, Quit
+        NewGame = 0, Continue, GameOver, Options, Quit
     };
 };
 
@@ -44,11 +44,24 @@ struct TransitionContext final
     std::int32_t nextState = StateID::Game;
 };
 
+struct Inventory final
+{
+    std::int32_t lives = 3;
+    std::int32_t coins = 0;
+    std::int32_t score = 0;
+    std::int32_t ammo = 10;
+};
+
 struct SharedData final
 {
     InputBinding inputBinding;
     std::int32_t menuID = -1;
     std::string nextMap = "gb01.tmx";
+    std::string theme = "gearboy";
+    Inventory inventory;
 
     TransitionContext transitionContext;
+
+    void saveProgress() {}
+    void loadProgress() {}
 };

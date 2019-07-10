@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "SharedStateData.hpp"
 #include "GameConsts.hpp"
 #include "CommandIDs.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -93,11 +94,30 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
                 
                 requestStackPush(StateID::Transition);
                 break;
+            case MenuID::GameOver:
+                //TODO restore inventory to last checkpoint
+                //TODO transition to beginning of last saved map
+                break;
             }
         }
         else
         {
-            requestStackPop();
+            switch (m_sharedData.menuID)
+            {
+            default:
+                requestStackPop();
+                break;
+            case MenuID::GameOver:
+            {
+                XY_ASSERT(m_sharedData.transitionContext.shader, "shader not set!");
+                auto& window = getContext().renderWindow;
+                m_sharedData.transitionContext.texture.create(window.getSize().x, window.getSize().y);
+                m_sharedData.transitionContext.texture.update(window);
+                m_sharedData.transitionContext.nextState = StateID::MainMenu;
+                requestStackPush(StateID::Transition);
+            }
+                break;
+            }
         }
     };
 
@@ -188,7 +208,7 @@ void MenuConfirmState::build()
     m_scene.addSystem<xy::RenderSystem>(mb);
 
 
-    auto background = m_resources.load<sf::Texture>("assets/images/gearboy/menu_background.png");
+    auto background = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_background.png");
     m_resources.get<sf::Texture>(background).setRepeated(true);
 
     const float scale = 4.f; //kludge.
@@ -206,14 +226,14 @@ void MenuConfirmState::build()
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
 
-    auto fontID = m_resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
+    auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -180.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -228,6 +248,21 @@ void MenuConfirmState::build()
     case MenuID::Continue:
         entity.getComponent<xy::Text>().setString("Continue From Save Game?");
         break;
+    case MenuID::GameOver:
+        entity.getComponent<xy::Text>().setString("Restart From Last Checkpoint?");
+
+        //add a title
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, -440.f);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+        entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::LargeTextSize);
+        entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+        entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+        entity.getComponent<xy::Text>().setOutlineThickness(4.f);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        entity.getComponent<xy::Text>().setString("Game Over");
+        break;
     }
 
     //yes
@@ -235,7 +270,7 @@ void MenuConfirmState::build()
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -247,14 +282,14 @@ void MenuConfirmState::build()
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 60.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(64);
+    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("No");
 
-    auto arrow = m_resources.load<sf::Texture>("assets/images/gearboy/menu_cursor.png");
+    auto arrow = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_cursor.png");
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(selection[0]);
     entity.getComponent<xy::Transform>().setScale(scale, scale);

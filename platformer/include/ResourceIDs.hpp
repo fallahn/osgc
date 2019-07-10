@@ -48,6 +48,7 @@ namespace TextureID
         enum
         {
             Background,
+            UIBackground,
 
             Count
         };
@@ -63,6 +64,8 @@ namespace FontID
 
         Count 
     };
+
+    static const std::string GearBoyFont("assets/fonts/IBM_CGA.ttf");
 }
 
 namespace ParticleID

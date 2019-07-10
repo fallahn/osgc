@@ -33,6 +33,18 @@ namespace GameConst
 
     static const float VerticalTileCount = 17.f; //only true for 16px tiles :/
 
+    namespace UI
+    {
+        static const float BannerHeight = 160.f; //banner behind scores
+        static const float TopRow = 30.f;
+        static const float BottomRow = 96.f;
+        static const sf::Vector2f CoinPosition(890.f, 20.f);
+
+        static const std::uint32_t SmallTextSize = 32;
+        static const std::uint32_t MediumTextSize = 64;
+        static const std::uint32_t LargeTextSize = 128;
+    }
+
     namespace Gearboy
     {
         static const sf::FloatRect PlayerBounds(-6.f, -10.f, 12.f, 10.f); //relative to player origin

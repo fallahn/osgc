@@ -67,18 +67,22 @@ namespace
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_gameScene     (ctx.appInstance.getMessageBus()),
+    m_uiScene       (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
-    m_playerInput   (sd.inputBinding),
-    m_theme         ("gearboy")
+    m_playerInput   (sd.inputBinding)
 {
     launchLoadingScreen();
 
     initScene();
     loadResources();
     buildWorld();
+    buildUI();
 
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
+    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     quitLoadingScreen();
 }
@@ -116,6 +120,7 @@ bool GameState::handleEvent(const sf::Event& evt)
 
     m_playerInput.handleEvent(evt);
     m_gameScene.forwardEvent(evt);
+    m_uiScene.forwardEvent(evt);
     return true;
 }
 
@@ -127,6 +132,8 @@ void GameState::handleMessage(const xy::Message& msg)
         if (data.type == PlayerEvent::Exited)
         {
             m_sharedData.nextMap = m_mapLoader.getNextMap() + ".tmx";
+            m_sharedData.theme = m_mapLoader.getNextTheme();
+            m_sharedData.saveProgress();
 
             //copy the window to a texture so we can do wibbly things with it
             auto* window = xy::App::getRenderWindow();
@@ -139,12 +146,14 @@ void GameState::handleMessage(const xy::Message& msg)
     }
 
     m_gameScene.forwardMessage(msg);
+    m_uiScene.forwardMessage(msg);
 }
 
 bool GameState::update(float dt)
 {
     m_playerInput.update();
     m_gameScene.update(dt);
+    m_uiScene.update(dt);
     return true;
 }
 
@@ -152,6 +161,7 @@ void GameState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
+    rw.draw(m_uiScene);
 }
 
 //private
@@ -176,15 +186,24 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::ParticleSystem>(mb);
 
     m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters);
+
+    m_uiScene.addSystem<xy::CommandSystem>(mb);
+    m_uiScene.addSystem<xy::TextSystem>(mb);
+    m_uiScene.addSystem<xy::SpriteSystem>(mb);
+    m_uiScene.addSystem<xy::SpriteAnimator>(mb);
+    m_uiScene.addSystem<xy::RenderSystem>(mb);
 }
 
 void GameState::loadResources() 
 {
-    m_textureIDs[TextureID::Game::Background] = m_resources.load<sf::Texture>("assets/images/"+m_theme+"/background.png");
+    m_textureIDs[TextureID::Game::Background] = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/background.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Background]).setRepeated(true);
+    
+    m_textureIDs[TextureID::Game::UIBackground] = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_background.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::UIBackground]).setRepeated(true);
 
     xy::SpriteSheet spriteSheet;
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/player.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
 
     m_playerAnimations[AnimID::Player::Idle] = spriteSheet.getAnimationIndex("idle", "player");
@@ -192,34 +211,34 @@ void GameState::loadResources()
     m_playerAnimations[AnimID::Player::Run] = spriteSheet.getAnimationIndex("run", "player");
     m_playerAnimations[AnimID::Player::Die] = spriteSheet.getAnimationIndex("die", "player");
 
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/projectile.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/projectile.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Star] = spriteSheet.getSprite("projectile");
 
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/smoke_puff.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/smoke_puff.spt", m_resources);
     m_sprites[SpriteID::GearBoy::SmokePuff] = spriteSheet.getSprite("smoke_puff");
 
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/checkpoint.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/checkpoint.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Checkpoint] = spriteSheet.getSprite("checkpoint");
     m_checkpointAnimations[AnimID::Checkpoint::Idle] = spriteSheet.getAnimationIndex("idle", "checkpoint");
     m_checkpointAnimations[AnimID::Checkpoint::Activate] = spriteSheet.getAnimationIndex("activate", "checkpoint");
 
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/lava.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/lava.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
 
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/water.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
 
-    spriteSheet.loadFromFile("assets/sprites/"+m_theme+"/collectibles.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/collectibles.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Coin] = spriteSheet.getSprite("coin");
     m_sprites[SpriteID::GearBoy::Shield] = spriteSheet.getSprite("shield");
     m_sprites[SpriteID::GearBoy::Ammo] = spriteSheet.getSprite("ammo");
 
-    spriteSheet.loadFromFile("assets/sprites/" + m_theme + "/shield.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/shield.spt", m_resources);
     m_sprites[SpriteID::GearBoy::ShieldAvatar] = spriteSheet.getSprite("shield");
 
-    spriteSheet.loadFromFile("assets/sprites/" + m_theme + "/enemies.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/enemies.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Bird] = spriteSheet.getSprite("bird");
     m_sprites[SpriteID::GearBoy::Walker] = spriteSheet.getSprite("walker");
     m_sprites[SpriteID::GearBoy::Crawler] = spriteSheet.getSprite("crawler");
@@ -228,8 +247,8 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
 
-    m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_theme + "/shield.xyp", m_resources);
-    m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_theme + "/checkpoint.xyp", m_resources);
+    m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
+    m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
 }
 
 void GameState::buildWorld()
@@ -534,4 +553,84 @@ void GameState::loadEnemies()
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
     }
+}
+
+void GameState::buildUI()
+{
+    auto scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+
+    const float offset = 0.f;// xy::DefaultSceneSize.y - GameConst::UI::BannerHeight;
+
+    //background
+    auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>().setDepth(-1);
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    verts.emplace_back(sf::Vector2f(), sf::Vector2f());
+    verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / scale, 0.f), sf::Vector2f(xy::DefaultSceneSize.x / scale, 0.f));
+    verts.emplace_back(sf::Vector2f(xy::DefaultSceneSize.x / scale, GameConst::UI::BannerHeight / scale), sf::Vector2f(xy::DefaultSceneSize.x / scale, GameConst::UI::BannerHeight / scale));
+    verts.emplace_back(sf::Vector2f(0.f, GameConst::UI::BannerHeight / scale), sf::Vector2f(0.f, GameConst::UI::BannerHeight / scale));
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::UIBackground]));
+
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+
+    //coin count
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(GameConst::UI::CoinPosition);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Coin];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+
+    auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
+    auto& font = m_resources.get<sf::Font>(fontID);
+
+    auto createText = [&](const std::string& str)->xy::Entity
+    {
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Text>(font);
+        entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::SmallTextSize);
+
+        entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
+        entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[3]);
+        entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+        entity.getComponent<xy::Text>().setString(str);
+
+        return entity;
+    };
+
+    entity = createText("x");
+    entity.getComponent<xy::Transform>().setPosition(980.f, GameConst::UI::TopRow);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+
+    entity = createText("000");
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::BottomRow);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::CoinText;
+
+    entity = createText("LIVES 0");
+    entity.getComponent<xy::Transform>().setPosition(30.f, GameConst::UI::TopRow);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LivesText;
+
+    entity = createText("SCORE: 0000");
+    entity.getComponent<xy::Transform>().setPosition(30.f, GameConst::UI::BottomRow);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::ScoreText;
+
+    entity = createText("TIME");
+    entity.getComponent<xy::Transform>().setPosition(1800.f, GameConst::UI::TopRow);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+
+    entity = createText("000");
+    entity.getComponent<xy::Transform>().setPosition(1800.f, GameConst::UI::BottomRow);
+    entity.getComponent<xy::Transform>().move(0.f, offset);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 }

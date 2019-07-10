@@ -60,6 +60,8 @@ public:
 
     const std::string& getNextMap() const { return m_nextMap; }
 
+    const std::string getNextTheme() const { return m_nextTheme; }
+
     const std::vector<EnemySpawn>& getEnemySpawns() const { return m_enemySpawns; }
 
 private:
@@ -79,6 +81,7 @@ private:
     sf::Vector2f m_mapSize;
     sf::Vector2f m_spawnPoint;
     std::string m_nextMap;
+    std::string m_nextTheme;
 
     std::vector<CollisionShape> m_collisionShapes;
     std::vector<EnemySpawn> m_enemySpawns;

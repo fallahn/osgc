@@ -260,7 +260,7 @@ void MenuState::loadResources()
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
 
-    m_fontID = m_resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
+    m_fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
 }
 
 void MenuState::buildBackground()
@@ -449,6 +449,8 @@ void MenuState::buildBackground()
             entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
         }
+
+        m_backgroundScene.getSystem<PlayerSystem>().setBounds({ sf::Vector2f(), m_mapLoader.getMapSize() * pixelScale });
     }
 }
 
@@ -460,7 +462,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(340.f, 100.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setString("TITLE!");
-    entity.getComponent<xy::Text>().setCharacterSize(128);
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::LargeTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(4.f);
@@ -469,7 +471,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(1100.f, 300.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setString("New Game");
-    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -484,7 +486,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(1200.f, 390.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setString("Continue");
-    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -499,7 +501,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(800.f, 700.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setString("Options");
-    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -514,7 +516,7 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(220.f, 770.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setString("Quit");
-    entity.getComponent<xy::Text>().setCharacterSize(64);
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);

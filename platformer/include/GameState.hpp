@@ -45,6 +45,7 @@ public:
 
 private:
     xy::Scene m_gameScene;
+    xy::Scene m_uiScene;
     SharedData& m_sharedData;
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
@@ -58,10 +59,9 @@ private:
     MapLoader m_mapLoader;
     InputParser m_playerInput;
 
-    std::string m_theme;
-
     void initScene();
     void loadResources();
     void buildWorld();
     void loadEnemies();
+    void buildUI();
 };
