@@ -27,8 +27,8 @@ struct ShieldAnim final
     std::size_t indexX = 0;
     std::size_t indexY = 0;
 
-    static constexpr float Width = 10.f;
-    static constexpr float Height = 4.f;
+    static constexpr float Width = 32.f;
+    static constexpr float Height = 8.f;
 };
 
 class ShieldAnimationSystem final : public xy::System

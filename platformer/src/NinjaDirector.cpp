@@ -24,9 +24,11 @@ Copyright 2019 Matt Marchant
 #include "Collision.hpp"
 #include "ShieldAnimationSystem.hpp"
 #include "CommandIDs.hpp"
+#include "CameraTarget.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -178,5 +180,11 @@ void NinjaDirector::spawnShield(xy::Entity playerEnt)
     entity.addComponent<xy::SpriteAnimation>().play(0);
     entity.addComponent<xy::Drawable>().setDepth(1);
 
-    playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    auto targetEnt = getScene().createEntity();
+    targetEnt.addComponent<xy::Transform>().setOrigin(0.f, 48.f);
+    targetEnt.addComponent<CameraTarget>().target = playerEnt;
+    targetEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::ShieldParticle;
+    targetEnt.addComponent<xy::Camera>(); //dummy camera just so we can take advantage of target component
+
+    targetEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

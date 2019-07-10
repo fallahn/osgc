@@ -355,6 +355,7 @@ void GameState::buildWorld()
 
         m_gameScene.getActiveCamera().addComponent<CameraTarget>().target = entity;
         m_gameScene.getSystem<CameraTargetSystem>().setBounds({ sf::Vector2f(), m_mapLoader.getMapSize() * scale });
+        m_gameScene.getSystem<PlayerSystem>().setBounds({ sf::Vector2f(), m_mapLoader.getMapSize() * scale });
 
         //map collision data
         const auto& collisionShapes = m_mapLoader.getCollisionShapes();

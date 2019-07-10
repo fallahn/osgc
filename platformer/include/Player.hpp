@@ -57,7 +57,11 @@ public:
 
     void process(float) override;
 
+    void setBounds(sf::FloatRect bounds) { m_bounds = bounds; }
+
 private:
+
+    sf::FloatRect m_bounds;
 
     void processFalling(xy::Entity, float);
     void processRunning(xy::Entity, float);

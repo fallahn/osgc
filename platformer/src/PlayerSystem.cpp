@@ -71,6 +71,14 @@ void PlayerSystem::process(float dt)
     for (auto entity : entities)
     {
         const auto& player = entity.getComponent<Player>();
+        auto pos = entity.getComponent<xy::Transform>().getPosition();
+        if (!m_bounds.contains(pos) &&
+            (player.state == Player::Falling || player.state == Player::Running))
+        {
+            kill(entity);
+        }
+
+
         switch (player.state)
         {
         default: break;
