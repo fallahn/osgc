@@ -169,9 +169,11 @@ void NinjaDirector::spawnEgg(sf::Vector2f position)
 void NinjaDirector::spawnShield(xy::Entity playerEnt)
 {
     auto bounds = m_sprites[SpriteID::GearBoy::ShieldAvatar].getTextureBounds();
+    float scale = playerEnt.getComponent<xy::Transform>().getScale().y;
 
     auto entity = getScene().createEntity();
     entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
     entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Shield];
     entity.getComponent<xy::ParticleEmitter>().start();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::World::ShieldParticle;

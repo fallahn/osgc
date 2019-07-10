@@ -7,7 +7,7 @@ particle_system shield
     spread = 0.000000
     lifetime = 0.778000
     lifetime_variance = 0.411000
-    colour = 174,196,64,255
+    colour = 74,80,56,255
     random_initial_rotation = true
     rotation_speed = 0.000000
     scale_affector = 0.000000

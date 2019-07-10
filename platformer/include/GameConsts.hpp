@@ -57,10 +57,26 @@ namespace GameConst
 
         static const std::array<sf::Color, 4u> colours =
         {
-            sf::Color(215,232,148),
+            /*sf::Color(215,232,148),
             sf::Color(174,196,64),
             sf::Color(82,127,57),
-            sf::Color(32,70,49)
+            sf::Color(32,70,49)*/
+
+            sf::Color(197,203,164),
+            sf::Color(140,146,107),
+            sf::Color(74,80,56),
+            sf::Color(23,23,23)
+        };
+    }
+
+    namespace Mes
+    {
+        static const std::array<sf::Color, 4u> colours =
+        {
+            sf::Color(255,141,7),
+            sf::Color(255,214,133),
+            sf::Color(5,101,146),
+            sf::Color(33,182,251), 
         };
     }
 }

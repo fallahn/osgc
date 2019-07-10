@@ -5,7 +5,7 @@
  </tileset>
  <layer id="2" name="foreground" width="30" height="17">
   <data encoding="base64" compression="zlib">
-   eJy9k0tPwzAQhJdCeyjQJjmUtwSl7a2Fn8ANuHNC4gw3ILklpf3rHQtb3Vj25lGrI31S4l3POIo3JqKYMQBDa01C6le1xFO3FYGeY90nqT/SuXX8muaegNMAuZJPUymvOKBfCPU1x3vOzej/H4yEngPQ1XQC5SaaJ3J/t8o8ZH1HgfJvLe6surmTBcuue0d3kcm155/f0T+wAmvB5wycgwtwWSPXzELVPFxV+IzBPZiAaYtztNUcLMADeHScI4SewYvm1ZNrv3NdU/nfzVjtreFZPsEXQ8p16Rv8ePgV9qW0vZ9FC4+cyvPEZ2wJ3j2kjn2GjD37PHJyz7PZc+NB5X6w3g13RyRN
+   eJy9k7kOwjAQRJez4E4KTiFxlhyfQAf0VEjU0AFJl3D8OhNhC2PFJofFSE9K4vWMI+9aRGQJ1EBd+qZDVx+s2Yr1nkQDFCm6dPUNlhvFL25uBVQN5Op84irwsgz6mVCJUf5zrkvvO2hqajKgwMgayrUZKwr/7yAzJ9TlDeUPJIbSOu9JX8iO2qNpxHPl+Rd79A4e4KnxaYE26IBuhFw+C2nnYQTGYAKmCc6RVDMwBwuwDDmHCa3BhrFV5MrvslR3t4t5liM4CfzKlXUGFwVXzT6HPv3pJ/Dw6HuexBm7gb0CJ2QfxxWeVR4ehc8z39NXEOQehNoX27UkXA==
   </data>
  </layer>
  <layer id="4" name="detail" width="30" height="17">
@@ -41,13 +41,11 @@
     <property name="id" type="int" value="0"/>
    </properties>
   </object>
-  <object id="20" type="checkpoint" x="288" y="112" width="16" height="16">
+  <object id="20" type="checkpoint" x="288" y="105" width="16" height="16">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>
   </object>
-  <object id="21" type="spikes" x="176" y="208" width="8" height="16"/>
-  <object id="22" type="spikes" x="120" y="208" width="8" height="16"/>
-  <object id="23" type="spikes" x="288" y="160" width="16" height="8"/>
+  <object id="22" type="spikes" x="9" y="17" width="55" height="8"/>
  </objectgroup>
 </map>

@@ -587,6 +587,12 @@ void GameState::buildUI()
     auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
+    const sf::Color* colours = GameConst::Gearboy::colours.data();
+    if (m_sharedData.theme == "mes")
+    {
+        colours = GameConst::Mes::colours.data();
+    }
+
     auto createText = [&](const std::string& str)->xy::Entity
     {
         entity = m_uiScene.createEntity();
@@ -595,8 +601,8 @@ void GameState::buildUI()
         entity.addComponent<xy::Text>(font);
         entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::SmallTextSize);
 
-        entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-        entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[3]);
+        entity.getComponent<xy::Text>().setFillColour(colours[0]);
+        entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
         entity.getComponent<xy::Text>().setOutlineThickness(2.f);
         entity.getComponent<xy::Text>().setString(str);
 

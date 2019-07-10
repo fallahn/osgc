@@ -232,14 +232,20 @@ void PauseState::build()
     auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
+    const sf::Color* colours = GameConst::Gearboy::colours.data();
+    if (m_sharedData.theme == "mes")
+    {
+        colours = GameConst::Mes::colours.data();
+    }
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -180.f);
+    entity.getComponent<xy::Transform>().move(0.f, -280.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour(colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(4.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Paused");
 
@@ -250,8 +256,8 @@ void PauseState::build()
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setFillColour(colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Continue");
@@ -262,8 +268,8 @@ void PauseState::build()
     entity.getComponent<xy::Transform>().move(0.f, 60.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setFillColour(colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Options");
@@ -274,8 +280,8 @@ void PauseState::build()
     entity.getComponent<xy::Transform>().move(0.f, 160.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setFillColour(colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setString("Quit");
@@ -286,8 +292,8 @@ void PauseState::build()
     entity.getComponent<xy::Transform>().move(0.f, 360.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
     entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
+    entity.getComponent<xy::Text>().setFillColour(colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setString("Continue Playing");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
