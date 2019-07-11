@@ -66,6 +66,7 @@ struct SharedData final
 
     TransitionContext transitionContext;
 
-    void saveProgress() {}
-    void loadProgress() {}
+    void saveProgress();
+    void loadProgress();
+    void reset();
 };

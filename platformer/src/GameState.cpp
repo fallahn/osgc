@@ -246,6 +246,8 @@ void GameState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/lava.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
     const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
+    //ALSO setting this repeated fails if the spritesheet failed and texture is nullptr
+    LOG("FIX THIS", xy::Logger::Type::Warning);
 
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");

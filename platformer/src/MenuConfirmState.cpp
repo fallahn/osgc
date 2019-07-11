@@ -86,17 +86,13 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
             {
             default: break;
             case MenuID::NewGame:
-                
+                m_sharedData.reset();
                 requestStackPush(StateID::Transition);
                 break;
             case MenuID::Continue:
-                //TODO load some sort of state into shared data
-                
-                requestStackPush(StateID::Transition);
-                break;
             case MenuID::GameOver:
-                //TODO restore inventory to last checkpoint
-                //TODO transition to beginning of last saved map
+                m_sharedData.loadProgress();
+                requestStackPush(StateID::Transition);
                 break;
             }
         }

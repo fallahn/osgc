@@ -187,6 +187,7 @@
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerSystem.cpp" />
     <ClCompile Include="src\ShakerSystem.cpp" />
+    <ClCompile Include="src\SharedStateData.cpp" />
     <ClCompile Include="src\TransitionState.cpp" />
     <ClCompile Include="src\UIDirector.cpp" />
   </ItemGroup>

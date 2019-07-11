@@ -45,7 +45,7 @@ struct Player final
     float stateTime = 0.f;
     static constexpr float DyingTime = 1.f;
     static constexpr float DeadTime = 1.f;
-    static constexpr float InvincibleTime = 1.5f;
+    static constexpr float InvincibleTime = 0.5f;
 
     bool hasShield = false;
 };
