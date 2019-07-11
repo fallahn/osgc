@@ -46,10 +46,14 @@ struct TransitionContext final
 
 struct Inventory final
 {
+    static constexpr std::int32_t MaxAmmo = 10;
+    static constexpr std::int32_t MaxCoins = 999;
+    static constexpr std::int32_t MaxLives = 99;
+
     std::int32_t lives = 3;
     std::int32_t coins = 0;
     std::int32_t score = 0;
-    std::int32_t ammo = 10;
+    std::int32_t ammo = MaxAmmo;
 };
 
 struct SharedData final

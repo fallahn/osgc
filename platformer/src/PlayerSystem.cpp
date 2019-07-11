@@ -183,7 +183,7 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
             //flash
             auto& sprite = entity.getComponent<xy::Sprite>();
             auto c = sprite.getColour();
-            c.a = (c.a == 0) ? 255 : 0;
+            c.a = (c.a == 0) ? 1 : (c.a == 1) ? 254 : (c.a == 254) ? 255 : (c.a == 255) ? 0 : 0;
             sprite.setColour(c);
         }
         else
@@ -283,7 +283,7 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
             //flash
             auto& sprite = entity.getComponent<xy::Sprite>();
             auto c = sprite.getColour();
-            c.a = (c.a == 0) ? 255 : 0;
+            c.a = (c.a == 0) ? 1 : (c.a == 1) ? 254 : (c.a == 254) ? 255 : (c.a == 255) ? 0 : 0;
             sprite.setColour(c);
         }
         else

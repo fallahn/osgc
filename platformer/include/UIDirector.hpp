@@ -18,20 +18,27 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/System.hpp>
+#include <xyginext/ecs/Director.hpp>
 
-struct NinjaStar final
-{
-    sf::Vector2f velocity;
-};
+#include <SFML/System/Clock.hpp>
 
-class NinjaStarSystem final : public xy::System
+struct SharedData;
+class UIDirector final : public xy::Director
 {
 public:
-    explicit NinjaStarSystem(xy::MessageBus&);
+    explicit UIDirector(SharedData&);
+
+    void handleMessage(const xy::Message&) override;
 
     void process(float) override;
 
 private:
 
+    SharedData& m_sharedData;
+    sf::Clock m_roundClock;
+    std::int32_t m_displayTime;
+
+    void updateTimer();
+    void updateScore();
+    void updateLives();
 };

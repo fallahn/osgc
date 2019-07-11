@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "ShieldAnimationSystem.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -37,9 +38,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 
-NinjaDirector::NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>& sa, const std::array<xy::EmitterSettings, ParticleID::Count>& es)
+NinjaDirector::NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>& sa, const std::array<xy::EmitterSettings, ParticleID::Count>& es, const SharedData& sd)
     : m_sprites         (sa),
     m_particleEmitters  (es),
+    m_sharedData        (sd),
     m_spriteScale       (1.f)
 {
 
@@ -108,17 +110,20 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
 //private
 void NinjaDirector::spawnStar(xy::Entity entity)
 {
-    auto starEnt = getScene().createEntity();
-    starEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition() + GameConst::Gearboy::StarOffset);   
-    starEnt.addComponent<xy::Drawable>();
-    starEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
-    auto bounds = starEnt.getComponent<xy::Sprite>().getTextureBounds();
-    starEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    starEnt.addComponent<xy::SpriteAnimation>().play(0);
-    starEnt.addComponent<NinjaStar>().velocity.x = entity.getComponent<xy::Transform>().getScale().x * GameConst::Gearboy::StarSpeed;
+    if (m_sharedData.inventory.ammo > 0)
+    {
+        auto starEnt = getScene().createEntity();
+        starEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition() + GameConst::Gearboy::StarOffset);
+        starEnt.addComponent<xy::Drawable>();
+        starEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
+        auto bounds = starEnt.getComponent<xy::Sprite>().getTextureBounds();
+        starEnt.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        starEnt.addComponent<xy::SpriteAnimation>().play(0);
+        starEnt.addComponent<NinjaStar>().velocity.x = entity.getComponent<xy::Transform>().getScale().x * GameConst::Gearboy::StarSpeed;
 
-    auto scale = starEnt.getComponent<NinjaStar>().velocity.x > 0 ? m_spriteScale : -m_spriteScale;
-    starEnt.getComponent<xy::Transform>().setScale(scale, m_spriteScale);
+        auto scale = starEnt.getComponent<NinjaStar>().velocity.x > 0 ? m_spriteScale : -m_spriteScale;
+        starEnt.getComponent<xy::Transform>().setScale(scale, m_spriteScale);
+    }
 }
 
 void NinjaDirector::spawnPuff(sf::Vector2f position)

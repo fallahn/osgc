@@ -21,7 +21,7 @@ void main()
 {
   vec2 tilePos = gl_TexCoord[0].xy;// / tileSize;
 
-  float index = floor(texture2D(u_indexMap, tilePos).r * 255.0);
+  float index = floor(texture2D(u_indexMap, tilePos).r * 256.0);
 
   //tmx maps start at index 1, 0 is no tile
   if(index == 0)
@@ -55,7 +55,7 @@ const float epsilon = 0.000005; //try reduce rounding errors
 
 void main()
 {
-    float index = floor(texture2D(u_indexMap, gl_TexCoord[0].xy).r * 255.0);
+    float index = floor(texture2D(u_indexMap, gl_TexCoord[0].xy).r * 256.0);
 
     //tmx maps start at index 1, 0 is no tile
     if(index == 0)

@@ -27,7 +27,8 @@ namespace MessageID
     {
         PlayerMessage = xy::Message::Count,
         StarMessage,
-        EnemyMessage
+        EnemyMessage,
+        GameMessage
     };
 }
 
@@ -36,7 +37,7 @@ struct PlayerEvent final
     enum
     {
         Jumped, Landed, Shot, Died, Respawned, Exited,
-        GotCoin, GotShield, GotAmmo, LostShield
+        GotCoin, GotShield, GotAmmo, LostShield, GotLife
     }type = Shot;
     xy::Entity entity;
 };
@@ -59,4 +60,14 @@ struct EnemyEvent final
         Died, SpawnEgg
     }type = Died;
     xy::Entity entity;
+};
+
+struct GameEvent final
+{
+    enum
+    {
+        TimerExpired,
+        TimerWarning,
+        LivesExpired
+    }type = TimerExpired;
 };

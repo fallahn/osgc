@@ -26,10 +26,11 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/System/Vector2.hpp>
 
+struct SharedData;
 class NinjaDirector final : public xy::Director
 {
 public:
-    NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>&, const std::array<xy::EmitterSettings, ParticleID::Count>&);
+    NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>&, const std::array<xy::EmitterSettings, ParticleID::Count>&, const SharedData&);
 
     void handleMessage(const xy::Message&) override;
 
@@ -39,6 +40,7 @@ private:
 
     const SpriteArray<SpriteID::GearBoy::Count>& m_sprites;
     const std::array<xy::EmitterSettings, ParticleID::Count>& m_particleEmitters;
+    const SharedData& m_sharedData;
     float m_spriteScale;
 
     void spawnStar(xy::Entity);

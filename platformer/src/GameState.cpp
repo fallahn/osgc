@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include "BobAnimationSystem.hpp"
 #include "EnemySystem.hpp"
 #include "ShieldAnimationSystem.hpp"
+#include "UIDirector.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -144,6 +145,24 @@ void GameState::handleMessage(const xy::Message& msg)
             requestStackPush(StateID::Transition);
         }
     }
+    else if (msg.id == MessageID::GameMessage)
+    {
+        const auto& data = msg.getData<GameEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case GameEvent::TimerExpired:
+        case GameEvent::LivesExpired:
+            auto* window = xy::App::getRenderWindow();
+            m_sharedData.transitionContext.texture.create(window->getSize().x, window->getSize().y);
+            m_sharedData.transitionContext.texture.update(*window);
+            m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
+
+            m_sharedData.menuID = MenuID::GameOver;
+            requestStackPush(StateID::MenuConfirm);
+            break;
+        }
+    }
 
     m_gameScene.forwardMessage(msg);
     m_uiScene.forwardMessage(msg);
@@ -185,13 +204,15 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::RenderSystem>(mb);
     m_gameScene.addSystem<xy::ParticleSystem>(mb);
 
-    m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters);
+    m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
+
+    m_uiScene.addDirector<UIDirector>(m_sharedData);
 }
 
 void GameState::loadResources() 
@@ -613,18 +634,20 @@ void GameState::buildUI()
     entity.getComponent<xy::Transform>().setPosition(980.f, GameConst::UI::TopRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
 
-    entity = createText("000");
+    std::stringstream ss;
+    ss << std::setw(3) << std::setfill('0') << m_sharedData.inventory.coins;
+    entity = createText(ss.str());
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::BottomRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::CoinText;
 
-    entity = createText("LIVES 0");
+    entity = createText("LIVES " + std::to_string(m_sharedData.inventory.lives));
     entity.getComponent<xy::Transform>().setPosition(30.f, GameConst::UI::TopRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LivesText;
 
-    entity = createText("SCORE: 0000");
+    entity = createText("SCORE: " + std::to_string(m_sharedData.inventory.score));
     entity.getComponent<xy::Transform>().setPosition(30.f, GameConst::UI::BottomRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::ScoreText;
@@ -634,7 +657,7 @@ void GameState::buildUI()
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 
-    entity = createText("000");
+    entity = createText("160");
     entity.getComponent<xy::Transform>().setPosition(1800.f, GameConst::UI::BottomRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);

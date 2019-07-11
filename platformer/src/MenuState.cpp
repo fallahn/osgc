@@ -226,7 +226,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
 
-    m_backgroundScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters);
+    m_backgroundScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
 }
 
 void MenuState::loadResources()

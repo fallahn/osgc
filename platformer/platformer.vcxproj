@@ -168,6 +168,7 @@
     <ClInclude Include="include\ShieldAnimationSystem.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\TransitionState.hpp" />
+    <ClInclude Include="include\UIDirector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CameraTargetSystem.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="src\PlayerSystem.cpp" />
     <ClCompile Include="src\ShakerSystem.cpp" />
     <ClCompile Include="src\TransitionState.cpp" />
+    <ClCompile Include="src\UIDirector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\tilemap.inl" />

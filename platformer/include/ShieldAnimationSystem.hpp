@@ -61,7 +61,7 @@ public:
 private:
     std::vector<float> m_wavetable;
 
-    void onEntityAdded(xy::Entity entity)
+    void onEntityAdded(xy::Entity entity) override
     {
         entity.getComponent<ShieldAnim>().indexY = m_wavetable.size() / 4;
     }
