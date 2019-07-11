@@ -250,11 +250,19 @@ void MenuState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/gearboy/lava.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
-    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
+    auto* tex = m_sprites[SpriteID::GearBoy::Lava].getTexture();
+    if (tex) //uuugghhhhhh
+    {
+        const_cast<sf::Texture*>(tex)->setRepeated(true);
+    }
 
     spriteSheet.loadFromFile("assets/sprites/gearboy/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
-    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
+    tex = m_sprites[SpriteID::GearBoy::Water].getTexture();
+    if (tex) //uuugghhhhhhghghghghghdddhhhhhh
+    {
+        const_cast<sf::Texture*>(tex)->setRepeated(true);
+    }
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);

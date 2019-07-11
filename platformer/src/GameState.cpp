@@ -84,7 +84,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
-
+    
     quitLoadingScreen();
 }
 
@@ -105,6 +105,9 @@ bool GameState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Pause:
         case sf::Keyboard::Escape:
             requestStackPush(StateID::Pause);
+            break;
+        case sf::Keyboard::L:
+            requestStackPush(StateID::Dialogue);
             break;
         }
     }
@@ -245,13 +248,19 @@ void GameState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/lava.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Lava] = spriteSheet.getSprite("lava");
-    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Lava].getTexture())->setRepeated(true); //uuugghhhhhh
-    //ALSO setting this repeated fails if the spritesheet failed and texture is nullptr
-    LOG("FIX THIS", xy::Logger::Type::Warning);
+    auto* tex = m_sprites[SpriteID::GearBoy::Lava].getTexture();
+    if (tex) //uuugghhhhhh
+    {
+        const_cast<sf::Texture*>(tex)->setRepeated(true);
+    }
 
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
-    const_cast<sf::Texture*>(m_sprites[SpriteID::GearBoy::Water].getTexture())->setRepeated(true);
+    tex = m_sprites[SpriteID::GearBoy::Water].getTexture();
+    if (tex) //uuugghhhhhhghghghghghdddhhhhhh
+    {
+        const_cast<sf::Texture*>(tex)->setRepeated(true);
+    }
 
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/collectibles.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Coin] = spriteSheet.getSprite("coin");

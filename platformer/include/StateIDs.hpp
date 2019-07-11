@@ -36,6 +36,7 @@ namespace StateID
         Game,
         Pause,
         Transition,
-        Error
+        Error,
+        Dialogue
     };
 }

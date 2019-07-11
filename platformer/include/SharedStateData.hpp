@@ -65,6 +65,7 @@ struct SharedData final
     Inventory inventory;
 
     TransitionContext transitionContext;
+    std::string dialogueFile = "intro.txt";
 
     void saveProgress();
     void loadProgress();
