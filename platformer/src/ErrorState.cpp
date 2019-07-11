@@ -105,8 +105,6 @@ void ErrorState::draw()
 //private
 void ErrorState::build()
 {
-    //TODO load correct graphics / colours based on current theme
-
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
@@ -139,26 +137,22 @@ void ErrorState::build()
         colours = GameConst::Mes::colours.data();
     }
 
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    auto createText = [&](const std::string& str)->xy::Entity
+    {
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+        entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
+        entity.getComponent<xy::Text>().setFillColour(colours[0]);
+        entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
+        entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        entity.getComponent<xy::Text>().setString(str);
+        return entity;
+    };
+    entity = createText("Error");
     entity.getComponent<xy::Transform>().move(0.f, -180.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setString("Error");
 
-
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity = createText("Failed to load map");
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setString("Failed to load map"); //TODO error message
 }

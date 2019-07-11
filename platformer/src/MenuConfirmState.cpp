@@ -235,65 +235,50 @@ void MenuConfirmState::build()
         colours = GameConst::Mes::colours.data();
     }
 
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -180.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    auto createText = [&](const std::string& str)->xy::Entity
+    {
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+        entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
+        entity.getComponent<xy::Text>().setFillColour(colours[0]);
+        entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
+        entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        entity.getComponent<xy::Text>().setString(str);
+        return entity;
+    };
 
     switch (m_sharedData.menuID)
     {
     default: break;
     case MenuID::NewGame:
-        entity.getComponent<xy::Text>().setString("Overwrite Save Game?");
+        entity = createText("Overwrite Save Game?");
+        entity.getComponent<xy::Transform>().move(0.f, -180.f);
         break;
     case MenuID::Continue:
-        entity.getComponent<xy::Text>().setString("Continue From Save Game?");
+        entity = createText("Continue From Save Game?");
+        entity.getComponent<xy::Transform>().move(0.f, -180.f);
         break;
     case MenuID::GameOver:
-        entity.getComponent<xy::Text>().setString("Restart From Last Checkpoint?");
+        entity = createText("Restart From Last Checkpoint?");
+        entity.getComponent<xy::Transform>().move(0.f, -180.f);
 
         //add a title
-        entity = m_scene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity = createText("Game Over");
         entity.getComponent<xy::Transform>().move(0.f, -440.f);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-        entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::LargeTextSize);
-        entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
-        entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
         entity.getComponent<xy::Text>().setOutlineThickness(4.f);
-        entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-        entity.getComponent<xy::Text>().setString("Game Over");
+        entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::LargeTextSize);
         break;
     }
 
     //yes
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity = createText("Yes");
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setString("Yes");
 
     //no
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity = createText("No");
     entity.getComponent<xy::Transform>().move(0.f, 60.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(colours[0]);
-    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
-    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setString("No");
 
     auto arrow = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_cursor.png");
     entity = m_scene.createEntity();
