@@ -216,7 +216,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::CallbackSystem>(mb);
     m_backgroundScene.addSystem<xy::CommandSystem>(mb);
     m_backgroundScene.addSystem<xy::DynamicTreeSystem>(mb);
-    m_backgroundScene.addSystem<PlayerSystem>(mb);
+    m_backgroundScene.addSystem<PlayerSystem>(mb, m_sharedData);
     m_backgroundScene.addSystem<NinjaStarSystem>(mb);
     m_backgroundScene.addSystem<ShakerSystem>(mb);
     m_backgroundScene.addSystem<FluidAnimationSystem>(mb);

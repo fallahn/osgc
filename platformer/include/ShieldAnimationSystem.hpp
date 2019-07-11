@@ -43,7 +43,7 @@ public:
         m_wavetable = xy::Util::Wavetable::sine(1.f);
     }
 
-    void process(float dt) override
+    void process(float) override
     {
         auto& entities = getEntities();
         for (auto entity : entities)

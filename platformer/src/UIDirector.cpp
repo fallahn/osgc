@@ -114,6 +114,10 @@ void UIDirector::handleMessage(const xy::Message& msg)
             {
                 m_sharedData.inventory.score += 200;
             }
+            else if (data.entity.getComponent<Enemy>().type == Enemy::Egg)
+            {
+                m_sharedData.inventory.score += 0; //eggs die on their own.
+            }
             else
             {
                 m_sharedData.inventory.score += 150;
@@ -124,7 +128,7 @@ void UIDirector::handleMessage(const xy::Message& msg)
     }
 }
 
-void UIDirector::process(float dt)
+void UIDirector::process(float)
 {
     updateTimer();
 }

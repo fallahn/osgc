@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "CommandIDs.hpp"
 #include "EnemySystem.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -55,8 +56,9 @@ namespace
     //const float MaxJump = -1500.f;
 }
 
-PlayerSystem::PlayerSystem(xy::MessageBus& mb)
-    : xy::System(mb, typeid(PlayerSystem))
+PlayerSystem::PlayerSystem(xy::MessageBus& mb, const SharedData& sd)
+    : xy::System(mb, typeid(PlayerSystem)),
+    m_sharedData(sd)
 {
     requireComponent<xy::Transform>();
     requireComponent<xy::BroadphaseComponent>();
@@ -320,7 +322,8 @@ void PlayerSystem::processDead(xy::Entity entity, float dt)
     auto& player = entity.getComponent<Player>();
     player.stateTime -= dt;
 
-    if (player.stateTime < 0)
+    if (player.stateTime < 0
+        && m_sharedData.inventory.lives > 0)
     {
         xy::Command cmd;
         cmd.targetFlags = CommandID::World::CheckPoint;
@@ -349,7 +352,6 @@ void PlayerSystem::processDead(xy::Entity entity, float dt)
 
 void PlayerSystem::doCollision(xy::Entity entity, float)
 {
-    auto& player = entity.getComponent<Player>();
     auto& tx = entity.getComponent<xy::Transform>();
     entity.getComponent<CollisionBody>().collisionFlags = 0;
 

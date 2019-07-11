@@ -34,7 +34,7 @@ TransitionState::TransitionState(xy::StateStack& ss, xy::State::Context ctx, Sha
 }
 
 //public
-bool TransitionState::handleEvent(const sf::Event& evt)
+bool TransitionState::handleEvent(const sf::Event&)
 {
     if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
     {
@@ -49,7 +49,7 @@ void TransitionState::handleMessage(const xy::Message&)
 
 }
 
-bool TransitionState::update(float dt)
+bool TransitionState::update(float)
 {
     float transitionTime = std::min(1.f, m_transitionClock.getElapsedTime().asSeconds() / m_sharedData.transitionContext.duration);
 

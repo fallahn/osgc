@@ -50,10 +50,11 @@ struct Player final
     bool hasShield = false;
 };
 
+struct SharedData;
 class PlayerSystem final : public xy::System
 {
 public:
-    explicit PlayerSystem(xy::MessageBus&);
+    PlayerSystem(xy::MessageBus&, const SharedData&);
 
     void process(float) override;
 
@@ -61,6 +62,7 @@ public:
 
 private:
 
+    const SharedData& m_sharedData;
     sf::FloatRect m_bounds;
 
     void processFalling(xy::Entity, float);

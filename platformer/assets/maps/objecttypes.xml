@@ -6,6 +6,9 @@
  <objecttype name="collectible" color="#4ff8a0">
   <property name="id" type="int" default="-1"/>
  </objecttype>
+ <objecttype name="dialogue" color="#ffaa00">
+  <property name="file" type="string" default="info.txt"/>
+ </objecttype>
  <objecttype name="enemy" color="#ff00ff">
   <property name="id" type="int" default="-1"/>
  </objecttype>

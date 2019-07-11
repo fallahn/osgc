@@ -73,7 +73,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_playerInput   (sd.inputBinding)
 {
     launchLoadingScreen();
-
+    //sd.theme = "mes";
     initScene();
     loadResources();
     buildWorld();
@@ -194,7 +194,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
-    m_gameScene.addSystem<PlayerSystem>(mb);
+    m_gameScene.addSystem<PlayerSystem>(mb, m_sharedData);
     m_gameScene.addSystem<ShieldAnimationSystem>(mb);
     m_gameScene.addSystem<NinjaStarSystem>(mb);
     m_gameScene.addSystem<FluidAnimationSystem>(mb);
