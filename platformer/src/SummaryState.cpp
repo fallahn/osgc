@@ -72,9 +72,6 @@ SummaryState::SummaryState(xy::StateStack& ss, xy::State::Context ctx, SharedDat
     m_sharedData(sd),
     m_state     (AddCoins)
 {
-    sd.inventory.coins = 900;
-    sd.roundTime = 900;
-
     build();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
@@ -293,5 +290,6 @@ void SummaryState::addTime()
     {
         m_textEnts[OK].getComponent<xy::Text>().setFillColour(sf::Color::White);
         m_state = Completed;
+        m_sharedData.saveProgress();
     }
 }

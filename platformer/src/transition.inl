@@ -37,3 +37,24 @@ void main()
 	
 	gl_FragColor = mix(texture2D(u_texture, coord), vec4(vec3(0.0), 1.0), u_time);
 })";
+
+static const std::string NoiseFrag = R"(
+#version 120
+
+uniform sampler2D u_texture;
+
+uniform float u_time;
+
+float rand(vec2 pos)
+{
+    return fract(sin(dot(pos, vec2(12.9898, 4.1414) + u_time)) * 43758.5453);
+}
+
+void main()
+{
+    vec4 noise = vec4(vec3(rand(floor((gl_FragCoord.xy / 4.0)))), 1.0);
+    vec4 colour = texture2D(u_texture, gl_TexCoord[0].xy);
+
+    gl_FragColor = mix(colour, noise, u_time);
+
+})";

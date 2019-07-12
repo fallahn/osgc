@@ -134,7 +134,7 @@ void GameState::handleMessage(const xy::Message& msg)
     if (msg.id == MessageID::PlayerMessage)
     {
         const auto& data = msg.getData<PlayerEvent>();
-        if (data.type == PlayerEvent::Exited)
+        if (data.type == PlayerEvent::Exited) //TODO check if we're on a stage end or round end
         {
             m_sharedData.nextMap = m_mapLoader.getNextMap() + ".tmx";
             m_sharedData.theme = m_mapLoader.getNextTheme();
@@ -294,6 +294,7 @@ void GameState::loadResources()
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::NoiseTransition, NoiseFrag, sf::Shader::Fragment);
 
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
