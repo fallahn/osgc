@@ -37,6 +37,7 @@ namespace StateID
         Pause,
         Transition,
         Error,
-        Dialogue
+        Dialogue,
+        Summary
     };
 }

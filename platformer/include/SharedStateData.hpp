@@ -63,6 +63,7 @@ struct SharedData final
     std::string nextMap = "gb01.tmx";
     std::string theme = "gearboy";
     Inventory inventory;
+    std::int32_t roundTime = 0;
 
     TransitionContext transitionContext;
     std::string dialogueFile = "intro.txt";

@@ -28,10 +28,9 @@ Copyright 2019 Matt Marchant
 #include <sstream>
 
 UIDirector::UIDirector(SharedData& sd)
-    : m_sharedData  (sd),
-    m_displayTime   (160)
+    : m_sharedData  (sd)
 {
-
+    sd.roundTime = 160;
 }
 
 //public
@@ -141,19 +140,19 @@ void UIDirector::updateTimer()
     {
         m_roundClock.restart();
         
-        if (m_displayTime > 0)
+        if (m_sharedData.roundTime > 0)
         {
-            m_displayTime--;
+            m_sharedData.roundTime--;
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::TimeText;
             cmd.action = [&](xy::Entity e, float)
             {
-                e.getComponent<xy::Text>().setString(std::to_string(m_displayTime));
+                e.getComponent<xy::Text>().setString(std::to_string(m_sharedData.roundTime));
             };
             sendCommand(cmd);
 
-            if (m_displayTime == 30)
+            if (m_sharedData.roundTime == 30)
             {
                 auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
                 msg->type = GameEvent::TimerWarning;

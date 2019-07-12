@@ -28,6 +28,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShieldAnimationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TransitionState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/UIDirector.hpp
   PARENT_SCOPE)

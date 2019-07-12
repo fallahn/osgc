@@ -107,11 +107,11 @@ bool DialogueState::handleEvent(const sf::Event& evt)
     //slight delay before accepting input
     if (delayClock.getElapsedTime() > delayTime)
     {
-        if (evt.type == sf::Event::KeyReleased)
+        if (evt.type == sf::Event::KeyPressed)
         {
             displayNextLine();
         }
-        else if (evt.type == sf::Event::JoystickButtonReleased
+        else if (evt.type == sf::Event::JoystickButtonPressed
             && evt.joystickButton.joystickId == 0)
         {
             if (evt.joystickButton.button == 0)

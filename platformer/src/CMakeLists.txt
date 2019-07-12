@@ -18,6 +18,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TransitionState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/UIDirector.cpp
   PARENT_SCOPE)

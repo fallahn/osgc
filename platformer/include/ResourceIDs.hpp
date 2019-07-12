@@ -65,7 +65,7 @@ namespace FontID
         Count 
     };
 
-    static const std::string GearBoyFont("assets/fonts/IBM_CGA.ttf");
+    static const std::string GearBoyFont("assets/fonts/gameboy.ttf");
 }
 
 namespace ParticleID

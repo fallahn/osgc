@@ -18,27 +18,49 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/Director.hpp>
+#include "StateIDs.hpp"
 
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+
+#include <SFML/Graphics/Shader.hpp>
 #include <SFML/System/Clock.hpp>
 
 struct SharedData;
-class UIDirector final : public xy::Director
+class SummaryState final : public xy::State
 {
 public:
-    explicit UIDirector(SharedData&);
+    SummaryState(xy::StateStack&, xy::State::Context, SharedData&);
 
+    bool handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
 
-    void process(float) override;
+    xy::StateID stateID() const override { return StateID::Summary; }
 
 private:
-
+    xy::Scene m_scene;
     SharedData& m_sharedData;
-    sf::Clock m_roundClock;
+    xy::ResourceHandler m_resources;
 
-    void updateTimer();
-    void updateScore();
-    void updateLives();
-    void updateAmmo();
+    sf::Shader m_shader;
+
+    enum
+    {
+        AddCoins, AddTime, Completed
+    }m_state;
+    sf::Clock m_stateClock;
+
+    enum
+    {
+        Score, Coins, Time, OK, Count
+    };
+    std::array<xy::Entity, Count> m_textEnts;
+
+    void build();
+
+    void addCoins();
+    void addTime();
 };

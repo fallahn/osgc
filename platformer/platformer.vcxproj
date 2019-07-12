@@ -168,6 +168,7 @@
     <ClInclude Include="include\SharedStateData.hpp" />
     <ClInclude Include="include\ShieldAnimationSystem.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\SummaryState.hpp" />
     <ClInclude Include="include\TransitionState.hpp" />
     <ClInclude Include="include\UIDirector.hpp" />
   </ItemGroup>
@@ -190,6 +191,7 @@
     <ClCompile Include="src\PlayerSystem.cpp" />
     <ClCompile Include="src\ShakerSystem.cpp" />
     <ClCompile Include="src\SharedStateData.cpp" />
+    <ClCompile Include="src\SummaryState.cpp" />
     <ClCompile Include="src\TransitionState.cpp" />
     <ClCompile Include="src\UIDirector.cpp" />
   </ItemGroup>
