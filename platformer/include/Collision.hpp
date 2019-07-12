@@ -43,7 +43,8 @@ struct CollisionShape final
         LeftHand = 0x200,
         RightHand = 0x400,
 
-        Text = 0x800
+        Text = 0x800,
+        Dialogue = 0x1000
     }type = Solid;
 
     //these are the types this shape collides with
@@ -56,7 +57,9 @@ struct CollisionShape final
 
     sf::FloatRect aabb;
 
-    std::int32_t ID = -1; //used for map objects with properties such as NPC/Collectible type
+    //used for map objects with properties such as NPC/Collectible type
+    //or index into speech text file array
+    std::int32_t ID = -1; 
 };
 
 struct CollisionBody final
@@ -77,7 +80,7 @@ namespace CollisionGroup
     static const std::uint64_t PlayerFlags = 
         CollisionShape::Fluid | CollisionShape::Solid | CollisionShape::Spikes | 
         CollisionShape::Collectible | CollisionShape::Checkpoint | CollisionShape::Enemy |
-        CollisionShape::Exit;
+        CollisionShape::Exit | CollisionShape::Dialogue;
 
     static const std::uint64_t StarFlags =
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes |

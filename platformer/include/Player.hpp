@@ -50,11 +50,17 @@ struct Player final
     bool hasShield = false;
 };
 
+struct Dialogue final
+{
+    bool expired = false;
+    std::string file;
+};
+
 struct SharedData;
 class PlayerSystem final : public xy::System
 {
 public:
-    PlayerSystem(xy::MessageBus&, const SharedData&);
+    PlayerSystem(xy::MessageBus&, SharedData&);
 
     void process(float) override;
 
@@ -62,7 +68,7 @@ public:
 
 private:
 
-    const SharedData& m_sharedData;
+    SharedData& m_sharedData;
     sf::FloatRect m_bounds;
 
     void processFalling(xy::Entity, float);

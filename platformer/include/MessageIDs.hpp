@@ -37,7 +37,8 @@ struct PlayerEvent final
     enum
     {
         Jumped, Landed, Shot, Died, Respawned, Exited,
-        GotCoin, GotShield, GotAmmo, LostShield, GotLife
+        GotCoin, GotShield, GotAmmo, LostShield, GotLife,
+        TriggerDialogue
     }type = Shot;
     xy::Entity entity;
 };

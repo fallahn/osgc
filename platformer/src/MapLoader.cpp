@@ -297,6 +297,36 @@ bool MapLoader::load(const std::string& file)
                                 m_collisionShapes.pop_back();
                             }
                         }
+                        else if (type == "dialogue")
+                        {
+                            const auto& properties = object.getProperties();
+                            auto result = std::find_if(properties.begin(), properties.end(),
+                                [](const tmx::Property& prop)
+                                {
+                                    return prop.getName() == "file";
+                                });
+
+                            if (result != properties.end())
+                            {
+                                auto str = result->getStringValue();
+                                if (!str.empty())
+                                {
+                                    collision.type = CollisionShape::Dialogue;
+                                    collision.collisionFlags = CollisionShape::Player;
+                                    collision.ID = static_cast<std::int32_t>(m_dialogueFiles.size());
+
+                                    m_dialogueFiles.push_back(str);
+                                }
+                                else
+                                {
+                                    m_collisionShapes.pop_back();
+                                }
+                            }
+                            else
+                            {
+                                m_collisionShapes.pop_back();
+                            }
+                        }
                         else
                         {
                             //not valid, remove

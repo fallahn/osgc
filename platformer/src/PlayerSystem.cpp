@@ -56,7 +56,7 @@ namespace
     //const float MaxJump = -1500.f;
 }
 
-PlayerSystem::PlayerSystem(xy::MessageBus& mb, const SharedData& sd)
+PlayerSystem::PlayerSystem(xy::MessageBus& mb, SharedData& sd)
     : xy::System(mb, typeid(PlayerSystem)),
     m_sharedData(sd)
 {
@@ -494,6 +494,20 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                             return;
                         }
                     }
+                    break;
+                case CollisionShape::Dialogue:
+                {
+                    auto& dialogue = other.getComponent<Dialogue>();
+                    if (!dialogue.expired)
+                    {
+                        m_sharedData.dialogueFile = dialogue.file;
+                        dialogue.expired = true;
+
+                        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                        msg->type = PlayerEvent::TriggerDialogue;
+                        msg->entity = entity;
+                    }
+                }
                     break;
                 }
             }

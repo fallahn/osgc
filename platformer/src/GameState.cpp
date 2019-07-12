@@ -148,6 +148,11 @@ void GameState::handleMessage(const xy::Message& msg)
 
             requestStackPush(StateID::Transition);
         }
+        else if (data.type == PlayerEvent::TriggerDialogue)
+        {
+            m_playerInput.setEnabled(false);
+            requestStackPush(StateID::Dialogue);
+        }
     }
     else if (msg.id == MessageID::GameMessage)
     {
@@ -167,7 +172,15 @@ void GameState::handleMessage(const xy::Message& msg)
             break;
         }
     }
-
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Popped
+            && data.id == StateID::Dialogue)
+        {
+            m_playerInput.setEnabled(true);
+        }
+    }
     m_gameScene.forwardMessage(msg);
     m_uiScene.forwardMessage(msg);
 }
@@ -524,6 +537,9 @@ void GameState::buildWorld()
                     cEnt.addComponent<BobAnimation>().parent = entity;
                     entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
                 }
+                    break;
+                case CollisionShape::Dialogue:
+                    entity.addComponent<Dialogue>().file = m_mapLoader.getDialogueFiles()[shape.ID];
                     break;
                 }
             }

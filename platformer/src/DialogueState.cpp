@@ -25,9 +25,11 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 
@@ -40,7 +42,45 @@ Copyright 2019 Matt Marchant
 namespace
 {
     sf::Clock delayClock;
-    const sf::Time delayTime = sf::seconds(1.f);
+    const sf::Time delayTime = sf::seconds(2.f);
+
+    struct LineData final
+    {
+        std::size_t lineIndex = 0;
+        std::size_t charIndex = 0;
+        float charTime = 0.f;
+        static constexpr float TimePerChar = 0.05f;
+    };
+
+    struct LineCallback final
+    {
+        explicit LineCallback(const std::vector<std::string>& lines)
+            : m_lines(lines) {}
+
+        void operator () (xy::Entity entity, float dt)
+        {
+            auto& lineData = entity.getComponent<LineData>();
+            const auto& str = m_lines[lineData.lineIndex];
+
+            if (lineData.charIndex < str.size())
+            {
+                lineData.charTime += dt;
+                if (lineData.charTime > LineData::TimePerChar)
+                {
+                    lineData.charIndex++;
+                    lineData.charTime = 0.f;
+                }
+            }
+            else
+            {
+                entity.getComponent<xy::Callback>().active = false;
+            }
+            entity.getComponent<xy::Text>().setString(str.substr(0, lineData.charIndex));
+        }
+
+    private:
+        const std::vector<std::string>& m_lines;
+    };
 }
 
 DialogueState::DialogueState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -107,6 +147,7 @@ void DialogueState::draw()
 void DialogueState::build()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::CallbackSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
 
@@ -139,17 +180,29 @@ void DialogueState::build()
     auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
-    //auto createText = [&](const std::string& str)->xy::Entity
+    auto createText = [&]()->xy::Entity
     {
         auto entity = m_scene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(80.f, xy::DefaultSceneSize.y - 200.f); //TODO make this relative to background
+        
         entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
         entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::SmallTextSize);
         entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
-        entity.getComponent<xy::Text>().setString(m_lines[0]);
-        //return entity;
-    }//;
+
+        entity.addComponent<LineData>();
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function = LineCallback(m_lines);
+
+        return entity;
+    };
     
+    auto entity = createText();
+    entity.addComponent<xy::Transform>().setPosition(80.f, xy::DefaultSceneSize.y - 200.f); //TODO make this relative to background
+    m_lineEntities[0] = entity;
+
+    entity = createText();
+    entity.addComponent<xy::Transform>().setPosition(80.f, xy::DefaultSceneSize.y - 140.f);
+    entity.getComponent<xy::Callback>().active = false;
+    m_lineEntities[1] = entity;
 }
 
 void DialogueState::createBackground()
@@ -234,5 +287,42 @@ void DialogueState::createBackground()
 
 void DialogueState::displayNextLine()
 {
+    auto entityIndex = m_lineIndex % m_lineEntities.size();
+    auto& lineData = m_lineEntities[entityIndex].getComponent<LineData>();
 
+    //if line is active skip to the end
+    if (lineData.charIndex < m_lines[lineData.lineIndex].size())
+    {
+        m_lineEntities[entityIndex].getComponent<xy::Callback>().active = false;
+        m_lineEntities[entityIndex].getComponent<xy::Text>().setString(m_lines[m_lineIndex]);
+        lineData.charIndex = m_lines[m_lineIndex].size();
+    }
+
+    //else move to next line
+    else if (m_lineIndex < m_lines.size() - 1)
+    {
+        m_lineIndex++;
+        entityIndex = m_lineIndex % m_lineEntities.size();
+
+        auto& data = m_lineEntities[entityIndex].getComponent<LineData>();
+        data.charIndex = 0;
+        data.lineIndex = m_lineIndex;
+        data.charTime = 0.f;
+
+        m_lineEntities[entityIndex].getComponent<xy::Callback>().active = true;
+
+        if (entityIndex == 0)
+        {
+            //wrapped around so clear other lines
+            for (auto e : m_lineEntities)
+            {
+                e.getComponent<xy::Text>().setString("");
+            }
+        }
+    }
+    else
+    {
+        //all lines displayed
+        requestStackPop();
+    }
 }

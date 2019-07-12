@@ -34,10 +34,13 @@ public:
     void update();
     void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
     xy::Entity getPlayerEntity() const { return m_playerEntity; }
+    void setEnabled(bool enabled) { m_enabled = enabled; }
 
 private:
     const InputBinding& m_inputBinding;
     xy::Entity m_playerEntity;
     float m_runningMultiplier;
     std::uint16_t m_currentInput;
+
+    bool m_enabled;
 };

@@ -45,6 +45,8 @@ private:
     std::vector<std::string> m_lines;
     std::size_t m_lineIndex;
 
+    std::array<xy::Entity, 2u> m_lineEntities;
+
     void build();
     void createBackground();
 

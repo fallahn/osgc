@@ -30,7 +30,8 @@ namespace
 InputParser::InputParser(const InputBinding& binding)
     : m_inputBinding        (binding),
     m_runningMultiplier     (1.f),
-    m_currentInput          (0)
+    m_currentInput          (0),
+    m_enabled               (true)
 {
 
 }
@@ -174,6 +175,11 @@ void InputParser::handleEvent(const sf::Event& evt)
 
 void InputParser::update()
 {
+    if (!m_enabled)
+    {
+        m_currentInput = 0;
+    }
+
     if (m_playerEntity.isValid())
     {
         //set local player input

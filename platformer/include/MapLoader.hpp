@@ -64,6 +64,8 @@ public:
 
     const std::vector<EnemySpawn>& getEnemySpawns() const { return m_enemySpawns; }
 
+    const std::vector<std::string>& getDialogueFiles() const { return m_dialogueFiles; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -85,4 +87,5 @@ private:
 
     std::vector<CollisionShape> m_collisionShapes;
     std::vector<EnemySpawn> m_enemySpawns;
+    std::vector<std::string> m_dialogueFiles;
 };
