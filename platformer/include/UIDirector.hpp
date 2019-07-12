@@ -41,4 +41,5 @@ private:
     void updateTimer();
     void updateScore();
     void updateLives();
+    void updateAmmo();
 };

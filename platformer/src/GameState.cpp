@@ -55,6 +55,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Rectangle.hpp>
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/detail/Operators.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -173,6 +174,8 @@ void GameState::handleMessage(const xy::Message& msg)
 
 bool GameState::update(float dt)
 {
+    //updateShaderView();
+
     m_playerInput.update();
     m_gameScene.update(dt);
     m_uiScene.update(dt);
@@ -607,15 +610,6 @@ void GameState::buildUI()
 
     entity.getComponent<xy::Transform>().move(0.f, offset);
 
-    //coin count
-    entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(GameConst::UI::CoinPosition);
-    entity.getComponent<xy::Transform>().setScale(scale, scale);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Coin];
-    entity.addComponent<xy::SpriteAnimation>().play(0);
-    entity.getComponent<xy::Transform>().move(0.f, offset);
-
     auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
@@ -641,28 +635,57 @@ void GameState::buildUI()
         return entity;
     };
 
-    entity = createText("x");
-    entity.getComponent<xy::Transform>().setPosition(980.f, GameConst::UI::TopRow);
-    entity.getComponent<xy::Transform>().move(0.f, offset);
+
+    //coin count
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(GameConst::UI::CoinPosition);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Coin];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.getComponent<xy::Transform>().move(-10.f, offset);
 
     std::stringstream ss;
-    ss << std::setw(3) << std::setfill('0') << m_sharedData.inventory.coins;
+    ss << "x " << std::setw(3) << std::setfill('0') << m_sharedData.inventory.coins;
     entity = createText(ss.str());
-    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::BottomRow);
-    entity.getComponent<xy::Transform>().move(0.f, offset);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::TopRow);
+    entity.getComponent<xy::Transform>().move(-10.f, offset);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::CoinText;
 
-    entity = createText("LIVES " + std::to_string(m_sharedData.inventory.lives));
-    entity.getComponent<xy::Transform>().setPosition(30.f, GameConst::UI::TopRow);
+    //ammo
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(GameConst::UI::CoinPosition.x, GameConst::UI::CoinPosition.y + 68.f);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+
+    std::stringstream se;
+    se << "x " << std::setw(2) << std::setfill('0') << m_sharedData.inventory.ammo;
+    entity = createText(se.str());
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::BottomRow);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::AmmoText;
+
+    //lives
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(20.f, 6.f);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Player];
+    entity.addComponent<xy::SpriteAnimation>().play(m_playerAnimations[AnimID::Player::Idle]);
+
+    entity = createText(std::to_string(m_sharedData.inventory.lives));
+    entity.getComponent<xy::Transform>().setPosition(90.f, GameConst::UI::TopRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LivesText;
 
-    entity = createText("SCORE: " + std::to_string(m_sharedData.inventory.score));
+    //score
+    entity = createText("SCORE " + std::to_string(m_sharedData.inventory.score));
     entity.getComponent<xy::Transform>().setPosition(30.f, GameConst::UI::BottomRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::ScoreText;
 
+    //timer
     entity = createText("TIME");
     entity.getComponent<xy::Transform>().setPosition(1800.f, GameConst::UI::TopRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
@@ -673,4 +696,15 @@ void GameState::buildUI()
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
+}
+
+void GameState::updateShaderView()
+{
+    sf::Vector2f windowSize(xy::App::getRenderWindow()->getSize());
+    sf::Vector2f vp(getContext().defaultView.getViewport().width, getContext().defaultView.getViewport().height);
+    windowSize = windowSize * vp;
+
+    sf::Vector2f ratio = windowSize / xy::DefaultSceneSize;
+
+    m_shaders.get(ShaderID::TileMap).setUniform("u_windowScale", ratio);
 }

@@ -64,4 +64,6 @@ private:
     void buildWorld();
     void loadEnemies();
     void buildUI();
+
+    void updateShaderView();
 };

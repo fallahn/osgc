@@ -38,7 +38,7 @@ namespace GameConst
         static const float BannerHeight = 160.f; //banner behind scores
         static const float TopRow = 30.f;
         static const float BottomRow = 96.f;
-        static const sf::Vector2f CoinPosition(890.f, 20.f);
+        static const sf::Vector2f CoinPosition(870.f, 10.f);
 
         static const std::uint32_t SmallTextSize = 32;
         static const std::uint32_t MediumTextSize = 64;

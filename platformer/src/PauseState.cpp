@@ -270,7 +270,7 @@ void PauseState::build()
     entity = createText("Continue Playing");
     entity.getComponent<xy::Transform>().move(0.f, 360.f);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Menu::Message;
-    
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::SmallTextSize);
 
     auto arrow = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_cursor.png");
     entity = m_scene.createEntity();

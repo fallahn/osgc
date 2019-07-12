@@ -45,7 +45,8 @@ namespace CommandID
             CoinText = 0x1,
             ScoreText = 0x2,
             LivesText = 0x4,
-            TimeText = 0x8
+            TimeText = 0x8,
+            AmmoText = 0x10
         };
     }
 }

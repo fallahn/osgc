@@ -71,7 +71,7 @@ void UIDirector::handleMessage(const xy::Message& msg)
             cmd.action = [&](xy::Entity e, float)
             {
                 std::stringstream ss;
-                ss << std::setw(3) << std::setfill('0') << m_sharedData.inventory.coins;
+                ss << "x " << std::setw(3) << std::setfill('0') << m_sharedData.inventory.coins;
 
                 e.getComponent<xy::Text>().setString(ss.str());
             };
@@ -82,10 +82,10 @@ void UIDirector::handleMessage(const xy::Message& msg)
         {
             m_sharedData.inventory.ammo = std::min(m_sharedData.inventory.ammo + 5, Inventory::MaxAmmo);
 
-            xy::Command cmd;
-            //cmd.targetFlags = CommandID::UI::AmmoText;
+            updateAmmo();
         }
             break;
+
         case PlayerEvent::GotShield:
         {
             m_sharedData.inventory.score += 100;
@@ -100,6 +100,7 @@ void UIDirector::handleMessage(const xy::Message& msg)
             break;
         case PlayerEvent::Shot:
             m_sharedData.inventory.ammo = std::max(0, m_sharedData.inventory.ammo - 1);
+            updateAmmo();
             break;
         }
     }
@@ -172,7 +173,7 @@ void UIDirector::updateScore()
     cmd.targetFlags = CommandID::UI::ScoreText;
     cmd.action = [&](xy::Entity e, float)
     {
-        e.getComponent<xy::Text>().setString("SCORE: " + std::to_string(m_sharedData.inventory.score));
+        e.getComponent<xy::Text>().setString("SCORE " + std::to_string(m_sharedData.inventory.score));
     };
     sendCommand(cmd);
 }
@@ -183,7 +184,21 @@ void UIDirector::updateLives()
     cmd.targetFlags = CommandID::UI::LivesText;
     cmd.action = [&](xy::Entity e, float)
     {
-        e.getComponent<xy::Text>().setString("LIVES: " + std::to_string(m_sharedData.inventory.lives));
+        e.getComponent<xy::Text>().setString(std::to_string(m_sharedData.inventory.lives));
+    };
+    sendCommand(cmd);
+}
+
+void UIDirector::updateAmmo()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::UI::AmmoText;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        std::stringstream ss;
+        ss << "x " << std::setw(2) << std::setfill('0') << m_sharedData.inventory.ammo;
+
+        e.getComponent<xy::Text>().setString(ss.str());
     };
     sendCommand(cmd);
 }

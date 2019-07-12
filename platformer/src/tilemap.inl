@@ -50,6 +50,7 @@ uniform sampler2D u_tileSet;
 uniform vec2 u_indexSize; //resolution of index map aka map tile count x/y
 uniform vec2 u_tileCount; //tile count in tileset
 uniform vec2 u_tileSize;
+uniform vec2 u_windowScale; //scale of the actual window relative to the scene size
 
 const float epsilon = 0.000005; //try reduce rounding errors
 
