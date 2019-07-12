@@ -41,4 +41,6 @@ private:
     void updateScore();
     void updateLives();
     void updateAmmo();
+
+    void spawnWarning();
 };

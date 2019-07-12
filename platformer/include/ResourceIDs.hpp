@@ -104,6 +104,8 @@ namespace SpriteID
             Walker,
             Bomb,
 
+            Crack,
+
             Count
         };
     }

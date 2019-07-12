@@ -278,7 +278,31 @@ bool MapLoader::load(const std::string& file)
                             }
                             m_nextMap = result->getStringValue();
 
-                            LOG("Parse next map theme", xy::Logger::Type::Info);
+                            result = std::find_if(properties.begin(), properties.end(),
+                                [](const tmx::Property& p)
+                                {
+                                    return p.getName() == "next_theme";
+                                });
+
+                            if (result != properties.end())
+                            {
+                                m_nextTheme = result->getStringValue();
+                                if (!xy::FileSystem::directoryExists(xy::FileSystem::getResourcePath() + "assets/images/" + m_nextTheme))
+                                {
+                                    xy::Logger::log(m_nextTheme + ": invalid theme property", xy::Logger::Type::Error);
+                                    return false;
+                                }
+                            }
+
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                collision.ID = *id;
+                            }
+                            else
+                            {
+                                collision.ID = 0;
+                            }
 
                             collision.type = CollisionShape::Exit;
                             collision.collisionFlags = CollisionShape::Player;
@@ -355,4 +379,3 @@ bool MapLoader::load(const std::string& file)
 
     return false;
 }
-

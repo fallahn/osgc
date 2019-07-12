@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="108">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="110">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -117,7 +117,9 @@
   <object id="90" type="spikes" x="1896" y="176" width="8" height="48"/>
   <object id="91" type="exit" x="1640" y="112" width="20" height="36">
    <properties>
+    <property name="id" type="int" value="0"/>
     <property name="next_map" value="gb01"/>
+    <property name="next_theme" value="gearboy"/>
    </properties>
   </object>
   <object id="92" type="checkpoint" x="40" y="272" width="20" height="32">
@@ -130,17 +132,17 @@
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="94" type="collectible" x="104" y="284" width="16" height="16">
+  <object id="94" type="collectible" x="168" y="152" width="16" height="16">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>
   </object>
-  <object id="95" type="collectible" x="132" y="284" width="16" height="16">
+  <object id="95" type="collectible" x="256" y="121" width="16" height="16">
    <properties>
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="96" type="collectible" x="160" y="284" width="16" height="16">
+  <object id="96" type="collectible" x="200" y="56" width="16" height="16">
    <properties>
     <property name="id" type="int" value="2"/>
    </properties>
@@ -170,7 +172,7 @@
    </properties>
    <polyline points="0,0 72,0"/>
   </object>
-  <object id="106" type="dialogue" x="240" y="240" width="16" height="15">
+  <object id="106" type="dialogue" x="64" y="209" width="16" height="94">
    <properties>
     <property name="file" value="intro.txt"/>
    </properties>
@@ -178,6 +180,11 @@
   <object id="107" type="dialogue" x="1784" y="240" width="16" height="32">
    <properties>
     <property name="file" value="outro.txt"/>
+   </properties>
+  </object>
+  <object id="109" type="dialogue" x="160" y="209" width="16" height="94">
+   <properties>
+    <property name="file" value="intro_2.txt"/>
    </properties>
   </object>
  </objectgroup>

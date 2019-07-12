@@ -40,6 +40,7 @@ struct PlayerEvent final
         GotCoin, GotShield, GotAmmo, LostShield, GotLife,
         TriggerDialogue
     }type = Shot;
+    std::int32_t id = -1;
     xy::Entity entity;
 };
 

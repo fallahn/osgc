@@ -444,6 +444,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
                     msg->type = PlayerEvent::Exited;
                     msg->entity = entity;
+                    msg->id = otherBody.shapes[0].ID;
 
                     player.state = Player::Dead; //just prevents further collisions
                     return;

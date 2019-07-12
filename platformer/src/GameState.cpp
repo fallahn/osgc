@@ -144,7 +144,18 @@ void GameState::handleMessage(const xy::Message& msg)
             auto* window = xy::App::getRenderWindow();
             m_sharedData.transitionContext.texture.create(window->getSize().x, window->getSize().y);
             m_sharedData.transitionContext.texture.update(*window);
-            m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
+
+            if (data.id == 1)
+            {
+                //end of a stage
+                m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::NoiseTransition);
+                m_sharedData.transitionContext.nextState = StateID::Summary;
+            }
+            else
+            {
+                m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
+                m_sharedData.transitionContext.nextState = StateID::Game;
+            }
 
             requestStackPush(StateID::Transition);
         }
@@ -291,6 +302,9 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Walker] = spriteSheet.getSprite("walker");
     m_sprites[SpriteID::GearBoy::Crawler] = spriteSheet.getSprite("crawler");
     m_sprites[SpriteID::GearBoy::Bomb] = spriteSheet.getSprite("bomb");
+
+    spriteSheet.loadFromFile("assets/sprites/crack.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Crack] = spriteSheet.getSprite("crack");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
@@ -541,6 +555,23 @@ void GameState::buildWorld()
                     break;
                 case CollisionShape::Dialogue:
                     entity.addComponent<Dialogue>().file = m_mapLoader.getDialogueFiles()[shape.ID];
+                    break;
+                case CollisionShape::Exit:
+                {
+                    if (shape.ID == 1)
+                    {
+                        auto crackEntity = m_gameScene.createEntity();
+                        crackEntity.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                        crackEntity.getComponent<xy::Transform>().setScale(scale, scale);
+                        crackEntity.addComponent<xy::Drawable>();
+                        crackEntity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crack];
+                        crackEntity.addComponent<xy::SpriteAnimation>().play(0);
+                        bounds = m_sprites[SpriteID::GearBoy::Crack].getTextureBounds();
+                        crackEntity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+                        bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+                        crackEntity.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 2.f);
+                    }
+                }
                     break;
                 }
             }

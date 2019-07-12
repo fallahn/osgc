@@ -156,6 +156,8 @@ void UIDirector::updateTimer()
             {
                 auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
                 msg->type = GameEvent::TimerWarning;
+
+                spawnWarning();
             }
         }
         else
@@ -200,4 +202,9 @@ void UIDirector::updateAmmo()
         e.getComponent<xy::Text>().setString(ss.str());
     };
     sendCommand(cmd);
+}
+
+void UIDirector::spawnWarning()
+{
+    LOG("implement me!!", xy::Logger::Type::Warning);
 }
