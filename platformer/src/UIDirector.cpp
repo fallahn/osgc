@@ -21,14 +21,19 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "SharedStateData.hpp"
 #include "EnemySystem.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
 
 #include <sstream>
 
-UIDirector::UIDirector(SharedData& sd)
-    : m_sharedData  (sd)
+UIDirector::UIDirector(SharedData& sd, const sf::Font& font)
+    : m_sharedData  (sd),
+    m_font          (font)
 {
     sd.roundTime = 160;
 }
@@ -206,5 +211,28 @@ void UIDirector::updateAmmo()
 
 void UIDirector::spawnWarning()
 {
-    LOG("implement me!!", xy::Logger::Type::Warning);
+    const sf::Color* colours = GameConst::Gearboy::colours.data();
+    if (m_sharedData.theme == "mes")
+    {
+        colours = GameConst::Mes::colours.data();
+    }
+
+    auto entity = getScene().createEntity();
+    entity.addComponent<xy::Transform>().setPosition(-300.f, xy::DefaultSceneSize.y / 2.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Text>(m_font).setString("HURRY!");
+    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
+    entity.getComponent<xy::Text>().setFillColour(colours[0]);
+    entity.getComponent<xy::Text>().setOutlineColour(colours[2]);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        e.getComponent<xy::Transform>().move(400.f * dt, 0.f);
+        if (e.getComponent<xy::Transform>().getPosition().x > xy::DefaultSceneSize.x)
+        {
+            getScene().destroyEntity(e);
+        }
+    };
 }

@@ -23,10 +23,16 @@ Copyright 2019 Matt Marchant
 #include <SFML/System/Clock.hpp>
 
 struct SharedData;
+
+namespace sf
+{
+    class Font;
+}
+
 class UIDirector final : public xy::Director
 {
 public:
-    explicit UIDirector(SharedData&);
+    UIDirector(SharedData&, const sf::Font&);
 
     void handleMessage(const xy::Message&) override;
 
@@ -35,6 +41,8 @@ public:
 private:
 
     SharedData& m_sharedData;
+    const sf::Font& m_font;
+
     sf::Clock m_roundClock;
 
     void updateTimer();

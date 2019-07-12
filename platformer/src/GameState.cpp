@@ -64,6 +64,8 @@ namespace
 {
 #include "tilemap.inl"
 #include "transition.inl"
+
+    std::size_t fontID = 0;
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -237,12 +239,14 @@ void GameState::initScene()
     m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
+    m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
 
-    m_uiScene.addDirector<UIDirector>(m_sharedData);
+    fontID = m_resources.load<sf::Font>(FontID::GearBoyFont); //bleh this should be done elsewhere for neatness
+    m_uiScene.addDirector<UIDirector>(m_sharedData, m_resources.get<sf::Font>(fontID));
 }
 
 void GameState::loadResources() 
@@ -658,7 +662,6 @@ void GameState::buildUI()
 
     entity.getComponent<xy::Transform>().move(0.f, offset);
 
-    auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
     const sf::Color* colours = GameConst::Gearboy::colours.data();

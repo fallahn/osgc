@@ -89,6 +89,7 @@ bool MapLoader::load(const std::string& file)
 
         //this makes some basic assumptions such as a layer only uses a single
         //tile set, and that all tiles within the set are the same size.
+        std::size_t exitCount = 0; //MUST have exactly 1
         const auto& layers = map.getLayers();
         for (const auto& layer : layers)
         {
@@ -306,6 +307,8 @@ bool MapLoader::load(const std::string& file)
 
                             collision.type = CollisionShape::Exit;
                             collision.collisionFlags = CollisionShape::Player;
+
+                            exitCount++;
                         }
                         else if (type == "collectible")
                         {
@@ -361,6 +364,12 @@ bool MapLoader::load(const std::string& file)
                     }
                 }
             }
+        }
+
+        if (exitCount != 1)
+        {
+            xy::Logger::log(std::to_string(exitCount) + ": invalid exit count");
+            return false;
         }
 
         //check valid check points and at least one spawn
