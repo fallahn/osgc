@@ -30,6 +30,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
+#include <SFML/Graphics/RenderTexture.hpp>
+
 struct SharedData;
 class GameState final : public xy::State
 {
@@ -44,11 +46,14 @@ public:
     xy::StateID stateID() const override { return StateID::Game; }
 
 private:
+    xy::Scene m_tilemapScene;
     xy::Scene m_gameScene;
     xy::Scene m_uiScene;
     SharedData& m_sharedData;
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
+
+    sf::RenderTexture m_tilemapBuffer;
 
     std::array<std::size_t, TextureID::Game::Count> m_textureIDs;
     SpriteArray<SpriteID::GearBoy::Count> m_sprites;
@@ -64,6 +69,4 @@ private:
     void buildWorld();
     void loadEnemies();
     void buildUI();
-
-    void updateShaderView();
 };

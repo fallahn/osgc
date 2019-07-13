@@ -70,6 +70,7 @@ namespace
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
+    m_tilemapScene  (ctx.appInstance.getMessageBus()),
     m_gameScene     (ctx.appInstance.getMessageBus()),
     m_uiScene       (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
@@ -81,6 +82,9 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     loadResources();
     buildWorld();
     buildUI();
+
+    m_tilemapScene.getActiveCamera().getComponent<xy::Camera>().setView(xy::DefaultSceneSize);
+    m_tilemapScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
 
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -126,6 +130,7 @@ bool GameState::handleEvent(const sf::Event& evt)
     }
 
     m_playerInput.handleEvent(evt);
+    m_tilemapScene.forwardEvent(evt);
     m_gameScene.forwardEvent(evt);
     m_uiScene.forwardEvent(evt);
     return true;
@@ -194,22 +199,32 @@ void GameState::handleMessage(const xy::Message& msg)
             m_playerInput.setEnabled(true);
         }
     }
+    m_tilemapScene.forwardMessage(msg);
     m_gameScene.forwardMessage(msg);
     m_uiScene.forwardMessage(msg);
 }
 
 bool GameState::update(float dt)
 {
-    //updateShaderView();
-
     m_playerInput.update();
     m_gameScene.update(dt);
     m_uiScene.update(dt);
+
+    //do this after game scene update so that the view is up to date and
+    //not lagging behind
+    auto pos = m_gameScene.getActiveCamera().getComponent<xy::Transform>().getPosition();
+    m_tilemapScene.getActiveCamera().getComponent<xy::Transform>().setPosition(pos);
+    m_tilemapScene.update(dt);
+    
     return true;
 }
 
 void GameState::draw()
 {
+    m_tilemapBuffer.clear(sf::Color::Transparent);
+    m_tilemapBuffer.draw(m_tilemapScene);
+    m_tilemapBuffer.display();
+
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
     rw.draw(m_uiScene);
@@ -219,6 +234,10 @@ void GameState::draw()
 void GameState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+
+    m_tilemapScene.addSystem<xy::SpriteSystem>(mb);
+    m_tilemapScene.addSystem<xy::CameraSystem>(mb);
+    m_tilemapScene.addSystem<xy::RenderSystem>(mb);
 
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
@@ -316,6 +335,9 @@ void GameState::loadResources()
 
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
+
+    //buffer texture for map
+    m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y));
 }
 
 void GameState::buildWorld()
@@ -370,6 +392,14 @@ void GameState::buildWorld()
 
         m_gameScene.getActiveCamera().getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+        //carries the buffer to which the tilemap is drawn
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(-xy::DefaultSceneSize / 2.f);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 1);
+        entity.addComponent<xy::Sprite>(m_tilemapBuffer.getTexture());
+
+        m_gameScene.getActiveCamera().getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
         //map layers
         const auto& layers = m_mapLoader.getLayers();
 
@@ -377,7 +407,7 @@ void GameState::buildWorld()
         std::int32_t startDepth = GameConst::BackgroundDepth + 2;
         for (const auto& layer : layers)
         {
-            auto entity = m_gameScene.createEntity();
+            auto entity = m_tilemapScene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Drawable>().setDepth(startDepth++);
             entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);
@@ -747,15 +777,4 @@ void GameState::buildUI()
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
-}
-
-void GameState::updateShaderView()
-{
-    sf::Vector2f windowSize(xy::App::getRenderWindow()->getSize());
-    sf::Vector2f vp(getContext().defaultView.getViewport().width, getContext().defaultView.getViewport().height);
-    windowSize = windowSize * vp;
-
-    sf::Vector2f ratio = windowSize / xy::DefaultSceneSize;
-
-    m_shaders.get(ShaderID::TileMap).setUniform("u_windowScale", ratio);
 }

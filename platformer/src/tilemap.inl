@@ -50,7 +50,6 @@ uniform sampler2D u_tileSet;
 uniform vec2 u_indexSize; //resolution of index map aka map tile count x/y
 uniform vec2 u_tileCount; //tile count in tileset
 uniform vec2 u_tileSize;
-uniform vec2 u_windowScale; //scale of the actual window relative to the scene size
 
 const float epsilon = 0.000005; //try reduce rounding errors
 
@@ -68,8 +67,7 @@ void main()
         index -= 1.0;
 
         vec2 position = vec2(mod(index + epsilon, u_tileCount.x), floor((index / u_tileCount.x) + epsilon)) / u_tileCount;
-        //vec2 offsetCoord = (gl_TexCoord[0].xy * u_indexSize) / u_tileSize;
-        //vec2 offset = mod(offsetCoord, 1.0) / u_tileCount;
+
 
         vec2 texelSize = vec2(1.0) / u_indexSize;
         vec2 offset = mod(gl_TexCoord[0].xy, texelSize);

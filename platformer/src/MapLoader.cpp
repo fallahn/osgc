@@ -62,6 +62,7 @@ bool MapLoader::load(const std::string& file)
         {
             if (ts.getTileCount() > 256)
             {
+                //TODO could use green channel to store next 256 IDs
                 xy::Logger::log("Tileset found with more than 256 tiles", xy::Logger::Type::Error);
                 return false;
             }
