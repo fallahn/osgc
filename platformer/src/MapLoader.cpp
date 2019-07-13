@@ -60,6 +60,12 @@ bool MapLoader::load(const std::string& file)
         const auto& tileSets = map.getTilesets();
         for (const auto& ts : tileSets)
         {
+            if (ts.getTileCount() > 256)
+            {
+                xy::Logger::log("Tileset found with more than 256 tiles", xy::Logger::Type::Error);
+                return false;
+            }
+
             auto path = ts.getImagePath();
             if (!path.empty())
             {
@@ -102,18 +108,24 @@ bool MapLoader::load(const std::string& file)
                 std::uint32_t firstID = std::numeric_limits<std::uint32_t>::max();
 
                 const auto& tiles = tileLayer.getTiles();
-                std::vector<sf::Uint8> tileIDs(tiles.size());
+                std::vector<sf::Uint32> tileIDs(tiles.size());
 
                 for (auto i = 0u; i < tiles.size(); ++i)
                 {
                     //REMEMBER tmx tile IDs start at 1 (0 is an empty tile)
                     //we'll account for this in the tile shader.
-                    tileIDs[i] = static_cast<sf::Uint8>(tiles[i].ID);
+                    tileIDs[i] = /*static_cast<sf::Uint8>*/(tiles[i].ID);
 
-                    if (tiles[i].ID < firstID)
+                    if (tiles[i].ID < firstID
+                        && tiles[i].ID > 0)
                     {
                         firstID = std::max(1u, tiles[i].ID);
                     }
+                }
+
+                if (firstID == std::numeric_limits<std::uint32_t>::max())
+                {
+                    xy::Logger::log("Do you have an empty tile layer?", xy::Logger::Type::Warning);
                 }
 
                 //find the tile set and its associated texture
@@ -142,12 +154,14 @@ bool MapLoader::load(const std::string& file)
                 {
                     //if the layer tile set ID doesn't start at 1 we need to subtract the
                     //min ID from the tile ID before uploading it to the index texture
-                    tileIDs[i] -= (tileset->getFirstGID() - 1);
-
+                    if (tileIDs[i] >= tileset->getFirstGID())
+                    {
+                        tileIDs[i] -= (tileset->getFirstGID() - 1);
+                    }
                     auto x = i % layerSize.x;
                     auto y = i / layerSize.x;
 
-                    indexImage.setPixel(x, y, { tileIDs[i], 255,255 });
+                    indexImage.setPixel(x, y, { static_cast<sf::Uint8>(tileIDs[i]), 255,255 });
                 }
 
                 m_indexMaps.emplace_back() = std::make_unique<sf::Texture>();

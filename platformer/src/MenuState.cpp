@@ -95,6 +95,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
 
+    m_sharedData.reset();
+
     initScene();
     loadResources();
     buildBackground();
@@ -102,6 +104,20 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_backgroundScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    registerCommand("map", [&](const std::string params)
+        {
+            if (xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + "assets/maps/" + params + ".tmx"))
+            {
+                m_sharedData.nextMap = params + ".tmx";
+                requestStackClear();
+                requestStackPush(StateID::Game);
+            }
+            else
+            {
+                xy::Console::print(params + ": map not found");
+            }
+        });
 
     quitLoadingScreen();
 }

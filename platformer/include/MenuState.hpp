@@ -33,6 +33,7 @@ source distribution.
 #include "AnimationMap.hpp"
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/ParticleEmitter.hpp>
@@ -40,7 +41,7 @@ source distribution.
 #include <xyginext/resources/ResourceHandler.hpp>
 
 struct SharedData;
-class MenuState final : public xy::State
+class MenuState final : public xy::State, public xy::ConsoleClient
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);

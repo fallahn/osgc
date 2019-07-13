@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="24">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="25">
  <tileset firstgid="1" name="gearboy" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
  <layer id="2" name="foreground" width="30" height="17">
   <data encoding="base64" compression="zlib">
    eJy9k7kOwjAQRJez4E4KTiFxlhyfQAf0VEjU0AFJl3D8OhNhC2PFJofFSE9K4vWMI+9aRGQJ1EBd+qZDVx+s2Yr1nkQDFCm6dPUNlhvFL25uBVQN5Op84irwsgz6mVCJUf5zrkvvO2hqajKgwMgayrUZKwr/7yAzJ9TlDeUPJIbSOu9JX8iO2qNpxHPl+Rd79A4e4KnxaYE26IBuhFw+C2nnYQTGYAKmCc6RVDMwBwuwDDmHCa3BhrFV5MrvslR3t4t5liM4CfzKlXUGFwVXzT6HPv3pJ/Dw6HuexBm7gb0CJ2QfxxWeVR4ehc8z39NXEOQehNoX27UkXA==
-  </data>
- </layer>
- <layer id="4" name="detail" width="30" height="17">
-  <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMApGwUgBAAf4AAE=
   </data>
  </layer>
  <objectgroup color="#aa0000" id="3" name="collision">
@@ -47,5 +42,12 @@
    </properties>
   </object>
   <object id="22" type="spikes" x="9" y="17" width="55" height="8"/>
+  <object id="24" type="exit" x="244" y="252" width="12" height="12">
+   <properties>
+    <property name="id" type="int" value="0"/>
+    <property name="next_map" value="menu"/>
+    <property name="next_theme" value="gearboy"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
