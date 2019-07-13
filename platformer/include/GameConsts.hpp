@@ -33,6 +33,8 @@ namespace GameConst
 
     static const float VerticalTileCount = 17.f; //only true for 16px tiles :/
 
+    static const std::int32_t RoundTime = 180;
+
     namespace UI
     {
         static const float BannerHeight = 160.f; //banner behind scores

@@ -35,7 +35,7 @@ UIDirector::UIDirector(SharedData& sd, const sf::Font& font)
     : m_sharedData  (sd),
     m_font          (font)
 {
-    sd.roundTime = 160;
+    sd.roundTime = GameConst::RoundTime;
 }
 
 //public

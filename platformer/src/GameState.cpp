@@ -660,7 +660,7 @@ void GameState::loadEnemies()
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
         bounds.left -= bounds.width / 2.f;
-        bounds.top -= bounds.height / 2.f;
+        //bounds.top -= bounds.height / 2.f;
 
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = bounds;
@@ -772,7 +772,7 @@ void GameState::buildUI()
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 
-    entity = createText("160");
+    entity = createText(std::to_string(GameConst::RoundTime));
     entity.getComponent<xy::Transform>().setPosition(1800.f, GameConst::UI::BottomRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
