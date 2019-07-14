@@ -78,4 +78,22 @@ spritesheet enemies
             framerate=18
         }
     }
+
+    sprite orb
+    {
+        bounds = 0,64,16,16
+
+        animation idle
+        {
+            frame=0,64,16,16
+            frame=16,64,16,16
+            frame=32,64,16,16
+            frame=32,64,16,16
+            frame=32,64,16,16
+            frame=16,64,16,16
+
+            loop=true
+            framerate=16
+        }
+    }
 }

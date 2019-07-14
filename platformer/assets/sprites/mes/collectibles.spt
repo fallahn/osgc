@@ -22,7 +22,7 @@ spritesheet collectibles
 
     sprite shield
     {
-        bounds = 16,0,16,16
+        bounds = 0,16,16,16
 
         animation idle
         {
@@ -40,7 +40,7 @@ spritesheet collectibles
 
     sprite ammo
     {
-        bounds = 32,0,16,16
+        bounds = 0,32,16,16
 
         animation idle
         {
@@ -53,6 +53,27 @@ spritesheet collectibles
 
             loop=true
             framerate = 14
+        }
+    }
+
+    sprite extra_life
+    {
+        bounds = 0,48,16,16
+
+        animation idle
+        {
+            frame = 0,48,16,16
+            frame = 16,48,16,16
+            frame = 32,48,16,16
+            frame = 48,48,16,16
+
+            frame = 0,64,16,16
+            frame = 16,64,16,16
+            frame = 32,64,16,16
+            frame = 48,64,16,16
+
+            loop=true
+            framerate = 18
         }
     }
 }

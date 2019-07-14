@@ -43,7 +43,7 @@ Copyright 2019 Matt Marchant
 namespace
 {
     sf::Clock delayClock;
-    const sf::Time delayTime = sf::seconds(1.f);
+    const sf::Time delayTime = sf::seconds(2.f);
 
     const std::array<sf::Vector2f, 2u> selection =
     {
@@ -135,7 +135,7 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
     //slight delay before accepting input
     if (delayClock.getElapsedTime() > delayTime)
     {
-        if (evt.type == sf::Event::KeyReleased)
+        if (evt.type == sf::Event::KeyPressed)
         {
             switch (evt.key.code)
             {
@@ -152,7 +152,7 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
                 break;
             }
         }
-        else if (evt.type == sf::Event::JoystickButtonReleased
+        else if (evt.type == sf::Event::JoystickButtonPressed
             && evt.joystickButton.joystickId == 0)
         {
             if (evt.joystickButton.button == 0)
