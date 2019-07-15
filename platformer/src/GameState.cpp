@@ -78,7 +78,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
-    sd.nextMap = "gb02.tmx";
+    //sd.nextMap = "gb02.tmx";
     initScene();
     loadResources();
     buildWorld();

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="199">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="199">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -11,6 +11,11 @@
  <layer id="2" name="terrain" width="120" height="24">
   <data encoding="base64" compression="zlib">
    eJzVWUlvVDEMDggQUJa2qsrSkZiyVUJlKe0FTiMOLCcERyTOwImlPTEF/jqx+qyxPLZjJ2E0fNKnDu/lOY6/2FlYSymtNfJK5nrm1Q62Sv3U9oE+LsLPSHxaxlT6Ht7dT+1YzZxmnutgq9RPTR+j4dvDdBLnf+0nx6rRb+2Y+PdbAuFdL30XEbdWfTF//xd972TeLTyzvod3Fw2uOHxHO9G4XQj2AbiUeTnQHtGqL/paE5uUfPpey7yeeSPz5vDuUeZj1p4/K+m7Tjhl/950+g9xh3ofif2G0cdOwA4CNFgRfgOovlCjo/reyhwT7iZ/bABWfFCf22mWm/eGd88yn7P2/Jk15+maRPlgGMc2a38q8+zA0/aQVOwNfzeGvnmcRkOb6LqxQWzR34he9Xk02J+kWM3bUp6jvg/TLDefBH2ybI8Fcl0RMFdwv1ZTJwFUXy1/NX8tlPTFHIrWGQ7U91BhJK8PUlzfHcISavZXNWug5Iulr4Vfmb8z/wj2LH29kNZanpeWvhOhvQXQ4Eya1UWrNu4JLNm29OXrmBdcA8lOrb4SwP6L1EdfTbtNR5uaPAYN+PnVyh96/pH0pvkNuYj68pzfSeU4abnEgXbeZb4f/nr1fVp4j/aprWXQd5J86zPW55pzKj/vSnpb5yOaEy2Q9iNgGzWp2S8DsJaCrWma19ey+yrzdeYb9hz3yrBHxn0mcFtoU0O+t6k980mgWgNAX9xTSvto4CTVn/sQUjx2FfuRPkDHj2n+PIfzybJT2sO11ADpLonHXsN+Otl37bPfUeA5RDoXWdT21hakMVo5oPXBazXNNaovPq/xFdGib2/QvZS31qG+9E4DxyPdi5Wg1TsNLXOcAs8rpbU86h/MkZb50RvS2mppjvqO03zeSPdiywqq7ySV67x37ljz7FPmZ4VfnPZ7oHRWwmf87lO6F1sUomsN6KvV+t75h7q+TPJeBXjUuc8WoL7S3WcJ0XrXiq+Z3zvai/hf0pWuccuob8vdZxSg0zdGTTfaFmL71vFNC7S6y3XVzhoRfQ+Cvklx8xCwKH3BRykHjjM/CPwptEWC1r01/mH052VL/lp7YysWFiNzoSWeqK0090Hf8wJxTPz/LWs09tRjqq/Wp0df7/0/RSk/MS+4X5qfh+yvh8cNPkp5i74dK/1pc5b63DOPe+Qv+FOzr67NzxrSOUFjqdVRTz0tzZuIvlJMe9Qbj74tee2NXW0frX5rdZTX05JtXjNa9bX8tWLK6dFXolQD+ZiPKmNX6qd17tFvavX16ODV1xoDf1fyl5PqG1m3POyhbw3/AgzB0dc=
+  </data>
+ </layer>
+ <layer id="5" name="near detail" width="120" height="24">
+  <data encoding="base64" compression="zlib">
+   eJzt2dEJgDAMQEEncxRdJW7ur4J+iNU05W6A8AqlFDJNwIii+PwvbNkBdGnODnhgaTSn0pnvrNkBwElkBwDpIjsADvwVAQDG4W9Xy5s9TLSKuFBxP1SxmX+5I/9rtadrLbIDOhPZAQPy3gDQsx0vdgjc
   </data>
  </layer>
  <objectgroup id="3" name="objects">
