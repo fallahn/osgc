@@ -9,7 +9,8 @@ Objects have specific properties which define their behaviour. For example colle
 
   * 0 is a coin
   * 1 is a shield
-  * 3 is ammo
+  * 2 is ammo
+  * 3 is extra life
 
 Enemy objects also have an ID property. See the existing maps for further information (as these are likely to change with updates).
 

@@ -81,4 +81,12 @@ namespace GameConst
             sf::Color(33,182,251), 
         };
     }
+
+    namespace CollectibleID
+    {
+        enum
+        {
+            Coin, Shield, Ammo, Life
+        };
+    }
 }

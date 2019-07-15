@@ -73,7 +73,7 @@ spritesheet collectibles
             frame = 48,64,16,16
 
             loop=true
-            framerate = 18
+            framerate = 12
         }
     }
 }

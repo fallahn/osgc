@@ -317,6 +317,7 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Coin] = spriteSheet.getSprite("coin");
     m_sprites[SpriteID::GearBoy::Shield] = spriteSheet.getSprite("shield");
     m_sprites[SpriteID::GearBoy::Ammo] = spriteSheet.getSprite("ammo");
+    m_sprites[SpriteID::GearBoy::ExtraLife] = spriteSheet.getSprite("extra_life");
 
     spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/shield.spt", m_resources);
     m_sprites[SpriteID::GearBoy::ShieldAvatar] = spriteSheet.getSprite("shield");
@@ -569,14 +570,20 @@ void GameState::buildWorld()
                     switch (shape.ID)
                     {
                     default:
-                    case 0:
+                    case GameConst::CollectibleID::Coin:
                         spriteID = SpriteID::GearBoy::Coin;
                         break;
-                    case 1:
+                    case GameConst::CollectibleID::Shield:
                         spriteID = SpriteID::GearBoy::Shield;
                         break;
-                    case 2:
+                    case GameConst::CollectibleID::Ammo:
                         spriteID = SpriteID::GearBoy::Ammo;
+                        break;
+                    case GameConst::CollectibleID::Life:
+                        spriteID = SpriteID::GearBoy::ExtraLife;
+                        entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Shield];
+                        entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.x = entity.getComponent<CollisionBody>().shapes[0].aabb.width / 2.f;
+                        entity.getComponent<xy::ParticleEmitter>().start();
                         break;
                     }
 
@@ -586,6 +593,7 @@ void GameState::buildWorld()
                     cEnt.addComponent<xy::Sprite>() = m_sprites[spriteID];
                     cEnt.addComponent<xy::SpriteAnimation>().play(0);
                     cEnt.addComponent<BobAnimation>().parent = entity;
+
                     entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
                 }
                     break;
@@ -762,7 +770,7 @@ void GameState::buildUI()
     entity.addComponent<xy::SpriteAnimation>().play(m_playerAnimations[AnimID::Player::Idle]);
 
     entity = createText(std::to_string(m_sharedData.inventory.lives));
-    entity.getComponent<xy::Transform>().setPosition(90.f, GameConst::UI::TopRow);
+    entity.getComponent<xy::Transform>().setPosition(102.f, GameConst::UI::TopRow);
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::LivesText;
 

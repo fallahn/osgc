@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "EnemySystem.hpp"
 #include "SharedStateData.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -457,15 +458,18 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     switch (otherBody.shapes[0].ID)
                     {
                     default:
-                    case 0:
+                    case GameConst::CollectibleID::Coin:
                         msg->type = PlayerEvent::GotCoin;
                         break;
-                    case 1:
+                    case GameConst::CollectibleID::Shield:
                         msg->type = PlayerEvent::GotShield;
                         player.hasShield = true;
                         break;
-                    case 2:
+                    case GameConst::CollectibleID::Ammo:
                         msg->type = PlayerEvent::GotAmmo;
+                        break;
+                    case GameConst::CollectibleID::Life:
+                        msg->type = PlayerEvent::GotLife;
                         break;
                     }
 
