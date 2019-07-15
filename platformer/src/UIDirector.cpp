@@ -33,7 +33,8 @@ Copyright 2019 Matt Marchant
 
 UIDirector::UIDirector(SharedData& sd, const sf::Font& font)
     : m_sharedData  (sd),
-    m_font          (font)
+    m_font          (font),
+    m_dialogueShown (false)
 {
     sd.roundTime = GameConst::RoundTime;
 }
@@ -131,6 +132,27 @@ void UIDirector::handleMessage(const xy::Message& msg)
             break;
         }
     }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Pushed)
+        {
+            if (data.id == StateID::Dialogue || data.id == StateID::Pause)
+            {
+                //not necessarily a dialogue, but any pushed
+                //state should have the same effect
+                m_dialogueShown = true;
+            }
+        }
+        else if (data.type == xy::Message::StateEvent::Popped)
+        {
+            if (data.id == StateID::Dialogue || data.id == StateID::Pause)
+            {
+                m_dialogueShown = false;
+                m_roundClock.restart();
+            }
+        }
+    }
 }
 
 void UIDirector::process(float)
@@ -141,7 +163,8 @@ void UIDirector::process(float)
 //private
 void UIDirector::updateTimer()
 {
-    if (m_roundClock.getElapsedTime() > sf::seconds(1.f))
+    if (m_roundClock.getElapsedTime() > sf::seconds(1.f)
+        && !m_dialogueShown)
     {
         m_roundClock.restart();
         

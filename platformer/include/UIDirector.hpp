@@ -44,6 +44,7 @@ private:
     const sf::Font& m_font;
 
     sf::Clock m_roundClock;
+    bool m_dialogueShown;
 
     void updateTimer();
     void updateScore();
