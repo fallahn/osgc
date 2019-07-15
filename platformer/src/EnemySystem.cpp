@@ -100,6 +100,9 @@ void EnemySystem::process(float dt)
             case Enemy::Orb:
                 processOrb(entity, dt);
                 break;
+            case Enemy::Spitball:
+                processSpitball(entity, dt);
+                break;
             }
         }
         else
@@ -276,6 +279,59 @@ void EnemySystem::processOrb(xy::Entity entity, float dt)
     tx.setPosition(pos);
 }
 
+void EnemySystem::processSpitball(xy::Entity entity, float dt)
+{
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto& enemy = entity.getComponent<Enemy>();
+
+
+    if (tx.getPosition().y < enemy.start.y)
+    {
+        //currently moving
+        tx.move(enemy.velocity * dt);
+        enemy.velocity.y += Gravity * dt;
+
+        auto scale = tx.getScale();
+        if (enemy.velocity.y < 0)
+        {
+            scale.y = -scale.x;
+        }
+        else
+        {
+            scale.y = scale.x;
+        }
+        tx.setScale(scale);
+    }
+    else
+    {
+        //pause for some time
+        enemy.stateTime -= dt;
+        if (enemy.stateTime < 0)
+        {
+            enemy.stateTime = 1.5f;
+            enemy.velocity = { 0.f, -(1000.f + xy::Util::Random::value(0.f, 100.f)) };
+
+            tx.setPosition(enemy.start);
+        }
+    }
+}
+
+void EnemySystem::processRocket(xy::Entity entity, float dt)
+{
+    auto& enemy = entity.getComponent<Enemy>();
+    auto& tx = entity.getComponent<xy::Transform>();
+    tx.move(enemy.velocity * dt);
+
+    auto maxDist = xy::Util::Vector::lengthSquared(enemy.end - enemy.start);
+    auto currDist = xy::Util::Vector::lengthSquared(tx.getPosition() - enemy.start);
+
+    if (currDist > maxDist)
+    {
+        //TODO raise a message
+        getScene()->destroyEntity(entity);
+    }
+}
+
 void EnemySystem::onEntityAdded(xy::Entity entity)
 {
     auto& enemy = entity.getComponent<Enemy>();
@@ -294,8 +350,15 @@ void EnemySystem::onEntityAdded(xy::Entity entity)
     case Enemy::Walker:
         enemy.velocity.x *= Enemy::WalkerVelocity;
         break;
+    case Enemy::Rocket:
+        enemy.velocity = enemy.end - enemy.start;
+        enemy.velocity = xy::Util::Vector::normalise(enemy.velocity);
+        enemy.velocity *= Enemy::RocketVelocity;
+        entity.getComponent<xy::Transform>().setRotation(xy::Util::Vector::rotation(enemy.velocity));
+        break;
     case Enemy::Egg:
-        enemy.velocity.x = 0.f; //TODO should be that of bird which dropped it
+    case Enemy::Spitball:
+        enemy.velocity.x = 0.f;
         break;
     case Enemy::Orb:
         enemy.velocity.y = enemy.velocity.x;

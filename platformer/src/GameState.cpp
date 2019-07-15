@@ -664,6 +664,13 @@ void GameState::loadEnemies()
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Orb];
             entity.addComponent<Enemy>().type = Enemy::Orb;
             break;
+        case Enemy::Spitball:
+            entity.addComponent<Enemy>().type = Enemy::Spitball;
+            break;
+        case Enemy::Rocket:
+            entity.addComponent<Enemy>().type = Enemy::Rocket;
+            //TODO add spawn position to director
+            break;
         }
         entity.getComponent<Enemy>().start = path.first * scale;
         entity.getComponent<Enemy>().end = path.second * scale;
