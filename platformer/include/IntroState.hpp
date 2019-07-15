@@ -48,6 +48,16 @@ private:
     std::vector<std::string> m_lines;
     std::size_t m_currentLine;
 
+    struct Action final
+    {
+        std::function<void(float)> update;
+        std::function<void()> finish;
+        bool finished = false;
+    };
+    std::vector<Action> m_actions;
+    std::vector<float> m_actionTimes;
+    std::size_t m_currentAction;
+
     void build();
     void nextLine();
 };

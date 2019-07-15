@@ -78,7 +78,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
-    //sd.nextMap = "gb02.tmx";
+    sd.nextMap = "gb02.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -673,7 +673,7 @@ void GameState::loadEnemies()
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
-        bounds.left -= bounds.width / 2.f;
+        //bounds.left -= bounds.width / 2.f;
         //bounds.top -= bounds.height / 2.f;
 
         auto& collision = entity.addComponent<CollisionBody>();
@@ -682,7 +682,7 @@ void GameState::loadEnemies()
         collision.shapes[0].collisionFlags = CollisionShape::Player;
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
-        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy | CollisionShape::Spikes);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(collision.shapes[0].type);
     }
 }
 

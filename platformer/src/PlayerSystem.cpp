@@ -79,6 +79,10 @@ void PlayerSystem::process(float dt)
             (player.state == Player::Falling || player.state == Player::Running))
         {
             kill(entity);
+#ifdef XY_DEBUG
+            entity.getComponent<Player>().stateTime = 0.f;
+            entity.getComponent<Player>().state = Player::Dead;
+#endif
         }
 
 
@@ -455,6 +459,12 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                 }
                 case CollisionShape::Collectible:
                 {
+                    if (otherBody.shapes[0].ID == GameConst::CollectibleID::Shield
+                        && player.hasShield)
+                    {
+                        break;
+                    }
+
                     auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
                     msg->entity = entity;
 

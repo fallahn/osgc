@@ -22,16 +22,20 @@ Copyright 2019 Matt Marchant
 #include "ResourceIDs.hpp"
 
 #include <xyginext/ecs/components/Text.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
@@ -48,13 +52,15 @@ namespace
     const sf::Time textTime = sf::seconds(0.05f);
 
     xy::Entity textEntity;
+    xy::Entity spriteEntity;
 }
 
 IntroState::IntroState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_scene         (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
-    m_currentLine   (0)
+    m_currentLine   (0),
+    m_currentAction (0)
 {
     build();
 
@@ -100,6 +106,8 @@ void IntroState::handleMessage(const xy::Message& msg)
 
 bool IntroState::update(float dt)
 {
+    m_actions[m_currentAction].update(dt);
+
     m_scene.update(dt);
     return false;
 }
@@ -116,6 +124,7 @@ void IntroState::build()
     auto& mb = getContext().appInstance.getMessageBus();
     m_scene.addSystem<xy::CallbackSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
+    m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
 
     std::ifstream file(xy::FileSystem::getResourcePath() + "assets/dialogue/intro.txt");
@@ -137,6 +146,7 @@ void IntroState::build()
 
             textEntity = m_scene.createEntity();
             textEntity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+            textEntity.getComponent<xy::Transform>().move(0.f, 480.f);
             textEntity.addComponent<xy::Drawable>();
             textEntity.addComponent<xy::Text>(font).setFillColour(sf::Color::White);
             textEntity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::SmallTextSize);
@@ -155,6 +165,217 @@ void IntroState::build()
                 }
 
                 entity.getComponent<xy::Text>().setString(m_lines[m_currentLine].substr(0, charIndex));
+            };
+
+            //sprite
+            xy::SpriteSheet spriteSheet;
+            spriteSheet.loadFromFile("assets/sprites/intro.spt", m_resources);
+
+            spriteEntity = m_scene.createEntity();
+            spriteEntity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+            spriteEntity.addComponent<xy::Drawable>();
+            spriteEntity.addComponent<xy::Sprite>() = spriteSheet.getSprite("background");
+            spriteEntity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+            auto bounds = spriteEntity.getComponent<xy::Sprite>().getTextureBounds();
+            spriteEntity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+            spriteEntity.getComponent<xy::Transform>().setScale(4.f, 4.f);
+
+            auto screwDriverEnt = m_scene.createEntity();
+            screwDriverEnt.addComponent<xy::Transform>().setPosition(600.f, -512.f);
+            screwDriverEnt.addComponent<xy::Drawable>().setDepth(1);
+            screwDriverEnt.addComponent<xy::Sprite>() = spriteSheet.getSprite("screwdriver");
+            screwDriverEnt.getComponent<xy::Transform>().setScale(4.f, 4.f);
+
+            //action list
+            m_actions.resize(7);
+            m_actionTimes = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
+            //fades in sprite
+            auto& actionOne = m_actions[0];
+            actionOne.update = [&](float dt)
+            {
+                if (!actionOne.finished)
+                {
+                    float& currTime = m_actionTimes[0];
+
+                    //fade in
+                    currTime = std::min(1.f, currTime + dt);
+                    auto c = sf::Color::White;
+                    c.a = static_cast<sf::Uint8>(255.f * currTime);
+                    spriteEntity.getComponent<xy::Sprite>().setColour(c);
+
+                    if (currTime == 1)
+                    {
+                        actionOne.finished = true;
+                    }
+                }
+            };
+
+            actionOne.finish = [&]()
+            {
+                spriteEntity.getComponent<xy::Sprite>().setColour(sf::Color::White);
+                actionOne.finished = true;
+            };
+
+            //slide to next screen
+            bounds.left += bounds.width;
+            auto& actionTwo = m_actions[1];
+            actionTwo.update = [&, bounds](float dt)
+            {
+                if (!actionTwo.finished)
+                {
+                    auto currBounds = spriteEntity.getComponent<xy::Sprite>().getTextureRect();
+                    float move = bounds.left - currBounds.left;
+                    
+                    if (move < 3)
+                    {
+                        spriteEntity.getComponent<xy::Sprite>().setTextureRect(bounds);
+                        actionTwo.finished = true;
+                    }
+                    else
+                    {
+                    currBounds.left += move * dt * 4.f;
+                    spriteEntity.getComponent<xy::Sprite>().setTextureRect(currBounds);
+                    }
+                }
+            };
+
+            actionTwo.finish = [&, bounds]
+            {
+                spriteEntity.getComponent<xy::Sprite>().setTextureRect(bounds);
+                actionTwo.finished = true;
+            };
+
+            //slide down
+            bounds.top += bounds.height;
+            auto& actionThree = m_actions[2];
+            actionThree.update = [&, bounds](float dt)
+            {
+                if (!actionThree.finished)
+                {
+                    auto currBounds = spriteEntity.getComponent<xy::Sprite>().getTextureRect();
+                    float move = bounds.top - currBounds.top;
+
+                    if (move < 3)
+                    {
+                        spriteEntity.getComponent<xy::Sprite>().setTextureRect(bounds);
+                        actionThree.finished = true;
+                    }
+                    else
+                    {
+                        currBounds.top += move * dt * 4.f;
+                        spriteEntity.getComponent<xy::Sprite>().setTextureRect(currBounds);
+                    }
+                }
+            };
+
+            actionThree.finish = [&, bounds]
+            {
+                spriteEntity.getComponent<xy::Sprite>().setTextureRect(bounds);
+                actionThree.finished = true;
+            };
+
+            //slide back
+            bounds.left -= bounds.width;
+            auto& actionFour = m_actions[3];
+            actionFour.update = [&, bounds](float dt)
+            {
+                if (!actionFour.finished)
+                {
+                    auto currBounds = spriteEntity.getComponent<xy::Sprite>().getTextureRect();
+                    float move = bounds.left - currBounds.left;
+
+                    if (move > -3)
+                    {
+                        spriteEntity.getComponent<xy::Sprite>().setTextureRect(bounds);
+                        actionFour.finished = true;
+                    }
+                    else
+                    {
+                        currBounds.left += move * dt * 4.f;
+                        spriteEntity.getComponent<xy::Sprite>().setTextureRect(currBounds);
+                    }
+                }
+            };
+
+            actionFour.finish = [&, bounds]
+            {
+                spriteEntity.getComponent<xy::Sprite>().setTextureRect(bounds);
+                actionFour.finished = true;
+            };
+
+            //insert screwdriver
+            auto& actionFive = m_actions[4];
+            actionFive.update =
+                [&, screwDriverEnt](float dt) mutable
+            {
+                if (!actionFive.finished &&
+                    screwDriverEnt.getComponent<xy::Transform>().getPosition().y < 0)
+                {
+                    screwDriverEnt.getComponent<xy::Transform>().move(0.f, 220.f * dt);
+                }
+                else
+                {
+                    actionFive.finished = true;
+                }
+            };
+            actionFive.finish =
+                [&, screwDriverEnt]() mutable
+            {
+                auto pos = screwDriverEnt.getComponent<xy::Transform>().getPosition();
+                pos.y = 0.f;
+                screwDriverEnt.getComponent<xy::Transform>().setPosition(pos);
+                actionFive.finished = true;
+            };
+
+            //elec shock
+            auto& actionSix = m_actions[5];
+            actionSix.update = [&](float dt)
+            {
+                if (!actionSix.finished)
+                {
+                    //TODO display shock lines
+
+                    auto pos = xy::DefaultSceneSize / 2.f;
+                    pos.x += xy::Util::Random::value(-5.f, 5.f);
+                    pos.y += xy::Util::Random::value(-5.f, 5.f);
+                    spriteEntity.getComponent<xy::Transform>().setPosition(pos);
+
+                    float& currTime = m_actionTimes[5];
+                    currTime += dt;
+                    if (currTime > 2.5f)
+                    {
+                        actionSix.finish();
+                    }
+                }
+            };
+
+            actionSix.finish = 
+                [&, screwDriverEnt]() mutable
+            {
+                screwDriverEnt.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+                spriteEntity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+                textEntity.getComponent<xy::Text>().setFillColour(sf::Color::Transparent);
+                actionSix.finished = true;
+
+                m_currentAction++;
+            };
+
+            //pause
+            auto& actionSeven = m_actions[6];
+            actionSeven.update = [&](float dt)
+            {
+                float& currTime = m_actionTimes[6];
+                currTime += dt;
+                if (currTime > 3.f)
+                {
+                    requestStackClear();
+                    requestStackPush(StateID::Game);
+                }
+            };
+            actionSeven.finish = [&]()
+            {
+                requestStackClear();
+                requestStackPush(StateID::Game);
             };
         }
         else
@@ -181,18 +402,35 @@ void IntroState::nextLine()
         if (charIndex < m_lines[m_currentLine].size())
         {
             charIndex = m_lines[m_currentLine].size();
+
+            m_actions[m_currentAction].finish();
         }
         else
         {
             charIndex = 0;
             m_currentLine++;
 
-            //TODO sync images
+            //sync images
+            if (m_currentAction < m_actions.size() - 1)
+            {
+                if (!m_actions[m_currentAction].finished)
+                {
+                    m_actions[m_currentAction].finish();
+                }
+
+                m_currentAction++;
+            }
         }
     }
     else
     {
-        requestStackClear();
-        requestStackPush(StateID::Game);
+        if (m_currentAction < m_actions.size() - 1)
+        {
+            m_currentAction++;
+        }
+        else
+        {
+            m_actions[m_currentAction].finish();
+        }
     }
 }

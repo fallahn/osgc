@@ -59,8 +59,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
 #ifdef XY_DEBUG
     //return StateID::Intro;
-    //return StateID::Game;
-    return StateID::MainMenu;
+    return StateID::Game;
+    //return StateID::MainMenu;
 #else
     return StateID::MainMenu;
 #endif //XY_DEBUG

@@ -1,0 +1,14 @@
+spritesheet intro
+{
+    src="assets/images/intro.png"
+
+    sprite background
+    {
+        bounds = 0, 0, 320, 240
+    }
+
+    sprite screwdriver
+    {
+        bounds = 640, 0, 16, 128
+    }
+}
