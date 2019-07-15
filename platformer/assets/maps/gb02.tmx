@@ -292,43 +292,43 @@
   </object>
   <object id="122" name="orb" type="enemy" x="1032" y="328">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,92"/>
   </object>
   <object id="123" name="orb" type="enemy" x="1800" y="284">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,92"/>
   </object>
   <object id="124" name="orb" type="enemy" x="2120" y="344">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,48"/>
   </object>
   <object id="125" name="orb" type="enemy" x="2216" y="344">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,48"/>
   </object>
   <object id="126" name="orb" type="enemy" x="2536" y="312">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,80"/>
   </object>
   <object id="127" name="orb" type="enemy" x="2632" y="344">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,48"/>
   </object>
   <object id="128" name="orb" type="enemy" x="936" y="344">
    <properties>
-    <property name="id" type="int" value="3"/>
+    <property name="id" type="int" value="4"/>
    </properties>
    <polyline points="0,0 0,76"/>
   </object>

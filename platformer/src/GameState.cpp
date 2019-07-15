@@ -71,13 +71,14 @@ namespace
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
     m_tilemapScene  (ctx.appInstance.getMessageBus()),
-    m_gameScene     (ctx.appInstance.getMessageBus()),
+    m_gameScene     (ctx.appInstance.getMessageBus(), 1024),
     m_uiScene       (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
     m_playerInput   (sd.inputBinding)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
+    sd.nextMap = "gb02.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -325,6 +326,7 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Walker] = spriteSheet.getSprite("walker");
     m_sprites[SpriteID::GearBoy::Crawler] = spriteSheet.getSprite("crawler");
     m_sprites[SpriteID::GearBoy::Bomb] = spriteSheet.getSprite("bomb");
+    m_sprites[SpriteID::GearBoy::Orb] = spriteSheet.getSprite("orb");
 
     spriteSheet.loadFromFile("assets/sprites/crack.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Crack] = spriteSheet.getSprite("crack");
@@ -638,17 +640,21 @@ void GameState::loadEnemies()
         switch (id)
         {
         default:
-        case 0:
+        case Enemy::Crawler:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crawler];
             entity.addComponent<Enemy>().type = Enemy::Crawler;
             break;
-        case 1:
+        case Enemy::Bird:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Bird];
             entity.addComponent<Enemy>().type = Enemy::Bird;
             break;
-        case 2:
+        case Enemy::Walker:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Walker];
             entity.addComponent<Enemy>().type = Enemy::Walker;
+            break;
+        case Enemy::Orb:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Orb];
+            entity.addComponent<Enemy>().type = Enemy::Orb;
             break;
         }
         entity.getComponent<Enemy>().start = path.first * scale;
@@ -664,11 +670,11 @@ void GameState::loadEnemies()
 
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = bounds;
-        collision.shapes[0].type = CollisionShape::Enemy;
+        collision.shapes[0].type = (id == Enemy::Orb) ? CollisionShape::Spikes : CollisionShape::Enemy;
         collision.shapes[0].collisionFlags = CollisionShape::Player;
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
-        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Enemy | CollisionShape::Spikes);
     }
 }
 

@@ -103,6 +103,7 @@ namespace SpriteID
             Bird,
             Walker,
             Bomb,
+            Orb,
 
             Crack,
 

@@ -29,7 +29,7 @@ struct Enemy final
 
     enum
     {
-        Crawler, Bird, Walker, Egg
+        Crawler, Bird, Walker, Egg, Orb
     }type = Crawler;
 
     sf::Vector2f velocity;
@@ -68,6 +68,7 @@ private:
     void processBird(xy::Entity, float);
     void processWalker(xy::Entity, float);
     void processEgg(xy::Entity, float);
+    void processOrb(xy::Entity, float);
     void processDying(xy::Entity, float);
 
     void onEntityAdded(xy::Entity) override;

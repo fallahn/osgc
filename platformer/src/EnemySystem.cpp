@@ -25,10 +25,16 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/util/Vector.hpp>
 
 namespace
 {
-    const float Gravity = 5000.f;
+    const float Gravity = 4000.f;
+
+    float easeInOutQuad(float t)
+    {
+        return t < 0.5f ? 2.f * t * t : t * (4.f - 2.f * t) - 1.f;
+    }
 }
 
 EnemySystem::EnemySystem(xy::MessageBus& mb)
@@ -90,6 +96,10 @@ void EnemySystem::process(float dt)
                 break;
             case Enemy::Egg:
                 processEgg(entity, dt);
+                break;
+            case Enemy::Orb:
+                processOrb(entity, dt);
+                break;
             }
         }
         else
@@ -236,6 +246,36 @@ void EnemySystem::processEgg(xy::Entity entity, float dt)
     }
 }
 
+void EnemySystem::processOrb(xy::Entity entity, float dt)
+{
+    auto& enemy = entity.getComponent<Enemy>();
+    auto& tx = entity.getComponent<xy::Transform>();
+
+    if (enemy.velocity.y > 0)
+    {
+        enemy.stateTime = std::min(1.f, enemy.stateTime + dt);
+        if (enemy.stateTime == 1)
+        {
+            enemy.velocity.y = -enemy.velocity.y;
+        }
+    }
+    else
+    {
+        enemy.stateTime = std::max(0.f, enemy.stateTime - dt);
+        if (enemy.stateTime == 0)
+        {
+            enemy.velocity.y = -enemy.velocity.y;
+        }
+    }
+
+    float pathDist = enemy.end.y - enemy.start.y;
+    float pathPos = easeInOutQuad(enemy.stateTime) * pathDist;
+
+    auto pos = tx.getPosition();
+    pos.y = enemy.start.y + pathPos;
+    tx.setPosition(pos);
+}
+
 void EnemySystem::onEntityAdded(xy::Entity entity)
 {
     auto& enemy = entity.getComponent<Enemy>();
@@ -256,6 +296,11 @@ void EnemySystem::onEntityAdded(xy::Entity entity)
         break;
     case Enemy::Egg:
         enemy.velocity.x = 0.f; //TODO should be that of bird which dropped it
+        break;
+    case Enemy::Orb:
+        enemy.velocity.y = enemy.velocity.x;
+        enemy.velocity.x = 0.f;
+        enemy.stateTime = 0.5f;
         break;
     }
 }

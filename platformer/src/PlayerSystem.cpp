@@ -527,6 +527,10 @@ void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
 
 void PlayerSystem::kill(xy::Entity entity)
 {
+#ifdef XY_DEBUG
+    return;
+#endif
+
     auto& player = entity.getComponent<Player>();
 
     if (player.hasShield)
