@@ -24,7 +24,7 @@ Maps must have exactly one exit. Exit properties are:
 
 Themes are stored in a directory matching the theme name within the assets/images/ directory and assets/sprites/ directory. Currently `gearboy` and `mes` themes exist. Adding a new theme is just a case of creating a new directory with a new theme name, alongside the gearboy and mes directories. The assets themselves must have the same names as the other themes, eg `checkpoint.spt` or `player.spt`. Themes are used to replace sprites for the player, enemies, collectibles and other details.
 
-Dialogue objects trigger an on-screen dialogue box used to expose story lines. They have one property `file` which contains the name of the text file in the dialogue directory to display. These should be used sparingly to not distract from the gameplay, and because they do not pause the level timer. Players are somewhat miffed if they run out of time because they are forced to read pages of text :)
+Dialogue objects trigger an on-screen dialogue box used to expose story lines. They have one property `file` which contains the name of the text file in the dialogue directory to display. These should be used sparingly to not distract from the gameplay too much. It can be jarring to have the flow of gameplay interrupted by an unexpected tex box.
 
 All objects should be rectangular with the exception of enemies. Enemies use polyline objects which mark the start and end of their travel path. If a polyline with more than two points is drawn then the enemy will move in a straight line between the first and last point.
 

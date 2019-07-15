@@ -38,6 +38,7 @@ namespace StateID
         Transition,
         Error,
         Dialogue,
-        Summary
+        Summary,
+        Intro
     };
 }

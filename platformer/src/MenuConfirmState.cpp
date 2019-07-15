@@ -81,19 +81,20 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
             auto& window = getContext().renderWindow;
             m_sharedData.transitionContext.texture.create(window.getSize().x, window.getSize().y);
             m_sharedData.transitionContext.texture.update(window);
-            m_sharedData.transitionContext.nextState = StateID::Game; //TODO this might change depending on which part of the game we're loading
-
+            
             switch (m_sharedData.menuID)
             {
             default: break;
             case MenuID::NewGame:
                 m_sharedData.reset();
                 m_sharedData.saveProgress();
+                m_sharedData.transitionContext.nextState = StateID::Intro;
                 requestStackPush(StateID::Transition);
                 break;
             case MenuID::Continue:
             case MenuID::GameOver:
                 m_sharedData.loadProgress();
+                m_sharedData.transitionContext.nextState = StateID::Game;
                 requestStackPush(StateID::Transition);
                 break;
             }

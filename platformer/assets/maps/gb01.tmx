@@ -178,12 +178,12 @@
   </object>
   <object id="106" type="dialogue" x="64" y="209" width="16" height="94">
    <properties>
-    <property name="file" value="intro.txt"/>
+    <property name="file" value="gb01.txt"/>
    </properties>
   </object>
   <object id="109" type="dialogue" x="160" y="209" width="16" height="94">
    <properties>
-    <property name="file" value="intro_2.txt"/>
+    <property name="file" value="gb02.txt"/>
    </properties>
   </object>
   <object id="110" type="solid" x="336" y="128" width="48" height="16"/>
