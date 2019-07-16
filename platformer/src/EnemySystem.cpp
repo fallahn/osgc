@@ -176,10 +176,18 @@ void EnemySystem::processBird(xy::Entity entity, float dt)
         enemy.stateTime = 0.f;
         enemy.targetTime = xy::Util::Random::value(6.f, 8.f);
 
-        auto* msg = postMessage<EnemyEvent>(MessageID::EnemyMessage);
-        msg->type = EnemyEvent::SpawnEgg;
-        msg->entity = entity;
+        //only drop egg is bird is visible
+        auto pos = getScene()->getActiveCamera().getComponent<xy::Transform>().getPosition();
+        pos -= xy::DefaultSceneSize / 2.f;
+        
+        sf::FloatRect view(pos, xy::DefaultSceneSize);
 
+        if (view.contains(tx.getPosition()))
+        {
+            auto* msg = postMessage<EnemyEvent>(MessageID::EnemyMessage);
+            msg->type = EnemyEvent::SpawnEgg;
+            msg->entity = entity;
+        }
     }
 }
 

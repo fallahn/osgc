@@ -164,14 +164,17 @@ bool PauseState::handleEvent(const sf::Event& evt)
             default: break;
             case sf::Joystick::Y:
             case sf::Joystick::PovY:
+                if (std::abs(evt.joystickMove.position > 20))
+                {
 #ifdef _WIN32
-                //POVY is inverted on windows
-                bool prev = ((evt.joystickMove.position < 0 && evt.joystickMove.axis == sf::Joystick::Y)
-                    || (evt.joystickMove.position > 0 && evt.joystickMove.axis == sf::Joystick::PovY));
-                selectNext(prev);
+                    //POVY is inverted on windows
+                    bool prev = ((evt.joystickMove.position < 0 && evt.joystickMove.axis == sf::Joystick::Y)
+                        || (evt.joystickMove.position > 0 && evt.joystickMove.axis == sf::Joystick::PovY));
+                    selectNext(prev);
 #else
-                selectNext((evt.joystickMove.position < 0));
+                    selectNext((evt.joystickMove.position < 0));
 #endif //_WIN32
+                }
                 break;
             }
         }
