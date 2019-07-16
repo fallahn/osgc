@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="22">
+ <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
+  <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
+ </tileset>
+ <layer id="5" name="far" width="178" height="25">
+  <data encoding="base64" compression="zlib">
+   eJzt2EsOgjAUheEOHXeuY1yCLsKw/9UICQ3Xmz6AKm3t/yVNgXTQhJND1RgAAAAAAAAAAAAANbhO41Z6E8BOOrfDNO6F9gIcpXNLH6M1o1lz62aXa1+e5bPXSXsEUuYcu9zq/Mqe1lmfZ3KMWmztY98acryNLb2BDhztY3KMmtDHbaDT4/b2sVzbe45t4PrbRnHt+50i517Rx/WT70h3jp57Jfs4lGfjeUaOzxN7R6k+tpHxT+Q3K3S+MIY+Lok+zpP6vyLlsowe6d7L6cGcPsanYRmPaTzFPX7H5T72zaSP0YoxvaSI0Hm75nP4G3BxI4U=
+  </data>
+ </layer>
+ <layer id="4" name="Tile Layer 1" width="178" height="25">
+  <data encoding="base64" compression="zlib">
+   eJztW8tuFTEMnSXrbgq0Kx66KwpSWVD4AECFbXW3hW3VfRcFCd0Pr0dqpGDZjh0780jH0pE6M5kk1zl+ZdKjYRiOnihuAL9mxu0C9LBh3dgP88vVEPubtLaJ7edGeLbZZrt1iNDjWnks6eh35bh75lmNjqJtc42I4JZWj2vlcQsdbTzuk8eXgJ8BcynJXDy+Hng/fs3c18rG4+Xw+Ip4PnL7hxKUDVDvH5RzjdZRjeD5c3a+8fj/NeJ4U/KTHh6fZ33g57hfa56KfWAttD7yHvAH8FfZviRSLiK16wWW2i1fI04fJX/Uyh9r17FX0f7+ZK+97VvUrvfSeCzllGsTKUe4ZO5jvf5j2nHtOd+2Fr635PFXwDfAd8V7Xh73JDX7FZJeKV1p26d2Gm7Pyf81+ONzoo+aeVtqwZrcP0q0PM59Lq5Jc05RsUniJzWehttau2oBKv6cDvSaS3Es/aZSPJ/TH3t1S41prdc0toQ5KfHVqr80/oFoJ3G2dO+OaVMDr18vzUN6ruWVNi+T7CGax1KtezvobdQzh2iU6jypdt8T7ak9bHyPahPJQy2/o3n8Mfsb+wGL7rHU7h9zY0+Zi8/NY83cLO8eA54DXgBeEtdjn9bzDNJ3n5NHWPP7HFJ8i8iLS30ku9Dsu0WtuYfHVM6xZB5TfrYkrwCvAW8Ab4nrpD/Mb69I9jHOP3EltwNNbKjhMZ6H5RxNad/NckapR3+c+5yWNeo7wBngPeADcZ30h/ntlZp1ifClpTzFOp/SuyfKOUjz2CnHsshc39Na7VN+AlwAPgO+ENdJf5jfXpmCx9p94xrd5tzaGd+18DjP57Fv8+zNLYHHaX3wGrWQtFaY31H9Wt/x2jsV97V5RL5/PPIrccsaK7ncw3veIs9XPHWCph7S5HhUP3N935TyY80ZHe77Jd4f8dT5U8QtLN7ztxbhahOqJs/nJOnJ+t0NS4RPmVKk/FgTH7XrHRXneuQxV5tQNXmaUykH8e47auLEVL5X6wOp/DjFVU4Pzx7xFHm8y0BdW4WrTaiafE06jBLLt1mLzrj93Sl4bKmFPDg0HHPMv3Lec7UJVZNH6zB6n8x7tqQ23+TWqeZ/FKT1rumvV9TaRQsdSnuBVJzh7ifp9fz8hmUjOtbM6a8eAOVFyTY=
+  </data>
+ </layer>
+ <objectgroup id="6" name="Object Layer 1">
+  <object id="1" type="checkpoint" x="1912" y="16" width="32" height="80">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="2" type="checkpoint" x="1000" y="272" width="32" height="80">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="3" type="checkpoint" x="40" y="336" width="20" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="4" type="exit" x="2616" y="252" width="28" height="48">
+   <properties>
+    <property name="id" type="int" value="1"/>
+    <property name="next_map" value="gb03"/>
+    <property name="next_theme" value="gearboy"/>
+   </properties>
+  </object>
+  <object id="5" name="water" type="fluid" x="208" y="320" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="6" name="lava" type="fluid" x="1760" y="288" width="112" height="32">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="7" name="lava" type="fluid" x="1760" y="288" width="112" height="32">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="8" name="orb" type="enemy" x="2112" y="60">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+   <polyline points="0,0 0,92"/>
+  </object>
+  <object id="9" name="orb" type="enemy" x="224" y="224">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+   <polyline points="0,0 0,72"/>
+  </object>
+  <object id="10" name="bird" type="enemy" x="1468" y="232">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+   <polyline points="0,0 72,0"/>
+  </object>
+  <object id="11" name="bird" type="enemy" x="1468" y="232">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+   <polyline points="0,0 72,0"/>
+  </object>
+  <object id="12" name="life" type="collectible" x="1608" y="328" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="13" name="life" type="collectible" x="2016" y="320" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="14" name="orb" type="enemy" x="2480" y="200">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+   <polyline points="0,0 0,132"/>
+  </object>
+  <object id="15" name="orb" type="enemy" x="2560" y="168">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+   <polyline points="0,0 0,168"/>
+  </object>
+  <object id="16" type="dialogue" x="2512" y="240" width="16" height="112">
+   <properties>
+    <property name="file" value="gb03.txt"/>
+   </properties>
+  </object>
+  <object id="17" type="solid" x="0" y="160" width="208" height="80"/>
+  <object id="18" type="solid" x="0" y="240" width="16" height="160"/>
+  <object id="19" type="solid" x="96" y="304" width="112" height="96"/>
+  <object id="20" type="solid" x="16" y="368" width="80" height="32"/>
+  <object id="21" type="solid" x="80" y="336" width="16" height="32"/>
+ </objectgroup>
+</map>
