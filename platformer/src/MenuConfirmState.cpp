@@ -167,9 +167,8 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
             switch (evt.joystickMove.axis)
             {
             default: break;
-            case sf::Joystick::Y:
             case sf::Joystick::PovY:
-                if (std::abs(evt.joystickMove.position > 20))
+                if (std::abs(evt.joystickMove.position) > 30)
                 {
                     selectNext();
                 }

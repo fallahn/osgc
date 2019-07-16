@@ -61,10 +61,10 @@ namespace
 }
 
 PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State     (ss, ctx),
-    m_scene         (ctx.appInstance.getMessageBus()),
-    m_sharedData    (sd),
-    m_selectedIndex (0)
+    : xy::State         (ss, ctx),
+    m_scene             (ctx.appInstance.getMessageBus()),
+    m_sharedData        (sd),
+    m_selectedIndex     (0)
 {
     build();
 
@@ -162,18 +162,17 @@ bool PauseState::handleEvent(const sf::Event& evt)
             switch (evt.joystickMove.axis)
             {
             default: break;
-            case sf::Joystick::Y:
             case sf::Joystick::PovY:
-                if (std::abs(evt.joystickMove.position > 20))
+                if (std::abs(evt.joystickMove.position) > 20)
                 {
-#ifdef _WIN32
-                    //POVY is inverted on windows
-                    bool prev = ((evt.joystickMove.position < 0 && evt.joystickMove.axis == sf::Joystick::Y)
-                        || (evt.joystickMove.position > 0 && evt.joystickMove.axis == sf::Joystick::PovY));
-                    selectNext(prev);
-#else
-                    selectNext((evt.joystickMove.position < 0));
-#endif //_WIN32
+//#ifdef _WIN32
+//                    //POVY is inverted on windows
+//                    bool prev = ((evt.joystickMove.position > 0 && evt.joystickMove.axis == sf::Joystick::Y)
+//                        || (evt.joystickMove.position < 0 && evt.joystickMove.axis == sf::Joystick::PovY));
+//                    selectNext(prev);
+//#else
+                    selectNext((evt.joystickMove.position > 0));
+//#endif //_WIN32
                 }
                 break;
             }

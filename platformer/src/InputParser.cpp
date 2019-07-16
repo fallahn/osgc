@@ -25,6 +25,11 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const float Deadzone = 30.f;
+
+    float cubicEase(float f)
+    {
+        return f * f * f;
+    }
 }
 
 InputParser::InputParser(const InputBinding& binding)
@@ -138,14 +143,14 @@ void InputParser::handleEvent(const sf::Event& evt)
                 m_currentInput |= InputFlag::Right;
                 m_currentInput &= ~InputFlag::Left;
 
-                m_runningMultiplier = evt.joystickMove.position / 100.f;
+                m_runningMultiplier = cubicEase(evt.joystickMove.position / 100.f);
             }
             else if (evt.joystickMove.position < -Deadzone)
             {
                 m_currentInput |= InputFlag::Left;
                 m_currentInput &= ~InputFlag::Right;
 
-                m_runningMultiplier = evt.joystickMove.position / -100.f;
+                m_runningMultiplier = cubicEase(evt.joystickMove.position / -100.f);
             }
             else
             {
