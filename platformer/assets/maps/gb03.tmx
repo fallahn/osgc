@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="22">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="31">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
  <layer id="5" name="far" width="178" height="25">
   <data encoding="base64" compression="zlib">
-   eJzt2EsOgjAUheEOHXeuY1yCLsKw/9UICQ3Xmz6AKm3t/yVNgXTQhJND1RgAAAAAAAAAAAAANbhO41Z6E8BOOrfDNO6F9gIcpXNLH6M1o1lz62aXa1+e5bPXSXsEUuYcu9zq/Mqe1lmfZ3KMWmztY98acryNLb2BDhztY3KMmtDHbaDT4/b2sVzbe45t4PrbRnHt+50i517Rx/WT70h3jp57Jfs4lGfjeUaOzxN7R6k+tpHxT+Q3K3S+MIY+Lok+zpP6vyLlsowe6d7L6cGcPsanYRmPaTzFPX7H5T72zaSP0YoxvaSI0Hm75nP4G3BxI4U=
+   eJztmUEOgjAQRbtkDWtd4xH0EIb7n0ZIaBwnbSm2MDPlv2TSSohF+/hAca4u/VzDWv1aAFiDewyAReAxaAFLHms/PiCHBo9zx9XgcZ9R4Hzg8T7gsU4seawdeCwHPAYtcITHuMaCs9GQxzWwfOy16dbSwm2u+8FjtOLxWVh4ppP2mHs7zvU4eEx4vA8LHkvDvUUeH8/edTNpj7WfP5P7eutb73XIZ7rtXTBuDY+lr2MlDKw0O7JgwWPvLfeX5jR3fWlLPPaU/DfWPaZ9DY7kvGvR6nNuHof2kfbYCqHfqDGPrXv8Tx7X8viqWHDDEtJ5DPKw4Lnkfd7ePKb7Xt3jPtKvzUT6oecU2koi7THyWDd0jnjm8Paq0DyO+ewC26Q97iL9FknN0VYed4lqCXrNit1fOCefx6l5aG1OOMjjMrbWK7aoed6nvkfCY/8ex8PXzvg6RMm6REkeg1/GtZ5zvcjns7Dmca0xlkpdM5HHtkjd57XqsWfa3kWE2Pq35nXxDzNwL+E=
   </data>
  </layer>
  <layer id="4" name="Tile Layer 1" width="178" height="25">
   <data encoding="base64" compression="zlib">
-   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
+   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
   </data>
  </layer>
  <objectgroup id="6" name="Object Layer 1">
@@ -46,9 +46,9 @@
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="7" name="lava" type="fluid" x="1760" y="288" width="112" height="32">
+  <object id="7" name="water" type="fluid" x="1760" y="288" width="112" height="32">
    <properties>
-    <property name="id" type="int" value="1"/>
+    <property name="id" type="int" value="0"/>
    </properties>
   </object>
   <object id="8" name="orb" type="enemy" x="2112" y="60">
@@ -107,5 +107,54 @@
   <object id="19" type="solid" x="96" y="304" width="112" height="96"/>
   <object id="20" type="solid" x="16" y="368" width="80" height="32"/>
   <object id="21" type="solid" x="80" y="336" width="16" height="32"/>
+  <object id="22" name="spitball" type="enemy" x="1856" y="304">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+   <polyline points="0,0 0,-144"/>
+  </object>
+  <object id="23" name="spitball" type="enemy" x="1776" y="304">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+   <polyline points="0,0 0,-108"/>
+  </object>
+  <object id="24" name="water" type="fluid" x="2192" y="128" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="25" name="spitball" type="enemy" x="2208" y="144">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+   <polyline points="0,0 0,-52"/>
+  </object>
+  <object id="26" name="water" type="fluid" x="592" y="192" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="27" name="spitball" type="enemy" x="608" y="208">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+   <polyline points="0,0 0,-108"/>
+  </object>
+  <object id="28" name="shield" type="collectible" x="432" y="144" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="29" name="water" type="fluid" x="2192" y="256" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="30" name="water" type="fluid" x="592" y="304" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

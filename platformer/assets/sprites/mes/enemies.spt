@@ -96,4 +96,19 @@ spritesheet enemies
             framerate=16
         }
     }
+
+    sprite spitball
+    {
+        bounds = 0,80,16,16
+
+        animation idle
+        {
+            frame=0,80,16,16
+            frame=16,80,16,16
+            frame=32,80,16,16
+
+            loop=true
+            framerate=16
+        }
+    }    
 }
