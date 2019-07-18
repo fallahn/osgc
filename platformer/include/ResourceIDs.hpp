@@ -105,6 +105,7 @@ namespace SpriteID
             Walker,
             Bomb,
             Orb,
+            Spitball,
 
             Crack,
 

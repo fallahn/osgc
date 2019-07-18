@@ -328,6 +328,7 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Crawler] = spriteSheet.getSprite("crawler");
     m_sprites[SpriteID::GearBoy::Bomb] = spriteSheet.getSprite("bomb");
     m_sprites[SpriteID::GearBoy::Orb] = spriteSheet.getSprite("orb");
+    m_sprites[SpriteID::GearBoy::Spitball] = spriteSheet.getSprite("spitball");
 
     spriteSheet.loadFromFile("assets/sprites/crack.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Crack] = spriteSheet.getSprite("crack");
@@ -665,6 +666,7 @@ void GameState::loadEnemies()
             entity.addComponent<Enemy>().type = Enemy::Orb;
             break;
         case Enemy::Spitball:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Spitball];
             entity.addComponent<Enemy>().type = Enemy::Spitball;
             break;
         case Enemy::Rocket:
