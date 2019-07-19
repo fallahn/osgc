@@ -29,7 +29,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float Gravity = 4000.f;
+    const float Gravity = 3600.f;
 
     float easeInOutQuad(float t)
     {
@@ -293,7 +293,7 @@ void EnemySystem::processSpitball(xy::Entity entity, float dt)
     auto& enemy = entity.getComponent<Enemy>();
 
 
-    if (tx.getPosition().y < enemy.start.y)
+    if (tx.getPosition().y <= enemy.start.y)
     {
         //currently moving
         tx.move(enemy.velocity * dt);
@@ -316,8 +316,11 @@ void EnemySystem::processSpitball(xy::Entity entity, float dt)
         enemy.stateTime -= dt;
         if (enemy.stateTime < 0)
         {
-            enemy.stateTime = 1.5f;
-            enemy.velocity = { 0.f, -(1000.f + xy::Util::Random::value(0.f, 100.f)) };
+            enemy.stateTime = 1.f;
+            enemy.velocity = { 0.f, -(1600.f + xy::Util::Random::value(0.f, 100.f)) };
+
+            //kind of a kludge to make spitballs jump higher based on the map data
+            enemy.velocity.y *= -((enemy.end.y - enemy.start.y) / 448.f); //112 * scale
 
             tx.setPosition(enemy.start);
         }

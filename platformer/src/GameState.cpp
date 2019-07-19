@@ -78,7 +78,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
-    //sd.nextMap = "gb02.tmx";
+    sd.nextMap = "gb03.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -439,7 +439,7 @@ void GameState::buildWorld()
         entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(m_mapLoader.getSpawnPoint() * scale);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
-        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Drawable>().setDepth(3);
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Player];
         entity.addComponent<xy::SpriteAnimation>().play(0);
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -504,7 +504,7 @@ void GameState::buildWorld()
                     sf::Vector2f size(shape.aabb.width, shape.aabb.height);
                     size *= scale;
 
-                    entity.addComponent<xy::Drawable>().setDepth(-1);
+                    entity.addComponent<xy::Drawable>().setDepth(1);
                     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
                     verts.emplace_back(sf::Vector2f());
                     verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));

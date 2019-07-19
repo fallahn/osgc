@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="104">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="189">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
- <layer id="5" name="far" width="178" height="25">
+ <tileset firstgid="133" name="master_entertainment_system" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+  <image source="../images/tiles/master_entertainment_system.png" width="256" height="256"/>
+ </tileset>
+ <layer id="8" name="mes far" width="178" height="25">
   <data encoding="base64" compression="zlib">
-   eJztmUEOgjAQRbtkDWtd4xH0EIb7n0ZIaBwnbSm2MDPlv2TSSohF+/hAca4u/VzDWv1aAFiDewyAReAxaAFLHms/PiCHBo9zx9XgcZ9R4Hzg8T7gsU4seawdeCwHPAYtcITHuMaCs9GQxzWwfOy16dbSwm2u+8FjtOLxWVh4ppP2mHs7zvU4eEx4vA8LHkvDvUUeH8/edTNpj7WfP5P7eutb73XIZ7rtXTBuDY+lr2MlDKw0O7JgwWPvLfeX5jR3fWlLPPaU/DfWPaZ9DY7kvGvR6nNuHof2kfbYCqHfqDGPrXv8Tx7X8viqWHDDEtJ5DPKw4Lnkfd7ePKb7Xt3jPtKvzUT6oecU2koi7THyWDd0jnjm8Paq0DyO+ewC26Q97iL9FknN0VYed4lqCXrNit1fOCefx6l5aG1OOMjjMrbWK7aoed6nvkfCY/8ex0PXzkJrECXrEiV5DH4Z13rO9SKfz8KSxzXHWCp1zUQe2yJ1n9eqx55pexcRYuvfmtfFPzRIL+E=
+   eJzt2UEKgCAQAEA/76noQ0Ef6hN5sKOQEWg6A4ugCHtYVhZDAAAAAABgJLF1AgxPjQGMR2/nj9QtM4o59rweFfegN0uKNcXWOhH4wNk6AabhTQcAAOCt0kxp1gSoc//Xlc6e7AHQvwuYCAvV
   </data>
  </layer>
- <layer id="4" name="Tile Layer 1" width="178" height="25">
+ <layer id="5" name="far" width="178" height="25">
   <data encoding="base64" compression="zlib">
-   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
+   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
+  </data>
+ </layer>
+ <layer id="10" name="Tile Layer 1" width="178" height="25">
+  <data encoding="base64" compression="zlib">
+   eJztW1lrVUEMPq6otVCL1K2gdQXBBeqDyw9QqX2VvlSpfS2++CSiXsUfbgZOMMQkk8xy72k18KH3nFlzvskkmenqMAyrDbEDWAGcBrxt3HZrHAA+LBgfJ6CH//gbGo93JzA2aayLFqqjL0P9nLxrk6+fA+VdyVo/Cmszao972ERNj3wtTY3HFujYLZ3tB/ql62aHvavRUc0+PBV7F+VxDy559Zj6vtuh/4iUfPMWOuP9ToXHU8Giebzu7DfH42OA45m+3jcY694Q31ta6Iz3u6+889p3KlP3Jy3geCUet9gHvdKKxzgHSc4CzmWwVFiPtyHNZVH+0BbgzYhto9wU7XF0PUk8nqfeozzmsjn+S3m8ycpcHOvfB9xQsCG0fd0or7Uh2Wvv2v8K+Ab47iyfE6+/sUgef2rUTg8e3yPICeexNS9rXJY9Rh6vAa6N6CE92y4RjcczVg7XHveJtFh1ivmNljym+xiFtacNQ94eYJxeymO0q5LNPSzCdbutvKPPqV5/GvWl8hwHpNxR57GmB9reS8ArwGtHPa89XidzqMlnzJzlvHtNSynJV1h6lXTpLa+Vk/Lpvey4lJMt4bEU+3t4LEkJj7kPLNnjJ7lJDPoeoiHZsRT/LY11c3tNRKx8ipfH1O7+Is957C757FKcj9zzrg9e11uvhz2musDvlGye9M21fYzOKRfn8HparFrqV0T69ugr+dtrY11pTNF4zbOWKCc1vmqxxa4yTt4/tiNxr8TOfw7UyyFn13P549w4rPde/8S7vq31YPH4nfAMfQOeX0AdabnHNAbk8V5mTF6JfF/Mk5fYK02s3LTEYyuHzvPaUp47519I61HjGbWV8+Ix9wW4HYjqn0pt/pjnf7V+Uz4CedwqN4F9enJQOM+WPPaMLVL/EuAy4ArgqvA7tRm932Cd+2CeqIbHmj/mmXuL80P0gT354xzQV8j1izwuEcnn4HpINveUghOAk+P/Jbus7b+lPEbORPadm4BbgNuAO8Jv9Mc4v2sFOaDl8JEr9L0n9izhsSceseYgifc8Y2Poz2NJuB7OAy44sDzYOrfybp58aKk8ADwEPAI8Fn4jjzm/a6UkRrJi2xoel9oNzxy4HyDFrlKsQyX51Gld0Fz0zOjzR2ZMSVrG8ZG4qte57VPAM8BzwAvhN/KY87tWanjs9Y+9eeMS3SZu4Ryied1IrjCao2t1DjQPHuP34d+ohyCPOb+peNY/F4nHM8dYIjyWpOYuAvWBkz+JfiO98+bJH2uxtzSO3F037d5bTZzgiYdoX978cdTnlXI+pWL5x54zYe38Mvljy0q5XD6zRd6tVlZInyU55IhosYkUk1M9nDFg5c89Oux53xa50NKXtvxjz/7Y4/4T/Ub/Ao+12ESKySUb6TnjiOrQs0+U5rmjeTevDZT8463hjy74GbfGs1IeS/mECI9nTn1I+5h2bqvxWLp3Jz3zjimJFptIMXlrf7eH5PzQKI8jdwwiOtP8JRyXxJfcPufdH3N2qAXSfsd5XBqPae1T3muxiRST829R8rcW0h2BVhLxH73f0tpbctzw1vVyLLfPeXlsofX9acrjlvF/6VqMfhPP316j7ZHu29FnM+U5fTY01tNhQyn/eyHC48P2t2cR3c9jreUQ0e9vR3jNkw==
+  </data>
+ </layer>
+ <layer id="7" name="mes bits" width="178" height="25">
+  <data encoding="base64" compression="zlib">
+   eJzt1DsKAjEUBdCxcQnufzMiuoWxVsFfN9goZgFGRknmYTwHXpOQxy0u6ToAAAAAAKayjA4AP+IYHQCgcZuKu09pzhX3Q84lzbXgvnvBXTDWIzoATKBPs/3i3a50EP7OLTpAMkQHgAL0mBboMS3QY1own0UngPFWmfOFHgN8ZJ/mkLl79deuK2YBAHjnCYCTE90=
   </data>
  </layer>
  <objectgroup id="6" name="Object Layer 1">
@@ -41,12 +54,7 @@
     <property name="id" type="int" value="0"/>
    </properties>
   </object>
-  <object id="6" name="lava" type="fluid" x="1760" y="288" width="112" height="32">
-   <properties>
-    <property name="id" type="int" value="1"/>
-   </properties>
-  </object>
-  <object id="7" name="water" type="fluid" x="1760" y="288" width="112" height="32">
+  <object id="6" name="water" type="fluid" x="1760" y="288" width="112" height="32">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>
@@ -91,7 +99,7 @@
    </properties>
    <polyline points="0,0 0,168"/>
   </object>
-  <object id="16" type="dialogue" x="2512" y="240" width="16" height="112">
+  <object id="16" type="dialogue" x="2512" y="240" width="16" height="64">
    <properties>
     <property name="file" value="gb03.txt"/>
    </properties>
@@ -122,7 +130,7 @@
    <properties>
     <property name="id" type="int" value="5"/>
    </properties>
-   <polyline points="0,0 0,-52"/>
+   <polyline points="0,0 0,-97"/>
   </object>
   <object id="26" name="water" type="fluid" x="592" y="192" width="32" height="32">
    <properties>
@@ -133,7 +141,7 @@
    <properties>
     <property name="id" type="int" value="5"/>
    </properties>
-   <polyline points="0,0 0,-108"/>
+   <polyline points="0,0 0,-128"/>
   </object>
   <object id="28" name="shield" type="collectible" x="432" y="144" width="16" height="16">
    <properties>
@@ -165,7 +173,7 @@
   <object id="43" type="solid" x="464" y="240" width="16" height="16"/>
   <object id="44" type="solid" x="624" y="128" width="80" height="272"/>
   <object id="45" type="solid" x="704" y="128" width="32" height="64"/>
-  <object id="46" type="solid" x="768" y="208" width="16" height="16"/>
+  <object id="46" type="solid" x="752" y="208" width="16" height="16"/>
   <object id="47" type="solid" x="768" y="144" width="48" height="16"/>
   <object id="48" type="solid" x="736" y="272" width="48" height="16"/>
   <object id="49" type="solid" x="528" y="0" width="320" height="48"/>
@@ -188,9 +196,9 @@
   <object id="66" type="solid" x="1232" y="112" width="48" height="32"/>
   <object id="67" type="solid" x="1232" y="208" width="112" height="48"/>
   <object id="68" type="solid" x="1168" y="352" width="320" height="48"/>
-  <object id="69" type="solid" x="1344" y="160" width="108" height="144"/>
+  <object id="69" type="solid" x="1344" y="208" width="112" height="96"/>
   <object id="70" type="solid" x="1536" y="0" width="224" height="112"/>
-  <object id="71" type="solid" x="1452" y="160" width="164" height="48"/>
+  <object id="71" type="solid" x="1344" y="160" width="272" height="48"/>
   <object id="72" type="solid" x="1488" y="368" width="208" height="32"/>
   <object id="73" type="solid" x="1520" y="272" width="240" height="32"/>
   <object id="74" type="solid" x="1552" y="208" width="32" height="64"/>
@@ -223,5 +231,328 @@
   <object id="101" type="solid" x="2704" y="124" width="144" height="48"/>
   <object id="102" type="solid" x="2832" y="172" width="16" height="148"/>
   <object id="103" type="solid" x="1200" y="288" width="16" height="16"/>
+  <object id="104" type="spikes" x="304" y="224" width="32" height="6"/>
+  <object id="105" type="spikes" x="490" y="177" width="6" height="15"/>
+  <object id="106" type="spikes" x="656" y="122" width="48" height="6"/>
+  <object id="107" type="spikes" x="842" y="64" width="6" height="64"/>
+  <object id="108" type="spikes" x="1024" y="48" width="6" height="48"/>
+  <object id="109" type="spikes" x="1114" y="144" width="6" height="16"/>
+  <object id="110" type="spikes" x="1152" y="144" width="6" height="16"/>
+  <object id="111" type="spikes" x="1105" y="282" width="15" height="6"/>
+  <object id="112" type="spikes" x="1152" y="282" width="15" height="6"/>
+  <object id="113" type="spikes" x="1264" y="256" width="16" height="6"/>
+  <object id="114" type="spikes" x="1338" y="256" width="6" height="16"/>
+  <object id="115" type="spikes" x="1280" y="346" width="48" height="6"/>
+  <object id="116" type="spikes" x="1488" y="362" width="32" height="6"/>
+  <object id="117" type="spikes" x="1536" y="266" width="16" height="6"/>
+  <object id="118" type="spikes" x="1536" y="208" width="16" height="6"/>
+  <object id="119" type="spikes" x="1584" y="208" width="16" height="6"/>
+  <object id="120" type="spikes" x="1312" y="202" width="32" height="6"/>
+  <object id="121" type="spikes" x="1280" y="112" width="32" height="6"/>
+  <object id="122" type="spikes" x="1530" y="64" width="6" height="16"/>
+  <object id="123" type="spikes" x="1552" y="154" width="32" height="6"/>
+  <object id="124" type="spikes" x="1648" y="112" width="32" height="6"/>
+  <object id="125" type="spikes" x="2064" y="378" width="32" height="6"/>
+  <object id="126" type="spikes" x="2144" y="378" width="32" height="6"/>
+  <object id="127" type="spikes" x="2240" y="378" width="32" height="6"/>
+  <object id="128" type="spikes" x="2320" y="378" width="16" height="6"/>
+  <object id="129" name="bird" type="enemy" x="1384" y="41">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+   <polyline points="0,0 80,0"/>
+  </object>
+  <object id="130" name="bird" type="enemy" x="1003" y="248">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+   <polyline points="0,0 72,0"/>
+  </object>
+  <object id="131" name="shield" type="collectible" x="1296" y="160" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="132" name="shield" type="collectible" x="2104" y="156" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="133" name="ammo" type="collectible" x="1696" y="152" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="134" name="ammo" type="collectible" x="1488" y="56" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="135" name="ammo" type="collectible" x="2200" y="360" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="136" type="solid" x="2496" y="304" width="48" height="48"/>
+  <object id="137" name="walker" type="enemy" x="312" y="360">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+   <polyline points="0,0 80,0"/>
+  </object>
+  <object id="138" name="walker" type="enemy" x="504" y="168">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+   <polyline points="0,0 80,0"/>
+  </object>
+  <object id="139" name="walker" type="enemy" x="808" y="344">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+   <polyline points="0,0 160,0"/>
+  </object>
+  <object id="140" name="walker" type="enemy" x="1368" y="152">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+   <polyline points="0,0 112,0"/>
+  </object>
+  <object id="141" name="walker" type="enemy" x="1640" y="264">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+   <polyline points="0,0 107,0"/>
+  </object>
+  <object id="142" name="bird" type="enemy" x="1064" y="40">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+   <polyline points="0,0 144,0"/>
+  </object>
+  <object id="143" name="crawler" type="enemy" x="1368" y="346">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+   <polyline points="0,0 116,0"/>
+  </object>
+  <object id="144" name="crawler" type="enemy" x="1896" y="170">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+   <polyline points="0,0 96,0"/>
+  </object>
+  <object id="145" name="crawler" type="enemy" x="2360" y="346">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+   <polyline points="0,0 116,0"/>
+  </object>
+  <object id="147" type="solid" x="752" y="208" width="16" height="16"/>
+  <object id="148" name="coin" type="collectible" x="112" y="280" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="149" name="coin" type="collectible" x="144" y="280" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="150" name="coin" type="collectible" x="176" y="280" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="151" name="coin" type="collectible" x="264" y="280" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="152" name="coin" type="collectible" x="512" y="280" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="153" name="coin" type="collectible" x="448" y="280" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="154" name="coin" type="collectible" x="784" y="120" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="155" name="coin" type="collectible" x="824" y="184" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="156" name="coin" type="collectible" x="720" y="328" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="157" name="coin" type="collectible" x="768" y="328" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="158" name="coin" type="collectible" x="1072" y="328" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="159" name="coin" type="collectible" x="1088" y="200" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="160" name="coin" type="collectible" x="1056" y="136" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="161" name="coin" type="collectible" x="1088" y="72" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="162" name="coin" type="collectible" x="1128" y="40" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="163" name="coin" type="collectible" x="1168" y="72" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="164" name="coin" type="collectible" x="1200" y="136" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="165" name="coin" type="collectible" x="1172" y="200" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="166" name="coin" type="collectible" x="1256" y="328" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="167" name="coin" type="collectible" x="1560" y="336" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="168" name="coin" type="collectible" x="1656" y="336" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="169" name="coin" type="collectible" x="1280" y="56" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="170" name="coin" type="collectible" x="1312" y="56" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="171" name="coin" type="collectible" x="1344" y="56" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="172" name="coin" type="collectible" x="1512" y="136" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="173" name="coin" type="collectible" x="1592" y="136" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="174" name="coin" type="collectible" x="1608" y="248" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="175" name="coin" type="collectible" x="2032" y="104" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="176" name="coin" type="collectible" x="2064" y="104" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="177" name="coin" type="collectible" x="2152" y="104" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="178" name="coin" type="collectible" x="2248" y="56" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="179" name="coin" type="collectible" x="2312" y="104" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="180" name="coin" type="collectible" x="2320" y="216" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="181" name="coin" type="collectible" x="2288" y="360" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="182" name="coin" type="collectible" x="2112" y="360" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="183" name="coin" type="collectible" x="2424" y="248" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="184" name="coin" type="collectible" x="2736" y="296" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="185" name="coin" type="collectible" x="2784" y="296" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="186" name="coin" type="collectible" x="640" y="80" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="187" name="coin" type="collectible" x="672" y="80" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="188" name="coin" type="collectible" x="704" y="80" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
