@@ -17,12 +17,16 @@ spritesheet player
         animation run
         {
             frame = 0,0,16,16
+            frame = 0,0,16,16
+            frame = 16,0,16,16
             frame = 16,0,16,16
             frame = 32,0,16,16
+            frame = 32,0,16,16
+            frame = 16,0,16,16
             frame = 16,0,16,16
 
             loop=true
-            framerate=20
+            framerate=16
         }
 
         animation jump

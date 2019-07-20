@@ -77,8 +77,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_playerInput   (sd.inputBinding)
 {
     launchLoadingScreen();
-    //sd.theme = "mes";
-    sd.nextMap = "gb03.tmx";
+    sd.theme = "mes";
+    sd.nextMap = "mes01.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -687,7 +687,7 @@ void GameState::loadEnemies()
 
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = bounds;
-        collision.shapes[0].type = (id == Enemy::Orb) ? CollisionShape::Spikes : CollisionShape::Enemy;
+        collision.shapes[0].type = (id == Enemy::Orb || id == Enemy::Spitball) ? CollisionShape::Spikes : CollisionShape::Enemy;
         collision.shapes[0].collisionFlags = CollisionShape::Player;
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);

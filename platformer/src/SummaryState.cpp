@@ -61,7 +61,7 @@ namespace
 
         })";
 
-    const sf::Time textUpdateTime = sf::seconds(0.01f);
+    const sf::Time textUpdateTime = sf::seconds(0.05f);
     const std::int32_t coinScore = 100;
     const std::int32_t timeScore = 50;
 }
