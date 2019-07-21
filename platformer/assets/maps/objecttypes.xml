@@ -22,4 +22,8 @@
  </objecttype>
  <objecttype name="solid" color="#00003f"/>
  <objecttype name="spikes" color="#ff0000"/>
+ <objecttype name="torch" color="#55ff00"/>
+ <objecttype name="waterfall" color="#00aaff">
+  <property name="id" type="int" default="0"/>
+ </objecttype>
 </objecttypes>

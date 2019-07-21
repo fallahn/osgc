@@ -13,7 +13,7 @@ spritesheet fireball
             frame=32,0,16,16
 
             loop=true
-            framerate=24
+            framerate=18
         }
     }
 }
