@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "MapLoader.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
 #include <xyginext/core/Log.hpp>
@@ -369,6 +370,31 @@ bool MapLoader::load(const std::string& file)
                                 m_collisionShapes.pop_back();
                             }
                         }
+
+                        //props
+                        else if (type == "torch")
+                        {
+                            m_collisionShapes.pop_back();
+                            auto pos = object.getPosition();
+                            auto aabb = object.getAABB();
+                            m_props.emplace_back(std::make_pair(PropID::Torch, sf::FloatRect(pos.x, pos.y, aabb.width, aabb.height)));
+                        }
+                        else if (type == "waterfall")
+                        {
+                            m_collisionShapes.pop_back();
+                            
+                            auto propID = PropID::WaterFall;
+                            auto id = getID(object);
+                            if (id && *id == 1)
+                            {
+                                propID = PropID::LavaFall;
+                            }
+
+                            auto pos = object.getPosition();
+                            auto aabb = object.getAABB();
+                            m_props.emplace_back(std::make_pair(propID, sf::FloatRect(pos.x, pos.y, aabb.width, aabb.height)));
+                        }
+
                         else
                         {
                             //not valid, remove

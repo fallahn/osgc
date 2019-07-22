@@ -66,6 +66,8 @@ public:
 
     const std::vector<std::string>& getDialogueFiles() const { return m_dialogueFiles; }
 
+    const std::vector<std::pair<std::int32_t, sf::FloatRect>>& getProps() const { return m_props; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -78,6 +80,8 @@ private:
     //holds all the info needed to feed the layer drawable component
     //this is in bottom up order.
     std::vector<MapLayer> m_mapLayers;
+
+    std::vector<std::pair<std::int32_t, sf::FloatRect>> m_props;
 
     float m_tileSize;
     sf::Vector2f m_mapSize;

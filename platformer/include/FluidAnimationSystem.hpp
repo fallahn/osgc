@@ -22,9 +22,10 @@ Copyright 2019 Matt Marchant
 
 struct Fluid final
 {
-    float frameHeight = 0.f;
+    float frameSize = 0.f;
     float frameTime = 1.f;
     float currentTime = 0.f;
+    bool horizontal = true;
 };
 
 class FluidAnimationSystem final : public xy::System

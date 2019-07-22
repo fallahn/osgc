@@ -305,9 +305,25 @@ void GameState::loadResources()
         const_cast<sf::Texture*>(tex)->setRepeated(true);
     }
 
+    spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/lavafall.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Lavafall] = spriteSheet.getSprite("lava");
+    tex = m_sprites[SpriteID::GearBoy::Lavafall].getTexture();
+    if (tex) //uuugghhhhhh
+    {
+        const_cast<sf::Texture*>(tex)->setRepeated(true);
+    }
+
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/water.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Water] = spriteSheet.getSprite("water");
     tex = m_sprites[SpriteID::GearBoy::Water].getTexture();
+    if (tex) //uuugghhhhhhghghghghghdddhhhhhh
+    {
+        const_cast<sf::Texture*>(tex)->setRepeated(true);
+    }
+
+    spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/waterfall.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Waterfall] = spriteSheet.getSprite("water");
+    tex = m_sprites[SpriteID::GearBoy::Waterfall].getTexture();
     if (tex) //uuugghhhhhhghghghghghdddhhhhhh
     {
         const_cast<sf::Texture*>(tex)->setRepeated(true);
@@ -332,6 +348,9 @@ void GameState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/crack.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Crack] = spriteSheet.getSprite("crack");
+
+    spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/torch.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Torch] = spriteSheet.getSprite("torch");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
@@ -413,7 +432,7 @@ void GameState::buildWorld()
         {
             auto entity = m_tilemapScene.createEntity();
             entity.addComponent<xy::Transform>();
-            entity.addComponent<xy::Drawable>().setDepth(startDepth++);
+            entity.addComponent<xy::Drawable>().setDepth(startDepth);
             entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);
             entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileMap));
             entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_indexMap");
@@ -433,6 +452,8 @@ void GameState::buildWorld()
 
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Transform>().setScale(scale, scale);
+
+            startDepth += 2; //place layers 2 apart so props etc can be placed in between
         }
 
         //create player
@@ -522,7 +543,7 @@ void GameState::buildWorld()
                         spriteID = SpriteID::GearBoy::Water;
                     }
                     entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
-                    entity.addComponent<Fluid>().frameHeight = m_sprites[spriteID].getTextureBounds().height;
+                    entity.addComponent<Fluid>().frameSize = m_sprites[spriteID].getTextureBounds().height;
                     if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
                     {
                         entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;
@@ -623,6 +644,7 @@ void GameState::buildWorld()
         }
 
         loadEnemies();
+        loadProps();
     }
     else
     {
@@ -692,6 +714,54 @@ void GameState::loadEnemies()
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(collision.shapes[0].type);
+    }
+}
+
+void GameState::loadProps()
+{
+    auto scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+
+    const auto& props = m_mapLoader.getProps();
+    for (const auto& [id, bounds] : props)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(bounds.left * scale, bounds.top * scale);
+        entity.getComponent<xy::Transform>().setScale(scale, scale);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 3);
+
+        switch (id)
+        {
+        default: break;
+        case PropID::Torch:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Torch];
+            entity.addComponent<xy::SpriteAnimation>().play(0);
+            //TODO smoke particles
+            break;
+        case PropID::LavaFall:
+        case PropID::WaterFall:
+        {
+            sf::Vector2f size(bounds.width, bounds.height);
+
+            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            verts.emplace_back(sf::Vector2f());
+            verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));
+            verts.emplace_back(size, size);
+            verts.emplace_back(sf::Vector2f(0.f, size.y), sf::Vector2f(0.f, size.y));
+
+            entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+            std::int32_t spriteID = id == PropID::LavaFall ? SpriteID::GearBoy::Lavafall : SpriteID::GearBoy::Waterfall;
+            entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
+            entity.addComponent<Fluid>().frameSize = m_sprites[spriteID].getTextureBounds().width;
+            entity.getComponent<Fluid>().horizontal = false;
+
+            if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
+            {
+                entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;
+            }
+        }
+            break;
+        }
     }
 }
 

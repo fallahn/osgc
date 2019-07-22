@@ -23,6 +23,7 @@
     <ProjectGuid>{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}</ProjectGuid>
     <RootNamespace>platformer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>back_to_computer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -33,21 +33,41 @@ void FluidAnimationSystem::process(float dt)
     auto& entities = getEntities();
     for (auto entity : entities)
     {
+        auto& fluid = entity.getComponent<Fluid>();
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        for (auto& v : verts)
+        if (fluid.horizontal)
         {
-            v.texCoords.x -= dt * 4.f;
+            for (auto& v : verts)
+            {
+                v.texCoords.x -= dt * 4.f;
+            }
+        }
+        else
+        {
+            for (auto& v : verts)
+            {
+                v.texCoords.y -= dt * 4.f;
+            }
         }
 
-        auto& fluid = entity.getComponent<Fluid>();
         fluid.currentTime += dt;
         if (fluid.currentTime > fluid.frameTime)
         {
             fluid.currentTime = 0.f;
 
-            for (auto& v : verts)
+            if (fluid.horizontal)
             {
-                v.texCoords.y += fluid.frameHeight;
+                for (auto& v : verts)
+                {
+                    v.texCoords.y += fluid.frameSize;
+                }
+            }
+            else
+            {
+                for (auto& v : verts)
+                {
+                    v.texCoords.x += fluid.frameSize;
+                }
             }
         }
     }

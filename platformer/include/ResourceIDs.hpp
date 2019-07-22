@@ -80,6 +80,16 @@ namespace ParticleID
     };
 }
 
+namespace PropID
+{
+    enum
+    {
+        Torch,
+        LavaFall,
+        WaterFall
+    };
+}
+
 namespace SpriteID
 {
     namespace GearBoy
@@ -91,7 +101,9 @@ namespace SpriteID
             SmokePuff,
             Squidger,
             Lava,
+            Lavafall,
             Water,
+            Waterfall,
             Checkpoint,
 
             Coin,
@@ -108,6 +120,7 @@ namespace SpriteID
             Spitball,
 
             Crack,
+            Torch,
 
             Count
         };

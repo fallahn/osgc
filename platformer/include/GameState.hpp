@@ -68,5 +68,6 @@ private:
     void loadResources();
     void buildWorld();
     void loadEnemies();
+    void loadProps();
     void buildUI();
 };

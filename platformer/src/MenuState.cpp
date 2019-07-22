@@ -451,7 +451,7 @@ void MenuState::buildBackground()
                         spriteID = SpriteID::GearBoy::Water;
                     }
                     entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
-                    entity.addComponent<Fluid>().frameHeight = m_sprites[spriteID].getTextureBounds().height;
+                    entity.addComponent<Fluid>().frameSize = m_sprites[spriteID].getTextureBounds().height;
                     if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
                     {
                         entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;

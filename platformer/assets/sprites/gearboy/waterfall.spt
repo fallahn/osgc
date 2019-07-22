@@ -1,0 +1,19 @@
+spritesheet water
+{
+    src="assets/images/gearboy/waterfall.png"
+
+    sprite water
+    {
+        bounds = 0,0,16,16
+
+        animation idle
+        {
+            frame = 0,0,16,16
+            frame = 16,0,16,16
+            frame = 32,0,16,16
+
+            loop=true
+            framerate = 12
+        }
+    }
+}
