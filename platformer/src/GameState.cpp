@@ -361,6 +361,7 @@ void GameState::loadResources()
 
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
+    m_particleEmitters[ParticleID::TorchSmoke].loadFromFile("assets/particles/torch_smoke.xyp", m_resources);
 
     //buffer texture for map
     m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y));
@@ -747,7 +748,13 @@ void GameState::loadProps()
         case PropID::Torch:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Torch];
             entity.addComponent<xy::SpriteAnimation>().play(0);
-            //TODO smoke particles
+            {
+                auto smokeEnt = m_gameScene.createEntity();
+                smokeEnt.addComponent<xy::Transform>().setPosition(bounds.left * scale, bounds.top * scale);
+                smokeEnt.getComponent<xy::Transform>().move((bounds.width / 2.f) * scale, 0.f);
+                smokeEnt.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::TorchSmoke];
+                smokeEnt.getComponent<xy::ParticleEmitter>().start();
+            }
             break;
         case PropID::LavaFall:
         case PropID::WaterFall:

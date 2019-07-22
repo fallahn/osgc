@@ -148,6 +148,7 @@
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\DialogueState.hpp" />
+    <ClInclude Include="include\EndingState.hpp" />
     <ClInclude Include="include\EnemySystem.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
     <ClInclude Include="include\FluidAnimationSystem.hpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="src\CameraTargetSystem.cpp" />
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\DialogueState.cpp" />
+    <ClCompile Include="src\EndingState.cpp" />
     <ClCompile Include="src\EnemySystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\ErrorState.cpp" />

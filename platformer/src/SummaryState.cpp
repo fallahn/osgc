@@ -102,7 +102,14 @@ bool SummaryState::handleEvent(const sf::Event& evt)
             break;
         case Completed:
             requestStackClear();
-            requestStackPush(StateID::Game); //TODO check shared data for game type
+            if (m_sharedData.nextMap == "credits")
+            {
+                requestStackPush(StateID::Ending);
+            }
+            else
+            {
+                requestStackPush(StateID::Game); //TODO check shared data for game type
+            }
             break;
         }
     };

@@ -39,6 +39,7 @@ namespace StateID
         Error,
         Dialogue,
         Summary,
-        Intro
+        Intro,
+        Ending
     };
 }

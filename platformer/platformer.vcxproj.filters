@@ -123,6 +123,9 @@
     <ClInclude Include="include\IntroState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\EndingState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -189,6 +192,9 @@
       <Filter>Source Files\states</Filter>
     </ClCompile>
     <ClCompile Include="src\IntroState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EndingState.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>

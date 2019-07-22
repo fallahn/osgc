@@ -67,6 +67,7 @@ namespace FontID
     };
 
     static const std::string GearBoyFont("assets/fonts/gameboy.ttf");
+    static const std::string IBMFont("assets/fonts/IBM_CGA.ttf");
 }
 
 namespace ParticleID
@@ -75,6 +76,7 @@ namespace ParticleID
     {
         Shield,
         Checkpoint,
+        TorchSmoke,
 
         Count
     };

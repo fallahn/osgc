@@ -483,10 +483,10 @@ void MenuState::buildMenu()
     auto& font = m_resources.get<sf::Font>(m_fontID);
 
     auto entity = m_backgroundScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(340.f, 100.f);
+    entity.addComponent<xy::Transform>().setPosition(140.f, 100.f);
     entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
-    entity.addComponent<xy::Text>(font).setString("TITLE!");
-    entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::LargeTextSize);
+    entity.addComponent<xy::Text>(font).setString("Back To Computer!");
+    entity.getComponent<xy::Text>().setCharacterSize(/*GameConst::UI::LargeTextSize*/96);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
     entity.getComponent<xy::Text>().setOutlineColour(GameConst::Gearboy::colours[2]);
     entity.getComponent<xy::Text>().setOutlineThickness(4.f);

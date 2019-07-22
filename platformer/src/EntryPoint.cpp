@@ -36,6 +36,7 @@ source distribution.
 #include "DialogueState.hpp"
 #include "SummaryState.hpp"
 #include "IntroState.hpp"
+#include "EndingState.hpp"
 #include "SharedStateData.hpp"
 
 #include <xyginext/core/StateStack.hpp>
@@ -56,9 +57,10 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<DialogueState>(StateID::Dialogue, sd);
     ss->registerState<SummaryState>(StateID::Summary, sd);
     ss->registerState<IntroState>(StateID::Intro, sd);
+    ss->registerState<EndingState>(StateID::Ending, sd);
 
 #ifdef XY_DEBUG
-    //return StateID::Intro;
+    //return StateID::Ending;
     return StateID::Game;
     //return StateID::MainMenu;
 #else
@@ -77,4 +79,5 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::Dialogue);
     ss->unregisterState(StateID::Summary);
     ss->unregisterState(StateID::Intro);
+    ss->unregisterState(StateID::Ending);
 }

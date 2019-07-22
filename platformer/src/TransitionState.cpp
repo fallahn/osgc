@@ -58,7 +58,14 @@ bool TransitionState::update(float)
     if (transitionTime == 1)
     {
         requestStackClear();
-        requestStackPush(m_sharedData.transitionContext.nextState);
+        if (m_sharedData.nextMap == "credits")
+        {
+            requestStackPush(StateID::Ending);
+        }
+        else
+        {
+            requestStackPush(m_sharedData.transitionContext.nextState);
+        }
     }
 
     return false;
