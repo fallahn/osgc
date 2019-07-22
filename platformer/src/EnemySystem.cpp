@@ -74,10 +74,13 @@ void EnemySystem::process(float dt)
         auto& tx = entity.getComponent<xy::Transform>();
 
         //update sprite direction
-        if ((enemy.velocity.x < 0 && tx.getScale().x < 0)
-            || (enemy.velocity.x > 0 && tx.getScale().x > 0))
+        if (enemy.type != Enemy::Rocket)
         {
-            tx.scale(-1.f, 1.f);
+            if ((enemy.velocity.x < 0 && tx.getScale().x < 0)
+                || (enemy.velocity.x > 0 && tx.getScale().x > 0))
+            {
+                tx.scale(-1.f, 1.f);
+            }
         }
         
         if (enemy.state == Enemy::Normal)
@@ -343,11 +346,12 @@ void EnemySystem::processRocket(xy::Entity entity, float dt)
         {
             //respawn
             auto scale = tx.getScale();
-            scale.x = -scale.y;
+            scale.x = scale.y;
             tx.setScale(scale);
 
             auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
             msg->position = enemy.start;
+            msg->type = StarEvent::None;
         }
     }
     else
@@ -367,6 +371,7 @@ void EnemySystem::processRocket(xy::Entity entity, float dt)
 
             auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
             msg->position = enemy.end;
+            msg->type = StarEvent::None;
         }
     }
 }
@@ -393,7 +398,7 @@ void EnemySystem::onEntityAdded(xy::Entity entity)
         enemy.velocity = enemy.end - enemy.start;
         enemy.velocity = xy::Util::Vector::normalise(enemy.velocity);
         enemy.velocity *= Enemy::RocketVelocity;
-        entity.getComponent<xy::Transform>().setRotation(xy::Util::Vector::rotation(-enemy.velocity));
+        entity.getComponent<xy::Transform>().setRotation(xy::Util::Vector::rotation(enemy.velocity));
         break;
     case Enemy::Egg:
     case Enemy::Spitball:

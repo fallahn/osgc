@@ -48,6 +48,7 @@ struct StarEvent final
 {
     enum
     {
+        None,
         HitItem
     }type = HitItem;
     sf::Vector2f position;

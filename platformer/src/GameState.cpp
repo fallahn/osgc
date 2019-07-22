@@ -706,7 +706,6 @@ void GameState::loadEnemies()
             entity.getComponent<Enemy>().stateTime = xy::Util::Random::value(0.2f, 3.f);
             entity.getComponent<xy::Transform>().setScale(0.f, scale);
             entity.getComponent<xy::Transform>().setPosition(path.first);
-            entity.getComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 4); //duh map is in its own scene...
             break;
         }
         entity.getComponent<Enemy>().start = path.first * scale;

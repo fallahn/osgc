@@ -87,6 +87,7 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case StarEvent::HitItem:
+        case StarEvent::None:
             spawnPuff(data.position);
             break;
         }
