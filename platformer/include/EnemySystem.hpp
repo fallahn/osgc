@@ -44,7 +44,7 @@ struct Enemy final
     static constexpr float CrawlerVelocity = 100.f;
     static constexpr float BirdVelocity = 200.f;
     static constexpr float WalkerVelocity = 110.f;
-    static constexpr float RocketVelocity = 310.f;
+    static constexpr float RocketVelocity = 500.f;
     static constexpr float DeathImpulse = 700.f;
     static constexpr float EggLife = 4.f;
 

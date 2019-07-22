@@ -54,6 +54,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Rectangle.hpp>
+#include <xyginext/util/Vector.hpp>
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/detail/Operators.hpp>
 
@@ -237,6 +238,8 @@ void GameState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_tilemapScene.addSystem<xy::SpriteSystem>(mb);
+    m_tilemapScene.addSystem<FluidAnimationSystem>(mb);
+    m_tilemapScene.addSystem<xy::SpriteAnimator>(mb);
     m_tilemapScene.addSystem<xy::CameraSystem>(mb);
     m_tilemapScene.addSystem<xy::RenderSystem>(mb);
 
@@ -453,7 +456,7 @@ void GameState::buildWorld()
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Transform>().setScale(scale, scale);
 
-            startDepth += 2; //place layers 2 apart so props etc can be placed in between
+            startDepth += 4; //place layers 4 apart so props etc can be placed in between
         }
 
         //create player
@@ -498,157 +501,162 @@ void GameState::buildWorld()
         m_gameScene.getSystem<CameraTargetSystem>().setBounds({ sf::Vector2f(), m_mapLoader.getMapSize() * scale });
         m_gameScene.getSystem<PlayerSystem>().setBounds({ sf::Vector2f(), m_mapLoader.getMapSize() * scale });
 
-        //map collision data
-        const auto& collisionShapes = m_mapLoader.getCollisionShapes();
-
-        for (const auto& shape : collisionShapes)
-        {
-            entity = m_gameScene.createEntity();
-            entity.addComponent<xy::Transform>().setPosition(shape.aabb.left * scale, shape.aabb.top * scale);
-            entity.addComponent<CollisionBody>().shapes[0] = shape;
-            //convert from world to local
-            entity.getComponent<CollisionBody>().shapes[0].aabb.left = 0;
-            entity.getComponent<CollisionBody>().shapes[0].aabb.top = 0;
-            entity.getComponent<CollisionBody>().shapes[0].aabb.width *= scale;
-            entity.getComponent<CollisionBody>().shapes[0].aabb.height *= scale;
-            entity.getComponent<CollisionBody>().shapeCount = 1;
-            entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<CollisionBody>().shapes[0].aabb);
-            entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(shape.type);
-
-            if (shape.ID > -1)
-            {
-                switch (shape.type)
-                {
-                default: break;
-                case CollisionShape::Fluid:
-                {
-                    sf::Vector2f size(shape.aabb.width, shape.aabb.height);
-                    size *= scale;
-
-                    entity.addComponent<xy::Drawable>().setDepth(1);
-                    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-                    verts.emplace_back(sf::Vector2f());
-                    verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));
-                    verts.emplace_back(size, size);
-                    verts.emplace_back(sf::Vector2f(0.f, size.y), sf::Vector2f(0.f, size.y));
-
-                    entity.getComponent<xy::Drawable>().updateLocalBounds();
-                    std::int32_t spriteID;
-                    if (shape.ID == 0)
-                    {
-                        spriteID = SpriteID::GearBoy::Lava;
-                    }
-                    else
-                    {
-                        spriteID = SpriteID::GearBoy::Water;
-                    }
-                    entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
-                    entity.addComponent<Fluid>().frameSize = m_sprites[spriteID].getTextureBounds().height;
-                    if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
-                    {
-                        entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;
-                    }
-                }
-                break;
-                case CollisionShape::Checkpoint:
-                    entity.addComponent<xy::CommandTarget>().ID = CommandID::World::CheckPoint;
-
-                    if (shape.ID > 0)
-                    {
-                        auto checkpointEnt = m_gameScene.createEntity();
-                        checkpointEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
-                        checkpointEnt.getComponent<xy::Transform>().setScale(scale, scale);
-                        checkpointEnt.addComponent<xy::Drawable>().setDepth(-1);
-                        checkpointEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Checkpoint];
-                        checkpointEnt.addComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Idle]);
-
-                        bounds = m_sprites[SpriteID::GearBoy::Checkpoint].getTextureBounds();
-                        bounds.width *= scale;
-                        bounds.height *= scale;
-
-                        auto particleEnt = m_gameScene.createEntity();
-                        particleEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
-                        particleEnt.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 3.f);
-                        particleEnt.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Checkpoint];
-                        //TODO could add callback to destroy end when particles finished?
-
-                        entity.addComponent<xy::Callback>().function =
-                            [&,checkpointEnt, particleEnt](xy::Entity e, float) mutable
-                        {
-                            if (checkpointEnt.getComponent<xy::SpriteAnimation>().getAnimationIndex() ==
-                                m_checkpointAnimations[AnimID::Checkpoint::Idle])
-                            {
-                                checkpointEnt.getComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Activate]);
-                                particleEnt.getComponent<xy::ParticleEmitter>().start();
-                            }
-                            e.getComponent<xy::Callback>().active = false;
-                        };
-                    }
-
-                    break;
-                case CollisionShape::Collectible:
-                {
-                    std::int32_t spriteID = 0;
-                    switch (shape.ID)
-                    {
-                    default:
-                    case GameConst::CollectibleID::Coin:
-                        spriteID = SpriteID::GearBoy::Coin;
-                        break;
-                    case GameConst::CollectibleID::Shield:
-                        spriteID = SpriteID::GearBoy::Shield;
-                        break;
-                    case GameConst::CollectibleID::Ammo:
-                        spriteID = SpriteID::GearBoy::Ammo;
-                        break;
-                    case GameConst::CollectibleID::Life:
-                        spriteID = SpriteID::GearBoy::ExtraLife;
-                        entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Shield];
-                        entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.x = entity.getComponent<CollisionBody>().shapes[0].aabb.width / 2.f;
-                        entity.getComponent<xy::ParticleEmitter>().start();
-                        break;
-                    }
-
-                    auto cEnt = m_gameScene.createEntity();
-                    cEnt.addComponent<xy::Transform>().setScale(scale, scale);
-                    cEnt.addComponent<xy::Drawable>();
-                    cEnt.addComponent<xy::Sprite>() = m_sprites[spriteID];
-                    cEnt.addComponent<xy::SpriteAnimation>().play(0);
-                    cEnt.addComponent<BobAnimation>().parent = entity;
-
-                    entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
-                }
-                    break;
-                case CollisionShape::Dialogue:
-                    entity.addComponent<Dialogue>().file = m_mapLoader.getDialogueFiles()[shape.ID];
-                    break;
-                case CollisionShape::Exit:
-                {
-                    if (shape.ID == 1)
-                    {
-                        auto crackEntity = m_gameScene.createEntity();
-                        crackEntity.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
-                        crackEntity.getComponent<xy::Transform>().setScale(scale, scale);
-                        crackEntity.addComponent<xy::Drawable>();
-                        crackEntity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crack];
-                        crackEntity.addComponent<xy::SpriteAnimation>().play(0);
-                        bounds = m_sprites[SpriteID::GearBoy::Crack].getTextureBounds();
-                        crackEntity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-                        bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
-                        crackEntity.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 2.f);
-                    }
-                }
-                    break;
-                }
-            }
-        }
-
+        loadCollision();
         loadEnemies();
         loadProps();
     }
     else
     {
         requestStackPush(StateID::Error);
+    }
+}
+
+void GameState::loadCollision()
+{
+    //map collision data
+    const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+    const auto& collisionShapes = m_mapLoader.getCollisionShapes();
+
+    for (const auto& shape : collisionShapes)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(shape.aabb.left * scale, shape.aabb.top * scale);
+        entity.addComponent<CollisionBody>().shapes[0] = shape;
+        //convert from world to local
+        entity.getComponent<CollisionBody>().shapes[0].aabb.left = 0;
+        entity.getComponent<CollisionBody>().shapes[0].aabb.top = 0;
+        entity.getComponent<CollisionBody>().shapes[0].aabb.width *= scale;
+        entity.getComponent<CollisionBody>().shapes[0].aabb.height *= scale;
+        entity.getComponent<CollisionBody>().shapeCount = 1;
+        entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<CollisionBody>().shapes[0].aabb);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(shape.type);
+
+        if (shape.ID > -1)
+        {
+            switch (shape.type)
+            {
+            default: break;
+            case CollisionShape::Fluid:
+            {
+                sf::Vector2f size(shape.aabb.width, shape.aabb.height);
+                size *= scale;
+
+                entity.addComponent<xy::Drawable>().setDepth(1);
+                auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+                verts.emplace_back(sf::Vector2f());
+                verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));
+                verts.emplace_back(size, size);
+                verts.emplace_back(sf::Vector2f(0.f, size.y), sf::Vector2f(0.f, size.y));
+
+                entity.getComponent<xy::Drawable>().updateLocalBounds();
+                std::int32_t spriteID;
+                if (shape.ID == 0)
+                {
+                    spriteID = SpriteID::GearBoy::Lava;
+                }
+                else
+                {
+                    spriteID = SpriteID::GearBoy::Water;
+                }
+                entity.getComponent<xy::Drawable>().setTexture(m_sprites[spriteID].getTexture());
+                entity.addComponent<Fluid>().frameSize = m_sprites[spriteID].getTextureBounds().height;
+                if (m_sprites[spriteID].getAnimations()[0].framerate != 0)
+                {
+                    entity.getComponent<Fluid>().frameTime = 1.f / m_sprites[spriteID].getAnimations()[0].framerate;
+                }
+            }
+            break;
+            case CollisionShape::Checkpoint:
+                entity.addComponent<xy::CommandTarget>().ID = CommandID::World::CheckPoint;
+
+                if (shape.ID > 0)
+                {
+                    auto checkpointEnt = m_gameScene.createEntity();
+                    checkpointEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                    checkpointEnt.getComponent<xy::Transform>().setScale(scale, scale);
+                    checkpointEnt.addComponent<xy::Drawable>().setDepth(-1);
+                    checkpointEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Checkpoint];
+                    checkpointEnt.addComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Idle]);
+
+                    auto bounds = m_sprites[SpriteID::GearBoy::Checkpoint].getTextureBounds();
+                    bounds.width *= scale;
+                    bounds.height *= scale;
+
+                    auto particleEnt = m_gameScene.createEntity();
+                    particleEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                    particleEnt.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 3.f);
+                    particleEnt.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Checkpoint];
+                    //TODO could add callback to destroy end when particles finished?
+
+                    entity.addComponent<xy::Callback>().function =
+                        [&, checkpointEnt, particleEnt](xy::Entity e, float) mutable
+                    {
+                        if (checkpointEnt.getComponent<xy::SpriteAnimation>().getAnimationIndex() ==
+                            m_checkpointAnimations[AnimID::Checkpoint::Idle])
+                        {
+                            checkpointEnt.getComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Activate]);
+                            particleEnt.getComponent<xy::ParticleEmitter>().start();
+                        }
+                        e.getComponent<xy::Callback>().active = false;
+                    };
+                }
+
+                break;
+            case CollisionShape::Collectible:
+            {
+                std::int32_t spriteID = 0;
+                switch (shape.ID)
+                {
+                default:
+                case GameConst::CollectibleID::Coin:
+                    spriteID = SpriteID::GearBoy::Coin;
+                    break;
+                case GameConst::CollectibleID::Shield:
+                    spriteID = SpriteID::GearBoy::Shield;
+                    break;
+                case GameConst::CollectibleID::Ammo:
+                    spriteID = SpriteID::GearBoy::Ammo;
+                    break;
+                case GameConst::CollectibleID::Life:
+                    spriteID = SpriteID::GearBoy::ExtraLife;
+                    entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Shield];
+                    entity.getComponent<xy::ParticleEmitter>().settings.spawnOffset.x = entity.getComponent<CollisionBody>().shapes[0].aabb.width / 2.f;
+                    entity.getComponent<xy::ParticleEmitter>().start();
+                    break;
+                }
+
+                auto cEnt = m_gameScene.createEntity();
+                cEnt.addComponent<xy::Transform>().setScale(scale, scale);
+                cEnt.addComponent<xy::Drawable>();
+                cEnt.addComponent<xy::Sprite>() = m_sprites[spriteID];
+                cEnt.addComponent<xy::SpriteAnimation>().play(0);
+                cEnt.addComponent<BobAnimation>().parent = entity;
+
+                entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());
+            }
+            break;
+            case CollisionShape::Dialogue:
+                entity.addComponent<Dialogue>().file = m_mapLoader.getDialogueFiles()[shape.ID];
+                break;
+            case CollisionShape::Exit:
+            {
+                if (shape.ID == 1)
+                {
+                    auto crackEntity = m_gameScene.createEntity();
+                    crackEntity.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                    crackEntity.getComponent<xy::Transform>().setScale(scale, scale);
+                    crackEntity.addComponent<xy::Drawable>();
+                    crackEntity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crack];
+                    crackEntity.addComponent<xy::SpriteAnimation>().play(0);
+                    auto bounds = m_sprites[SpriteID::GearBoy::Crack].getTextureBounds();
+                    crackEntity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+                    bounds = entity.getComponent<xy::BroadphaseComponent>().getArea();
+                    crackEntity.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 2.f);
+                }
+            }
+            break;
+            }
+        }
     }
 }
 
@@ -692,8 +700,12 @@ void GameState::loadEnemies()
             entity.addComponent<Enemy>().type = Enemy::Spitball;
             break;
         case Enemy::Rocket:
+            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
             entity.addComponent<Enemy>().type = Enemy::Rocket;
-            //TODO add spawn position to director
+            entity.getComponent<Enemy>().stateTime = xy::Util::Random::value(0.2f, 3.f);
+            entity.getComponent<xy::Transform>().setScale(0.f, scale);
+            entity.getComponent<xy::Transform>().setPosition(path.first);
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 4); //duh map is in its own scene...
             break;
         }
         entity.getComponent<Enemy>().start = path.first * scale;
@@ -709,7 +721,7 @@ void GameState::loadEnemies()
 
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = bounds;
-        collision.shapes[0].type = (id == Enemy::Orb || id == Enemy::Spitball) ? CollisionShape::Spikes : CollisionShape::Enemy;
+        collision.shapes[0].type = (id == Enemy::Orb || id == Enemy::Spitball || id == Enemy::Rocket) ? CollisionShape::Spikes : CollisionShape::Enemy;
         collision.shapes[0].collisionFlags = CollisionShape::Player;
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
@@ -719,12 +731,12 @@ void GameState::loadEnemies()
 
 void GameState::loadProps()
 {
-    auto scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+    const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
 
     const auto& props = m_mapLoader.getProps();
     for (const auto& [id, bounds] : props)
     {
-        auto entity = m_gameScene.createEntity();
+        auto entity = m_tilemapScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(bounds.left * scale, bounds.top * scale);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 3);

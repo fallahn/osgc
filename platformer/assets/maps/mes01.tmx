@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="215">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="219">
  <tileset firstgid="1" name="master_entertainment_system" tilewidth="16" tileheight="16" tilecount="256" columns="16">
   <image source="../images/tiles/master_entertainment_system.png" width="256" height="256"/>
  </tileset>
@@ -18,7 +18,7 @@
    eJzt2bEJwDAMBEDtv1lG8CjpUqQNIaTQG/tugvcjsI2qAAAAAAAAAAAA4J+RDgDQ7EgHALZypgMAcaP8u8hzHwEAQD/vcJLM322lHt72W13n/LpjW6n3Jzv2YP7mMWsPF0tHEr4=
   </data>
  </layer>
- <objectgroup id="3" name="Object Layer 1" visible="0">
+ <objectgroup id="3" name="Object Layer 1">
   <object id="1" type="solid" x="0" y="352" width="192" height="128"/>
   <object id="2" type="solid" x="192" y="384" width="128" height="96"/>
   <object id="3" type="solid" x="320" y="416" width="32" height="64"/>
@@ -344,11 +344,11 @@
    </properties>
    <polyline points="0,0 80,0"/>
   </object>
-  <object id="156" name="fireball" type="enemy" x="1636" y="344">
+  <object id="156" name="fireball" type="enemy" x="1645" y="343">
    <properties>
-    <property name="id" type="int" value="2"/>
+    <property name="id" type="int" value="6"/>
    </properties>
-   <polyline points="0,0 104,0"/>
+   <polyline points="0,0 141,0"/>
   </object>
   <object id="157" name="coin" type="collectible" x="48" y="72" width="16" height="16">
    <properties>
@@ -639,6 +639,18 @@
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>
+  </object>
+  <object id="217" name="fireball" type="enemy" x="1472" y="343">
+   <properties>
+    <property name="id" type="int" value="6"/>
+   </properties>
+   <polyline points="0,0 30,0"/>
+  </object>
+  <object id="218" name="fireball" type="enemy" x="1505" y="343">
+   <properties>
+    <property name="id" type="int" value="6"/>
+   </properties>
+   <polyline points="0,0 -33,0"/>
   </object>
  </objectgroup>
 </map>

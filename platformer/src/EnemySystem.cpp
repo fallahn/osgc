@@ -103,6 +103,9 @@ void EnemySystem::process(float dt)
             case Enemy::Spitball:
                 processSpitball(entity, dt);
                 break;
+            case Enemy::Rocket:
+                processRocket(entity, dt);
+                break;
             }
         }
         else
@@ -331,15 +334,40 @@ void EnemySystem::processRocket(xy::Entity entity, float dt)
 {
     auto& enemy = entity.getComponent<Enemy>();
     auto& tx = entity.getComponent<xy::Transform>();
-    tx.move(enemy.velocity * dt);
 
-    auto maxDist = xy::Util::Vector::lengthSquared(enemy.end - enemy.start);
-    auto currDist = xy::Util::Vector::lengthSquared(tx.getPosition() - enemy.start);
-
-    if (currDist > maxDist)
+    if (enemy.stateTime > 0)
     {
-        //TODO raise a message
-        getScene()->destroyEntity(entity);
+        enemy.stateTime -= dt;
+
+        if (enemy.stateTime < 0)
+        {
+            //respawn
+            auto scale = tx.getScale();
+            scale.x = -scale.y;
+            tx.setScale(scale);
+
+            auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
+            msg->position = enemy.start;
+        }
+    }
+    else
+    {
+        tx.move(enemy.velocity * dt);
+
+        auto maxDist = xy::Util::Vector::lengthSquared(enemy.end - enemy.start);
+        auto currDist = xy::Util::Vector::lengthSquared(tx.getPosition() - enemy.start);
+
+        if (currDist > maxDist)
+        {
+            enemy.stateTime = 3.f;
+            auto scale = tx.getScale();
+            scale.x = 0.f;
+            tx.setScale(scale);
+            tx.setPosition(enemy.start);
+
+            auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
+            msg->position = enemy.end;
+        }
     }
 }
 
@@ -365,7 +393,7 @@ void EnemySystem::onEntityAdded(xy::Entity entity)
         enemy.velocity = enemy.end - enemy.start;
         enemy.velocity = xy::Util::Vector::normalise(enemy.velocity);
         enemy.velocity *= Enemy::RocketVelocity;
-        entity.getComponent<xy::Transform>().setRotation(xy::Util::Vector::rotation(enemy.velocity));
+        entity.getComponent<xy::Transform>().setRotation(xy::Util::Vector::rotation(-enemy.velocity));
         break;
     case Enemy::Egg:
     case Enemy::Spitball:

@@ -67,6 +67,7 @@ private:
     void initScene();
     void loadResources();
     void buildWorld();
+    void loadCollision();
     void loadEnemies();
     void loadProps();
     void buildUI();
