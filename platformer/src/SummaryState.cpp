@@ -102,7 +102,7 @@ bool SummaryState::handleEvent(const sf::Event& evt)
             break;
         case Completed:
             requestStackClear();
-            if (m_sharedData.nextMap == "credits")
+            if (m_sharedData.nextMap == "credits.tmx")
             {
                 requestStackPush(StateID::Ending);
             }

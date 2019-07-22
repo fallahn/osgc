@@ -5,7 +5,7 @@
  </tileset>
  <layer id="2" name="foreground" width="30" height="17">
   <data encoding="base64" compression="zlib">
-   eJy9k7kOwjAQRJez4E4KTiFxlhyfQAf0VEjU0AFJl3D8OhNhC2PFJofFSE9K4vWMI+9aRGQJ1EBd+qZDVx+s2Yr1nkQDFCm6dPUNlhvFL25uBVQN5Op84irwsgz6mVCJUf5zrkvvO2hqajKgwMgayrUZKwr/7yAzJ9TlDeUPJIbSOu9JX8iO2qNpxHPl+Rd79A4e4KnxaYE26IBuhFw+C2nnYQTGYAKmCc6RVDMwBwuwDDmHCa3BhrFV5MrvslR3t4t5liM4CfzKlXUGFwVXzT6HPv3pJ/Dw6HuexBm7gb0CJ2QfxxWeVR4ehc8z39NXEOQehNoX27UkXA==
+   eJzt08sKgkAUBuDTddGF0kVXgq7LykdoV+1bBa1rV+lOu7x6/8CI0zCjaVIQHfhA8cz8I3oMIjK+oCv5129ViSt/ONcBExohPRkocNmUck1uQer3Zpk5oS+fUn5fMpCe13meJ2QzxTdzo8rPZWoUzH1V6LnCDe4h+zShBW3ovJBb0WTFrSGMYAyTBOdIWlOYwRwsxTnSqCWsuLUmV76XS/ftNjHPsoeDICpXriOcNM4h62wK/k8vwR4uPc+TOGMX2GrYinU+R7jW7eGSep79NT0NlrsTeh/0myN8
   </data>
  </layer>
  <objectgroup color="#aa0000" id="3" name="collision">
@@ -19,9 +19,6 @@
   <object id="8" type="solid" x="0" y="0" width="8" height="240"/>
   <object id="9" type="solid" x="472" y="0" width="8" height="208"/>
   <object id="10" type="solid" x="8" y="0" width="464" height="16"/>
-  <object id="11" type="solid" x="64" y="16" width="32" height="48"/>
-  <object id="12" type="solid" x="256" y="16" width="32" height="32"/>
-  <object id="13" type="solid" x="368" y="16" width="48" height="48"/>
   <object id="14" type="solid" x="144" y="96" width="64" height="16"/>
   <object id="15" type="solid" x="128" y="160" width="64" height="16"/>
   <object id="16" type="solid" x="8" y="80" width="40" height="64"/>

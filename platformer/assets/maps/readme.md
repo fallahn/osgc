@@ -3,7 +3,7 @@ Mapping Guide
 
 Maps are [Tiled](https://www.mapeditor.org) `.tmx` format maps, stored with base64 encoding and zlib compression. Object types are defined in objecttypes.xml.
 
-Maps can have any size tiles, but tilesets should all have the same tile size and must be no more than 16x16 (256 total) tiles in size. Multiple tilesets can be used per map, but only one tile set is currently supported per layer. With this in mind it's best to organise your tilesets such as one for basic geometry, another for details and so on.
+Maps can have any size tiles, but tilesets should all have the same tile size and must be no more than 16x16 (256 total) tiles in size. Multiple tilesets can be used per map, but only one tile set is currently supported per layer. With this in mind it's best to organise your tilesets such as one for basic geometry, another for details and so on. Also, as Tiled starts tile IDs at 1, not 0, the last tile (256) will currently not be drawn. This may change in the future, however.
 
 Objects have specific properties which define their behaviour. For example collectible objects have an ID property which defines their type.
 

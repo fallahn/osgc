@@ -53,7 +53,7 @@ struct Inventory final
     std::int32_t lives = 3;
     std::int32_t coins = 0;
     std::int32_t score = 0;
-    std::int32_t ammo = MaxAmmo;
+    std::int32_t ammo = 0;
 };
 
 struct SharedData final
