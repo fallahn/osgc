@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include "InputBinding.hpp"
 #include "StateIDs.hpp"
+#include "LoadingScreen.hpp"
 
 #include <SFML/Graphics/Texture.hpp>
 
@@ -67,6 +68,8 @@ struct SharedData final
 
     TransitionContext transitionContext;
     std::string dialogueFile = "intro.txt";
+
+    LoadingScreen loadingScreen;
 
     void saveProgress();
     void loadProgress();

@@ -157,6 +157,7 @@
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\IntroState.hpp" />
+    <ClInclude Include="include\LoadingScreen.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuConfirmState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\IntroState.cpp" />
+    <ClCompile Include="src\LoadingScreen.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuConfirmState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />

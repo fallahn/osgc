@@ -11,6 +11,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IntroState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp

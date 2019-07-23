@@ -72,4 +72,6 @@ private:
     void loadEnemies();
     void loadProps();
     void buildUI();
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

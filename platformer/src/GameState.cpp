@@ -894,3 +894,9 @@ void GameState::buildUI()
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
 }
+
+void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
+}

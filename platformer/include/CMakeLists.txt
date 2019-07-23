@@ -17,6 +17,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/IntroState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.hpp

@@ -550,3 +550,9 @@ void MenuState::buildMenu()
     entity.addComponent<Shaker>();
     entity.addComponent<MenuItem>().ID = MenuID::Quit;
 }
+
+void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
+}

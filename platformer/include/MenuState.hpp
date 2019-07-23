@@ -76,4 +76,6 @@ private:
     void loadResources();
     void buildBackground();
     void buildMenu();
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };
