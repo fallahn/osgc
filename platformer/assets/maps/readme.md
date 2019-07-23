@@ -12,6 +12,13 @@ Objects have specific properties which define their behaviour. For example colle
   * 2 is ammo
   * 3 is extra life
 
+Prop objects are generally not interactable (with the exception of crates) and are placed in the background
+
+  * 0 is a waterfall
+  * 1 is a lavafall
+  * 2 is a torch/lamp
+  * 3 is a crate
+
 Enemy objects also have an ID property. See the existing maps for further information (as these are likely to change with updates). The IDs ahould match the enum values in EnemySystem.hpp
 
 Maps must have at least one checkpoint object, which is where the player will start the level, with an ID of 0. Further checkpoints should have their ID incremented each time. When the map is loaded the checkpoint sprite is automatically placed based on the current theme.

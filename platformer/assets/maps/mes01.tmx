@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="221">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="221">
  <tileset firstgid="1" name="master_entertainment_system" tilewidth="16" tileheight="16" tilecount="256" columns="16">
   <image source="../images/tiles/master_entertainment_system.png" width="256" height="256"/>
  </tileset>
@@ -158,30 +158,66 @@
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="103" type="waterfall" x="408" y="288" width="16" height="176">
+  <object id="103" name="lavav" type="prop" x="408" y="288" width="16" height="176">
    <properties>
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="104" type="waterfall" x="1000" y="288" width="16" height="179">
+  <object id="104" name="lava" type="prop" x="1000" y="288" width="16" height="179">
    <properties>
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="106" type="waterfall" x="2024" y="336" width="16" height="136">
+  <object id="106" name="lava" type="prop" x="2024" y="336" width="16" height="136">
    <properties>
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="107" type="torch" x="1200" y="320" width="16" height="32"/>
-  <object id="108" type="torch" x="1792" y="320" width="16" height="32"/>
-  <object id="109" type="torch" x="712" y="80" width="16" height="32"/>
-  <object id="110" type="torch" x="776" y="80" width="16" height="32"/>
-  <object id="111" type="torch" x="2504" y="144" width="16" height="32"/>
-  <object id="112" type="torch" x="2376" y="144" width="16" height="32"/>
-  <object id="113" type="torch" x="24" y="320" width="16" height="32"/>
-  <object id="114" type="torch" x="2480" y="320" width="16" height="32"/>
-  <object id="115" type="torch" x="1872" y="416" width="16" height="32"/>
+  <object id="107" name="torch" type="prop" x="1200" y="320" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="108" name="torch" type="prop" x="1792" y="320" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="109" name="torch" type="prop" x="712" y="80" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="110" name="torch" type="prop" x="776" y="80" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="111" name="torch" type="prop" x="2504" y="144" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="112" name="torch" type="prop" x="2376" y="144" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="113" name="torch" type="prop" x="24" y="320" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="114" name="torch" type="prop" x="2480" y="320" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="115" name="torch" type="prop" x="1872" y="416" width="16" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
   <object id="116" type="spikes" x="16" y="48" width="12" height="48"/>
   <object id="117" type="spikes" x="496" y="436" width="16" height="12"/>
   <object id="118" type="spikes" x="352" y="436" width="16" height="12"/>

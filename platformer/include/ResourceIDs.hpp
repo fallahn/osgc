@@ -84,11 +84,12 @@ namespace ParticleID
 
 namespace PropID
 {
-    enum
+    enum Prop
     {
-        Torch,
+        WaterFall,
         LavaFall,
-        WaterFall
+        Torch,
+        Crate
     };
 }
 
