@@ -1,7 +1,7 @@
 particle_system torch_smoke
 {
     src = "assets/images/smoke.png"
-    blendmode = add
+    blendmode = alpha
     gravity = -13.699000,0.000000
     velocity = 0.000000,-100.000000
     spread = 0.000000
@@ -11,7 +11,7 @@ particle_system torch_smoke
     random_initial_rotation = true
     rotation_speed = 0.000000
     scale_affector = 0.342000
-    size = 10.258000
+    size = 4.258000
     emit_rate = 1.027000
     emit_count = 2
     spawn_radius = 17.122999

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="176" height="29" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="180">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="176" height="29" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="187">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -566,5 +566,40 @@
   <object id="177" type="solid" x="544" y="160" width="16" height="16"/>
   <object id="178" type="solid" x="2032" y="224" width="16" height="16"/>
   <object id="179" type="solid" x="2064" y="160" width="16" height="16"/>
+  <object id="180" name="torch" type="prop" x="108" y="80" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="181" name="torch" type="prop" x="548" y="176" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="182" name="torch" type="prop" x="644" y="336" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="183" name="torch" type="prop" x="1388" y="192" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="184" name="torch" type="prop" x="2124" y="80" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="185" name="torch" type="prop" x="2420" y="272" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="186" name="torch" type="prop" x="2708" y="272" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

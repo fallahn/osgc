@@ -20,21 +20,18 @@ spritesheet torch
         }
     }
 
-    sprite torch_side
+    sprite torch
     {
-        bounds = 3,0,16,32
+        bounds = 0,32,8,16
 
         animation idle
         {
-            frame=32,0,16,32
-            frame=32,16,16,32
-            frame=32,32,16,32
-            frame=32,48,16,32
-            frame=32,64,16,32
-            frame=32,80,16,32
+            frame=0,32,8,16
+            frame=8,32,8,16
+            frame=16,32,8,16
 
             loop=true
-            framerate=24
+            framerate=12
         }
     }
 }

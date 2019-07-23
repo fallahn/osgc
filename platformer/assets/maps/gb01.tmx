@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="26" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="199">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="26" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="207">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -10,7 +10,7 @@
  </layer>
  <layer id="7" name="terrain" width="120" height="26">
   <data encoding="base64" compression="zlib">
-   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
+   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
   </data>
  </layer>
  <layer id="8" name="near detail" width="120" height="26">
@@ -76,7 +76,6 @@
   <object id="39" type="solid" x="448" y="112" width="16" height="32"/>
   <object id="40" type="solid" x="480" y="80" width="48" height="160"/>
   <object id="41" type="solid" x="400" y="160" width="32" height="64"/>
-  <object id="42" type="spikes" x="432" y="176" width="48" height="54"/>
   <object id="43" type="solid" x="544" y="208" width="64" height="32"/>
   <object id="44" type="spikes" x="587" y="107" width="26" height="26"/>
   <object id="45" type="solid" x="688" y="48" width="32" height="48"/>
@@ -103,7 +102,7 @@
   <object id="67" type="spikes" x="96" y="186" width="16" height="6"/>
   <object id="68" type="spikes" x="0" y="144" width="6" height="48"/>
   <object id="69" type="spikes" x="0" y="48" width="6" height="32"/>
-  <object id="70" type="spikes" x="400" y="224" width="32" height="6"/>
+  <object id="70" type="spikes" x="400" y="224" width="80" height="6"/>
   <object id="71" type="spikes" x="480" y="240" width="128" height="6"/>
   <object id="72" type="spikes" x="400" y="154" width="16" height="6"/>
   <object id="73" type="spikes" x="880" y="202" width="16" height="6"/>
@@ -561,6 +560,46 @@
    </properties>
   </object>
   <object id="198" name="coin" type="collectible" x="408" y="296" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="199" name="torch" type="prop" x="192" y="240" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="200" name="torch" type="prop" x="292" y="112" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="201" name="torch" type="prop" x="756" y="240" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="202" name="torch" type="prop" x="956" y="144" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="203" name="torch" type="prop" x="1172" y="208" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="204" name="torch" type="prop" x="1548" y="208" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="205" name="torch" type="prop" x="1796" y="112" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="206" type="fluid" x="432" y="176" width="48" height="16">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>

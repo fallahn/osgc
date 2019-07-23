@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="190">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="178" height="25" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="198">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
@@ -555,5 +555,45 @@
    </properties>
   </object>
   <object id="189" type="solid" x="1584" y="160" width="32" height="48"/>
+  <object id="190" name="torch" type="prop" x="348" y="320" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="191" name="torch" type="prop" x="516" y="96" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="192" name="torch" type="prop" x="940" y="256" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="193" name="torch" type="prop" x="1308" y="256" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="194" name="torch" type="prop" x="1476" y="112" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="195" name="torch" type="prop" x="1812" y="48" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="196" name="torch" type="prop" x="2340" y="32" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="197" name="torch" type="prop" x="2060" y="304" width="8" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
