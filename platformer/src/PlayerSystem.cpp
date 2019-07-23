@@ -53,8 +53,9 @@ namespace
     }
 
     const float Gravity = 5999.9f;
-    const float JumpImpulse = 1500.f;
+    const float JumpImpulse = 1480.f;
     //const float MaxJump = -1500.f;
+    const float TerminalVelocity = 12000.f;
 }
 
 PlayerSystem::PlayerSystem(xy::MessageBus& mb, SharedData& sd)
@@ -163,8 +164,8 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
 
 
     //apply gravity
-    float multiplier = (entity.getComponent<Player>().velocity.y < 0) ? 0.7f : 1.2f;
-    entity.getComponent<Player>().velocity.y += Gravity * multiplier * dt;
+    float multiplier = (player.velocity.y < 0) ? 0.7f : 1.2f;
+    player.velocity.y = std::min(player.velocity.y + Gravity * multiplier * dt, TerminalVelocity);
 
     applyVelocity(entity, dt);
     doCollision(entity, dt);

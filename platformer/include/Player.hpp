@@ -36,7 +36,7 @@ struct Player final
     
     sf::Vector2f velocity;
     static constexpr float Acceleration = 120.f;
-    static constexpr float Drag = 0.82f;
+    static constexpr float Drag = 0.81f;
 
     AnimationMap<AnimID::Player::Count> animations = {};
 
