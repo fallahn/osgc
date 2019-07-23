@@ -59,6 +59,7 @@ private:
     SpriteArray<SpriteID::GearBoy::Count> m_sprites;
     AnimationMap<AnimID::Player::Count> m_playerAnimations;
     AnimationMap<AnimID::Checkpoint::Count> m_checkpointAnimations;
+    AnimationMap<AnimID::Enemy::Count> m_crawlerAnimations;
     std::array<xy::EmitterSettings, ParticleID::Count> m_particleEmitters;
 
     MapLoader m_mapLoader;

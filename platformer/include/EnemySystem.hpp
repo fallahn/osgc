@@ -18,10 +18,14 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "AnimationMap.hpp"
+
 #include <xyginext/ecs/System.hpp>
 
 struct Enemy final
 {
+    AnimationMap<AnimID::Enemy::Count> animationIDs;
+
     enum
     {
         Normal, Dying, Dead

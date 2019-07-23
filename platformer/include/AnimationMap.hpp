@@ -41,6 +41,16 @@ namespace AnimID
             Count
         };
     }
+
+    namespace Enemy
+    {
+        enum
+        {
+            Walk, Idle, Die,
+
+            Count
+        };
+    }
 }
 
 template <std::size_t size>

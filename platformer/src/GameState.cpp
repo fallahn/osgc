@@ -78,8 +78,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_playerInput   (sd.inputBinding)
 {
     launchLoadingScreen();
-    sd.theme = "mes";
-    sd.nextMap = "mes01.tmx";
+    //sd.theme = "mes";
+    //sd.nextMap = "mes01.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -348,6 +348,10 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Bomb] = spriteSheet.getSprite("bomb");
     m_sprites[SpriteID::GearBoy::Orb] = spriteSheet.getSprite("orb");
     m_sprites[SpriteID::GearBoy::Spitball] = spriteSheet.getSprite("spitball");
+
+    m_crawlerAnimations[AnimID::Enemy::Walk] = spriteSheet.getAnimationIndex("walk", "crawler");
+    m_crawlerAnimations[AnimID::Enemy::Die] = spriteSheet.getAnimationIndex("die", "crawler");
+    m_crawlerAnimations[AnimID::Enemy::Idle] = spriteSheet.getAnimationIndex("idle", "crawler");
 
     spriteSheet.loadFromFile("assets/sprites/crack.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Crack] = spriteSheet.getSprite("crack");
@@ -683,6 +687,7 @@ void GameState::loadEnemies()
         case Enemy::Crawler:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crawler];
             entity.addComponent<Enemy>().type = Enemy::Crawler;
+            entity.getComponent<Enemy>().animationIDs = m_crawlerAnimations;
             break;
         case Enemy::Bird:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Bird];

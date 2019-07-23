@@ -24,6 +24,30 @@ spritesheet enemies
             loop=true
             framerate=30
         }
+
+        animation idle
+        {
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=102,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+            frame=6,3,20,13
+
+            loop=true
+            framerate = 10
+        }
     }
 
     sprite bird

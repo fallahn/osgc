@@ -147,12 +147,12 @@ void EnemySystem::processCrawler(xy::Entity entity, float dt)
         if (enemy.velocity.x == 0)
         {
             enemy.velocity.x = (xy::Util::Random::value(0, 1) == 0) ? -Enemy::CrawlerVelocity : Enemy::CrawlerVelocity;
-            entity.getComponent<xy::SpriteAnimation>().play(0);
+            entity.getComponent<xy::SpriteAnimation>().play(enemy.animationIDs[AnimID::Enemy::Walk]);
         }
         else
         {
             enemy.velocity.x = 0.f;
-            entity.getComponent<xy::SpriteAnimation>().pause();
+            entity.getComponent<xy::SpriteAnimation>().play(enemy.animationIDs[AnimID::Enemy::Idle]);
         }
     }
 }
