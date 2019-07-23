@@ -40,6 +40,7 @@ source distribution.
 #include "ShakerSystem.hpp"
 #include "PluginExport.hpp"
 #include "FluidAnimationSystem.hpp"
+#include "CrateSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -96,7 +97,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     launchLoadingScreen();
 
     m_sharedData.reset();
-    m_sharedData.inventory.ammo = 1;
+    //m_sharedData.inventory.ammo = 1;
 
     initScene();
     loadResources();
@@ -234,6 +235,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::CommandSystem>(mb);
     m_backgroundScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_backgroundScene.addSystem<PlayerSystem>(mb, m_sharedData);
+    m_backgroundScene.addSystem<CrateSystem>(mb);
     m_backgroundScene.addSystem<NinjaStarSystem>(mb);
     m_backgroundScene.addSystem<ShakerSystem>(mb);
     m_backgroundScene.addSystem<FluidAnimationSystem>(mb);
@@ -280,6 +282,9 @@ void MenuState::loadResources()
     {
         const_cast<sf::Texture*>(tex)->setRepeated(true);
     }
+
+    spriteSheet.loadFromFile("assets/sprites/gearboy/crate.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Crate] = spriteSheet.getSprite("crate");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
@@ -409,7 +414,6 @@ void MenuState::buildBackground()
 
 
         const auto& collisionShapes = m_mapLoader.getCollisionShapes();
-
         for (const auto& shape : collisionShapes)
         {
             entity = m_backgroundScene.createEntity();
@@ -473,6 +477,15 @@ void MenuState::buildBackground()
             debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f); //press F2 to toggle visibility
             entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
 #endif //XY_DEBUG
+        }
+
+        const auto& props = m_mapLoader.getProps();
+        for (const auto& [id, bounds] : props)
+        {
+            if (id == PropID::CrateSpawn)
+            {
+                spawnCrate({ bounds.left * pixelScale, bounds.top * pixelScale });
+            }
         }
 
         m_backgroundScene.getSystem<PlayerSystem>().setBounds({ sf::Vector2f(), m_mapLoader.getMapSize() * pixelScale });
@@ -549,6 +562,32 @@ void MenuState::buildMenu()
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
     entity.addComponent<Shaker>();
     entity.addComponent<MenuItem>().ID = MenuID::Quit;
+}
+
+void MenuState::spawnCrate(sf::Vector2f position)
+{
+    const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+
+    auto entity = m_backgroundScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crate];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Crate);
+    
+    entity.addComponent<CollisionBody>().shapeCount = 2;
+    entity.getComponent<CollisionBody>().shapes[0].aabb = bounds;
+    entity.getComponent<CollisionBody>().shapes[0].type = CollisionShape::Crate;
+    entity.getComponent<CollisionBody>().shapes[0].collisionFlags = CollisionGroup::CrateFlags;
+
+    entity.getComponent<CollisionBody>().shapes[1].aabb = GameConst::Gearboy::PlayerFoot;
+    entity.getComponent<CollisionBody>().shapes[1].type = CollisionShape::Foot;
+    entity.getComponent<CollisionBody>().shapes[1].collisionFlags = CollisionGroup::CrateFlags;
+
+    entity.addComponent<Crate>().spawnPosition = position;
 }
 
 void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

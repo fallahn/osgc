@@ -77,5 +77,7 @@ private:
     void buildBackground();
     void buildMenu();
 
+    void spawnCrate(sf::Vector2f);
+
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

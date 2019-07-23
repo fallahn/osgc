@@ -89,7 +89,7 @@ namespace PropID
         WaterFall,
         LavaFall,
         Torch,
-        Crate
+        CrateSpawn
     };
 }
 
@@ -124,6 +124,9 @@ namespace SpriteID
 
             Crack,
             Torch,
+
+            CrateSpawner,
+            Crate,
 
             Count
         };

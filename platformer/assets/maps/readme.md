@@ -12,12 +12,12 @@ Objects have specific properties which define their behaviour. For example colle
   * 2 is ammo
   * 3 is extra life
 
-Prop objects are generally not interactable (with the exception of crates) and are placed in the background
+Prop objects are not interactable and are placed in the background between the furthest map layer and the next layer
 
   * 0 is a waterfall
   * 1 is a lavafall
   * 2 is a torch/lamp
-  * 3 is a crate
+  * 3 is a crate spawner
 
 Enemy objects also have an ID property. See the existing maps for further information (as these are likely to change with updates). The IDs ahould match the enum values in EnemySystem.hpp
 

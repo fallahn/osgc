@@ -39,19 +39,6 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    sf::FloatRect boundsToWorldspace(sf::FloatRect bounds, const xy::Transform& tx)
-    {
-        auto scale = tx.getScale();
-        bounds.left *= scale.x;
-        bounds.width *= scale.x;
-        bounds.top *= scale.y;
-        bounds.height *= scale.y;
-        bounds.left += tx.getPosition().x;
-        bounds.top += tx.getPosition().y;
-
-        return bounds;
-    }
-
     const float Gravity = 5999.9f;
     const float JumpImpulse = 1480.f;
     //const float MaxJump = -1500.f;
@@ -364,14 +351,14 @@ void PlayerSystem::doCollision(xy::Entity entity, float)
     //broad phase
     auto area = entity.getComponent<xy::BroadphaseComponent>().getArea();
 
-    auto queryArea = boundsToWorldspace(area, tx);
+    auto queryArea = boundsToWorldSpace(area, tx);
     auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionGroup::PlayerFlags);
 
     for (auto other : nearby)
     {
         if (other != entity)
         {
-            auto otherBounds = boundsToWorldspace(other.getComponent<xy::BroadphaseComponent>().getArea(), other.getComponent<xy::Transform>());
+            auto otherBounds = boundsToWorldSpace(other.getComponent<xy::BroadphaseComponent>().getArea(), other.getComponent<xy::Transform>());
 
             if (otherBounds.intersects(queryArea))
             {
@@ -392,7 +379,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
     for (auto i = 0u; i < collisionBody.shapeCount; ++i)
     {
         auto bounds = collisionBody.shapes[i].aabb;
-        bounds = boundsToWorldspace(bounds, tx);
+        bounds = boundsToWorldSpace(bounds, tx);
 
         if (auto manifold = intersectsAABB(bounds, otherBounds); manifold)
         {

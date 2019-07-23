@@ -19,6 +19,8 @@ Copyright 2019 Matt Marchant
 
 #include "Collision.hpp"
 
+#include <xyginext/ecs/components/Transform.hpp>
+
 std::optional<Manifold> intersectsAABB(sf::FloatRect a, sf::FloatRect b)
 {
     sf::FloatRect overlap;
@@ -49,4 +51,17 @@ std::optional<Manifold> intersectsAABB(sf::FloatRect a, sf::FloatRect b)
 std::optional<Manifold> intersectsSAT(xy::Entity, xy::Entity)
 {
     return std::nullopt;
+}
+
+sf::FloatRect boundsToWorldSpace(sf::FloatRect bounds, const xy::Transform& tx)
+{
+    auto scale = tx.getScale();
+    bounds.left *= scale.x;
+    bounds.width *= scale.x;
+    bounds.top *= scale.y;
+    bounds.height *= scale.y;
+    bounds.left += tx.getPosition().x;
+    bounds.top += tx.getPosition().y;
+
+    return bounds;
 }

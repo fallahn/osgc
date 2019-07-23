@@ -44,7 +44,8 @@ struct CollisionShape final
         RightHand = 0x400,
 
         Text = 0x800,
-        Dialogue = 0x1000
+        Dialogue = 0x1000,
+        Crate = 0x2000
     }type = Solid;
 
     //these are the types this shape collides with
@@ -80,13 +81,22 @@ namespace CollisionGroup
     static const std::uint64_t PlayerFlags = 
         CollisionShape::Fluid | CollisionShape::Solid | CollisionShape::Spikes | 
         CollisionShape::Collectible | CollisionShape::Checkpoint | CollisionShape::Enemy |
-        CollisionShape::Exit | CollisionShape::Dialogue;
+        CollisionShape::Exit | CollisionShape::Dialogue | CollisionShape::Crate;
 
     static const std::uint64_t StarFlags =
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes |
         CollisionShape::Enemy | CollisionShape::Text;
+
+    static const std::uint64_t CrateFlags = CollisionShape::Player | CollisionShape::Enemy |
+        CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes;// | CollisionShape::LeftHand | CollisionShape::RightHand | CollisionShape::Foot;
 }
 
 std::optional<Manifold> intersectsAABB(sf::FloatRect, sf::FloatRect);
 
 std::optional<Manifold> intersectsSAT(xy::Entity, xy::Entity);
+
+namespace xy
+{
+    class Transform;
+}
+sf::FloatRect boundsToWorldSpace(sf::FloatRect, const xy::Transform&);
