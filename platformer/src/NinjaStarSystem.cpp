@@ -59,7 +59,13 @@ void NinjaStarSystem::process(float dt)
         {
             if (other != entity)
             {
-                auto otherBounds = other.getComponent<xy::Transform>().getTransform().transformRect(other.getComponent<xy::BroadphaseComponent>().getArea());
+                const auto& otherTx = other.getComponent<xy::Transform>();
+
+                auto otherBounds = other.getComponent<xy::BroadphaseComponent>().getArea();
+                //otherBounds.left -= otherTx.getOrigin().x;
+                //otherBounds.top -= otherTx.getOrigin().y;
+                otherBounds = otherTx.getTransform().transformRect(otherBounds);
+
                 if (otherBounds.intersects(bounds))
                 {
                     getScene()->destroyEntity(entity);

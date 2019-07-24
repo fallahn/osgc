@@ -42,6 +42,8 @@ struct Player final
 
     std::int32_t lastCheckpoint = 0;
 
+    xy::Entity carriedItem;
+
     float stateTime = 0.f;
     static constexpr float DyingTime = 1.f;
     static constexpr float DeadTime = 1.f;

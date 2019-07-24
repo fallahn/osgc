@@ -17,7 +17,10 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "CrateSystem.hpp"
+#include "Player.hpp"
 #include "Collision.hpp"
+#include "SharedStateData.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -31,10 +34,15 @@ namespace
 {
     const float Gravity = 5999.f;
     const float TerminalVelocity = 12000.f;
+
+    //TODO as with dropping items, if this is made more generic
+    //move elsewhere - possible to game consts?
+    const sf::Vector2f CarryOffset(18.f, -10.f);
 }
 
-CrateSystem::CrateSystem(xy::MessageBus& mb)
-    :xy::System(mb, typeid(CrateSystem))
+CrateSystem::CrateSystem(xy::MessageBus& mb, SharedData& sd)
+    : xy::System    (mb, typeid(CrateSystem)),
+    m_sharedData    (sd)
 {
     requireComponent<Crate>();
     requireComponent<xy::BroadphaseComponent>();
@@ -42,6 +50,78 @@ CrateSystem::CrateSystem(xy::MessageBus& mb)
 }
 
 //public
+void CrateSystem::handleMessage(const xy::Message& msg)
+{
+    if (msg.id == MessageID::PlayerMessage)
+    {
+        const auto& data = msg.getData<PlayerEvent>();
+        if (data.type == PlayerEvent::Shot
+            && m_sharedData.inventory.ammo == 0)
+        {
+            //try picking up a crate (or dropping player has one)
+            auto playerEnt = data.entity;
+            auto& player = playerEnt.getComponent<Player>();
+
+            if (player.carriedItem.isValid())
+            {
+                //drop it - TODO if this is extended to generic carriables
+                //then this should probably be elsewhere...
+                auto& crate = player.carriedItem.getComponent<Crate>();
+                crate.state = Crate::Falling;
+
+                auto& tx = playerEnt.getComponent<xy::Transform>();
+                auto& crateTx = player.carriedItem.getComponent<xy::Transform>();
+                auto position = crateTx.getWorldPosition();
+                crateTx.setPosition(position);
+                crateTx.setScale(tx.getScale().y, tx.getScale().y); //not a mistake, don't want negative x vals
+                tx.removeChild(crateTx);
+
+                player.carriedItem = {};
+            }
+            else
+            {
+                //scan area for crates and pick up
+                auto& tx = playerEnt.getComponent<xy::Transform>();
+                auto position = tx.getPosition();
+                auto offset = CarryOffset;
+                offset.x *= tx.getScale().x;
+                offset.y *= tx.getScale().y;
+
+                position += offset;
+                //TODO constify
+                sf::FloatRect queryArea(position.x - 32.f, position.y - 32.f, 64.f, 64.f);
+                auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionShape::Crate);
+                for (auto crate : nearby)
+                {
+                    auto& crateTx = crate.getComponent<xy::Transform>();
+                    auto bounds = crate.getComponent<xy::BroadphaseComponent>().getArea();
+                    bounds = crateTx.getTransform().transformRect(bounds);
+
+                    if (bounds.contains(position))
+                    {
+                        //pick up crate
+                        crateTx.setPosition(CarryOffset/* - crateTx.getOrigin()*/);
+                        crateTx.setScale(1.f, 1.f); //now getting scale from parent
+                        tx.addChild(crateTx);
+
+                        player.carriedItem = crate;
+                        crate.getComponent<Crate>().state = Crate::Carried;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    else if (msg.id == MessageID::StarMessage)
+    {
+        const auto& data = msg.getData<StarEvent>();
+        if (data.entityHit.getComponent<CollisionBody>().shapes[0].type == CollisionShape::Crate)
+        {
+            kill(data.entityHit);
+        }
+    }
+}
+
 void CrateSystem::process(float dt)
 {
     auto& entities = getEntities();

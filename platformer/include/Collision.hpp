@@ -85,7 +85,7 @@ namespace CollisionGroup
 
     static const std::uint64_t StarFlags =
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes |
-        CollisionShape::Enemy | CollisionShape::Text;
+        CollisionShape::Enemy | CollisionShape::Text | CollisionShape::Crate;
 
     static const std::uint64_t CrateFlags = CollisionShape::Player | CollisionShape::Enemy |
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes;// | CollisionShape::LeftHand | CollisionShape::RightHand | CollisionShape::Foot;

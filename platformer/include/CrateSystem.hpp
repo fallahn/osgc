@@ -36,14 +36,18 @@ struct Crate final
     static constexpr float DeadTime = 4.f;
 };
 
+struct SharedData;
 class CrateSystem final : public xy::System
 {
 public:
-    explicit CrateSystem(xy::MessageBus&);
+    CrateSystem(xy::MessageBus&, SharedData&);
 
+    void handleMessage(const xy::Message&) override;
     void process(float) override;
 
 private:
+
+    SharedData& m_sharedData;
 
     void updateFalling(xy::Entity, float);
     void updateIdle(xy::Entity, float);
