@@ -79,19 +79,19 @@ void PlayerSystem::process(float dt)
         default: break;
         case Player::Falling:
             processFalling(entity, dt);
-            DPRINT("State", "Falling");
+            //DPRINT("State", "Falling");
             break;
         case Player::Running:
             processRunning(entity, dt);
-            DPRINT("State", "Running");
+            //DPRINT("State", "Running");
             break;
         case Player::Dying:
             processDying(entity, dt);
-            DPRINT("State", "Dying");
+            //DPRINT("State", "Dying");
             break;
         case Player::Dead:
             processDead(entity, dt);
-            DPRINT("State", "Dead");
+            //DPRINT("State", "Dead");
             break;
         }
     }
@@ -387,7 +387,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
 
             //registering foot/hand collisions should only affect state
             //under certain collisions
-            if (otherBody.shapes[0].type & (CollisionShape::Solid/* | CollisionShape::Enemy*/))
+            if (otherBody.shapes[0].type & (CollisionShape::Solid | CollisionShape::Crate))
             {
                 collisionBody.collisionFlags |= collisionBody.shapes[i].type;
             }
@@ -515,6 +515,17 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     }
                 }
                     break;
+                case CollisionShape::Crate:
+                    if (manifold->normal.y != 0)
+                    {
+                        tx.move(manifold->normal* manifold->penetration);
+                        player.velocity = {};
+
+                        if (manifold->normal.y > 0)
+                        {
+                            kill(entity); //squashed!
+                        }
+                    }
                 }
             }
         }

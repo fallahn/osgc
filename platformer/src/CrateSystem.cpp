@@ -53,12 +53,15 @@ void CrateSystem::process(float dt)
         default: break;
         case Crate::Falling:
             updateFalling(entity, dt);
+            DPRINT("State", "Falling");
             break;
         case Crate::Idle:
             updateIdle(entity, dt);
+            DPRINT("State", "Idle");
             break;
         case Crate::Dead:
             updateDead(entity, dt);
+            DPRINT("State", "Dead");
             break;
         }
     }
@@ -76,7 +79,7 @@ void CrateSystem::updateFalling(xy::Entity entity, float dt)
     //check which shapes have collision
     if (crate.state != Crate::Dead) //collision may have killed it
     {
-        if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Crate | CollisionShape::Foot))
+        if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Crate/* | CollisionShape::Foot*/))
         {
             //touched the ground
             crate.velocity = {};
@@ -151,6 +154,7 @@ void CrateSystem::doCollision(xy::Entity entity)
             }
         }
     }
+    DPRINT("Nearby", std::to_string(nearby.size()));
 }
 
 void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::FloatRect otherBounds)
@@ -158,6 +162,8 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
     auto& tx = entity.getComponent<xy::Transform>();
     auto& collisionBody = entity.getComponent<CollisionBody>();
     auto& crate = entity.getComponent<Crate>();
+
+    auto position = tx.getPosition();
 
     for (auto i = 0u; i < collisionBody.shapeCount; ++i)
     {
@@ -169,7 +175,11 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
             auto& otherBody = other.getComponent<CollisionBody>();
 
             //flag crate body as having a collision on this shape
-            collisionBody.collisionFlags |= collisionBody.shapes[i].type;
+            if (otherBody.shapes[0].type & CollisionShape::Solid)
+            {
+                collisionBody.collisionFlags |= collisionBody.shapes[i].type;
+                //DPRINT("Type", std::to_string(collisionBody.shapes[i].type));
+            }
 
             if (collisionBody.shapes[i].type == CollisionShape::Crate)
             {
@@ -193,10 +203,12 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
                     kill(entity);
                     break;
                 case CollisionShape::Player:
-                    tx.move(manifold->normal * manifold->penetration);
-                    //if (manifold->normal.x != 0)
+                    
+                    if (manifold->normal.x != 0)
                     {
-                        crate.velocity.x += manifold->normal.x * 20.f; //TODO const this impulse
+                        //DPRINT("Player", "Collision");
+                        crate.velocity.x += manifold->normal.x * 80.f; //TODO const this impulse
+                        tx.move(manifold->normal * manifold->penetration);
                     }
                     break;
                 }

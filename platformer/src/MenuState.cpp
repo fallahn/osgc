@@ -72,6 +72,11 @@ namespace
 #include "tilemap.inl"
 #include "transition.inl"
 
+    sf::FloatRect operator * (sf::FloatRect r, float f)
+    {
+        return { r.left * f, r.top * f, r.width * f, r.height * f };
+    }
+
     struct MenuItem final
     {
         std::int32_t ID = -1;
@@ -378,6 +383,22 @@ void MenuState::buildBackground()
         m_playerInput.setPlayerEntity(entity);
 
 #ifdef XY_DEBUG
+        /*entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function = [aabb](xy::Entity e, float)
+        {
+            const auto& tx = e.getComponent<xy::Transform>();
+            auto b = boundsToWorldSpace(aabb, tx);
+            auto c = tx.getWorldTransform().transformRect(aabb);
+            c.left += tx.getOrigin().x * tx.getScale().x;
+            c.top += tx.getOrigin().y * tx.getScale().y;
+
+            auto pos = tx.getPosition();
+            DPRINT("Pos", std::to_string(pos.x) + ", " + std::to_string(pos.y));
+            DPRINT("aabb", std::to_string(aabb.left) + ", " + std::to_string(aabb.top) + ", " + std::to_string(aabb.width) + ", " + std::to_string(aabb.height));
+            DPRINT("b", std::to_string(b.left) + ", " + std::to_string(b.top) + ", " + std::to_string(b.width) + ", " + std::to_string(b.height));
+            DPRINT("c", std::to_string(c.left) + ", " + std::to_string(c.top) + ", " + std::to_string(c.width) + ", " + std::to_string(c.height));
+        };*/
+
         //player debug bounds
         auto debugEnt = m_backgroundScene.createEntity();
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
@@ -407,6 +428,14 @@ void MenuState::buildBackground()
         debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
         debugEnt.getComponent<xy::Transform>().move(GameConst::Gearboy::PlayerRightHand.left, GameConst::Gearboy::PlayerRightHand.top);
         Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { GameConst::Gearboy::PlayerRightHand.width, GameConst::Gearboy::PlayerRightHand.height }, sf::Color::Blue);
+        debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+        debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
+        entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
+
+        debugEnt = m_backgroundScene.createEntity();
+        debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+        debugEnt.getComponent<xy::Transform>().move(aabb.left, aabb.top);
+        Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { aabb.width, aabb.height }, sf::Color::Yellow);
         debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
         debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
         entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
@@ -575,19 +604,51 @@ void MenuState::spawnCrate(sf::Vector2f position)
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crate];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
-    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Crate);
+
+    bounds.left -= bounds.width / 2.f;
+    bounds.top -= bounds.height / 2.f;
     
     entity.addComponent<CollisionBody>().shapeCount = 2;
     entity.getComponent<CollisionBody>().shapes[0].aabb = bounds;
     entity.getComponent<CollisionBody>().shapes[0].type = CollisionShape::Crate;
     entity.getComponent<CollisionBody>().shapes[0].collisionFlags = CollisionGroup::CrateFlags;
 
-    entity.getComponent<CollisionBody>().shapes[1].aabb = GameConst::Gearboy::PlayerFoot;
+    sf::FloatRect foot(bounds.left + 2.f, bounds.height / 2.f, bounds.width - 4.f, 4.f);
+    entity.getComponent<CollisionBody>().shapes[1].aabb = foot;
     entity.getComponent<CollisionBody>().shapes[1].type = CollisionShape::Foot;
     entity.getComponent<CollisionBody>().shapes[1].collisionFlags = CollisionGroup::CrateFlags;
 
+    entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Util::Rectangle::combine(bounds, foot));
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Crate);
+
     entity.addComponent<Crate>().spawnPosition = position;
+
+#ifdef XY_DEBUG
+    auto debugEnt = m_backgroundScene.createEntity();
+    debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    debugEnt.getComponent<xy::Transform>().move(bounds.left, bounds.top);
+    Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { bounds.width, bounds.height }, sf::Color::Red);
+    debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+    debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
+    entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
+
+    debugEnt = m_backgroundScene.createEntity();
+    debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    debugEnt.getComponent<xy::Transform>().move(foot.left, foot.top);
+    Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { foot.width, foot.height }, sf::Color::Blue);
+    debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+    debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
+    entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
+
+    auto global =xy::Util::Rectangle::combine(bounds, foot);
+    debugEnt = m_backgroundScene.createEntity();
+    debugEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getOrigin());
+    debugEnt.getComponent<xy::Transform>().move(global.left, global.top);
+    Shape::setRectangle(debugEnt.addComponent<xy::Drawable>(), { global.width, global.height }, sf::Color::Yellow);
+    debugEnt.getComponent<xy::Transform>().setScale(0.f, 0.f);
+    debugEnt.addComponent<xy::CommandTarget>().ID = CommandID::World::DebugItem;
+    entity.getComponent<xy::Transform>().addChild(debugEnt.getComponent<xy::Transform>());
+#endif //XY_DEBUG
 }
 
 void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

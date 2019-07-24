@@ -62,6 +62,5 @@ sf::FloatRect boundsToWorldSpace(sf::FloatRect bounds, const xy::Transform& tx)
     bounds.height *= scale.y;
     bounds.left += tx.getPosition().x;
     bounds.top += tx.getPosition().y;
-
     return bounds;
 }
