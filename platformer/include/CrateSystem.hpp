@@ -33,7 +33,7 @@ struct Crate final
     }state = Falling;
 
     static constexpr float Drag = 0.8f;
-    static constexpr float DeadTime = 4.f;
+    static constexpr float DeadTime = 2.f;
 };
 
 struct SharedData;

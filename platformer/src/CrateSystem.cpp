@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 
 #include <xyginext/util/Vector.hpp>
+#include <xyginext/detail/Operators.hpp>
 
 namespace
 {
@@ -37,7 +38,7 @@ namespace
 
     //TODO as with dropping items, if this is made more generic
     //move elsewhere - possible to game consts?
-    const sf::Vector2f CarryOffset(18.f, -10.f);
+    const sf::Vector2f CarryOffset(16.f, -10.f);
 }
 
 CrateSystem::CrateSystem(xy::MessageBus& mb, SharedData& sd)
@@ -72,7 +73,7 @@ void CrateSystem::handleMessage(const xy::Message& msg)
                 auto& tx = playerEnt.getComponent<xy::Transform>();
                 auto& crateTx = player.carriedItem.getComponent<xy::Transform>();
                 auto position = crateTx.getWorldPosition();
-                crateTx.setPosition(position);
+                crateTx.setPosition(position + (crateTx.getOrigin() * tx.getScale()));
                 crateTx.setScale(tx.getScale().y, tx.getScale().y); //not a mistake, don't want negative x vals
                 tx.removeChild(crateTx);
 
@@ -84,10 +85,10 @@ void CrateSystem::handleMessage(const xy::Message& msg)
                 auto& tx = playerEnt.getComponent<xy::Transform>();
                 auto position = tx.getPosition();
                 auto offset = CarryOffset;
-                offset.x *= tx.getScale().x;
-                offset.y *= tx.getScale().y;
+                offset = offset * tx.getScale();
 
                 position += offset;
+
                 //TODO constify
                 sf::FloatRect queryArea(position.x - 32.f, position.y - 32.f, 64.f, 64.f);
                 auto nearby = getScene()->getSystem<xy::DynamicTreeSystem>().query(queryArea, CollisionShape::Crate);
@@ -96,11 +97,14 @@ void CrateSystem::handleMessage(const xy::Message& msg)
                     auto& crateTx = crate.getComponent<xy::Transform>();
                     auto bounds = crate.getComponent<xy::BroadphaseComponent>().getArea();
                     bounds = crateTx.getTransform().transformRect(bounds);
+                    auto origin = crateTx.getOrigin() * tx.getScale().y;
+                    bounds.left += origin.x;
+                    bounds.top += origin.y;
 
                     if (bounds.contains(position))
                     {
                         //pick up crate
-                        crateTx.setPosition(CarryOffset/* - crateTx.getOrigin()*/);
+                        crateTx.setPosition(22.f, 6.f); //no idea what relation this has to offset - subtracted origin?
                         crateTx.setScale(1.f, 1.f); //now getting scale from parent
                         tx.addChild(crateTx);
 
