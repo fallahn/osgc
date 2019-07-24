@@ -1312,7 +1312,7 @@ void MenuState::buildLocalPlayMenu(xy::Entity rootNode, sf::Uint32 mouseEnter, s
 
         if (m_sharedData.localPlayers[i].cpu)
         {
-            auto bounds = toggleEnt.getComponent<xy::Sprite>().getTextureRect();
+            bounds = toggleEnt.getComponent<xy::Sprite>().getTextureRect();
             bounds.top = bounds.height;
             toggleEnt.getComponent<xy::Sprite>().setTextureRect(bounds);
         }

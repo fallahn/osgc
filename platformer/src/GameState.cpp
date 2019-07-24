@@ -438,7 +438,7 @@ void GameState::buildWorld()
         std::int32_t startDepth = GameConst::BackgroundDepth + 2;
         for (const auto& layer : layers)
         {
-            auto entity = m_tilemapScene.createEntity();
+            entity = m_tilemapScene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Drawable>().setDepth(startDepth);
             entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);
@@ -449,14 +449,14 @@ void GameState::buildWorld()
             entity.getComponent<xy::Drawable>().bindUniform("u_tileCount", layer.tileSetSize);
             entity.getComponent<xy::Drawable>().bindUniform("u_tileSize", sf::Vector2f(m_mapLoader.getTileSize(), m_mapLoader.getTileSize()));
 
-            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            auto& layerVerts = entity.getComponent<xy::Drawable>().getVertices();
             sf::Vector2f texCoords(layer.indexMap->getSize());
             //texCoords *= m_mapLoader.getTileSize();
 
-            verts.emplace_back(sf::Vector2f(), sf::Vector2f());
-            verts.emplace_back(sf::Vector2f(layer.layerSize.x, 0.f), sf::Vector2f(texCoords.x, 0.f));
-            verts.emplace_back(layer.layerSize, texCoords);
-            verts.emplace_back(sf::Vector2f(0.f, layer.layerSize.y), sf::Vector2f(0.f, texCoords.y));
+            layerVerts.emplace_back(sf::Vector2f(), sf::Vector2f());
+            layerVerts.emplace_back(sf::Vector2f(layer.layerSize.x, 0.f), sf::Vector2f(texCoords.x, 0.f));
+            layerVerts.emplace_back(layer.layerSize, texCoords);
+            layerVerts.emplace_back(sf::Vector2f(0.f, layer.layerSize.y), sf::Vector2f(0.f, texCoords.y));
 
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Transform>().setScale(scale, scale);

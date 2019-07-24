@@ -393,13 +393,10 @@ bool MapParser::load(const std::string& path)
 
 
         //make sure we found all the image layers
-        for (auto l : m_layers)
+        if(std::any_of(m_layers.begin(), m_layers.end(), [](const tmx::TileLayer* l){return l == nullptr;}))
         {
-            if (l == nullptr)
-            {
-                xy::Logger::log("Missing one or more image layers", xy::Logger::Type::Error);
-                return false;
-            }
+            xy::Logger::log("Missing one or more image layers", xy::Logger::Type::Error);
+            return false;
         }
 
         auto mapSize = m_map.getTileCount() * m_map.getTileSize();
