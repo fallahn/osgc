@@ -197,8 +197,8 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
             requestStackPush(StateID::TimeTrialSummary);
             m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
 
-            auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
-            msg->type = GameEvent::RaceEnded;
+            auto* msg2 = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+            msg2->type = GameEvent::RaceEnded;
         }
     }
     else if (msg.id == MessageID::VehicleMessage)
@@ -233,7 +233,6 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
             {
                 tx.setPosition(vehicle.currentWaypoint.getComponent<xy::Transform>().getPosition());
                 tx.setRotation(vehicle.currentWaypoint.getComponent<WayPoint>().rotation);
-                auto& wp = vehicle.currentWaypoint.getComponent<WayPoint>();
             }
             else
             {
@@ -293,8 +292,8 @@ void TimeTrialState::handleMessage(const xy::Message& msg)
                 requestStackPush(StateID::TimeTrialSummary);
                 m_playerInput.getPlayerEntity().getComponent<Vehicle>().stateFlags = (1 << Vehicle::Disabled);
 
-                auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
-                msg->type = GameEvent::RaceEnded;
+                auto* msg2 = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+                msg2->type = GameEvent::RaceEnded;
             }
         }
     }
@@ -346,14 +345,14 @@ bool TimeTrialState::update(float dt)
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::SpriteAnimation>().play(0);
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
             cmd.targetFlags = CommandID::Game::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::AudioEmitter>().play();
             };
@@ -365,7 +364,7 @@ bool TimeTrialState::update(float dt)
         {
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::Callback>().active = true;
             };

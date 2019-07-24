@@ -340,7 +340,7 @@ void MenuState::buildBackground()
 
         entity = m_backgroundScene.createEntity();
         entity.addComponent<xy::Transform>().setScale(pixelScale, pixelScale);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 1);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
         entity.getComponent<xy::Sprite>().setTextureRect({ 0.f, 272.f, 480.f, 82.f });
 

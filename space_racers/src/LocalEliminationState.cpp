@@ -307,8 +307,8 @@ void LocalEliminationState::handleMessage(const xy::Message& msg)
             //we'll go to sudden death mode instead
             if (m_sharedData.localPlayers[id].lapCount == 0)
             {                
-                auto* msg = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
-                msg->type = GameEvent::SuddenDeath;
+                auto* msg2 = getContext().appInstance.getMessageBus().post<GameEvent>(MessageID::GameMessage);
+                msg2->type = GameEvent::SuddenDeath;
 
                 //m_suddenDeath = true;
             }

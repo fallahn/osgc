@@ -46,7 +46,7 @@ namespace
     };
 }
 
-LobbyState::LobbyState(SharedData& sd, xy::MessageBus& mb)
+LobbyState::LobbyState(SharedData& sd, xy::MessageBus&)
     : m_sharedData  (sd),
     m_nextState     (StateID::Lobby),
     m_mapIndex      (0),

@@ -44,12 +44,12 @@ void DigitSystem::process(float dt)
         if (digit.lastValue != digit.value)
         {
             //update new target
-            std::int32_t diff = digit.value - digit.lastValue;
+            //std::int32_t diff = digit.value - digit.lastValue;
             float tens = static_cast<float>(std::min(9, digit.value / 10));
             digit.targetTenPosition = frame.height * tens; //this column never rolls over, so woo
 
             float units = static_cast<float>(digit.value % 10);
-            float lastUnits = static_cast<float>(digit.lastValue % 10);
+            //float lastUnits = static_cast<float>(digit.lastValue % 10);
 
             digit.targetUnitPosition = (frame.height * units) + ((frame.height * 10.f) * tens);
         }

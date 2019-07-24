@@ -721,8 +721,8 @@ void GameState::loadEnemies()
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
-        //bounds.left -= bounds.width / 2.f;
-        //bounds.top -= bounds.height / 2.f;
+        bounds.left -= bounds.width / 2.f;
+        bounds.top -= bounds.height / 2.f;
 
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = bounds;

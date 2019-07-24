@@ -110,9 +110,9 @@ void TimeTrialDirector::handleMessage(const xy::Message& msg)
                 };
                 sendCommand(cmd);
 
-                auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
-                msg->type = GameEvent::NewBestTime;
-                msg->position = data.entity.getComponent<xy::Transform>().getPosition();
+                auto* msg2 = postMessage<GameEvent>(MessageID::GameMessage);
+                msg2->type = GameEvent::NewBestTime;
+                msg2->position = data.entity.getComponent<xy::Transform>().getPosition();
 
                 m_playbackPoints.swap(m_recordedPoints);
                 saveGhost();

@@ -496,7 +496,7 @@ void VehicleSystem::updateFalling(xy::Entity entity, float dt)
     }
 }
 
-void VehicleSystem::updateExploding(xy::Entity entity, float dt)
+void VehicleSystem::updateExploding(xy::Entity entity, float)
 {
     auto& vehicle = entity.getComponent<Vehicle>();
     vehicle.accelerationMultiplier = 0.f;

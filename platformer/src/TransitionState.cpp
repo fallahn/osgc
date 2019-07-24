@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "SharedStateData.hpp"
 
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/core/App.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Shader.hpp>
@@ -73,6 +74,8 @@ bool TransitionState::update(float)
 
 void TransitionState::draw()
 {
-    getContext().renderWindow.setView(getContext().renderWindow.getDefaultView());
-    getContext().renderWindow.draw(m_sprite, m_sharedData.transitionContext.shader);
+    auto& rw = getContext().renderWindow;
+    rw.setView(getContext().renderWindow.getDefaultView());
+    rw.draw(m_sprite, m_sharedData.transitionContext.shader);
+    rw.setView(getContext().defaultView);
 }

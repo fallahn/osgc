@@ -40,7 +40,7 @@ SplitScreenDirector::SplitScreenDirector(xy::Scene& uiScene, SharedData& sd)
 }
 
 //public
-void SplitScreenDirector::handleMessage(const xy::Message& msg)
+void SplitScreenDirector::handleMessage(const xy::Message&)
 {
 
 }
@@ -58,14 +58,14 @@ void SplitScreenDirector::process(float)
 
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::SpriteAnimation>().play(0);
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
             cmd.targetFlags = CommandID::Game::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::AudioEmitter>().play();
             };
@@ -77,7 +77,7 @@ void SplitScreenDirector::process(float)
         {
             xy::Command cmd;
             cmd.targetFlags = CommandID::UI::StartLights;
-            cmd.action = [](xy::Entity e, float dt)
+            cmd.action = [](xy::Entity e, float)
             {
                 e.getComponent<xy::Callback>().active = true;
             };

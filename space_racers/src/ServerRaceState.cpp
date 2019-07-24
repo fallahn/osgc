@@ -109,13 +109,13 @@ void RaceState::handleMessage(const xy::Message& msg)
 
             tx.setScale(1.f, 1.f);
 
-            VehicleData data;
-            data.x = tx.getPosition().x;
-            data.y = tx.getPosition().y;
-            data.rotation = tx.getRotation();
-            data.serverID = entity.getIndex();
+            VehicleData vd;
+            vd.x = tx.getPosition().x;
+            vd.y = tx.getPosition().y;
+            vd.rotation = tx.getRotation();
+            vd.serverID = entity.getIndex();
 
-            m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, data, xy::NetFlag::Reliable);
+            m_sharedData.netHost.broadcastPacket(PacketID::VehicleSpawned, vd, xy::NetFlag::Reliable);
         }
         else if (data.type == VehicleEvent::Exploded)
         {
@@ -570,17 +570,17 @@ void RaceState::sendPlayerData(const xy::NetPeer& peer)
             auto netActor = actor.getComponent<NetActor>();
             const auto& tx = actor.getComponent<xy::Transform>();
 
-            ActorData data;
-            data.actorID = static_cast<std::int16_t>(netActor.actorID);
-            data.serverID = static_cast<std::int16_t>(netActor.serverID);
-            data.colourID = static_cast<std::uint8_t>(netActor.colourID);
-            data.x = tx.getPosition().x;
-            data.y = tx.getPosition().y;
-            data.rotation = tx.getRotation();
-            data.scale = tx.getScale().x;
-            data.timestamp = getServerTime();
+            ActorData ad;
+            ad.actorID = static_cast<std::int16_t>(netActor.actorID);
+            ad.serverID = static_cast<std::int16_t>(netActor.serverID);
+            ad.colourID = static_cast<std::uint8_t>(netActor.colourID);
+            ad.x = tx.getPosition().x;
+            ad.y = tx.getPosition().y;
+            ad.rotation = tx.getRotation();
+            ad.scale = tx.getScale().x;
+            ad.timestamp = getServerTime();
 
-            m_sharedData.netHost.sendPacket(peer, PacketID::ActorData, data, xy::NetFlag::Reliable);
+            m_sharedData.netHost.sendPacket(peer, PacketID::ActorData, ad, xy::NetFlag::Reliable);
         }
     }
 }

@@ -368,7 +368,7 @@ void LobbyState::buildMenu()
         entity.getComponent<xy::Transform>().move(-bounds.width, 0.f);
 
         bounds.width /= 3.f;
-        auto buttonEnt = m_scene.createEntity();
+        buttonEnt = m_scene.createEntity();
         entity.getComponent<xy::Transform>().addChild(buttonEnt.addComponent<xy::Transform>());
         buttonEnt.addComponent<xy::UIHitBox>().area = bounds;
         buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
