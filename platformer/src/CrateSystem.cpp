@@ -119,7 +119,7 @@ void CrateSystem::handleMessage(const xy::Message& msg)
     else if (msg.id == MessageID::StarMessage)
     {
         const auto& data = msg.getData<StarEvent>();
-        if (data.entityHit.getComponent<CollisionBody>().shapes[0].type == CollisionShape::Crate)
+        if (data.entityHit.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionShape::Crate)
         {
             kill(data.entityHit);
         }
@@ -137,15 +137,15 @@ void CrateSystem::process(float dt)
         default: break;
         case Crate::Falling:
             updateFalling(entity, dt);
-            DPRINT("State", "Falling");
+            //DPRINT("State", "Falling");
             break;
         case Crate::Idle:
             updateIdle(entity, dt);
-            DPRINT("State", "Idle");
+            //DPRINT("State", "Idle");
             break;
         case Crate::Dead:
             updateDead(entity, dt);
-            DPRINT("State", "Dead");
+            //DPRINT("State", "Dead");
             break;
         }
     }
@@ -203,6 +203,10 @@ void CrateSystem::updateDead(xy::Entity entity, float dt)
         scale.x = scale.y;
         tx.setScale(scale);
         tx.setPosition(crate.spawnPosition);
+
+        auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
+        msg->type = CrateEvent::Spawned;
+        msg->position = tx.getPosition();
     }
 }
 
@@ -246,8 +250,6 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
     auto& tx = entity.getComponent<xy::Transform>();
     auto& collisionBody = entity.getComponent<CollisionBody>();
     auto& crate = entity.getComponent<Crate>();
-
-    auto position = tx.getPosition();
 
     for (auto i = 0u; i < collisionBody.shapeCount; ++i)
     {
@@ -312,4 +314,8 @@ void CrateSystem::kill(xy::Entity entity)
     auto scale = tx.getScale();
     scale.x = 0.f;
     tx.setScale(scale);
+
+    auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
+    msg->type = CrateEvent::Destroyed;
+    msg->position = tx.getPosition();
 }

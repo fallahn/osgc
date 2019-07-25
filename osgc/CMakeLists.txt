@@ -61,6 +61,8 @@ if(X11_FOUND)
     ${CMAKE_DL_LIBS})
 endif()
 
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
+
 #copies the assets directory to the output
 set(dst_path "${CMAKE_BINARY_DIR}/osgc/")
 FILE(COPY assets DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)

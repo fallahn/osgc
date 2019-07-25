@@ -62,9 +62,12 @@ void NinjaStarSystem::process(float dt)
                 const auto& otherTx = other.getComponent<xy::Transform>();
 
                 auto otherBounds = other.getComponent<xy::BroadphaseComponent>().getArea();
-                //otherBounds.left -= otherTx.getOrigin().x;
-                //otherBounds.top -= otherTx.getOrigin().y;
                 otherBounds = otherTx.getTransform().transformRect(otherBounds);
+
+                auto origin = otherTx.getOrigin() * tx.getScale().y;
+                otherBounds.left += origin.x;
+                otherBounds.top += origin.y;
+                
 
                 if (otherBounds.intersects(bounds))
                 {

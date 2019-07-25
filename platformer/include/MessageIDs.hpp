@@ -28,7 +28,8 @@ namespace MessageID
         PlayerMessage = xy::Message::Count,
         StarMessage,
         EnemyMessage,
-        GameMessage
+        GameMessage,
+        CrateMessage
     };
 }
 
@@ -73,4 +74,14 @@ struct GameEvent final
         TimerWarning,
         LivesExpired
     }type = TimerExpired;
+};
+
+struct CrateEvent final
+{
+    enum
+    {
+        Spawned,
+        Destroyed
+    }type = Spawned;
+    sf::Vector2f position;
 };
