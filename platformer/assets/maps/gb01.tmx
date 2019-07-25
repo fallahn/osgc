@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="120" height="26" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="207">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="120" height="26" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="207">
  <tileset firstgid="1" name="gearboy00" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
  <layer id="6" name="far detail" width="120" height="26">
   <data encoding="base64" compression="zlib">
-   eJzt2E0OwiAQBWAugmt6A3/izrXp2vsfRFhMQtGpjZlHM/R9ycSuKAEfUEIgIq9irpNS5F/KNSn13LFfRyM5k1+rsY9KWb6DfpOcya/V2CelJqP2aRtUfkfz2rsDf0LldzSIdWcOy2wh1G2XZ8v9Vzs/e/wPRUCbZX7rbCHUbZdny/13pPNzAraNzO851yXXNdct2I39Y6U8Qn639zx33ju9xxvk+CPzS9sg9l/xbV3jnPeF3H9FOW/JvMqaze/WPnpkqZ5fb/cS3vrbKlmSXKH6PofP+wgv9xLe+kvrtHXGa35pSVtnmN8xtOd75ncs7Z0M80tEREREpHsDsOIfTw==
+   eJzt2EEOgyAQhWEuYtd6iO66Nq57/4NUFpOg7VjT8DBD/y+Z1BUS6AMkJQBRDWvdnEJ841qTU/OF/fo3ljP7rTX2g1M134HvLGf2W2vsR6emSu3jHFV+e/O8ugM/UuW3N4p1Z0nbbCmUbefnmvuvd36O+B8aBG3m+S2zpVC2nZ9r7r89nZ9HYdvK/Kqy9TioiJTf7a3OnXns7w3eE5Fy/JX5xTmK/dd8WteY87aU+6/J5y2bV1uz+W5to0WWyvmNdi8Rrb97OUuWK1Xfl/R+HxHlXiJaf3HMW2ei5hdb3jpDfvuwP9+T377s72TILwAAAOB7ATYfHyU=
   </data>
  </layer>
  <layer id="7" name="terrain" width="120" height="26">

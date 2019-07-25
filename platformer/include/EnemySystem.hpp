@@ -79,5 +79,7 @@ private:
     void processRocket(xy::Entity, float);
     void processDying(xy::Entity, float);
 
+    void doCollision(xy::Entity);
+
     void onEntityAdded(xy::Entity) override;
 };

@@ -23,6 +23,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/util/Random.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -61,6 +63,19 @@ void EnemySystem::handleMessage(const xy::Message& msg)
                 msg2->type = EnemyEvent::Died;
                 msg2->entity = entity;
             }
+        }
+    }
+    else if (msg.id == MessageID::CrateMessage)
+    {
+        const auto& data = msg.getData<CrateEvent>();
+        if (data.type == CrateEvent::KilledEnemy)
+        {
+            auto entity = data.entityHit;
+            entity.getComponent<Enemy>().kill();
+
+            auto* msg2 = postMessage<EnemyEvent>(MessageID::EnemyMessage);
+            msg2->type = EnemyEvent::Died;
+            msg2->entity = entity;
         }
     }
 }
@@ -155,6 +170,8 @@ void EnemySystem::processCrawler(xy::Entity entity, float dt)
             entity.getComponent<xy::SpriteAnimation>().play(enemy.animationIDs[AnimID::Enemy::Idle]);
         }
     }
+
+    doCollision(entity);
 }
 
 void EnemySystem::processBird(xy::Entity entity, float dt)
@@ -214,6 +231,8 @@ void EnemySystem::processWalker(xy::Entity entity, float dt)
         enemy.velocity.x = -enemy.velocity.x;
         tx.setPosition(enemy.start);
     }
+
+    doCollision(entity);
 
     //TODO stop and shoot
 }
@@ -372,6 +391,47 @@ void EnemySystem::processRocket(xy::Entity entity, float dt)
             auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
             msg->position = enemy.end;
             msg->type = StarEvent::None;
+        }
+    }
+}
+
+void EnemySystem::doCollision(xy::Entity entity)
+{
+    //TODO skip this if we know there are no crates on the map
+
+    auto& tx = entity.getComponent<xy::Transform>();
+
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    auto scale = tx.getScale() / 2.f;
+    bounds.left = tx.getPosition().x;
+    bounds.top = tx.getPosition().y;
+    bounds.left -= tx.getOrigin().x * scale.x;
+    bounds.top -= tx.getOrigin().y * scale.y;
+    bounds.width *= scale.x;
+    bounds.height *= scale.y;
+
+    auto query = getScene()->getSystem<xy::DynamicTreeSystem>().query(bounds, CollisionShape::Crate);
+    for (auto other : query)
+    {
+        //if (other != entity)
+        {
+            const auto& otherTx = other.getComponent<xy::Transform>();
+
+            auto otherBounds = other.getComponent<xy::BroadphaseComponent>().getArea();
+            otherBounds = otherTx.getTransform().transformRect(otherBounds);
+
+            auto origin = otherTx.getOrigin() * tx.getScale().y;
+            otherBounds.left += origin.x;
+            otherBounds.top += origin.y;
+
+            if (otherBounds.intersects(bounds))
+            {
+                auto manifold = intersectsAABB(bounds, otherBounds);
+                tx.move(manifold->normal * manifold->penetration);
+                entity.getComponent<Enemy>().velocity.x *= -1.f;
+
+                break;
+            }
         }
     }
 }

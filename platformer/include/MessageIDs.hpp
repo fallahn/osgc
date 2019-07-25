@@ -81,7 +81,9 @@ struct CrateEvent final
     enum
     {
         Spawned,
-        Destroyed
+        Destroyed,
+        KilledEnemy
     }type = Spawned;
     sf::Vector2f position;
+    xy::Entity entityHit;
 };

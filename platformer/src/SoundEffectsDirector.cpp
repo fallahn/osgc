@@ -111,7 +111,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case StarEvent::HitItem:
-            playSound(xy::Util::Random::value(AudioID::Hit, AudioID::Hit2), data.position);
+            playSound(AudioID::Hit, data.position);
             break;
         }
     }
@@ -125,9 +125,13 @@ void SFXDirector::handleMessage(const xy::Message& msg)
 
             break;
         case EnemyEvent::Died:
-            if (data.entity.getComponent<Enemy>().type != Enemy::Egg)
+            if (data.entity.getComponent<Enemy>().type == Enemy::Bird)
             {
                 playSound(AudioID::EnemyDie, data.entity.getComponent<xy::Transform>().getPosition());
+            }
+            else if (data.entity.getComponent<Enemy>().type != Enemy::Egg)
+            {
+                
             }
             break;
         }
@@ -180,7 +184,7 @@ xy::AudioEmitter& SFXDirector::playSound(std::int32_t audioID, sf::Vector2f posi
     auto& emitter = entity.getComponent<xy::AudioEmitter>();
     emitter.setSource(m_resources.get<sf::SoundBuffer>(audioIDs[audioID]));
     //must reset values here in case they were changed prior to recycling from pool
-    emitter.setAttenuation(1.f);
+    emitter.setAttenuation(0.f);
     emitter.setMinDistance(5.f);
     emitter.setVolume(1.f);
     emitter.setPitch(1.f);

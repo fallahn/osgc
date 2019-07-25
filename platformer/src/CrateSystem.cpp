@@ -297,6 +297,33 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
                         tx.move(manifold->normal * manifold->penetration);
                     }
                     break;
+                case CollisionShape::Enemy:
+                    if (manifold->normal.y != 0)
+                    {
+                        if (manifold->normal.y < 0)
+                        {
+                            //crate on top, so kill enemy
+                            auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
+                            msg->type = CrateEvent::KilledEnemy;
+                            msg->entityHit = other;
+                            msg->position = tx.getPosition();
+                        }
+                        kill(entity);
+                    }
+                    else
+                    {
+                        //if penetration above a certain threshold, kill the enemy/crate
+                        if (manifold->penetration > 4)
+                        {
+                            auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
+                            msg->type = CrateEvent::KilledEnemy;
+                            msg->entityHit = other;
+                            msg->position = tx.getPosition();
+
+                            kill(entity);
+                        }
+                    }
+                    break;
                 }
 
             }
