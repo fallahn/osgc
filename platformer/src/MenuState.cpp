@@ -41,6 +41,7 @@ source distribution.
 #include "PluginExport.hpp"
 #include "FluidAnimationSystem.hpp"
 #include "CrateSystem.hpp"
+#include "SoundEffectsDirector.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -59,6 +60,7 @@ source distribution.
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/detail/Operators.hpp>
@@ -249,8 +251,10 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
+    m_backgroundScene.addSystem<xy::AudioSystem>(mb);
 
     m_backgroundScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
+    m_backgroundScene.addDirector<SFXDirector>();
 }
 
 void MenuState::loadResources()

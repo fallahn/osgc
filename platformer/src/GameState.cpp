@@ -31,6 +31,7 @@ Copyright 2019 Matt Marchant
 #include "EnemySystem.hpp"
 #include "ShieldAnimationSystem.hpp"
 #include "UIDirector.hpp"
+#include "SoundEffectsDirector.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -51,6 +52,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/systems/ParticleSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Rectangle.hpp>
@@ -258,8 +260,10 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
     m_gameScene.addSystem<xy::ParticleSystem>(mb);
+    m_gameScene.addSystem<xy::AudioSystem>(mb);
 
     m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
+    m_gameScene.addDirector<SFXDirector>();
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);

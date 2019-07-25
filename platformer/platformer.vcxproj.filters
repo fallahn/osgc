@@ -28,6 +28,12 @@
     <Filter Include="Source Files\states">
       <UniqueIdentifier>{7298dc2c-fdc5-48e0-a7fb-ad122cf921eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\directors">
+      <UniqueIdentifier>{0f8bd76d-dee7-47d2-b460-77e7dcde6aff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\directors">
+      <UniqueIdentifier>{ee54a11a-450d-4fe3-a13d-21e124edb005}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\PluginExport.hpp">
@@ -58,9 +64,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\MessageIDs.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NinjaDirector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\AnimationMap.hpp">
@@ -111,9 +114,6 @@
     <ClInclude Include="include\ErrorState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
-    <ClInclude Include="include\UIDirector.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\DialogueState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
@@ -132,6 +132,15 @@
     <ClInclude Include="include\CrateSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\UIDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NinjaDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SoundEffectsDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -144,9 +153,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Collision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NinjaDirector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PlayerSystem.cpp">
@@ -185,9 +191,6 @@
     <ClCompile Include="src\ErrorState.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIDirector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\SharedStateData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -208,6 +211,15 @@
     </ClCompile>
     <ClCompile Include="src\CrateSystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NinjaDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SoundEffectsDirector.cpp">
+      <Filter>Source Files\directors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
