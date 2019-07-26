@@ -83,7 +83,8 @@ void CrateSystem::handleMessage(const xy::Message& msg)
             {
                 //scan area for crates and pick up
                 auto& tx = playerEnt.getComponent<xy::Transform>();
-                auto position = tx.getPosition();
+                auto position = tx.getWorldPosition();
+                position += tx.getOrigin() * tx.getScale();
                 auto offset = CarryOffset;
                 offset = offset * tx.getScale();
 
@@ -96,13 +97,18 @@ void CrateSystem::handleMessage(const xy::Message& msg)
                 {
                     auto& crateTx = crate.getComponent<xy::Transform>();
                     auto bounds = crate.getComponent<xy::BroadphaseComponent>().getArea();
-                    bounds = crateTx.getTransform().transformRect(bounds);
+                    bounds = crateTx.getWorldTransform().transformRect(bounds);
                     auto origin = crateTx.getOrigin() * tx.getScale().y;
                     bounds.left += origin.x;
                     bounds.top += origin.y;
 
                     if (bounds.contains(position))
                     {
+                        if (crateTx.getDepth() > 0) //assumes parented to a platform... 
+                        {
+                            detachPlatform(crate);
+                        }
+
                         //pick up crate
                         crateTx.setPosition(22.f, 6.f); //no idea what relation this has to offset - subtracted origin?
                         crateTx.setScale(1.f, 1.f); //now getting scale from parent
@@ -157,19 +163,38 @@ void CrateSystem::updateFalling(xy::Entity entity, float dt)
     auto& crate = entity.getComponent<Crate>();
     crate.velocity.y = std::min(crate.velocity.y + Gravity * dt, TerminalVelocity);
 
+    crate.platform = {};
+
     applyVelocity(entity, dt);
     doCollision(entity);
 
     //check which shapes have collision
     if (crate.state != Crate::Dead) //collision may have killed it
     {
-        if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Crate/* | CollisionShape::Foot*/))
+        auto flags = entity.getComponent<CollisionBody>().collisionFlags;
+        if (flags & (CollisionShape::Crate/* | CollisionShape::Foot*/))
         {
             //touched the ground
             crate.velocity = {};
             crate.state = Crate::Idle;
 
-            //TODO raise a message
+            auto& tx = entity.getComponent<xy::Transform>();
+
+            //parent to moving platform if landed on one
+            if (crate.platform.isValid()
+                && (flags & CollisionShape::Foot))
+            {
+                auto relPos = tx.getPosition() - crate.platform.getComponent<xy::Transform>().getPosition();
+                tx.setPosition(relPos);
+                crate.platform.getComponent<xy::Transform>().addChild(tx);
+
+                std::cout << "parented\n";
+            }
+
+            //raise a message
+            auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
+            msg->type = CrateEvent::Landed;
+            msg->position = tx.getPosition(); //TODO if parented to platform this should be world + origin
         }
     }
 }
@@ -186,6 +211,12 @@ void CrateSystem::updateIdle(xy::Entity entity, float dt)
         if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
         {
             crate.state = Crate::Falling;
+
+            //unparent from moving platforms
+            if (crate.platform.isValid())
+            {
+                detachPlatform(entity);
+            }
         }
     }
 }
@@ -207,6 +238,23 @@ void CrateSystem::updateDead(xy::Entity entity, float dt)
         auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
         msg->type = CrateEvent::Spawned;
         msg->position = tx.getPosition();
+    }
+}
+
+void CrateSystem::detachPlatform(xy::Entity entity)
+{
+
+    auto& tx = entity.getComponent<xy::Transform>();
+    if (tx.getDepth() > 0)
+    {
+        auto& crate = entity.getComponent<Crate>();
+        auto worldPos = tx.getPosition() + crate.platform.getComponent<xy::Transform>().getPosition();
+        tx.setPosition(worldPos);
+        crate.platform.getComponent<xy::Transform>().removeChild(tx);
+
+        crate.platform = {};
+
+        std::cout << "unparent\n";
     }
 }
 
@@ -242,7 +290,7 @@ void CrateSystem::doCollision(xy::Entity entity)
             }
         }
     }
-    DPRINT("Nearby", std::to_string(nearby.size()));
+    //DPRINT("Nearby", std::to_string(nearby.size()));
 }
 
 void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::FloatRect otherBounds)
@@ -261,7 +309,7 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
             auto& otherBody = other.getComponent<CollisionBody>();
 
             //flag crate body as having a collision on this shape
-            if (otherBody.shapes[0].type & CollisionShape::Solid)
+            if (otherBody.shapes[0].type & (CollisionShape::Solid | CollisionShape::MPlat))
             {
                 collisionBody.collisionFlags |= collisionBody.shapes[i].type;
                 //DPRINT("Type", std::to_string(collisionBody.shapes[i].type));
@@ -272,6 +320,13 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
                 switch (otherBody.shapes[0].type)
                 {
                 default: break;
+                case CollisionShape::MPlat:
+                    //set player platform if not set
+                    if (!crate.platform.isValid()
+                        && manifold->normal.y < 0)
+                    {
+                       crate.platform = other;
+                    } //fall through to solid physics
                 case CollisionShape::Solid:
                     tx.move(manifold->normal * manifold->penetration);
 

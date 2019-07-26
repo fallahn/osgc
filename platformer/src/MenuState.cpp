@@ -104,7 +104,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     launchLoadingScreen();
 
     m_sharedData.reset();
-    m_sharedData.inventory.ammo = 1;
+    //m_sharedData.inventory.ammo = 1;
 
     initScene();
     loadResources();

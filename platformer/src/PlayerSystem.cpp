@@ -424,7 +424,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                         && manifold->normal.y < 0)
                     {
                         player.platform = other;
-                    }
+                    } //fall through to solid physics
                 case CollisionShape::Solid:
                     tx.move(manifold->normal * manifold->penetration);
 

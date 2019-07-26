@@ -81,6 +81,7 @@ struct CrateEvent final
     enum
     {
         Spawned,
+        Landed,
         Destroyed,
         KilledEnemy
     }type = Spawned;

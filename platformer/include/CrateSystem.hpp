@@ -32,6 +32,8 @@ struct Crate final
         Idle, Falling, Carried, Dead
     }state = Falling;
 
+    xy::Entity platform; //parent if crate is resting on a moving platform
+
     static constexpr float Drag = 0.8f;
     static constexpr float DeadTime = 2.f;
 };
@@ -52,6 +54,8 @@ private:
     void updateFalling(xy::Entity, float);
     void updateIdle(xy::Entity, float);
     void updateDead(xy::Entity, float);
+
+    void detachPlatform(xy::Entity);
 
     void applyVelocity(xy::Entity, float);
     void doCollision(xy::Entity);
