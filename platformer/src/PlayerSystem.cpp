@@ -62,7 +62,7 @@ void PlayerSystem::process(float dt)
     for (auto entity : entities)
     {
         const auto& player = entity.getComponent<Player>();
-        auto pos = entity.getComponent<xy::Transform>().getPosition();
+        auto pos = entity.getComponent<xy::Transform>().getWorldPosition(); //we may be parented to a platform
         if (!m_bounds.contains(pos) &&
             (player.state == Player::Falling || player.state == Player::Running))
         {
@@ -79,15 +79,15 @@ void PlayerSystem::process(float dt)
         default: break;
         case Player::Falling:
             processFalling(entity, dt);
-            //DPRINT("State", "Falling");
+            DPRINT("State", "Falling");
             break;
         case Player::Running:
             processRunning(entity, dt);
-            //DPRINT("State", "Running");
+            DPRINT("State", "Running");
             break;
         case Player::Dying:
             processDying(entity, dt);
-            //DPRINT("State", "Dying");
+            DPRINT("State", "Dying");
             break;
         case Player::Dead:
             processDead(entity, dt);
@@ -160,10 +160,20 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
     //check collision flags and change state if necessary
     if (player.state != Player::Dying) //collision may have killed player
     {
-        if (entity.getComponent<CollisionBody>().collisionFlags & (CollisionShape::Player | CollisionShape::Foot))
+        auto flags = entity.getComponent<CollisionBody>().collisionFlags;
+        if (flags & (CollisionShape::Player/* | CollisionShape::Foot*/))
         {
-            entity.getComponent<Player>().state = Player::Running;
+            player.state = Player::Running;
             entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Idle]);
+
+            //parent to moving platform
+            if (player.platform.isValid()
+                && (flags & CollisionShape::Foot))
+            {
+                    auto relPos = tx.getPosition() - player.platform.getComponent<xy::Transform>().getPosition();
+                    tx.setPosition(relPos);
+                    player.platform.getComponent<xy::Transform>().addChild(tx);
+            }
 
             auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
             msg->type = PlayerEvent::Landed;
@@ -264,9 +274,20 @@ void PlayerSystem::processRunning(xy::Entity entity, float dt)
 
     if (player.state != Player::Dying)//collision may have killed player
     {
-        if ((entity.getComponent<CollisionBody>().collisionFlags & CollisionShape::Foot) == 0)
+        auto flags = entity.getComponent<CollisionBody>().collisionFlags;
+        if ((flags & CollisionShape::Foot) == 0)
         {
-            entity.getComponent<Player>().state = Player::Falling;
+            //unparent from moving platforms
+            if (player.platform.isValid())
+            {
+                auto worldPos = tx.getPosition() + player.platform.getComponent<xy::Transform>().getPosition();
+                tx.setPosition(worldPos);
+                player.platform.getComponent<xy::Transform>().removeChild(tx);
+
+                player.platform = {};
+            }
+
+            player.state = Player::Falling;
             entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
         }
     
@@ -386,8 +407,8 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
             auto& otherBody = other.getComponent<CollisionBody>();
 
             //registering foot/hand collisions should only affect state
-            //under certain collisions
-            if (otherBody.shapes[0].type & (CollisionShape::Solid | CollisionShape::Crate))
+            //for objects which can be stood upon
+            if (otherBody.shapes[0].type & (CollisionShape::Solid | CollisionShape::Crate | CollisionShape::MPlat))
             {
                 collisionBody.collisionFlags |= collisionBody.shapes[i].type;
             }
@@ -397,6 +418,13 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                 switch (otherBody.shapes[0].type)
                 {
                 default: break;
+                case CollisionShape::MPlat:
+                    //set player platform if not set
+                    if (!player.platform.isValid()
+                        && manifold->normal.y < 0)
+                    {
+                        player.platform = other;
+                    }
                 case CollisionShape::Solid:
                     tx.move(manifold->normal * manifold->penetration);
 

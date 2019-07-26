@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="26">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="27">
  <tileset firstgid="1" name="gearboy" tilewidth="16" tileheight="16" tilecount="132" columns="11">
   <image source="../images/tiles/gearboy00.png" width="176" height="192"/>
  </tileset>
  <layer id="2" name="foreground" width="30" height="17">
   <data encoding="base64" compression="zlib">
-   eJzt08kOgjAUBdA6LhyisHCMiePS4RPcqb9goi51p8IOHP/cS9KG2rSAWMPGl5wEwuu7JVCDEGIkoC34129ql1BugSqG9D0159pgQi2gJwU5Kq0p16TmRP7eXmaG68tqyu8KesLzKs1zuWxP/svcsGK5ngrxz32Z67nCDe4Bc+rQgCa0IuSWFFmfVh8GMIRRjH3ErTFMYAozyT501AKW1EqRK96LFeXbsXoEPNvDgSPmbkNmH+GkcA5YZxH//3RjzHDI+3niz9gF1gqWZB1jc9eqGQ6Rn2e2pqPg5W643he2hSTm
+   eJzt08kKwjAUBdA4LhzQduGI4Lh0+AR36i8I6lJ3artrHf/cG2hoDElaasSNDw605CU3oY1FCLF+oC3413dq96PcQqAY0fc0nOuCDTVNTwpygbShXDswJ/Jz08wM15c1lN8V9ITxapDnc9lU/sPcqGK5VIWE977M9VzhBnfNOnVoQBNaMXJLiqw4tYAlrKAPAxjCKME+ktYYJjCFmWQfJoqdk51Vliu+ixXn27F6aMb2cOCIuduItY9wUjhr5jkk/D/9BGt45P0+8XfsAmsFRzKPcbln1Roekd9nNqejQHM3XO8LKmolvg==
   </data>
  </layer>
  <objectgroup color="#aa0000" id="3" name="collision">
@@ -49,6 +49,11 @@
   <object id="25" name="crate" type="prop" x="240" y="208" width="16" height="16">
    <properties>
     <property name="id" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="26" type="mplat" x="368" y="160" width="48" height="16">
+   <properties>
+    <property name="id" type="int" value="0"/>
    </properties>
   </object>
  </objectgroup>

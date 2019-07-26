@@ -370,6 +370,20 @@ bool MapLoader::load(const std::string& file)
                                 m_collisionShapes.pop_back();
                             }
                         }
+                        else if (type == "mplat")
+                        {
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                collision.type = CollisionShape::MPlat;
+                                collision.collisionFlags = CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand;
+                                collision.ID = *id;
+                            }
+                            else
+                            {
+                                m_collisionShapes.pop_back();
+                            }
+                        }
 
                         //props
                         else if (type == "prop")

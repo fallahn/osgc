@@ -20,6 +20,9 @@
  <objecttype name="fluid" color="#000ffe">
   <property name="id" type="int" default="-1"/>
  </objecttype>
+ <objecttype name="mplat" color="#ff007f">
+  <property name="id" type="int" default="-1"/>
+ </objecttype>
  <objecttype name="prop" color="#55ff00">
   <property name="id" type="int" default="-1"/>
  </objecttype>

@@ -45,7 +45,8 @@ struct CollisionShape final
 
         Text = 0x800,
         Dialogue = 0x1000,
-        Crate = 0x2000
+        Crate = 0x2000,
+        MPlat = 0x4000
     }type = Solid;
 
     //these are the types this shape collides with
@@ -81,14 +82,15 @@ namespace CollisionGroup
     static const std::uint64_t PlayerFlags = 
         CollisionShape::Fluid | CollisionShape::Solid | CollisionShape::Spikes | 
         CollisionShape::Collectible | CollisionShape::Checkpoint | CollisionShape::Enemy |
-        CollisionShape::Exit | CollisionShape::Dialogue | CollisionShape::Crate;
+        CollisionShape::Exit | CollisionShape::Dialogue | CollisionShape::Crate |CollisionShape::MPlat;
 
     static const std::uint64_t StarFlags =
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes |
-        CollisionShape::Enemy | CollisionShape::Text | CollisionShape::Crate;
+        CollisionShape::Enemy | CollisionShape::Text | CollisionShape::Crate | CollisionShape::MPlat;
 
     static const std::uint64_t CrateFlags = CollisionShape::Player | CollisionShape::Enemy |
-        CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes;// | CollisionShape::LeftHand | CollisionShape::RightHand | CollisionShape::Foot;
+        CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes | CollisionShape::MPlat;
+    // | CollisionShape::LeftHand | CollisionShape::RightHand | CollisionShape::Foot;
 }
 
 std::optional<Manifold> intersectsAABB(sf::FloatRect, sf::FloatRect);

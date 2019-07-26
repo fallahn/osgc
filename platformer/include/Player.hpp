@@ -43,6 +43,7 @@ struct Player final
     std::int32_t lastCheckpoint = 0;
 
     xy::Entity carriedItem;
+    xy::Entity platform; //moving platform if on one
 
     float stateTime = 0.f;
     static constexpr float DyingTime = 1.f;
