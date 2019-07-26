@@ -42,6 +42,7 @@ source distribution.
 #include "FluidAnimationSystem.hpp"
 #include "CrateSystem.hpp"
 #include "SoundEffectsDirector.hpp"
+#include "MovingPlatform.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -104,7 +105,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     launchLoadingScreen();
 
     m_sharedData.reset();
-    //m_sharedData.inventory.ammo = 1;
+    m_sharedData.inventory.ammo = 1;
 
     initScene();
     loadResources();
@@ -253,6 +254,8 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
     m_backgroundScene.addSystem<xy::AudioSystem>(mb);
 
+    m_backgroundScene.addSystem<MovingPlatformSystem>(mb);
+
     m_backgroundScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
     m_backgroundScene.addDirector<SFXDirector>();
 }
@@ -260,6 +263,7 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     m_textureIDs[TextureID::Menu::Background] = m_resources.load<sf::Texture>("assets/images/gearboy/background.png");
+    m_textureIDs[TextureID::Menu::MovingPlatform] = m_resources.load<sf::Texture>("assets/images/platform.png");
     
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/gearboy/player.spt", m_resources);
@@ -447,6 +451,7 @@ void MenuState::buildBackground()
 
 
         const auto& collisionShapes = m_mapLoader.getCollisionShapes();
+        const auto& platPaths = m_mapLoader.getPlatformPaths();
         for (const auto& shape : collisionShapes)
         {
             entity = m_backgroundScene.createEntity();
@@ -466,6 +471,31 @@ void MenuState::buildBackground()
                 switch (shape.type)
                 {
                 default: break;
+                case CollisionShape::MPlat:
+                    if (platPaths.count(shape.ID) == 0)
+                    {
+                        //missing path, kill platform
+                        m_backgroundScene.destroyEntity(entity);
+                    }
+                    else
+                    {
+                        //convert path to world scale
+                        auto path = platPaths.at(shape.ID);
+                        std::transform(path.begin(), path.end(), path.begin(),
+                            [pixelScale](sf::Vector2f v) { return v * pixelScale; });
+
+                        //move plat to beginning
+                        entity.getComponent<xy::Transform>().setPosition(path[0]);
+
+                        //add path
+                        entity.addComponent<MovingPlatform>().path = path;
+
+                        //set texture
+                        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::Menu::MovingPlatform));
+                        entity.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<CollisionBody>().shapes[0].aabb);
+                        entity.addComponent<xy::Drawable>();
+                    }
+                    break;
                 case CollisionShape::Fluid:
                 {
                     sf::Vector2f size(shape.aabb.width, shape.aabb.height);

@@ -163,6 +163,7 @@
     <ClInclude Include="include\MenuConfirmState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\MovingPlatform.hpp" />
     <ClInclude Include="include\NinjaDirector.hpp" />
     <ClInclude Include="include\NinjaStarSystem.hpp" />
     <ClInclude Include="include\PauseState.hpp" />
@@ -195,6 +196,7 @@
     <ClCompile Include="src\MapLoader.cpp" />
     <ClCompile Include="src\MenuConfirmState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\MovingPlatformSystem.cpp" />
     <ClCompile Include="src\NinjaDirector.cpp" />
     <ClCompile Include="src\NinjaStarSystem.cpp" />
     <ClCompile Include="src\PauseState.cpp" />

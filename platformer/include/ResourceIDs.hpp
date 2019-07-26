@@ -39,6 +39,7 @@ namespace TextureID
         enum
         {
             Background,
+            MovingPlatform,
 
             Count
         };
@@ -50,6 +51,7 @@ namespace TextureID
         {
             Background,
             UIBackground,
+            MovingPlatform,
 
             Count
         };

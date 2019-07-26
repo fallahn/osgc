@@ -234,6 +234,24 @@ bool MapLoader::load(const std::string& file)
                                 }
                             }
                         }
+                        else if (type == "platpath")
+                        {
+                            auto id = getID(object);
+                            if (id)
+                            {
+                                const auto& points = object.getPoints();
+                                if (points.size() > 1)
+                                {
+                                    auto pos = object.getPosition();
+                                    PlatformPath path;
+                                    for (auto p : points)
+                                    {
+                                        path.emplace_back(pos.x + p.x, pos.y + p.y);
+                                    }
+                                    m_platformPaths.insert(std::make_pair(*id, path));
+                                }
+                            }
+                        }
                     }
                         break;
                     case tmx::Object::Shape::Rectangle:

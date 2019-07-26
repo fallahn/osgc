@@ -187,14 +187,12 @@ void CrateSystem::updateFalling(xy::Entity entity, float dt)
                 auto relPos = tx.getPosition() - crate.platform.getComponent<xy::Transform>().getPosition();
                 tx.setPosition(relPos);
                 crate.platform.getComponent<xy::Transform>().addChild(tx);
-
-                std::cout << "parented\n";
             }
 
             //raise a message
             auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
             msg->type = CrateEvent::Landed;
-            msg->position = tx.getPosition(); //TODO if parented to platform this should be world + origin
+            msg->position = tx.getWorldPosition() + (tx.getOrigin() * tx.getScale());
         }
     }
 }
@@ -253,8 +251,6 @@ void CrateSystem::detachPlatform(xy::Entity entity)
         crate.platform.getComponent<xy::Transform>().removeChild(tx);
 
         crate.platform = {};
-
-        std::cout << "unparent\n";
     }
 }
 
@@ -327,6 +323,7 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
                     {
                        crate.platform = other;
                     } //fall through to solid physics
+                case CollisionShape::Crate:
                 case CollisionShape::Solid:
                     tx.move(manifold->normal * manifold->penetration);
 

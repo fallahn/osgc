@@ -32,6 +32,7 @@ Copyright 2019 Matt Marchant
 #include "ShieldAnimationSystem.hpp"
 #include "UIDirector.hpp"
 #include "SoundEffectsDirector.hpp"
+#include "MovingPlatform.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -284,6 +285,9 @@ void GameState::loadResources()
     m_textureIDs[TextureID::Game::UIBackground] = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_background.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::UIBackground]).setRepeated(true);
 
+    m_textureIDs[TextureID::Game::MovingPlatform] = m_resources.load<sf::Texture>("assets/images/" + m_sharedData.theme + "/platform.png");
+    m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::MovingPlatform]).setRepeated(true);
+
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
@@ -525,6 +529,7 @@ void GameState::loadCollision()
     //map collision data
     const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
     const auto& collisionShapes = m_mapLoader.getCollisionShapes();
+    const auto& platPaths = m_mapLoader.getPlatformPaths();
 
     for (const auto& shape : collisionShapes)
     {
@@ -545,6 +550,31 @@ void GameState::loadCollision()
             switch (shape.type)
             {
             default: break;
+            case CollisionShape::MPlat:
+                if (platPaths.count(shape.ID) == 0)
+                {
+                    //missing path, kill platform
+                    m_gameScene.destroyEntity(entity);
+                }
+                else
+                {
+                    //convert path to world scale
+                    auto path = platPaths.at(shape.ID);
+                    std::transform(path.begin(), path.end(), path.begin(),
+                        [scale](sf::Vector2f v) { return v * scale; });
+
+                    //move plat to beginning
+                    entity.getComponent<xy::Transform>().setPosition(path[0]);
+
+                    //add path
+                    entity.addComponent<MovingPlatform>().path = path;
+
+                    //set texture
+                    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::Menu::MovingPlatform));
+                    entity.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<CollisionBody>().shapes[0].aabb);
+                    entity.addComponent<xy::Drawable>();
+                }
+                break;
             case CollisionShape::Fluid:
             {
                 sf::Vector2f size(shape.aabb.width, shape.aabb.height);
@@ -639,6 +669,7 @@ void GameState::loadCollision()
                 cEnt.addComponent<xy::Drawable>();
                 cEnt.addComponent<xy::Sprite>() = m_sprites[spriteID];
                 cEnt.addComponent<xy::SpriteAnimation>().play(0);
+                cEnt.getComponent<xy::SpriteAnimation>().setFrameID(xy::Util::Random::value(0, m_sprites[spriteID].getAnimations()[0].frameCount));
                 cEnt.addComponent<BobAnimation>().parent = entity;
 
                 entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());

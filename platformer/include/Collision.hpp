@@ -88,7 +88,8 @@ namespace CollisionGroup
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes |
         CollisionShape::Enemy | CollisionShape::Text | CollisionShape::Crate | CollisionShape::MPlat;
 
-    static const std::uint64_t CrateFlags = CollisionShape::Player | CollisionShape::Enemy |
+    static const std::uint64_t CrateFlags = 
+        CollisionShape::Player | CollisionShape::Enemy | CollisionShape::Crate |
         CollisionShape::Solid | CollisionShape::Fluid | CollisionShape::Spikes | CollisionShape::MPlat;
     // | CollisionShape::LeftHand | CollisionShape::RightHand | CollisionShape::Foot;
 }

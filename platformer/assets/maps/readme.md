@@ -3,8 +3,10 @@ Mapping Guide
 
 Maps are [Tiled](https://www.mapeditor.org) `.tmx` format maps, stored with base64 encoding and zlib compression. Object types are defined in objecttypes.xml.
 
+###### Tiles
 Maps can have any size tiles, but tilesets should all have the same tile size and must be no more than 16x16 (256 total) tiles in size. Multiple tilesets can be used per map, but only one tile set is currently supported per layer. With this in mind it's best to organise your tilesets such as one for basic geometry, another for details and so on. Also, as Tiled starts tile IDs at 1, not 0, the last tile (256) will currently not be drawn. This may change in the future, however.
 
+###### Objects
 Objects have specific properties which define their behaviour. For example collectible objects have an ID property which defines their type.
 
   * 0 is a coin
@@ -29,10 +31,14 @@ Maps must have exactly one exit. Exit properties are:
   * next_map the name of the next map to load, without the .tmx extension
   * theme is the theme to be used by the next map
 
+###### Moving Platforms
+Moving platforms are created in two parts. The first is a rectangular object with type `mplat`. This defines the size and shape of the moving platform. It will automatically use the moving platform texture in the current theme directory. This texture is repeated to fill the shape of the platform. The second object is a polyline with the type `platpath` used to mark out the points between which the platform is moved. The platform is automatically moved to the first point when it is spawned. Both objects must have the same ID property so that the platform knows which path to follow. Moving platforms collide only with the player and crates, so they can move through solid objects.
+
+###### Themes
 Themes are stored in a directory matching the theme name within the assets/images/ directory and assets/sprites/ directory. Currently `gearboy` and `mes` themes exist. Adding a new theme is just a case of creating a new directory with a new theme name, alongside the gearboy and mes directories. The assets themselves must have the same names as the other themes, eg `checkpoint.spt` or `player.spt`. Themes are used to replace sprites for the player, enemies, collectibles and other details.
 
 Dialogue objects trigger an on-screen dialogue box used to expose story lines. They have one property `file` which contains the name of the text file in the dialogue directory to display. These should be used sparingly to not distract from the gameplay too much. It can be jarring to have the flow of gameplay interrupted by an unexpected tex box.
 
-All objects should be rectangular with the exception of enemies. Enemies use polyline objects which mark the start and end of their travel path. If a polyline with more than two points is drawn then the enemy will move in a straight line between the first and last point.
+All objects should be rectangular with the exception of enemies and platform paths. Enemies use polyline objects which mark the start and end of their travel path. If a polyline with more than two points is drawn then the enemy will move in a straight line between the first and last point.
 
 Most of these rules are early in development and are subject to change. I'd love to hear feedback and suggestions for improving the mapping process.

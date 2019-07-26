@@ -21,6 +21,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MovingPlatform.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.hpp

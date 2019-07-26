@@ -141,6 +141,9 @@
     <ClInclude Include="include\SoundEffectsDirector.hpp">
       <Filter>Header Files\directors</Filter>
     </ClInclude>
+    <ClInclude Include="include\MovingPlatform.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -220,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="src\SoundEffectsDirector.cpp">
       <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MovingPlatformSystem.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

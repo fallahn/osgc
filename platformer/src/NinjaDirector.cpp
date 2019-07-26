@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
+#include <xyginext/detail/Operators.hpp>
 
 NinjaDirector::NinjaDirector(const SpriteArray<SpriteID::GearBoy::Count>& sa, const std::array<xy::EmitterSettings, ParticleID::Count>& es, const SharedData& sd)
     : m_sprites         (sa),
@@ -106,6 +107,17 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
             spawnEgg(position);
         }
     }
+    else if (msg.id == MessageID::CrateMessage)
+    {
+        const auto& data = msg.getData<CrateEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case CrateEvent::Landed:
+            spawnPuff(data.position);
+            break;
+        }
+    }
 }
 
 //private
@@ -113,8 +125,12 @@ void NinjaDirector::spawnStar(xy::Entity entity)
 {
     if (m_sharedData.inventory.ammo > 0)
     {
+        const auto& tx = entity.getComponent<xy::Transform>();
+        auto position = tx.getWorldPosition() + (tx.getOrigin() * tx.getScale());
+        position += GameConst::Gearboy::StarOffset;
+
         auto starEnt = getScene().createEntity();
-        starEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition() + GameConst::Gearboy::StarOffset);
+        starEnt.addComponent<xy::Transform>().setPosition(position);
         starEnt.addComponent<xy::Drawable>();
         starEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
         auto bounds = starEnt.getComponent<xy::Sprite>().getTextureBounds();
@@ -129,6 +145,7 @@ void NinjaDirector::spawnStar(xy::Entity entity)
 
 void NinjaDirector::spawnPuff(sf::Vector2f position)
 {
+    //TODO pool and recycle these entities
     auto entity = getScene().createEntity();
     entity.addComponent<xy::Transform>().setPosition(position);
     entity.getComponent<xy::Transform>().setScale(m_spriteScale, m_spriteScale);

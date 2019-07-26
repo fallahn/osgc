@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 
 using Path = std::pair<sf::Vector2f, sf::Vector2f>;
 using EnemySpawn = std::pair<Path, std::int32_t>;
+using PlatformPath = std::vector<sf::Vector2f>;
 
 struct MapLayer final
 {
@@ -68,6 +69,8 @@ public:
 
     const std::vector<std::pair<std::int32_t, sf::FloatRect>>& getProps() const { return m_props; }
 
+    const std::unordered_map<std::int32_t, PlatformPath>& getPlatformPaths() const { return m_platformPaths; }
+
 private:
 
     //mapped to strings so we don't load the same texture more than once
@@ -82,6 +85,8 @@ private:
     std::vector<MapLayer> m_mapLayers;
 
     std::vector<std::pair<std::int32_t, sf::FloatRect>> m_props;
+
+    std::unordered_map<std::int32_t, PlatformPath> m_platformPaths;
 
     float m_tileSize;
     sf::Vector2f m_mapSize;

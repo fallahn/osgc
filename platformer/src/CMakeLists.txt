@@ -16,6 +16,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MovingPlatformSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
