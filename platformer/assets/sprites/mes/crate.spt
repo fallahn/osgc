@@ -1,0 +1,14 @@
+spritesheet crate
+{
+    src="assets/images/tiles/master_entertainment_system.png"
+
+    sprite crate
+    {
+        bounds = 32,224,16,16
+    }
+
+    sprite spawner
+    {
+        bounds=0,0,0,0
+    }
+}

@@ -453,14 +453,21 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                     }
                     return;
                 case CollisionShape::Checkpoint:
-                    //we can assume we're alive at this point because
-                    //dead/dying states perform no collision
-                    player.lastCheckpoint = otherBody.shapes[0].ID;
-
-                    //trigger the animation on the checkpoint
-                    if (player.lastCheckpoint > 0)
+                    if (player.lastCheckpoint != otherBody.shapes[0].ID)
                     {
-                        other.getComponent<xy::Callback>().active = true;
+                        //we can assume we're alive at this point because
+                        //dead/dying states perform no collision
+                        player.lastCheckpoint = otherBody.shapes[0].ID;
+
+                        //trigger the animation on the checkpoint
+                        if (player.lastCheckpoint > 0)
+                        {
+                            other.getComponent<xy::Callback>().active = true;
+
+                            auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                            msg->type = PlayerEvent::Checkpoint;
+                            msg->entity = entity;
+                        }
                     }
                     break;
                 case CollisionShape::Exit:

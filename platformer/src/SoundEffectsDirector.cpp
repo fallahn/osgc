@@ -28,6 +28,7 @@ source distribution.
 #include "SoundEffectsDirector.hpp"
 #include "MessageIDs.hpp"
 #include "EnemySystem.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -44,7 +45,9 @@ namespace
     enum AudioID
     {
         Collect, Die, EnemyDie, GetShield,
-        Hit, Hit2, Jump, Shoot,
+        LoseShield, GetAmmo, GetLife,
+        Hit, Hit2, Jump, Shoot, Egg,
+        EnemyDie2, CrateSmash, Checkpoint,
 
         Count
     };
@@ -57,10 +60,17 @@ namespace
         "assets/sound/die.wav",
         "assets/sound/enemy_die.wav",
         "assets/sound/get_shield.wav",
+        "assets/sound/lose_shield.wav",
+        "assets/sound/collect_ammo.wav",
+        "assets/sound/extra_life.wav",
         "assets/sound/hit.wav",
         "assets/sound/hit2.wav",
         "assets/sound/jump.wav",
-        "assets/sound/shoot.wav",        
+        "assets/sound/shoot.wav",
+        "assets/sound/egg.wav",
+        "assets/sound/enemy_die2.wav",
+        "assets/sound/crate_break.wav",
+        "assets/sound/checkpoint.wav",
     };
 
     std::array<std::size_t, AudioID::Count> audioIDs = {};
@@ -68,8 +78,9 @@ namespace
     const std::size_t MinEntities = 32;
 }
 
-SFXDirector::SFXDirector()
-    : m_nextFreeEntity    (0)
+SFXDirector::SFXDirector(const SharedData& sd)
+    : m_sharedData  (sd),
+    m_nextFreeEntity(0)
 {
     //pre-load sounds
     for(auto i = 0; i < AudioID::Count; ++i)
@@ -94,13 +105,28 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             playSound(AudioID::Die, data.entity.getComponent<xy::Transform>().getPosition());
             break;
         case PlayerEvent::GotShield:
-            playSound(AudioID::GetShield, data.entity.getComponent<xy::Transform>().getPosition());
+            playSound(AudioID::GetShield, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.5f);
+            break;
+        case PlayerEvent::LostShield:
+            playSound(AudioID::LoseShield, data.entity.getComponent<xy::Transform>().getPosition());
+            break;
+        case PlayerEvent::GotAmmo:
+            playSound(AudioID::GetAmmo, data.entity.getComponent<xy::Transform>().getPosition());
             break;
         case PlayerEvent::Jumped:
             playSound(AudioID::Jump, data.entity.getComponent<xy::Transform>().getPosition());
             break;
-        case PlayerEvent::Shot: //TODO swap to star spawn or check ammo level
-            playSound(AudioID::Shoot, data.entity.getComponent<xy::Transform>().getPosition());
+        case PlayerEvent::GotLife:
+            playSound(AudioID::GetLife, data.entity.getComponent<xy::Transform>().getPosition());
+            break;
+        case PlayerEvent::Checkpoint:
+            playSound(AudioID::Checkpoint, data.entity.getComponent<xy::Transform>().getPosition());
+            break;
+        case PlayerEvent::Shot:
+            if (m_sharedData.inventory.ammo > 0)
+            {
+                playSound(AudioID::Shoot, data.entity.getComponent<xy::Transform>().getPosition());
+            }
             break;
         }
     }
@@ -122,18 +148,26 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case EnemyEvent::SpawnEgg:
-
+            playSound(AudioID::Egg, data.entity.getComponent<xy::Transform>().getPosition());
             break;
         case EnemyEvent::Died:
             if (data.entity.getComponent<Enemy>().type == Enemy::Bird)
             {
-                playSound(AudioID::EnemyDie, data.entity.getComponent<xy::Transform>().getPosition());
+                playSound(AudioID::EnemyDie, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.45f);
             }
             else if (data.entity.getComponent<Enemy>().type != Enemy::Egg)
             {
-                
+                playSound(AudioID::EnemyDie2, data.entity.getComponent<xy::Transform>().getPosition());
             }
             break;
+        }
+    }
+    else if (msg.id == MessageID::CrateMessage)
+    {
+        const auto& data = msg.getData<CrateEvent>();
+        if (data.type == CrateEvent::Destroyed)
+        {
+            playSound(AudioID::CrateSmash, data.position).setVolume(0.2f);
         }
     }
 }

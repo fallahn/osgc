@@ -33,6 +33,7 @@ Copyright 2019 Matt Marchant
 #include "UIDirector.hpp"
 #include "SoundEffectsDirector.hpp"
 #include "MovingPlatform.hpp"
+#include "CrateSystem.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -43,6 +44,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/AudioListener.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
@@ -82,7 +84,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
-    //sd.nextMap = "mes01.tmx";
+    //sd.nextMap = "gb02.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -93,6 +95,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+    m_gameScene.getActiveListener().getComponent<xy::AudioListener>().setDepth(1000.f);
 
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -118,9 +121,32 @@ bool GameState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
             requestStackPush(StateID::Pause);
             break;
+#ifdef XY_DEBUG
         case sf::Keyboard::L:
             requestStackPush(StateID::Dialogue);
             break;
+        case sf::Keyboard::R:
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::World::CheckPoint;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                if (e.getComponent<CollisionBody>().shapes[0].ID == 0)
+                {
+                    auto pos = e.getComponent<xy::Transform>().getPosition();
+                    xy::Command cmd2;
+                    cmd2.targetFlags = CommandID::World::Player;
+                    cmd2.action = [&, pos](xy::Entity f, float)
+                    {
+                        f.getComponent<xy::Transform>().setPosition(pos);
+                    };
+                    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
+                }
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+            break;
+#endif
         }
     }
     else if (evt.type == sf::Event::JoystickButtonReleased)
@@ -249,6 +275,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
+    m_gameScene.addSystem<CrateSystem>(mb, m_sharedData);
     m_gameScene.addSystem<PlayerSystem>(mb, m_sharedData);
     m_gameScene.addSystem<ShieldAnimationSystem>(mb);
     m_gameScene.addSystem<NinjaStarSystem>(mb);
@@ -264,7 +291,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::AudioSystem>(mb);
 
     m_gameScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
-    m_gameScene.addDirector<SFXDirector>();
+    m_gameScene.addDirector<SFXDirector>(m_sharedData);
 
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -366,6 +393,9 @@ void GameState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/torch.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Torch] = spriteSheet.getSprite("torch");
+
+    spriteSheet.loadFromFile("assets/sprites/" + m_sharedData.theme + "/crate.spt", m_resources);
+    m_sprites[SpriteID::GearBoy::Crate] = spriteSheet.getSprite("crate");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
@@ -508,6 +538,7 @@ void GameState::buildWorld()
         entity.addComponent<xy::BroadphaseComponent>().setArea(aabb);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Player | CollisionShape::Foot | CollisionShape::LeftHand | CollisionShape::RightHand);
         entity.addComponent<Player>().animations = m_playerAnimations;
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::World::Player;
         m_playerInput.setPlayerEntity(entity);
 
         m_gameScene.getActiveCamera().addComponent<CameraTarget>().target = entity;
@@ -819,6 +850,9 @@ void GameState::loadProps()
             }
         }
             break;
+        case PropID::CrateSpawn:
+            spawnCrate({ bounds.left * scale, bounds.top * scale });
+            break;
         }
     }
 }
@@ -928,6 +962,37 @@ void GameState::buildUI()
     entity.getComponent<xy::Transform>().move(0.f, offset);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::TimeText;
+}
+
+void GameState::spawnCrate(sf::Vector2f position)
+{
+    const float scale = GameConst::PixelsPerTile / m_mapLoader.getTileSize();
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().setScale(scale, scale);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Crate];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+    bounds.left -= bounds.width / 2.f;
+    bounds.top -= bounds.height / 2.f;
+
+    entity.addComponent<CollisionBody>().shapeCount = 2;
+    entity.getComponent<CollisionBody>().shapes[0].aabb = bounds;
+    entity.getComponent<CollisionBody>().shapes[0].type = CollisionShape::Crate;
+    entity.getComponent<CollisionBody>().shapes[0].collisionFlags = CollisionGroup::CrateFlags;
+
+    sf::FloatRect foot(bounds.left + 2.f, bounds.height / 2.f, bounds.width - 4.f, 4.f);
+    entity.getComponent<CollisionBody>().shapes[1].aabb = foot;
+    entity.getComponent<CollisionBody>().shapes[1].type = CollisionShape::Foot;
+    entity.getComponent<CollisionBody>().shapes[1].collisionFlags = CollisionGroup::CrateFlags;
+
+    entity.addComponent<xy::BroadphaseComponent>().setArea(xy::Util::Rectangle::combine(bounds, foot));
+    entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Crate);
+
+    entity.addComponent<Crate>().spawnPosition = position;
 }
 
 void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

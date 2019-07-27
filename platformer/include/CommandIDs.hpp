@@ -35,7 +35,8 @@ namespace CommandID
         {
             DebugItem = 0x1,
             CheckPoint = 0x2,
-            ShieldParticle = 0x4
+            ShieldParticle = 0x4,
+            Player = 0x8
         };
     }
     namespace UI

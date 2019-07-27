@@ -50,11 +50,12 @@ recieved on the message bus. See SoundEffectsDirector.cpp for more
 detailed examples.
 */
 
+struct SharedData;
 class SFXDirector final : public xy::Director
 {
 public:
 
-    SFXDirector();
+    explicit SFXDirector(const SharedData&);
 
     void handleEvent(const sf::Event&) override {}
     void handleMessage(const xy::Message&) override;
@@ -62,6 +63,7 @@ public:
 
 private:
 
+    const SharedData& m_sharedData;
     xy::ResourceHandler m_resources;
 
     std::vector<xy::Entity> m_entities;

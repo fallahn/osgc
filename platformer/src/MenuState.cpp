@@ -52,6 +52,7 @@ source distribution.
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/AudioListener.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
@@ -257,7 +258,9 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<MovingPlatformSystem>(mb);
 
     m_backgroundScene.addDirector<NinjaDirector>(m_sprites, m_particleEmitters, m_sharedData);
-    m_backgroundScene.addDirector<SFXDirector>();
+    m_backgroundScene.addDirector<SFXDirector>(m_sharedData);
+
+    m_backgroundScene.getActiveListener().getComponent<xy::AudioListener>().setDepth(1000.f);
 }
 
 void MenuState::loadResources()
@@ -350,7 +353,7 @@ void MenuState::buildBackground()
         entity.addComponent<xy::Transform>().setScale(pixelScale, pixelScale);
         entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 1);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
-        entity.getComponent<xy::Sprite>().setTextureRect({ 0.f, 272.f, 480.f, 82.f });
+        entity.getComponent<xy::Sprite>().setTextureRect({ 0.f, 272.f, 480.f, 86.f });
 
         //player
         entity = m_backgroundScene.createEntity();

@@ -39,7 +39,7 @@ struct PlayerEvent final
     {
         Jumped, Landed, Shot, Died, Respawned, Exited,
         GotCoin, GotShield, GotAmmo, LostShield, GotLife,
-        TriggerDialogue
+        TriggerDialogue, Checkpoint
     }type = Shot;
     std::int32_t id = -1;
     xy::Entity entity;

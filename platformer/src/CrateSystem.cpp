@@ -125,7 +125,8 @@ void CrateSystem::handleMessage(const xy::Message& msg)
     else if (msg.id == MessageID::StarMessage)
     {
         const auto& data = msg.getData<StarEvent>();
-        if (data.entityHit.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionShape::Crate)
+        if (data.type == StarEvent::HitItem &&
+            data.entityHit.getComponent<xy::BroadphaseComponent>().getFilterFlags() & CollisionShape::Crate)
         {
             kill(data.entityHit);
         }
@@ -365,7 +366,7 @@ void CrateSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Floa
                     else
                     {
                         //if penetration above a certain threshold, kill the enemy/crate
-                        if (manifold->penetration > 4)
+                        if (manifold->penetration > 48)
                         {
                             auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
                             msg->type = CrateEvent::KilledEnemy;

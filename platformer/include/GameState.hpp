@@ -73,5 +73,7 @@ private:
     void loadProps();
     void buildUI();
 
+    void spawnCrate(sf::Vector2f);
+
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };
