@@ -24,11 +24,13 @@ Copyright 2019 Matt Marchant
 #include "InputParser.hpp"
 #include "AnimationMap.hpp"
 
+#include <xyginext/audio/AudioScape.hpp>
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/ParticleEmitter.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/resources/Resource.hpp>
 
 #include <SFML/Graphics/RenderTexture.hpp>
 
@@ -64,6 +66,10 @@ private:
 
     MapLoader m_mapLoader;
     InputParser m_playerInput;
+
+    xy::AudioResource m_audioResource;
+    xy::AudioScape m_ambience;
+    xy::AudioScape m_effects;
 
     void initScene();
     void loadResources();

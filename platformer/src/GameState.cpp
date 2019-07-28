@@ -80,7 +80,9 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_gameScene     (ctx.appInstance.getMessageBus(), 1024),
     m_uiScene       (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
-    m_playerInput   (sd.inputBinding)
+    m_playerInput   (sd.inputBinding),
+    m_ambience      (m_audioResource),
+    m_effects       (m_audioResource)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
@@ -193,8 +195,8 @@ void GameState::handleMessage(const xy::Message& msg)
             {
                 m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
                 m_sharedData.transitionContext.nextState = StateID::Game;
+                m_gameScene.getActiveCamera().getComponent<xy::AudioEmitter>().play();
             }
-
             requestStackPush(StateID::Transition);
         }
         else if (data.type == PlayerEvent::TriggerDialogue)
@@ -404,6 +406,10 @@ void GameState::loadResources()
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
     m_particleEmitters[ParticleID::TorchSmoke].loadFromFile("assets/particles/torch_smoke.xyp", m_resources);
+
+    m_ambience.loadFromFile("assets/sound/ambience.xas");
+    m_effects.loadFromFile("assets/sound/effects.xas");
+    m_gameScene.getActiveCamera().addComponent<xy::AudioEmitter>() = m_ambience.getEmitter("transition");
 
     //buffer texture for map
     m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y));
@@ -623,6 +629,8 @@ void GameState::loadCollision()
                 if (shape.ID == 0)
                 {
                     spriteID = SpriteID::GearBoy::Lava;
+                    entity.addComponent<xy::AudioEmitter>() = m_ambience.getEmitter("lava");
+                    entity.getComponent<xy::AudioEmitter>().play();
                 }
                 else
                 {
@@ -770,6 +778,8 @@ void GameState::loadEnemies()
         case Enemy::Spitball:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Spitball];
             entity.addComponent<Enemy>().type = Enemy::Spitball;
+            entity.addComponent<xy::AudioEmitter>() = m_effects.getEmitter("fireball");
+            entity.getComponent<xy::AudioEmitter>().setPitch(1.2f);
             break;
         case Enemy::Rocket:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Star];
@@ -777,6 +787,7 @@ void GameState::loadEnemies()
             entity.getComponent<Enemy>().stateTime = xy::Util::Random::value(0.2f, 3.f);
             entity.getComponent<xy::Transform>().setScale(0.f, scale);
             entity.getComponent<xy::Transform>().setPosition(path.first);
+            entity.addComponent<xy::AudioEmitter>() = m_effects.getEmitter("fireball");
             break;
         }
         entity.getComponent<Enemy>().start = path.first * scale;
@@ -826,8 +837,15 @@ void GameState::loadProps()
                 smokeEnt.getComponent<xy::ParticleEmitter>().start();
             }
             break;
-        case PropID::LavaFall:
         case PropID::WaterFall:
+        {
+            auto audioEnt = m_gameScene.createEntity();
+            audioEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+            audioEnt.addComponent<xy::AudioEmitter>() = m_ambience.getEmitter("waterfall");
+            audioEnt.getComponent<xy::AudioEmitter>().play();
+        }
+        //fall through
+        case PropID::LavaFall:
         {
             sf::Vector2f size(bounds.width, bounds.height);
 

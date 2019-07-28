@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+#include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/util/Random.hpp>
@@ -348,6 +349,8 @@ void EnemySystem::processSpitball(xy::Entity entity, float dt)
             enemy.velocity.y *= -((enemy.end.y - enemy.start.y) / 448.f); //112 * scale
 
             tx.setPosition(enemy.start);
+
+            entity.getComponent<xy::AudioEmitter>().play();
         }
     }
 }
@@ -367,6 +370,8 @@ void EnemySystem::processRocket(xy::Entity entity, float dt)
             auto scale = tx.getScale();
             scale.x = scale.y;
             tx.setScale(scale);
+
+            entity.getComponent<xy::AudioEmitter>().play();
 
             auto* msg = postMessage<StarEvent>(MessageID::StarMessage);
             msg->position = enemy.start;

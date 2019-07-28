@@ -99,16 +99,16 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case PlayerEvent::GotCoin:
-            playSound(AudioID::Collect, data.entity.getComponent<xy::Transform>().getPosition());
+            playSound(AudioID::Collect, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.4f);
             break;
         case PlayerEvent::Died:
-            playSound(AudioID::Die, data.entity.getComponent<xy::Transform>().getPosition());
+            playSound(AudioID::EnemyDie2, data.entity.getComponent<xy::Transform>().getPosition()).setPitch(0.8f);
             break;
         case PlayerEvent::GotShield:
-            playSound(AudioID::GetShield, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.5f);
+            playSound(AudioID::GetShield, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.35f);
             break;
         case PlayerEvent::LostShield:
-            playSound(AudioID::LoseShield, data.entity.getComponent<xy::Transform>().getPosition());
+            playSound(AudioID::LoseShield, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(0.4f);
             break;
         case PlayerEvent::GotAmmo:
             playSound(AudioID::GetAmmo, data.entity.getComponent<xy::Transform>().getPosition());

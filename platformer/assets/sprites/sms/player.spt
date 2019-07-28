@@ -1,0 +1,52 @@
+spritesheet player
+{
+    src="assets/images/sms/player.png"
+
+    sprite player
+    {
+        bounds = 0,0,16,16
+
+        animation idle
+        {
+            frame = 96,0,16,16
+            frame = 112,0,16,16
+            frame = 0,16,16,16
+            frame = 112,0,16,16
+
+            loop=true
+            framerate=12
+        }
+
+        animation run
+        {
+            frame = 0,0,16,16
+            frame = 16,0,16,16
+            frame = 32,0,16,16
+            frame = 48,0,16,16
+            frame = 64,0,16,16
+            frame = 80,0,16,16
+
+            loop=true
+            framerate=22
+        }
+
+        animation jump
+        {
+            frame = 16,16,16,16
+            loop=true
+            framerate=30
+        }
+
+        animation die
+        {
+            frame=48,16,16,16
+            frame=64,16,16,16
+            frame=80,16,16,16
+            frame=96,16,16,16
+            frame=112,16,16,16
+
+            loop=true
+            framerate=22
+        }
+    }
+}

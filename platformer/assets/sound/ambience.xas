@@ -1,0 +1,35 @@
+audioscape ambience
+{
+    emitter lava
+    {
+        path = "assets/sound/lava.wav"
+        looped = true
+        streaming = true
+        volume = 1
+        attenuation = 0.01
+        falloff = 800
+        mixer_channel = 1
+    }
+
+    emitter waterfall
+    {
+        path = "assets/sound/waterfall.wav"
+        looped = true
+        streaming = true
+        volume = 0.6
+        attenuation = 0.04
+        falloff = 600
+        mixer_channel = 1
+    }
+
+    emitter transition
+    {
+        path = "assets/sound/transition.wav"
+        looped = false
+        streaming = false
+        volume = 0.6
+        attenuation = 0
+        falloff = 0
+        mixer_channel = 1
+    }
+}

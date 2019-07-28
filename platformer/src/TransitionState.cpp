@@ -69,7 +69,7 @@ bool TransitionState::update(float)
         }
     }
 
-    return false;
+    return true;
 }
 
 void TransitionState::draw()
