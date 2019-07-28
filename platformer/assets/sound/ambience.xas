@@ -16,9 +16,9 @@ audioscape ambience
         path = "assets/sound/waterfall.wav"
         looped = true
         streaming = true
-        volume = 0.6
-        attenuation = 0.04
-        falloff = 600
+        volume = 1
+        attenuation = 0.01
+        falloff = 800
         mixer_channel = 1
     }
 

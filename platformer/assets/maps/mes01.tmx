@@ -118,7 +118,7 @@
   <object id="94" type="exit" x="2436" y="140" width="20" height="36">
    <properties>
     <property name="id" type="int" value="0"/>
-    <property name="next_map" value="credits"/>
+    <property name="next_map" value="mes02"/>
     <property name="next_theme" value="mes"/>
    </properties>
   </object>
