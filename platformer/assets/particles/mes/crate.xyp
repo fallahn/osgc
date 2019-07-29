@@ -1,19 +1,27 @@
-particle_system spawn
+particle_system crate
 {
-	src = "assets/images/mes/fragment.png"
-	blend_mode = add
-	gravity = 0,2000
-	velocity = 0,0
-	//spread = 0
-	lifetime = 0.43
-	lifetime_variance = 0.13
-	colour = 125,75,9,255
-	scale_affector = 1
-	size = 16.0
-	emit_rate = 5
-	emit_count = 5
-	spawn_radius = 60
-	spawn_offset = 32,32
-	release_count = 5
-	random_initial_rotation = false
+    src = "assets/images/mes/fragment.png"
+    blendmode = alpha
+    gravity = 0.000000,1000.000000
+    velocity = 0.000000,-260.273987
+    spread = 49.316002
+    lifetime = 0.710000
+    lifetime_variance = 0.130000
+    colour = 255,255,255,255
+    random_initial_rotation = true
+    rotation_speed = 2.671000
+    scale_affector = 1.000000
+    size = 16.679000
+    emit_rate = 5.000000
+    emit_count = 8
+    spawn_radius = 34.247002
+    spawn_offset = 0.000000,0.000000
+    release_count = 8
+    forces 
+    {
+        force = 0.000000,0.000000
+        force = 0.000000,0.000000
+        force = 0.000000,0.000000
+        force = 0.000000,0.000000
+    }
 }

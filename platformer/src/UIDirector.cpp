@@ -157,7 +157,9 @@ void UIDirector::handleMessage(const xy::Message& msg)
 
 void UIDirector::process(float)
 {
+#ifndef XY_DEBUG
     updateTimer();
+#endif
 }
 
 //private

@@ -48,6 +48,7 @@ namespace
         LoseShield, GetAmmo, GetLife,
         Hit, Hit2, Jump, Shoot, Egg,
         EnemyDie2, CrateSmash, Checkpoint,
+        Respawn,
 
         Count
     };
@@ -71,6 +72,7 @@ namespace
         "assets/sound/enemy_die2.wav",
         "assets/sound/crate_break.wav",
         "assets/sound/checkpoint.wav",
+        "assets/sound/player_spawn.wav",
     };
 
     std::array<std::size_t, AudioID::Count> audioIDs = {};
@@ -121,6 +123,9 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             break;
         case PlayerEvent::Checkpoint:
             playSound(AudioID::Checkpoint, data.entity.getComponent<xy::Transform>().getPosition());
+            break;
+        case PlayerEvent::Respawned:
+            playSound(AudioID::Respawn, data.entity.getComponent<xy::Transform>().getPosition());
             break;
         case PlayerEvent::Shot:
             if (m_sharedData.inventory.ammo > 0)

@@ -319,7 +319,8 @@ void GameState::loadResources()
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::MovingPlatform]).setRepeated(true);
 
     xy::SpriteSheet spriteSheet;
-    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/player.spt", m_resources);
+    //spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/player.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/sms/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
 
     m_playerAnimations[AnimID::Player::Idle] = spriteSheet.getAnimationIndex("idle", "player");
@@ -611,7 +612,7 @@ void GameState::loadCollision()
                     entity.addComponent<MovingPlatform>().path = path;
 
                     //set texture
-                    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::MovingPlatform]));
+                    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::MovingPlatform]));
                     entity.getComponent<xy::Sprite>().setTextureRect(bounds);
                     entity.addComponent<xy::Drawable>();
                 }
