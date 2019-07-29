@@ -284,6 +284,7 @@ void GameState::initScene()
     m_gameScene.addSystem<FluidAnimationSystem>(mb);
     m_gameScene.addSystem<BobAnimationSystem>(mb);
     m_gameScene.addSystem<EnemySystem>(mb);
+    m_gameScene.addSystem<MovingPlatformSystem>(mb);
     m_gameScene.addSystem<CameraTargetSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
@@ -596,10 +597,12 @@ void GameState::loadCollision()
                 }
                 else
                 {
+                    auto bounds = entity.getComponent<CollisionBody>().shapes[0].aabb;
+
                     //convert path to world scale
                     auto path = platPaths.at(shape.ID);
                     std::transform(path.begin(), path.end(), path.begin(),
-                        [scale](sf::Vector2f v) { return v * scale; });
+                        [scale, bounds](sf::Vector2f v) { return (v * scale) - sf::Vector2f(bounds.width / 2.f, bounds.height / 2.f); });
 
                     //move plat to beginning
                     entity.getComponent<xy::Transform>().setPosition(path[0]);
@@ -608,8 +611,8 @@ void GameState::loadCollision()
                     entity.addComponent<MovingPlatform>().path = path;
 
                     //set texture
-                    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::Menu::MovingPlatform));
-                    entity.getComponent<xy::Sprite>().setTextureRect(entity.getComponent<CollisionBody>().shapes[0].aabb);
+                    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::MovingPlatform]));
+                    entity.getComponent<xy::Sprite>().setTextureRect(bounds);
                     entity.addComponent<xy::Drawable>();
                 }
                 break;

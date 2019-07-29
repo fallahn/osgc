@@ -170,9 +170,11 @@ void PlayerSystem::processFalling(xy::Entity entity, float dt)
             if (player.platform.isValid()
                 && (flags & CollisionShape::Foot))
             {
-                    auto relPos = tx.getPosition() - player.platform.getComponent<xy::Transform>().getPosition();
-                    tx.setPosition(relPos);
-                    player.platform.getComponent<xy::Transform>().addChild(tx);
+                auto& platTx = player.platform.getComponent<xy::Transform>();
+
+                auto relPos = tx.getPosition() - (platTx.getPosition()/* + platTx.getOrigin()*/);
+                tx.setPosition(relPos);
+                player.platform.getComponent<xy::Transform>().addChild(tx);
             }
 
             auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
@@ -380,7 +382,7 @@ void PlayerSystem::doCollision(xy::Entity entity, float)
         if (other != entity)
         {
             auto otherBounds = boundsToWorldSpace(other.getComponent<xy::BroadphaseComponent>().getArea(), other.getComponent<xy::Transform>());
-
+            //auto otherBounds = other.getComponent<xy::Transform>().getTransform().transformRect(other.getComponent<xy::BroadphaseComponent>().getArea());
             if (otherBounds.intersects(queryArea))
             {
                 resolveCollision(entity, other, otherBounds);

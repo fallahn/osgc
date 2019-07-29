@@ -73,9 +73,9 @@ void CameraTargetSystem::process(float dt)
             {
                 if (camera.lastTarget.isValid())
                 {
-                    auto targetPosition = camera.target.getComponent<xy::Transform>().getPosition();
+                    auto targetPosition = camera.target.getComponent<xy::Transform>().getWorldPosition();
 
-                    auto diff = targetPosition - camera.lastTarget.getComponent<xy::Transform>().getPosition();
+                    auto diff = targetPosition - camera.lastTarget.getComponent<xy::Transform>().getWorldPosition();
                     float len2 = xy::Util::Vector::lengthSquared(diff);
 
                     if (len2 > 25)
@@ -95,7 +95,7 @@ void CameraTargetSystem::process(float dt)
             }
             else
             {
-                camera.targetPosition = camera.target.getComponent<xy::Transform>().getPosition();
+                camera.targetPosition = camera.target.getComponent<xy::Transform>().getWorldPosition();
             }
 
             sf::Vector2f targetPos(smoothMotion(tx.getPosition(), camera.targetPosition, camera.velocity, dt));
