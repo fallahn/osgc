@@ -59,6 +59,9 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<IntroState>(StateID::Intro, sd);
     ss->registerState<EndingState>(StateID::Ending, sd);
 
+    sd.loadInputBinding();
+    sd.loadProgress();
+
 #ifdef XY_DEBUG
     //return StateID::Ending;
     return StateID::Game;

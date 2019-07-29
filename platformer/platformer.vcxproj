@@ -158,6 +158,7 @@
     <ClInclude Include="include\InputBinding.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\IntroState.hpp" />
+    <ClInclude Include="include\KeyMapping.hpp" />
     <ClInclude Include="include\LoadingScreen.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
     <ClInclude Include="include\MenuConfirmState.hpp" />

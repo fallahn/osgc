@@ -43,6 +43,7 @@ source distribution.
 #include "CrateSystem.hpp"
 #include "SoundEffectsDirector.hpp"
 #include "MovingPlatform.hpp"
+#include "KeyMapping.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -131,6 +132,85 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
             }
         });
 
+    registerConsoleTab("Key Binds",
+        [&]() 
+        {
+            xy::Nim::text("Move Left");
+            if (!m_sharedData.waitingBind)
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text(KeyMapping.at(m_sharedData.inputBinding.keys[InputBinding::Left]));
+                xy::Nim::sameLine();
+                if (xy::Nim::button("Change##0"))
+                {
+                    auto* bind = &m_sharedData.inputBinding.keys[InputBinding::Left];
+                    m_sharedData.waitingBind = reinterpret_cast<std::int32_t*>(bind);
+                }
+            }
+            else if (*m_sharedData.waitingBind == static_cast<std::int32_t>(m_sharedData.inputBinding.keys[InputBinding::Left]))
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text("Press a key");
+            }
+
+            //-------------------------
+            xy::Nim::text("Move Right");
+            if (!m_sharedData.waitingBind)
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text(KeyMapping.at(m_sharedData.inputBinding.keys[InputBinding::Right]));
+                xy::Nim::sameLine();
+                if (xy::Nim::button("Change##1"))
+                {
+                    auto* bind = &m_sharedData.inputBinding.keys[InputBinding::Right];
+                    m_sharedData.waitingBind = reinterpret_cast<std::int32_t*>(bind);
+                }
+            }
+            else if (*m_sharedData.waitingBind == static_cast<std::int32_t>(m_sharedData.inputBinding.keys[InputBinding::Right]))
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text("Press a key");
+            }
+
+            //------------------------
+            xy::Nim::text("Jump");
+            if (!m_sharedData.waitingBind)
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text(KeyMapping.at(m_sharedData.inputBinding.keys[InputBinding::Jump]));
+                xy::Nim::sameLine();
+                if (xy::Nim::button("Change##2"))
+                {
+                    auto* bind = &m_sharedData.inputBinding.keys[InputBinding::Jump];
+                    m_sharedData.waitingBind = reinterpret_cast<std::int32_t*>(bind);
+                }
+            }
+            else if (*m_sharedData.waitingBind == static_cast<std::int32_t>(m_sharedData.inputBinding.keys[InputBinding::Jump]))
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text("Press a key");
+            }
+            
+            //------------------------
+            xy::Nim::text("Action");
+            if (!m_sharedData.waitingBind)
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text(KeyMapping.at(m_sharedData.inputBinding.keys[InputBinding::Shoot]));
+                xy::Nim::sameLine();
+                if (xy::Nim::button("Change##3"))
+                {
+                    auto* bind = &m_sharedData.inputBinding.keys[InputBinding::Shoot];
+                    m_sharedData.waitingBind = reinterpret_cast<std::int32_t*>(bind);
+                }
+            }
+            else if (*m_sharedData.waitingBind == static_cast<std::int32_t>(m_sharedData.inputBinding.keys[InputBinding::Shoot]))
+            {
+                xy::Nim::sameLine();
+                xy::Nim::text("Press a key");
+            }
+        });
+
     quitLoadingScreen();
 }
 
@@ -138,7 +218,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 bool MenuState::handleEvent(const sf::Event& evt)
 {
 	//prevents events being forwarded if the console wishes to consume them
-	if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+	if ((xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse()) &&
+        !m_sharedData.waitingBind)
     {
         return true;
     }
@@ -168,6 +249,13 @@ bool MenuState::handleEvent(const sf::Event& evt)
             m_backgroundScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
         break;
+        }
+
+        if (m_sharedData.waitingBind)
+        {
+            *m_sharedData.waitingBind = evt.key.code;
+            m_sharedData.waitingBind = nullptr;
+            m_sharedData.saveInputBinding();
         }
     }
 

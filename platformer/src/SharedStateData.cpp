@@ -27,6 +27,48 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const std::string fileName("platform.prog");
+    const std::string bindName("keys.bind");
+}
+
+void SharedData::saveInputBinding()
+{
+    std::string path = xy::FileSystem::getConfigDirectory(xy::App::getActiveInstance()->getApplicationName()) + bindName;
+    std::ofstream file(path, std::ios::binary);
+    if (file.is_open() && file.good())
+    {
+        file.write((char*)&inputBinding, sizeof(InputBinding));
+    }
+    file.close();
+}
+
+void SharedData::loadInputBinding()
+{
+    inputBinding = {};
+
+    std::string path = xy::FileSystem::getConfigDirectory(xy::App::getActiveInstance()->getApplicationName()) + bindName;
+
+    auto expected = sizeof(InputBinding);
+    std::ifstream file(path, std::ios::binary);
+    if (file.is_open() && file.good())
+    {
+        //check file is at least header size
+        file.seekg(0, file.end);
+        auto fileSize = file.tellg();
+        file.seekg(file.beg);
+
+        if (fileSize < expected)
+        {
+            xy::Logger::log(path + " - Invalid file size", xy::Logger::Type::Error);
+            file.close();
+            return;
+        }
+
+        std::vector<char> buffer(sizeof(InputBinding));
+        file.read(buffer.data(), sizeof(InputBinding));
+
+        std::memcpy(&inputBinding, buffer.data(), sizeof(InputBinding));
+    }
+    file.close();
 }
 
 void SharedData::loadProgress()

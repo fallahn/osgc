@@ -60,6 +60,8 @@ struct Inventory final
 struct SharedData final
 {
     InputBinding inputBinding;
+    std::int32_t* waitingBind = nullptr;
+
     std::int32_t menuID = -1;
     std::string nextMap = "gb01.tmx";
     std::string theme = "gearboy";
@@ -70,6 +72,9 @@ struct SharedData final
     std::string dialogueFile = "intro.txt";
 
     LoadingScreen loadingScreen;
+
+    void saveInputBinding();
+    void loadInputBinding();
 
     void saveProgress();
     void loadProgress();

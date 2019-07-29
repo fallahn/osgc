@@ -62,8 +62,13 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
             spawnStar(data.entity);
             break;
         case PlayerEvent::Respawned:
-            getScene().getActiveCamera().getComponent<CameraTarget>().shakeAmount = 1.f;
             {
+                auto camera = getScene().getActiveCamera();
+                if (camera.hasComponent<CameraTarget>())
+                {
+                    camera.getComponent<CameraTarget>().shakeAmount = 1.f;
+                }
+
                 auto entity = data.entity;
 
                 //trigger particles on spawner
@@ -72,7 +77,8 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
                 cmd.action = [&, entity](xy::Entity e, float) mutable
                 {
                     auto& p = entity.getComponent<Player>();
-                    if (p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
+                    if (p.lastCheckpoint > 0 &&
+                        p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
                     {
                         e.getComponent<xy::Callback>().active = true;
                     }

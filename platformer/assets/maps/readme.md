@@ -42,3 +42,6 @@ Dialogue objects trigger an on-screen dialogue box used to expose story lines. T
 All objects should be rectangular with the exception of enemies and platform paths. Enemies use polyline objects which mark the start and end of their travel path. If a polyline with more than two points is drawn then the enemy will move in a straight line between the first and last point.
 
 Most of these rules are early in development and are subject to change. I'd love to hear feedback and suggestions for improving the mapping process.
+
+###### Testing
+To test a map open the console from the main menu (press F1 or hit the options item), then type `map <mapname>` where `<mapname>` is the name of your map without the `*.tmx` extension.
