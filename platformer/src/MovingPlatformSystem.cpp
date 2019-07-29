@@ -43,8 +43,6 @@ void MovingPlatformSystem::process(float dt)
         auto len2 = xy::Util::Vector::lengthSquared(plat.path[plat.currentTarget] - tx.getPosition());
         if (len2 < 10) 
         {
-            std::size_t lastTarget = plat.currentTarget;
-
             if (plat.forwards)
             {
                 plat.currentTarget = (plat.currentTarget + 1) % plat.path.size();

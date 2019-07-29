@@ -172,7 +172,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
     }
 }
 
-void SFXDirector::process(float dt)
+void SFXDirector::process(float)
 {
     //check our ents and free up finished sounds
     for (auto i = 0u; i < m_nextFreeEntity; ++i)
