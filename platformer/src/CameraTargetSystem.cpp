@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/util/Math.hpp>
 #include <xyginext/util/Vector.hpp>
+#include <xyginext/util/Wavetable.hpp>
 
 namespace
 {
@@ -51,10 +52,13 @@ namespace
 }
 
 CameraTargetSystem::CameraTargetSystem(xy::MessageBus& mb)
-    : xy::System(mb, typeid(CameraTargetSystem))
+    : xy::System(mb, typeid(CameraTargetSystem)),
+    m_shakeIndex(0)
 {
     requireComponent<CameraTarget>();
     requireComponent<xy::Transform>();
+
+    m_shakeTable = xy::Util::Wavetable::sine(8.f, 5.f);
 }
 
 //public
@@ -107,7 +111,14 @@ void CameraTargetSystem::process(float dt)
             targetPos.x = xy::Util::Math::clamp(targetPos.x, m_bounds.left + offset.x, (m_bounds.left + m_bounds.width) - offset.x);
             targetPos.y = xy::Util::Math::clamp(targetPos.y, m_bounds.top + offset.y, (m_bounds.top + m_bounds.height) - offset.y);
             
+            //add any shake
+            camera.shakeAmount = std::max(camera.shakeAmount - dt, 0.f);
+            targetPos.x += camera.shakeAmount * m_shakeTable[m_shakeIndex];
+
             tx.setPosition(targetPos);
         }
     }
+
+    //update wavetable
+    m_shakeIndex = (m_shakeIndex + 1) % m_shakeTable.size();
 }

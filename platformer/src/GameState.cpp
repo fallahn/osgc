@@ -85,8 +85,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_effects       (m_audioResource)
 {
     launchLoadingScreen();
-    sd.theme = "mes";
-    sd.nextMap = "mes02.tmx";
+    //sd.theme = "mes";
+    sd.nextMap = "gb03.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -668,7 +668,6 @@ void GameState::loadCollision()
                     particleEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
                     particleEnt.getComponent<xy::Transform>().move(bounds.width / 2.f, bounds.height / 3.f);
                     particleEnt.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Checkpoint];
-                    //TODO could add callback to destroy end when particles finished?
 
                     entity.addComponent<xy::Callback>().function =
                         [&, checkpointEnt, particleEnt](xy::Entity e, float) mutable
@@ -677,8 +676,8 @@ void GameState::loadCollision()
                             m_checkpointAnimations[AnimID::Checkpoint::Idle])
                         {
                             checkpointEnt.getComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Activate]);
-                            particleEnt.getComponent<xy::ParticleEmitter>().start();
                         }
+                        particleEnt.getComponent<xy::ParticleEmitter>().start(); //do this out here so can replay effect on player spawn
                         e.getComponent<xy::Callback>().active = false;
                     };
                 }

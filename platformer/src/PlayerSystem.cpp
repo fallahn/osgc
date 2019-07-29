@@ -79,15 +79,15 @@ void PlayerSystem::process(float dt)
         default: break;
         case Player::Falling:
             processFalling(entity, dt);
-            DPRINT("State", "Falling");
+            //DPRINT("State", "Falling");
             break;
         case Player::Running:
             processRunning(entity, dt);
-            DPRINT("State", "Running");
+            //DPRINT("State", "Running");
             break;
         case Player::Dying:
             processDying(entity, dt);
-            DPRINT("State", "Dying");
+            //DPRINT("State", "Dying");
             break;
         case Player::Dead:
             processDead(entity, dt);
@@ -319,12 +319,30 @@ void PlayerSystem::processDying(xy::Entity entity, float dt)
 
     //state time
     player.stateTime -= dt;
-    if (player.stateTime < 0)
+    if (player.stateTime < 0
+        && m_sharedData.inventory.lives > 0)
     {
         player.stateTime = Player::DeadTime;
         player.state = Player::Dead;
 
         entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::World::CheckPoint;
+        cmd.action = [&, entity](xy::Entity e, float) mutable
+        {
+            auto& p = entity.getComponent<Player>();
+            if (p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
+            {
+                auto bounds = e.getComponent<xy::BroadphaseComponent>().getArea();
+                auto position = e.getComponent<xy::Transform>().getPosition();
+
+                auto& tx = entity.getComponent<xy::Transform>();
+                tx.setPosition(position.x + (bounds.width / 2.f), position.y + (bounds.height / 2.f));
+            }
+        };
+        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+        return;
     }
 
     applyVelocity(entity, dt);
@@ -341,26 +359,12 @@ void PlayerSystem::processDead(xy::Entity entity, float dt)
     if (player.stateTime < 0
         && m_sharedData.inventory.lives > 0)
     {
-        xy::Command cmd;
-        cmd.targetFlags = CommandID::World::CheckPoint;
-        cmd.action = [&, entity](xy::Entity e, float) mutable
-        {
-            auto& p = entity.getComponent<Player>();
-            if (p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
-            {
-                auto bounds = e.getComponent<xy::BroadphaseComponent>().getArea();
-                auto position = e.getComponent<xy::Transform>().getPosition();
+        player.state = Player::Falling;
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
 
-                p.state = Player::Falling;
-                entity.getComponent<xy::Transform>().setPosition(position.x + (bounds.width / 2.f), position.y + (bounds.height / 2.f));
-                entity.getComponent<xy::Sprite>().setColour(sf::Color::White);
-
-                auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
-                msg->type = PlayerEvent::Respawned;
-                msg->entity = entity;
-            }
-        };
-        getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+        auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+        msg->type = PlayerEvent::Respawned;
+        msg->entity = entity;
 
         entity.getComponent<xy::SpriteAnimation>().play(player.animations[AnimID::Player::Jump]);
     }
@@ -581,7 +585,8 @@ void PlayerSystem::applyVelocity(xy::Entity entity, float dt)
 void PlayerSystem::kill(xy::Entity entity)
 {
 #ifdef XY_DEBUG
-    return;
+    //return;
+    m_sharedData.inventory.lives++;
 #endif
 
     auto& player = entity.getComponent<Player>();

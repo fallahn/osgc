@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "CameraTarget.hpp"
 #include "SharedStateData.hpp"
+#include "Player.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -61,6 +62,24 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
             spawnStar(data.entity);
             break;
         case PlayerEvent::Respawned:
+            getScene().getActiveCamera().getComponent<CameraTarget>().shakeAmount = 1.f;
+            {
+                auto entity = data.entity;
+
+                //trigger particles on spawner
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::World::CheckPoint;
+                cmd.action = [&, entity](xy::Entity e, float) mutable
+                {
+                    auto& p = entity.getComponent<Player>();
+                    if (p.lastCheckpoint == e.getComponent<CollisionBody>().shapes[0].ID)
+                    {
+                        e.getComponent<xy::Callback>().active = true;
+                    }
+                };
+                sendCommand(cmd);
+            }
+
         //case PlayerEvent::Jumped:
         case PlayerEvent::Landed:
             spawnPuff(data.entity.getComponent<xy::Transform>().getPosition());
