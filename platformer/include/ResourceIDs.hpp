@@ -79,6 +79,7 @@ namespace ParticleID
         Shield,
         Checkpoint,
         TorchSmoke,
+        Crate,
 
         Count
     };

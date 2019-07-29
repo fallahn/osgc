@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/ParticleEmitter.hpp>
 
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -48,6 +49,7 @@ CrateSystem::CrateSystem(xy::MessageBus& mb, SharedData& sd)
     requireComponent<Crate>();
     requireComponent<xy::BroadphaseComponent>();
     requireComponent<xy::Transform>();
+    requireComponent<xy::ParticleEmitter>();
 }
 
 //public
@@ -394,6 +396,8 @@ void CrateSystem::kill(xy::Entity entity)
     auto scale = tx.getScale();
     scale.x = 0.f;
     tx.setScale(scale);
+
+    entity.getComponent<xy::ParticleEmitter>().start();
 
     auto* msg = postMessage<CrateEvent>(MessageID::CrateMessage);
     msg->type = CrateEvent::Destroyed;

@@ -28,104 +28,66 @@ Copyright 2019 Matt Marchant
 namespace
 {
     constexpr float frametime = 1.f / 50.f;
-
-    const char chuff[] = "buns flaps dicketry makes speefcake libblelow hibberny. Woops barnacles cleft#";
-    std::size_t chuffIdx = 0;
+    const float scale = 4.f;
+    const float tailSize = 16.f;
 }
 
 LoadingScreen::LoadingScreen()
-    : m_currentFrameTime  (0.f)
+    : m_currentFrameTime  (0.f),
+    m_tailCount(0)
 {
-    m_imageData =
-    {
-        255, 128, 0, 255,
-        0, 128, 255, 255,
-        128, 255, 0, 255,
-        0, 255, 128, 255,
-        255, 128, 128, 255,
-        128, 128, 255, 255,
-        0, 128, 255, 255,
-        128, 255, 128, 255,
-        255, 0, 128, 255,
-        128, 0, 128, 255,
-        255, 128, 0, 255,
-        0, 128, 255, 255,
-        128, 255, 0, 255,
-        0, 255, 128, 255,
-        255, 255, 128, 255,
-        128, 255, 0, 255,
-        255, 128, 128, 255,
-        128, 255, 128, 255,
-        255, 0, 128, 255,
-        128, 0, 128, 255,
-        255, 128, 0, 255,
-        0, 128, 255, 255,
-        255, 255, 0, 255,
-        0, 255, 255, 255,
-        255, 128, 128, 255,
-        128, 128, 255, 255,
-        255, 128, 0, 255,
-        128, 255, 128, 255,
-        255, 0, 128, 255,
-        128, 0, 128, 255,
-        0, 128, 255, 255,
-        255, 0, 128, 255,
-        128, 0, 255, 255,
-    };
+    m_texture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/loading.png");
 
-    m_texture.create(1, 33);
-    m_texture.update(m_imageData.data());
-
-    m_sprite.setTexture(m_texture, true);
-    m_sprite.setScale(xy::DefaultSceneSize.x, xy::DefaultSceneSize.y / 32.f);
-
-    sf::Color c(0, 0, 128, 255);
+    m_frameSize = sf::Vector2f(m_texture.getSize());
+    m_frameSize.y /= 2.f;
+    m_frameSize.x -= 16.f;
 
     m_vertices =
     {
-        sf::Vertex(sf::Vector2f(262.f, 94.f), c),
-        {sf::Vector2f(xy::DefaultSceneSize.x - 262.f, 94.f), c},
-        {sf::Vector2f(xy::DefaultSceneSize.x - 262.f, xy::DefaultSceneSize.y - 94.f), c},
-        {sf::Vector2f(262.f, xy::DefaultSceneSize.y - 94.f), c}
+        sf::Vertex(),
+        {sf::Vector2f(m_frameSize.x, 0.f), sf::Vector2f(m_frameSize.x, 0.f)},
+        {m_frameSize, m_frameSize},
+        {sf::Vector2f(0.f, m_frameSize.y), sf::Vector2f(0.f, m_frameSize.y)}
     };
+
+    m_transform.translate(40.f + (MaxTail * (tailSize * scale)), 40.f);
+    m_transform.scale(scale, scale);
 }
 
 //public
 void LoadingScreen::update(float dt)
 {
-    static int offset = 0;
-
     m_currentFrameTime += dt;
     if (m_currentFrameTime > frametime)
     {
         m_currentFrameTime = 0.f;
 
-        offset++;
-        if (offset % 2 == 0)
-        {
-            m_sprite.move(0.f, 32.f);
-        }
-        else
-        {
-            m_sprite.move(0.f, -32.f);
-        }
+        static int currFrame = 0;
+        currFrame = (currFrame + 1) % 2;
 
-        for (auto i = 0u; i <  m_imageData.size(); ++i)
+        m_vertices[0].texCoords.y = currFrame * m_frameSize.y;
+        m_vertices[1].texCoords.y = currFrame * m_frameSize.y;
+        m_vertices[2].texCoords.y = (currFrame * m_frameSize.y) + m_frameSize.y;
+        m_vertices[3].texCoords.y = (currFrame * m_frameSize.y) + m_frameSize.y;
+
+        if (m_tailCount < MaxTail)
         {
-            if (i % 4 == 1)
-            {
-                m_imageData[i] ^= chuff[chuffIdx];
-                chuffIdx = (chuffIdx + 1) % 79;
-            }
+            m_vertices.emplace_back(sf::Vector2f(m_frameSize.x + (tailSize * m_tailCount), 0.f), sf::Vector2f(m_frameSize.x, 0.f));
+            m_vertices.emplace_back(sf::Vector2f((m_frameSize.x + (tailSize * m_tailCount)) + tailSize, 0.f), sf::Vector2f(m_frameSize.x + tailSize, 0.f));
+            m_vertices.emplace_back(sf::Vector2f((m_frameSize.x + (tailSize * m_tailCount)) + tailSize, m_frameSize.y), sf::Vector2f(m_frameSize.x + tailSize, m_frameSize.y));
+            m_vertices.emplace_back(sf::Vector2f(m_frameSize.x + (tailSize * m_tailCount), m_frameSize.y), sf::Vector2f(m_frameSize.x, m_frameSize.y));
+
+            m_transform.translate(-tailSize, 0.f);
+
+            m_tailCount++;
         }
-        
-        m_texture.update(m_imageData.data());
     }
 }
 
 //private
 void LoadingScreen::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    rt.draw(m_sprite, states);
-    rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads);
+    states.texture = &m_texture;
+    states.transform = m_transform;
+    rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 }

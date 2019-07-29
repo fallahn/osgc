@@ -1,7 +1,7 @@
 particle_system spawn
 {
 	src = "assets/images/gearboy/fragment.png"
-	blend_mode = add
+	blend_mode = alpha
 	gravity = 0,2000
 	velocity = 0,0
 	//spread = 0
@@ -13,7 +13,7 @@ particle_system spawn
 	emit_rate = 5
 	emit_count = 5
 	spawn_radius = 60
-	spawn_offset = 32,32
+	//spawn_offset = 32,32
 	release_count = 5
 	random_initial_rotation = false
 }

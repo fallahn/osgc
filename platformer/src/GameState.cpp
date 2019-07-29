@@ -314,7 +314,7 @@ void GameState::loadResources()
     m_textureIDs[TextureID::Game::UIBackground] = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_background.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::UIBackground]).setRepeated(true);
 
-    m_textureIDs[TextureID::Game::MovingPlatform] = m_resources.load<sf::Texture>("assets/images/" + m_sharedData.theme + "/platform.png");
+    m_textureIDs[TextureID::Game::MovingPlatform] = m_resources.load<sf::Texture>("assets/images/" + m_sharedData.theme + "/moving_platform.png");
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::MovingPlatform]).setRepeated(true);
 
     xy::SpriteSheet spriteSheet;
@@ -406,6 +406,7 @@ void GameState::loadResources()
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
     m_particleEmitters[ParticleID::TorchSmoke].loadFromFile("assets/particles/torch_smoke.xyp", m_resources);
+    m_particleEmitters[ParticleID::Crate].loadFromFile("assets/particles/" + m_sharedData.theme + "/crate.xyp", m_resources);
 
     m_ambience.loadFromFile("assets/sound/ambience.xas");
     m_effects.loadFromFile("assets/sound/effects.xas");
@@ -1011,6 +1012,7 @@ void GameState::spawnCrate(sf::Vector2f position)
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Crate);
 
     entity.addComponent<Crate>().spawnPosition = position;
+    entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Crate];
 }
 
 void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

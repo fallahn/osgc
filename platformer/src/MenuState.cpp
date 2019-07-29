@@ -63,6 +63,7 @@ source distribution.
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
+#include <xyginext/ecs/systems/ParticleSystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/detail/Operators.hpp>
@@ -253,6 +254,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
     m_backgroundScene.addSystem<xy::RenderSystem>(mb);
+    m_backgroundScene.addSystem<xy::ParticleSystem>(mb);
     m_backgroundScene.addSystem<xy::AudioSystem>(mb);
 
     m_backgroundScene.addSystem<MovingPlatformSystem>(mb);
@@ -266,7 +268,6 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     m_textureIDs[TextureID::Menu::Background] = m_resources.load<sf::Texture>("assets/images/gearboy/background.png");
-    m_textureIDs[TextureID::Menu::MovingPlatform] = m_resources.load<sf::Texture>("assets/images/platform.png");
     
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/gearboy/player.spt", m_resources);
@@ -305,6 +306,8 @@ void MenuState::loadResources()
     m_shaders.preload(ShaderID::TileMap, tilemapFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
+
+    m_particleEmitters[ParticleID::Crate].loadFromFile("assets/particles/gearboy/crate.xyp", m_resources);
 
     m_fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
 }
@@ -659,6 +662,7 @@ void MenuState::spawnCrate(sf::Vector2f position)
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Crate);
 
     entity.addComponent<Crate>().spawnPosition = position;
+    entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Crate];
 
 #ifdef XY_DEBUG
     auto debugEnt = m_backgroundScene.createEntity();

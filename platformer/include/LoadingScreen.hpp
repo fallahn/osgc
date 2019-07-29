@@ -22,7 +22,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-#include <array>
+#include <vector>
 
 class LoadingScreen final : public sf::Drawable
 {
@@ -33,13 +33,15 @@ public:
 
 private:
 
-    std::array<sf::Uint8, 132> m_imageData;
-    std::array<sf::Vertex, 4u> m_vertices;
+    std::vector<sf::Vertex> m_vertices;
 
     sf::Texture m_texture;
-    sf::Sprite m_sprite;
+    sf::Transform m_transform;
 
     float m_currentFrameTime;
+    sf::Vector2f m_frameSize;
+    std::size_t m_tailCount;
+    static constexpr std::size_t MaxTail = 24;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
