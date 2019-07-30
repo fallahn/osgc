@@ -288,6 +288,8 @@ void EnemySystem::processOrb(xy::Entity entity, float dt)
     auto& enemy = entity.getComponent<Enemy>();
     auto& tx = entity.getComponent<xy::Transform>();
 
+    //only using velocity to track direction - doesn't
+    //influence the actual speed
     if (enemy.velocity.y > 0)
     {
         enemy.stateTime = std::min(1.f, enemy.stateTime + dt);
@@ -305,12 +307,10 @@ void EnemySystem::processOrb(xy::Entity entity, float dt)
         }
     }
 
-    float pathDist = enemy.end.y - enemy.start.y;
-    float pathPos = easeInOutQuad(enemy.stateTime) * pathDist;
+    auto pathDist = enemy.end - enemy.start;
+    sf::Vector2f pathPos = easeInOutQuad(enemy.stateTime) * pathDist;
 
-    auto pos = tx.getPosition();
-    pos.y = enemy.start.y + pathPos;
-    tx.setPosition(pos);
+    tx.setPosition(enemy.start + pathPos);
 }
 
 void EnemySystem::processSpitball(xy::Entity entity, float dt)

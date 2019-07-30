@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "EnemySystem.hpp"
 #include "SharedStateData.hpp"
 #include "GameConsts.hpp"
+#include "CameraTarget.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -342,6 +343,10 @@ void PlayerSystem::processDying(xy::Entity entity, float dt)
             }
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        //restore camera target
+        getScene()->getActiveCamera().getComponent<CameraTarget>().target = entity;
+
         return;
     }
 
@@ -607,6 +612,9 @@ void PlayerSystem::kill(xy::Entity entity)
         player.velocity.x = 200.f;
         player.state = Player::Dying;
         player.stateTime = Player::DyingTime;
+
+        //stop camera following
+        getScene()->getActiveCamera().getComponent<CameraTarget>().target = {};
 
         auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
         msg->type = PlayerEvent::Died;

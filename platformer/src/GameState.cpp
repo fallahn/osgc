@@ -319,8 +319,8 @@ void GameState::loadResources()
     m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::MovingPlatform]).setRepeated(true);
 
     xy::SpriteSheet spriteSheet;
-    //spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/player.spt", m_resources);
-    spriteSheet.loadFromFile("assets/sprites/sms/player.spt", m_resources);
+    spriteSheet.loadFromFile("assets/sprites/"+m_sharedData.theme+"/player.spt", m_resources);
+    //spriteSheet.loadFromFile("assets/sprites/sms/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
 
     m_playerAnimations[AnimID::Player::Idle] = spriteSheet.getAnimationIndex("idle", "player");
