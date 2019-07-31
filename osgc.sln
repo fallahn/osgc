@@ -13,7 +13,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "drone_drop", "shooter\shoot
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "space_racers", "space_racers\space_racers.vcxproj", "{E932802A-6053-40AE-A61D-065443E7C269}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "platformer", "platformer\platformer.vcxproj", "{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "back_to_computer", "platformer\platformer.vcxproj", "{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "music_player", "music_player\music_player.vcxproj", "{6DC2B774-386F-4990-B58A-D8DAD3941368}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,14 @@ Global
 		{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}.Release|x64.Build.0 = Release|x64
 		{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}.Release|x86.ActiveCfg = Release|Win32
 		{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}.Release|x86.Build.0 = Release|Win32
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Debug|x64.ActiveCfg = Debug|x64
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Debug|x64.Build.0 = Debug|x64
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Debug|x86.ActiveCfg = Debug|Win32
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Debug|x86.Build.0 = Debug|Win32
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Release|x64.ActiveCfg = Release|x64
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Release|x64.Build.0 = Release|x64
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Release|x86.ActiveCfg = Release|Win32
+		{6DC2B774-386F-4990-B58A-D8DAD3941368}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
