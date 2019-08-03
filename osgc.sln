@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "space_racers", "space_racer
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "back_to_computer", "platformer\platformer.vcxproj", "{0AD9DD92-BCAA-4B37-8D93-454BB009CBD7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "music_player", "music_player\music_player.vcxproj", "{6DC2B774-386F-4990-B58A-D8DAD3941368}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bubble_pop", "bubble_pop\bubble_pop.vcxproj", "{6DC2B774-386F-4990-B58A-D8DAD3941368}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

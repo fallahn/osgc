@@ -1,0 +1,39 @@
+spritesheet misc
+{
+    src="assets/images/misc.png"
+
+    sprite top_bar
+    {
+        bounds = 3,102,408,25
+    }
+
+    sprite paused
+    {
+        bounds = 42,272,189,104
+    }
+
+    sprite game_over
+    {
+        bounds = 15,389,267, 64
+    }
+
+    sprite title
+    {
+        bounds = 283,134,195,99
+    }
+
+    sprite text
+    {
+        bounds = 5,38,10,10
+
+        animation space
+        {
+            frame = 5,38, 10, 10
+            loop=false
+            framerate=1
+        }
+
+        //frames are 16px / 16px apart
+        //top row has 40 chars, bottom has 10
+    }
+}

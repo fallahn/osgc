@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 # Rename this variable to change the project name
 # see the last line of this file for info on copying assets
-SET(PROJECT_NAME music_player)
+SET(PROJECT_NAME bubble_pop)
 
 # Set up the project
 project(${PROJECT_NAME})

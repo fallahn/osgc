@@ -1,0 +1,94 @@
+spritesheet ball
+{
+    src="assets/images/cyan.png"
+
+    sprite ball
+    {
+        bounds = 0,0,47,47
+
+        animation idle
+        {
+            frame = 0,0,47,47
+            loop = true
+            framerate = 30
+        }
+
+        animation happy
+        {
+            frame = 94,0,47,47
+            loop = true
+            framerate = 30
+        }
+
+        animation shoot
+        {
+            frame = 141,282,47,47
+            frame = 94,141,47,47
+            frame = 141,141,47,47
+            frame = 188,141,47,47
+            frame = 235,141,47,47
+            frame = 282,141,47,47
+            frame = 0,188,47,47
+
+            loop = false
+            framerate = 12
+        }
+
+        animation burst
+        {
+            frame = 47,188,47,47
+            frame = 94,188,47,47
+            frame = 141,188,47,47
+            frame = 188,188,47,47
+            frame = 235,188,47,47
+            frame = 282,188,47,47
+
+            frame = 0,235,47,47
+            frame = 47,235,47,47
+            frame = 94,235,47,47
+            frame = 141,235,47,47
+            frame = 188,235,47,47
+            frame = 235,235,47,47
+            frame = 282,235,47,47
+
+            frame = 0,282,47,47
+            frame = 47,282,47,47
+
+            loop = false
+            framerate = 12
+        }
+
+        animation wink
+        {
+            frame = 94,94,47,47
+            frame = 141,94,47,47
+            frame = 188,94,47,47
+            frame = 141,94,47,47
+            frame = 94,94,47,47
+
+            loop = true
+            framerate = 30
+        }
+
+        animation grin
+        {
+            frame = 141,0,47,47
+            loop = true
+            framerate = 30
+        }
+
+        animation wait_1
+        {
+            frame = 94,282,47,47
+            loop = true
+            framerate = 30
+        }
+
+        animation wait_2
+        {
+            frame = 141,282,47,47
+            loop = true
+            framerate = 30
+        }
+    }
+}

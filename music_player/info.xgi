@@ -1,7 +1,0 @@
-game_info
-{
-    thumb = "path/to/thumb.png"
-    title = "Music Player"
-    version = "0.0.1"
-    author = "fallahn"
-}
