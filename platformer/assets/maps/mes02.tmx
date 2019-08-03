@@ -5,7 +5,7 @@
  </tileset>
  <layer id="4" name="farground" width="60" height="170">
   <data encoding="base64" compression="zlib">
-   eJzt3MlOFFEAheHiFXj/DYgIBlAQcIgyywqQGGhcCLpwYKFCwtAulHhu6AVWKiTdXZW699z/JH+gx9SXgtSuioKx/zeaaHjx4m3/uPHixYsXL1686YQ3H2/bx4IXL168ePHi9Qyvd3i9w+sdXu/weufm7WdtHytevHjx4sWLN83w4h3Ue9+6akyNqwdqQj1Uk6be32peLahnalEtqeWGvf0cb93nd11tqE21pd6q7YS9p706Fb93eu953/t5oA5btNbhfaSm1LR6XHrtq/p25/GXiudS8z5XL9RL9ar02pW6vvP4suK51Lyphdc7vN7h9Q6vd3i9w+sdXu/weofXO7ze4fUOr3d4vcPrHV7v8HqH1zu83uH1Dq93eL3D692g3hk1q+bUE/U0AkuT3tfqjVpRq2otAkuT3h21q/bUO7UfgaVJ70d1rE7UJ/U5AkuT3h/qp/qlztR5BJYmvX/UX3UTPjRSFBcRWJr0phpe7/B6h9c7vN7h9Q6vd3i9w+sdXu/weofXO7ze4fUOr3d4vcPrHV7v8HqH1zu8aVTX2nbgrd/7YcjPVy1mb7jv+NGQ31Fe7N7ukN9RXsze78XtvfTrXMzecF/5nM5vsOZ0foO3M+R3lBe7N7fzm9v/b07ecD3KyZvj9Sg3b07Xo7Ccrkdhdf89x77cvIwxlsr+AY3RmpM=
+   eJzt3MlO21AAheE8A++/YSwgxjIW0TKzagEhCCwKdMHQBYVKLQ0LpmORBbUipCS2fO+5/5F+QRKw/Mkg71yrMfb/eiINL1681Z83Xrx48eLFizee8Kbjrfpc8OLFixcvXrye4fUOr3d4vcPrHV7v3LztrOpzxYsXL168ePHGGV68nXrfW0P1qj7VrwbUoBoy9d6rafVRzahZNafmS/a2c75FX981ta421KbaUtsRe382q7f4vt78mf3m1wN1WKG1CO8HNaxG1Gjuswt1+eb1eYv3YvMuqEX1SS3lPrtT/968/tvivdi8sYXXO7ze4fUOr3d4vcPrHV7v8HqH1zu83uH1Dq93eL3D6x1e7/B6h9c7vN7h9Q6vd3i9w+tdp94xNa4m1KSaCsBSpndZfVZf1IpaDcBSpver+qZ21K7aC8BSpve7OlGn6kz9CMBSpvda/VI36lb9DsBSpvdBPaon9az+BGAp0xtreL3D6x1e7/B6h9c7vN7h9Q6vd3i9w+sdXu/weofXO7ze4fUOr3d4vcPrHV7v8MZRUavagbd473GXv99qIXuz544fdXmM/EL3Nro8Rn4he69qr8/SL3Ihe7Pnyqd0fTNrStc389a7PEZ+oXtTu76p/f+m5M3uRyl5U7wfpeZN6X6ULaX7Ubai/55DX2pexhiLZS+6HZuR
   </data>
  </layer>
  <layer id="1" name="Tile Layer 1" width="60" height="170">
@@ -201,18 +201,6 @@
    </properties>
   </object>
   <object id="34" name="orb" type="enemy" x="100" y="700">
-   <properties>
-    <property name="id" type="int" value="4"/>
-   </properties>
-   <polyline points="-20,20 92,20"/>
-  </object>
-  <object id="35" name="orb" type="enemy" x="100" y="868">
-   <properties>
-    <property name="id" type="int" value="4"/>
-   </properties>
-   <polyline points="-20,20 92,20"/>
-  </object>
-  <object id="36" name="orb" type="enemy" x="100" y="500">
    <properties>
     <property name="id" type="int" value="4"/>
    </properties>

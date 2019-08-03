@@ -86,7 +86,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
     sd.theme = "mes";
-    sd.nextMap = "mes02.tmx";
+    sd.nextMap = "mes01.tmx";
     initScene();
     loadResources();
     buildWorld();
@@ -174,7 +174,8 @@ void GameState::handleMessage(const xy::Message& msg)
     if (msg.id == MessageID::PlayerMessage)
     {
         const auto& data = msg.getData<PlayerEvent>();
-        if (data.type == PlayerEvent::Exited) //TODO check if we're on a stage end or round end
+        if (data.type == PlayerEvent::Exited
+            && getStackSize() == 1) //don't do this if already transitioning
         {
             m_sharedData.nextMap = m_mapLoader.getNextMap() + ".tmx";
             m_sharedData.theme = m_mapLoader.getNextTheme();
@@ -195,7 +196,12 @@ void GameState::handleMessage(const xy::Message& msg)
             {
                 m_sharedData.transitionContext.shader = &m_shaders.get(ShaderID::PixelTransition);
                 m_sharedData.transitionContext.nextState = StateID::Game;
-                m_gameScene.getActiveCamera().getComponent<xy::AudioEmitter>().play();
+
+                auto& emitter = m_gameScene.getActiveCamera().getComponent<xy::AudioEmitter>();
+                if (emitter.getStatus() == xy::AudioEmitter::Stopped)
+                {
+                    emitter.play();
+                }
             }
             requestStackPush(StateID::Transition);
         }

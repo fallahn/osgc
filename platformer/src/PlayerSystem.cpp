@@ -345,7 +345,11 @@ void PlayerSystem::processDying(xy::Entity entity, float dt)
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 
         //restore camera target
-        getScene()->getActiveCamera().getComponent<CameraTarget>().target = entity;
+        auto cam = getScene()->getActiveCamera();
+        if (cam.hasComponent<CameraTarget>())
+        {
+            cam.getComponent<CameraTarget>().target = entity;
+        }
 
         return;
     }
@@ -614,7 +618,11 @@ void PlayerSystem::kill(xy::Entity entity)
         player.stateTime = Player::DyingTime;
 
         //stop camera following
-        getScene()->getActiveCamera().getComponent<CameraTarget>().target = {};
+        auto cam = getScene()->getActiveCamera();
+        if (cam.hasComponent<CameraTarget>())
+        {
+            cam.getComponent<CameraTarget>().target = {};
+        }
 
         auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
         msg->type = PlayerEvent::Died;
