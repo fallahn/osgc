@@ -142,14 +142,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\MainState.hpp" />
-    <ClInclude Include="include\Playlist.hpp" />
+    <ClInclude Include="include\PlayerInput.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
+    <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MainState.cpp" />
-    <ClCompile Include="src\Playlist.cpp" />
+    <ClCompile Include="src\PlayerInput.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

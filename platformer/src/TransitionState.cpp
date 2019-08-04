@@ -69,6 +69,8 @@ bool TransitionState::update(float)
         }
     }
 
+    //TODO we want to return false but unless it's
+    //delayed a frame the transition sound won't play
     return true;
 }
 

@@ -27,7 +27,15 @@ source distribution.
 
 #pragma once
 
+#include "ResourceIDs.hpp"
+#include "PlayerInput.hpp"
+
 #include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+
+#include <array>
 
 class MainState final : public xy::State
 {
@@ -46,4 +54,15 @@ public:
 
 private:
 
+    xy::Scene m_scene;
+    xy::ResourceHandler m_resources;
+    std::array<xy::Sprite, BubbleID::Count> m_bubbleSprites;
+    std::array<xy::Sprite, SpriteID::Count> m_sprites;
+    std::array<std::size_t, TextureID::Count> m_textures;
+
+    PlayerInput m_playerInput;
+
+    void initScene();
+    void loadResources();
+    void buildArena();
 };
