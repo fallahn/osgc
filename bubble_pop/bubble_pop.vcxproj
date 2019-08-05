@@ -141,6 +141,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\CommandID.hpp" />
+    <ClInclude Include="include\GameConsts.hpp" />
+    <ClInclude Include="include\GameDirector.hpp" />
     <ClInclude Include="include\IniParse.hpp" />
     <ClInclude Include="include\LevelData.hpp" />
     <ClInclude Include="include\MainState.hpp" />
@@ -151,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\GameDirector.cpp" />
     <ClCompile Include="src\MainState.cpp" />
     <ClCompile Include="src\PlayerInput.cpp" />
   </ItemGroup>

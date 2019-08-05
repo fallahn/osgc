@@ -66,8 +66,13 @@ private:
     std::size_t m_currentLevel;
     std::vector<LevelData> m_levels;
 
+    xy::Entity m_rootNode; //TODO remove this
+    xy::Entity m_barNode;
+
     void initScene();
     void loadResources();
     void loadLevelData();
     void buildArena();
+
+    void activateLevel();
 };

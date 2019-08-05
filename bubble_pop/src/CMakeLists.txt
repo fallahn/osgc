@@ -1,6 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MainState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerInput.cpp
   PARENT_SCOPE)

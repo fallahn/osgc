@@ -28,16 +28,21 @@ source distribution.
 #include "MainState.hpp"
 #include "StateIDs.hpp"
 #include "IniParse.hpp"
+#include "GameConsts.hpp"
+#include "CommandID.hpp"
+#include "GameDirector.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -47,11 +52,33 @@ source distribution.
 namespace
 {
     const std::size_t MaxLevels = 100;
+
+    sf::Vector2f tileToWorldCoord(std::size_t index)
+    {
+        auto xPos = index % Const::BubblesPerRow;
+        auto yPos = index / Const::BubblesPerRow;
+
+        float x = xPos * Const::BubbleSize.x;
+        float y = yPos * Const::BubbleSize.y * 0.8889f;
+
+        if (yPos % 2 == 0)
+        {
+            x += Const::BubbleSize.x / 2.f;
+        }
+
+        return { x,y };
+    }
+
+    std::size_t worldToTileCoord(sf::Vector2f position)
+    {
+        return 0;
+    }
 }
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
-    : xy::State (ss, ctx),
-    m_scene     (ctx.appInstance.getMessageBus())
+    : xy::State     (ss, ctx),
+    m_scene         (ctx.appInstance.getMessageBus()),
+    m_currentLevel  (0)
 {
     launchLoadingScreen();
     initScene();
@@ -109,9 +136,12 @@ void MainState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
+    m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+
+    m_scene.addDirector<GameDirector>();
 }
 
 void MainState::loadResources()
@@ -265,6 +295,8 @@ void MainState::loadLevelData()
                     levelData.orderArray.push_back(BubbleID::Grey);
                 }
             }
+            //reverse this as we'll be popping from the back
+            std::reverse(levelData.orderArray.begin(), levelData.orderArray.end());
 
             if (levelData.level != 0 &&
                 levelData.interval != sf::Time::Zero &&
@@ -286,23 +318,23 @@ void MainState::buildArena()
 {
     sf::Vector2f playArea(m_resources.get<sf::Texture>(m_textures[TextureID::Background]).getSize());
     
-    auto rootEnt = m_scene.createEntity();
-    rootEnt.addComponent<xy::Transform>().setScale(2.f, 2.f);
-    rootEnt.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - playArea.x) / 4.f, 60.f);
+    m_rootNode = m_scene.createEntity();
+    m_rootNode.addComponent<xy::Transform>().setScale(2.f, 2.f);
+    m_rootNode.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - playArea.x) / 4.f, 60.f);
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(-10);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::Background]));
-    rootEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    m_rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(320.f, 445.f); //TODO constify
+    entity.addComponent<xy::Transform>().setPosition(Const::GunPosition);
     entity.addComponent<xy::Drawable>().setDepth(1);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::GunMount]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    rootEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    m_rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     auto mountEntity = entity;
 
@@ -315,4 +347,57 @@ void MainState::buildArena()
     mountEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     m_playerInput.setPlayerEntity(entity);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Const::BarPosition);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::TopBar];
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::TopBar;
+    m_rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    m_barNode = entity;
+
+    activateLevel();
+}
+
+void MainState::activateLevel()
+{
+    if (m_levels.empty())
+    {
+        xy::Logger::log("No levels loaded!", xy::Logger::Type::Error);
+        return;
+    }
+
+    auto barOffset = m_barNode.getComponent<xy::Sprite>().getTextureBounds().height;
+    auto origin = Const::BubbleSize / 2.f;
+
+    const auto& bubbles = m_levels[m_currentLevel].ballArray;
+    for (auto i = 0; i < bubbles.size(); ++i)
+    {
+        if (bubbles[i] != -1)
+        {
+            auto pos = tileToWorldCoord(i);
+            pos.y += barOffset;
+
+            auto entity = m_scene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(pos + origin);
+            entity.getComponent<xy::Transform>().setOrigin(origin);
+            entity.addComponent<xy::Drawable>();
+            entity.addComponent<xy::Sprite>() = m_bubbleSprites[bubbles[i]];
+
+            //TODO tag bubbles with level ID so next time we know which bubbles to clear
+
+            m_barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        }
+    }
+
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::TopBar;
+    cmd.action = [barOffset](xy::Entity e, float)
+    {
+        e.getComponent<xy::Transform>().setPosition(Const::BarPosition.x, -barOffset);
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    m_currentLevel = (m_currentLevel + 1) % m_levels.size();
 }
