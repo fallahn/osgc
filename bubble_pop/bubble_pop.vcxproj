@@ -141,6 +141,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\IniParse.hpp" />
+    <ClInclude Include="include\LevelData.hpp" />
     <ClInclude Include="include\MainState.hpp" />
     <ClInclude Include="include\PlayerInput.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />

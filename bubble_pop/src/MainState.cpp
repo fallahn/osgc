@@ -27,6 +27,7 @@ source distribution.
 
 #include "MainState.hpp"
 #include "StateIDs.hpp"
+#include "IniParse.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -41,6 +42,12 @@ source distribution.
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/core/FileSystem.hpp>
+
+namespace
+{
+    const std::size_t MaxLevels = 100;
+}
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State (ss, ctx),
@@ -49,6 +56,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     launchLoadingScreen();
     initScene();
     loadResources();
+    loadLevelData();
     buildArena();
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
@@ -143,6 +151,135 @@ void MainState::loadResources()
     m_textures[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
     m_textures[TextureID::RayGun] = m_resources.load<sf::Texture>("assets/images/shooter.png");
     m_textures[TextureID::GunMount] = m_resources.load<sf::Texture>("assets/images/shooter_circle.png");
+}
+
+void MainState::loadLevelData()
+{
+    static const std::string section("Bubble Puzzle 97 - Level");
+    static const std::size_t BallArraySize = 64;
+    
+    auto path = xy::FileSystem::getResourcePath() + "assets/levels/";
+
+    auto files = xy::FileSystem::listFiles(path);
+    for (const auto& file : files)
+    {
+        if (xy::FileSystem::getFileExtension(file) == ".ini")
+        {
+            IniParse iniFile(path + file);
+            if (iniFile.getData().empty())
+            {
+                continue;
+            }
+
+            LevelData levelData;
+            levelData.name = iniFile.getValueString(section, "name");
+            levelData.author = iniFile.getValueString(section, "author");
+            levelData.comment = iniFile.getValueString(section, "comment");
+
+            levelData.level = iniFile.getValueInt(section, "stage");
+            levelData.interval = sf::seconds(iniFile.getValueFloat(section, "interval"));
+            levelData.gunMove = iniFile.getValueInt(section, "gunmove") == 1;
+
+            for (auto i = 8; i > 0; --i)
+            {
+                auto str = iniFile.getValueString(section, "line" + std::to_string(i));
+                if (!str.empty())
+                {
+                    auto row = xy::Util::String::tokenize(str, ' ');
+
+                    for (auto s : row)
+                    {
+                        if (s == "R")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Red);
+                        }
+                        else if (s == "G")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Green);
+                        }
+                        else if (s == "B")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Blue);
+                        }
+                        else if (s == "C")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Cyan);
+                        }
+                        else if (s == "P")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Magenta);
+                        }
+                        else if (s == "Y")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Yellow);
+                        }
+                        else if (s == "O")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Orange);
+                        }
+                        else if (s == "E")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Grey);
+                        }
+                        else if (s == "-")
+                        {
+                            levelData.ballArray.push_back(-1);
+                        }
+                    }
+                }
+            }
+
+            auto order = iniFile.getValueString(section, "order");
+            for (auto c : order)
+            {
+                if (c == 'R')
+                {
+                    levelData.orderArray.push_back(BubbleID::Red);
+                }
+                else if (c == 'G')
+                {
+                    levelData.orderArray.push_back(BubbleID::Green);
+                }
+                else if (c == 'B')
+                {
+                    levelData.orderArray.push_back(BubbleID::Blue);
+                }
+                else if (c == 'C')
+                {
+                    levelData.orderArray.push_back(BubbleID::Cyan);
+                }
+                else if (c == 'P')
+                {
+                    levelData.orderArray.push_back(BubbleID::Magenta);
+                }
+                else if (c == 'Y')
+                {
+                    levelData.orderArray.push_back(BubbleID::Yellow);
+                }
+                else if (c == 'O')
+                {
+                    levelData.orderArray.push_back(BubbleID::Orange);
+                }
+                else if (c == 'E')
+                {
+                    levelData.orderArray.push_back(BubbleID::Grey);
+                }
+            }
+
+            if (levelData.level != 0 &&
+                levelData.interval != sf::Time::Zero &&
+                levelData.ballArray.size() == BallArraySize)
+            {
+                m_levels.push_back(levelData);
+            }
+        }
+    }
+
+    std::sort(m_levels.begin(), m_levels.end(),
+        [](const LevelData& a, const LevelData& b)
+        {
+            return a.level < b.level;
+        });
 }
 
 void MainState::buildArena()

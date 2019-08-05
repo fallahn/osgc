@@ -28,6 +28,7 @@ source distribution.
 #pragma once
 
 #include "ResourceIDs.hpp"
+#include "LevelData.hpp"
 #include "PlayerInput.hpp"
 
 #include <xyginext/core/State.hpp>
@@ -62,7 +63,11 @@ private:
 
     PlayerInput m_playerInput;
 
+    std::size_t m_currentLevel;
+    std::vector<LevelData> m_levels;
+
     void initScene();
     void loadResources();
+    void loadLevelData();
     void buildArena();
 };

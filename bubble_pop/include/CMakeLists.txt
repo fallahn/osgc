@@ -1,5 +1,7 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/IniParse.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LevelData.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MainState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerInput.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
