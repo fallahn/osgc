@@ -20,6 +20,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/System.hpp>
 
+#include <array>
+
 struct Bubble final
 {
     enum class State
@@ -31,6 +33,8 @@ struct Bubble final
         Suspended,//stuck to the arena
         Dying     //bursting animation
     }state = State::Queued;
+
+    std::int32_t gridIndex = -1;
 
     sf::Vector2f velocity;
     static constexpr float Speed = 1000.f;
@@ -44,6 +48,13 @@ public:
 
     void process(float) override;
 
+    void resetGrid() { m_grid = {}; }
+
 private:
     NodeSet& m_nodeSet;
+
+    std::array<xy::Entity, 64u> m_grid;
+
+    void doCollision(xy::Entity);
+    void onEntityAdded(xy::Entity) override;
 };

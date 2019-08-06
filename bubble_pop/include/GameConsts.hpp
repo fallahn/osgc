@@ -24,10 +24,34 @@ Copyright 2019 Matt Marchant
 
 namespace Const
 {
+    static const sf::Vector2f BubbleSize(47.f, 47.f);
+    static const float BubbleDistSqr = BubbleSize.x * BubbleSize.x;
+
     static const sf::Vector2f GunPosition(320.f, 445.f);
     static const sf::Vector2f BarPosition(128.f, 0.f);
-    static const sf::Vector2f BubbleQueuePosition(0.f, 445.f);
-    static const sf::Vector2f BubbleSize(47.f, 47.f);
+    static const sf::Vector2f BubbleQueuePosition(BubbleSize.x, 445.f);
+
     static const std::size_t BubblesPerRow = 8;
+    static const std::size_t MaxRows = 8;
+    static const std::size_t GridSize = BubblesPerRow * MaxRows;
     static const float RowHeight = BubbleSize.y * 0.8889f;
+
+    static const float LeftBounds = 127.f + (BubbleSize.x / 2.f);
+    static const float RightBounds = 534.f - (BubbleSize.x / 2.f);
+}
+
+static inline sf::Vector2f tileToWorldCoord(std::size_t index)
+{
+    auto xPos = index % Const::BubblesPerRow;
+    auto yPos = index / Const::BubblesPerRow;
+
+    float x = xPos * Const::BubbleSize.x;
+    float y = yPos * Const::RowHeight;
+
+    if (yPos % 2 == 0)
+    {
+        x += Const::BubbleSize.x / 2.f;
+    }
+
+    return { x,y };
 }

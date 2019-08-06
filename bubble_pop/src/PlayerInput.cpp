@@ -27,6 +27,12 @@ Copyright 2019 Matt Marchant
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>
 
+namespace
+{
+    const float MinAngle = -160.f;
+    const float MaxAngle = -20.f;
+}
+
 PlayerInput::PlayerInput()
 {
 
@@ -39,18 +45,20 @@ void PlayerInput::handleEvent(const sf::Event& evt)
         && evt.mouseButton.button == sf::Mouse::Left)
     {
         //raise shoot message
+        float rotation = xy::Util::Vector::rotation(getVelocityVector());
+        rotation = xy::Util::Math::clamp(rotation, MinAngle, MaxAngle);
+
         auto* msg = xy::App::getActiveInstance()->getMessageBus().post<BubbleEvent>(MessageID::BubbleMessage);
         msg->type = BubbleEvent::Fired;
-        msg->velocity = xy::Util::Vector::normalise(getVelocityVector()); //guh we need to clamp this
+        msg->velocity = xy::Util::Vector::rotate({ 1.f, 0.f }, rotation);
     }
 }
 
 void PlayerInput::update(float)
 {
-    auto dir = getVelocityVector();
+    float rotation = xy::Util::Vector::rotation(getVelocityVector());
+    rotation = xy::Util::Math::clamp(rotation, MinAngle, MaxAngle);
 
-    float rotation = xy::Util::Vector::rotation(dir);
-    rotation = xy::Util::Math::clamp(rotation, -160.f, -20.f);
     m_playerEntity.getComponent<xy::Transform>().setRotation(rotation);
 
     //DPRINT("Rotation", std::to_string(rotation));
@@ -66,5 +74,6 @@ sf::Vector2f PlayerInput::getVelocityVector()
     //sigh this just isn't right that the world position doesn't
     //account for scale and origin offset...
     auto dir = mousePos - (tx.getWorldPosition() + (tx.getOrigin() * 2.f));
+
     return dir;
 }

@@ -45,27 +45,6 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const std::size_t MaxLevels = 100;
-
-    sf::Vector2f tileToWorldCoord(std::size_t index)
-    {
-        auto xPos = index % Const::BubblesPerRow;
-        auto yPos = index / Const::BubblesPerRow;
-
-        float x = xPos * Const::BubbleSize.x;
-        float y = yPos * Const::RowHeight;
-
-        if (yPos % 2 == 0)
-        {
-            x += Const::BubbleSize.x / 2.f;
-        }
-
-        return { x,y };
-    }
-
-    std::size_t worldToTileCoord(sf::Vector2f position)
-    {
-        return 0;
-    }
 }
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
@@ -378,6 +357,7 @@ void MainState::activateLevel()
         //TODO tag bubbles with level ID so next time we know which bubbles to clear
         return entity;
     };
+    m_scene.getSystem<BubbleSystem>().resetGrid();
 
     const auto& bubbles = m_levels[m_currentLevel].ballArray;
     for (auto i = 0; i < bubbles.size(); ++i)
@@ -388,6 +368,7 @@ void MainState::activateLevel()
             pos.y += barOffset;
                         
             auto entity = createBubble(bubbles[i], pos);
+            entity.getComponent<Bubble>().gridIndex = i;
             m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         }
     }

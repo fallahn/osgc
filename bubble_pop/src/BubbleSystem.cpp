@@ -18,9 +18,32 @@ Copyright 2019 Matt Marchant
 
 #include "BubbleSystem.hpp"
 #include "NodeSet.hpp"
+#include "GameConsts.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+
+#include <xyginext/util/Vector.hpp>
+
+namespace
+{
+    //remember the input to this needs to be relative to the top bar node position
+    std::int32_t getGridIndex(sf::Vector2f position)
+    {
+        std::int32_t yPos = static_cast<std::int32_t>(std::floor(position.y / Const::RowHeight));
+
+        //check which row we're on and offset x pos back to square grid
+        if (yPos % 2 == 0)
+        {
+            position.x -= (Const::BubbleSize.x / 2.f);
+        }
+
+        std::int32_t xPos = static_cast<std::int32_t>(std::floor(position.x / Const::BubbleSize.x));
+
+        return (yPos * Const::BubblesPerRow) + xPos;
+    }
+}
 
 BubbleSystem::BubbleSystem(xy::MessageBus& mb, NodeSet& ns)
     : xy::System(mb, typeid(BubbleSystem)),
@@ -61,6 +84,8 @@ void BubbleSystem::process(float dt)
             auto& tx = entity.getComponent<xy::Transform>();
             tx.move(bubble.velocity * Bubble::Speed * dt);
 
+            doCollision(entity);
+
             //TEMP
             sf::FloatRect area(0.f, 0.f, 1280.f, 960.f);
             if (!area.contains(tx.getPosition()))
@@ -69,6 +94,113 @@ void BubbleSystem::process(float dt)
             }
         }
             break;
+        case Bubble::State::Suspended:
+            //TODO check for colour match
+            break;
         }
+    }
+}
+
+//private
+void BubbleSystem::doCollision(xy::Entity entity)
+{
+    auto& tx = entity.getComponent<xy::Transform>();
+    auto position = tx.getPosition();
+
+    //check against bounds
+    if (position.x < Const::LeftBounds)
+    {
+        position.x = Const::LeftBounds;
+        tx.setPosition(position);
+        entity.getComponent<Bubble>().velocity = xy::Util::Vector::reflect(entity.getComponent<Bubble>().velocity, { 1.f, 0.f });
+    }
+    else if (position.x > Const::RightBounds)
+    {
+        position.x = Const::RightBounds;
+        tx.setPosition(position);
+
+        entity.getComponent<Bubble>().velocity = xy::Util::Vector::reflect(entity.getComponent<Bubble>().velocity, { -1.f, 0.f });
+    }
+
+    //check against grid and top bar and stop if collision.
+
+    //get current grid index
+    auto relPos = position - m_nodeSet.barNode.getComponent<xy::Transform>().getPosition();
+    auto gridIndex = getGridIndex(relPos);
+
+    //calc if even or odd row (affects which cells to test)
+    bool collides = false;
+    std::vector<std::int32_t> gridIndices;
+    gridIndices.push_back(gridIndex - 1);
+    gridIndices.push_back(gridIndex + 1);
+    gridIndices.push_back(gridIndex - Const::BubblesPerRow);
+    gridIndices.push_back(gridIndex + Const::BubblesPerRow);
+
+    if (gridIndex % 2 == 0)
+    {
+        //offset to right
+        gridIndices.push_back((gridIndex - Const::BubblesPerRow) + 1);
+        gridIndices.push_back((gridIndex + Const::BubblesPerRow) + 1);
+    }
+    else
+    {
+        //offset to left
+        gridIndices.push_back((gridIndex - Const::BubblesPerRow) - 1);
+        gridIndices.push_back((gridIndex + Const::BubblesPerRow) - 1);
+    }
+
+    //test surrounding cells, if we collide change state and snap to grid pos
+    //and parent to top bar
+    for (auto i : gridIndices)
+    {
+        if (i > -1 && i < Const::GridSize)
+        {
+            if (m_grid[i].isValid())
+            {
+                auto len2 = xy::Util::Vector::lengthSquared(relPos - m_grid[i].getComponent<xy::Transform>().getPosition());
+                if (len2 < Const::BubbleDistSqr)
+                {
+                    collides = true; 
+                    break;
+                }
+            }
+        }
+    }
+
+
+    auto barOffset = m_nodeSet.barNode.getComponent<xy::Sprite>().getTextureBounds().height;
+    if (collides)
+    {
+        position = tileToWorldCoord(gridIndex);
+        position.y += barOffset;
+        tx.setPosition(position);
+
+        m_nodeSet.rootNode.getComponent<xy::Transform>().removeChild(tx);
+        m_nodeSet.barNode.getComponent<xy::Transform>().addChild(tx);
+        entity.getComponent<Bubble>().state = Bubble::State::Suspended;
+    }
+    else
+    {
+        //if no collision check top bar collision and snap to grid pos if there is
+        auto topBounds = barOffset + (Const::BubbleSize.y / 2.f) + m_nodeSet.barNode.getComponent<xy::Transform>().getPosition().y;
+        if (position.y < topBounds)
+        {
+            position = tileToWorldCoord(gridIndex);
+            position.y += barOffset;
+            tx.setPosition(position);
+
+            m_nodeSet.rootNode.getComponent<xy::Transform>().removeChild(tx);
+            m_nodeSet.barNode.getComponent<xy::Transform>().addChild(tx);
+            entity.getComponent<Bubble>().state = Bubble::State::Suspended;
+        }
+    }
+}
+
+void BubbleSystem::onEntityAdded(xy::Entity entity)
+{
+    const auto& bubble = entity.getComponent<Bubble>();
+    if (bubble.gridIndex > -1)
+    {
+        m_grid[bubble.gridIndex] = entity;
     }
 }
