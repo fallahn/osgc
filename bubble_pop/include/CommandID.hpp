@@ -22,6 +22,7 @@ namespace CommandID
 {
     enum
     {
-        TopBar = 0x01
+        TopBar = 0x01,
+        Bubble = 0x02
     };
 }

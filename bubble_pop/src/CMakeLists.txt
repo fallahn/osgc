@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/BubbleSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MainState.cpp

@@ -1,29 +1,21 @@
 /*********************************************************************
-(c) Matt Marchant 2019
-http://trederia.blogspot.com
 
-osgc - Open Source Game Collection - Zlib license.
+Copyright 2019 Matt Marchant
 
-This software is provided 'as-is', without any express or
-implied warranty. In no event will the authors be held
-liable for any damages arising from the use of this software.
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute
-it freely, subject to the following restrictions:
+       http://www.apache.org/licenses/LICENSE-2.0
 
-1. The origin of this software must not be misrepresented;
-you must not claim that you wrote the original software.
-If you use this software in a product, an acknowledgment
-in the product documentation would be appreciated but
-is not required.
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 
-2. Altered source versions must be plainly marked as such,
-and must not be misrepresented as being the original software.
-
-3. This notice may not be removed or altered from any
-source distribution.
 *********************************************************************/
+
 
 #include "MainState.hpp"
 #include "StateIDs.hpp"
@@ -31,6 +23,7 @@ source distribution.
 #include "GameConsts.hpp"
 #include "CommandID.hpp"
 #include "GameDirector.hpp"
+#include "BubbleSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -59,7 +52,7 @@ namespace
         auto yPos = index / Const::BubblesPerRow;
 
         float x = xPos * Const::BubbleSize.x;
-        float y = yPos * Const::BubbleSize.y * 0.8889f;
+        float y = yPos * Const::RowHeight;
 
         if (yPos % 2 == 0)
         {
@@ -136,12 +129,13 @@ void MainState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
+    m_scene.addSystem<BubbleSystem>(mb, m_nodeSet);
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
 
-    m_scene.addDirector<GameDirector>();
+    m_scene.addDirector<GameDirector>(m_nodeSet, m_bubbleSprites);
 }
 
 void MainState::loadResources()
@@ -318,15 +312,15 @@ void MainState::buildArena()
 {
     sf::Vector2f playArea(m_resources.get<sf::Texture>(m_textures[TextureID::Background]).getSize());
     
-    m_rootNode = m_scene.createEntity();
-    m_rootNode.addComponent<xy::Transform>().setScale(2.f, 2.f);
-    m_rootNode.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - playArea.x) / 4.f, 60.f);
+    m_nodeSet.rootNode = m_scene.createEntity();
+    m_nodeSet.rootNode.addComponent<xy::Transform>().setScale(2.f, 2.f);
+    m_nodeSet.rootNode.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - playArea.x) / 4.f, 60.f);
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(-10);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::Background]));
-    m_rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Const::GunPosition);
@@ -334,17 +328,17 @@ void MainState::buildArena()
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::GunMount]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    m_rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    auto mountEntity = entity;
+    m_nodeSet.gunNode = entity;
 
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(mountEntity.getComponent<xy::Transform>().getOrigin());
+    entity.addComponent<xy::Transform>().setPosition(m_nodeSet.gunNode.getComponent<xy::Transform>().getOrigin());
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::RayGun]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(11.f, bounds.height / 2.f);
-    mountEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    m_nodeSet.gunNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     m_playerInput.setPlayerEntity(entity);
 
@@ -353,9 +347,9 @@ void MainState::buildArena()
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::TopBar];
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TopBar;
-    m_rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    m_barNode = entity;
+    m_nodeSet.barNode = entity;
 
     activateLevel();
 }
@@ -368,8 +362,22 @@ void MainState::activateLevel()
         return;
     }
 
-    auto barOffset = m_barNode.getComponent<xy::Sprite>().getTextureBounds().height;
+    auto barOffset = m_nodeSet.barNode.getComponent<xy::Sprite>().getTextureBounds().height;
     auto origin = Const::BubbleSize / 2.f;
+
+    auto createBubble = [&,origin](int idx, sf::Vector2f pos)->xy::Entity
+    {
+        auto entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(pos + origin);
+        entity.getComponent<xy::Transform>().setOrigin(origin);
+        entity.addComponent<xy::Drawable>().setDepth(1);
+        entity.addComponent<xy::Sprite>() = m_bubbleSprites[idx];
+        entity.addComponent<Bubble>().state = Bubble::State::Suspended;
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
+
+        //TODO tag bubbles with level ID so next time we know which bubbles to clear
+        return entity;
+    };
 
     const auto& bubbles = m_levels[m_currentLevel].ballArray;
     for (auto i = 0; i < bubbles.size(); ++i)
@@ -378,18 +386,21 @@ void MainState::activateLevel()
         {
             auto pos = tileToWorldCoord(i);
             pos.y += barOffset;
-
-            auto entity = m_scene.createEntity();
-            entity.addComponent<xy::Transform>().setPosition(pos + origin);
-            entity.getComponent<xy::Transform>().setOrigin(origin);
-            entity.addComponent<xy::Drawable>();
-            entity.addComponent<xy::Sprite>() = m_bubbleSprites[bubbles[i]];
-
-            //TODO tag bubbles with level ID so next time we know which bubbles to clear
-
-            m_barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+                        
+            auto entity = createBubble(bubbles[i], pos);
+            m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         }
     }
+
+    auto queue = m_levels[m_currentLevel].orderArray;
+    //mount first bubble
+    auto entity = createBubble(queue.back(), m_nodeSet.gunNode.getComponent<xy::Transform>().getOrigin() - origin);
+    entity.getComponent<Bubble>().state = Bubble::State::Mounted;
+    m_nodeSet.gunNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    queue.pop_back();
+
+    //set director queue. This also queues first bubble
+    m_scene.getDirector<GameDirector>().setQueue(queue);
 
     xy::Command cmd;
     cmd.targetFlags = CommandID::TopBar;

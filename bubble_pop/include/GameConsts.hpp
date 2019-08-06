@@ -26,6 +26,8 @@ namespace Const
 {
     static const sf::Vector2f GunPosition(320.f, 445.f);
     static const sf::Vector2f BarPosition(128.f, 0.f);
+    static const sf::Vector2f BubbleQueuePosition(0.f, 445.f);
     static const sf::Vector2f BubbleSize(47.f, 47.f);
     static const std::size_t BubblesPerRow = 8;
+    static const float RowHeight = BubbleSize.y * 0.8889f;
 }

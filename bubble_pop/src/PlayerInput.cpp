@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "PlayerInput.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
@@ -38,10 +39,25 @@ void PlayerInput::handleEvent(const sf::Event& evt)
         && evt.mouseButton.button == sf::Mouse::Left)
     {
         //raise shoot message
+        auto* msg = xy::App::getActiveInstance()->getMessageBus().post<BubbleEvent>(MessageID::BubbleMessage);
+        msg->type = BubbleEvent::Fired;
+        msg->velocity = xy::Util::Vector::normalise(getVelocityVector()); //guh we need to clamp this
     }
 }
 
 void PlayerInput::update(float)
+{
+    auto dir = getVelocityVector();
+
+    float rotation = xy::Util::Vector::rotation(dir);
+    rotation = xy::Util::Math::clamp(rotation, -160.f, -20.f);
+    m_playerEntity.getComponent<xy::Transform>().setRotation(rotation);
+
+    //DPRINT("Rotation", std::to_string(rotation));
+}
+
+//private
+sf::Vector2f PlayerInput::getVelocityVector()
 {
     auto& rw = *xy::App::getRenderWindow();
     auto mousePos = rw.mapPixelToCoords(sf::Mouse::getPosition(rw));
@@ -50,10 +66,5 @@ void PlayerInput::update(float)
     //sigh this just isn't right that the world position doesn't
     //account for scale and origin offset...
     auto dir = mousePos - (tx.getWorldPosition() + (tx.getOrigin() * 2.f));
-
-    float rotation = xy::Util::Vector::rotation(dir);
-    rotation = xy::Util::Math::clamp(rotation, -160.f, -20.f);
-    tx.setRotation(rotation);
-
-    //DPRINT("Rotation", std::to_string(rotation));
+    return dir;
 }

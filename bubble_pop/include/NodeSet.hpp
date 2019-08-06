@@ -20,25 +20,9 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Entity.hpp>
 
-namespace sf
+struct NodeSet final
 {
-    class Event;
-}
-
-class PlayerInput final
-{
-public:
-    PlayerInput();
-
-    void handleEvent(const sf::Event&);
-
-    void update(float);
-
-    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
-
-private:
-
-    xy::Entity m_playerEntity;
-
-    sf::Vector2f getVelocityVector();
+    xy::Entity rootNode;
+    xy::Entity barNode;
+    xy::Entity gunNode;
 };

@@ -18,27 +18,24 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/Entity.hpp>
+#include <xyginext/core/Message.hpp>
 
-namespace sf
+namespace MessageID
 {
-    class Event;
+    enum
+    {
+        BubbleMessage = xy::Message::Count
+    };
 }
 
-class PlayerInput final
+struct BubbleEvent final
 {
-public:
-    PlayerInput();
+    enum
+    {
+        Fired
+    }type = Fired;
 
-    void handleEvent(const sf::Event&);
-
-    void update(float);
-
-    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
-
-private:
-
-    xy::Entity m_playerEntity;
-
-    sf::Vector2f getVelocityVector();
+    sf::Vector2f velocity;
+    sf::Vector2f position;
+    
 };

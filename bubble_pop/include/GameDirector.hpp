@@ -18,15 +18,30 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "ResourceIDs.hpp"
+
+#include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/Director.hpp>
 
+#include <array>
+
+struct NodeSet;
 class GameDirector final : public xy::Director
 {
 public:
-    GameDirector();
+    GameDirector(NodeSet&, const std::array<xy::Sprite, BubbleID::Count>&);
 
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
+    void setQueue(const std::vector<std::int32_t>&);
+
 private:
+    NodeSet& m_nodeSet;
+    const std::array<xy::Sprite, BubbleID::Count>& m_sprites;
+
+    std::vector<std::int32_t> m_queue;
+
+    void queueBubble();
+    void mountBubble();
 };

@@ -18,27 +18,32 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/Entity.hpp>
+#include <xyginext/ecs/System.hpp>
 
-namespace sf
+struct Bubble final
 {
-    class Event;
-}
+    enum class State
+    {
+        Queued,   //waiting at the side
+        Queuing,  //moving to gun mount
+        Mounted,  //on gun mount
+        Firing,   //travelling
+        Suspended,//stuck to the arena
+        Dying     //bursting animation
+    }state = State::Queued;
 
-class PlayerInput final
+    sf::Vector2f velocity;
+    static constexpr float Speed = 1000.f;
+};
+
+struct NodeSet;
+class BubbleSystem final : public xy::System
 {
 public:
-    PlayerInput();
+    BubbleSystem(xy::MessageBus&, NodeSet&);
 
-    void handleEvent(const sf::Event&);
-
-    void update(float);
-
-    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
+    void process(float) override;
 
 private:
-
-    xy::Entity m_playerEntity;
-
-    sf::Vector2f getVelocityVector();
+    NodeSet& m_nodeSet;
 };
