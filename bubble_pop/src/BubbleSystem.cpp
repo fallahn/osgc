@@ -57,6 +57,8 @@ BubbleSystem::BubbleSystem(xy::MessageBus& mb, NodeSet& ns)
 //public
 void BubbleSystem::process(float dt)
 {
+    bool clearFloating = false;
+
     auto& entities = getEntities();
     for (auto entity : entities)
     {
@@ -92,6 +94,15 @@ void BubbleSystem::process(float dt)
             //check for colour match
             if (bubble.testCluster)
             {
+                //reset all states
+                for (auto e : m_grid)
+                {
+                    if (e.isValid())
+                    {
+                        e.getComponent<Bubble>().processed = false;
+                    }
+                }
+
                 if (auto cluster = fetchCluster(entity); cluster.size() > 2)
                 {
                     //kill any bubbles if cluster >= 3
@@ -104,6 +115,7 @@ void BubbleSystem::process(float dt)
                     }
 
                     //testFloating();
+                    clearFloating = true;
                 }
                 bubble.testCluster = false;
             }
@@ -116,7 +128,7 @@ void BubbleSystem::process(float dt)
                 msg->generation = entity.getComponent<std::size_t>();
             }
 
-            bubble.processed = false; //reset for next frame testing
+            //bubble.processed = false; //reset for next frame testing
             break;
         case Bubble::State::Dying:
             //these should already be removed from grid
@@ -130,6 +142,13 @@ void BubbleSystem::process(float dt)
             break;
         }
     }
+
+    //check if we need to sweep up
+    //if (clearFloating)
+    //{
+    //    clearFloating = false;
+    //    testFloating();
+    //}
 }
 
 void BubbleSystem::resetGrid()
@@ -235,7 +254,7 @@ void BubbleSystem::doCollision(xy::Entity entity)
 }
 
 std::vector<std::int32_t> BubbleSystem::fetchCluster(xy::Entity entity, bool matchAll)
-{
+{    
     std::vector<std::int32_t> testList;
     testList.push_back(entity.getComponent<Bubble>().gridIndex);
 

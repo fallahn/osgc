@@ -305,6 +305,7 @@ void GameDirector::activateLevel()
     queueBubble();
 
     m_currentLevel = (m_currentLevel + 1) % m_levels.size();
+    m_roundTimer.restart();
 }
 
 //private
