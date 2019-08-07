@@ -56,15 +56,9 @@ private:
 
     PlayerInput m_playerInput;
 
-    std::size_t m_currentLevel;
-    std::vector<LevelData> m_levels;
-
     NodeSet m_nodeSet;
 
     void initScene();
     void loadResources();
-    void loadLevelData();
     void buildArena();
-
-    void activateLevel();
 };

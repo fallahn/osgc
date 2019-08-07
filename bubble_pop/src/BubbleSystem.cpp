@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "BubbleSystem.hpp"
 #include "NodeSet.hpp"
 #include "GameConsts.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -108,11 +109,17 @@ void BubbleSystem::process(float dt)
             }
 
             //if bubble in danger zone raise message
+            if (entity.getComponent<xy::Transform>().getPosition().y > Const::MaxBubbleHeight)
+            {
+                auto* msg = postMessage<BubbleEvent>(MessageID::BubbleMessage);
+                msg->type = BubbleEvent::EnteredZone;
+                msg->generation = entity.getComponent<std::size_t>();
+            }
 
             bubble.processed = false; //reset for next frame testing
             break;
         case Bubble::State::Dying:
-            //these should aready be removed from grid
+            //these should already be removed from grid
             //data, so just destroy ent when anim is finished
 
             /*if (entity.getComponent<xy::SpriteAnimation>().stopped())
@@ -122,6 +129,14 @@ void BubbleSystem::process(float dt)
             getScene()->destroyEntity(entity);
             break;
         }
+    }
+}
+
+void BubbleSystem::resetGrid()
+{
+    for (auto& e : m_grid)
+    {
+        e = {};
     }
 }
 

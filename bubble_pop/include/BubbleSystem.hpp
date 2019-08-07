@@ -53,7 +53,7 @@ public:
 
     void process(float) override;
 
-    void resetGrid() { m_grid = {}; }
+    void resetGrid();
 
 private:
     NodeSet& m_nodeSet;

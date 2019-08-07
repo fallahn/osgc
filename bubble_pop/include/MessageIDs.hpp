@@ -38,4 +38,5 @@ struct BubbleEvent final
 
     sf::Vector2f velocity;
     sf::Vector2f position;
+    std::size_t generation = 0;
 };

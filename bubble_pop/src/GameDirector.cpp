@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "GameConsts.hpp"
 #include "CommandID.hpp"
 #include "MessageIDs.hpp"
+#include "IniParse.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -33,8 +34,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Random.hpp>
 
 GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites)
-    : m_nodeSet (ns),
-    m_sprites   (sprites)
+    : m_nodeSet         (ns),
+    m_sprites           (sprites),
+    m_currentLevel      (0),
+    m_bubbleGeneration  (0)
 {
 
 }
@@ -71,21 +74,237 @@ void GameDirector::handleMessage(const xy::Message& msg)
             sendCommand(cmd);
         }
             break;
+        case BubbleEvent::EnteredZone:
+            if (data.generation == m_bubbleGeneration)
+            {
+                auto level = m_bubbleGeneration;
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::Bubble;
+                cmd.action = [&,level](xy::Entity e, float)
+                {
+                    if (e.getComponent<std::size_t>() == level)
+                    {
+                        getScene().destroyEntity(e);
+                    }
+                };
+                sendCommand(cmd);
+
+                m_nodeSet.barNode.getComponent<xy::Transform>().setPosition(Const::BarPosition);
+                activateLevel();
+                std::cout << "buns\n";
+            }
+            break;
         }
     }
 }
 
 void GameDirector::process(float)
 {
-    //TODO track round time and lower bar
+    //track round time and lower bar
+    //TODO fix the wrap around of this index
+    if (m_roundTimer.getElapsedTime() > m_levels[m_currentLevel - 1].interval)
+    {
+        m_roundTimer.restart();
 
-    //TODO check bubble collision with red area on bar move
+        m_nodeSet.barNode.getComponent<xy::Transform>().move(0.f, Const::RowHeight);
+
+        //TODO raise message
+    }
 }
 
-void GameDirector::setQueue(const std::vector<std::int32_t>& q)
+void GameDirector::loadLevelData()
 {
-    m_queue = q;
+    static const std::string section("Bubble Puzzle 97 - Level");
+    static const std::size_t BallArraySize = 64;
+
+    auto path = xy::FileSystem::getResourcePath() + "assets/levels/";
+
+    auto files = xy::FileSystem::listFiles(path);
+    for (const auto& file : files)
+    {
+        if (xy::FileSystem::getFileExtension(file) == ".ini")
+        {
+            IniParse iniFile(path + file);
+            if (iniFile.getData().empty())
+            {
+                continue;
+            }
+
+            LevelData levelData;
+            levelData.name = iniFile.getValueString(section, "name");
+            levelData.author = iniFile.getValueString(section, "author");
+            levelData.comment = iniFile.getValueString(section, "comment");
+
+            levelData.level = iniFile.getValueInt(section, "stage");
+            levelData.interval = sf::seconds(iniFile.getValueFloat(section, "interval"));
+            levelData.gunMove = iniFile.getValueInt(section, "gunmove") == 1;
+
+            for (auto i = 8; i > 0; --i)
+            {
+                auto str = iniFile.getValueString(section, "line" + std::to_string(i));
+                if (!str.empty())
+                {
+                    auto row = xy::Util::String::tokenize(str, ' ');
+
+                    for (auto s : row)
+                    {
+                        if (s == "R")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Red);
+                        }
+                        else if (s == "G")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Green);
+                        }
+                        else if (s == "B")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Blue);
+                        }
+                        else if (s == "C")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Cyan);
+                        }
+                        else if (s == "P")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Magenta);
+                        }
+                        else if (s == "Y")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Yellow);
+                        }
+                        else if (s == "O")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Orange);
+                        }
+                        else if (s == "E")
+                        {
+                            levelData.ballArray.push_back(BubbleID::Grey);
+                        }
+                        else if (s == "-")
+                        {
+                            levelData.ballArray.push_back(-1);
+                        }
+                    }
+                }
+            }
+
+            auto order = iniFile.getValueString(section, "order");
+            for (auto c : order)
+            {
+                if (c == 'R')
+                {
+                    levelData.orderArray.push_back(BubbleID::Red);
+                }
+                else if (c == 'G')
+                {
+                    levelData.orderArray.push_back(BubbleID::Green);
+                }
+                else if (c == 'B')
+                {
+                    levelData.orderArray.push_back(BubbleID::Blue);
+                }
+                else if (c == 'C')
+                {
+                    levelData.orderArray.push_back(BubbleID::Cyan);
+                }
+                else if (c == 'P')
+                {
+                    levelData.orderArray.push_back(BubbleID::Magenta);
+                }
+                else if (c == 'Y')
+                {
+                    levelData.orderArray.push_back(BubbleID::Yellow);
+                }
+                else if (c == 'O')
+                {
+                    levelData.orderArray.push_back(BubbleID::Orange);
+                }
+                else if (c == 'E')
+                {
+                    levelData.orderArray.push_back(BubbleID::Grey);
+                }
+            }
+            //reverse this as we'll be popping from the back
+            std::reverse(levelData.orderArray.begin(), levelData.orderArray.end());
+
+            if (levelData.level != 0 &&
+                levelData.interval != sf::Time::Zero &&
+                levelData.ballArray.size() == BallArraySize)
+            {
+                m_levels.push_back(levelData);
+            }
+        }
+    }
+
+    std::sort(m_levels.begin(), m_levels.end(),
+        [](const LevelData& a, const LevelData& b)
+        {
+            return a.level < b.level;
+        });
+}
+
+void GameDirector::activateLevel()
+{
+    if (m_levels.empty())
+    {
+        xy::Logger::log("No levels loaded!", xy::Logger::Type::Error);
+        return;
+    }
+    m_bubbleGeneration++;
+
+    auto origin = Const::BubbleSize / 2.f;
+
+    auto createBubble = [&, origin](int idx, sf::Vector2f pos)->xy::Entity
+    {
+        auto entity = getScene().createEntity();
+        entity.addComponent<xy::Transform>().setPosition(pos + origin);
+        entity.getComponent<xy::Transform>().setOrigin(origin);
+        entity.addComponent<xy::Drawable>().setDepth(1);
+        entity.addComponent<xy::Sprite>() = m_sprites[idx];
+        entity.addComponent<Bubble>().state = Bubble::State::Suspended;
+        entity.getComponent<Bubble>().colourType = idx;
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
+
+        //tag bubbles so next time we know which bubbles to clear
+        entity.addComponent<std::size_t>() = m_bubbleGeneration;
+        return entity;
+    };
+    getScene().getSystem<BubbleSystem>().resetGrid();
+
+    const auto& bubbles = m_levels[m_currentLevel].ballArray;
+    for (auto i = 0; i < bubbles.size(); ++i)
+    {
+        if (bubbles[i] != -1)
+        {
+            auto pos = tileToWorldCoord(i);
+
+            auto entity = createBubble(bubbles[i], pos);
+            entity.getComponent<Bubble>().gridIndex = i;
+            m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        }
+    }
+
+    auto queue = m_levels[m_currentLevel].orderArray;
+    
+    //mount first bubble
+    std::int32_t colour = xy::Util::Random::value(BubbleID::Red, BubbleID::Grey);
+    if (!queue.empty())
+    {
+        colour = queue.back();
+        queue.pop_back();
+    }
+
+    auto entity = createBubble(colour, m_nodeSet.gunNode.getComponent<xy::Transform>().getOrigin() - origin);
+    entity.getComponent<Bubble>().state = Bubble::State::Mounted;
+    m_nodeSet.gunNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //TODO check game rule id gun mouint should be moving
+
+    //set active queue
+    m_queue = queue;
     queueBubble();
+
+    m_currentLevel = (m_currentLevel + 1) % m_levels.size();
 }
 
 //private
@@ -108,6 +327,7 @@ void GameDirector::queueBubble()
     entity.addComponent<Bubble>().state = Bubble::State::Queued;
     entity.getComponent<Bubble>().colourType = id;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
+    entity.addComponent<std::size_t>() = m_bubbleGeneration;
 
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

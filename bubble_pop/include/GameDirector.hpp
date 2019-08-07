@@ -19,11 +19,13 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "ResourceIDs.hpp"
+#include "LevelData.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/Director.hpp>
-
 #include <xyginext/graphics/BitmapFont.hpp>
+
+#include <SFML/System/Clock.hpp>
 
 #include <array>
 
@@ -36,13 +38,19 @@ public:
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
-    void setQueue(const std::vector<std::int32_t>&);
+    void loadLevelData();
+    void activateLevel();
 
 private:
     NodeSet& m_nodeSet;
     const std::array<xy::Sprite, BubbleID::Count>& m_sprites;
 
+    std::vector<LevelData> m_levels;
+    std::size_t m_currentLevel;
+    std::size_t m_bubbleGeneration;
     std::vector<std::int32_t> m_queue;
+
+    sf::Clock m_roundTimer;
 
     void queueBubble();
     void mountBubble();
