@@ -358,6 +358,7 @@ void MainState::activateLevel()
         entity.addComponent<xy::Drawable>().setDepth(1);
         entity.addComponent<xy::Sprite>() = m_bubbleSprites[idx];
         entity.addComponent<Bubble>().state = Bubble::State::Suspended;
+        entity.getComponent<Bubble>().colourType = idx;
         entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
 
         //TODO tag bubbles with level ID so next time we know which bubbles to clear

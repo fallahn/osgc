@@ -106,6 +106,7 @@ void GameDirector::queueBubble()
     entity.addComponent<xy::Drawable>().setDepth(1);
     entity.addComponent<xy::Sprite>() = m_sprites[id];
     entity.addComponent<Bubble>().state = Bubble::State::Queued;
+    entity.getComponent<Bubble>().colourType = id;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
 
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

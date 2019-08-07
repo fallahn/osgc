@@ -32,10 +32,10 @@ struct BubbleEvent final
 {
     enum
     {
-        Fired
+        Fired,
+        EnteredZone
     }type = Fired;
 
     sf::Vector2f velocity;
     sf::Vector2f position;
-    
 };

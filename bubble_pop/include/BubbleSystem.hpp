@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/System.hpp>
 
 #include <array>
+#include <vector>
 
 struct Bubble final
 {
@@ -34,7 +35,11 @@ struct Bubble final
         Dying     //bursting animation
     }state = State::Queued;
 
-    std::int32_t gridIndex = -1;
+    std::int32_t gridIndex = -1; //where we are in the tile grid
+    std::int32_t colourType = -1;
+
+    bool testCluster = false; //true if just landed and needs to test for clusters
+    bool processed = false; //used during cluster testing
 
     sf::Vector2f velocity;
     static constexpr float Speed = 1000.f;
@@ -56,5 +61,8 @@ private:
     std::array<xy::Entity, 128u> m_grid;
 
     void doCollision(xy::Entity);
+    std::vector<std::int32_t> fetchCluster(xy::Entity, bool matchAll = false); //returns true if bubbles were removed
+    void testFloating();
+    std::vector<std::int32_t> getNeighbours(std::int32_t) const;
     void onEntityAdded(xy::Entity) override;
 };
