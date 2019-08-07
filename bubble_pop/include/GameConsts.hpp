@@ -28,7 +28,7 @@ namespace Const
     static const float BubbleDistSqr = BubbleSize.x * BubbleSize.x;
 
     static const sf::Vector2f GunPosition(320.f, 445.f);
-    static const sf::Vector2f BarPosition(128.f, 0.f);
+    static const sf::Vector2f BarPosition(128.f, 32.f);
     static const sf::Vector2f BubbleQueuePosition(BubbleSize.x, 445.f);
 
     static const std::size_t BubblesPerRow = 8;

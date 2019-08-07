@@ -53,7 +53,7 @@ public:
 private:
     NodeSet& m_nodeSet;
 
-    std::array<xy::Entity, 64u> m_grid;
+    std::array<xy::Entity, 128u> m_grid;
 
     void doCollision(xy::Entity);
     void onEntityAdded(xy::Entity) override;

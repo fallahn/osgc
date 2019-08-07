@@ -31,11 +31,15 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/BitmapText.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/BitmapTextSystem.hpp>
+
+#include <xyginext/graphics/BitmapFont.hpp>
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -112,6 +116,7 @@ void MainState::initScene()
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::SpriteAnimator>(mb);
+    m_scene.addSystem<xy::BitmapTextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
 
     m_scene.addDirector<GameDirector>(m_nodeSet, m_bubbleSprites);
@@ -321,14 +326,16 @@ void MainState::buildArena()
 
     m_playerInput.setPlayerEntity(entity);
 
+    m_nodeSet.barNode = m_scene.createEntity();
+    m_nodeSet.barNode.addComponent<xy::Transform>().setPosition(Const::BarPosition);
+    m_nodeSet.barNode.addComponent<xy::CommandTarget>().ID = CommandID::TopBar;
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(m_nodeSet.barNode.getComponent<xy::Transform>());
+
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Const::BarPosition);
+    entity.addComponent<xy::Transform>().setPosition(0.f, -m_sprites[SpriteID::TopBar].getTextureRect().height);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::TopBar];
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::TopBar;
-    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-
-    m_nodeSet.barNode = entity;
+    m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());   
 
     activateLevel();
 }
@@ -341,7 +348,6 @@ void MainState::activateLevel()
         return;
     }
 
-    auto barOffset = m_nodeSet.barNode.getComponent<xy::Sprite>().getTextureBounds().height;
     auto origin = Const::BubbleSize / 2.f;
 
     auto createBubble = [&,origin](int idx, sf::Vector2f pos)->xy::Entity
@@ -365,7 +371,6 @@ void MainState::activateLevel()
         if (bubbles[i] != -1)
         {
             auto pos = tileToWorldCoord(i);
-            pos.y += barOffset;
                         
             auto entity = createBubble(bubbles[i], pos);
             entity.getComponent<Bubble>().gridIndex = i;
@@ -382,14 +387,6 @@ void MainState::activateLevel()
 
     //set director queue. This also queues first bubble
     m_scene.getDirector<GameDirector>().setQueue(queue);
-
-    xy::Command cmd;
-    cmd.targetFlags = CommandID::TopBar;
-    cmd.action = [barOffset](xy::Entity e, float)
-    {
-        e.getComponent<xy::Transform>().setPosition(Const::BarPosition.x, -barOffset);
-    };
-    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
     m_currentLevel = (m_currentLevel + 1) % m_levels.size();
 }

@@ -23,6 +23,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/Director.hpp>
 
+#include <xyginext/graphics/BitmapFont.hpp>
+
 #include <array>
 
 struct NodeSet;
