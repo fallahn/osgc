@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "CommandID.hpp"
 #include "GameDirector.hpp"
 #include "BubbleSystem.hpp"
+#include "SoundEffectsDirector.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -39,6 +40,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/BitmapTextSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/AudioSystem.hpp>
 
 #include <xyginext/graphics/BitmapFont.hpp>
 
@@ -123,8 +125,10 @@ void MainState::initScene()
     m_scene.addSystem<xy::SpriteAnimator>(mb);
     m_scene.addSystem<xy::BitmapTextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
+    m_scene.addSystem<xy::AudioSystem>(mb);
 
     m_scene.addDirector<GameDirector>(m_nodeSet, m_bubbleSprites).loadLevelData();
+    m_scene.addDirector<SFXDirector>();
 }
 
 void MainState::loadResources()

@@ -153,6 +153,7 @@
     <ClInclude Include="include\PlayerInput.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\SoundEffectsDirector.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +162,7 @@
     <ClCompile Include="src\GameDirector.cpp" />
     <ClCompile Include="src\MainState.cpp" />
     <ClCompile Include="src\PlayerInput.cpp" />
+    <ClCompile Include="src\SoundEffectsDirector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

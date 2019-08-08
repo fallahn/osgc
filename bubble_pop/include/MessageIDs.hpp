@@ -34,6 +34,7 @@ struct BubbleEvent final
     enum
     {
         Fired,
+        Removed
     }type = Fired;
 
     sf::Vector2f velocity;

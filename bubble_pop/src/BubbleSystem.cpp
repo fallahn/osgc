@@ -224,10 +224,13 @@ void BubbleSystem::process(float dt)
                     //kill any bubbles if cluster >= 3
                     for (auto n : cluster)
                     {
-                        //TODO raise a message
                         //TODO play death animation
                         m_grid[n].getComponent<Bubble>().state = Bubble::State::Dying;
                         m_grid[n] = {};
+
+                        auto* msg = postMessage<BubbleEvent>(MessageID::BubbleMessage);
+                        msg->type = BubbleEvent::Removed;
+                        msg->position = xy::DefaultSceneSize / 2.f;
                     }
 
                     testFloating();
@@ -474,8 +477,6 @@ std::vector<std::int32_t> BubbleSystem::getNeighbours(std::int32_t gridIndex) co
 {
     std::vector<std::int32_t> gridIndices;
 
-    //gridIndices.push_back(gridIndex - 1);
-    //gridIndices.push_back(gridIndex + 1);
     gridIndices.push_back(gridIndex - Const::BubblesPerRow);
     gridIndices.push_back(gridIndex + Const::BubblesPerRow);
 

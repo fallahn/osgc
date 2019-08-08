@@ -12,5 +12,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerInput.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   PARENT_SCOPE)

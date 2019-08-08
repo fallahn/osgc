@@ -5,4 +5,5 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/GameDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MainState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerInput.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.cpp
   PARENT_SCOPE)
