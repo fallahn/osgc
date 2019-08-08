@@ -20,6 +20,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/System.hpp>
 
+#ifdef XY_DEBUG
+#include <xyginext/gui/GuiClient.hpp>
+#endif
+
 #include <array>
 #include <vector>
 
@@ -47,6 +51,9 @@ struct Bubble final
 
 struct NodeSet;
 class BubbleSystem final : public xy::System
+#ifdef XY_DEBUG
+    , public xy::GuiClient
+#endif
 {
 public:
     BubbleSystem(xy::MessageBus&, NodeSet&);
@@ -65,4 +72,5 @@ private:
     void testFloating();
     std::vector<std::int32_t> getNeighbours(std::int32_t) const;
     void onEntityAdded(xy::Entity) override;
+    void onEntityRemoved(xy::Entity) override;
 };

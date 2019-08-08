@@ -27,6 +27,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Vector.hpp>
 
+#ifdef XY_DEBUG
+#include <xyginext/gui/Gui.hpp>
+#endif
+
 namespace
 {
     //remember the input to this needs to be relative to the top bar node position
@@ -44,6 +48,8 @@ namespace
 
         return (yPos * Const::BubblesPerRow) + xPos;
     }
+
+    std::array<int, 64u> debugGrid = { -1 };
 }
 
 BubbleSystem::BubbleSystem(xy::MessageBus& mb, NodeSet& ns)
@@ -52,12 +58,121 @@ BubbleSystem::BubbleSystem(xy::MessageBus& mb, NodeSet& ns)
 {
     requireComponent<Bubble>();
     requireComponent<xy::Transform>();
+
+#ifdef XY_DEBUG
+    registerWindow([&]()
+        {
+            xy::Nim::begin("Grid");
+            std::array<char, 9> str = { 
+                char(debugGrid[0]),
+                char(debugGrid[1]),
+                char(debugGrid[2]),
+                char(debugGrid[3]),
+                char(debugGrid[4]),
+                char(debugGrid[5]),
+                char(debugGrid[6]),
+                char(debugGrid[7]), 0};
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[8]),
+                char(debugGrid[9]), 
+                char(debugGrid[10]),
+                char(debugGrid[11]),
+                char(debugGrid[12]),
+                char(debugGrid[13]),
+                char(debugGrid[14]), 
+                char(debugGrid[15]), 0 };
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[16]),
+                char(debugGrid[17]),
+                char(debugGrid[18]),
+                char(debugGrid[19]),
+                char(debugGrid[20]),
+                char(debugGrid[21]),
+                char(debugGrid[22]), 
+                char(debugGrid[23]), 0 };
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[24]),
+                char(debugGrid[25]),
+                char(debugGrid[26]), 
+                char(debugGrid[27]), 
+                char(debugGrid[28]), 
+                char(debugGrid[29]), 
+                char(debugGrid[30]), 
+                char(debugGrid[31]), 0 };
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[32]),
+                char(debugGrid[33]),
+                char(debugGrid[34]),
+                char(debugGrid[35]),
+                char(debugGrid[36]), 
+                char(debugGrid[37]),
+                char(debugGrid[38]),
+                char(debugGrid[39]),
+                0 };
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[40]),
+                char(debugGrid[41]), 
+                char(debugGrid[42]), 
+                char(debugGrid[43]), 
+                char(debugGrid[44]), 
+                char(debugGrid[45]), 
+                char(debugGrid[46]), 
+                char(debugGrid[47]), 0 };
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[48]),
+                char(debugGrid[49]), 
+                char(debugGrid[50]), 
+                char(debugGrid[51]), 
+                char(debugGrid[52]), 
+                char(debugGrid[53]), 
+                char(debugGrid[54]), 
+                char(debugGrid[55]), 0 };
+            xy::Nim::text(str.data());
+
+            str = { 
+                char(debugGrid[56]),
+                char(debugGrid[57]), 
+                char(debugGrid[58]), 
+                char(debugGrid[59]), 
+                char(debugGrid[60]), 
+                char(debugGrid[61]), 
+                char(debugGrid[62]), 
+                char(debugGrid[63]), 0 };
+            xy::Nim::text(str.data());
+
+            xy::Nim::end();
+        });
+#endif
 }
 
 //public
 void BubbleSystem::process(float dt)
 {
-    bool clearFloating = false;
+#ifdef XY_DEBUG   
+    for (auto i = 0u; i < debugGrid.size(); ++i)
+    {
+        if (m_grid[i].isValid()) 
+        {
+            debugGrid[i] = m_grid[i].getComponent<Bubble>().colourType + 48;
+        }
+        else
+        {
+            debugGrid[i] = 45;
+        }
+    }
+#endif
 
     auto& entities = getEntities();
     for (auto entity : entities)
@@ -114,8 +229,7 @@ void BubbleSystem::process(float dt)
                         m_grid[n] = {};
                     }
 
-                    //testFloating();
-                    clearFloating = true;
+                    testFloating();
                 }
                 bubble.testCluster = false;
             }
@@ -123,12 +237,11 @@ void BubbleSystem::process(float dt)
             //if bubble in danger zone raise message
             if (entity.getComponent<xy::Transform>().getPosition().y > Const::MaxBubbleHeight)
             {
-                auto* msg = postMessage<BubbleEvent>(MessageID::BubbleMessage);
-                msg->type = BubbleEvent::EnteredZone;
+                auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+                msg->type = GameEvent::RoundFailed;
                 msg->generation = entity.getComponent<std::size_t>();
             }
 
-            //bubble.processed = false; //reset for next frame testing
             break;
         case Bubble::State::Dying:
             //these should already be removed from grid
@@ -142,13 +255,6 @@ void BubbleSystem::process(float dt)
             break;
         }
     }
-
-    //check if we need to sweep up
-    //if (clearFloating)
-    //{
-    //    clearFloating = false;
-    //    testFloating();
-    //}
 }
 
 void BubbleSystem::resetGrid()
@@ -354,17 +460,41 @@ std::vector<std::int32_t> BubbleSystem::getNeighbours(std::int32_t gridIndex) co
     gridIndices.push_back(gridIndex - Const::BubblesPerRow);
     gridIndices.push_back(gridIndex + Const::BubblesPerRow);
 
-    if (gridIndex % 2 == 0)
+    if ((gridIndex / Const::BubblesPerRow) % 2 == 0)
     {
         //offset to right
-        gridIndices.push_back((gridIndex - Const::BubblesPerRow) + 1);
-        gridIndices.push_back((gridIndex + Const::BubblesPerRow) + 1);
+        auto rowIndex = gridIndices[2] / Const::BubblesPerRow;
+        auto idx = (gridIndices[2] + 1);
+        //not a neighbour if wrapped onto next row
+        if ((idx / Const::BubblesPerRow) == rowIndex)
+        {
+            gridIndices.push_back(idx);
+        }
+
+        rowIndex = gridIndices[3] / Const::BubblesPerRow;
+        idx = (gridIndices[3] + 1);
+        if ((idx / Const::BubblesPerRow) == rowIndex)
+        {
+            gridIndices.push_back(idx);
+        }
     }
     else
     {
         //offset to left
-        gridIndices.push_back((gridIndex - Const::BubblesPerRow) - 1);
-        gridIndices.push_back((gridIndex + Const::BubblesPerRow) - 1);
+        auto rowIndex = gridIndices[2] / Const::BubblesPerRow;
+        auto idx = (gridIndices[2] - 1);
+        //not a neighbour if wrapped onto next row
+        if ((idx / Const::BubblesPerRow) == rowIndex)
+        {
+            gridIndices.push_back(idx);
+        }
+
+        rowIndex = gridIndices[3] / Const::BubblesPerRow;
+        idx = (gridIndices[3] - 1);
+        if ((idx / Const::BubblesPerRow) == rowIndex)
+        {
+            gridIndices.push_back(idx);
+        }
     }
     return gridIndices;
 }
@@ -375,5 +505,16 @@ void BubbleSystem::onEntityAdded(xy::Entity entity)
     if (bubble.gridIndex > -1)
     {
         m_grid[bubble.gridIndex] = entity;
+    }
+}
+
+void BubbleSystem::onEntityRemoved(xy::Entity entity)
+{
+    if (getEntities().size() == 3)
+    {
+        //only queued and mounted remain
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::RoundCleared;
+        msg->generation = entity.getComponent<std::size_t>();
     }
 }

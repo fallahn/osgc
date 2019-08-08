@@ -24,7 +24,8 @@ namespace MessageID
 {
     enum
     {
-        BubbleMessage = xy::Message::Count
+        BubbleMessage = xy::Message::Count,
+        GameMessage
     };
 }
 
@@ -33,10 +34,18 @@ struct BubbleEvent final
     enum
     {
         Fired,
-        EnteredZone
     }type = Fired;
 
     sf::Vector2f velocity;
     sf::Vector2f position;
+};
+
+struct GameEvent final
+{
+    enum
+    {
+        RoundCleared,
+        RoundFailed
+    }type = RoundCleared;
     std::size_t generation = 0;
 };

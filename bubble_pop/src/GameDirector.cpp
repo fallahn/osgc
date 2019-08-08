@@ -74,25 +74,17 @@ void GameDirector::handleMessage(const xy::Message& msg)
             sendCommand(cmd);
         }
             break;
-        case BubbleEvent::EnteredZone:
-            if (data.generation == m_bubbleGeneration)
-            {
-                auto level = m_bubbleGeneration;
-                xy::Command cmd;
-                cmd.targetFlags = CommandID::Bubble;
-                cmd.action = [&,level](xy::Entity e, float)
-                {
-                    if (e.getComponent<std::size_t>() == level)
-                    {
-                        getScene().destroyEntity(e);
-                    }
-                };
-                sendCommand(cmd);
-
-                m_nodeSet.barNode.getComponent<xy::Transform>().setPosition(Const::BarPosition);
-                activateLevel();
-                std::cout << "buns\n";
-            }
+        }
+    }
+    else if (msg.id == MessageID::GameMessage)
+    {
+        const auto& data = msg.getData<GameEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case GameEvent::RoundCleared:
+        case GameEvent::RoundFailed:
+            loadNextLevel(data.generation);
             break;
         }
     }
@@ -346,4 +338,25 @@ void GameDirector::mountBubble()
         }
     };
     sendCommand(cmd);
+}
+
+void GameDirector::loadNextLevel(std::size_t generation)
+{
+    if (generation == m_bubbleGeneration)
+    {
+        auto level = m_bubbleGeneration;
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Bubble;
+        cmd.action = [&, level](xy::Entity e, float)
+        {
+            if (e.getComponent<std::size_t>() == level)
+            {
+                getScene().destroyEntity(e);
+            }
+        };
+        sendCommand(cmd);
+
+        m_nodeSet.barNode.getComponent<xy::Transform>().setPosition(Const::BarPosition);
+        activateLevel();
+    }
 }

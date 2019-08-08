@@ -54,4 +54,6 @@ private:
 
     void queueBubble();
     void mountBubble();
+
+    void loadNextLevel(std::size_t);
 };
