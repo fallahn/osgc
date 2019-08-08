@@ -264,6 +264,9 @@ void GameDirector::activateLevel()
     };
     getScene().getSystem<BubbleSystem>().resetGrid();
 
+
+    //just to pick a first colour at random
+    std::int32_t colour = 0;
     const auto& bubbles = m_levels[m_currentLevel].ballArray;
     for (auto i = 0; i < bubbles.size(); ++i)
     {
@@ -274,13 +277,14 @@ void GameDirector::activateLevel()
             auto entity = createBubble(bubbles[i], pos);
             entity.getComponent<Bubble>().gridIndex = i;
             m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+            colour = bubbles[i];
         }
     }
 
     auto queue = m_levels[m_currentLevel].orderArray;
     
     //mount first bubble
-    std::int32_t colour = xy::Util::Random::value(BubbleID::Red, BubbleID::Grey);
     if (!queue.empty())
     {
         colour = queue.back();
@@ -306,11 +310,17 @@ void GameDirector::activateLevel()
 //private
 void GameDirector::queueBubble()
 {
-    auto id = xy::Util::Random::value(BubbleID::Red, BubbleID::Grey);
+    const auto& activeColours = getScene().getSystem<BubbleSystem>().getActiveColours();
+
+    auto id = 0;
     if (!m_queue.empty())
     {
         id = m_queue.back();
         m_queue.pop_back();
+    }
+    else if (activeColours.size() > 1)
+    {
+        id = activeColours[xy::Util::Random::value(0, activeColours.size() - 1)];
     }
 
     //place bubble at spawn point

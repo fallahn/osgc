@@ -230,6 +230,7 @@ void BubbleSystem::process(float dt)
                     }
 
                     testFloating();
+                    updateActiveColours();
                 }
                 bubble.testCluster = false;
             }
@@ -267,6 +268,22 @@ void BubbleSystem::resetGrid()
 }
 
 //private
+void BubbleSystem::updateActiveColours()
+{
+    m_activeColours.clear();
+
+    for (auto e : m_grid)
+    {
+        if (e.isValid())
+        {
+            m_activeColours.push_back(e.getComponent<Bubble>().colourType);
+        }
+    }
+
+    std::sort(m_activeColours.begin(), m_activeColours.end());
+    m_activeColours.erase(std::unique(m_activeColours.begin(), m_activeColours.end()), m_activeColours.end());
+}
+
 void BubbleSystem::doCollision(xy::Entity entity)
 {
     auto& tx = entity.getComponent<xy::Transform>();
@@ -497,6 +514,7 @@ void BubbleSystem::onEntityAdded(xy::Entity entity)
     {
         m_grid[bubble.gridIndex] = entity;
     }
+    updateActiveColours();
 }
 
 void BubbleSystem::onEntityRemoved(xy::Entity entity)

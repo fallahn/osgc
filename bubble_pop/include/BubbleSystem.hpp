@@ -62,10 +62,15 @@ public:
 
     void resetGrid();
 
+    const std::vector<std::int32_t>& getActiveColours() const { return m_activeColours; }
+
 private:
     NodeSet& m_nodeSet;
 
     std::array<xy::Entity, 128u> m_grid;
+    std::vector<std::int32_t> m_activeColours;
+
+    void updateActiveColours();
 
     void doCollision(xy::Entity);
     std::vector<std::int32_t> fetchCluster(xy::Entity, bool matchAll = false); //returns true if bubbles were removed
