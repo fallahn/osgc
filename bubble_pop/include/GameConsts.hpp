@@ -27,7 +27,7 @@ namespace Const
     static const sf::Vector2f BubbleSize(47.f, 47.f);
     static const float BubbleDistSqr = BubbleSize.x * BubbleSize.x;
 
-    static const sf::Vector2f GunPosition(320.f, 445.f);
+    static const sf::Vector2f GunPosition(328.f, 445.f);
     static const sf::Vector2f BarPosition(128.f, 8.f);
     static const sf::Vector2f BubbleQueuePosition(BubbleSize.x, 445.f);
 
@@ -39,7 +39,7 @@ namespace Const
     static const float LeftBounds = 127.f + (BubbleSize.x / 2.f);
     static const float RightBounds = 534.f - (BubbleSize.x / 2.f);
 
-    static const float MaxBubbleHeight = 336.f - (BubbleSize.y / 2.f);
+    static const float MaxBubbleHeight = 346.f - (BubbleSize.y / 2.f);
 }
 
 static inline sf::Vector2f tileToWorldCoord(std::size_t index)

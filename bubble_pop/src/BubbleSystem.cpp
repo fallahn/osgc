@@ -62,6 +62,7 @@ BubbleSystem::BubbleSystem(xy::MessageBus& mb, NodeSet& ns)
 #ifdef XY_DEBUG
     registerWindow([&]()
         {
+            xy::Nim::setNextWindowSize(120.f, 200.f);
             xy::Nim::begin("Grid");
             std::array<char, 9> str = { 
                 char(debugGrid[0]),
@@ -311,7 +312,7 @@ void BubbleSystem::doCollision(xy::Entity entity)
 
     bool collides = false;
     //if we tunnelled collision, move back one radius
-    /*if (m_grid[gridIndex].isValid())
+    if (m_grid[gridIndex].isValid())
     {
         const auto& bubble = entity.getComponent<Bubble>();
 
@@ -324,7 +325,7 @@ void BubbleSystem::doCollision(xy::Entity entity)
         }
 
         collides = true;
-    }*/
+    }
 
     if (!collides) //check surrounding
     {
@@ -473,37 +474,50 @@ std::vector<std::int32_t> BubbleSystem::getNeighbours(std::int32_t gridIndex) co
 {
     std::vector<std::int32_t> gridIndices;
 
-    gridIndices.push_back(gridIndex - 1);
-    gridIndices.push_back(gridIndex + 1);
+    //gridIndices.push_back(gridIndex - 1);
+    //gridIndices.push_back(gridIndex + 1);
     gridIndices.push_back(gridIndex - Const::BubblesPerRow);
     gridIndices.push_back(gridIndex + Const::BubblesPerRow);
 
     if ((gridIndex / Const::BubblesPerRow) % 2 != 0)
     {
         //offset to left
-        if (gridIndices[2] % Const::BubblesPerRow != 0)
+        if (gridIndices[0] % Const::BubblesPerRow != 0)
         {
-            gridIndices.push_back(gridIndices[2] - 1);
+            gridIndices.push_back(gridIndices[0] - 1);
         }
 
-        if (gridIndices[3] % Const::BubblesPerRow != 0)
+        if (gridIndices[1] % Const::BubblesPerRow != 0)
         {
-            gridIndices.push_back(gridIndices[3] - 1);
+            gridIndices.push_back(gridIndices[1] - 1);
         }
     }
     else
     {
         //offset to right
-        if (gridIndices[2] % Const::BubblesPerRow != (Const::BubblesPerRow - 1))
+        if (gridIndices[0] % Const::BubblesPerRow != (Const::BubblesPerRow - 1))
         {
-            gridIndices.push_back(gridIndices[2] + 1);
+            gridIndices.push_back(gridIndices[0] + 1);
         }
 
-        if (gridIndices[3] % Const::BubblesPerRow != (Const::BubblesPerRow - 1))
+        if (gridIndices[1] % Const::BubblesPerRow != (Const::BubblesPerRow - 1))
         {
-            gridIndices.push_back(gridIndices[3] + 1);
+            gridIndices.push_back(gridIndices[1] + 1);
         }
     }
+
+    //don't add immediate neighbours of they are on the next row
+    auto rowPos = gridIndex % Const::BubblesPerRow;
+    if (rowPos != Const::BubblesPerRow)
+    {
+        gridIndices.push_back(gridIndex - 1);
+    }
+
+    if (rowPos != (Const::BubblesPerRow - 1))
+    {
+        gridIndices.push_back(gridIndex + 1);
+    }
+
     return gridIndices;
 }
 
