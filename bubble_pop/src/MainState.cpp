@@ -31,12 +31,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/BitmapText.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/BitmapTextSystem.hpp>
+#include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/graphics/BitmapFont.hpp>
 
@@ -52,7 +54,8 @@ namespace
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State     (ss, ctx),
-    m_scene         (ctx.appInstance.getMessageBus(), 1024u)
+    m_scene         (ctx.appInstance.getMessageBus(), 1024u),
+    m_playerInput   (m_nodeSet)
 {
     launchLoadingScreen();
     initScene();
@@ -62,6 +65,9 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    xy::App::setMouseCursorVisible(false);
+    xy::App::getRenderWindow()->setMouseCursorGrabbed(true);
 
     quitLoadingScreen();
 }
@@ -111,6 +117,7 @@ void MainState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_scene.addSystem<BubbleSystem>(mb, m_nodeSet);
+    m_scene.addSystem<xy::CallbackSystem>(mb);
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::SpriteAnimator>(mb);
@@ -179,8 +186,39 @@ void MainState::buildArena()
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::GunMount]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    entity.addComponent<xy::Callback>().userData = std::make_any<bool>(false);
+    entity.getComponent<xy::Callback>().function = [](xy::Entity e, float dt)
+    {
+        static const float Speed = 100.f;
+        auto& left = std::any_cast<bool&>(e.getComponent<xy::Callback>().userData);
 
+        auto& tx = e.getComponent<xy::Transform>();
+
+        if (left)
+        {
+            tx.move(-Speed * dt, 0.f);
+            auto position = tx.getPosition();
+            if (position.x < Const::LeftBounds)
+            {
+                left = false;
+                position.x = Const::LeftBounds;
+                tx.setPosition(position);
+            }
+        }
+        else
+        {
+            tx.move(Speed * dt, 0.f);
+            auto position = tx.getPosition();
+            if (position.x > Const::RightBounds)
+            {
+                left = true;
+                position.x = Const::RightBounds;
+                tx.setPosition(position);
+            }
+        }
+    };
+
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
     m_nodeSet.gunNode = entity;
 
     entity = m_scene.createEntity();

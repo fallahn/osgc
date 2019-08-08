@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/Scene.hpp>
 
@@ -290,7 +291,9 @@ void GameDirector::activateLevel()
     entity.getComponent<Bubble>().state = Bubble::State::Mounted;
     m_nodeSet.gunNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //TODO check game rule id gun mouint should be moving
+    //check game rule if gun mount should be moving
+    m_nodeSet.gunNode.getComponent<xy::Transform>().setPosition(Const::GunPosition);
+    m_nodeSet.gunNode.getComponent<xy::Callback>().active = m_levels[m_currentLevel].gunMove;
 
     //set active queue
     m_queue = queue;

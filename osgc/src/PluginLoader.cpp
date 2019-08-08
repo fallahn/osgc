@@ -75,6 +75,9 @@ void Game::loadPlugin(const std::string& path)
 
 void Game::unloadPlugin()
 {
+    //reset this in case any plugin set it true
+    xy::App::getRenderWindow()->setMouseCursorGrabbed(false);
+
     if (m_pluginHandle)
     {
         //reset the mouse cursor in case the plugin modified it

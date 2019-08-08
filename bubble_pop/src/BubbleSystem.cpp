@@ -235,7 +235,8 @@ void BubbleSystem::process(float dt)
             }
 
             //if bubble in danger zone raise message
-            if (entity.getComponent<xy::Transform>().getPosition().y > Const::MaxBubbleHeight)
+            if (entity.getComponent<xy::Transform>().getPosition().y + 
+                m_nodeSet.barNode.getComponent<xy::Transform>().getPosition().y > Const::MaxBubbleHeight)
             {
                 auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
                 msg->type = GameEvent::RoundFailed;
@@ -293,7 +294,7 @@ void BubbleSystem::doCollision(xy::Entity entity)
 
     bool collides = false;
     //if we tunnelled collision, move back one radius
-    if (m_grid[gridIndex].isValid())
+    /*if (m_grid[gridIndex].isValid())
     {
         const auto& bubble = entity.getComponent<Bubble>();
 
@@ -306,7 +307,7 @@ void BubbleSystem::doCollision(xy::Entity entity)
         }
 
         collides = true;
-    }
+    }*/
 
     if (!collides) //check surrounding
     {
@@ -460,40 +461,30 @@ std::vector<std::int32_t> BubbleSystem::getNeighbours(std::int32_t gridIndex) co
     gridIndices.push_back(gridIndex - Const::BubblesPerRow);
     gridIndices.push_back(gridIndex + Const::BubblesPerRow);
 
-    if ((gridIndex / Const::BubblesPerRow) % 2 == 0)
+    if ((gridIndex / Const::BubblesPerRow) % 2 != 0)
     {
-        //offset to right
-        auto rowIndex = gridIndices[2] / Const::BubblesPerRow;
-        auto idx = (gridIndices[2] + 1);
-        //not a neighbour if wrapped onto next row
-        if ((idx / Const::BubblesPerRow) == rowIndex)
+        //offset to left
+        if (gridIndices[2] % Const::BubblesPerRow != 0)
         {
-            gridIndices.push_back(idx);
+            gridIndices.push_back(gridIndices[2] - 1);
         }
 
-        rowIndex = gridIndices[3] / Const::BubblesPerRow;
-        idx = (gridIndices[3] + 1);
-        if ((idx / Const::BubblesPerRow) == rowIndex)
+        if (gridIndices[3] % Const::BubblesPerRow != 0)
         {
-            gridIndices.push_back(idx);
+            gridIndices.push_back(gridIndices[3] - 1);
         }
     }
     else
     {
-        //offset to left
-        auto rowIndex = gridIndices[2] / Const::BubblesPerRow;
-        auto idx = (gridIndices[2] - 1);
-        //not a neighbour if wrapped onto next row
-        if ((idx / Const::BubblesPerRow) == rowIndex)
+        //offset to right
+        if (gridIndices[2] % Const::BubblesPerRow != (Const::BubblesPerRow - 1))
         {
-            gridIndices.push_back(idx);
+            gridIndices.push_back(gridIndices[2] + 1);
         }
 
-        rowIndex = gridIndices[3] / Const::BubblesPerRow;
-        idx = (gridIndices[3] - 1);
-        if ((idx / Const::BubblesPerRow) == rowIndex)
+        if (gridIndices[3] % Const::BubblesPerRow != (Const::BubblesPerRow - 1))
         {
-            gridIndices.push_back(idx);
+            gridIndices.push_back(gridIndices[3] + 1);
         }
     }
     return gridIndices;

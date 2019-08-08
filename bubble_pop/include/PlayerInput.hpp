@@ -25,10 +25,11 @@ namespace sf
     class Event;
 }
 
+struct NodeSet;
 class PlayerInput final
 {
 public:
-    PlayerInput();
+    explicit PlayerInput(const NodeSet&);
 
     void handleEvent(const sf::Event&);
 
@@ -37,6 +38,8 @@ public:
     void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
 
 private:
+
+    const NodeSet& m_nodeSet;
 
     xy::Entity m_playerEntity;
 

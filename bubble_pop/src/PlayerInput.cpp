@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #include "PlayerInput.hpp"
 #include "MessageIDs.hpp"
+#include "GameConsts.hpp"
+#include "NodeSet.hpp"
 
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
@@ -33,7 +35,8 @@ namespace
     const float MaxAngle = -20.f;
 }
 
-PlayerInput::PlayerInput()
+PlayerInput::PlayerInput(const NodeSet& ns)
+    : m_nodeSet(ns)
 {
 
 }
@@ -71,9 +74,7 @@ sf::Vector2f PlayerInput::getVelocityVector()
     auto mousePos = rw.mapPixelToCoords(sf::Mouse::getPosition(rw));
 
     auto& tx = m_playerEntity.getComponent<xy::Transform>();
-    //sigh this just isn't right that the world position doesn't
-    //account for scale and origin offset...
-    auto dir = mousePos - (tx.getWorldPosition() + (tx.getOrigin() * 2.f));
+    auto dir = mousePos - m_nodeSet.rootNode.getComponent<xy::Transform>().getTransform().transformPoint(Const::GunPosition);
 
     return dir;
 }

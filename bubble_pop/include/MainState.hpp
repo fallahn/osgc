@@ -54,9 +54,9 @@ private:
     std::array<xy::Sprite, SpriteID::Count> m_sprites;
     std::array<std::size_t, TextureID::Count> m_textures;
 
-    PlayerInput m_playerInput;
-
+    
     NodeSet m_nodeSet;
+    PlayerInput m_playerInput;
 
     void initScene();
     void loadResources();
