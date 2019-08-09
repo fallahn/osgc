@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Animations.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BubbleSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandID.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp

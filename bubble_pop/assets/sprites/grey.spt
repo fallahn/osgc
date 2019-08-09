@@ -55,7 +55,7 @@ spritesheet ball
             frame = 47,282,47,47
 
             loop = false
-            framerate = 12
+            framerate = 24
         }
 
         animation wink
@@ -66,8 +66,8 @@ spritesheet ball
             frame = 141,94,47,47
             frame = 94,94,47,47
 
-            loop = true
-            framerate = 30
+            loop = false
+            framerate = 24
         }
 
         animation grin
@@ -77,16 +77,16 @@ spritesheet ball
             framerate = 30
         }
 
-        animation wait_1
+        animation mounted
         {
             frame = 94,282,47,47
             loop = true
             framerate = 30
         }
 
-        animation wait_2
+        animation queued
         {
-            frame = 141,282,47,47
+            frame = 188,282,47,47
             loop = true
             framerate = 30
         }

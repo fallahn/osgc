@@ -34,9 +34,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Random.hpp>
 
-GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites)
+GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites, const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& animations)
     : m_nodeSet         (ns),
     m_sprites           (sprites),
+    m_animationMaps     (animations),
     m_currentLevel      (0),
     m_bubbleGeneration  (0)
 {
@@ -68,6 +69,9 @@ void GameDirector::handleMessage(const xy::Message& msg)
                     m_nodeSet.gunNode.getComponent<xy::Transform>().removeChild(tx);
                     tx.setPosition(m_nodeSet.gunNode.getComponent<xy::Transform>().getPosition());
                     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(tx);
+
+                    const auto& animMap = e.getComponent<AnimationMap<AnimID::Bubble::Count>>();
+                    e.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Shoot]);
 
                     mountBubble(); //only mount a bubble if we fired one
                 }
@@ -257,6 +261,8 @@ void GameDirector::activateLevel()
         entity.addComponent<Bubble>().state = Bubble::State::Suspended;
         entity.getComponent<Bubble>().colourType = idx;
         entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
+        entity.addComponent<AnimationMap<AnimID::Bubble::Count>>() = m_animationMaps[idx];
+        entity.addComponent<xy::SpriteAnimation>().play(m_animationMaps[idx][AnimID::Bubble::Idle]);
 
         //tag bubbles so next time we know which bubbles to clear
         entity.addComponent<std::size_t>() = m_bubbleGeneration;
@@ -293,7 +299,29 @@ void GameDirector::activateLevel()
 
     auto entity = createBubble(colour, m_nodeSet.gunNode.getComponent<xy::Transform>().getOrigin() - origin);
     entity.getComponent<Bubble>().state = Bubble::State::Mounted;
+    entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[colour][AnimID::Bubble::Mounted]);
     m_nodeSet.gunNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //set matching bubbles to happy
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::Bubble;
+    cmd.action = [colour](xy::Entity e, float)
+    {
+        const auto& bubble = e.getComponent<Bubble>();
+        if (bubble.state == Bubble::State::Suspended)
+        {
+            const auto& animMap = e.getComponent<AnimationMap<AnimID::Bubble::Count>>();
+            if (bubble.colourType == colour)
+            {
+                e.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Happy]);
+            }
+            else
+            {
+                e.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Idle]);
+            }
+        }
+    };
+    sendCommand(cmd);
 
     //check game rule if gun mount should be moving
     m_nodeSet.gunNode.getComponent<xy::Transform>().setPosition(Const::GunPosition);
@@ -334,6 +362,8 @@ void GameDirector::queueBubble()
     entity.getComponent<Bubble>().colourType = id;
     entity.addComponent<xy::CommandTarget>().ID = CommandID::Bubble;
     entity.addComponent<std::size_t>() = m_bubbleGeneration;
+    entity.addComponent<AnimationMap<AnimID::Bubble::Count>>() = m_animationMaps[id];
+    entity.addComponent<xy::SpriteAnimation>().play(m_animationMaps[id][AnimID::Bubble::Queued]);
 
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

@@ -76,6 +76,8 @@ private:
     std::vector<std::int32_t> fetchCluster(xy::Entity, bool matchAll = false); //returns true if bubbles were removed
     void testFloating();
     std::vector<std::int32_t> getNeighbours(std::int32_t) const;
+    void removeBubble(std::int32_t);
+
     void onEntityAdded(xy::Entity) override;
     void onEntityRemoved(xy::Entity) override;
 };

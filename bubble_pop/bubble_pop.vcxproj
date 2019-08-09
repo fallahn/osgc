@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Animations.hpp" />
     <ClInclude Include="include\BubbleSystem.hpp" />
     <ClInclude Include="include\CommandID.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />

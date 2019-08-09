@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include "ResourceIDs.hpp"
 #include "LevelData.hpp"
+#include "Animations.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/Director.hpp>
@@ -33,7 +34,7 @@ struct NodeSet;
 class GameDirector final : public xy::Director
 {
 public:
-    GameDirector(NodeSet&, const std::array<xy::Sprite, BubbleID::Count>&);
+    GameDirector(NodeSet&, const std::array<xy::Sprite, BubbleID::Count>&, const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>&);
 
     void handleMessage(const xy::Message&) override;
     void process(float) override;
@@ -44,6 +45,7 @@ public:
 private:
     NodeSet& m_nodeSet;
     const std::array<xy::Sprite, BubbleID::Count>& m_sprites;
+    const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& m_animationMaps;
 
     std::vector<LevelData> m_levels;
     std::size_t m_currentLevel;

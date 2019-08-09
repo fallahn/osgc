@@ -20,12 +20,16 @@ Copyright 2019 Matt Marchant
 #include "NodeSet.hpp"
 #include "GameConsts.hpp"
 #include "MessageIDs.hpp"
+#include "Animations.hpp"
+#include "CommandID.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 
 #include <xyginext/util/Vector.hpp>
+#include <xyginext/util/Random.hpp>
 
 #ifdef XY_DEBUG
 #include <xyginext/gui/Gui.hpp>
@@ -195,6 +199,31 @@ void BubbleSystem::process(float dt)
                 m_nodeSet.gunNode.getComponent<xy::Transform>().addChild(tx);
                 tx.setPosition(m_nodeSet.gunNode.getComponent<xy::Transform>().getOrigin());
                 bubble.state = Bubble::State::Mounted;
+
+                const auto& animMap = entity.getComponent<AnimationMap<AnimID::Bubble::Count>>();
+                entity.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Mounted]);
+
+                //find other bubbles the same colour and give them a smiley face
+                auto colour = bubble.colourType;
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::Bubble;
+                cmd.action = [colour](xy::Entity e, float)
+                {
+                    const auto& bubble = e.getComponent<Bubble>();
+                    if (bubble.state == Bubble::State::Suspended)
+                    {
+                        const auto& animMap = e.getComponent<AnimationMap<AnimID::Bubble::Count>>();
+                        if (bubble.colourType == colour)
+                        {
+                            e.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Happy]);
+                        }
+                        else
+                        {
+                            e.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Idle]);
+                        }
+                    }
+                };
+                getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
         }
             break;
@@ -207,6 +236,25 @@ void BubbleSystem::process(float dt)
         }
             break;
         case Bubble::State::Suspended:
+            //occasional wink, reset to idle if anim stopped
+        {
+            const auto& animMap = entity.getComponent<AnimationMap<AnimID::Bubble::Count>>();
+            auto& anim = entity.getComponent<xy::SpriteAnimation>();
+            auto currID = anim.getAnimationIndex();
+            if (currID == animMap[AnimID::Bubble::Idle])
+            {
+                if (xy::Util::Random::value(0, 2000) == 0)
+                {
+                    anim.play(animMap[AnimID::Bubble::Wink]);
+                }
+                else if (currID == animMap[AnimID::Bubble::Wink]
+                    && entity.getComponent<xy::SpriteAnimation>().stopped())
+                {
+                    anim.play(animMap[AnimID::Bubble::Idle]);
+                }
+            }
+        }
+
             //check for colour match
             if (bubble.testCluster)
             {
@@ -224,14 +272,12 @@ void BubbleSystem::process(float dt)
                     //kill any bubbles if cluster >= 3
                     for (auto n : cluster)
                     {
-                        //TODO play death animation
-                        m_grid[n].getComponent<Bubble>().state = Bubble::State::Dying;
-                        m_grid[n] = {};
-
-                        auto* msg = postMessage<BubbleEvent>(MessageID::BubbleMessage);
-                        msg->type = BubbleEvent::Removed;
-                        msg->position = xy::DefaultSceneSize / 2.f;
+                        removeBubble(n);
                     }
+
+                    auto* msg = postMessage<BubbleEvent>(MessageID::BubbleMessage);
+                    msg->type = BubbleEvent::Removed;
+                    msg->position = xy::DefaultSceneSize / 2.f;
 
                     testFloating();
                     updateActiveColours();
@@ -252,12 +298,10 @@ void BubbleSystem::process(float dt)
         case Bubble::State::Dying:
             //these should already be removed from grid
             //data, so just destroy ent when anim is finished
-
-            /*if (entity.getComponent<xy::SpriteAnimation>().stopped())
+            if (entity.getComponent<xy::SpriteAnimation>().stopped())
             {
                 getScene()->destroyEntity(entity);
-            }*/
-            getScene()->destroyEntity(entity);
+            }
             break;
         }
     }
@@ -363,6 +407,10 @@ void BubbleSystem::doCollision(xy::Entity entity)
         entity.getComponent<Bubble>().state = Bubble::State::Suspended;
         entity.getComponent<Bubble>().gridIndex = gridIndex;
         entity.getComponent<Bubble>().testCluster = true; //we want to test for colour match next pass.
+
+        const auto& animMap = entity.getComponent<AnimationMap<AnimID::Bubble::Count>>();
+        entity.getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Idle]);
+
         m_grid[gridIndex] = entity;
     };
     
@@ -467,8 +515,7 @@ void BubbleSystem::testFloating()
     {
         for (auto b : c)
         {
-            m_grid[b].getComponent<Bubble>().state = Bubble::State::Dying;
-            m_grid[b] = {};
+            removeBubble(b);
         }
     }
 }
@@ -520,6 +567,14 @@ std::vector<std::int32_t> BubbleSystem::getNeighbours(std::int32_t gridIndex) co
     }
 
     return gridIndices;
+}
+
+void BubbleSystem::removeBubble(std::int32_t idx)
+{
+    const auto& animMap = m_grid[idx].getComponent<AnimationMap<AnimID::Bubble::Count>>();
+    m_grid[idx].getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Burst]);
+    m_grid[idx].getComponent<Bubble>().state = Bubble::State::Dying;
+    m_grid[idx] = {};
 }
 
 void BubbleSystem::onEntityAdded(xy::Entity entity)

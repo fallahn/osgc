@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "LevelData.hpp"
 #include "PlayerInput.hpp"
 #include "NodeSet.hpp"
+#include "Animations.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -54,7 +55,8 @@ private:
     std::array<xy::Sprite, SpriteID::Count> m_sprites;
     std::array<std::size_t, TextureID::Count> m_textures;
 
-    
+    std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count> m_animationMaps;
+
     NodeSet m_nodeSet;
     PlayerInput m_playerInput;
 

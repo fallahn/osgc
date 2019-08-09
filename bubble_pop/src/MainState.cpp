@@ -127,7 +127,7 @@ void MainState::initScene()
     m_scene.addSystem<xy::RenderSystem>(mb);
     m_scene.addSystem<xy::AudioSystem>(mb);
 
-    m_scene.addDirector<GameDirector>(m_nodeSet, m_bubbleSprites).loadLevelData();
+    m_scene.addDirector<GameDirector>(m_nodeSet, m_bubbleSprites, m_animationMaps).loadLevelData();
     m_scene.addDirector<SFXDirector>();
 }
 
@@ -137,27 +137,100 @@ void MainState::loadResources()
 
     spriteSheet.loadFromFile("assets/sprites/red.spt", m_resources);
     m_bubbleSprites[BubbleID::Red] = spriteSheet.getSprite("ball");
+    auto* animMap = m_animationMaps[BubbleID::Red].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/green.spt", m_resources);
     m_bubbleSprites[BubbleID::Green] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Green].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
+
 
     spriteSheet.loadFromFile("assets/sprites/blue.spt", m_resources);
     m_bubbleSprites[BubbleID::Blue] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Blue].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/cyan.spt", m_resources);
     m_bubbleSprites[BubbleID::Cyan] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Cyan].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/magenta.spt", m_resources);
     m_bubbleSprites[BubbleID::Magenta] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Magenta].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/yellow.spt", m_resources);
     m_bubbleSprites[BubbleID::Yellow] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Yellow].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/orange.spt", m_resources);
     m_bubbleSprites[BubbleID::Orange] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Orange].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/grey.spt", m_resources);
     m_bubbleSprites[BubbleID::Grey] = spriteSheet.getSprite("ball");
+    animMap = m_animationMaps[BubbleID::Grey].data();
+    animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
+    animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
+    animMap[AnimID::Bubble::Happy] = spriteSheet.getAnimationIndex("happy", "ball");
+    animMap[AnimID::Bubble::Idle] = spriteSheet.getAnimationIndex("idle", "ball");
+    animMap[AnimID::Bubble::Mounted] = spriteSheet.getAnimationIndex("mounted", "ball");
+    animMap[AnimID::Bubble::Queued] = spriteSheet.getAnimationIndex("queued", "ball");
+    animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
+    animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/misc.spt", m_resources);
     m_sprites[SpriteID::GameOver] = spriteSheet.getSprite("game_over");
