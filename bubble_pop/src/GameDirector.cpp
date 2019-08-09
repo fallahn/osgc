@@ -29,17 +29,22 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/BitmapText.hpp>
 
 #include <xyginext/ecs/Scene.hpp>
 
 #include <xyginext/util/Random.hpp>
+
+#include <sstream>
 
 GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites, const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& animations)
     : m_nodeSet         (ns),
     m_sprites           (sprites),
     m_animationMaps     (animations),
     m_currentLevel      (0),
-    m_bubbleGeneration  (0)
+    m_bubbleGeneration  (0),
+    m_score             (0),
+    m_previousScore     (0)
 {
 
 }
@@ -87,9 +92,18 @@ void GameDirector::handleMessage(const xy::Message& msg)
         switch (data.type)
         {
         default: break;
-        case GameEvent::RoundCleared:
         case GameEvent::RoundFailed:
+
+        case GameEvent::RoundCleared:
             loadNextLevel(data.generation);
+            break;
+        case GameEvent::NewGame:
+            m_score = 0;
+            m_previousScore = 0;
+            updateScoreDisplay();
+            break;
+        case GameEvent::Scored:
+            m_score += data.generation;
             break;
         }
     }
@@ -98,14 +112,20 @@ void GameDirector::handleMessage(const xy::Message& msg)
 void GameDirector::process(float)
 {
     //track round time and lower bar
-    //TODO fix the wrap around of this index
-    if (m_roundTimer.getElapsedTime() > m_levels[m_currentLevel - 1].interval)
+    if (m_roundTimer.getElapsedTime() > m_levels[(m_currentLevel - 1) % m_levels.size()].interval)
     {
         m_roundTimer.restart();
 
         m_nodeSet.barNode.getComponent<xy::Transform>().move(0.f, Const::RowHeight);
 
-        //TODO raise message
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::BarMoved;
+    }
+
+    if (m_score != m_previousScore)
+    {
+        updateScoreDisplay();
+        m_previousScore = m_score;
     }
 }
 
@@ -333,6 +353,21 @@ void GameDirector::activateLevel()
 
     m_currentLevel = (m_currentLevel + 1) % m_levels.size();
     m_roundTimer.restart();
+
+    auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+    msg->type = GameEvent::RoundBegin;
+    msg->generation = m_bubbleGeneration;
+}
+
+void GameDirector::reset()
+{
+    m_currentLevel = 0;
+    m_roundTimer.restart();
+    m_scoreTimer.restart();
+    loadNextLevel(m_bubbleGeneration);
+
+    auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+    msg->type = GameEvent::NewGame;
 }
 
 //private
@@ -401,5 +436,29 @@ void GameDirector::loadNextLevel(std::size_t generation)
 
         m_nodeSet.barNode.getComponent<xy::Transform>().setPosition(Const::BarPosition);
         activateLevel();
+
+        auto roundTime = m_scoreTimer.restart();
+        auto bonus = std::max(0, 30000 - roundTime.asMilliseconds());
+        bonus *= (5 + (m_currentLevel / 2));
+        bonus /= 1000;
+
+        auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+        msg->type = GameEvent::Scored;
+        msg->generation = bonus;
     }
+}
+
+void GameDirector::updateScoreDisplay()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::ScoreString;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        std::stringstream ss;
+        ss << std::setw(9) << std::setfill('0');
+        ss << m_score;
+
+        e.getComponent<xy::BitmapText>().setString(ss.str());
+    };
+    sendCommand(cmd);
 }

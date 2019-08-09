@@ -69,7 +69,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     xy::App::setMouseCursorVisible(false);
-    //xy::App::getRenderWindow()->setMouseCursorGrabbed(true);
+    xy::App::getRenderWindow()->setMouseCursorGrabbed(true);
 
     quitLoadingScreen();
 }
@@ -321,4 +321,20 @@ void MainState::buildArena()
     m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());   
 
     m_scene.getDirector<GameDirector>().activateLevel();
+
+    auto fontID = m_resources.load<xy::BitmapFont>("assets/images/bmp_font.png");
+    auto& font = m_resources.get<xy::BitmapFont>(fontID);
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(10.f, 10.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::BitmapText>(font).setString("SCORE");
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(10.f, 26.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::BitmapText>(font).setString("000000000");
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreString;
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }

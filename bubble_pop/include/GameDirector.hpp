@@ -42,6 +42,8 @@ public:
     void loadLevelData();
     void activateLevel();
 
+    void reset();
+
 private:
     NodeSet& m_nodeSet;
     const std::array<xy::Sprite, BubbleID::Count>& m_sprites;
@@ -53,9 +55,14 @@ private:
     std::vector<std::int32_t> m_queue;
 
     sf::Clock m_roundTimer;
+    sf::Clock m_scoreTimer;
+
+    std::size_t m_score;
+    std::size_t m_previousScore;
 
     void queueBubble();
     void mountBubble();
 
     void loadNextLevel(std::size_t);
+    void updateScoreDisplay();
 };

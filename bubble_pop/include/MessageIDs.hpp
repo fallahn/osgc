@@ -46,7 +46,11 @@ struct GameEvent final
     enum
     {
         RoundCleared,
-        RoundFailed
+        RoundFailed,
+        RoundBegin,
+        BarMoved,
+        Scored,
+        NewGame
     }type = RoundCleared;
-    std::size_t generation = 0;
+    std::size_t generation = 0; //also contains score
 };

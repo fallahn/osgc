@@ -575,6 +575,10 @@ void BubbleSystem::removeBubble(std::int32_t idx)
     m_grid[idx].getComponent<xy::SpriteAnimation>().play(animMap[AnimID::Bubble::Burst]);
     m_grid[idx].getComponent<Bubble>().state = Bubble::State::Dying;
     m_grid[idx] = {};
+
+    auto* msg = postMessage<GameEvent>(MessageID::GameMessage);
+    msg->type = GameEvent::Scored;
+    msg->generation = 20;
 }
 
 void BubbleSystem::onEntityAdded(xy::Entity entity)

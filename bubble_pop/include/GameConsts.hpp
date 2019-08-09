@@ -39,7 +39,7 @@ namespace Const
     static const float LeftBounds = 127.f + (BubbleSize.x / 2.f);
     static const float RightBounds = 534.f - (BubbleSize.x / 2.f);
 
-    static const float MaxBubbleHeight = 346.f - (BubbleSize.y / 2.f);
+    static const float MaxBubbleHeight = 346.f;
 }
 
 static inline sf::Vector2f tileToWorldCoord(std::size_t index)

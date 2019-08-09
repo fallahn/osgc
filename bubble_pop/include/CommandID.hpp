@@ -23,6 +23,7 @@ namespace CommandID
     enum
     {
         TopBar = 0x01,
-        Bubble = 0x02
+        Bubble = 0x02,
+        ScoreString = 0x04
     };
 }

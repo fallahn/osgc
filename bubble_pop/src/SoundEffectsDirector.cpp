@@ -84,7 +84,10 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case BubbleEvent::Removed:
-            playSound(AudioID::BubblePop, data.position).setPitch(xy::Util::Random::value(0.9f, 2.1f));
+            playSound(AudioID::BubblePop, data.position).setPitch(xy::Util::Random::value(0.9f, 1.5f));
+            break;
+        case BubbleEvent::Fired:
+            playSound(AudioID::Shoot, data.position);
             break;
         }
     }
@@ -94,6 +97,15 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         switch (data.type)
         {
         default: break;
+        case GameEvent::RoundFailed:
+            playSound(AudioID::QuitGame, xy::DefaultSceneSize / 2.f);
+            break;
+        case GameEvent::RoundBegin:
+            playSound(AudioID::StartGame, xy::DefaultSceneSize / 2.f);
+            break;
+        case GameEvent::BarMoved:
+            playSound(AudioID::NewLine, xy::DefaultSceneSize / 2.f);
+            break;
         }
     }
 }
