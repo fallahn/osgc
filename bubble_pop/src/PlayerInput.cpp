@@ -31,12 +31,13 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float MinAngle = -160.f;
-    const float MaxAngle = -20.f;
+    const float MinAngle = 200.f;
+    const float MaxAngle = 340.f;
 }
 
 PlayerInput::PlayerInput(const NodeSet& ns)
-    : m_nodeSet(ns)
+    : m_nodeSet(ns),
+    m_lastMousePos(sf::Mouse::getPosition().x)
 {
 
 }
@@ -44,37 +45,53 @@ PlayerInput::PlayerInput(const NodeSet& ns)
 //public
 void PlayerInput::handleEvent(const sf::Event& evt)
 {
-    if (evt.type == sf::Event::MouseButtonReleased
-        && evt.mouseButton.button == sf::Mouse::Left)
+    auto shoot = [&]()
     {
         //raise shoot message
-        float rotation = xy::Util::Vector::rotation(getVelocityVector());
-        rotation = xy::Util::Math::clamp(rotation, MinAngle, MaxAngle);
+        float rotation = m_playerEntity.getComponent<xy::Transform>().getRotation();
 
         auto* msg = xy::App::getActiveInstance()->getMessageBus().post<BubbleEvent>(MessageID::BubbleMessage);
         msg->type = BubbleEvent::Fired;
         msg->velocity = xy::Util::Vector::rotate({ 1.f, 0.f }, rotation);
+    };
+
+    if (evt.type == sf::Event::MouseButtonReleased
+        && evt.mouseButton.button == sf::Mouse::Left)
+    {
+        shoot();
+    }
+    else if (evt.type == sf::Event::MouseMoved)
+    {
+        auto pos = evt.mouseMove.x;
+        auto delta = pos - m_lastMousePos;
+        m_lastMousePos = pos;
+        rotatePlayer(float(delta));
+    }
+    else if (evt.type == sf::Event::KeyPressed
+        && evt.key.code == sf::Keyboard::Space)
+    {
+        shoot();
     }
 }
 
 void PlayerInput::update(float)
 {
-    float rotation = xy::Util::Vector::rotation(getVelocityVector());
-    rotation = xy::Util::Math::clamp(rotation, MinAngle, MaxAngle);
+    const float rotationAmount = 1.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    {
+        rotatePlayer(-rotationAmount);
+    }
 
-    m_playerEntity.getComponent<xy::Transform>().setRotation(rotation);
-
-    //DPRINT("Rotation", std::to_string(rotation));
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    {
+        rotatePlayer(rotationAmount);
+    }
 }
 
 //private
-sf::Vector2f PlayerInput::getVelocityVector()
+void PlayerInput::rotatePlayer(float amount)
 {
-    auto& rw = *xy::App::getRenderWindow();
-    auto mousePos = rw.mapPixelToCoords(sf::Mouse::getPosition(rw));
-
-    auto& tx = m_playerEntity.getComponent<xy::Transform>();
-    auto dir = mousePos - m_nodeSet.rootNode.getComponent<xy::Transform>().getTransform().transformPoint(Const::GunPosition);
-
-    return dir;
+    auto rotation = m_playerEntity.getComponent<xy::Transform>().getRotation();
+    rotation = xy::Util::Math::clamp(rotation + amount, MinAngle, MaxAngle);
+    m_playerEntity.getComponent<xy::Transform>().setRotation(rotation);
 }

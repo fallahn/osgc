@@ -41,7 +41,10 @@ private:
 
     const NodeSet& m_nodeSet;
 
+    std::int32_t m_lastMousePos;
+
     xy::Entity m_playerEntity;
 
-    sf::Vector2f getVelocityVector();
+    //sf::Vector2f getVelocityVector();
+    void rotatePlayer(float delta);
 };

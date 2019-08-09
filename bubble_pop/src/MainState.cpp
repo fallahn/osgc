@@ -69,7 +69,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     xy::App::setMouseCursorVisible(false);
-    xy::App::getRenderWindow()->setMouseCursorGrabbed(true);
+    //xy::App::getRenderWindow()->setMouseCursorGrabbed(true);
 
     quitLoadingScreen();
 }
@@ -227,6 +227,7 @@ void MainState::buildArena()
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(m_nodeSet.gunNode.getComponent<xy::Transform>().getOrigin());
+    entity.getComponent<xy::Transform>().setRotation(270.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textures[TextureID::RayGun]));
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
