@@ -54,8 +54,9 @@ namespace
     const std::size_t MaxLevels = 100;
 }
 
-MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
+MainState::MainState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State     (ss, ctx),
+    m_sharedData    (sd),
     m_scene         (ctx.appInstance.getMessageBus(), 1024u),
     m_playerInput   (m_nodeSet)
 {
@@ -127,7 +128,7 @@ void MainState::initScene()
     m_scene.addSystem<xy::RenderSystem>(mb);
     m_scene.addSystem<xy::AudioSystem>(mb);
 
-    m_scene.addDirector<GameDirector>(m_nodeSet, m_bubbleSprites, m_animationMaps).loadLevelData();
+    m_scene.addDirector<GameDirector>(m_nodeSet, m_sprites, m_animationMaps, m_sharedData).loadLevelData();
     m_scene.addDirector<SFXDirector>();
 }
 
@@ -136,7 +137,7 @@ void MainState::loadResources()
     xy::SpriteSheet spriteSheet;
 
     spriteSheet.loadFromFile("assets/sprites/red.spt", m_resources);
-    m_bubbleSprites[BubbleID::Red] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Red] = spriteSheet.getSprite("ball");
     auto* animMap = m_animationMaps[BubbleID::Red].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -148,7 +149,7 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/green.spt", m_resources);
-    m_bubbleSprites[BubbleID::Green] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Green] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Green].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -161,7 +162,7 @@ void MainState::loadResources()
 
 
     spriteSheet.loadFromFile("assets/sprites/blue.spt", m_resources);
-    m_bubbleSprites[BubbleID::Blue] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Blue] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Blue].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -173,7 +174,7 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/cyan.spt", m_resources);
-    m_bubbleSprites[BubbleID::Cyan] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Cyan] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Cyan].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -185,7 +186,7 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/magenta.spt", m_resources);
-    m_bubbleSprites[BubbleID::Magenta] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Magenta] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Magenta].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -197,7 +198,7 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/yellow.spt", m_resources);
-    m_bubbleSprites[BubbleID::Yellow] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Yellow] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Yellow].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -209,7 +210,7 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/orange.spt", m_resources);
-    m_bubbleSprites[BubbleID::Orange] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Orange] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Orange].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -221,7 +222,7 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
     spriteSheet.loadFromFile("assets/sprites/grey.spt", m_resources);
-    m_bubbleSprites[BubbleID::Grey] = spriteSheet.getSprite("ball");
+    m_sprites[BubbleID::Grey] = spriteSheet.getSprite("ball");
     animMap = m_animationMaps[BubbleID::Grey].data();
     animMap[AnimID::Bubble::Burst] = spriteSheet.getAnimationIndex("burst", "ball");
     animMap[AnimID::Bubble::Grin] = spriteSheet.getAnimationIndex("grin", "ball");
@@ -232,11 +233,6 @@ void MainState::loadResources()
     animMap[AnimID::Bubble::Shoot] = spriteSheet.getAnimationIndex("shoot", "ball");
     animMap[AnimID::Bubble::Wink] = spriteSheet.getAnimationIndex("wink", "ball");
 
-    spriteSheet.loadFromFile("assets/sprites/misc.spt", m_resources);
-    m_sprites[SpriteID::GameOver] = spriteSheet.getSprite("game_over");
-    m_sprites[SpriteID::Pause] = spriteSheet.getSprite("paused");
-    m_sprites[SpriteID::Title] = spriteSheet.getSprite("title");
-    m_sprites[SpriteID::TopBar] = spriteSheet.getSprite("top_bar");
 
     m_textures[TextureID::Background] = m_resources.load<sf::Texture>("assets/images/background.png");
     m_textures[TextureID::RayGun] = m_resources.load<sf::Texture>("assets/images/shooter.png");
@@ -315,9 +311,9 @@ void MainState::buildArena()
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(m_nodeSet.barNode.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(0.f, -m_sprites[SpriteID::TopBar].getTextureRect().height);
+    entity.addComponent<xy::Transform>().setPosition(0.f, -m_sharedData.sprites[SpriteID::TopBar].getTextureRect().height);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::TopBar];
+    entity.addComponent<xy::Sprite>() = m_sharedData.sprites[SpriteID::TopBar];
     m_nodeSet.barNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());   
 
     m_scene.getDirector<GameDirector>().activateLevel();

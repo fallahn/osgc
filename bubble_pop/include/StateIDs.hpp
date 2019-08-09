@@ -32,6 +32,21 @@ namespace StateID
     enum
     {
         Main,
-        //add your new state IDs here
+        Pause,
+        GameOver,
+        Attract
     };
 }
+
+#include "ResourceIDs.hpp"
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+#include <array>
+
+struct SharedData final
+{
+    xy::ResourceHandler resources;
+    std::array<xy::Sprite, SpriteID::Count> sprites;
+
+    std::size_t score;
+};

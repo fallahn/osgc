@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "CommandID.hpp"
 #include "MessageIDs.hpp"
 #include "IniParse.hpp"
+#include "StateIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -37,10 +38,12 @@ Copyright 2019 Matt Marchant
 
 #include <sstream>
 
-GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites, const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& animations)
+GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites,
+    const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& animations, SharedData& sd)
     : m_nodeSet         (ns),
     m_sprites           (sprites),
     m_animationMaps     (animations),
+    m_sharedData        (sd),
     m_currentLevel      (0),
     m_bubbleGeneration  (0),
     m_score             (0),
@@ -93,7 +96,9 @@ void GameDirector::handleMessage(const xy::Message& msg)
         {
         default: break;
         case GameEvent::RoundFailed:
-
+            m_sharedData.score = m_score;
+            /*requestStackPush(StateID::GameOver);
+            break;*/
         case GameEvent::RoundCleared:
             loadNextLevel(data.generation);
             break;
@@ -439,7 +444,7 @@ void GameDirector::loadNextLevel(std::size_t generation)
 
         auto roundTime = m_scoreTimer.restart();
         auto bonus = std::max(0, 30000 - roundTime.asMilliseconds());
-        bonus *= (5 + (m_currentLevel / 2));
+        bonus *= (5 + (static_cast<std::int32_t>(m_currentLevel) / 2));
         bonus /= 1000;
 
         auto* msg = postMessage<GameEvent>(MessageID::GameMessage);

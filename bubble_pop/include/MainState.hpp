@@ -32,10 +32,11 @@ Copyright 2019 Matt Marchant
 
 #include <array>
 
+struct SharedData;
 class MainState final : public xy::State
 {
 public:
-    MainState(xy::StateStack&, xy::State::Context);
+    MainState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -49,10 +50,10 @@ public:
 
 private:
 
+    SharedData& m_sharedData;
     xy::Scene m_scene;
     xy::ResourceHandler m_resources;
-    std::array<xy::Sprite, BubbleID::Count> m_bubbleSprites;
-    std::array<xy::Sprite, SpriteID::Count> m_sprites;
+    std::array<xy::Sprite, BubbleID::Count> m_sprites;
     std::array<std::size_t, TextureID::Count> m_textures;
 
     std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count> m_animationMaps;

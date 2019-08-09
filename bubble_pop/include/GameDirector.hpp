@@ -31,10 +31,11 @@ Copyright 2019 Matt Marchant
 #include <array>
 
 struct NodeSet;
+struct SharedData;
 class GameDirector final : public xy::Director
 {
 public:
-    GameDirector(NodeSet&, const std::array<xy::Sprite, BubbleID::Count>&, const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>&);
+    GameDirector(NodeSet&, const std::array<xy::Sprite, BubbleID::Count>&, const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>&, SharedData&);
 
     void handleMessage(const xy::Message&) override;
     void process(float) override;
@@ -48,6 +49,7 @@ private:
     NodeSet& m_nodeSet;
     const std::array<xy::Sprite, BubbleID::Count>& m_sprites;
     const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& m_animationMaps;
+    SharedData& m_sharedData;
 
     std::vector<LevelData> m_levels;
     std::size_t m_currentLevel;

@@ -33,11 +33,23 @@ source distribution.
 #include <xyginext/core/Log.hpp>
 #include <xyginext/core/Assert.hpp>
 
+#include <xyginext/graphics/SpriteSheet.hpp>
+
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
     XY_ASSERT(ss, "State stack is nullptr");
 
-    ss->registerState<MainState>(StateID::Main);
+    *sharedData = std::make_any<SharedData>();
+    auto& sd = std::any_cast<SharedData&>(*sharedData);
+
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/misc.spt", sd.resources);
+    sd.sprites[SpriteID::GameOver] = spriteSheet.getSprite("game_over");
+    sd.sprites[SpriteID::Pause] = spriteSheet.getSprite("paused");
+    sd.sprites[SpriteID::Title] = spriteSheet.getSprite("title");
+    sd.sprites[SpriteID::TopBar] = spriteSheet.getSprite("top_bar");
+
+    ss->registerState<MainState>(StateID::Main, sd);
 
     return StateID::Main;
 }
