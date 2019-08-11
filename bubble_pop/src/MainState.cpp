@@ -49,6 +49,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/core/FileSystem.hpp>
 
+#include <SFML/Window/Event.hpp>
+
 namespace
 {
     const std::size_t MaxLevels = 100;
@@ -333,4 +335,5 @@ void MainState::buildArena()
     entity.addComponent<xy::BitmapText>(font).setString("000000000");
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreString;
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
 }

@@ -33,6 +33,8 @@ namespace
 {
     const float MinAngle = 200.f;
     const float MaxAngle = 340.f;
+
+    float mouseSpeed = 0.8f;
 }
 
 PlayerInput::PlayerInput(const NodeSet& ns)
@@ -65,7 +67,7 @@ void PlayerInput::handleEvent(const sf::Event& evt)
         auto pos = evt.mouseMove.x;
         auto delta = pos - m_lastMousePos;
         m_lastMousePos = pos;
-        rotatePlayer(float(delta));
+        rotatePlayer(float(delta) * mouseSpeed);
     }
     else if (evt.type == sf::Event::KeyPressed
         && evt.key.code == sf::Keyboard::Space)

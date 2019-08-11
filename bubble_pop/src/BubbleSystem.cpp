@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/util/Math.hpp>
 
 #ifdef XY_DEBUG
 #include <xyginext/gui/Gui.hpp>
@@ -40,6 +41,8 @@ namespace
     //remember the input to this needs to be relative to the top bar node position
     std::int32_t getGridIndex(sf::Vector2f position)
     {
+        position.x = xy::Util::Math::clamp(position.x, 0.f, Const::BubbleSize.x * 8.5f);
+
         std::int32_t yPos = static_cast<std::int32_t>(std::floor(position.y / Const::RowHeight));
 
         //check which row we're on and offset x pos back to square grid
@@ -363,12 +366,25 @@ void BubbleSystem::doCollision(xy::Entity entity)
     {
         const auto& bubble = entity.getComponent<Bubble>();
 
-        relPos += (bubble.velocity * -(Const::BubbleSize.x / 2.f));
-        gridIndex = getGridIndex(relPos);
+        /*relPos += (bubble.velocity * -(Const::BubbleSize.x / 2.f));
+        gridIndex = getGridIndex(relPos);*/
+
+        auto neighbours = getNeighbours(gridIndex);
+        for (auto n : neighbours)
+        {
+            if (!m_grid[n].isValid())
+            {
+                gridIndex = n;
+                relPos = tileToWorldCoord(gridIndex);
+            }
+        }
 
         if (m_grid[gridIndex].isValid())
         {
             xy::Logger::log("Still in occupied space!", xy::Logger::Type::Warning);
+            
+            //we're desperate here...
+            removeBubble(gridIndex);
         }
 
         collides = true;
@@ -376,7 +392,6 @@ void BubbleSystem::doCollision(xy::Entity entity)
 
     if (!collides) //check surrounding
     {
-        //calc if even or odd row (affects which cells to test)
         std::vector<std::int32_t> gridIndices = getNeighbours(gridIndex);        
 
         //test surrounding cells, if we collide change state and snap to grid pos
@@ -556,7 +571,7 @@ std::vector<std::int32_t> BubbleSystem::getNeighbours(std::int32_t gridIndex) co
 
     //don't add immediate neighbours of they are on the next row
     auto rowPos = gridIndex % Const::BubblesPerRow;
-    if (rowPos != Const::BubblesPerRow)
+    if (rowPos != 0)
     {
         gridIndices.push_back(gridIndex - 1);
     }

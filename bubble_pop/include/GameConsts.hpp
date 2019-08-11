@@ -21,11 +21,12 @@ Copyright 2019 Matt Marchant
 #include <SFML/System/Vector2.hpp>
 
 #include <cstdint>
+#include <cmath>
 
 namespace Const
 {
     static const sf::Vector2f BubbleSize(47.f, 47.f);
-    static const float BubbleDistSqr = BubbleSize.x * BubbleSize.x;
+    static const float BubbleDistSqr = std::pow(BubbleSize.x * 0.84f, 2.f);
 
     static const sf::Vector2f GunPosition(328.f, 445.f);
     static const sf::Vector2f BarPosition(128.f, 8.f);
@@ -39,7 +40,7 @@ namespace Const
     static const float LeftBounds = 127.f + (BubbleSize.x / 2.f);
     static const float RightBounds = 534.f - (BubbleSize.x / 2.f);
 
-    static const float MaxBubbleHeight = 346.f;
+    static const float MaxBubbleHeight = 370.f;
 }
 
 static inline sf::Vector2f tileToWorldCoord(std::size_t index)

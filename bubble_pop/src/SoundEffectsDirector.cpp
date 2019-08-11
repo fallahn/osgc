@@ -87,7 +87,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             playSound(AudioID::BubblePop, data.position).setPitch(xy::Util::Random::value(0.9f, 1.5f));
             break;
         case BubbleEvent::Fired:
-            playSound(AudioID::Shoot, data.position);
+            playSound(AudioID::Shoot, xy::DefaultSceneSize / 2.f);
             break;
         }
     }
