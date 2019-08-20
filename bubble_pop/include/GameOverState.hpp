@@ -42,5 +42,7 @@ private:
     SharedData& m_sharedData;
     xy::ResourceHandler m_resources;
 
+    std::string m_playerName;
+
     void build();
 };

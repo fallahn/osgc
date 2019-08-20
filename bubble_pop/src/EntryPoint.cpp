@@ -31,6 +31,7 @@ source distribution.
 #include "PauseState.hpp"
 #include "AttractState.hpp"
 #include "GameOverState.hpp"
+#include "IniParse.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -59,6 +60,31 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<PauseState>(StateID::Pause, sd);
     ss->registerState<AttractState>(StateID::Attract, sd);
     ss->registerState<GameOverState>(StateID::GameOver, sd);
+
+    IniParse ini;
+    const std::string section("scores");
+    if (ini.parse(xy::FileSystem::getConfigDirectory(xy::App::getActiveInstance()->getApplicationName()) + "scores.ini"))
+    {
+        auto& data = ini.getData();
+        if (data.count(section) != 0)
+        {
+            std::size_t i = 0;
+            for (const auto& [name, value] : data[section])
+            {
+                sd.highScores[i++] = std::make_pair(name, ini.getValueInt(section, name));
+                if (i == sd.highScores.size())
+                {
+                    break;
+                }
+            }
+        }
+
+        std::sort(sd.highScores.begin(), sd.highScores.end(),
+            [](const std::pair<std::string, std::int32_t>& a, const std::pair<std::string, std::int32_t>& b)
+            {
+                return a.second > b.second;
+            });
+    }
 
     return StateID::Main;
 }

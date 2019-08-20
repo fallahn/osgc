@@ -49,5 +49,6 @@ struct SharedData final
     std::array<xy::Sprite, SpriteID::Count> sprites;
     std::size_t fontID = 0;
 
-    std::size_t score;
+    std::size_t score = 0;
+    std::array<std::pair<std::string, std::int32_t>, 10u> highScores = {};
 };

@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "GameOverState.hpp"
+#include "IniParse.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BitmapText.hpp>
@@ -30,6 +31,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/graphics/BitmapFont.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Clock.hpp>
@@ -38,6 +40,15 @@ namespace
 {
     sf::Clock delayClock;
     const sf::Time delayTime = sf::seconds(1.f);
+
+    const std::vector<std::string> names =
+    {
+        "Barry Lotter",
+        "Eddy Whirlpool",
+        "Buns McFarlane",
+        "Enty Hannah",
+        "Jeff Grapes"
+    };
 }
 
 GameOverState::GameOverState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -69,13 +80,39 @@ bool GameOverState::handleEvent(const sf::Event& evt)
             {
             default: break;
             case sf::Keyboard::Return:
+
+                if (m_playerName.empty())
+                {
+                    m_playerName = names[xy::Util::Random::value(0, names.size() - 1)];
+                }
+
+                if (m_sharedData.score > m_sharedData.highScores.back().second)
+                {
+                    std::int32_t i = m_sharedData.highScores.size() - 1;
+                    while (i > 0 && m_sharedData.highScores[i - 1].second < m_sharedData.score)
+                    {
+                        m_sharedData.highScores[i] = m_sharedData.highScores[i - 1];
+                        i--;
+                    }
+                    m_sharedData.highScores[i] = std::make_pair(m_playerName, static_cast<std::int32_t>(m_sharedData.score));
+
+                    //write score file
+                    IniParse ini;
+                    for (const auto& [name, score] : m_sharedData.highScores)
+                    {
+                        ini.setValue("scores", name, score);
+                    }
+
+                    ini.write(xy::FileSystem::getConfigDirectory(xy::App::getActiveInstance()->getApplicationName()) + "scores.ini");
+                }
+
                 requestStackPop();
                 break;
             }
         }
         else if (evt.type == sf::Event::TextEntered)
         {
-            //TODO enter name into high score
+            //TODO enter name into high score string
         }
     }
 

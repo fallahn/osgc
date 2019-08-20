@@ -63,7 +63,8 @@ bool AttractState::handleEvent(const sf::Event& evt)
     //slight delay before accepting input
     if (delayClock.getElapsedTime() > delayTime)
     {
-        if (evt.type == sf::Event::KeyReleased)
+        if (evt.type == sf::Event::KeyReleased
+            || evt.type == sf::Event::MouseButtonReleased)
         {
             requestStackPop();
         }

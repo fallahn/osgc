@@ -34,6 +34,7 @@ source distribution.
 #include <string>
 #include <regex>
 #include <fstream>
+#include <type_traits>
 
 using IniData = std::unordered_map<std::string, std::unordered_map<std::string, std::string>>;
 
@@ -55,7 +56,7 @@ public:
     /*!
     \brief Construct and IniParse object and parse the given file if it is available
     */
-    explicit IniParse(const std::string path) 
+    explicit IniParse(const std::string& path) 
         : m_sectionTest("\\[(.*?)\\]")
     {
         parse(path);
@@ -64,7 +65,7 @@ public:
     /*!
     \brief Clears existing data and attempts to parse the given file
     */
-    bool parse(const std::string path)
+    bool parse(const std::string& path)
     {
         clear();
 
@@ -109,7 +110,28 @@ public:
         return false;
     }
 
-    std::string getValueString(const std::string& section, const std::string name)
+    bool write(const std::string& path)
+    {
+        std::ofstream file(path);
+        if (file.is_open() && file.good())
+        {
+            for (const auto& section : m_data)
+            {
+                file << "\n[" << section.first << "]\n";
+                for (const auto& [name, value] : section.second)
+                {
+                    file << name << "=" << value << "\n";
+                }
+            }
+
+            file.close();
+            return true;
+        }
+        xy::Logger::log("Failed writing " + path, xy::Logger::Type::Error);
+        return false;
+    }
+
+    std::string getValueString(const std::string& section, const std::string& name)
     {
         if (m_data.count(section) != 0
             && m_data[section].count(name) != 0)
@@ -119,7 +141,7 @@ public:
         return {};
     }
 
-    std::int32_t getValueInt(const std::string& section, const std::string name, std::int32_t def = 0)
+    std::int32_t getValueInt(const std::string& section, const std::string& name, std::int32_t def = 0)
     {
         if (m_data.count(section) != 0
             && m_data[section].count(name) != 0)
@@ -137,7 +159,7 @@ public:
         return def;
     }
 
-    float getValueFloat(const std::string& section, const std::string name, float def = 0.f)
+    float getValueFloat(const std::string& section, const std::string& name, float def = 0.f)
     {
         if (m_data.count(section) != 0
             && m_data[section].count(name) != 0)
@@ -155,7 +177,7 @@ public:
         return def;
     }
 
-    bool getValueBool(const std::string& section, const std::string name, bool def = false)
+    bool getValueBool(const std::string& section, const std::string& name, bool def = false)
     {
         if (m_data.count(section) != 0
             && m_data[section].count(name) != 0)
@@ -165,7 +187,30 @@ public:
         return def;
     }
 
+    void setValue(const std::string& section, const std::string& name, const std::string& value)
+    {
+        m_data[section][name] = value;
+    }
+
+    void setValue(const std::string& section, const std::string& name, std::int32_t value)
+    {
+        m_data[section][name] = std::to_string(value);
+    }
+
+    void setValue(const std::string& section, const std::string& name, float value)
+    {
+        m_data[section][name] = std::to_string(value);
+    }
+
+    template<typename Y, typename T = std::enable_if_t<std::is_same<Y, bool>{}>>
+    void setValue(const std::string& section, const std::string& name, Y value)
+    {
+        m_data[section][name] = value ? "true" : "false";
+    }
+
     const IniData& getData() const { return m_data; }
+
+    IniData& getData() { return m_data; }
 
     void clear()
     {

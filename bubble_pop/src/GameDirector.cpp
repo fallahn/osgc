@@ -35,6 +35,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 
 #include <xyginext/util/Random.hpp>
+#include <xyginext/util/String.hpp>
 
 #include <sstream>
 
