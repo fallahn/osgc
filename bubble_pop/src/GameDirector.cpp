@@ -356,6 +356,43 @@ void GameDirector::activateLevel()
     m_queue = queue;
     queueBubble();
 
+    //update title text
+    auto ld = m_levels[m_currentLevel]; //copy this because it'll be wrong by the time command executes
+    cmd.targetFlags = CommandID::TitleTextA;
+    cmd.action = [ld](xy::Entity e, float)
+    {
+        std::string str("Stage ");
+        str += std::to_string(ld.level);
+        if (!ld.name.empty())
+        {
+            str += " - ";
+            str += ld.name;
+        }
+
+        e.getComponent<xy::BitmapText>().setString(str);
+        auto bounds = xy::BitmapText::getLocalBounds(e);
+        e.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        e.getComponent<xy::Callback>().active = true;
+    };
+    sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::TitleTextB;
+    cmd.action = [ld](xy::Entity e, float)
+    {
+        std::string str = ld.author;
+        if (!ld.comment.empty())
+        {
+            str += " - ";
+            str += ld.comment;
+        }
+
+        e.getComponent<xy::BitmapText>().setString(str);
+        auto bounds = xy::BitmapText::getLocalBounds(e);
+        e.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        e.getComponent<xy::Callback>().active = true;
+    };
+    sendCommand(cmd);
+
     m_currentLevel = (m_currentLevel + 1) % m_levels.size();
     m_roundTimer.restart();
 

@@ -53,7 +53,8 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const std::size_t MaxLevels = 100;
+    const std::size_t MaxLevels = 100; 
+    const float TitleSpeed = 400.f;
 }
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -323,6 +324,7 @@ void MainState::buildArena()
     auto fontID = m_resources.load<xy::BitmapFont>("assets/images/bmp_font.png");
     auto& font = m_resources.get<xy::BitmapFont>(fontID);
 
+    //score text
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(10.f, 10.f);
     entity.addComponent<xy::Drawable>();
@@ -336,4 +338,100 @@ void MainState::buildArena()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreString;
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //level text
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(playArea.x / 2.f, -48.f);
+    entity.addComponent<xy::Drawable>().setDepth(50);
+    entity.addComponent<xy::BitmapText>(font).setString("STAGE 0 - BUNS");
+    bounds = xy::BitmapText::getLocalBounds(entity);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleTextA;
+    entity.addComponent<xy::Callback>();// .active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<std::int32_t>(0);
+    entity.getComponent<xy::Callback>().function = 
+        [playArea](xy::Entity e, float dt)
+    {
+        auto& state = std::any_cast<std::int32_t&>(e.getComponent<xy::Callback>().userData);
+        auto& tx = e.getComponent<xy::Transform>();
+        static float timer = 1.5f;
+        switch(state)
+        {
+        case 0:
+            //move down
+            tx.move(0.f, TitleSpeed * dt);
+            if (tx.getPosition().y > (playArea.y / 2.f) - 16.f)
+            {
+                state = 1;
+            }
+            break;
+        case 1:
+            //hold
+            timer -= dt;
+            if (timer < 0)
+            {
+                timer = 1.5f;
+                state = 2;
+            }
+            break;
+        case 2:
+            //exit
+            tx.move(TitleSpeed * dt, 0.f);
+            if (tx.getPosition().x > 960)
+            {
+                state = 0;
+                tx.setPosition(playArea.x / 2.f, -48.f);
+                e.getComponent<xy::Callback>().active = false;
+            }
+            break;
+        }
+    };
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(playArea.x / 2.f, playArea.y + 16.f);
+    entity.addComponent<xy::Drawable>().setDepth(50);
+    entity.addComponent<xy::BitmapText>(font).setString("Author, comment");
+    bounds = xy::BitmapText::getLocalBounds(entity);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleTextB;
+    entity.addComponent<xy::Callback>();// .active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<std::int32_t>(0);
+    entity.getComponent<xy::Callback>().function = 
+        [playArea](xy::Entity e, float dt) 
+    {
+        auto& state = std::any_cast<std::int32_t&>(e.getComponent<xy::Callback>().userData);
+        auto& tx = e.getComponent<xy::Transform>();
+        static float timer = 1.5f;
+        switch (state)
+        {
+        case 0:
+            //move down
+            tx.move(0.f, -TitleSpeed * dt);
+            if (tx.getPosition().y < (playArea.y / 2.f) + 8.f)
+            {
+                state = 1;
+            }
+            break;
+        case 1:
+            //hold
+            timer -= dt;
+            if (timer < 0)
+            {
+                timer = 1.5f;
+                state = 2;
+            }
+            break;
+        case 2:
+            //exit
+            tx.move(-TitleSpeed * dt, 0.f);
+            if (tx.getPosition().x < -(xy::DefaultSceneSize.x - playArea.x) / 4.f)
+            {
+                state = 0;
+                tx.setPosition(playArea.x / 2.f, (xy::DefaultSceneSize.y / 2.f) + 1.f);
+                e.getComponent<xy::Callback>().active = false;
+            }
+            break;
+        }
+    };
+    m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
