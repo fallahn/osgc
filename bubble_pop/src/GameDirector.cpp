@@ -47,7 +47,8 @@ GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::C
     m_currentLevel      (0),
     m_bubbleGeneration  (0),
     m_score             (0),
-    m_previousScore     (0)
+    m_previousScore     (0),
+    m_gameActive        (false)
 {
 
 }
@@ -97,8 +98,8 @@ void GameDirector::handleMessage(const xy::Message& msg)
         default: break;
         case GameEvent::RoundFailed:
             m_sharedData.score = m_score;
-            /*requestStackPush(StateID::GameOver);
-            break;*/
+            m_gameActive = false;
+            break;
         case GameEvent::RoundCleared:
             loadNextLevel(data.generation);
             break;
@@ -112,10 +113,22 @@ void GameDirector::handleMessage(const xy::Message& msg)
             break;
         }
     }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Popped
+            && data.id == StateID::Attract)
+        {
+            std::cout << "buns\n";
+            m_gameActive = true;
+        }
+    }
 }
 
 void GameDirector::process(float)
 {
+    if (!m_gameActive) return;
+
     //track round time and lower bar
     if (m_roundTimer.getElapsedTime() > m_levels[(m_currentLevel - 1) % m_levels.size()].interval)
     {
@@ -402,7 +415,7 @@ void GameDirector::activateLevel()
 }
 
 void GameDirector::reset()
-{
+{   
     m_currentLevel = 0;
     m_roundTimer.restart();
     m_scoreTimer.restart();

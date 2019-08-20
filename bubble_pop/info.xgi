@@ -2,6 +2,6 @@ game_info
 {
     thumb = "assets/images/thumb.png"
     title = "Bubble Puzzle 2097"
-    version = "0.0.1"
+    version = "0.9.0"
     author = "fallahn"
 }

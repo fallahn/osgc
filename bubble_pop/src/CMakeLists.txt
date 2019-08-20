@@ -1,9 +1,12 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/AttractState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BubbleSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameDirector.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameOverState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MainState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerInput.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.cpp
   PARENT_SCOPE)

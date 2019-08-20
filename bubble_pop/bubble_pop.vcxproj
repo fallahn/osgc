@@ -142,15 +142,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Animations.hpp" />
+    <ClInclude Include="include\AttractState.hpp" />
     <ClInclude Include="include\BubbleSystem.hpp" />
     <ClInclude Include="include\CommandID.hpp" />
     <ClInclude Include="include\GameConsts.hpp" />
     <ClInclude Include="include\GameDirector.hpp" />
+    <ClInclude Include="include\GameOverState.hpp" />
     <ClInclude Include="include\IniParse.hpp" />
     <ClInclude Include="include\LevelData.hpp" />
     <ClInclude Include="include\MainState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\NodeSet.hpp" />
+    <ClInclude Include="include\PauseState.hpp" />
     <ClInclude Include="include\PlayerInput.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
@@ -158,10 +161,13 @@
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AttractState.cpp" />
     <ClCompile Include="src\BubbleSystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\GameDirector.cpp" />
+    <ClCompile Include="src\GameOverState.cpp" />
     <ClCompile Include="src\MainState.cpp" />
+    <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerInput.cpp" />
     <ClCompile Include="src\SoundEffectsDirector.cpp" />
   </ItemGroup>

@@ -28,12 +28,16 @@ source distribution.
 #include "PluginExport.hpp"
 #include "StateIDs.hpp"
 #include "MainState.hpp"
+#include "PauseState.hpp"
+#include "AttractState.hpp"
+#include "GameOverState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
 #include <xyginext/core/Assert.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/graphics/BitmapFont.hpp>
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
@@ -49,12 +53,20 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     sd.sprites[SpriteID::Title] = spriteSheet.getSprite("title");
     sd.sprites[SpriteID::TopBar] = spriteSheet.getSprite("top_bar");
 
+    sd.fontID = sd.resources.load<xy::BitmapFont>("assets/images/bmp_font.png");
+
     ss->registerState<MainState>(StateID::Main, sd);
+    ss->registerState<PauseState>(StateID::Pause, sd);
+    ss->registerState<AttractState>(StateID::Attract, sd);
+    ss->registerState<GameOverState>(StateID::GameOver, sd);
 
     return StateID::Main;
 }
 
 void end(xy::StateStack* ss)
 {
+    ss->unregisterState(StateID::GameOver);
+    ss->unregisterState(StateID::Attract);
+    ss->unregisterState(StateID::Pause);
     ss->unregisterState(StateID::Main);
 }

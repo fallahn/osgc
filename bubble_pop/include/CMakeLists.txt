@@ -1,15 +1,18 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/Animations.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/AttractState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BubbleSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandID.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConsts.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameDirector.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/GameOverState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IniParse.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LevelData.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MainState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NodeSet.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerInput.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp

@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "GameDirector.hpp"
 #include "BubbleSystem.hpp"
 #include "SoundEffectsDirector.hpp"
+#include "MessageIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -76,6 +77,15 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     xy::App::getRenderWindow()->setMouseCursorGrabbed(true);
 
     quitLoadingScreen();
+
+    //make sure to delay this by a frame
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::ScoreString; //doesn't matter, it just has to exist
+    cmd.action = [&](xy::Entity, float) 
+    {
+        requestStackPush(StateID::Attract); 
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
 //public
@@ -87,6 +97,19 @@ bool MainState::handleEvent(const sf::Event& evt)
         return true;
     }
 
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::P:
+        case sf::Keyboard::Escape:
+        case sf::Keyboard::Pause:
+            requestStackPush(StateID::Pause);
+            break;
+        }
+    }
+
     m_playerInput.handleEvent(evt);
     m_scene.forwardEvent(evt);
 
@@ -95,6 +118,38 @@ bool MainState::handleEvent(const sf::Event& evt)
 
 void MainState::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == MessageID::GameMessage)
+    {
+        const auto& data = msg.getData<GameEvent>();
+        if (data.type == GameEvent::RoundFailed
+            && getStackSize() == 1)
+        {
+            //disabling this prevents more bubble collision events being raised
+            m_scene.setSystemActive<BubbleSystem>(false);
+            m_scene.setSystemActive<xy::CallbackSystem>(false);
+            requestStackPush(StateID::GameOver);
+        }
+    }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        switch (data.type)
+        {
+        default: break;
+        case xy::Message::StateEvent::Popped:
+            if (data.id == StateID::Attract)
+            {
+                m_scene.setSystemActive<BubbleSystem>(true);
+                m_scene.setSystemActive<xy::CallbackSystem>(true);
+            }
+            else if (data.id == StateID::GameOver)
+            {
+                m_scene.getDirector<GameDirector>().reset();
+                requestStackPush(StateID::Attract);
+            }
+        }
+    }
+
     m_scene.forwardMessage(msg);
 }
 
@@ -133,6 +188,8 @@ void MainState::initScene()
 
     m_scene.addDirector<GameDirector>(m_nodeSet, m_sprites, m_animationMaps, m_sharedData).loadLevelData();
     m_scene.addDirector<SFXDirector>();
+
+    m_scene.setSystemActive<xy::CallbackSystem>(false); //disabled until game begins
 }
 
 void MainState::loadResources()
@@ -321,8 +378,7 @@ void MainState::buildArena()
 
     m_scene.getDirector<GameDirector>().activateLevel();
 
-    auto fontID = m_resources.load<xy::BitmapFont>("assets/images/bmp_font.png");
-    auto& font = m_resources.get<xy::BitmapFont>(fontID);
+    auto& font = m_sharedData.resources.get<xy::BitmapFont>(m_sharedData.fontID);
 
     //score text
     entity = m_scene.createEntity();
@@ -342,9 +398,7 @@ void MainState::buildArena()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(playArea.x / 2.f, -48.f);
     entity.addComponent<xy::Drawable>().setDepth(50);
-    entity.addComponent<xy::BitmapText>(font).setString("STAGE 0 - BUNS");
-    bounds = xy::BitmapText::getLocalBounds(entity);
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::BitmapText>(font);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleTextA;
     entity.addComponent<xy::Callback>();// .active = true;
     entity.getComponent<xy::Callback>().userData = std::make_any<std::int32_t>(0);
@@ -388,11 +442,9 @@ void MainState::buildArena()
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(playArea.x / 2.f, playArea.y + 16.f);
+    entity.addComponent<xy::Transform>().setPosition(playArea.x / 2.f, (xy::DefaultSceneSize.y / 2.f) + 1.f);
     entity.addComponent<xy::Drawable>().setDepth(50);
-    entity.addComponent<xy::BitmapText>(font).setString("Author, comment");
-    bounds = xy::BitmapText::getLocalBounds(entity);
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::BitmapText>(font);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleTextB;
     entity.addComponent<xy::Callback>();// .active = true;
     entity.getComponent<xy::Callback>().userData = std::make_any<std::int32_t>(0);

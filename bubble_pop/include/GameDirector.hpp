@@ -62,6 +62,8 @@ private:
     std::size_t m_score;
     std::size_t m_previousScore;
 
+    bool m_gameActive;
+
     void queueBubble();
     void mountBubble();
 

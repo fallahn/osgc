@@ -47,6 +47,7 @@ struct SharedData final
 {
     xy::ResourceHandler resources;
     std::array<xy::Sprite, SpriteID::Count> sprites;
+    std::size_t fontID = 0;
 
     std::size_t score;
 };
