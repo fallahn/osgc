@@ -2,6 +2,8 @@
 
 One of the earliest PC games I remember playing as a teenager was Bubble Puzzle 97, a freeware puzzle-bobble style clone. I recently rediscovered the title which, unfortunately, doesn't work on modern computers as it was written for Windows 95 using directX 3. This repository attempts to recreate the original game, using the assets distributed with the original. This is purely for nostaligia's sake... while this source code is released under the apache license because it is written from scratch, the assets retain the original license (below) and MUST NOT be distributed for commericial purposes. Of course, as this is an open source project, you may feel free to replace all the resources (including the level designs!) with your own.
 
+Oh and please don't hold me culpable for the ridiculous difficulty of some levels - I didn't make them! :D
+
 #### Original readme
 
    __________________

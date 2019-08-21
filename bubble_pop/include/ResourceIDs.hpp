@@ -33,7 +33,7 @@ namespace SpriteID
     enum
     {
         Title, Pause, TopBar,
-        GameOver,
+        GameOver, NameInput,
 
         Count
     };

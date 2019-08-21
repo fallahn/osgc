@@ -22,6 +22,11 @@ spritesheet misc
         bounds = 283,134,195,99
     }
 
+    sprite name_box
+    {
+        bounds = 406,462,234,18
+    }
+
     sprite text
     {
         bounds = 5,38,10,10

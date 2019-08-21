@@ -18,14 +18,18 @@ Copyright 2019 Matt Marchant
 
 #include "GameOverState.hpp"
 #include "IniParse.hpp"
+#include "GameConsts.hpp"
+#include "CommandID.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BitmapText.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/BitmapTextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
@@ -47,7 +51,8 @@ namespace
         "Eddy Whirlpool",
         "Buns McFarlane",
         "Enty Hannah",
-        "Jeff Grapes"
+        "Jeff Grapes",
+        "LZ Cook"
     };
 }
 
@@ -79,6 +84,13 @@ bool GameOverState::handleEvent(const sf::Event& evt)
             switch (evt.key.code)
             {
             default: break;
+            case sf::Keyboard::BackSpace:
+                if (!m_playerName.empty())
+                {
+                    m_playerName.pop_back();
+                    updatePlayerString();
+                }
+                break;
             case sf::Keyboard::Return:
 
                 if (m_playerName.empty())
@@ -112,7 +124,14 @@ bool GameOverState::handleEvent(const sf::Event& evt)
         }
         else if (evt.type == sf::Event::TextEntered)
         {
-            //TODO enter name into high score string
+            //enter name into high score string - bitmap text is ASCII only so...
+            if (evt.text.unicode > 31
+                && evt.text.unicode < 127
+                && m_playerName.size() < Const::MaxNameChar)
+            {
+                m_playerName += static_cast<char>(evt.text.unicode);
+                updatePlayerString();
+            }
         }
     }
 
@@ -142,6 +161,7 @@ void GameOverState::draw()
 void GameOverState::build()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::BitmapTextSystem>(mb);
     m_scene.addSystem<xy::RenderSystem>(mb);
@@ -158,13 +178,58 @@ void GameOverState::build()
     auto& font = m_sharedData.resources.get<xy::BitmapFont>(m_sharedData.fontID);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, bounds.height * 4.f);
+    entity.getComponent<xy::Transform>().move(0.f, 260.f);
     entity.getComponent<xy::Transform>().setScale(2.f, 2.f);
-
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::BitmapText>(font).setString("Press Enter To Continue");
     bounds = xy::BitmapText::getLocalBounds(entity);
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
-    //TODO show high scores input
+    //show high scores input
+    if (m_sharedData.score >= m_sharedData.highScores.back().second)
+    {
+        //background
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Drawable>().setDepth(-10);
+        entity.addComponent<xy::Sprite>() = m_sharedData.sprites[SpriteID::NameInput];
+        auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, bounds.height * 2.f);
+        entity.getComponent<xy::Transform>().setScale(2.f, 2.f);
+        auto boxPos = entity.getComponent<xy::Transform>().getPosition();
+
+        //header
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+        entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 2.2f);
+        entity.getComponent<xy::Transform>().setScale(2.f, 2.f);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::BitmapText>(font).setString("Enter Your Name");
+        bounds = xy::BitmapText::getLocalBounds(entity);
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+
+        //input text
+        entity = m_scene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(boxPos);
+        entity.getComponent<xy::Transform>().setScale(2.f, 2.f);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::BitmapText>(font);// .setString("Sarah Connor");
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreInput;
+        bounds = xy::BitmapText::getLocalBounds(entity);
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    }
+}
+
+void GameOverState::updatePlayerString()
+{
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::ScoreInput;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        e.getComponent<xy::BitmapText>().setString(m_playerName);
+        auto bounds = xy::BitmapText::getLocalBounds(e);
+        e.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }

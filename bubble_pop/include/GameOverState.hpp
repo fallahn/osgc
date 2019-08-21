@@ -45,4 +45,5 @@ private:
     std::string m_playerName;
 
     void build();
+    void updatePlayerString();
 };

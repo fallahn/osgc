@@ -53,6 +53,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     sd.sprites[SpriteID::Pause] = spriteSheet.getSprite("paused");
     sd.sprites[SpriteID::Title] = spriteSheet.getSprite("title");
     sd.sprites[SpriteID::TopBar] = spriteSheet.getSprite("top_bar");
+    sd.sprites[SpriteID::NameInput] = spriteSheet.getSprite("name_box");
 
     sd.fontID = sd.resources.load<xy::BitmapFont>("assets/images/bmp_font.png");
 

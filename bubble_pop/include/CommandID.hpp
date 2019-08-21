@@ -27,5 +27,6 @@ namespace CommandID
         ScoreString = 0x04,
         TitleTextA = 0x08,
         TitleTextB = 0x10,
+        ScoreInput = 0x20
     };
 }

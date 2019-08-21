@@ -83,7 +83,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     cmd.targetFlags = CommandID::ScoreString; //doesn't matter, it just has to exist
     cmd.action = [&](xy::Entity, float) 
     {
-        requestStackPush(StateID::GameOver); 
+        requestStackPush(StateID::Attract); 
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
