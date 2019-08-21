@@ -41,6 +41,10 @@ namespace Const
     static const float RightBounds = 534.f - (BubbleSize.x / 2.f);
 
     static const float MaxBubbleHeight = 370.f;
+
+    static const std::streamsize MaxNameChar = 16;
+    static const std::streamsize MinNameSpace = 4;
+    static const std::streamsize MaxScoreSize = 6;
 }
 
 static inline sf::Vector2f tileToWorldCoord(std::size_t index)

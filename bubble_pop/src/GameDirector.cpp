@@ -511,7 +511,7 @@ void GameDirector::updateScoreDisplay()
     cmd.action = [&](xy::Entity e, float)
     {
         std::stringstream ss;
-        ss << std::setw(9) << std::setfill('0');
+        ss << std::setw(Const::MaxScoreSize) << std::setfill('0');
         ss << m_score;
 
         e.getComponent<xy::BitmapText>().setString(ss.str());

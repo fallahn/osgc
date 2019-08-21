@@ -151,9 +151,9 @@ void GameOverState::build()
     entity.addComponent<xy::Sprite>() = m_sharedData.sprites[SpriteID::GameOver];
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 12.f);
-    entity.getComponent<xy::Transform>().setScale(2.f, 2.f);
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 2.f);
+    entity.getComponent<xy::Transform>().setScale(2.f, 2.f);
 
     auto& font = m_sharedData.resources.get<xy::BitmapFont>(m_sharedData.fontID);
     entity = m_scene.createEntity();

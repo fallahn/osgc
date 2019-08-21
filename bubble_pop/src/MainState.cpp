@@ -83,7 +83,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     cmd.targetFlags = CommandID::ScoreString; //doesn't matter, it just has to exist
     cmd.action = [&](xy::Entity, float) 
     {
-        requestStackPush(StateID::Attract); 
+        requestStackPush(StateID::GameOver); 
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
@@ -390,7 +390,7 @@ void MainState::buildArena()
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(10.f, 26.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::BitmapText>(font).setString("000000000");
+    entity.addComponent<xy::BitmapText>(font).setString("000000");
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ScoreString;
     m_nodeSet.rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
