@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "BubbleSystem.hpp"
 #include "SoundEffectsDirector.hpp"
 #include "MessageIDs.hpp"
+#include "PluginExport.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -102,8 +103,11 @@ bool MainState::handleEvent(const sf::Event& evt)
         switch (evt.key.code)
         {
         default: break;
-        case sf::Keyboard::P:
         case sf::Keyboard::Escape:
+            requestStackClear();
+            requestStackPush(StateID::ParentState);
+            break;
+        case sf::Keyboard::P:
         case sf::Keyboard::Pause:
             requestStackPush(StateID::Pause);
             break;

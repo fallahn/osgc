@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "PauseState.hpp"
+#include "PluginExport.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BitmapText.hpp>
@@ -70,10 +71,12 @@ bool PauseState::handleEvent(const sf::Event& evt)
             default: break;
             case sf::Keyboard::P:
             case sf::Keyboard::Pause:
-            case sf::Keyboard::Escape:
                 requestStackPop();
                 break;
-            
+            case sf::Keyboard::Escape:
+                requestStackClear();
+                requestStackPush(StateID::ParentState);
+                break;
             }
         }
         else if (evt.type == sf::Event::JoystickButtonReleased
