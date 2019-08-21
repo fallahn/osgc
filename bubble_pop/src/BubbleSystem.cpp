@@ -364,7 +364,7 @@ void BubbleSystem::doCollision(xy::Entity entity)
     //if we tunnelled collision, move back one radius
     if (m_grid[gridIndex].isValid())
     {
-        const auto& bubble = entity.getComponent<Bubble>();
+        //const auto& bubble = entity.getComponent<Bubble>();
 
         /*relPos += (bubble.velocity * -(Const::BubbleSize.x / 2.f));
         gridIndex = getGridIndex(relPos);*/

@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "AttractState.hpp"
 #include "GameConsts.hpp"
+#include "PluginExport.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BitmapText.hpp>
@@ -66,8 +67,19 @@ bool AttractState::handleEvent(const sf::Event& evt)
     //slight delay before accepting input
     if (delayClock.getElapsedTime() > delayTime)
     {
-        if (evt.type == sf::Event::KeyReleased
-            || evt.type == sf::Event::MouseButtonReleased)
+        if (evt.type == sf::Event::KeyReleased)
+        {
+            if(evt.key.code != sf::Keyboard::Escape)
+            {
+                requestStackPop();
+            }
+            else
+            {
+                requestStackClear();
+                requestStackPush(StateID::ParentState);
+            }
+        }
+        else if(evt.type == sf::Event::MouseButtonReleased)
         {
             requestStackPop();
         }
