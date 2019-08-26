@@ -1,0 +1,7 @@
+game_info
+{
+    thumb = "path/to/thumb.png"
+    title = "Master Entertainment"
+    version = "0.0.1"
+    author = "Fallahn"
+}

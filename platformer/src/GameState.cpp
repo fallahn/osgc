@@ -85,8 +85,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_effects       (m_audioResource)
 {
     launchLoadingScreen();
-    sd.theme = "mes";
-    sd.nextMap = "mes01.tmx";
+    //sd.theme = "mes";
+    //sd.nextMap = "mes01.tmx";
     initScene();
     loadResources();
     buildWorld();
