@@ -6,3 +6,5 @@ Journey back in time and travel through the landscapes of a multitude of retro i
 All maps are created in [Tiled](http://mapeditor.org) and contributions of new maps are welcome! See the map directory for more details on creating levels for the game.
 
 Back To Computer is made possible by the open source contributions of artists at [Open Game Art](http://opengameart.org), for a complete list of credits see the `assets` directory.
+
+![Back To Computer](../screens/windows04.png?raw=true "Back To Computer Plugin")
