@@ -1,7 +1,7 @@
 OSGC Plugin Project Template
 ----------------------------
 
-This folder contains the template files required to create an OSGC plugin. The source is licensed under the zlib license, however any further source files added to your own derived project may be licensed however you see fit - although open source is strongly encouraged!!
+This folder contains the template files required to create an OSGC plugin. `osgc_plugin_template.zip` contains a Visual Studio project which can be imported to visual studio to add OSGC plugin templates to the 'create new' menu when adding a project to a solution. The source is licensed under the zlib license, however any further source files added to your own derived project may be licensed however you see fit - although open source is strongly encouraged!!
 
 /*********************************************************************  
 (c) Matt Marchant 2019  
