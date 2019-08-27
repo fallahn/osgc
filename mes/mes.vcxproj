@@ -141,13 +141,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\CPU6502.hpp" />
     <ClInclude Include="include\MainState.hpp" />
+    <ClInclude Include="include\MMU.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CPU6502.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MainState.cpp" />
+    <ClCompile Include="src\MMU.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
