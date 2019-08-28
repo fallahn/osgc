@@ -146,6 +146,7 @@
     <ClInclude Include="include\MMU.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\Util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CPU6502.cpp" />

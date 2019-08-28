@@ -27,9 +27,13 @@ source distribution.
 
 #pragma once
 
-#include <xyginext/core/State.hpp>
+#include "MMU.hpp"
+#include "CPU6502.hpp"
 
-class MainState final : public xy::State
+#include <xyginext/core/State.hpp>
+#include <xyginext/gui/GuiClient.hpp>
+
+class MainState final : public xy::State, public xy::GuiClient
 {
 public:
     MainState(xy::StateStack&, xy::State::Context);
@@ -46,4 +50,7 @@ public:
 
 private:
 
+    MMU m_mmu;
+    CPU6502 m_cpu;
+    std::map<std::uint16_t, std::string> m_dasm;
 };

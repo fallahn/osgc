@@ -49,9 +49,7 @@ https://github.com/OneLoneCoder/olcNES
 
 #include "CPU6502.hpp"
 #include "MMU.hpp"
-
-#include <sstream>
-#include <iomanip>
+#include "Util.hpp"
 
 namespace
 {
@@ -95,7 +93,7 @@ CPU6502::CPU6502(MMU& mmu)
 void CPU6502::reset()
 {
     //the address 0xfffc contains the value of the address of the reset vector
-    m_addrAbs = 0xfffc;
+    m_addrAbs = ResetVector;
     std::uint16_t low = read(m_addrAbs);
     std::uint16_t high = read(m_addrAbs + 1);
     m_registers.pc = (high << 8) | low;
@@ -118,7 +116,7 @@ void CPU6502::irq()
 {
     if (getFlag(Flag::I) == 0)
     {
-        doInterrupt(0xfffe);
+        doInterrupt(InterruptVector);
 
         //set the cycle counter
         m_cycleCount = 7;
@@ -127,7 +125,7 @@ void CPU6502::irq()
 
 void CPU6502::nmi()
 {
-    doInterrupt(0xfffa);
+    doInterrupt(NMIVector);
     m_cycleCount = 8;
 }
 
@@ -174,14 +172,6 @@ std::map<std::uint16_t, std::string> CPU6502::dasm(std::uint16_t begin, std::uin
 
     std::map<std::uint16_t, std::string> retVal;
     std::uint16_t currentLine = 0;
-
-    auto hexStr = [](std::uint32_t val, std::uint8_t width)->std::string
-    {
-        std::stringstream ss;
-        ss << std::setfill('0') << std::setw(width);
-        ss << std::hex << val;
-        return ss.str();
-    };
 
     while (addr <= end)
     {
@@ -1068,7 +1058,7 @@ std::uint8_t CPU6502::RTI()
 
 std::uint8_t CPU6502::RTS()
 {
-    //restore pc
+    //return from subroutine
     m_registers.sp++;
     m_registers.pc = read(StackOffset + m_registers.sp);
     m_registers.sp++;

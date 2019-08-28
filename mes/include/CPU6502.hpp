@@ -88,6 +88,12 @@ public:
         N = 0x80
     };
     
+    //these addresses should be programmed with the actual
+    //address of the relevant vectors.
+    static constexpr std::uint16_t NMIVector = 0xfffa;
+    static constexpr std::uint16_t ResetVector = 0xfffc;
+    static constexpr std::uint16_t InterruptVector = 0xfffe;
+
     CPU6502(MMU&);
 
     Registers& getRegisters() { return m_registers; }
