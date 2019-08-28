@@ -68,8 +68,9 @@ struct Registers final
 /*
 while this is mostly a complete emulation of the 6502 (suitable for the NES) 
 the decimal flag is not implemented, as are 'undefined' opcodes. Using this
-class for other emulation such as a C64 will need at least the D flag implemented
-as well as possibly the undefined opcodes which may be present in C64 software.
+class for other emulation such as a C64 will need at least the Decimal mode
+(D flag) implemented for ADC and SBC - as well as possibly the undefined 
+opcodes which may be present in C64 software. See http://www.6502.org/tutorials/decimal_mode.html
 */
 
 class CPU6502 final
@@ -182,4 +183,9 @@ private:
 
     //used to catch unimplemented/unofficial ops
     std::uint8_t xxx();
+
+    //util funcs for functionally similar ops
+    inline std::uint8_t branch(bool);
+    inline void compare(std::uint8_t);
+    inline std::uint8_t loadRegister(std::uint8_t&);
 };

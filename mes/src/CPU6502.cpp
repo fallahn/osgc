@@ -53,6 +53,11 @@ https://github.com/OneLoneCoder/olcNES
 #include <sstream>
 #include <iomanip>
 
+namespace
+{
+    const std::uint16_t StackOffset = 0x0100;
+}
+
 CPU6502::CPU6502(MMU& mmu)
     : m_mmu     (mmu),
     m_fetched   (0),
@@ -283,17 +288,17 @@ std::map<std::uint16_t, std::string> CPU6502::dasm(std::uint16_t begin, std::uin
 void CPU6502::doInterrupt(std::uint16_t vectorAddress)
 {
     //push pc on the stack
-    write(0x0100 + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
+    write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
     m_registers.sp--;
 
-    write(0x0100 + m_registers.sp, m_registers.pc & 0x00ff);
+    write(StackOffset + m_registers.sp, m_registers.pc & 0x00ff);
     m_registers.sp--;
 
     //update status register and push to stack
     setFlag(Flag::B, false);
     setFlag(Flag::U, true);
     setFlag(Flag::I, true);
-    write(0x0100 + m_registers.sp, m_registers.status);
+    write(StackOffset + m_registers.sp, m_registers.status);
     m_registers.sp--;
 
     //grab the interrupt vector location from vector address
@@ -341,6 +346,878 @@ std::uint8_t CPU6502::fetch()
 }
 
 //----------address modes-----------//
+std::uint8_t CPU6502::IMP()
+{
+    //implied mode
+    m_fetched = m_registers.a;
+    return 0;
+}
 
+std::uint8_t CPU6502::IMM()
+{
+    //immediate mode - next byte is value
+    m_addrAbs = m_registers.pc++;
+    return 0;
+}
+
+std::uint8_t CPU6502::ZP0()
+{
+    //zero page addressing
+    m_addrAbs = read(m_registers.pc);
+    m_registers.pc++;
+    m_addrAbs &= 0x00ff;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ZPX()
+{
+    //sero page with x offset - read address is offset by value of x reg
+    m_addrAbs = read(m_registers.pc) + m_registers.x;
+    m_registers.pc++;
+    m_addrAbs &= 0x00ff;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ZPY()
+{
+    //zero page + y offset
+    m_addrAbs = read(m_registers.pc) + m_registers.y;
+    m_registers.pc++;
+    m_addrAbs &= 0x00ff;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::REL()
+{
+    //relative jump
+    m_addrRel = read(m_registers.pc);
+    m_registers.pc++;
+
+    if (m_addrRel & 0x80)
+    {
+        m_addrRel |= 0xff00;
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ABS()
+{
+    //absolute mode
+    std::uint16_t low = read(m_registers.pc);
+    m_registers.pc++;
+
+    std::uint16_t high = read(m_registers.pc);
+    m_registers.pc++;
+
+    m_addrAbs = (high << 8) | low;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ABX()
+{
+    //absolute address with offset from X register
+    std::uint16_t low = read(m_registers.pc);
+    m_registers.pc++;
+
+    std::uint16_t high = (read(m_registers.pc) << 8);
+    m_registers.pc++;
+
+    m_addrAbs = high | low;
+    m_addrAbs += m_registers.x;
+
+    //if the offset moved the address into the next page
+    //this mode requires another clock cycle
+    if ((m_addrAbs & 0xff00) != high)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ABY()
+{
+    //absolute address with offset from Y register
+    std::uint16_t low = read(m_registers.pc);
+    m_registers.pc++;
+
+    std::uint16_t high = (read(m_registers.pc) << 8);
+    m_registers.pc++;
+
+    m_addrAbs = high | low;
+    m_addrAbs += m_registers.y;
+
+    //if the offset moved the address into the next page
+    //this mode requires another clock cycle
+    if ((m_addrAbs & 0xff00) != high)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::IND()
+{
+    //indirect address mode. The actual hardware has a bug
+    //where crossing a page boundry wraps around to the beginning
+    //of the same page...
+    std::uint16_t low = read(m_registers.pc);
+    m_registers.pc++;
+
+    std::uint16_t high = (read(m_registers.pc) << 8);
+    m_registers.pc++;
+
+    std::uint16_t ptr = high | low;
+
+    //this simulates the bug
+    if (low == 0xff)
+    {
+        m_addrAbs = (read(ptr & 0xff00) << 8) | read(ptr);
+    }
+    else
+    {
+        m_addrAbs = (read(ptr + 1) << 8) | read(ptr);
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::IZX()
+{
+    //indirect mode with offset from x register.
+    //the read value at pc has the x value added to it
+    //to create a zero page address containing the
+    //final value of the pointer
+
+    std::uint16_t v = read(m_registers.pc);
+    m_registers.pc++;
+
+    std::uint16_t low = read(v + m_registers.x) & 0x00ff;
+    std::uint16_t high = read(v + m_registers.x + 1) & 0x00ff;
+
+    m_addrAbs = (high << 8) | low;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::IZY()
+{
+    //indirect with y offset. Unlike the
+    //x offset the y register value is added
+    //to the final pointer value. If this crosses
+    //a page boundry and extra clock cycle is used
+
+    std::uint16_t v = read(m_registers.pc);
+    m_registers.pc++;
+
+    //still zero paged however
+    std::uint16_t low = read(v & 0x00ff);
+    std::uint16_t high = (read((v + 1) & 0x00ff) << 8);
+
+    m_addrAbs = high | low;
+    m_addrAbs += m_registers.y;
+
+    if ((m_addrAbs & 0xff00) != high)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 //-----------opcodes----------//
+std::uint8_t CPU6502::ADC()
+{
+    //TODO this does not work in decimal mode!
+
+    //add with carry
+    fetch();
+
+    //use a 16bit val just to catch the carry flag
+    std::uint16_t temp = m_registers.a;
+    temp += m_fetched;
+    temp += getFlag(Flag::C);
+
+    setFlag(Flag::C, (temp & 0xff00));
+
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+
+    //the overflow flag is based on the truth table
+    //available at https://www.youtube.com/watch?v=8XmxKPJDGU0
+    setFlag(Flag::V, (~(static_cast<std::uint16_t>(m_registers.a) ^ static_cast<std::uint16_t>(m_fetched))
+        & (static_cast<std::uint16_t>(m_registers.a) ^ temp)) & 0x0080);
+
+    setFlag(Flag::N, (temp & 0x80));
+
+    //put the result in the accumulator
+    m_registers.a = (temp & 0x00ff);
+
+    return 1; //this will require an extra cycle when used in address modes which also require one
+}
+
+std::uint8_t CPU6502::SBC()
+{
+    //TODO this does not work in decimal mode!
+
+    //subtract with borrow
+    fetch();
+
+    std::uint16_t v = m_fetched;
+    v ^= 0x00ff;
+
+    std::uint16_t temp = m_registers.a;
+    temp += v;
+    temp += getFlag(Flag::C);
+
+    setFlag(Flag::C, (temp & 0xff00));
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+
+    setFlag(Flag::V, (temp ^ static_cast<std::uint16_t>(m_registers.a)) & (temp ^ v) & 0x0080);
+    setFlag(Flag::N, temp & 0x80);
+
+    m_registers.a = temp & 0x00ff;
+
+    return 1;
+}
+
+std::uint8_t CPU6502::AND()
+{
+    //bitwise AND
+    fetch();
+
+    m_registers.a &= m_fetched;
+
+    setFlag(Flag::Z, m_registers.a == 0);
+    setFlag(Flag::N, (m_registers.a & 0x80));
+
+    return 1;
+}
+
+std::uint8_t CPU6502::ASL()
+{
+    //shift left
+    fetch();
+
+    std::uint16_t temp = m_fetched;
+    temp <<= 1;
+
+    setFlag(Flag::C, (temp & 0xff00));
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+    setFlag(Flag::N, (temp & 0x80));
+
+    if (m_instructionTable[m_opcode].addrMode == &CPU6502::IMP)
+    {
+        //write back to accumulator
+        m_registers.a = (temp & 0x00ff);
+    }
+    else
+    {
+        write(m_addrAbs, (temp & 0x00ff));
+    }
+    return 0;
+}
+
+std::uint8_t CPU6502::BCC() 
+{
+    //branch if carry cleared
+    //if (getFlag(Flag::C) == 0)
+    //{
+    //    m_cycleCount++;
+    //    m_addrAbs = m_registers.pc + m_addrRel;
+
+    //    if ((m_addrAbs & 0xff00) != (m_registers.pc & 0xff00))
+    //    {
+    //        m_cycleCount++;
+    //    }
+
+    //    m_registers.pc = m_addrAbs;
+    //}
+    //return 0;
+    return branch(getFlag(Flag::C) == 0);
+}
+
+std::uint8_t CPU6502::BCS()
+{
+    //branch if carry set
+    //if (getFlag(Flag::C) != 0)
+    //{
+    //    m_cycleCount++;
+    //    m_addrAbs = m_registers.pc + m_addrRel;
+
+    //    if ((m_addrAbs & 0xff00) != (m_registers.pc & 0xff00))
+    //    {
+    //        m_cycleCount++;
+    //    }
+
+    //    m_registers.pc = m_addrAbs;
+    //}
+    //return 0;
+    return branch(getFlag(Flag::C) != 0);
+}
+
+std::uint8_t CPU6502::BEQ()
+{
+    //branch if equal
+    //if (getFlag(Flag::Z) == 1)
+    //{
+    //    m_cycleCount++;
+    //    m_addrAbs = m_registers.pc + m_addrRel;
+
+    //    if ((m_addrAbs & 0xff00) != (m_registers.pc & 0xff00))
+    //    {
+    //        m_cycleCount++;
+    //    }
+
+    //    m_registers.pc = m_addrAbs;
+    //}
+    //return 0;
+    return branch(getFlag(Flag::Z) == 1);
+}
+
+std::uint8_t CPU6502::BIT()
+{
+    fetch();
+    auto temp = m_registers.a & m_fetched;
+
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+    setFlag(Flag::N, (m_fetched & 0x80));
+    setFlag(Flag::V, (m_fetched & 0x40));
+
+    return 0;
+}
+
+std::uint8_t CPU6502::BMI()
+{
+    //branch if negative
+    return branch(getFlag(Flag::N) == 1);
+}
+
+std::uint8_t CPU6502::BNE()
+{
+    return branch(getFlag(Flag::Z) == 0);
+}
+
+std::uint8_t CPU6502::BPL()
+{
+    //branch of positive
+    return branch(getFlag(Flag::N) == 0);
+}
+
+std::uint8_t CPU6502::BRK()
+{
+    //program break - store the program 
+    //counter and status register on the stack
+    m_registers.pc++;
+
+    setFlag(Flag::I, true);
+    write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
+    m_registers.sp--;
+    write(StackOffset + m_registers.sp, (m_registers.pc & 0x00ff));
+    m_registers.sp--;
+
+    setFlag(Flag::B, true);
+    write(StackOffset + m_registers.sp, m_registers.status);
+    m_registers.sp--;
+    setFlag(Flag::B, false);
+
+    m_registers.pc = static_cast<std::uint16_t>(read(0xfffe)) | (static_cast<std::uint16_t>(read(0xffff) << 8));
+    return 0;
+}
+
+std::uint8_t CPU6502::BVC()
+{
+    //branch if ovderflow clear
+    return branch(getFlag(Flag::V) == 0);
+}
+
+std::uint8_t CPU6502::BVS()
+{
+    //branch if overflow set
+    return branch(getFlag(Flag::V) == 1);
+}
+
+std::uint8_t CPU6502::CLC()
+{
+    //clear carry flag
+    setFlag(Flag::C, false);
+    return 0;
+}
+
+std::uint8_t CPU6502::CLD()
+{
+    //clear decimal flag
+    setFlag(Flag::D, false);
+    return 0;
+}
+
+std::uint8_t CPU6502::CLI()
+{
+    //clear interrupt flag (disables interrupts)
+    setFlag(Flag::I, false);
+    return 0;
+}
+
+std::uint8_t CPU6502::CLV()
+{
+    //clear overflow flag
+    setFlag(Flag::V, false);
+    return 0;
+}
+
+std::uint8_t CPU6502::CMP()
+{
+    //compare accumulator
+    compare(m_registers.a);
+    return 1;
+}
+
+std::uint8_t CPU6502::CPX()
+{
+    //compare x
+    compare(m_registers.x);
+    return 0;
+}
+
+std::uint8_t CPU6502::CPY()
+{
+    compare(m_registers.y);
+    return 0;
+}
+
+std::uint8_t CPU6502::DEC()
+{
+    //decrements value at location
+    fetch();
+    std::uint16_t temp = m_fetched;
+    temp -= 1;
+    write(m_addrAbs, temp & 0x00ff);
+
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+    setFlag(Flag::N, (temp & 0x80));
+
+    return 0;
+}
+
+std::uint8_t CPU6502::DEX()
+{
+    //decrement x
+    m_registers.x--;
+    setFlag(Flag::Z, m_registers.x == 0);
+    setFlag(Flag::N, (m_registers.x & 0x80));
+
+    return 0;
+}
+
+std::uint8_t CPU6502::DEY()
+{
+    //decrement y
+    m_registers.y--;
+    setFlag(Flag::Z, m_registers.y == 0);
+    setFlag(Flag::N, (m_registers.y & 0x80));
+
+    return 0;
+}
+
+std::uint8_t CPU6502::EOR()
+{
+    //xor
+    fetch();
+    m_registers.a ^= m_fetched;
+    setFlag(Flag::Z, m_registers.a == 0);
+    setFlag(Flag::N, (m_registers.a & 0x80));
+
+    return 1;
+}
+
+std::uint8_t CPU6502::INC()
+{
+    //increment at location
+    fetch();
+    std::uint16_t temp = m_fetched;
+    temp += 1;
+
+    write(m_addrAbs, (temp & 0x00ff));
+    setFlag(Flag::Z, (temp & 0x00ff));
+    setFlag(Flag::N, (temp & 0x80));
+
+    return 0;
+}
+
+std::uint8_t CPU6502::INX()
+{
+    //increment x
+    m_registers.x++;
+    setFlag(Flag::Z, m_registers.x == 0);
+    setFlag(Flag::N, m_registers.x & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::INY()
+{
+    //increment y
+    m_registers.y++;
+    setFlag(Flag::Z, m_registers.y == 0);
+    setFlag(Flag::N, m_registers.y & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::JMP()
+{
+    m_registers.pc = m_addrAbs;
+    return 0;
+}
+
+std::uint8_t CPU6502::JSR()
+{
+    m_registers.pc--;
+
+    //push pc to stack
+    write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
+    m_registers.sp--;
+    write(StackOffset + m_registers.sp, (m_registers.pc & 0x00ff));
+    m_registers.sp--;
+
+    m_registers.pc = m_addrAbs;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::LDA()
+{
+    return loadRegister(m_registers.a);
+}
+
+std::uint8_t CPU6502::LDX()
+{
+    return loadRegister(m_registers.x);
+}
+
+std::uint8_t CPU6502::LDY()
+{
+    return loadRegister(m_registers.y);
+}
+
+std::uint8_t CPU6502::LSR()
+{
+    //shift right
+    fetch();
+    setFlag(Flag::C, m_fetched & 0x01);
+
+    std::uint16_t temp = m_fetched;
+    temp >>= 1;
+
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+    setFlag(Flag::N, (temp & 0x80));
+
+    if (m_instructionTable[m_opcode].addrMode == &CPU6502::IMP)
+    {
+        m_registers.a = temp & 0x00ff;
+    }
+    else
+    {
+        write(m_addrAbs, temp & 0x00ff);
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::NOP()
+{
+    //not all NOPs behave the same.
+    //see https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
+
+    switch (m_opcode)
+    {
+    default: return 0;
+        case 0x1c:
+        case 0x3c:
+        case 0x5c:
+        case 0x7c:
+        case 0xdc:
+        case 0xfc:
+            return 1;
+    }
+}
+
+std::uint8_t CPU6502::ORA()
+{
+    //OR accumulator
+    fetch();
+    m_registers.a |= m_fetched;
+    setFlag(Flag::Z, m_registers.a == 0);
+    setFlag(Flag::N, m_registers.a & 0x80);
+
+    return 1;
+}
+
+std::uint8_t CPU6502::PHA()
+{
+    //push accumulator to stack
+    write(StackOffset + m_registers.sp, m_registers.a);
+    m_registers.sp--;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::PHP()
+{
+    //push status flags to stack
+    write(StackOffset + m_registers.sp, m_registers.status | Flag::U | Flag::B);
+    m_registers.sp--;
+
+    setFlag(Flag::U, false);
+    setFlag(Flag::B, false);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::PLA()
+{
+    //pop accumulator
+    m_registers.sp++;
+    m_registers.a = read(StackOffset + m_registers.sp);
+
+    setFlag(Flag::Z, m_registers.a == 0);
+    setFlag(Flag::N, m_registers.a & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::PLP()
+{
+    //pop status register
+    m_registers.sp++;
+    m_registers.status = read(StackOffset + m_registers.sp);
+    setFlag(Flag::U, true);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ROL()
+{
+    //rotate value left
+    fetch();
+
+    std::uint16_t temp = m_fetched;
+    temp <<= 1;
+    temp |= getFlag(Flag::C);
+
+    setFlag(Flag::C, temp & 0xff00);
+    setFlag(Flag::Z, (temp & 0x00ff) == 0 );
+    setFlag(Flag::N, (temp & 0x80));
+
+    if (m_instructionTable[m_opcode].addrMode == &CPU6502::IMP)
+    {
+        m_registers.a = temp & 0x00ff;
+    }
+    else
+    {
+        write(m_addrAbs, temp & 0x00ff);
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::ROR()
+{
+    //rotate right
+    fetch();
+
+    std::uint16_t temp = (getFlag(Flag::C) << 7);
+    temp |= (m_fetched >> 1);
+
+    setFlag(Flag::C, m_fetched & 0x01);
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+    setFlag(Flag::N, temp & 0x80);
+
+    if (m_instructionTable[m_opcode].addrMode == &CPU6502::IMP)
+    {
+        m_registers.a = temp & 0x00ff;
+    }
+    else
+    {
+        write(m_addrAbs, temp & 0x00ff);
+    }
+
+    return 0;
+}
+
+std::uint8_t CPU6502::RTI()
+{
+    //return from interrupt
+    m_registers.sp++;
+
+    m_registers.status = read(StackOffset + m_registers.sp);
+    m_registers.status &= ~Flag::B;
+    m_registers.status &= ~Flag::U;
+
+    m_registers.sp++;
+    m_registers.pc = read(StackOffset + m_registers.sp);
+    m_registers.sp++;
+    m_registers.pc |= static_cast<std::uint16_t>(read(StackOffset + m_registers.sp)) << 8;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::RTS()
+{
+    //restore pc
+    m_registers.sp++;
+    m_registers.pc = read(StackOffset + m_registers.sp);
+    m_registers.sp++;
+    m_registers.pc |= static_cast<std::uint16_t>(read(StackOffset + m_registers.sp)) << 8;
+
+    m_registers.pc++;
+
+    return 0;
+}
+
+std::uint8_t CPU6502::SEC()
+{
+    setFlag(Flag::C, true);
+    return 0;
+}
+
+std::uint8_t CPU6502::SED()
+{
+    setFlag(Flag::D, true);
+    return 0;
+}
+
+std::uint8_t CPU6502::SEI()
+{
+    setFlag(Flag::I, true);
+    return 0;
+}
+
+std::uint8_t CPU6502::STA()
+{
+    //store accumulator
+    write(m_addrAbs, m_registers.a);
+    return 0;
+}
+
+std::uint8_t CPU6502::STX()
+{
+    //store x
+    write(m_addrAbs, m_registers.x);
+    return 0;
+}
+
+std::uint8_t CPU6502::STY()
+{
+    //store y
+    write(m_addrAbs, m_registers.y);
+    return 0;
+}
+
+std::uint8_t CPU6502::TAX()
+{
+    //transfer accumulator to x
+    m_registers.x = m_registers.a;
+    setFlag(Flag::Z, m_registers.x == 0);
+    setFlag(Flag::N, m_registers.x & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::TAY()
+{
+    //transfer accumulator to y
+    m_registers.y = m_registers.a;
+    setFlag(Flag::Z, m_registers.y == 0);
+    setFlag(Flag::N, m_registers.y & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::TSX()
+{
+    //transfer stack pointer to x
+    m_registers.x = m_registers.sp;
+
+    setFlag(Flag::Z, m_registers.x == 0);
+    setFlag(Flag::N, m_registers.x & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::TXA()
+{
+    //transfer x to accumulator
+    m_registers.a = m_registers.x;
+
+    setFlag(Flag::Z, m_registers.a == 0);
+    setFlag(Flag::N, m_registers.a & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::TXS()
+{
+    //transfer x to stack
+    m_registers.sp = m_registers.x;
+    return 0;
+}
+
+std::uint8_t CPU6502::TYA()
+{
+    m_registers.a = m_registers.y;
+
+    setFlag(Flag::Z, m_registers.a == 0);
+    setFlag(Flag::N, m_registers.a & 0x80);
+
+    return 0;
+}
+
+std::uint8_t CPU6502::xxx()
+{
+    return 0;
+}
+
+//inlines
+std::uint8_t CPU6502::branch(bool b)
+{
+    if (b)
+    {
+        m_cycleCount++;
+        m_addrAbs = m_registers.pc + m_addrRel;
+
+        if ((m_addrAbs & 0xff00) != (m_registers.pc & 0xff00))
+        {
+            m_cycleCount++;
+        }
+
+        m_registers.pc = m_addrAbs;
+    }
+    return 0;
+}
+
+void CPU6502::compare(std::uint8_t v)
+{
+    fetch();
+    std::uint16_t temp = v;
+    temp -= m_fetched;
+
+    setFlag(Flag::C, temp >= m_fetched);
+    setFlag(Flag::Z, (temp & 0x00ff) == 0);
+    setFlag(Flag::N, (temp & 0x80));
+}
+
+std::uint8_t CPU6502::loadRegister(std::uint8_t& reg)
+{
+    fetch();
+    reg = m_fetched;
+
+    setFlag(Flag::Z, reg == 0);
+    setFlag(Flag::N, reg & 0x80);
+
+    return 1;
+}
