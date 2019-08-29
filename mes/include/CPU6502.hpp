@@ -67,10 +67,8 @@ struct Registers final
 
 /*
 while this is mostly a complete emulation of the 6502 (suitable for the NES) 
-the decimal flag is not implemented, as are 'undefined' opcodes. Using this
-class for other emulation such as a C64 will need at least the Decimal mode
-(D flag) implemented for ADC and SBC - as well as possibly the undefined 
-opcodes which may be present in C64 software. See http://www.6502.org/tutorials/decimal_mode.html
+the undefined opcodes aren't implemented. Software which relies on unofficial
+or undocumneted behaviour may not work as expected.
 */
 
 class CPU6502 final
@@ -81,7 +79,7 @@ public:
         C = 0x01,
         Z = 0x02,
         I = 0x04,
-        D = 0x08, //note, currently unimplemented
+        D = 0x08,
         B = 0x10,
         U = 0x20,
         V = 0x40,
@@ -140,12 +138,12 @@ private:
 
     void doInterrupt(std::uint16_t vectorLocation);
 
-    std::uint8_t getFlag(Flag) const;
-    void setFlag(Flag, bool);
+    inline std::uint8_t getFlag(Flag) const;
+    inline void setFlag(Flag, bool);
 
     //read/write MMU
-    std::uint8_t read(std::uint16_t addr) const;
-    void write(std::uint16_t addr, std::uint8_t data);
+    inline std::uint8_t read(std::uint16_t addr) const;
+    inline void write(std::uint16_t addr, std::uint8_t data);
 
     //may read from MMU, may fetch opcode data, depending on opcode
     std::uint8_t fetch();
@@ -169,7 +167,7 @@ private:
     //the 56 'defined' opcodes which strictly speaking makes this
     //6502 compliant. Undocumented opcodes are not implemented
     //(the emulation doesn't take a microcode approach) so any
-    //software designed to take advantage of these will most likely
+    //software designed to take advantage of undefined behaviour will most likely
     //not work. Opcodes which require an additional cycle to complete
     //due to the current addressing mode will return 1, otherwise they return 0
     std::uint8_t ADC();	std::uint8_t AND();	std::uint8_t ASL();	std::uint8_t BCC();
@@ -194,4 +192,6 @@ private:
     inline std::uint8_t branch(bool);
     inline void compare(std::uint8_t);
     inline std::uint8_t loadRegister(std::uint8_t&);
+    inline void push(std::uint8_t);
+    inline std::uint8_t pop();
 };

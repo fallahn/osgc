@@ -278,18 +278,21 @@ std::map<std::uint16_t, std::string> CPU6502::dasm(std::uint16_t begin, std::uin
 void CPU6502::doInterrupt(std::uint16_t vectorAddress)
 {
     //push pc on the stack
-    write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
+    /*write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
     m_registers.sp--;
 
     write(StackOffset + m_registers.sp, m_registers.pc & 0x00ff);
-    m_registers.sp--;
+    m_registers.sp--;*/
+    push((m_registers.pc >> 8) & 0x00ff);
+    push(m_registers.pc & 0x00ff);
 
     //update status register and push to stack
     setFlag(Flag::B, false);
     setFlag(Flag::U, true);
     setFlag(Flag::I, true);
-    write(StackOffset + m_registers.sp, m_registers.status);
-    m_registers.sp--;
+    /*write(StackOffset + m_registers.sp, m_registers.status);
+    m_registers.sp--;*/
+    push(m_registers.status);
 
     //grab the interrupt vector location from vector address
     m_addrAbs = vectorAddress;
@@ -523,8 +526,6 @@ std::uint8_t CPU6502::IZY()
 //-----------opcodes----------//
 std::uint8_t CPU6502::ADC()
 {
-    //TODO this does not work in decimal mode!
-
     //add with carry
     fetch();
 
@@ -533,27 +534,47 @@ std::uint8_t CPU6502::ADC()
     temp += m_fetched;
     temp += getFlag(Flag::C);
 
-    setFlag(Flag::C, (temp & 0xff00));
-
     setFlag(Flag::Z, (temp & 0x00ff) == 0);
 
-    //the overflow flag is based on the truth table
-    //available at https://www.youtube.com/watch?v=8XmxKPJDGU0
-    setFlag(Flag::V, (~(static_cast<std::uint16_t>(m_registers.a) ^ static_cast<std::uint16_t>(m_fetched))
-        & (static_cast<std::uint16_t>(m_registers.a) ^ temp)) & 0x0080);
+    if (getFlag(Flag::D))
+    {
+        //TODO a 65C02 would add an extra cycle - this is probably irrelevant here
+        //m_cycleCount++;
 
-    setFlag(Flag::N, (temp & 0x80));
+        if (((m_registers.a & 0x0f) + (m_fetched & 0x0f) + getFlag(Flag::C)) > 9)
+        {
+            temp += 6;
+        }
 
+        setFlag(Flag::N, (temp & 0x80));
+
+        //the overflow flag is based on the truth table
+       //available at https://www.youtube.com/watch?v=8XmxKPJDGU0
+        setFlag(Flag::V, (~(static_cast<std::uint16_t>(m_registers.a) ^ static_cast<std::uint16_t>(m_fetched))
+            & (static_cast<std::uint16_t>(m_registers.a) ^ temp)) & 0x0080);
+
+        if (temp > 0x99)
+        {
+            temp += 96;
+        }
+        setFlag(Flag::C, temp > 0x99);
+    }
+    else
+    {
+        setFlag(Flag::N, (temp & 0x80));
+        setFlag(Flag::V, (~(static_cast<std::uint16_t>(m_registers.a) ^ static_cast<std::uint16_t>(m_fetched))
+            & (static_cast<std::uint16_t>(m_registers.a) ^ temp)) & 0x0080);
+
+        setFlag(Flag::C, (temp & 0xff00));
+    }
     //put the result in the accumulator
     m_registers.a = (temp & 0x00ff);
 
-    return 1; //this will require an extra cycle when used in address modes which also require one
+    return 1; //this will require an extra cycle when used in certain address modes
 }
 
 std::uint8_t CPU6502::SBC()
 {
-    //TODO this does not work in decimal mode!
-
     //subtract with borrow
     fetch();
 
@@ -564,11 +585,27 @@ std::uint8_t CPU6502::SBC()
     temp += v;
     temp += getFlag(Flag::C);
 
-    setFlag(Flag::C, (temp & 0xff00));
     setFlag(Flag::Z, (temp & 0x00ff) == 0);
-
     setFlag(Flag::V, (temp ^ static_cast<std::uint16_t>(m_registers.a)) & (temp ^ v) & 0x0080);
     setFlag(Flag::N, temp & 0x80);
+
+    if (getFlag(Flag::D))
+    {
+        //TODO a 65C02 would add an extra cycle - this is probably irrelevant here
+        //m_cycleCount++;
+
+        if (((m_registers.a & 0x0f) - getFlag(Flag::C)) < (v & 0x0f))
+        {
+            temp -= 6;
+        }
+
+        if (temp > 0x99)
+        {
+            temp -= 0x60;
+        }
+    }
+
+    setFlag(Flag::C, (temp & 0xff00));
 
     m_registers.a = temp & 0x00ff;
 
@@ -705,14 +742,17 @@ std::uint8_t CPU6502::BRK()
     m_registers.pc++;
 
     setFlag(Flag::I, true);
-    write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
+    /*write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
     m_registers.sp--;
     write(StackOffset + m_registers.sp, (m_registers.pc & 0x00ff));
-    m_registers.sp--;
+    m_registers.sp--;*/
+    push((m_registers.pc >> 8) & 0x00ff);
+    push((m_registers.pc & 0x00ff));
 
     setFlag(Flag::B, true);
-    write(StackOffset + m_registers.sp, m_registers.status);
-    m_registers.sp--;
+    /*write(StackOffset + m_registers.sp, m_registers.status);
+    m_registers.sp--;*/
+    push(m_registers.status);
     setFlag(Flag::B, false);
 
     m_registers.pc = static_cast<std::uint16_t>(read(0xfffe)) | (static_cast<std::uint16_t>(read(0xffff) << 8));
@@ -869,10 +909,12 @@ std::uint8_t CPU6502::JSR()
     m_registers.pc--;
 
     //push pc to stack
-    write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
+    /*write(StackOffset + m_registers.sp, (m_registers.pc >> 8) & 0x00ff);
     m_registers.sp--;
     write(StackOffset + m_registers.sp, (m_registers.pc & 0x00ff));
-    m_registers.sp--;
+    m_registers.sp--;*/
+    push((m_registers.pc >> 8) & 0x00ff);
+    push((m_registers.pc & 0x00ff));
 
     m_registers.pc = m_addrAbs;
 
@@ -950,8 +992,9 @@ std::uint8_t CPU6502::ORA()
 std::uint8_t CPU6502::PHA()
 {
     //push accumulator to stack
-    write(StackOffset + m_registers.sp, m_registers.a);
-    m_registers.sp--;
+    /*write(StackOffset + m_registers.sp, m_registers.a);
+    m_registers.sp--;*/
+    push(m_registers.a);
 
     return 0;
 }
@@ -959,8 +1002,9 @@ std::uint8_t CPU6502::PHA()
 std::uint8_t CPU6502::PHP()
 {
     //push status flags to stack
-    write(StackOffset + m_registers.sp, m_registers.status | Flag::U | Flag::B);
-    m_registers.sp--;
+    /*write(StackOffset + m_registers.sp, m_registers.status | Flag::U | Flag::B);
+    m_registers.sp--;*/
+    push(m_registers.status | Flag::U | Flag::B);
 
     setFlag(Flag::U, false);
     setFlag(Flag::B, false);
@@ -971,8 +1015,9 @@ std::uint8_t CPU6502::PHP()
 std::uint8_t CPU6502::PLA()
 {
     //pop accumulator
-    m_registers.sp++;
-    m_registers.a = read(StackOffset + m_registers.sp);
+    /*m_registers.sp++;
+    m_registers.a = read(StackOffset + m_registers.sp);*/
+    m_registers.a = pop();
 
     setFlag(Flag::Z, m_registers.a == 0);
     setFlag(Flag::N, m_registers.a & 0x80);
@@ -983,8 +1028,9 @@ std::uint8_t CPU6502::PLA()
 std::uint8_t CPU6502::PLP()
 {
     //pop status register
-    m_registers.sp++;
-    m_registers.status = read(StackOffset + m_registers.sp);
+    /*m_registers.sp++;
+    m_registers.status = read(StackOffset + m_registers.sp);*/
+    m_registers.status = pop();
     setFlag(Flag::U, true);
 
     return 0;
@@ -1042,16 +1088,18 @@ std::uint8_t CPU6502::ROR()
 std::uint8_t CPU6502::RTI()
 {
     //return from interrupt
-    m_registers.sp++;
-
-    m_registers.status = read(StackOffset + m_registers.sp);
+    /*m_registers.sp++;
+    m_registers.status = read(StackOffset + m_registers.sp);*/
+    m_registers.status = pop();
     m_registers.status &= ~Flag::B;
     m_registers.status &= ~Flag::U;
 
-    m_registers.sp++;
+    /*m_registers.sp++;
     m_registers.pc = read(StackOffset + m_registers.sp);
     m_registers.sp++;
-    m_registers.pc |= static_cast<std::uint16_t>(read(StackOffset + m_registers.sp)) << 8;
+    m_registers.pc |= static_cast<std::uint16_t>(read(StackOffset + m_registers.sp)) << 8;*/
+    m_registers.pc = pop();
+    m_registers.pc |= static_cast<std::uint16_t>(pop()) << 8;
 
     return 0;
 }
@@ -1059,10 +1107,12 @@ std::uint8_t CPU6502::RTI()
 std::uint8_t CPU6502::RTS()
 {
     //return from subroutine
-    m_registers.sp++;
+    /*m_registers.sp++;
     m_registers.pc = read(StackOffset + m_registers.sp);
     m_registers.sp++;
-    m_registers.pc |= static_cast<std::uint16_t>(read(StackOffset + m_registers.sp)) << 8;
+    m_registers.pc |= static_cast<std::uint16_t>(read(StackOffset + m_registers.sp)) << 8;*/
+    m_registers.pc = pop();
+    m_registers.pc |= static_cast<std::uint16_t>(pop()) << 8;
 
     m_registers.pc++;
 
@@ -1210,4 +1260,16 @@ std::uint8_t CPU6502::loadRegister(std::uint8_t& reg)
     setFlag(Flag::N, reg & 0x80);
 
     return 1;
+}
+
+void CPU6502::push(std::uint8_t val)
+{
+    write(StackOffset + m_registers.sp, val);
+    m_registers.sp++;
+}
+
+std::uint8_t CPU6502::pop()
+{
+    m_registers.sp--;
+    return read(StackOffset + m_registers.sp);
 }
