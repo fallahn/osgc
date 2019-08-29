@@ -79,7 +79,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     m_cpu.reset();
 
     //set up some UI stuff for printing info
-    namespace ui = xy::Nim;
+    namespace ui = xy::ui;
     registerWindow([&]() 
         {
             ui::begin("Disassembly");
@@ -148,7 +148,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
 bool MainState::handleEvent(const sf::Event& evt)
 {
 	//prevents events being forwarded if the console wishes to consume them
-	/*if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+	/*if (xy::ui::wantsKeyboard() || xy::ui::wantsMouse())
     {
         return true;
     }*/
