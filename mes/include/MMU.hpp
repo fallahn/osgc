@@ -49,12 +49,12 @@ https://github.com/OneLoneCoder/olcNES
 
 #pragma once
 
-#include <cstdint>
+#include "MappedDevice.hpp"
+
 #include <array>
-#include <limits>
 
 /*
-Memory mapping unit. Maps memory addresses to devices on the main bus.
+Memory mapping unit. Maps memory addresses to devices on a bus.
 */
 
 class MMU final
@@ -64,9 +64,12 @@ public:
 
     //the boolean is used in the disassembly mode to prevent
     //mutating the state of attached devices when performing dasm
-    std::uint8_t read(std::uint16_t address, bool = false) const;
+    std::uint8_t read(std::uint16_t address, bool preventWrite = false);
     void write(std::uint16_t address, std::uint8_t data);
 
+    //maps a device to its defined range
+    void mapDevice(MappedDevice&);
+
 private:
-    std::array<std::uint8_t, std::numeric_limits<std::uint16_t>::max()> m_ram = {};
+    std::array<MappedDevice*, std::numeric_limits<std::uint16_t>::max()> m_devices = {};
 };

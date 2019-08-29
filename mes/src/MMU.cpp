@@ -48,23 +48,40 @@ https://github.com/OneLoneCoder/olcNES
 */
 
 #include "MMU.hpp"
+#include "Util.hpp"
 
 #include <xyginext/core/Assert.hpp>
 
 MMU::MMU()
 {
-
+    for (auto& p : m_devices)
+    {
+        p = nullptr;
+    }
 }
 
 //public
-std::uint8_t MMU::read(std::uint16_t address, bool preventWrite) const
+std::uint8_t MMU::read(std::uint16_t address, bool preventWrite)
 {
     XY_ASSERT(address >= 0 && address <= 0xffff, "address out of range");
-    return m_ram[address];
+    return m_devices[address]->read(address, preventWrite);
 }
 
 void MMU::write(std::uint16_t address, std::uint8_t data)
 {
     XY_ASSERT(address >= 0 && address <= 0xffff, "address out of range");
-    m_ram[address] = data;
+    m_devices[address]->write(address, data);
+}
+
+void MMU::mapDevice(MappedDevice& device)
+{
+    XY_ASSERT(device.rangeEnd() < m_devices.size(), "Device out of range");
+    for (auto i = device.rangeStart(); i <= device.rangeEnd(); ++i)
+    {
+        if (m_devices[i] != nullptr)
+        {
+            xy::Logger::log("Overwrote mapped device " + m_devices[i]->name + " at $" + hexStr(i, 4) + " with " + device.name, xy::Logger::Type::Warning);
+        }
+        m_devices[i] = &device;
+    }
 }

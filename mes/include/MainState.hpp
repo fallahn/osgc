@@ -29,6 +29,7 @@ source distribution.
 
 #include "MMU.hpp"
 #include "CPU6502.hpp"
+#include "MappedDevice.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/gui/GuiClient.hpp>
@@ -52,5 +53,7 @@ private:
 
     MMU m_mmu;
     CPU6502 m_cpu;
+    RAMDevice m_ram;
+
     std::map<std::uint16_t, std::string> m_dasm;
 };

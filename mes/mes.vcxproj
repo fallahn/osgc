@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClInclude Include="include\CPU6502.hpp" />
     <ClInclude Include="include\MainState.hpp" />
+    <ClInclude Include="include\MappedDevice.hpp" />
     <ClInclude Include="include\MMU.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />

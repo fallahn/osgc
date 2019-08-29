@@ -61,8 +61,12 @@ namespace
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State (ss, ctx),
-    m_cpu       (m_mmu)
+    m_cpu       (m_mmu),
+    m_ram       (0, std::numeric_limits<std::uint16_t>::max() - 1)
 {
+    //map devices
+    m_mmu.mapDevice(m_ram);
+
     //load the test program
     std::uint16_t prgOffset = 0x8000;
     for (auto b : testPrg)
