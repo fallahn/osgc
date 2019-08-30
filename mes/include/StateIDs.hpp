@@ -31,6 +31,7 @@ namespace StateID
 {
     enum
     {
-        Main
+        Main,
+        VCS2600
     };
 }

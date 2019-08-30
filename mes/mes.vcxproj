@@ -147,13 +147,17 @@
     <ClInclude Include="include\MMU.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\Tia.hpp" />
     <ClInclude Include="include\Util.hpp" />
+    <ClInclude Include="include\VCSState.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CPU6502.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MainState.cpp" />
     <ClCompile Include="src\MMU.cpp" />
+    <ClCompile Include="src\Tia.cpp" />
+    <ClCompile Include="src\VCSState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

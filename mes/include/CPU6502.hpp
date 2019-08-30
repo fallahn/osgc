@@ -91,6 +91,7 @@ public:
     static constexpr std::uint16_t NMIVector = 0xfffa;
     static constexpr std::uint16_t ResetVector = 0xfffc;
     static constexpr std::uint16_t InterruptVector = 0xfffe;
+    static constexpr std::uint16_t StackOffset = 0x0100;
 
     CPU6502(MMU&);
 

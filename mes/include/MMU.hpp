@@ -55,6 +55,28 @@ https://github.com/OneLoneCoder/olcNES
 
 /*
 Memory mapping unit. Maps memory addresses to devices on a bus.
+
+Examples:
+    Atari 2600 (only has 13 bit bus)
+    $0000 - $007F TIA
+    $0080 - $00FF RAM
+
+    $0280 - $02FF RIOT
+
+    $1000 - $1FFF ROM
+
+    NES
+    $0000 - $07FF RAM
+    $0800 - $0FFF RAM mirror
+    $1000 - $17FF RAM mirror
+    $1800 - $1FFF RAM mirror
+
+    $2000 - $2007 PPU registers
+    $2008 - $3FFF PPU mirrors
+
+    $4000 - $4017 APU and IO registers
+    $4018 - $401F extra IO (norm disabled)
+    $4020 - $FFFF Cartridge space / mapper IO - note 6502 interrupt vector addresses are stored in the very end of this space
 */
 
 class MMU final

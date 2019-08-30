@@ -51,11 +51,6 @@ https://github.com/OneLoneCoder/olcNES
 #include "MMU.hpp"
 #include "Util.hpp"
 
-namespace
-{
-    const std::uint16_t StackOffset = 0x0100;
-}
-
 CPU6502::CPU6502(MMU& mmu)
     : m_mmu     (mmu),
     m_fetched   (0),

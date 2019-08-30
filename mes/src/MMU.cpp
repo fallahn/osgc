@@ -75,7 +75,7 @@ void MMU::write(std::uint16_t address, std::uint8_t data)
 
 void MMU::mapDevice(MappedDevice& device)
 {
-    XY_ASSERT(device.rangeEnd() < m_devices.size(), "Device out of range");
+    XY_ASSERT(device.rangeEnd() <= 0xffff, "Device out of range");
     for (auto i = device.rangeStart(); i <= device.rangeEnd(); ++i)
     {
         if (m_devices[i] != nullptr)

@@ -25,23 +25,38 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include "PluginExport.hpp"
-#include "StateIDs.hpp"
-#include "MainState.hpp"
-#include "VCSState.hpp"
+#pragma once
 
-#include <xyginext/core/StateStack.hpp>
-#include <xyginext/core/Log.hpp>
+#include "MMU.hpp"
+#include "CPU6502.hpp"
+#include "Tia.hpp"
+#include "MappedDevice.hpp"
 
+#include <xyginext/core/State.hpp>
+#include <xyginext/gui/GuiClient.hpp>
 
-int begin(xy::StateStack* ss, SharedStateData* sharedData)
+class VCSState final : public xy::State, public xy::GuiClient
 {
-    ss->registerState<MainState>(StateID::Main);
-    ss->registerState<VCSState>(StateID::VCS2600);
-    return StateID::VCS2600;
-}
+public:
+    VCSState(xy::StateStack&, xy::State::Context);
 
-void end(xy::StateStack* ss)
-{
-    ss->unregisterState(StateID::VCS2600);
-}
+    bool handleEvent(const sf::Event&) override;
+
+    void handleMessage(const xy::Message&) override;
+
+    bool update(float) override;
+
+    void draw() override;
+
+    xy::StateID stateID() const override;
+
+private:
+
+    MMU m_mmu;
+    CPU6502 m_cpu;
+    Tia m_tia;
+    RAMDevice m_ram;
+    RAMDevice m_vectorRAM; //we need somewhere to store the reset vector
+
+    std::map<std::uint16_t, std::string> m_dasm;
+};
