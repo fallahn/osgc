@@ -57,6 +57,7 @@ private:
     Tia m_tia;
     RAMDevice m_ram;
     RAMDevice m_vectorRAM; //we need somewhere to store the reset vector
+    RAMDevice m_tempROM;
 
     std::map<std::uint16_t, std::string> m_dasm;
 };

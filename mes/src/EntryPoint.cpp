@@ -44,4 +44,5 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 void end(xy::StateStack* ss)
 {
     ss->unregisterState(StateID::VCS2600);
+    ss->unregisterState(StateID::Main);
 }

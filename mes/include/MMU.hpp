@@ -51,7 +51,7 @@ https://github.com/OneLoneCoder/olcNES
 
 #include "MappedDevice.hpp"
 
-#include <array>
+#include <vector>
 
 /*
 Memory mapping unit. Maps memory addresses to devices on a bus.
@@ -93,5 +93,5 @@ public:
     void mapDevice(MappedDevice&);
 
 private:
-    std::array<MappedDevice*, std::numeric_limits<std::uint16_t>::max()> m_devices = {};
+    std::vector<MappedDevice*> m_devices;
 };

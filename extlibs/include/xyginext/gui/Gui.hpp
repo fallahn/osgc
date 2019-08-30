@@ -104,7 +104,7 @@ namespace xy
                 Count
             };
             
-            float           Alpha = 1.f;                      // Global alpha applies to everything in Nim
+            float           Alpha = 1.f;                      // Global alpha applies to everything
             sf::Vector2i    WindowPadding = {8,8};              // Padding within a window
             float           WindowRounding = 7.f;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows
             float           WindowBorderSize = 0.f;           // Thickness of border around windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly)

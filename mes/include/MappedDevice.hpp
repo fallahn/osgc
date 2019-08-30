@@ -58,9 +58,9 @@ class RAMDevice : public MappedDevice
 public:
     RAMDevice(std::uint16_t start, std::uint16_t end)
         : MappedDevice  (start, end),
-        m_data          (end - start)
+        m_data          ((end - start) + 1)
     {
-
+        name = "Generic RAM";
     }
 
     std::uint8_t read(std::uint16_t addr, bool preventWrite) override

@@ -50,6 +50,8 @@ Tia::Tia()
     : MappedDevice  (0, 0x7f),
     m_readyStatus   (ReadyStatus::High)
 {
+    name = "TIA";
+
     //TODO pixel array for frame buffer
 
     //TODO create texture to display frame buffer

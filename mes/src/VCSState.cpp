@@ -39,9 +39,9 @@ namespace
     std::array<std::uint8_t, 32> testPrg =
     {
         0xA2, 0x0A,       //ldx 10
-        0x8E, 0x00, 0x00, //stx 0
+        0x8E, 0x80, 0x00, //stx 128
         0xA2, 0x03,       //ldx 3
-        0x8E, 0x01, 0x00, //stx 1
+        0x8E, 0x81, 0x00, //stx 129
         0xAC, 0x00, 0x00, //ldy 0
         0xA9, 0x00,       //lda 0
         0x18,             //clc
@@ -49,12 +49,12 @@ namespace
         0x6D, 0x01, 0x00, //adc 1
         0x88,             //dey
         0xD0, 0xFA,       //bne loop
-        0x8D, 0x02, 0x00, //sta 2
+        0x8D, 0x82, 0x00, //sta 130
         0xEA,             //nop
         0xEA,             //nop
         0xEA,             //nop
         0xEA,             //nop
-        0x4C, 0x80, 0x00  //jmp 0x80
+        0x4C, 0x00, 0x10  //jmp 0x1000
     };
 }
 
@@ -62,25 +62,29 @@ VCSState::VCSState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State (ss, ctx),
     m_cpu       (m_mmu),
     m_ram       (0x80, 0xFF),
-    m_vectorRAM (CPU6502::ResetVector, 0xffff)
+    m_vectorRAM (CPU6502::ResetVector, 0xffff),
+    m_tempROM   (0x1000, 0x1fff)
 {
+    m_vectorRAM.name = "Vector RAM";
+
     //map devices
-    m_mmu.mapDevice(m_ram);
-    m_mmu.mapDevice(m_vectorRAM);
     m_mmu.mapDevice(m_tia);
+    m_mmu.mapDevice(m_ram);
+    m_mmu.mapDevice(m_tempROM);
+    m_mmu.mapDevice(m_vectorRAM);    
 
     //load the test program
-    std::uint16_t prgOffset = 0x80;
+    std::uint16_t prgOffset = 0x1000;
     for (auto b : testPrg)
     {
         m_mmu.write(prgOffset++, b);
     }
 
     //set the reset vector
-    m_mmu.write(CPU6502::ResetVector, 0x80);
-    m_mmu.write(CPU6502::ResetVector + 1, 0x00);
+    m_mmu.write(CPU6502::ResetVector, 0x00);
+    m_mmu.write(CPU6502::ResetVector + 1, 0x10);
 
-    m_dasm = m_cpu.dasm(0x80, 0x80 + testPrg.size() - 1);
+    m_dasm = m_cpu.dasm(0x1000, 0x1000 + testPrg.size() - 1);
 
     m_cpu.reset();
 
@@ -132,8 +136,8 @@ VCSState::VCSState(xy::StateStack& ss, xy::State::Context ctx)
     registerWindow([&]() 
         {
             ui::begin("RAM view");
-            static std::uint16_t start = 0;
-            static std::uint16_t end = 64;
+            static std::uint16_t start = 128;
+            static std::uint16_t end = 192;
 
             static const std::uint16_t ColWidth = 8;
             for (auto i = start; i < end;)

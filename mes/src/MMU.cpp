@@ -53,6 +53,7 @@ https://github.com/OneLoneCoder/olcNES
 #include <xyginext/core/Assert.hpp>
 
 MMU::MMU()
+    : m_devices(0xffff + 1)
 {
     for (auto& p : m_devices)
     {
@@ -76,7 +77,7 @@ void MMU::write(std::uint16_t address, std::uint8_t data)
 void MMU::mapDevice(MappedDevice& device)
 {
     XY_ASSERT(device.rangeEnd() <= 0xffff, "Device out of range");
-    for (auto i = device.rangeStart(); i <= device.rangeEnd(); ++i)
+    for (std::uint32_t i = device.rangeStart(); i <= device.rangeEnd(); ++i)
     {
         if (m_devices[i] != nullptr)
         {
