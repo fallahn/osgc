@@ -6,5 +6,6 @@ add_subdirectory(shooter)
 add_subdirectory(space_racers)
 add_subdirectory(platformer)
 add_subdirectory(bubble_pop)
+add_subdirectory(mes)
 
 #add further plugin project directories here
