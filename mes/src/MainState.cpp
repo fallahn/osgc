@@ -47,7 +47,7 @@ namespace
         0xA9, 0x00,       //lda 0
         0x18,             //clc
                           //loop
-        0x6D, 0x01, 0x00, //adc 1
+        0x6D, 0x01, 0x00, //adc from $1
         0x88,             //dey
         0xD0, 0xFA,       //bne loop
         0x8D, 0x02, 0x00, //sta 2
