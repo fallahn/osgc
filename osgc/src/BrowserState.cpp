@@ -163,8 +163,8 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
         [&]() 
         {
             auto oldSlideshow = m_settings.useSlideshow;
-            xy::Nim::checkbox("Slideshow Background", &m_settings.useSlideshow);
-            xy::Nim::sameLine(); xy::Nim::showToolTip("Displays images stored in the /images/backgrounds/ directory as a slideshow instead of the selected game background.");
+            xy::ui::checkbox("Slideshow Background", &m_settings.useSlideshow);
+            xy::ui::sameLine(); xy::Nim::showToolTip("Displays images stored in the /images/backgrounds/ directory as a slideshow instead of the selected game background.");
             if (oldSlideshow != m_settings.useSlideshow)
             {
                 xy::Command cmd;
@@ -191,14 +191,33 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     registerConsoleTab("About",
         [&]()
         {
-            xy::Nim::text("OSGC - Open Source Game Collection. Copyright 2019 Matt Marchant and contributors");
-            xy::Nim::text("For more information visit https://github.com/fallah/osgc");
+            xy::ui::text("OSGC - Open Source Game Collection. Copyright 2019 Matt Marchant and contributors");
+            xy::ui::text("For more information visit https://github.com/fallah/osgc");
         });
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
     ctx.appInstance.setMouseCursorVisible(true);
+
+    if (!m_gameInstance.getArgsString().empty())
+    {
+        auto path = xy::FileSystem::getResourcePath() + pluginFolder + m_gameInstance.getArgsString() + pluginFile;
+        if (xy::FileSystem::fileExists(path))
+        {
+            path = pluginFolder + m_gameInstance.getArgsString();
+
+            //send as a command to delay by one frame
+            //and make sure everything is set up
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::RootNode;
+            cmd.action = [&,path](xy::Entity, float)
+            {
+                m_gameInstance.loadPlugin(path);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+    }
 
     quitLoadingScreen();
 }

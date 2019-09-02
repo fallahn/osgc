@@ -53,6 +53,16 @@ public:
     void loadPlugin(const std::string&);
     void unloadPlugin();
 
+    void setArgsString(const std::string& argsString)
+    {
+        m_argsString = argsString;
+    }
+
+    const std::string& getArgsString() const
+    {
+        return m_argsString;
+    }
+
 private:
 
     xy::StateStack m_stateStack;
@@ -61,6 +71,8 @@ private:
     fe::LoadingScreen m_loadingScreen;
 
     sf::Cursor m_defaultCursor;
+
+    std::string m_argsString;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

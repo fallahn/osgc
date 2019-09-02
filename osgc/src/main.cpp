@@ -31,13 +31,19 @@ source distribution.
 #include <X11/Xlib.h>
 #endif // __linux
 
-int main()
+int main(int argc, char** args)
 {
 #ifdef __linux
     XInitThreads();
 #endif //__linux
 
     Game game;
+
+    if (argc > 1)
+    {
+        game.setArgsString({ args[1] });
+    }
+
     game.run();
 
     return 0;
