@@ -32,7 +32,7 @@ Mapped devices can be placed in memory space via the MMU
 class MappedDevice
 {
 public:
-    MappedDevice(std::uint16_t start = 0, std::uint16_t end = std::numeric_limits<std::uint16_t>::max() - 1)
+    MappedDevice(std::uint16_t start = 0, std::uint16_t end = std::numeric_limits<std::uint16_t>::max())
         : m_rangeStart(start), m_rangeEnd(end)
     {
         XY_ASSERT(end > start, "Invalid range");

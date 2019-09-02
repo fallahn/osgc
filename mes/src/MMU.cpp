@@ -53,7 +53,7 @@ https://github.com/OneLoneCoder/olcNES
 #include <xyginext/core/Assert.hpp>
 
 MMU::MMU()
-    : m_devices(0xffff + 1)
+    : m_devices(0x10000)
 {
     for (auto& p : m_devices)
     {

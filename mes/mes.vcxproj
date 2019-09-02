@@ -145,6 +145,7 @@
     <ClInclude Include="include\MainState.hpp" />
     <ClInclude Include="include\MappedDevice.hpp" />
     <ClInclude Include="include\MMU.hpp" />
+    <ClInclude Include="include\NESCart.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\Tia.hpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MainState.cpp" />
     <ClCompile Include="src\MMU.cpp" />
+    <ClCompile Include="src\NESCart.cpp" />
     <ClCompile Include="src\Tia.cpp" />
     <ClCompile Include="src\VCSState.cpp" />
   </ItemGroup>
