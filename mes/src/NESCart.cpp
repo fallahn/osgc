@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "NESCart.hpp"
 
 #include <xyginext/core/Log.hpp>
+#include <xyginext/core/Assert.hpp>
 
 #include <fstream>
 
@@ -35,6 +36,15 @@ NESCart::NESCart()
 //public
 bool NESCart::loadFromFile(const std::string& path)
 {
+    m_mapperID = 0;
+    m_tableMirroring = 0;
+    m_hasExtendedRAM = 0;
+    m_CHRROM.clear();
+    m_PRGROM.clear();
+
+    m_chrMapper.reset();
+    m_prgMapper.reset();
+
     std::ifstream file(path, std::ios::binary);
     if (file.is_open() && file.good())
     {
@@ -92,6 +102,8 @@ bool NESCart::loadFromFile(const std::string& path)
             return false;
         }
 
+        //TODO attempt to create ROM mapper
+
         if (vbankCount)
         {
             m_CHRROM.resize(vbankCount * 0x2000);
@@ -101,6 +113,8 @@ bool NESCart::loadFromFile(const std::string& path)
                 return false;
             }
 
+            //TODO attempt creating VROM mapper
+
             xy::Logger::log("Read " + std::to_string(m_CHRROM.size()) + " bytes of CHR ROM", xy::Logger::Type::Info);
         }
 
@@ -109,4 +123,16 @@ bool NESCart::loadFromFile(const std::string& path)
     xy::Logger::log("Failed to open " + path, xy::Logger::Type::Error);
 
     return false;
+}
+
+MappedDevice* NESCart::getRomMapper()
+{
+    XY_ASSERT(m_prgMapper, "PRG mapper has not been created!");
+    return m_prgMapper.get();
+}
+
+MappedDevice* NESCart::getVRomMapper()
+{
+    XY_ASSERT(m_chrMapper, "CHR mapper has not been created!");
+    return m_chrMapper.get();
 }

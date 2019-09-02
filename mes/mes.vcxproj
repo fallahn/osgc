@@ -144,6 +144,7 @@
     <ClInclude Include="include\CPU6502.hpp" />
     <ClInclude Include="include\MainState.hpp" />
     <ClInclude Include="include\MappedDevice.hpp" />
+    <ClInclude Include="include\Mapper.hpp" />
     <ClInclude Include="include\MMU.hpp" />
     <ClInclude Include="include\NESCart.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="src\CPU6502.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MainState.cpp" />
+    <ClCompile Include="src\MapperNROM.cpp" />
     <ClCompile Include="src\MMU.cpp" />
     <ClCompile Include="src\NESCart.cpp" />
     <ClCompile Include="src\Tia.cpp" />

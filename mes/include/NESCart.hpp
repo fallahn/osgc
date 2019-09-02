@@ -18,9 +18,12 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "MappedDevice.hpp"
+
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 
 class NESCart final
 {
@@ -36,6 +39,9 @@ public:
     std::uint8_t getTableMirroring() const { return m_tableMirroring; }
     bool hasExtendedRAM() const { return m_hasExtendedRAM; }
 
+    MappedDevice* getRomMapper();
+    MappedDevice* getVRomMapper();
+
 private:
 
     std::vector<std::uint8_t> m_PRGROM;
@@ -44,4 +50,7 @@ private:
     std::uint8_t m_mapperID;
     std::uint8_t m_tableMirroring;
     bool m_hasExtendedRAM;
+
+    std::unique_ptr<MappedDevice> m_prgMapper;
+    std::unique_ptr<MappedDevice> m_chrMapper;
 };
