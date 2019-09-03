@@ -21,17 +21,17 @@ Copyright 2019 Matt Marchant
 
 using namespace Mapper;
 
-NRomCPU::NRomCPU(const NESCart& c)
+NROMCPU::NROMCPU(const NESCart& c)
     : MappedDevice(0x6000, 0xffff),
     m_nesCart   (c),
     m_multipage (c.getROM().size() > 0x4000),
     m_basicRAM  (0x2000)
 {
-
+    name = "NROM CPU";
 }
 
 //public
-std::uint8_t NRomCPU::read(std::uint16_t addr, bool)
+std::uint8_t NROMCPU::read(std::uint16_t addr, bool)
 {
     XY_ASSERT(addr >= rangeStart() && addr <= rangeEnd(), "Address out of range");
     
@@ -45,17 +45,21 @@ std::uint8_t NRomCPU::read(std::uint16_t addr, bool)
         return m_nesCart.getROM()[addr - 0x8000];
     }
 
-    return m_nesCart.getROM()[addr - 0xc000];
+    return m_nesCart.getROM()[(addr - 0x8000) & 0x3fff];
 }
 
-void NRomCPU::write(std::uint16_t addr, std::uint8_t value)
+void NROMCPU::write(std::uint16_t addr, std::uint8_t value)
 {
-    XY_ASSERT(addr >= rangeStart() && addr < m_basicRAM.size(), "Address out of range");
-    m_basicRAM[addr] = value;
+    //XY_ASSERT(addr >= rangeStart() && addr < rangeStart() + m_basicRAM.size(), "Address out of range");
+    if (addr < 0x8000)
+    {
+        m_basicRAM[addr - 0x6000] = value;
+    }
+    //LOG("Attempt to write to ROM at " + std::to_string(addr), xy::Logger::Type::Warning);
 }
 
 //------------------------//
-NRomPPU::NRomPPU(const NESCart& c)
+NROMPPU::NROMPPU(const NESCart& c)
     : MappedDevice(0, 0x2000),
     m_nesCart(c)
 {
@@ -63,9 +67,11 @@ NRomPPU::NRomPPU(const NESCart& c)
     {
         m_charRAM.resize(0x2000);
     }
+
+    name = "NROM PPU";
 }
 
-std::uint8_t NRomPPU::read(std::uint16_t addr, bool)
+std::uint8_t NROMPPU::read(std::uint16_t addr, bool)
 {
     XY_ASSERT(addr >= rangeStart() && addr <= rangeEnd(), "Address out of range");
     if (m_charRAM.empty())
@@ -76,7 +82,7 @@ std::uint8_t NRomPPU::read(std::uint16_t addr, bool)
     return m_charRAM[addr];
 }
 
-void NRomPPU::write(std::uint16_t addr, std::uint8_t value)
+void NROMPPU::write(std::uint16_t addr, std::uint8_t value)
 {
     XY_ASSERT(addr >= rangeStart() && addr <= rangeEnd(), "Address out of range");
     if (!m_charRAM.empty()) 

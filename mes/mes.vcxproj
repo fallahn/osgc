@@ -157,7 +157,9 @@
     <ClCompile Include="src\CPU6502.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MainState.cpp" />
+    <ClCompile Include="src\MapperCNROM.cpp" />
     <ClCompile Include="src\MapperNROM.cpp" />
+    <ClCompile Include="src\MapperUxROM.cpp" />
     <ClCompile Include="src\MMU.cpp" />
     <ClCompile Include="src\NESCart.cpp" />
     <ClCompile Include="src\Tia.cpp" />

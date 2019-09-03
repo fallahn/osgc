@@ -38,8 +38,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
     ss->registerState<MainState>(StateID::Main);
     ss->registerState<VCSState>(StateID::VCS2600);
-    return StateID::VCS2600;
-    //return StateID::Main;
+    //return StateID::VCS2600;
+    return StateID::Main;
 }
 
 void end(xy::StateStack* ss)

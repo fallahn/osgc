@@ -61,6 +61,11 @@ public:
         m_data          ((end - start) + 1)
     {
         name = "Generic RAM";
+
+        for (auto& d : m_data)
+        {
+            d = 0xff;
+        }
     }
 
     std::uint8_t read(std::uint16_t addr, bool preventWrite) override

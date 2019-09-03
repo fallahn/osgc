@@ -28,7 +28,6 @@ source distribution.
 #include "MainState.hpp"
 #include "StateIDs.hpp"
 #include "Util.hpp"
-#include "NESCart.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -63,32 +62,33 @@ namespace
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State (ss, ctx),
     m_cpu       (m_mmu),
-    m_ram       (0, 0xffff)
+    m_ram       (0, 0x5fff)
 {
     //map devices
     m_mmu.mapDevice(m_ram);
 
-    NESCart cart;
-    if (cart.loadFromFile(xy::FileSystem::getResourcePath() + "instr_misc.nes"))
+    if (m_nesCart.loadFromFile(xy::FileSystem::getResourcePath() + "nestest.nes"))
     {
-        //TODO check mapper type and map to mmu
+        //const auto& prg = cart.getROM();
 
-        const auto& prg = cart.getROM();
+        ////load the test program
+        //std::uint16_t prgOffset = 0x8000;
+        //for (auto b : prg)
+        //{
+        //    m_mmu.write(prgOffset++, b);
+        //}
 
-        //load the test program
-        std::uint16_t prgOffset = 0x8000;
-        for (auto b : prg)
-        {
-            m_mmu.write(prgOffset++, b);
-        }
+        ////set the reset and interrupt vectors
+        //m_mmu.write(CPU6502::ResetVector, 0x00);
+        //m_mmu.write(CPU6502::ResetVector + 1, 0xc0);
 
-        //set the reset and interrupt vectors
-        m_mmu.write(CPU6502::ResetVector, 0x00);
-        m_mmu.write(CPU6502::ResetVector + 1, 0xc0);
+        m_mmu.mapDevice(*m_nesCart.getRomMapper());
+        //TODO map VROM to PPU mapper
 
-        m_dasm = m_cpu.dasm(0xc000, 0xc000 + /*prg.size() - 1*/120);
+        m_dasm = m_cpu.dasm(0x8000, 0xc000 + /*prg.size() - 1*/120);
 
         m_cpu.reset();
+        m_cpu.getRegisters().pc = 0xc000;
     }
     //set up some UI stuff for printing info
     namespace ui = xy::ui;
@@ -138,8 +138,8 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     registerWindow([&]() 
         {
             ui::begin("RAM view");
-            static std::uint16_t start = 0x6000;
-            static std::uint16_t end = 0x6000 + 64;
+            static std::uint16_t start = 0x0000;
+            static std::uint16_t end = 0x0000 + 64;
 
             static const std::uint16_t ColWidth = 8;
             for (auto i = start; i < end;)

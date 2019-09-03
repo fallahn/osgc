@@ -28,12 +28,13 @@ namespace Mapper
         //generic ROM. $8000 - $bfff First 16kb, $c000 - $ffff Second 16kb, or mirror of first
         //CHR rom 8Kb, nto bank switched. Optionally CHR ram for some homebrew, mapped from 
         //$0000 on the PPU bus. $6000-$7ffff on the CPU bus read/write for famicom basic
-        NRom = 0, 
+        NROM = 0, 
         //SxROM. $6000-$7fff optional RAM. $8000-$bfff switchable low bank. $c000 - $ffff switchable
         //high bank. PPU banks $0000 - $0fff and $1000 - $1fff
         SxROM = 1,
         //UxROM - $8000 - $bfff is switchable. $c000 - $ffff is fixed to last bank.
-        //note only bits 3 - 0 are used in bank select register.
+        //note only bits 3 - 0 are used in bank select register. Some variants have fixed CHR
+        //ROM
         UxROM = 2,
         //CNROM - ROM is fixed at either $8000 - $bfff or $8000 - $ffff.
         //writing bank select register ($8000 - $ffff) selects the CHR bank mapped to $0000-$1ffff PPU
@@ -52,10 +53,10 @@ namespace Mapper
     };
 
     //mapped to CPU bus
-    class NRomCPU final : public MappedDevice
+    class NROMCPU final : public MappedDevice
     {
     public:
-        explicit NRomCPU(const NESCart&);
+        explicit NROMCPU(const NESCart&);
 
         std::uint8_t read(std::uint16_t address, bool noMutate) override;
         void write(std::uint16_t address, std::uint8_t data) override;
@@ -68,10 +69,10 @@ namespace Mapper
     };
 
     //mapped to PPU
-    class NRomPPU final : public MappedDevice
+    class NROMPPU final : public MappedDevice
     {
     public:
-        explicit NRomPPU(const NESCart&);
+        explicit NROMPPU(const NESCart&);
 
         std::uint8_t read(std::uint16_t address, bool noMutate) override;
         void write(std::uint16_t address, std::uint8_t data) override;
@@ -94,10 +95,24 @@ namespace Mapper
     private:
         const NESCart& m_nesCart;
         std::uint8_t m_currentBank;
+        std::size_t m_lastBankAddress;
         static constexpr std::uint8_t BankMask = 0x03;
     };
 
-    //UxROM has no CHRROM mapping - do we need to create a dummy?
+    //UxROM has CHR RAM in special cases
+    class UxROMPPU final : public MappedDevice
+    {
+    public:
+        explicit UxROMPPU(const NESCart&);
+
+        std::uint8_t read(std::uint16_t, bool) override;
+        void write(std::uint16_t, std::uint8_t) override;
+
+    private:
+        const NESCart& m_nesCart;
+        bool m_hasRam;
+        std::vector<std::uint8_t> m_ram;
+    };
 
     //-------------------------------------//
     class CNROMCPU final : public MappedDevice
@@ -109,7 +124,7 @@ namespace Mapper
 
     private:
         NESCart& m_nesCart;
-
+        bool m_mirrored;
         static constexpr std::uint8_t BankMask = 0x03;
     };
 

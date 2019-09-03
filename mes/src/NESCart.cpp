@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 //iNES format http://nesdev.com/neshdr20.txt
 
 #include "NESCart.hpp"
+#include "Mapper.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/core/Assert.hpp>
@@ -102,8 +103,6 @@ bool NESCart::loadFromFile(const std::string& path)
             return false;
         }
 
-        //TODO attempt to create ROM mapper
-
         if (vbankCount)
         {
             m_CHRROM.resize(vbankCount * 0x2000);
@@ -112,10 +111,30 @@ bool NESCart::loadFromFile(const std::string& path)
                 xy::Logger::log("Failed reading CHR ROM", xy::Logger::Type::Error);
                 return false;
             }
-
-            //TODO attempt creating VROM mapper
-
             xy::Logger::log("Read " + std::to_string(m_CHRROM.size()) + " bytes of CHR ROM", xy::Logger::Type::Info);
+        }
+
+        //attempt to create ROM mapper
+        switch (m_mapperID)
+        {
+        default:
+            xy::Logger::log("Mapper " + std::to_string(m_mapperID) + " not implemented!", xy::Logger::Type::Error);
+            return false;
+        case Mapper::NROM:
+            LOG("Created NROM mapper", xy::Logger::Type::Info);
+            m_prgMapper = std::make_unique<Mapper::NROMCPU>(*this);
+            m_chrMapper = std::make_unique<Mapper::NROMPPU>(*this);
+            break;
+        case Mapper::UxROM:
+            LOG("Created UxROM mapper", xy::Logger::Type::Info);
+            m_prgMapper = std::make_unique<Mapper::UxROMCPU>(*this);
+            m_chrMapper = std::make_unique<Mapper::UxROMPPU>(*this);
+            break;
+        /*case Mapper::CNROM:
+            LOG("Created CNROM mapper", xy::Logger::Type::Info);
+            m_prgMapper = std::make_unique<Mapper::CNROMCPU>(*this);
+            m_chrMapper = std::make_unique<Mapper::CNROMPPU>(*this);
+            break;*/
         }
 
         return true;
