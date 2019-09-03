@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#include "Mapper.hpp""
+#include "Mapper.hpp"
 #include "NESCart.hpp"
 
 using namespace Mapper;

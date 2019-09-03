@@ -152,6 +152,8 @@ VCSState::VCSState(xy::StateStack& ss, xy::State::Context ctx)
 
             ui::end();
         });
+
+    ctx.renderWindow.setView(ctx.defaultView);
 }
 
 //public
@@ -190,17 +192,36 @@ bool VCSState::handleEvent(const sf::Event& evt)
 
 void VCSState::handleMessage(const xy::Message&)
 {
-
+    //TODO update view on resize
 }
 
 bool VCSState::update(float)
 {
+    //a kludge for cpu timing - we might have to
+    //hack this into draw updates as the update
+    //rate is fixed at 60hz
+
+    static int count = 0;
+    count++;
+    if (count == 3)
+    {
+        count = 0;
+        for (auto i = 0; i < 59500; ++i)
+        {
+            m_cpu.clock();
+
+            m_tia.clock();
+            m_tia.clock();
+            m_tia.clock();
+        }
+    }
+
     return true;
 }
 
 void VCSState::draw()
 {
-
+    getContext().renderWindow.draw(m_tia);
 }
 
 xy::StateID VCSState::stateID() const

@@ -21,10 +21,12 @@ Copyright 2019 Matt Marchant
 #include "MappedDevice.hpp"
 
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include <array>
 
-class Tia final : public MappedDevice
+class Tia final : public MappedDevice, public sf::Drawable
 {
 public:
     Tia();
@@ -76,8 +78,22 @@ public:
     }
 
 private:
+    sf::Image m_image;
     sf::Texture m_texture;
+    sf::Sprite m_sprite;
     ReadyStatus m_readyStatus;
+
+    std::size_t m_currentLine;
+    std::size_t m_currentClock;
+
+    static constexpr std::size_t LinesPerFrame = 262;
+    static constexpr std::size_t ClocksPerLine = 228;
+    static constexpr std::size_t VSyncHeight = 3;
+    static constexpr std::size_t VBlankHeight = 37 + VSyncHeight;
+    static constexpr std::size_t OverscanHeight = LinesPerFrame - 30;
+    static constexpr std::size_t HBlankWidth = 68;
+    static constexpr std::size_t PictureWidth = 160;
+    static constexpr std::size_t PictureHeight = 192;
 
     std::array<std::uint8_t, 14u> m_readRegisters = {}; //contains collision data and controller input
     std::array<std::uint8_t, 45u> m_writeRegisters = {};
@@ -92,4 +108,6 @@ private:
     void hmove();
     void hmclr();
     void cxclr();
+
+    void draw(sf::RenderTarget&, sf::RenderStates) const;
 };

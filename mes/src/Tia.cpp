@@ -18,7 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "Tia.hpp"
 
-#include <array>
+#include <SFML/Graphics/RenderTarget.hpp>
 
 namespace
 {
@@ -48,13 +48,26 @@ namespace
 
 Tia::Tia()
     : MappedDevice  (0, 0x7f),
-    m_readyStatus   (ReadyStatus::High)
+    m_readyStatus   (ReadyStatus::High),
+    m_currentLine   (0),
+    m_currentClock  (0)
 {
     name = "TIA";
 
-    //TODO pixel array for frame buffer
+    //TODO rasteriser could be moved to own class
 
-    //TODO create texture to display frame buffer
+    //pixel array for frame buffer
+    m_image.create(PictureWidth, PictureHeight, sf::Color::Blue);
+
+    //create texture to display frame buffer
+    m_texture.create(PictureWidth, PictureHeight);
+
+    float widthRatio = (static_cast<float>(PictureHeight) / 3.f) * 4.f;
+    widthRatio /= static_cast<float>(PictureWidth);
+    m_sprite.setTexture(m_texture, true);
+    m_sprite.setScale(widthRatio, 1.f);
+    m_sprite.setOrigin(PictureWidth / 2, PictureHeight / 2);
+    m_sprite.setPosition(xy::DefaultSceneSize / 2.f);
 
     //TODO check what the start up state of the registers should be
 }
@@ -148,6 +161,29 @@ void Tia::clock()
     //together can be used to create the collision register
     //values, and lookup the final pixel output using the
     //pallet registers and priority registers.
+
+    m_currentClock++;
+    if (m_currentClock == ClocksPerLine)
+    {
+        m_currentClock = 0;
+        m_currentLine++;
+
+        //TODO hblank
+        m_readyStatus = ReadyStatus::High;
+
+        if (m_currentLine == LinesPerFrame)
+        {
+            m_currentLine = 0;
+
+            m_texture.update(m_image);
+        }
+
+        if (m_currentLine > VBlankHeight && m_currentLine < OverscanHeight
+            && m_currentClock > HBlankWidth)
+        {
+            //rasterise current state
+        }
+    }
 }
 
 //private
@@ -208,4 +244,9 @@ void Tia::cxclr()
     {
         m_readRegisters[i] = 0;
     }
+}
+
+void Tia::draw(sf::RenderTarget& rt, sf::RenderStates states) const
+{
+    rt.draw(m_sprite, states);
 }
