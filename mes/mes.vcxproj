@@ -145,6 +145,7 @@
     <ClInclude Include="include\MainState.hpp" />
     <ClInclude Include="include\MappedDevice.hpp" />
     <ClInclude Include="include\Mapper.hpp" />
+    <ClInclude Include="include\MirroredRAM.hpp" />
     <ClInclude Include="include\MMU.hpp" />
     <ClInclude Include="include\NESCart.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />

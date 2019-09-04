@@ -130,11 +130,11 @@ bool NESCart::loadFromFile(const std::string& path)
             m_prgMapper = std::make_unique<Mapper::UxROMCPU>(*this);
             m_chrMapper = std::make_unique<Mapper::UxROMPPU>(*this);
             break;
-        /*case Mapper::CNROM:
+        case Mapper::CNROM:
             LOG("Created CNROM mapper", xy::Logger::Type::Info);
             m_prgMapper = std::make_unique<Mapper::CNROMCPU>(*this);
             m_chrMapper = std::make_unique<Mapper::CNROMPPU>(*this);
-            break;*/
+            break;
         }
 
         return true;

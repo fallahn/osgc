@@ -62,12 +62,14 @@ namespace
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State (ss, ctx),
     m_cpu       (m_mmu),
-    m_ram       (0, 0x5fff)
+    m_tempRam   (0x2000, 0x5fff),
+    m_ram       (0, 0x07ff, 4)
 {
     //map devices
     m_mmu.mapDevice(m_ram);
+    m_mmu.mapDevice(m_tempRam);
 
-    if (m_nesCart.loadFromFile(xy::FileSystem::getResourcePath() + "nestest.nes"))
+    if (m_nesCart.loadFromFile(xy::FileSystem::getResourcePath() + "official_only.nes"))
     {
         //const auto& prg = cart.getROM();
 
@@ -138,8 +140,8 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     registerWindow([&]() 
         {
             ui::begin("RAM view");
-            static std::uint16_t start = 0x0000;
-            static std::uint16_t end = 0x0000 + 64;
+            static std::uint16_t start = 0x6000;
+            static std::uint16_t end = 0x6000 + 64;
 
             static const std::uint16_t ColWidth = 8;
             for (auto i = start; i < end;)

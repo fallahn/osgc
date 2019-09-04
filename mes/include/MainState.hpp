@@ -31,6 +31,7 @@ source distribution.
 #include "CPU6502.hpp"
 #include "MappedDevice.hpp"
 #include "NESCart.hpp"
+#include "MirroredRAM.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/gui/GuiClient.hpp>
@@ -54,7 +55,8 @@ private:
 
     MMU m_mmu;
     CPU6502 m_cpu;
-    RAMDevice m_ram;
+    RAMDevice m_tempRam;
+    MirroredRAM m_ram;
     NESCart m_nesCart;
 
     std::map<std::uint16_t, std::string> m_dasm;

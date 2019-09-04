@@ -117,6 +117,7 @@ namespace Mapper
     //-------------------------------------//
     class CNROMCPU final : public MappedDevice
     {
+    public:
         explicit CNROMCPU(NESCart&); //needs to be able to write to the CHR mapper
 
         std::uint8_t read(std::uint16_t address, bool noMutate) override;
