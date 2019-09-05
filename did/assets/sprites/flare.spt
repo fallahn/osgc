@@ -1,0 +1,60 @@
+sprite_sheet flare
+{
+	src = "assets/images/flare.png"
+	blendmode = alpha	
+
+	sprite flare
+	{
+		bounds = 0, 0, 32, 32
+
+		animation carried
+		{
+			frame = 0, 0, 32, 32
+			loop = true
+			framerate = 30
+		}
+	}
+
+	sprite flare_item
+	{
+		bounds = 32, 16, 32, 16
+
+		animation idle
+		{
+			frame = 32, 16, 32, 16
+			loop = true
+			framerate = 30
+		}
+
+		animation carried
+		{
+			frame = 0, 0, 32, 32
+			loop = true
+			framerate = 30
+		}
+	}
+
+	sprite smoke
+	{
+		bounds = 32, 0, 16, 16
+
+		animation explode
+		{
+			
+			frame = 32, 0, 16, 16
+			frame = 48, 0, 16, 16
+			frame = 64, 0, 16, 16
+			frame = 80, 0, 16, 16
+			frame = 96, 0, 16, 16
+			frame = 112, 0, 16, 16
+			
+			frame = 64, 16, 16, 16
+			frame = 80, 16, 16, 16
+			frame = 96, 16, 16, 16
+			frame = 0, 0, 0, 0
+
+			loop = false
+			framerate = 12
+		}		
+	}
+}

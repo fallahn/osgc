@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseWithDebug|Win32">
+      <Configuration>ReleaseWithDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseWithDebug|x64">
+      <Configuration>ReleaseWithDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{1A3BCFC1-FB2D-4405-AA54-4AC65A5BEB29}</ProjectGuid>
+    <RootNamespace>retrokart</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>DID</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>DID</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
+    <TargetName>DID</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\Release\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\extlibs\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>XY_DEBUG;_ITERATOR_DEBUG_LEVEL=0;_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)extlibs\bin\msvc_x64\steam;..\extlibs\bin\msvc_x64\xygine\Debug;..\extlibs\bin\msvc_x64\sfml\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-window-d.lib;sfml-graphics-d.lib;sfml-system-d.lib;xyginext-d.lib;opengl32.lib;%(AdditionalDependencies);steam_api64.lib</AdditionalDependencies>
+      <StackReserveSize>4194304</StackReserveSize>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\extlibs\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)extlibs\bin\msvc_x64\steam;..\extlibs\bin\msvc_x64\xygine\Release;..\extlibs\bin\msvc_x64\sfml\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio.lib;sfml-window.lib;sfml-system.lib;sfml-graphics.lib;sfml-main.lib;xyginext.lib;%(AdditionalDependencies);steam_api64.lib</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>4194304</StackReserveSize>
+    </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)buildnumber.exe"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\extlibs\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <PreprocessorDefinitions>XY_DEBUG;_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <UndefinePreprocessorDefinitions>NDEBUG</UndefinePreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)extlibs\bin\msvc_x64\steam;..\extlibs\bin\msvc_x64\xygine\Release;..\extlibs\bin\msvc_x64\sfml\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio.lib;sfml-window.lib;sfml-system.lib;sfml-graphics.lib;xyginext.lib;%(AdditionalDependencies);steam_api64.lib</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <StackReserveSize>4194304</StackReserveSize>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Actor.hpp" />
+    <ClInclude Include="src\ActorSystem.hpp" />
+    <ClInclude Include="src\AnimationCallbacks.hpp" />
+    <ClInclude Include="src\AnimationSystem.hpp" />
+    <ClInclude Include="src\AudioSystem.hpp" />
+    <ClInclude Include="src\BarrelSystem.hpp" />
+    <ClInclude Include="src\BeeSystem.hpp" />
+    <ClInclude Include="src\BoatSystem.hpp" />
+    <ClInclude Include="src\BotSystem.hpp" />
+    <ClInclude Include="src\BroadcastSystem.hpp" />
+    <ClInclude Include="src\Camera3D.hpp" />
+    <ClInclude Include="src\CarriableSystem.hpp" />
+    <ClInclude Include="src\CircularBuffer.hpp" />
+    <ClInclude Include="src\ClientBeeSystem.hpp" />
+    <ClInclude Include="src\ClientCarriableCallback.hpp" />
+    <ClInclude Include="src\ClientDecoySystem.hpp" />
+    <ClInclude Include="src\ClientFlareSystem.hpp" />
+    <ClInclude Include="src\ClientInfoManager.hpp" />
+    <ClInclude Include="src\ClientWeaponSystem.hpp" />
+    <ClInclude Include="src\CollectibleSystem.hpp" />
+    <ClInclude Include="src\CollisionBounds.hpp" />
+    <ClInclude Include="src\CollisionSystem.hpp" />
+    <ClInclude Include="src\CommandIDs.hpp" />
+    <ClInclude Include="src\CompassSystem.hpp" />
+    <ClInclude Include="src\ConCommands.hpp" />
+    <ClInclude Include="src\CrabSystem.hpp" />
+    <ClInclude Include="src\DayNightSystem.hpp" />
+    <ClInclude Include="src\DecoySystem.hpp" />
+    <ClInclude Include="src\DepthAnimationSystem.hpp" />
+    <ClInclude Include="src\DogSystem.hpp" />
+    <ClInclude Include="src\ErrorState.hpp" />
+    <ClInclude Include="src\ExplosionSystem.hpp" />
+    <ClInclude Include="src\FlappySailSystem.hpp" />
+    <ClInclude Include="src\FlareSystem.hpp" />
+    <ClInclude Include="src\FoliageGenerator.hpp" />
+    <ClInclude Include="src\FoliageSystem.hpp" />
+    <ClInclude Include="src\Game.hpp" />
+    <ClInclude Include="src\GameState.hpp" />
+    <ClInclude Include="src\GlobalConsts.hpp" />
+    <ClInclude Include="src\HealthBarSystem.hpp" />
+    <ClInclude Include="src\InputBinding.hpp" />
+    <ClInclude Include="src\InputParser.hpp" />
+    <ClInclude Include="src\InterpolationSystem.hpp" />
+    <ClInclude Include="src\InventorySystem.hpp" />
+    <ClInclude Include="src\IslandGenerator.hpp" />
+    <ClInclude Include="src\IslandSystem.hpp" />
+    <ClInclude Include="src\MatrixPool.hpp" />
+    <ClInclude Include="src\MenuGame.hpp" />
+    <ClInclude Include="src\MenuPlayerSystem.hpp" />
+    <ClInclude Include="src\MenuUI.hpp" />
+    <ClInclude Include="src\MenuState.hpp" />
+    <ClInclude Include="src\MessageIDs.hpp" />
+    <ClInclude Include="src\MiniMap.hpp" />
+    <ClInclude Include="src\MixerChannels.hpp" />
+    <ClInclude Include="src\NameTagManager.hpp" />
+    <ClInclude Include="src\NetworkClient.hpp" />
+    <ClInclude Include="src\Operators.hpp" />
+    <ClInclude Include="src\Packet.hpp" />
+    <ClInclude Include="src\PacketTypes.hpp" />
+    <ClInclude Include="src\ParrotLauncherSystem.hpp" />
+    <ClInclude Include="src\ParrotSystem.hpp" />
+    <ClInclude Include="src\PathFinder.hpp" />
+    <ClInclude Include="src\PlayerStats.hpp" />
+    <ClInclude Include="src\PlayerSystem.hpp" />
+    <ClInclude Include="src\QuadTreeFilter.hpp" />
+    <ClInclude Include="src\RainSystem.hpp" />
+    <ClInclude Include="src\Render3DSystem.hpp" />
+    <ClInclude Include="src\ResourceIDs.hpp" />
+    <ClInclude Include="src\Revision.hpp" />
+    <ClInclude Include="src\SeagullSystem.hpp" />
+    <ClInclude Include="src\Server.hpp" />
+    <ClInclude Include="src\ServerActiveState.hpp" />
+    <ClInclude Include="src\ServerMessages.hpp" />
+    <ClInclude Include="src\ServerRandom.hpp" />
+    <ClInclude Include="src\ServerRoundTimer.hpp" />
+    <ClInclude Include="src\ServerRunningState.hpp" />
+    <ClInclude Include="src\ServerSharedStateData.hpp" />
+    <ClInclude Include="src\ServerState.hpp" />
+    <ClInclude Include="src\ServerStormDirector.hpp" />
+    <ClInclude Include="src\ServerWeaponDirector.hpp" />
+    <ClInclude Include="src\ShadowCastSystem.hpp" />
+    <ClInclude Include="src\ShapeUtils.hpp" />
+    <ClInclude Include="src\SharedStateData.hpp" />
+    <ClInclude Include="src\SimpleShadowSystem.hpp" />
+    <ClInclude Include="src\SkeletonSystem.hpp" />
+    <ClInclude Include="src\SkullShieldSystem.hpp" />
+    <ClInclude Include="src\SoundEffectsDirector.hpp" />
+    <ClInclude Include="src\SpringFlower.hpp" />
+    <ClInclude Include="src\Sprite3D.hpp" />
+    <ClInclude Include="src\StateIDs.hpp" />
+    <ClInclude Include="src\SummaryTexture.hpp" />
+    <ClInclude Include="src\TimedCarriableSystem.hpp" />
+    <ClInclude Include="src\TorchlightSystem.hpp" />
+    <ClInclude Include="src\GameUI.hpp" />
+    <ClInclude Include="src\WetPatchDirector.hpp" />
+    <ClInclude Include="src\XPSystem.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ActorSystem.cpp" />
+    <ClCompile Include="src\AnimationSystem.cpp" />
+    <ClCompile Include="src\AudioSystem.cpp" />
+    <ClCompile Include="src\BarrelSystem.cpp" />
+    <ClCompile Include="src\BeeSystem.cpp" />
+    <ClCompile Include="src\BoatSystem.cpp" />
+    <ClCompile Include="src\BotSystem.cpp" />
+    <ClCompile Include="src\boxer\boxer_win.cpp" />
+    <ClCompile Include="src\Camera3D.cpp" />
+    <ClCompile Include="src\CarriableSystem.cpp" />
+    <ClCompile Include="src\ClientBeeSystem.cpp" />
+    <ClCompile Include="src\ClientDecoySystem.cpp" />
+    <ClCompile Include="src\ClientFlareSystem.cpp" />
+    <ClCompile Include="src\ClientInfoManager.cpp" />
+    <ClCompile Include="src\ClientWeaponSystem.cpp" />
+    <ClCompile Include="src\CollectibleSystem.cpp" />
+    <ClCompile Include="src\CollisionSystem.cpp" />
+    <ClCompile Include="src\CompassSystem.cpp" />
+    <ClCompile Include="src\CrabSystem.cpp" />
+    <ClCompile Include="src\DayNightSystem.cpp" />
+    <ClCompile Include="src\DecoySystem.cpp" />
+    <ClCompile Include="src\DepthAnimationSystem.cpp" />
+    <ClCompile Include="src\DogSystem.cpp" />
+    <ClCompile Include="src\ErrorState.cpp" />
+    <ClCompile Include="src\ExplosionSystem.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx2.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx512.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_neon.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse2.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse41.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="src\FlappySailSystem.cpp" />
+    <ClCompile Include="src\FlareSystem.cpp" />
+    <ClCompile Include="src\FoliageGenerator.cpp" />
+    <ClCompile Include="src\FoliageSystem.cpp" />
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GameActorFactory.cpp" />
+    <ClCompile Include="src\GameAudio.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
+    <ClCompile Include="src\GameUI.cpp" />
+    <ClCompile Include="src\HealthBarSystem.cpp" />
+    <ClCompile Include="src\InputParser.cpp" />
+    <ClCompile Include="src\InterpolationComponent.cpp" />
+    <ClCompile Include="src\InterpolationSystem.cpp" />
+    <ClCompile Include="src\InventorySystem.cpp" />
+    <ClCompile Include="src\IslandGenerator.cpp" />
+    <ClCompile Include="src\IslandSystem.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MatrixPool.cpp" />
+    <ClCompile Include="src\MenuLobbyFunctions.cpp" />
+    <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\MenuUIBrowser.cpp" />
+    <ClCompile Include="src\MenuUILobby.cpp" />
+    <ClCompile Include="src\MenuUIOptions.cpp" />
+    <ClCompile Include="src\MiniMap.cpp" />
+    <ClCompile Include="src\NameTagManager.cpp" />
+    <ClCompile Include="src\ParrotLauncherSystem.cpp" />
+    <ClCompile Include="src\ParrotSystem.cpp" />
+    <ClCompile Include="src\PathFinder.cpp" />
+    <ClCompile Include="src\PlayerSystem.cpp" />
+    <ClCompile Include="src\RainSystem.cpp" />
+    <ClCompile Include="src\Render3DSystem.cpp" />
+    <ClCompile Include="src\SeagullSystem.cpp" />
+    <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\ServerIdleState.cpp" />
+    <ClCompile Include="src\ServerActiveState.cpp" />
+    <ClCompile Include="src\ServerRoundTimer.cpp" />
+    <ClCompile Include="src\ServerRunningState.cpp" />
+    <ClCompile Include="src\ServerStormDirector.cpp" />
+    <ClCompile Include="src\ServerWeaponDirector.cpp" />
+    <ClCompile Include="src\ShadowCastSystem.cpp" />
+    <ClCompile Include="src\SimpleShadowSystem.cpp" />
+    <ClCompile Include="src\SkeletonSystem.cpp" />
+    <ClCompile Include="src\SkullShieldSystem.cpp" />
+    <ClCompile Include="src\SoundEffectsDirector.cpp" />
+    <ClCompile Include="src\SpringFlower.cpp" />
+    <ClCompile Include="src\Sprite3DSystem.cpp" />
+    <ClCompile Include="src\SummaryTexture.cpp" />
+    <ClCompile Include="src\TorchlightSystem.cpp" />
+    <ClCompile Include="src\WetPatchDirector.cpp" />
+    <ClCompile Include="src\XPSystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\GroundShaders.inl" />
+    <None Include="src\IslandShaders.inl" />
+    <None Include="src\ParticleShader.inl" />
+    <None Include="src\Server.inl" />
+    <None Include="src\SpriteShader.inl" />
+    <None Include="src\SunsetShader.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

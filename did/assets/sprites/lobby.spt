@@ -1,0 +1,15 @@
+sprite_sheet lobby
+{
+	src = "assets/images/lobby.png"
+	blendmode = alpha	
+
+	sprite host
+	{
+		bounds = 0,0,64,64
+	}
+
+	sprite checkbox
+	{
+		bounds = 64, 0, 64, 64
+	}
+}

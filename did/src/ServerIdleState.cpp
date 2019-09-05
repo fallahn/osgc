@@ -1,0 +1,51 @@
+/*********************************************************************
+
+Copyright 2019 Matt Marchant
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*********************************************************************/
+
+#include "ServerState.hpp"
+#include "Packet.hpp"
+
+#include<xyginext/core/Log.hpp>
+
+using namespace Server;
+
+IdleState::IdleState(SharedStateData&)
+{
+    setNextState(getID());
+    xy::Logger::log("Server switched to idle state");
+}
+
+//public
+void IdleState::networkUpdate(float dt)
+{
+
+}
+
+void IdleState::logicUpdate(float dt)
+{
+
+}
+
+void IdleState::handlePacket(const Packet& packet)
+{
+
+}
+
+void IdleState::handleMessage(const xy::Message&)
+{
+
+}

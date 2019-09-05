@@ -1,0 +1,50 @@
+audio_scape weapons
+{
+    emitter pistol01
+    {
+        path = "assets/sound/effects/pistol01.wav"
+        streaming = false
+        min_distance = 20
+        attenuation = 1
+    }
+
+    emitter pistol02
+    {
+        path = "assets/sound/effects/pistol02.wav"
+        streaming = false
+        min_distance = 20
+        attenuation = 1
+    }
+
+    emitter pistol03
+    {
+        path = "assets/sound/effects/pistol03.wav"
+        streaming = false
+        min_distance = 20
+        attenuation = 1
+    }
+
+    emitter pistol04
+    {
+        path = "assets/sound/effects/pistol04.wav"
+        streaming = false
+        min_distance = 20
+        attenuation = 1
+    }
+
+    emitter pistol05
+    {
+        path = "assets/sound/effects/pistol05.wav"
+        streaming = false
+        min_distance = 20
+        attenuation = 1
+    }
+
+    emitter pistol06
+    {
+        path = "assets/sound/effects/pistol06.wav"
+        streaming = false
+        min_distance = 20
+        attenuation = 1
+    }
+}

@@ -1,0 +1,35 @@
+sprite_sheet collectibles
+{
+	src = "assets/images/collectibles.png"
+	blendmode = alpha	
+
+	sprite ammo
+	{
+		bounds = 0, 0, 16, 16
+	}
+
+	sprite food
+	{
+		bounds = 16, 0, 16, 16
+	}
+
+	sprite coin
+	{
+		bounds = 0, 16, 16, 16
+
+		animation idle
+		{
+			frame = 0, 16, 16, 16
+			frame = 16, 16, 16, 16
+			frame = 32, 16, 16, 16
+			frame = 48, 16, 16, 16
+			frame = 64, 16, 16, 16
+			frame = 80, 16, 16, 16
+			frame = 96, 16, 16, 16
+			frame = 112, 16, 16, 16
+
+			loop = true
+			framerate = 12
+		}
+	}
+}

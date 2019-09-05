@@ -1,0 +1,1127 @@
+sprite_sheet players
+{
+	src = "assets/images/player.png"
+	blendmode = alpha
+
+	sprite player_one
+	{
+		bounds = 0,0,64,64
+
+		animation idle_up
+		{
+			frame = 128,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_down
+		{
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 512,0,64,64
+			frame = 576,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 512,0,64,64
+			frame = 576,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64						
+			frame = 512,0,64,64
+			frame = 576,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			frame = 0,0,64,64
+			
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_left
+		{
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 640,64,64,64
+			frame = 704,64,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 640,64,64,64
+			frame = 704,64,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+			frame = 192,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_right
+		{
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 512,64,64,64
+			frame = 576,64,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 512,64,64,64
+			frame = 576,64,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+			frame = 64,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_up
+		{
+			frame = 128,0,64,64
+			frame = 128,64,64,64
+			frame = 128,128,64,64
+			frame = 128,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_down
+		{
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 576,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,0,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_left
+		{
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 704,64,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 192,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_right
+		{
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 576,64,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,0,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+	}
+
+	sprite player_two
+	{
+		bounds = 256,0,64,64
+
+		animation idle_up
+		{
+			frame = 384,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_down
+		{
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 512,128,64,64
+			frame = 576,128,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 512,128,64,64
+			frame = 576,128,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+			frame = 256,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_left
+		{
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 640,192,64,64
+			frame = 704,192,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 640,192,64,64
+			frame = 704,192,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+			frame = 448,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_right
+		{
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 512,192,64,64
+			frame = 576,192,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+			frame = 320,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_up
+		{
+			frame = 384,0,64,64
+			frame = 384,64,64,64
+			frame = 384,128,64,64
+			frame = 384,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_down
+		{
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 576,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 256,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_left
+		{
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 704,192,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+			frame = 448,0,64,64
+			frame = 448,64,64,64
+			frame = 448,128,64,64
+			frame = 448,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_right
+		{
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 576,192,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 320,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+	}
+
+	sprite player_three
+	{
+		bounds = 0,256,64,64
+
+		animation idle_up
+		{
+			frame = 128,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_down
+		{
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 512,320,64,64
+			frame = 576,320,64,64
+			frame = 640,320,64,64
+			frame = 704,320,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+			frame = 0,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_left
+		{
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 512,448,64,64
+			frame = 576,448,64,64
+			frame = 640,448,64,64
+			frame = 704,448,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+			frame = 192,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_right
+		{
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 512,384,64,64
+			frame = 576,384,64,64
+			frame = 640,384,64,64
+			frame = 704,384,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+			frame = 64,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_up
+		{
+			frame = 128,256,64,64
+			frame = 128,320,64,64
+			frame = 128,384,64,64
+			frame = 128,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_down
+		{
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 640,320,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+			frame = 0,256,64,64
+			frame = 0,320,64,64
+			frame = 0,384,64,64
+			frame = 0,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_left
+		{
+			frame = 192,256,64,64
+			frame = 192,320,64,64
+			frame = 192,384,64,64
+			frame = 192,448,64,64
+			frame = 192,256,64,64
+			frame = 192,320,64,64
+			frame = 192,384,64,64
+			frame = 192,448,64,64
+			frame = 192,256,64,64
+			frame = 192,320,64,64
+			frame = 192,384,64,64
+			frame = 192,448,64,64
+			frame = 576,448,64,64
+			frame = 192,320,64,64
+			frame = 192,384,64,64
+			frame = 192,448,64,64
+			frame = 192,256,64,64
+			frame = 192,320,64,64
+			frame = 192,384,64,64
+			frame = 192,448,64,64
+			frame = 192,256,64,64
+			frame = 192,320,64,64
+			frame = 192,384,64,64
+			frame = 192,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_right
+		{
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 640,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+			frame = 64,256,64,64
+			frame = 64,320,64,64
+			frame = 64,384,64,64
+			frame = 64,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+	}
+
+	sprite player_four
+	{
+		bounds = 256,256,64,64
+
+		animation idle_up
+		{
+			frame = 384,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_down
+		{
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 512,256,64,64
+			frame = 576,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+			frame = 256,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_left
+		{
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 640,256,64,64
+			frame = 704,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+			frame = 640,256,64,64
+			frame = 704,256,64,64
+			frame = 448,256,64,64
+			frame = 448,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation idle_right
+		{
+			frame = 320,256,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_up
+		{
+			frame = 384,256,64,64
+			frame = 384,320,64,64
+			frame = 384,384,64,64
+			frame = 384,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_down
+		{
+			frame = 256,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+			frame = 256,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+			frame = 256,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+			frame = 576,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+			frame = 256,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+			frame = 256,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+			frame = 256,256,64,64
+			frame = 256,320,64,64
+			frame = 256,384,64,64
+			frame = 256,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_left
+		{
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 704,256,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+			frame = 448,256,64,64
+			frame = 448,320,64,64
+			frame = 448,384,64,64
+			frame = 448,448,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation walk_right
+		{
+			frame = 320,256,64,64
+			frame = 320,320,64,64
+			frame = 320,384,64,64
+			frame = 320,448,64,64
+			
+			framerate = 12
+			loop=true
+		}
+	}
+}

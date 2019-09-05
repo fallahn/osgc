@@ -1,0 +1,65 @@
+sprite_sheet crab
+{
+	src = "assets/images/crab.png"
+	blendmode = alpha
+
+	sprite crab
+	{
+		bounds = 0,0,48,32
+
+		animation idle
+		{
+			frame = 0,0,48,32
+			//frame = 0,32,32,32
+			//frame = 0,64,32,32
+			//frame = 0,96,32,32
+
+			framerate = 12
+			loop=true
+		}
+
+		animation up
+		{
+			frame = 64,0,32,32
+			frame = 64,32,32,32
+			frame = 64,64,32,32
+			frame = 64,96,32,32
+
+			framerate = 12
+			loop=true
+		}
+
+		animation down
+		{
+			frame = 0,0,32,32
+			frame = 0,32,32,32
+			frame = 0,64,32,32
+			frame = 0,96,32,32
+
+			framerate = 12
+			loop=true
+		}
+
+		animation left
+		{
+			frame = 0,0,48,32
+			frame = 48,0,48,32
+			frame = 96,0,48,32
+			frame = 0,32,48,32
+
+			framerate = 12
+			loop=true
+		}
+
+		animation right
+		{
+			frame = 0,32,48,32
+			frame = 96,0,48,32
+			frame = 48,0,48,32
+			frame = 0,0,48,32
+
+			framerate = 12
+			loop=true
+		}
+	}
+}

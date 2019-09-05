@@ -1,0 +1,29 @@
+sprite_sheet ships
+{
+	src = "assets/images/ships.png"
+	blendmode = alpha	
+
+	sprite ship
+	{
+		bounds = 0, 0, 1024, 96
+
+		animation zero
+		{
+			frame = 0, 0, 1024, 96
+			framerate = 30
+			loop = true
+		}
+	}
+
+	sprite lights
+	{
+		bounds = 0, 96, 1024, 96
+
+		animation zero
+		{
+			frame = 0, 96, 1024, 96
+			framerate = 30
+			loop = true
+		}
+	}
+}

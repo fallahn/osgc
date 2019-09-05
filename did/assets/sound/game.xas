@@ -1,0 +1,70 @@
+audio_scape player
+{
+    emitter walk
+    {
+        path = "assets/sound/effects/walking.wav"
+        streaming = false
+        min_distance = 10
+        attenuation = 1
+        looped = true
+    }
+
+    emitter barrel
+    {
+    	path = "assets/sound/effects/barrel_beach.wav"
+    	streaming = false
+    	min_distance = 5
+    	volume = 1.2
+    	attenuation = 1
+    }
+
+    emitter bees
+    {
+    	path = "assets/sound/effects/bees.wav"
+        streaming = false
+        min_distance = 4
+        attenuation = 2
+        looped = true
+        volume = 2.2
+    }
+
+    emitter crab
+    {
+    	path = "assets/sound/effects/crab.wav"
+    	streaming = false
+    	min_distance = 6
+    	attenuation = 1.5
+    	looped = false
+    	volume = 4
+    }
+
+    emitter decoy
+    {
+        path = "assets/sound/effects/decoy_deploy.wav"
+        streaming = false
+        min_distance = 6
+        attenuation = 1.5
+        looped = false
+        volume = 4
+    }
+
+    emitter flare
+    {
+        path = "assets/sound/effects/flare.wav"
+        streaming = false
+        min_distance = 10
+        attenuation = 1
+        looped = false
+        volume = 2
+    }
+
+    emitter splash
+    {
+        path = "assets/sound/effects/large_splash.wav"
+        streaming = false
+        min_distance = 10
+        attenuation = 1
+        looped = false
+        volume = 2
+    }    
+}

@@ -1,0 +1,620 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\fastnoise">
+      <UniqueIdentifier>{f993ebc7-fc44-4a73-b096-a896c8359556}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\server">
+      <UniqueIdentifier>{7bffd699-2188-4087-9347-d38ed206cfa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\server">
+      <UniqueIdentifier>{3bea0746-8115-44af-8afb-e965db167b34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\states">
+      <UniqueIdentifier>{f4ee2e77-762e-48f2-ace0-cd6e27f57ddc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\states">
+      <UniqueIdentifier>{66d026e1-5193-4db8-83af-d384e2f18e72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems">
+      <UniqueIdentifier>{31d1e5fe-71d8-431f-81c7-672958041da2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\systems">
+      <UniqueIdentifier>{eb728826-23f8-41b1-8152-7916d0509bb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\directors">
+      <UniqueIdentifier>{228000d3-40a3-4b3c-942f-100e006eddd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\directors">
+      <UniqueIdentifier>{5017152b-5ee4-4d4b-9abb-8a30a5fa47d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems\Server">
+      <UniqueIdentifier>{092bd800-e358-44b8-a935-965e6959b519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems\Client">
+      <UniqueIdentifier>{a3ae6cde-4a65-4024-89e5-0248d135504d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems\Shared">
+      <UniqueIdentifier>{c25bb9b7-a2e6-48b5-bc4c-af8eddb1f4fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\systems\client">
+      <UniqueIdentifier>{3702c4db-1aef-438c-b252-25b01ab1917a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\systems\server">
+      <UniqueIdentifier>{85e86cfb-0573-4f88-af59-6552981ad26f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\systems\shared">
+      <UniqueIdentifier>{6e21c2fe-8c4b-49aa-96e2-12f2332c78f9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Game.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\StateIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ResourceIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CommandIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FoliageGenerator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GlobalConsts.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MessageIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IslandGenerator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Revision.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Server.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerState.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerSharedStateData.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Packet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkClient.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SharedStateData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MenuState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerRunningState.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputBinding.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PacketTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerRandom.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionBounds.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameUI.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WetPatchDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AnimationCallbacks.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\QuadTreeFilter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerWeaponDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MatrixPool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NameTagManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClientInfoManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlayerStats.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ErrorState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PathFinder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Operators.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerMessages.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MenuUI.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SoundEffectsDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MiniMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerStormDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClientCarriableCallback.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\XPSystem.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerRoundTimer.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SummaryTexture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ActorSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AnimationSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AudioSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BarrelSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BeeSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BoatSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BotSystem.hpp">
+      <Filter>Header Files\systems\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BroadcastSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camera3D.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CarriableSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClientWeaponSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollectibleSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionSystem.hpp">
+      <Filter>Header Files\systems\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CompassSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CrabSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DayNightSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DecoySystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DepthAnimationSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DogSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ExplosionSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlappySailSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FoliageSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HealthBarSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InventorySystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IslandSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ParrotLauncherSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ParrotSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlayerSystem.hpp">
+      <Filter>Header Files\systems\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RainSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render3DSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SeagullSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SkeletonSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpringFlower.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sprite3D.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TorchlightSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClientBeeSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ConCommands.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShadowCastSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SimpleShadowSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClientDecoySystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TimedCarriableSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FlareSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClientFlareSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SkullShieldSystem.hpp">
+      <Filter>Header Files\systems\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MixerChannels.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShapeUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ServerActiveState.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MenuGame.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InterpolationSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CircularBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MenuPlayerSystem.hpp">
+      <Filter>Header Files\systems\shared</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoliageGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx2.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx512.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_neon.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse2.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse41.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IslandGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Server.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ServerIdleState.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ServerRunningState.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ServerActiveState.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameUI.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WetPatchDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ServerWeaponDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MatrixPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NameTagManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientInfoManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SummaryTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ErrorState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PathFinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuUIBrowser.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuUILobby.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuLobbyFunctions.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameAudio.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SoundEffectsDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MiniMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuUIOptions.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ServerStormDirector.cpp">
+      <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\XPSystem.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ServerRoundTimer.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameActorFactory.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AnimationSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BarrelSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BeeSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BoatSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BotSystem.cpp">
+      <Filter>Source Files\systems\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Camera3D.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CarriableSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientWeaponSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CollectibleSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CollisionSystem.cpp">
+      <Filter>Source Files\systems\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CompassSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CrabSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DayNightSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DecoySystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DepthAnimationSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExplosionSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FlappySailSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoliageSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HealthBarSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InventorySystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IslandSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ParrotLauncherSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ParrotSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlayerSystem.cpp">
+      <Filter>Source Files\systems\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RainSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SeagullSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render3DSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SkeletonSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpringFlower.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sprite3DSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TorchlightSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DogSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\boxer\boxer_win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientBeeSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShadowCastSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SimpleShadowSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientDecoySystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FlareSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientFlareSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SkullShieldSystem.cpp">
+      <Filter>Source Files\systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InterpolationComponent.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InterpolationSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\IslandShaders.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\SpriteShader.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\Server.inl">
+      <Filter>Header Files\server</Filter>
+    </None>
+    <None Include="src\ParticleShader.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\SunsetShader.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\GroundShaders.inl">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

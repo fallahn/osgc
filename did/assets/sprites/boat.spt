@@ -1,0 +1,89 @@
+sprite_sheet boat
+{
+	src = "assets/images/boat.png"
+	blendmode = alpha	
+
+	sprite boat
+	{
+		bounds = 0, 0, 142, 70
+
+		animation zero
+		{
+			frame = 0, 0, 142, 70
+			framerate = 30
+			loop = true
+		}
+
+		animation one
+		{
+			frame = 0, 70, 142, 70
+			framerate = 30
+			loop = true
+		}
+
+		animation two
+		{
+			frame = 0, 140, 142, 70
+			framerate = 30
+			loop = true
+		}
+
+		animation three
+		{
+			frame = 142, 0, 142, 70
+			framerate = 30
+			loop = true
+		}
+
+		animation four
+		{
+			frame = 142, 70, 142, 70
+			framerate = 30
+			loop = true
+		}
+
+		animation five
+		{
+			frame = 142, 140, 142, 70
+			framerate = 30
+			loop = true
+		}
+	}
+
+	sprite sail
+	{
+		bounds = 0, 216, 74, 64
+
+		animation player_one
+		{
+			frame = 0, 216, 74, 64
+
+			framerate = 30
+			loop = true
+		}
+
+		animation player_two
+		{
+			frame = 0, 216, 74, 64
+
+			framerate = 30
+			loop = true
+		}
+
+		animation player_three
+		{
+			frame = 0, 216, 74, 64
+
+			framerate = 30
+			loop = true
+		}
+
+		animation player_four
+		{
+			frame = 0, 216, 74, 64
+
+			framerate = 30
+			loop = true
+		}
+	}
+}

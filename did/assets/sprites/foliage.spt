@@ -1,0 +1,55 @@
+sprite_sheet foliage
+{
+	src="assets/images/foliage.png"
+	blendmode=alpha
+
+	sprite far_one
+	{
+		bounds = 0,0,210,64
+	}
+
+	sprite far_two
+	{
+		bounds=224,0,210,64
+	}
+
+	sprite mid_one
+	{
+		bounds = 0,64,64,128
+	}
+
+	sprite mid_two
+	{
+		bounds = 64,64,64,128
+	}
+
+	sprite mid_three
+	{
+		bounds = 128,64,64,128
+	}
+
+	sprite mid_four
+	{
+		bounds = 192,64,64,128
+	}
+
+	sprite mid_five
+	{
+		bounds = 256,64,80,128
+	}
+
+	sprite near_one
+	{
+		bounds =0,208,80,48
+	}
+
+	sprite near_two
+	{
+		bounds = 96,208,96,48
+	}
+
+	sprite near_three
+	{
+		bounds = 192,208,80,48
+	}
+}

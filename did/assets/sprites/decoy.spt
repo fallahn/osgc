@@ -1,0 +1,49 @@
+sprite_sheet decoy
+{
+	src = "assets/images/decoy.png"
+	blendmode = alpha	
+
+	sprite decoy
+	{
+		bounds = 0, 0, 64, 64
+
+		animation idle
+		{
+			frame = 0, 0, 64, 64
+			frame = 128, 0, 64, 64
+			frame = 192, 0, 64, 64
+			frame = 128, 0, 64, 64
+			loop = true
+			framerate = 12
+		}
+
+		animation spawn
+		{
+			frame = 0, 0, 64, 64
+			loop = true
+			framerate = 30
+		}
+
+		animation break
+		{
+			frame = 256, 0, 64, 64
+			frame = 0, 64, 64, 64
+			frame = 64, 64, 64, 64
+			frame = 128, 64, 64, 64
+			frame = 192, 64, 64, 64
+			frame = 256, 64, 64, 64
+			frame = 0, 128, 64, 64
+			frame = 64, 128, 64, 64
+			frame = 128, 128, 64, 64
+			frame = 0, 0, 0, 0
+
+			loop = false
+			framerate = 30
+		}
+	}
+
+	sprite decoy_item
+	{
+		bounds = 64, 32, 32, 32
+	}
+}

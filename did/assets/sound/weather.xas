@@ -1,0 +1,39 @@
+audio_scape weather
+{
+    emitter rain
+    {
+        path = "assets/sound/effects/rain.ogg"
+        streaming = true
+        min_distance = 512
+        attenuation = 0.1
+        looped = true
+        volume = 0.2
+    }
+
+    emitter thunder01
+    {
+    	path = "assets/sound/effects/thunder01.wav"
+    	streaming = false
+    	min_distance = 5
+    	volume = 2
+    	attenuation = 1
+    }
+
+    emitter thunder02
+    {
+    	path = "assets/sound/effects/thunder02.wav"
+    	streaming = false
+    	min_distance = 5
+    	volume = 2
+    	attenuation = 1
+    }
+
+    emitter thunder03
+    {
+    	path = "assets/sound/effects/thunder03.wav"
+    	streaming = false
+    	min_distance = 5
+    	volume = 2
+    	attenuation = 1
+    }
+}

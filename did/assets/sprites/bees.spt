@@ -1,0 +1,97 @@
+sprite_sheet bees
+{
+	src = "assets/images/bees.png"
+	blendmode = alpha
+
+	sprite hive
+	{
+		bounds = 640, 32, 32 ,32
+	}
+
+	sprite bees
+	{
+		bounds = 0,0,64,32
+
+		animation idle
+		{
+			frame = 0,0,64,32
+			frame = 64,0,64,32
+			frame = 128,0,64,32
+			frame = 192,0,64,32
+			frame = 256,0,64,32
+			frame = 320,0,64,32
+			frame = 384,0,64,32
+			frame = 448,0,64,32
+			frame = 512,0,64,32
+			frame = 576,0,64,32
+			frame = 640,0,64,32
+			frame = 704,0,64,32
+
+			framerate = 18
+			loop=true
+		}
+
+		animation sleep
+		{
+			frame = 0,64,64,32
+			frame = 64,64,64,32
+			frame = 128,64,64,32
+			frame = 192,64,64,32
+			frame = 256,64,64,32
+			frame = 320,64,64,32
+			frame = 384,64,64,32
+			frame = 448,64,64,32
+			frame = 512,64,64,32
+			frame = 576,64,64,32
+			frame = 640,64,64,32
+			frame = 704,64,64,32
+			frame = 0,0,0,0
+
+			framerate = 18
+			loop=false
+		}
+
+		animation wake
+		{
+			frame = 704,64,64,32
+			frame = 640,64,64,32
+			frame = 576,64,64,32
+			frame = 512,64,64,32
+			frame = 448,64,64,32
+			frame = 384,64,64,32
+			frame = 320,64,64,32
+			frame = 256,64,64,32
+			frame = 192,64,64,32
+			frame = 128,64,64,32
+			frame = 64,64,64,32
+			frame = 0,64,64,32
+			
+			framerate = 18
+			loop=false
+		}
+
+		animation right
+		{
+			frame = 0,32,64,32
+			frame = 64,32,64,32
+			frame = 128,32,64,32
+			frame = 192,32,64,32
+			frame = 256,32,64,32
+
+			framerate = 18
+			loop=true
+		}
+
+		animation left
+		{
+			frame = 320,32,64,32
+			frame = 384,32,64,32
+			frame = 448,32,64,32
+			frame = 512,32,64,32
+			frame = 576,32,64,32
+
+			framerate = 18
+			loop=true
+		}
+	}
+}

@@ -1,0 +1,42 @@
+sprite_sheet wet_patch
+{
+	src = "assets/images/wet_patch.png"
+	blendmode = alpha	
+
+	sprite wet_patch
+	{
+		bounds = 0,32,32,32
+
+		animation one
+		{
+			frame = 0,32,32,32
+			
+			loop = true
+			framerate = 14
+		}
+
+		animation two
+		{
+			frame = 32,32,32,32
+			
+			loop = true
+			framerate = 14
+		}
+
+		animation three
+		{
+			frame = 64,32,32,32
+			
+			loop = true
+			framerate = 14
+		}
+
+		animation four
+		{
+			frame = 96,32,32,32
+			
+			loop = true
+			framerate = 14
+		}		
+	}
+}

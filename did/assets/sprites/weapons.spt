@@ -1,0 +1,812 @@
+sprite_sheet weapons
+{
+	src = "assets/images/weapons2.png"
+	blendmode = alpha	
+
+	sprite weapon_rodney
+	{
+		bounds = 0,0,96, 48
+
+		//shovel
+		animation dig_side
+		{
+			frame = 384, 768, 96, 48
+			frame = 480, 768, 96, 48
+			frame = 576, 768, 96, 48
+			frame = 672, 768, 96, 48
+			frame = 384, 768, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_front
+		{
+			frame = 384, 720, 96, 48
+			frame = 480, 720, 96, 48
+			frame = 576, 720, 96, 48
+			frame = 672, 720, 96, 48
+			frame = 384, 720, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_back
+		{
+			frame = 384, 816, 96, 48
+			frame = 480, 816, 96, 48
+			frame = 576, 816, 96, 48
+			frame = 672, 816, 96, 48
+			frame = 384, 816, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation shovel_idle_side
+		{
+			frame = 96, 768, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_idle_front
+		{
+			frame = 96, 720, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_idle_back
+		{
+			frame = 96, 816, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_walk_side
+		{
+			frame = 0, 768, 96, 48
+			frame = 96, 768, 96, 48
+			frame = 192, 768, 96, 48
+			frame = 288, 768, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_walk_front
+		{
+			frame = 0, 720, 96, 48
+			frame = 96, 720, 96, 48
+			frame = 192, 720, 96, 48
+			frame = 288, 720, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_walk_back
+		{
+			frame = 0, 816, 96, 48
+			frame = 96, 816, 96, 48
+			frame = 192, 816, 96, 48
+			frame = 288, 816, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		//pistol
+		animation shoot_side
+		{
+			frame = 384, 480, 96, 48
+			frame = 480, 480, 96, 48
+			frame = 576, 480, 96, 48
+			frame = 672, 480, 96, 48
+
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_front
+		{
+			frame = 384, 432, 96, 48
+			frame = 480, 432, 96, 48
+			frame = 576, 432, 96, 48
+			frame = 672, 432, 96, 48
+
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_back
+		{
+			frame = 384, 528, 96, 48
+			frame = 480, 528, 96, 48
+			frame = 576, 528, 96, 48
+			frame = 672, 528, 96, 48
+
+			framerate = 10
+			loop = false
+		}
+
+		animation pistol_idle_side
+		{
+			frame = 0, 480, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation pistol_idle_front
+		{
+			frame = 0, 432, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation pistol_idle_back
+		{
+			frame = 0, 528, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation pistol_walk_side
+		{
+			frame = 0, 480, 96, 48
+			frame = 96, 480, 96, 48
+			frame = 192, 480, 96, 48
+			frame = 288, 480, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation pistol_walk_front
+		{
+			frame = 0, 432, 96, 48
+			frame = 96, 432, 96, 48
+			frame = 192, 432, 96, 48
+			frame = 288, 432, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation pistol_walk_back
+		{
+			frame = 0, 528, 96, 48
+			frame = 96, 528, 96, 48
+			frame = 192, 528, 96, 48
+			frame = 288, 528, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		//sword
+		animation slash_side
+		{
+			//frame = 576, 144, 96, 48
+			frame = 0, 192, 96, 48
+			frame = 96, 192, 96, 48
+			frame = 192, 192, 96, 48
+			frame = 288, 192, 96, 48
+			frame = 384, 192, 96, 48
+			frame = 480, 192, 96, 48
+			frame = 576, 144, 96, 48
+
+			framerate = 16
+			loop = false
+		}
+
+		animation slash_front
+		{
+			frame = 0, 144, 96, 48
+			frame = 96, 144, 96, 48
+			frame = 192, 144, 96, 48
+			frame = 288, 144, 96, 48
+			frame = 384, 144, 96, 48
+			frame = 480, 144, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation slash_back
+		{
+			//uses front anim mirrored
+			framerate = 12
+			loop = false
+		}
+
+		animation sword_idle_side
+		{
+			frame = 576, 144, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation sword_idle_front
+		{
+			frame = 384, 240, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation sword_idle_back
+		{
+			frame = 0, 240, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation sword_walk_side
+		{
+			frame = 576, 144, 96, 48
+			frame = 672, 144, 96, 48
+			frame = 576, 192, 96, 48
+			frame = 672, 192, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation sword_walk_front
+		{
+			frame = 384, 240, 96, 48
+			frame = 480, 240, 96, 48
+			frame = 576, 240, 96, 48
+			frame = 672, 240, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation sword_walk_back
+		{
+			frame = 0, 240, 96, 48
+			frame = 96, 240, 96, 48
+			frame = 192, 240, 96, 48
+			frame = 288, 240, 96, 48
+
+			framrate = 12
+			loop = true
+		}
+
+		animation none_side
+		{
+			frame = 288, 864, 96, 48
+
+			framerate = 30
+			loop = true		
+		}
+
+		animation none_front
+		{
+			frame = 192, 864, 96, 48
+			
+			framerate = 30
+			loop = true		
+		}
+
+		animation hidden
+		{
+			frame = 0,0,64,64
+			framerate = 30
+			loop = true
+		}
+	}
+
+	sprite weapon_jean
+	{
+		bounds = 0,0,96, 48
+
+		//shovel
+		animation dig_side
+		{
+			frame = 384, 624, 96, 48
+			frame = 480, 624, 96, 48
+			frame = 576, 624, 96, 48
+			frame = 672, 624, 96, 48
+			frame = 384, 624, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_front
+		{
+			frame = 384, 576, 96, 48
+			frame = 480, 576, 96, 48
+			frame = 576, 576, 96, 48
+			frame = 672, 576, 96, 48
+			frame = 384, 576, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_back
+		{
+			frame = 384, 672, 96, 48
+			frame = 480, 672, 96, 48
+			frame = 576, 672, 96, 48
+			frame = 672, 672, 96, 48
+			frame = 384, 672, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation shovel_idle_side
+		{
+			frame = 0, 624, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_idle_front
+		{
+			frame = 0, 576, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_idle_back
+		{
+			frame = 0, 672, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_walk_side
+		{
+			frame = 0, 624, 96, 48
+			frame = 96, 624, 96, 48
+			frame = 192, 624, 96, 48
+			frame = 288, 624, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_walk_front
+		{
+			frame = 0, 576, 96, 48
+			frame = 96, 576, 96, 48
+			frame = 192, 576, 96, 48
+			frame = 288, 576, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation shovel_walk_back
+		{
+			frame = 0, 672, 96, 48
+			frame = 96, 672, 96, 48
+			frame = 192, 672, 96, 48
+			frame = 288, 672, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		//pistol
+		animation shoot_side
+		{
+			frame = 384, 336, 96, 48
+			frame = 480, 336, 96, 48
+			frame = 576, 336, 96, 48
+			frame = 672, 336, 96, 48
+
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_front
+		{
+			frame = 384, 288, 96, 48
+			frame = 480, 288, 96, 48
+			frame = 576, 288, 96, 48
+			frame = 672, 288, 96, 48
+
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_back
+		{
+			frame = 384, 384, 96, 48
+			frame = 480, 384, 96, 48
+			frame = 576, 384, 96, 48
+			frame = 672, 384, 96, 48
+
+			framerate = 10
+			loop = false
+		}
+
+		animation pistol_idle_side
+		{
+			frame = 0, 336, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation pistol_idle_front
+		{
+			frame = 0, 288, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation pistol_idle_back
+		{
+			frame = 0, 384, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation pistol_walk_side
+		{
+			frame = 0, 336, 96, 48
+			frame = 96, 336, 96, 48
+			frame = 192, 336, 96, 48
+			frame = 288, 336, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation pistol_walk_front
+		{
+			frame = 0, 288, 96, 48
+			frame = 96, 288, 96, 48
+			frame = 192, 288, 96, 48
+			frame = 288, 288, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation pistol_walk_back
+		{
+			frame = 0, 384, 96, 48
+			frame = 96, 384, 96, 48
+			frame = 192, 384, 96, 48
+			frame = 288, 384, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		//sword
+		animation slash_side
+		{
+			//frame = 576, 0, 96, 48
+			frame = 0, 48, 96, 48
+			frame = 96, 48, 96, 48
+			frame = 192, 48, 96, 48
+			frame = 288, 48, 96, 48
+			frame = 384, 48, 96, 48
+			frame = 480, 48, 96, 48
+			frame = 576, 0, 96, 48
+
+			framerate = 16
+			loop = false
+		}
+
+		animation slash_front
+		{
+			frame = 0, 0, 96, 48
+			frame = 96, 0, 96, 48
+			frame = 192, 0, 96, 48
+			frame = 288, 0, 96, 48
+			frame = 384, 0, 96, 48
+			frame = 480, 0, 96, 48
+
+			framerate = 12
+			loop = false
+		}
+
+		animation slash_back
+		{
+			//uses front anim mirrored
+			framerate = 12
+			loop = false
+		}
+
+		animation sword_idle_side
+		{
+			frame = 576, 0, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation sword_idle_front
+		{
+			frame = 384, 96, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation sword_idle_back
+		{
+			frame = 0, 96, 96, 48
+
+			framerate = 30
+			loop = true
+		}
+
+		animation sword_walk_side
+		{
+			frame = 576, 0, 96, 48
+			frame = 672, 0, 96, 48
+			frame = 576, 48, 96, 48
+			frame = 672, 48, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation sword_walk_front
+		{
+			frame = 384, 96, 96, 48
+			frame = 480, 96, 96, 48
+			frame = 576, 96, 96, 48
+			frame = 672, 96, 96, 48
+
+			framerate = 12
+			loop = true
+		}
+
+		animation sword_walk_back
+		{
+			frame = 0, 96, 96, 48
+			frame = 96, 96, 96, 48
+			frame = 192, 96, 96, 48
+			frame = 288, 96, 96, 48
+
+			framrate = 12
+			loop = true
+		}
+
+		animation none_side
+		{
+			frame = 96, 864, 96, 48
+
+			framerate = 30
+			loop = true		
+		}
+
+		animation none_front
+		{
+			frame = 0, 864, 96, 48
+
+			framerate = 30
+			loop = true		
+		}
+
+		animation hidden
+		{
+			frame = 0,0,64,64
+			framerate = 30
+			loop = true
+		}
+	}
+
+	sprite weapon
+	{
+		bounds = 0,0,64,64
+
+		animation dig_left
+		{
+			frame = 128,64,64,64
+			frame = 128,64,64,64
+			frame = 128,128,64,64
+			frame = 128,192,64,64
+			frame = 128,64,64,64
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_right
+		{
+			frame = 64,64,64,64
+			frame = 64,64,64,64
+			frame = 64,128,64,64
+			frame = 64,192,64,64
+			frame = 64,64,64,64
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_front
+		{
+			frame = 0,64,64,64
+			frame = 0,64,64,64
+			frame = 0,128,64,64
+			frame = 0,192,64,64
+			frame = 0,64,64,64
+
+			framerate = 12
+			loop = false
+		}
+
+		animation dig_idle_left
+		{
+			frame = 128,64,64,64
+			framerate = 30
+			loop = true		
+		}
+
+		animation dig_idle_right
+		{
+			frame = 64,64,64,64
+			framerate = 30
+			loop = true		
+		}
+
+		animation dig_idle_front
+		{
+			frame = 0,64,64,64
+			framerate = 30
+			loop = true	
+		}
+
+		animation shoot_left
+		{
+			frame = 128,256,64,64
+			frame = 320,0,64,64
+			frame = 320,64,64,64
+			frame = 320,128,64,64
+			frame = 128,256,64,64
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_right
+		{
+			frame = 64,256,64,64
+			frame = 256,0,64,64
+			frame = 256,64,64,64
+			frame = 256,128,64,64
+			frame = 64,256,64,64
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_front
+		{
+			frame = 0,256,64,64
+			frame = 192,0,64,64
+			frame = 192,64,64,64
+			frame = 192,128,64,64
+			frame = 0,256,64,64
+			framerate = 10
+			loop = false
+		}
+
+		animation shoot_idle_left
+		{
+			frame = 128,256,64,64
+			framerate = 30
+			loop = true
+		}
+
+		animation shoot_idle_right
+		{
+			frame = 64,256,64,64
+			framerate = 30
+			loop = true
+		}
+
+		animation shoot_idle_front
+		{
+			frame = 0,256,64,64
+			framerate = 30
+			loop = true
+		}
+
+		animation slash_left
+		{
+			frame = 320,192,64,64
+			frame = 320,256,64,64
+			frame = 320,192,64,64
+
+			framerate = 22
+			loop = false		
+		}
+
+		animation slash_right
+		{
+			frame = 256,192,64,64
+			frame = 256,256,64,64
+			frame = 256,192,64,64
+
+			framerate = 22
+			loop = false		
+		}
+
+		animation slash_front
+		{
+			frame = 192,192,64,64
+			frame = 192,256,64,64
+			frame = 192,192,64,64
+
+			framerate = 22
+			loop = false
+		}
+
+		animation slash_idle_left
+		{
+			frame = 320,192,64,64
+			framerate = 30
+			loop = true
+		}
+
+		animation slash_idle_right
+		{
+			frame = 256,192,64,64
+			framerate = 30
+			loop = true
+		}
+
+		animation slash_idle_front
+		{
+			frame = 192,192,64,64
+			framerate = 30
+			loop = true
+		}
+
+		animation none_left
+		{
+			frame = 128,0,64,64
+			framerate = 30
+			loop = true		
+		}
+
+		animation none_right
+		{
+			frame = 64,0,64,64
+			framerate = 30
+			loop = true		
+		}
+
+		animation none_front
+		{
+			frame = 0,0,64,64
+			framerate = 30
+			loop = true		
+		}
+
+		animation hidden
+		{
+			frame = 0,0,64,64
+			framerate = 30
+			loop = true
+		}	
+	}
+}

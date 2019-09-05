@@ -1,0 +1,54 @@
+sprite_sheet ghosts
+{
+	src = "assets/images/ghosts.png"
+	blendmode = alpha	
+
+	sprite ghost
+	{
+		bounds = 0,0,64,64
+
+		animation rodney
+		{
+			frame = 0,192,64,64
+			frame = 64,192,64,64
+			frame = 128,192,64,64
+			frame = 192,192,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation jean
+		{
+			frame = 0,0,64,64
+			frame = 64,0,64,64
+			frame = 128,0,64,64
+			frame = 192,0,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation helena
+		{
+			frame = 0,64,64,64
+			frame = 64,64,64,64
+			frame = 128,64,64,64
+			frame = 192,64,64,64
+
+			framerate = 12
+			loop=true
+		}
+
+		animation lars
+		{
+			frame = 0,128,64,64
+			frame = 64,128,64,64
+			frame = 128,128,64,64
+			frame = 192,128,64,64
+
+			framerate = 12
+			loop=true
+		}	
+	}
+}

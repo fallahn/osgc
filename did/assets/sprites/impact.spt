@@ -1,0 +1,56 @@
+sprite_sheet impact
+{
+	src = "assets/images/canon_hit.png"
+	blendmode = alpha	
+
+	sprite impact
+	{
+		bounds = 0,0,48,104
+
+		animation boom
+		{
+			frame = 0,0,48,104
+			frame = 48,0,48,104
+			frame = 96,0,48,104
+			frame = 144,0,48,104
+			frame = 192,0,48,104
+			frame = 240,0,48,104
+			frame = 288,0,48,104
+			frame = 336,0,48,104
+			frame = 0,104,48,104
+			frame = 48,104,48,104
+			frame = 96,104,48,104
+			frame = 144,104,48,104
+			frame = 192,104,48,104
+			frame = 240,104,48,104
+			frame = 288,104,48,104
+			frame = 336,104,48,104
+			
+			loop = false
+			framerate = 20
+		}
+
+		animation splash
+		{
+			frame = 0,208,48,104
+			frame = 48,208,48,104
+			frame = 96,208,48,104
+			frame = 144,208,48,104
+			frame = 192,208,48,104
+			frame = 240,208,48,104
+			frame = 288,208,48,104
+			frame = 336,208,48,104
+			frame = 0,312,48,104
+			frame = 48,312,48,104
+			frame = 96,312,48,104
+			frame = 144,312,48,104
+			frame = 192,312,48,104
+			frame = 240,312,48,104
+			frame = 288,312,48,104
+			frame = 336,312,48,104
+			
+			loop = false
+			framerate = 20
+		}		
+	}
+}

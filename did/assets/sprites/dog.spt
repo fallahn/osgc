@@ -1,0 +1,65 @@
+sprite_sheet dog
+{
+	src = "assets/images/dog.png"
+	blendmode = alpha
+
+	sprite dog
+	{
+		bounds = 0,0,64,32
+
+		animation bark
+		{
+			frame = 192,0,64,32
+			frame = 128,0,64,32
+			frame = 64,0,64,32
+			frame = 0,0,64,32
+
+			frame = 0,32,64,32
+			frame = 64,32,64,32
+			frame = 128,32,64,32
+			frame = 192,32,64,32
+            frame = 256,32,64,32
+
+			framerate = 12
+			loop=true
+			loop_start = 4
+		}
+
+		animation idle
+		{
+			frame = 0, 0, 64,32
+			frame = 64, 0, 64,32
+			frame = 128,0,64,32
+			frame = 192,0,64,32
+
+			frame = 192,0,64,32
+			frame = 192,0,64,32
+
+			framerate = 32
+			loop=true
+			loop_start = 3
+		}
+
+		animation up
+		{
+			frame = 192,0,64,32
+			frame = 128,0,64,32
+			frame = 64,0,64,32
+			frame = 0,0,64,32
+
+			framerate = 12
+			loop=false
+		}
+
+		animation down
+		{
+			frame = 0,0,64,32
+			frame = 64,0,64,32
+			frame = 128,0,64,32
+			frame = 192,0,64,32
+
+			framerate = 12
+			loop=false
+		}
+	}
+}

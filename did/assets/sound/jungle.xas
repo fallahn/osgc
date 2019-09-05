@@ -1,0 +1,49 @@
+audio_scape
+{
+	emitter jungle_day
+	{
+		path = "assets/sound/effects/jungle_day.wav"
+		streaming = true
+		looped = true
+		min_distance = 10
+		attenuation = 0.5
+		volume = 0.1
+	}
+
+	emitter jungle_night
+	{
+		path = "assets/sound/effects/jungle_night.wav"
+		streaming = true
+		looped = true
+		min_distance = 10
+		attenuation = 0.5
+		volume = 0.1
+	}
+
+	emitter parrots01
+	{
+		path = "assets/sound/effects/parrots01.wav"
+		streaming = false
+		min_distance = 10
+		attenuation = 2
+		looped = false
+	}
+
+	emitter parrots02
+	{
+		path = "assets/sound/effects/parrots02.wav"
+		streaming = false
+		min_distance = 10
+		attenuation = 2
+		looped = false
+	}
+
+	emitter parrots03
+	{
+		path = "assets/sound/effects/parrots03.wav"
+		streaming = false
+		min_distance = 10
+		attenuation = 2
+		looped = false
+	}
+}

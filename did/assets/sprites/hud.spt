@@ -1,0 +1,30 @@
+sprite_sheet hud
+{
+	src = "assets/images/hud.png"
+	blendmode = alpha	
+
+	sprite weapons
+	{
+		bounds = 0,0,432,144
+	}
+
+	sprite highlight
+	{
+		bounds = 432, 0, 144, 144
+	}
+
+	sprite ammo
+	{
+		bounds = 576, 48, 96, 96
+	}
+
+	sprite treasure
+	{
+		bounds = 672, 48, 96, 96
+	}
+
+	sprite skull
+	{
+		bounds = 576, 0, 32, 32
+	}
+}

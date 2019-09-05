@@ -1,0 +1,22 @@
+sprite_sheet parrot
+{
+	src = "assets/images/parrot.png"
+	blendmode = alpha	
+
+	sprite parrot
+	{
+		bounds = 0,0,32,42
+
+		animation fly
+		{
+			frame = 0,0,32,42
+			frame = 32,0,32,42
+			frame = 64,0,32,42
+			frame = 96,0,32,42
+			frame = 128,0,32,42
+			
+			loop = true
+			framerate = 14
+		}
+	}
+}

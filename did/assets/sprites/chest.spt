@@ -1,0 +1,47 @@
+sprite_sheet chest
+{
+	src = "assets/images/chest.png"
+	blendmode = alpha	
+
+	sprite chest
+	{
+		bounds = 0,0,32,32
+
+		animation down
+		{
+			frame = 0,0,32,32
+			
+			loop = true
+			framerate = 14
+		}
+
+		animation up
+		{
+			frame = 32,0,32,32
+			
+			loop = true
+			framerate = 14
+		}
+
+		animation left
+		{
+			frame = 64,0,32,32
+			
+			loop = true
+			framerate = 14
+		}
+
+		animation spawn
+		{
+			frame = 96,0,32,32
+			frame = 0,32,32,32
+			frame = 32,32,32,32
+			frame = 64,32,32,32
+
+			frame = 0,0,32,32
+			
+			loop = false
+			framerate = 16
+		}
+	}
+}

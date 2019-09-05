@@ -1,0 +1,23 @@
+sprite_sheet lantern
+{
+	src = "assets/images/lantern.png"
+	blendmode = alpha	
+
+	sprite lantern
+	{
+		bounds = 0,0,16,32
+
+		animation flicker
+		{
+			frame = 0,0,16,32
+			frame = 16,0,16,32
+			frame = 32,0,16,32
+			frame = 0,32,16,32
+			frame = 16,32,16,32
+			frame = 32,32,16,32
+			
+			loop = true
+			framerate = 14
+		}
+	}
+}

@@ -1,0 +1,42 @@
+sprite_sheet trophies
+{
+	src = "assets/images/trophies.png"
+	blendmode = alpha
+
+	sprite trophy
+	{
+		bounds = 16,0,32,40
+
+		animation gold
+		{
+			frame = 16,0,32,40
+
+			framerate = 12
+			loop=true
+		}
+
+		animation silver
+		{
+			frame = 64,0,32,40
+
+			framerate = 12
+			loop=true
+		}
+
+		animation bronze
+		{
+			frame = 112,0,32,40
+
+			framerate = 12
+			loop=true
+		}
+
+		animation none
+		{
+			frame = 0,0,0,0
+
+			framerate = 12
+			loop=true
+		}
+	}
+}
