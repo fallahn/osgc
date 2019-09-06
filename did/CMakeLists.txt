@@ -37,10 +37,9 @@ endif()
 SET(SFML_MIN_VERSION 2.4)
 find_package(SFML ${SFML_MIN_VERSION} REQUIRED graphics window audio system)
 
-# Find xyginext and tmxlite
+# Find xyginext
 find_package(XYGINEXT REQUIRED)
 find_package(STEAMWORKS)
-#find_package(TMXLITE REQUIRED)
 
 # X11 is required on unices
 # plus UI frameworks for message box
@@ -83,37 +82,8 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   add_definitions(-DXY_DEBUG)
 endif()
 
-# If on apple, create a nice bundle
-If (APPLE AND MACOS_BUNDLE)
-
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
-
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# the RPATH to be used when installing, but only if it's not a system directory
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-ENDIF("${isSystemDir}" STREQUAL "-1")
-
-set_source_files_properties( 
-    ${CMAKE_SOURCE_DIR}/assets PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
-set_source_files_properties(
-    ${CMAKE_SOURCE_DIR}/macOS/icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${PROJECT_SRC} ${BOX_SRC} ${CMAKE_SOURCE_DIR}/assets ${CMAKE_SOURCE_DIR}/macOS/icon.icns)
-set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
-else()
-  add_executable(${PROJECT_NAME} ${PROJECT_SRC} ${BOX_SRC})
-endif()
+# Create the actual binary (PROJECT_SRC variable is set inside previous steps)
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
 
 # Linker settings
 if(X11_FOUND)
@@ -142,28 +112,9 @@ if(UNIX AND NOT APPLE)
   target_include_directories(${PROJECT_NAME} PRIVATE ${GTK_INCLUDE_DIRS})
 endif()
 
-# Install executable - don't install the bundle to usr/lib because this requires sudo
-install(TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION .
-  BUNDLE DESTINATION ${CMAKE_SOURCE_DIR})
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
+set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}")
 
-# Install assets folder except on Apple, where it's included in the app bundle
-if (NOT (APPLE AND MACOS_BUNDLE))
-  install(DIRECTORY assets
-  DESTINATION .)
-endif()
-
-#Platform specific packaging
-if(APPLE AND MACOS_BUNDLE)
-    install(CODE " include(BundleUtilities)
-		 fixup_bundle(${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.app \"\" \"/Library/Frameworks\")
-		 verify_app(${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.app)")
-    set(CPACK_GENERATOR "DragNDrop")
-elseif(UNIX AND NOT APPLE)
-    set(CPACK_GENERATOR "DEB")
-    set(CPACK_PACKAGE_CONTACT Jonny@JonnyPaton.com)
-else()
-    set(CPACK_GENERATOR "ZIP")
-endif()
-
-include(CPack)
+set(dst_path "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}/")
+FILE(COPY info.xgi DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+FILE(COPY assets DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)

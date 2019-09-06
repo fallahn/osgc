@@ -82,14 +82,16 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     xy::AudioMixer::setLabel("Music", MixerChannel::Music);
 
     ss->registerState<MenuState>(StateID::Menu, sd);
-    ss->registerState<MenuState>(StateID::Error, sd);
-    ss->registerState<MenuState>(StateID::Game, sd);
+    ss->registerState<ErrorState>(StateID::Error, sd);
+    ss->registerState<GameState>(StateID::Game, sd);
 
     if (!SteamAPI_Init())
     {
         boxer::show("Steam not running!\nPlease launch Steam before trying to run the game again.", "Error.");
         return StateID::ParentState;
     }
+
+    gameServer->setMaxPlayers(4);
 
 #ifdef DD_DEBUG
     SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook);

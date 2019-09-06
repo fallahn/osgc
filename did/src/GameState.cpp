@@ -335,6 +335,12 @@ bool GameState::handleEvent(const sf::Event& evt)
             zoomMap();
         }
         //else if (evt.key.code == sf::Keyboard::End) m_gameScene.getActiveCamera().getComponent<Camera3D>().shakeAmount = 1.f;
+#ifdef XY_DEBUG
+        else if (evt.key.code == sf::Keyboard::Escape)
+        {
+            xy::App::quit();
+        }
+#endif
     }
     else if (evt.type == sf::Event::JoystickButtonReleased)
     {
