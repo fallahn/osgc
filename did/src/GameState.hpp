@@ -43,7 +43,7 @@ Copyright 2019 Matt Marchant
 #include <queue>
 
 struct Packet;
-struct SharedStateData;
+struct SharedData;
 
 struct MiniMapData final
 {
@@ -57,7 +57,7 @@ class GameState final : public xy::State
 #endif
 {
 public:
-    GameState(xy::StateStack&, xy::State::Context, SharedStateData&);
+    GameState(xy::StateStack&, xy::State::Context, SharedData&);
 
     xy::StateID stateID() const override { return StateID::Game; }
 
@@ -74,7 +74,7 @@ private:
 
     xy::Scene m_gameScene;
     xy::Scene m_uiScene;
-    SharedStateData& m_sharedData;
+    SharedData& m_sharedData;
     InputParser m_inputParser;
 
     xy::TextureResource m_textureResource;

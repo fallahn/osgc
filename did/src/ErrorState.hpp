@@ -26,11 +26,11 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-struct SharedStateData;
+struct SharedData;
 class ErrorState final : public xy::State, public xy::GuiClient
 {
 public:
-    ErrorState(xy::StateStack&, xy::State::Context, const SharedStateData&);
+    ErrorState(xy::StateStack&, xy::State::Context, SharedData&);
 
     xy::StateID stateID() const override { return StateID::Error; }
     bool handleEvent(const sf::Event&) override;
@@ -39,7 +39,7 @@ public:
     void draw() override;
 
 private:
+    SharedData& m_sharedData;
     sf::Texture m_backgroundTexture;
     sf::Sprite m_backgroundSprite;
-    std::string m_message;
 };

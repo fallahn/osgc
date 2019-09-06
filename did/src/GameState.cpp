@@ -111,7 +111,7 @@ namespace
 #include "GroundShaders.inl"
 }
 
-GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedStateData& sd)
+GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
     m_gameScene         (ctx.appInstance.getMessageBus(), 512),
     m_uiScene           (ctx.appInstance.getMessageBus()),
@@ -386,6 +386,8 @@ bool GameState::handleEvent(const sf::Event& evt)
 
 void GameState::handleMessage(const xy::Message& msg)
 {
+    serverMessageHandler(m_sharedData, msg);
+
     if (msg.id == MessageID::MapMessage)
     {
         const auto& data = msg.getData<MapEvent>();

@@ -25,9 +25,9 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Graphics/Image.hpp>
 
-ErrorState::ErrorState(xy::StateStack& stack, xy::State::Context ctx, const SharedStateData& shared)
-    : xy::State(stack, ctx),
-    m_message(shared.error)
+ErrorState::ErrorState(xy::StateStack& stack, xy::State::Context ctx, SharedData& shared)
+    : xy::State     (stack, ctx),
+    m_sharedData    (shared)
 {
     sf::Image img;
     img.create(1, 1, { 0,0,0,160 });
@@ -44,17 +44,17 @@ ErrorState::ErrorState(xy::StateStack& stack, xy::State::Context ctx, const Shar
         auto boxSize = sf::Vector2f(400.f, 100.f);
         windowSize = (windowSize - boxSize) / 2.f;
 
-        xy::Nim::setNextWindowPosition(windowSize.x, windowSize.y);
-        xy::Nim::setNextWindowSize(boxSize.x, boxSize.y);
-        xy::Nim::begin("Error");      
-        xy::Nim::text(m_message);
-        if (xy::Nim::button("OK", 40.f, 16.f))
+        xy::ui::setNextWindowPosition(windowSize.x, windowSize.y);
+        xy::ui::setNextWindowSize(boxSize.x, boxSize.y);
+        xy::ui::begin("Error");      
+        xy::ui::text(m_sharedData.error);
+        if (xy::ui::button("OK", 40.f, 16.f))
         {
             requestStackClear();
             requestStackPush(StateID::Menu);
             //getContext().appInstance.getMessageBus().post<MenuEvent>(MessageID::MenuMessage)->action = MenuEvent::QuitGameClicked;
         }
-        xy::Nim::end();
+        xy::ui::end();
     });
 
     xy::App::setMouseCursorVisible(true);
@@ -65,9 +65,9 @@ bool ErrorState::handleEvent(const sf::Event&)
     return false;
 }
 
-void ErrorState::handleMessage(const xy::Message&)
+void ErrorState::handleMessage(const xy::Message& msg)
 {
-
+    serverMessageHandler(m_sharedData, msg);
 }
 
 bool ErrorState::update(float)

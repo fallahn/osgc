@@ -23,8 +23,13 @@ Copyright 2019 Matt Marchant
 #include "InputBinding.hpp"
 #include "ClientInfoManager.hpp"
 #include "ServerSharedStateData.hpp"
+#include "Server.hpp"
 
-struct SharedStateData final
+#include <SFML/System/Thread.hpp>
+
+#include <memory>
+
+struct SharedData final
 {
     CSteamID serverID;
     CSteamID lobbyID;
@@ -33,4 +38,16 @@ struct SharedStateData final
     ClientInfoManager clientInformation;
     std::string error;
     Server::SeedData seedData;
+
+    //these strictly shouldn't be shared
+    //but it's a required fudge to enable this
+    //struct to be std::any compatible
+    std::shared_ptr<GameServer> gameServer;
+    std::shared_ptr<sf::Thread> serverThread;
 };
+
+namespace xy
+{
+    class Message;
+}
+void serverMessageHandler(SharedData&, const xy::Message&);

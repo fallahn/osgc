@@ -56,9 +56,19 @@ void Game::loadPlugin(const std::string& path)
             xy::FileSystem::setResourceDirectory(path);
 
             int reqState = entry(&m_stateStack, &m_sharedData);
-            m_stateStack.clearStates();
-            m_stateStack.pushState(reqState);
 
+            if (reqState != std::numeric_limits<std::int32_t>::max())
+            {
+                m_stateStack.clearStates();
+                m_stateStack.pushState(reqState);
+            }
+            else
+            {
+                exit(&m_stateStack);
+                m_sharedData.reset();
+                FreeLibrary(m_pluginHandle);
+                m_pluginHandle = nullptr;
+            }
         }
         else
         {

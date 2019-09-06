@@ -53,7 +53,7 @@ private:
     sf::Thread m_serverThread;
 
     xy::StateStack m_stateStack;
-    SharedStateData m_sharedData;
+    SharedData m_sharedData;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

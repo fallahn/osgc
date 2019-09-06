@@ -33,13 +33,13 @@ Copyright 2019 Matt Marchant
 #include <array>
 
 struct Packet;
-struct SharedStateData;
+struct SharedData;
 struct ActorState;
 struct SceneState;
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedStateData&);
+    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
 
     xy::StateID stateID() const override { return StateID::Menu; }
     bool handleEvent(const sf::Event&) override;
@@ -50,7 +50,7 @@ public:
 private:
     xy::Scene m_uiScene;
     xy::Scene m_gameScene;
-    SharedStateData& m_sharedData;
+    SharedData& m_sharedData;
 
     xy::TextureResource m_textureResource;
     xy::FontResource m_fontResource;

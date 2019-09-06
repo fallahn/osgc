@@ -54,20 +54,20 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -98,15 +98,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>DID</TargetName>
+    <TargetName>osgc</TargetName>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>DID</TargetName>
+    <TargetName>osgc</TargetName>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\plugins\$(ProjectName)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">
-    <TargetName>DID</TargetName>
+    <TargetName>osgc</TargetName>
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Platform)\Release\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\Release\plugins\$(ProjectName)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -257,7 +259,6 @@
     <ClInclude Include="src\FlareSystem.hpp" />
     <ClInclude Include="src\FoliageGenerator.hpp" />
     <ClInclude Include="src\FoliageSystem.hpp" />
-    <ClInclude Include="src\Game.hpp" />
     <ClInclude Include="src\GameState.hpp" />
     <ClInclude Include="src\GlobalConsts.hpp" />
     <ClInclude Include="src\HealthBarSystem.hpp" />
@@ -285,6 +286,7 @@
     <ClInclude Include="src\PathFinder.hpp" />
     <ClInclude Include="src\PlayerStats.hpp" />
     <ClInclude Include="src\PlayerSystem.hpp" />
+    <ClInclude Include="src\PluginExport.hpp" />
     <ClInclude Include="src\QuadTreeFilter.hpp" />
     <ClInclude Include="src\RainSystem.hpp" />
     <ClInclude Include="src\Render3DSystem.hpp" />
@@ -342,6 +344,7 @@
     <ClCompile Include="src\DecoySystem.cpp" />
     <ClCompile Include="src\DepthAnimationSystem.cpp" />
     <ClCompile Include="src\DogSystem.cpp" />
+    <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\ErrorState.cpp" />
     <ClCompile Include="src\ExplosionSystem.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp" />
@@ -367,7 +370,6 @@
     <ClCompile Include="src\FlareSystem.cpp" />
     <ClCompile Include="src\FoliageGenerator.cpp" />
     <ClCompile Include="src\FoliageSystem.cpp" />
-    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameActorFactory.cpp" />
     <ClCompile Include="src\GameAudio.cpp" />
     <ClCompile Include="src\GameState.cpp" />
@@ -379,7 +381,6 @@
     <ClCompile Include="src\InventorySystem.cpp" />
     <ClCompile Include="src\IslandGenerator.cpp" />
     <ClCompile Include="src\IslandSystem.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuLobbyFunctions.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
@@ -398,6 +399,7 @@
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServerIdleState.cpp" />
     <ClCompile Include="src\ServerActiveState.cpp" />
+    <ClCompile Include="src\ServerMessageHandler.cpp" />
     <ClCompile Include="src\ServerRoundTimer.cpp" />
     <ClCompile Include="src\ServerRunningState.cpp" />
     <ClCompile Include="src\ServerStormDirector.cpp" />

@@ -23,13 +23,14 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/DecoySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DepthAnimationSystem.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/DogSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ExplosionSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FlareSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FlappySailSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FoliageGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FoliageSystem.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameActorFactory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameAudio.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
@@ -41,7 +42,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InventorySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandSystem.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/MenuGame.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuLobbyFunctions.cpp
@@ -65,6 +66,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerIdleState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerActiveState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerMessageHandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRunningState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRoundTimer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerStormDirector.cpp

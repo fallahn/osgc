@@ -58,7 +58,7 @@ namespace
     const float PingTime = 1.f;
 }
 
-MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedStateData& sd)
+MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     :xy::State      (ss, ctx),
     m_uiScene       (ctx.appInstance.getMessageBus()),
     m_gameScene     (ctx.appInstance.getMessageBus()),
@@ -83,6 +83,8 @@ bool MenuState::handleEvent(const sf::Event& evt)
 
 void MenuState::handleMessage(const xy::Message& msg)
 {
+    serverMessageHandler(m_sharedData, msg);
+
     if (msg.id == MessageID::SystemMessage)
     {
         const auto& data = msg.getData<SystemEvent>();
