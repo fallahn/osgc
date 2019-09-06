@@ -22,7 +22,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/DayNightSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DecoySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DepthAnimationSystem.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/DogSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ExplosionSystem.cpp
@@ -30,7 +29,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/FlappySailSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FoliageGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FoliageSystem.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameActorFactory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameAudio.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
@@ -42,11 +40,8 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InventorySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandSystem.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/MenuGame.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuLobbyFunctions.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/MenuPlayerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuUIBrowser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuUILobby.cpp
@@ -57,9 +52,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ParrotSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PathFinder.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerSystem.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/PhysicsObject.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/PhysicsScene.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/PhysicsSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RainSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Render3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SeagullSystem.cpp
@@ -82,17 +74,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/TorchlightSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/WetPatchDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/XPSystem.cpp
-
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/AudioBuffer.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/AudioRenderer.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/AudioResource.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/AudioStream.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/OpenALImpl.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/VorbisLoader.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/WavLoader.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/audio/stb_vorbis.c
-
-  #${CMAKE_CURRENT_SOURCE_DIR}/glad/glad.c
 
   ${CMAKE_CURRENT_SOURCE_DIR}/fastnoise/FastNoiseSIMD.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/fastnoise/FastNoiseSIMD_avx2.cpp

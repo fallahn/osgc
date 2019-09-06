@@ -66,10 +66,13 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_pingServer    (false),
     m_gameLaunched  (false)
 {
+    launchLoadingScreen();
     loadAssets();
     createScene();
 
     setLobbyView();
+
+    quitLoadingScreen();
 }
 
 //public

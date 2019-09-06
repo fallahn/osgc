@@ -55,15 +55,9 @@ void Sprite3DSystem::process(float)
         //we're also flipping the sprites vertically with a negative scale  
         float height = tx.getTransform().transformRect(drawable.getLocalBounds()).height;
 
-        //something I
-        //don't understand means transforms are still applied to vertices
-        //even with custom shaders. Because of this we need to negate the
-        //position to prevent transforms being applied twice
-        //ie, no extra x movement, y takes into account sprites are vertically flipped
-        //and the actual y position is applied to the z plane
-        //TODO this is somehow only applied to sprites but not other components like health bars???
+        //SFML 'optimises' by pre-transforming verts if there are 4 or fewer
         auto& matrix = spr.getMatrix();
-        if (spr.needsCorrection) //TODO this is to do with SFML caching transforms for vertex arrays with 4 or fewer vertices
+        if (spr.needsCorrection)
         {
             matrix = glm::translate(glm::mat4(1.f), glm::vec3(0.f, height - position.y - spr.verticalOffset, position.y));
         }

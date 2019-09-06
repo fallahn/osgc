@@ -93,6 +93,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/graphics/SpriteSheet.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
@@ -229,6 +230,11 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 //public
 bool GameState::handleEvent(const sf::Event& evt)
 {
+    if (xy::ui::wantsMouse() || xy::ui::wantsKeyboard())
+    {
+        return true;
+    }
+
     auto zoomMap = [&]()
     {
         xy::Command cmd;
