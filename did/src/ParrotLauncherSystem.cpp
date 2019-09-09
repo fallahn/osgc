@@ -78,7 +78,7 @@ void ParrotLauncherSystem::process(float dt)
                     {
                         launcher.launched = true;
                         launcher.currentLaunchTime = 12.f;
-                        m_sharedData.gameServer->broadcastData(PacketID::ParrotLaunch, entity.getIndex(), k_EP2PSendReliable);
+                        m_sharedData.gameServer->broadcastData(PacketID::ParrotLaunch, entity.getIndex(), xy::NetFlag::Reliable);
                     }
                 }
             }

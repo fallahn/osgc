@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "NetworkClient.hpp"
 #include "SharedStateData.hpp"
+#include "Packet.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -131,7 +132,7 @@ void MenuState::buildLobby(sf::Font& font)
                 SteamMatchmaking()->SendLobbyChatMsg(m_sharedData.lobbyID, &buns, 1);
 
                 //send a packet to server if we're host telling it to switch to game state
-                sendData(PacketID::StartGame, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable);
 
                 //set the lobby not joinable while playing the game
                 SteamMatchmaking()->SetLobbyJoinable(m_sharedData.lobbyID, false);

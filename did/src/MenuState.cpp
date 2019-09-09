@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "SharedStateData.hpp"
 #include "MixerChannels.hpp"
 #include "PacketTypes.hpp"
+#include "Packet.hpp"
 
 #include <steam/steam_api.h>
 #include <steam/steam_gameserver.h>
@@ -47,6 +48,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/network/NetData.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
@@ -128,11 +130,15 @@ bool MenuState::update(float dt)
     static std::size_t frames = 0;
     static float bw = 0.f;
 
-    Packet packet;
-    while (pollNetwork(packet))
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
     {
-        handlePacket(packet);
-        packetSize += packet.size + 1;
+        //TODO handle disconnect
+        if (evt.type == xy::NetEvent::PacketReceived)
+        {
+            handlePacket(evt);
+        }
+        packetSize += evt.packet.getSize() + 1;
     }
 
     frames++;
@@ -145,10 +151,14 @@ bool MenuState::update(float dt)
     }
     xy::Console::printStat("Incoming bw", std::to_string(bw) + "Kbps");
 #else
-    Packet packet;
-    while (pollNetwork(packet))
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
     {
-        handlePacket(packet);
+        //TODO handle disconnect
+        if (evt.type == xy::NetEvent::PacketReceived)
+        {
+            handlePacket(evt);
+        }
     }
 #endif //XY_DEBUG
 
@@ -159,7 +169,7 @@ bool MenuState::update(float dt)
     if (m_pingServer && m_pingClock.getElapsedTime().asSeconds() > PingTime)
     {
         m_pingClock.restart();
-        sendData(PacketID::RequestSeed, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable);
         std::cout << "Pinging " << m_sharedData.serverID.ConvertToUint64() << "...\n";
     }
 
@@ -500,9 +510,9 @@ void MenuState::setLobbyView()
     }
 }
 
-void MenuState::handlePacket(const Packet& packet)
+void MenuState::handlePacket(const xy::NetEvent& evt)
 {
-    switch (packet.id())
+    switch (evt.packet.getID())
     {
     default: break;
     case PacketID::LaunchGame:
@@ -514,12 +524,12 @@ void MenuState::handlePacket(const Packet& packet)
 
             m_gameLaunched = true;
         }
-        m_sharedData.serverID = packet.sender;
+        //m_sharedData.serverID = packet.sender;
         break;
     }
     case PacketID::CurrentSeed:
     {
-        m_sharedData.seedData = packet.as<Server::SeedData>();
+        m_sharedData.seedData = evt.packet.as<Server::SeedData>();
 
         xy::Command cmd;
         cmd.targetFlags = Menu::CommandID::SeedText;

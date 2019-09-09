@@ -99,7 +99,7 @@ void CollectibleSystem::process(float dt)
                             InventoryState state;
                             state.inventory = inventory;
                             state.parentID = otherEnt.getIndex();
-                            m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<CSteamID>(), EP2PSend::k_EP2PSendReliable);
+                            m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<std::uint64_t>(), xy::NetFlag::Reliable);
                         }
 
                         getScene()->destroyEntity(entity);

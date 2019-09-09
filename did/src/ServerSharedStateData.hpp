@@ -18,21 +18,13 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/Entity.hpp>
+#include <xyginext/network/NetData.hpp>
 
-#include <steam/steam_api.h>
-
-#include <vector>
+#include <map>
 
 class GameServer;
 namespace Server
 {
-    struct ConnectedClient final
-    {
-        CSteamID id;
-        //xy::Entity sceneEntity;
-    };
-
     struct SeedData final
     {
         static constexpr std::size_t MaxChar = 12;
@@ -42,9 +34,9 @@ namespace Server
 
     struct SharedStateData final
     {
-        CSteamID gameHost;
+        xy::NetPeer hostClient;
         GameServer* gameServer = nullptr;
-        std::vector<ConnectedClient> connectedClients;
+        std::map<std::uint64_t, xy::NetPeer> connectedClients;
         SeedData seedData;
     };
 }

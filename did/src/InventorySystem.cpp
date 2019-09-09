@@ -85,7 +85,7 @@ void InventorySystem::handleMessage(const xy::Message& msg)
                     state.inventory = inventory;
                     state.parentID = e.getIndex();
 
-                    m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, e.getComponent<CSteamID>(), EP2PSend::k_EP2PSendReliable);
+                    m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, e.getComponent<std::uint64_t>(), xy::NetFlag::Reliable);
                 }
             }
         }
@@ -180,7 +180,7 @@ void InventorySystem::sendUpdate(Inventory& inventory, std::uint32_t parentID)
     state.inventory = inventory;
     state.parentID = parentID;
 
-    m_sharedData.gameServer->broadcastData(PacketID::InventoryUpdate, state, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.gameServer->broadcastData(PacketID::InventoryUpdate, state, xy::NetFlag::Reliable);
 
     inventory.sendUpdate = false;
 }

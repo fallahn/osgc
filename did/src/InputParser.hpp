@@ -33,6 +33,11 @@ namespace sf
     class Event;
 }
 
+namespace xy
+{
+    class NetClient;
+}
+
 struct Input final
 {
     std::int32_t timestamp = 0;
@@ -69,7 +74,7 @@ current player, along with the client timestamp.
 class InputParser final
 {
 public:
-    InputParser(const InputBinding&, CSteamID);
+    InputParser(const InputBinding&, xy::NetClient&);
 
     void handleEvent(const sf::Event&);
     void update(float);
@@ -97,7 +102,7 @@ private:
     std::uint8_t m_playerNumber;
 
     InputBinding m_inputBinding;
-    CSteamID m_serverID;
+    xy::NetClient& m_connection;
 
     void checkControllerInput();
 };

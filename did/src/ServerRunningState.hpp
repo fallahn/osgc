@@ -26,8 +26,6 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Scene.hpp>
 
-#include <steam/steamclientpublic.h>
-
 namespace Server
 {
     namespace ConCommand
@@ -46,7 +44,7 @@ namespace Server
 
         void logicUpdate(float) override;
 
-        void handlePacket(const Packet&) override;
+        void handlePacket(const xy::NetEvent&) override;
 
         void handleMessage(const xy::Message&) override;
 
@@ -63,7 +61,7 @@ namespace Server
         struct PlayerSlot final
         {
             xy::Entity gameEntity;
-            CSteamID clientID;
+            std::uint64_t clientID;
             bool available = true;
             PlayerStats stats;
             bool sendStatsUpdate = true;
@@ -75,7 +73,7 @@ namespace Server
         PathFinder m_pathFinder;
 
         void createScene();
-        void spawnPlayer(CSteamID);
+        void spawnPlayer(std::uint64_t);
         void createPlayerEntity(std::size_t);
         void spawnMapActors();
         xy::Entity spawnActor(sf::Vector2f, std::int32_t); //also broadcasts to clients

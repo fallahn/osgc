@@ -106,7 +106,7 @@ void DigDirector::handleMessage(const xy::Message& msg)
                                 HoleState sync;
                                 sync.state = wetPatch.state;
                                 sync.serverID = e.getIndex();
-                                m_sharedData.gameServer->broadcastData(PacketID::PatchSync, sync, EP2PSend::k_EP2PSendReliable);
+                                m_sharedData.gameServer->broadcastData(PacketID::PatchSync, sync, xy::NetFlag::Reliable);
 
                                 //raise spawn message if hole fully dug
                                 if (wetPatch.state == WetPatch::OneHundred)

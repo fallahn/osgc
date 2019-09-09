@@ -127,7 +127,7 @@ void CarriableSystem::process(float)
                 cs.carriableID = entity.getIndex();
                 cs.parentID = 0;
                 cs.position = entity.getComponent<xy::Transform>().getPosition();
-                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable);
 
                 entity.getComponent<xy::Transform>().setPosition(carriable.spawnPosition);
             }
@@ -233,7 +233,7 @@ void CarriableSystem::tryGrab(xy::Entity entity)
                 cs.carriableID = treasureEnt.getIndex();
                 cs.parentID = entity.getIndex();
                 cs.position = carriablePosition;
-                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable);
                 break;
             }
         }
@@ -260,7 +260,7 @@ void CarriableSystem::tryGrab(xy::Entity entity)
                 cs.carriableID = ent.getIndex();
                 cs.parentID = entity.getIndex();
                 cs.position = carriablePosition;
-                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable);
                 break;
             }
         }
@@ -322,7 +322,7 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
     cs.carriableID = ent.getIndex();
     cs.parentID = entity.getIndex();
     cs.position = ent.getComponent<xy::Transform>().getPosition();
-    m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable);
 
     
 }

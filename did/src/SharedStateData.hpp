@@ -25,6 +25,8 @@ Copyright 2019 Matt Marchant
 #include "ServerSharedStateData.hpp"
 #include "Server.hpp"
 
+#include <xyginext/network/NetClient.hpp>
+
 #include <SFML/System/Thread.hpp>
 
 #include <memory>
@@ -34,6 +36,7 @@ struct SharedData final
     CSteamID serverID;
     CSteamID lobbyID;
     CSteamID host;
+
     InputBinding inputBinding;
     ClientInfoManager clientInformation;
     std::string error;
@@ -44,6 +47,8 @@ struct SharedData final
     //struct to be std::any compatible
     std::shared_ptr<GameServer> gameServer;
     std::shared_ptr<sf::Thread> serverThread;
+
+    std::shared_ptr<xy::NetClient> netClient;
 };
 
 namespace xy

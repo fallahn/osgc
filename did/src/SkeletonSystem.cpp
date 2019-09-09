@@ -377,7 +377,7 @@ void SkeletonSystem::updateNormal(xy::Entity entity, float dt)
         state.actorID = Actor::ID::Fire;
         state.position = tx.getPosition();
         state.serverID = entity.getIndex(); //client makes a special case to attach to this actor
-        m_sharedData.gameServer->broadcastData(PacketID::ActorData, state, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.gameServer->broadcastData(PacketID::ActorData, state, xy::NetFlag::Reliable);
     }
 
     if (skeleton.onFire || skeleton.inLight)

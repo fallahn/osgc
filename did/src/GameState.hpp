@@ -45,6 +45,11 @@ Copyright 2019 Matt Marchant
 struct Packet;
 struct SharedData;
 
+namespace xy
+{
+    struct NetEvent;
+}
+
 struct MiniMapData final
 {
     sf::Vector2f targetPosition;
@@ -109,7 +114,7 @@ private:
     void loadScene(const TileArray&);
     bool m_sceneLoaded;
 
-    void handlePacket(const Packet&);
+    void handlePacket(const xy::NetEvent&);
 
     void spawnActor(Actor, sf::Vector2f, std::int32_t timestamp, bool localPlayer = false);
     void updateCarriable(const CarriableState&);
@@ -128,5 +133,5 @@ private:
     void plotPath(const std::vector<sf::Vector2f>&);
     void loadAudio();
 
-    STEAM_CALLBACK(GameState, p2pSessionFail, P2PSessionConnectFail_t);
+    //STEAM_CALLBACK(GameState, p2pSessionFail, P2PSessionConnectFail_t);
 };

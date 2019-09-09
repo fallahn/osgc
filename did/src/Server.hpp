@@ -22,14 +22,13 @@ Copyright 2019 Matt Marchant
 #include "ServerSharedStateData.hpp"
 
 #include <xyginext/core/MessageBus.hpp>
-#include <steam/steam_gameserver.h>
+#include <xyginext/network/NetHost.hpp>
 
 #include <atomic>
 #include <memory>
 #include <vector>
 #include <cstring>
 
-struct Packet;
 class GameServer final
 {
 public:
@@ -45,14 +44,13 @@ public:
     void stop();
     bool running() const { return m_running; }
 
-    CSteamID getSteamID() const;
     void setMaxPlayers(std::uint8_t);
 
     template <typename T>
-    void sendData(std::uint8_t packetID, const T& data, CSteamID dest, EP2PSend sendType = k_EP2PSendUnreliable);
+    void sendData(std::uint8_t packetID, const T& data, std::uint64_t dest, xy::NetFlag sendType = xy::NetFlag::Unreliable);
 
     template <typename T>
-    void broadcastData(std::uint8_t packetID, const T& data, EP2PSend sendType = k_EP2PSendUnreliable);
+    void broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType = xy::NetFlag::Unreliable);
 
     xy::MessageBus& getMessageBus() { return m_messageBus; }
 
@@ -67,14 +65,15 @@ private:
     xy::MessageBus m_messageBus;
 
     sf::Clock m_serverTime;
+    xy::NetHost m_host;
 
-    bool pollNetwork(Packet&);
+    bool pollNetwork(xy::NetEvent&);
 
-    void initSteamServer();
-    void closeSteamServer();
+    void initServer();
+    void closeServer();
 
-    STEAM_GAMESERVER_CALLBACK(GameServer, p2pSessionRequest, P2PSessionRequest_t);
-    STEAM_GAMESERVER_CALLBACK(GameServer, p2pSessionFail, P2PSessionConnectFail_t);
+    void clientConnect(const xy::NetEvent&);
+    void clientDisconnect(const xy::NetEvent&);
 
     void run();
 };

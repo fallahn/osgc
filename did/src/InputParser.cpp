@@ -19,11 +19,11 @@ Copyright 2019 Matt Marchant
 #include "InputParser.hpp"
 #include "Packet.hpp"
 #include "PlayerSystem.hpp"
-#include "NetworkClient.hpp"
 #include "BotSystem.hpp"
 
 #include <xyginext/ecs/Entity.hpp>
 #include <xyginext/core/App.hpp>
+#include <xyginext/network/NetClient.hpp>
 
 #include <SFML/Window/Event.hpp>
 
@@ -34,7 +34,7 @@ namespace
     const float deadZone = 20.f;
 }
 
-InputParser::InputParser(const InputBinding& ib, CSteamID server)
+InputParser::InputParser(const InputBinding& ib, xy::NetClient& connection)
     : m_currentInput    (0),
     m_prevPad           (0),
     m_prevStick         (0),
@@ -44,7 +44,7 @@ InputParser::InputParser(const InputBinding& ib, CSteamID server)
     m_playerEntity      (0,0),
     m_playerNumber      (255),
     m_inputBinding      (ib),
-    m_serverID          (server)
+    m_connection        (connection)
 {
 
 }
@@ -223,7 +223,7 @@ void InputParser::update(float dt)
     iu.playerNumber = m_playerNumber;
     iu.acceleration = input.acceleration;
 
-    sendData(PacketID::ClientInput, iu, m_serverID, EP2PSend::k_EP2PSendUnreliable);
+    m_connection.sendPacket(PacketID::ClientInput, iu, xy::NetFlag::Unreliable);
 }
 
 void InputParser::setPlayerEntity(xy::Entity entity, std::uint8_t playerNumber)

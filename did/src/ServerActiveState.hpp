@@ -22,9 +22,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Scene.hpp>
 
-class PhysicsSystem;
 namespace Server
 {
+    //TODO convert this to lobby state
+
     class ActiveState final : public State
     {
     public:
@@ -37,7 +38,7 @@ namespace Server
 
         void logicUpdate(float) override;
 
-        void handlePacket(const Packet&) override;
+        void handlePacket(const xy::NetEvent&) override;
 
         void handleMessage(const xy::Message&) override;
 

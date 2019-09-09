@@ -144,7 +144,7 @@ struct ServerEvent final
         ClientConnected,
         ClientDisconnected
     }type;
-    CSteamID steamID;
+    std::uint64_t id;
 };
 
 struct CarryEvent final

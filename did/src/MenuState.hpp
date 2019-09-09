@@ -36,6 +36,12 @@ struct Packet;
 struct SharedData;
 struct ActorState;
 struct SceneState;
+
+namespace xy
+{
+    struct NetEvent;
+}
+
 class MenuState final : public xy::State
 {
 public:
@@ -90,5 +96,5 @@ private:
     void refreshLobbyView();
     void refreshBrowserView();
 
-    void handlePacket(const Packet&);
+    void handlePacket(const xy::NetEvent&);
 };

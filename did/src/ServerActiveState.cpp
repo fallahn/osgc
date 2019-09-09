@@ -25,10 +25,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
-
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/core/Log.hpp>
+#include <xyginext/network/NetData.hpp>
 
 using namespace Server;
 
@@ -78,26 +78,26 @@ void ActiveState::logicUpdate(float dt)
 
 }
 
-void ActiveState::handlePacket(const Packet& packet)
+void ActiveState::handlePacket(const xy::NetEvent& evt)
 {
-    switch (packet.id())
+    switch (evt.packet.getID())
     {
     default: break;
     case PacketID::StartGame:
         //start game on request
         setNextState(Server::StateID::Running);
-        m_sharedData.gameServer->broadcastData(PacketID::LaunchGame, std::uint8_t(0), EP2PSend::k_EP2PSendReliable);
+        m_sharedData.gameServer->broadcastData(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
         break;
     case PacketID::SetSeed:
     {
-        m_sharedData.seedData = packet.as<Server::SeedData>();
+        m_sharedData.seedData = evt.packet.as<Server::SeedData>();
         std::hash<std::string> hash;
         m_sharedData.seedData.hash = hash(std::string(m_sharedData.seedData.str));
     }
-        m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, xy::NetFlag::Reliable);
         break;
     case PacketID::RequestSeed:
-        m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, xy::NetFlag::Reliable);
         break;
     }
 }
@@ -109,9 +109,7 @@ void ActiveState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<ServerEvent>();
         if (data.type == ServerEvent::ClientConnected)
         {
-            m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, EP2PSend::k_EP2PSendReliable);
-
-            //TODO send scene data to client
+            m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, xy::NetFlag::Reliable);
         }
     }
 }

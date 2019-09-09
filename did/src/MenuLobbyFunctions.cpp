@@ -36,7 +36,10 @@ void MenuState::onLobbyEnter(LobbyEnter_t* cb)
 
     //attempt to join the server - if hosting this sometimes happens too soon..
     SteamMatchmaking()->GetLobbyGameServer(m_sharedData.lobbyID, nullptr, nullptr, &m_sharedData.serverID);
-    sendData(PacketID::None, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+    //sendData(PacketID::None, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+
+    //TODO get the IP address stored in lobby data - for now this is a kludge assuming we connected locally
+    m_sharedData.netClient->connect("127.0.0.1", Global::GamePort);
 }
 
 void MenuState::onLobbyDataUpdate(LobbyDataUpdate_t* cb)
@@ -53,7 +56,7 @@ void MenuState::onLobbyDataUpdate(LobbyDataUpdate_t* cb)
             SteamNetworking()->CloseP2PSessionWithUser(oldServer);
             
             //request join server
-            sendData(PacketID::None, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+            //sendData(PacketID::None, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
         }
 
         //check if we're the new host and rejigger local server
@@ -170,7 +173,8 @@ void MenuState::onLobbyCreated(LobbyCreated_t* cb, bool failed)
     SteamMatchmaking()->SetLobbyGameServer(id, 0, 0, m_sharedData.serverID);
 
     //attempts to join if we're hosting.
-    sendData(PacketID::None, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+    //sendData(PacketID::None, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.netClient->connect("127.0.0.1", Global::GamePort);
 
     //enable pinging in case first attempt fails
     m_pingServer = true;

@@ -32,25 +32,25 @@ void serverMessageHandler(SharedData& sharedData, const xy::Message& msg)
             sharedData.serverThread->launch();
 
             sf::Clock clock;
-            while (!sharedData.gameServer->getSteamID().IsValid()
-                && clock.getElapsedTime().asSeconds() < 3.f) {
+            while (/*!sharedData.gameServer->getSteamID().IsValid()
+                && */clock.getElapsedTime().asSeconds() < 3.f) {
             }
 
             auto newMsg = xy::App::getActiveInstance()->getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
 
-            if (sharedData.gameServer->getSteamID().IsValid())
+            //if (sharedData.gameServer->getSteamID().IsValid())
             {
-                sharedData.serverID = sharedData.gameServer->getSteamID();
+                //sharedData.serverID = sharedData.gameServer->getSteamID();
                 xy::Logger::log("Created server instance " + std::to_string(sharedData.serverID.ConvertToUint64()), xy::Logger::Type::Info);
                 newMsg->action = SystemEvent::ServerStarted;
             }
-            else
+            /*else //TODO restire this when we unkludge
             {
                 sharedData.serverID = {};
                 sharedData.gameServer->stop();
                 xy::Logger::log("Failed creating game server instance", xy::Logger::Type::Error);
                 newMsg->action = SystemEvent::ServerStopped;
-            }
+            }*/
         }
         else if (data.action == SystemEvent::RequestStopServer)
         {

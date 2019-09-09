@@ -65,6 +65,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 
 #include <xyginext/util/Vector.hpp>
+#include <xyginext/network/NetData.hpp>
 
 using namespace Server;
 
@@ -177,7 +178,7 @@ void RunningState::networkUpdate(float dt)
     for (auto& client : m_playerSlots)
     {
         //client state for reconciliation
-        if (client.clientID.IsValid() && client.gameEntity.isValid())
+        if (/*client.clientID.IsValid() && */client.gameEntity.isValid())
         {
             const auto tx = client.gameEntity.getComponent<xy::Transform>().getPosition();
             const auto& player = client.gameEntity.getComponent<Player>();
@@ -204,7 +205,7 @@ void RunningState::networkUpdate(float dt)
             stats.livesLost = client.stats.livesLost;
             stats.shotsFired = client.stats.shotsFired;
 
-            m_sharedData.gameServer->broadcastData(PacketID::StatUpdate, stats, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::StatUpdate, stats, xy::NetFlag::Reliable);
 
             client.sendStatsUpdate = false;
         }   
@@ -258,25 +259,25 @@ void RunningState::logicUpdate(float dt)
         {
             m_roundTimer.start();
             //start client timers
-            m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::OneTreasureRemaining, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::OneTreasureRemaining, xy::NetFlag::Reliable);
         }
     }
 }
 
-void RunningState::handlePacket(const Packet& packet)
+void RunningState::handlePacket(const xy::NetEvent& evt)
 {
-    switch (packet.id())
+    switch (evt.packet.getID())
     {
     default: break;
     case PacketID::RequestMap:
-        m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData, packet.sender, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData, evt.peer.getID(), xy::NetFlag::Reliable);
         break;
     case PacketID::RequestPlayer:
-        spawnPlayer(packet.sender);
+        spawnPlayer(evt.peer.getID());
         break;
     case PacketID::ClientInput:
     {
-        auto ip = packet.as<InputUpdate>();
+        auto ip = evt.packet.as<InputUpdate>();
 
         auto& playerIp = m_playerSlots[ip.playerNumber].gameEntity.getComponent<InputComponent>();
 
@@ -288,7 +289,7 @@ void RunningState::handlePacket(const Packet& packet)
     }
         break;
     case PacketID::ConCommand:
-        doConCommand(packet.as<ConCommand::Data>());
+        doConCommand(evt.packet.as<ConCommand::Data>());
         break;
     }
 }
@@ -326,7 +327,7 @@ void RunningState::handleMessage(const xy::Message& msg)
             SceneState state;
             state.action = SceneState::EntityRemoved;
             state.serverID = data.entityID;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
         }
     }
         break;
@@ -342,7 +343,7 @@ void RunningState::handleMessage(const xy::Message& msg)
         case PlayerEvent::Died:
             state.action = SceneState::PlayerDied;
             state.position = data.entity.getComponent<Player>().deathPosition;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
 
             for (auto& slot : m_playerSlots)
             {
@@ -477,7 +478,7 @@ void RunningState::handleMessage(const xy::Message& msg)
                     }
                     break;
                 }
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, messageID, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, messageID, xy::NetFlag::Reliable);
 
                 auto e = data.entity;
                 e.getComponent<xy::Transform>().setPosition(e.getComponent<Player>().spawnPosition);
@@ -486,15 +487,15 @@ void RunningState::handleMessage(const xy::Message& msg)
             break;
         case PlayerEvent::Respawned:
             state.action = SceneState::PlayerSpawned;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
             break;
         case PlayerEvent::BeeHit:
             state.action = SceneState::Stung;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
             break;
         case PlayerEvent::Cursed:
             state.action = data.data == 0 ? SceneState::LostCurse : SceneState::GotCursed;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
             break;
         case PlayerEvent::DidAction:
         {
@@ -520,7 +521,7 @@ void RunningState::handleMessage(const xy::Message& msg)
             //based on player ID
 
             //update client scoreboards
-            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable);
             LOG(std::to_string(data.entity.getComponent<Player>().playerNumber) + " stole treasure from " + std::to_string(data.data) + "\n", xy::Logger::Type::Info);
             break;
         case PlayerEvent::StashedTreasure:
@@ -535,23 +536,23 @@ void RunningState::handleMessage(const xy::Message& msg)
             {
             default: break;
             case 0:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerOneScored, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerOneScored, xy::NetFlag::Reliable);
                 break;
             case 1:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerTwoScored, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerTwoScored, xy::NetFlag::Reliable);
                 break;
             case 2:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerThreeScored, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerThreeScored, xy::NetFlag::Reliable);
                 break;
             case 3:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerFourScored, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerFourScored, xy::NetFlag::Reliable);
                 break;
             }
 
             m_playerSlots[playerID].sendStatsUpdate = true;
 
             //update client scoreboard
-            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable);
 
             //raises an event so client can play a sound
             {
@@ -559,7 +560,7 @@ void RunningState::handleMessage(const xy::Message& msg)
                 state.action = SceneState::StashedTreasure;
                 state.position = data.entity.getComponent<xy::Transform>().getPosition();
                 state.serverID = data.entity.getIndex();
-                m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
             }
             break;
         }
@@ -571,18 +572,16 @@ void RunningState::handleMessage(const xy::Message& msg)
         if (data.type == ServerEvent::ClientDisconnected)
         {
             //TODO quit back to idle state if all connections are dropped
-            
-            CSteamID clientID(data.steamID);
             Actor::ID id = Actor::None;
             
             //remove from active list
             for (auto& slot : m_playerSlots)
             {
-                if (slot.clientID == clientID)
+                if (slot.clientID == data.id)
                 {
                     slot.available = true;
                     slot.clientID = {};
-                    slot.gameEntity.getComponent<CSteamID>() = {};
+                    slot.gameEntity.getComponent<std::uint64_t>() = 0;
                     slot.gameEntity.getComponent<Inventory>().reset();
                     slot.stats.reset();
                     id = slot.gameEntity.getComponent<Actor>().id;
@@ -596,7 +595,7 @@ void RunningState::handleMessage(const xy::Message& msg)
             ConnectionState state;
             state.steamID = 0;
             state.actorID = id;
-            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable);
         }
     }
         break;
@@ -646,11 +645,11 @@ void RunningState::createScene()
     spawnMapActors();
 }
 
-void RunningState::spawnPlayer(CSteamID clientID)
+void RunningState::spawnPlayer(std::uint64_t clientID)
 {
     //TODO would be nice to let players request a character from lobby menu
     {
-        if (clientID.IsValid())
+        //if (clientID.IsValid()) //TODO would this be better by validating on the peer?
         {
             xy::Entity entity;
             for (auto& slot : m_playerSlots)
@@ -662,7 +661,7 @@ void RunningState::spawnPlayer(CSteamID clientID)
                     slot.clientID = clientID;
                     slot.stats.reset();
                     entity = slot.gameEntity;
-                    entity.getComponent<CSteamID>() = clientID;
+                    entity.getComponent<std::uint64_t>() = clientID;
                     entity.getComponent<Bot>().enabled = false;
                     //////entity.getComponent<CollisionComponent>().collidesTerrain = true;
                     break;
@@ -674,21 +673,21 @@ void RunningState::spawnPlayer(CSteamID clientID)
             PlayerInfo info;
             info.actor = entity.getComponent<Actor>();
             info.position = entity.getComponent<xy::Transform>().getPosition();
-            m_sharedData.gameServer->sendData(PacketID::PlayerData, info, clientID, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->sendData(PacketID::PlayerData, info, clientID, xy::NetFlag::Reliable);
 
             //broadcast to all clients that someone has joined
             ConnectionState state;
-            state.steamID = clientID.ConvertToUint64();
+            state.steamID = clientID;
             state.actorID = entity.getComponent<Actor>().id;
-            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable);
 
             //let everyone know what the current score is
-            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable);
         }
-        else
+        /*else
         {
             std::cout << "invalid client ID\n";
-        }
+        }*/
     }
 
     //send all the actor data to the client for spawning
@@ -701,7 +700,7 @@ void RunningState::spawnPlayer(CSteamID clientID)
             state.actorID = actor.getComponent<Actor>().id;
             state.serverID = actor.getIndex();
             state.serverTime = m_sharedData.gameServer->getServerTime();
-            m_sharedData.gameServer->sendData(PacketID::ActorData, state, clientID, EP2PSend::k_EP2PSendReliable);
+            m_sharedData.gameServer->sendData(PacketID::ActorData, state, clientID, xy::NetFlag::Reliable);
         }
     }
     m_scene.setSystemActive<BotSystem>(true);
@@ -740,7 +739,7 @@ void RunningState::createPlayerEntity(std::size_t idx)
     entity.addComponent<xy::BroadphaseComponent>().setArea(Global::PlayerBounds);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Player | QuadTreeFilter::BotQuery);
     entity.addComponent<Inventory>();
-    entity.addComponent<CSteamID>();
+    entity.addComponent<std::uint64_t>();
     entity.addComponent<Bot>().enabled = true;
     entity.addComponent<Carrier>();
 
@@ -1039,7 +1038,7 @@ xy::Entity RunningState::spawnActor(sf::Vector2f position, std::int32_t id)
     state.actorID = entity.getComponent<Actor>().id;
     state.serverID = entity.getIndex();
     state.serverTime = m_sharedData.gameServer->getServerTime();
-    m_sharedData.gameServer->broadcastData(PacketID::ActorData, state, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.gameServer->broadcastData(PacketID::ActorData, state, xy::NetFlag::Reliable);
 
     return entity;
 }
@@ -1075,7 +1074,7 @@ void RunningState::endGame()
     }
 
     //send stats to clients and notify clients game ended
-    m_sharedData.gameServer->broadcastData(PacketID::EndOfRound, summary, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.gameServer->broadcastData(PacketID::EndOfRound, summary, xy::NetFlag::Reliable);
 
     //TODO send player stats to steam - but not host if they quit or are a bot
 
