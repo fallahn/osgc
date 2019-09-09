@@ -178,7 +178,7 @@ void RunningState::networkUpdate(float dt)
     for (auto& client : m_playerSlots)
     {
         //client state for reconciliation
-        if (/*client.clientID.IsValid() && */client.gameEntity.isValid())
+        if (client.clientID > 0 && client.gameEntity.isValid())
         {
             const auto tx = client.gameEntity.getComponent<xy::Transform>().getPosition();
             const auto& player = client.gameEntity.getComponent<Player>();
@@ -270,7 +270,8 @@ void RunningState::handlePacket(const xy::NetEvent& evt)
     {
     default: break;
     case PacketID::RequestMap:
-        m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData, evt.peer.getID(), xy::NetFlag::Reliable);
+        m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData.data, Global::TileCount, evt.peer.getID(), xy::NetFlag::Reliable);
+        std::cout << "sending map data\n";
         break;
     case PacketID::RequestPlayer:
         spawnPlayer(evt.peer.getID());
@@ -739,7 +740,7 @@ void RunningState::createPlayerEntity(std::size_t idx)
     entity.addComponent<xy::BroadphaseComponent>().setArea(Global::PlayerBounds);
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Player | QuadTreeFilter::BotQuery);
     entity.addComponent<Inventory>();
-    entity.addComponent<std::uint64_t>();
+    entity.addComponent<std::uint64_t>() = 0;
     entity.addComponent<Bot>().enabled = true;
     entity.addComponent<Carrier>();
 

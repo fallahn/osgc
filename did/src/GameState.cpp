@@ -1094,7 +1094,9 @@ void GameState::handlePacket(const xy::NetEvent& evt)
         break;
     case PacketID::MapData:
     {
-        const TileArray& mapData = evt.packet.as<TileArray>();
+        TileArray mapData;
+        std::memcpy(mapData.data, evt.packet.getData(), evt.packet.getSize());
+        std::cout << "packet size is " << evt.packet.getSize() << "\n";
         loadScene(mapData);
     }
         break;
@@ -1618,7 +1620,7 @@ void GameState::updateScene(SceneState state)
 
 void GameState::updateConnection(ConnectionState state)
 {
-    m_sharedData.clientInformation.updateClient(state);
+    //m_sharedData.clientInformation.updateClient(state);
     {
         auto idx = state.actorID - Actor::ID::PlayerOne;
 

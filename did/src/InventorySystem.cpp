@@ -78,8 +78,7 @@ void InventorySystem::handleMessage(const xy::Message& msg)
                 inventory.ammo = std::max(0, inventory.ammo - 1);
                 
                 //send update to client if not a bot
-                auto steamID = e.getComponent<CSteamID>();
-                if (steamID.IsValid())
+                if (e.getComponent<std::uint64_t>() > 0)
                 {
                     InventoryState state;
                     state.inventory = inventory;

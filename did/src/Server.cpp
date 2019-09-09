@@ -72,11 +72,6 @@ void GameServer::stop()
     xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
 }
 
-void GameServer::setMaxPlayers(std::uint8_t number)
-{
-    //TODO can we expose this from enet?
-}
-
 //private
 bool GameServer::pollNetwork(xy::NetEvent& evt)
 {
@@ -117,7 +112,8 @@ void GameServer::closeServer()
 
 void GameServer::clientConnect(const xy::NetEvent& evt)
 {
-    if (m_currentState->getID() != StateID::Running) //don't join running games
+    if (m_currentState->getID() != StateID::Running  //don't join running games
+        && m_sharedStateData.connectedClients.size() < m_maxPlayers)
     {
         LOG("We're accepting a user connection without validating!! This must be rectified in the future.", xy::Logger::Type::Warning);
         m_sharedStateData.connectedClients.insert(std::make_pair(evt.peer.getID(), evt.peer));
@@ -146,13 +142,6 @@ void GameServer::clientConnect(const xy::NetEvent& evt)
 
 void GameServer::clientDisconnect(const xy::NetEvent& evt)
 {
-    /*m_sharedStateData.connectedClients.erase(
-        std::remove_if(m_sharedStateData.connectedClients.begin(), m_sharedStateData.connectedClients.end(),
-            [&evt](const std::pair<std::uint64_t, xy::NetPeer>& p)
-    {
-        return evt.peer.getID() == p.first;
-    }));*/
-
     m_sharedStateData.connectedClients.erase(evt.peer.getID());
 
     auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);

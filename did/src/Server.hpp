@@ -44,13 +44,19 @@ public:
     void stop();
     bool running() const { return m_running; }
 
-    void setMaxPlayers(std::uint8_t);
+    void setMaxPlayers(std::uint8_t maxPlayers) { m_maxPlayers = maxPlayers; }
+
+    inline void sendData(std::uint8_t packetID, void* data, std::size_t size, std::uint64_t destination, xy::NetFlag sendType)
+    {
+        m_host.sendPacket(m_sharedStateData.connectedClients[destination], packetID, data, size, sendType);
+        std::cout << "sending " << size << "bytes\n";
+    }
 
     template <typename T>
-    void sendData(std::uint8_t packetID, const T& data, std::uint64_t dest, xy::NetFlag sendType = xy::NetFlag::Unreliable);
+    inline void sendData(std::uint8_t packetID, const T& data, std::uint64_t dest, xy::NetFlag sendType = xy::NetFlag::Unreliable);
 
     template <typename T>
-    void broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType = xy::NetFlag::Unreliable);
+    inline void broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType = xy::NetFlag::Unreliable);
 
     xy::MessageBus& getMessageBus() { return m_messageBus; }
 
@@ -66,6 +72,8 @@ private:
 
     sf::Clock m_serverTime;
     xy::NetHost m_host;
+
+    std::size_t m_maxPlayers;
 
     bool pollNetwork(xy::NetEvent&);
 

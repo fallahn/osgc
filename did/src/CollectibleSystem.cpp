@@ -94,7 +94,7 @@ void CollectibleSystem::process(float dt)
                     if (collected)
                     {
                         //only send if we're not a bot player
-                        if (otherEnt.getComponent<CSteamID>().IsValid())
+                        if (otherEnt.getComponent<std::uint64_t>() != 0)
                         {
                             InventoryState state;
                             state.inventory = inventory;

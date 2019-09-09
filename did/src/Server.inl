@@ -24,7 +24,7 @@ inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint
 #ifdef XY_DEBUG
     if (m_sharedStateData.connectedClients.count(destination) == 0)
     {
-        std::cout << "Tried to send to invalid destination\n";
+        std::cout << "Tried to send to " << destination << ": invalid destination\n";
         return;
     }
 #endif
