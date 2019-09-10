@@ -28,11 +28,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/Resource.hpp>
 
-#include <steam/steam_api.h>
-
 #include <array>
 
-struct Packet;
 struct SharedData;
 struct ActorState;
 struct SceneState;
@@ -55,7 +52,7 @@ public:
 
 private:
     xy::Scene m_uiScene;
-    xy::Scene m_gameScene;
+    xy::Scene m_gameScene; //used for drawing background
     SharedData& m_sharedData;
 
     xy::TextureResource m_textureResource;
@@ -79,19 +76,19 @@ private:
 
     xy::Entity addCheckbox();
 
-    //lobby callbacks and call results
-    STEAM_CALLBACK(MenuState, onLobbyEnter, LobbyEnter_t);
-    STEAM_CALLBACK(MenuState, onLobbyDataUpdate, LobbyDataUpdate_t);
-    STEAM_CALLBACK(MenuState, onLobbyChatUpdate, LobbyChatUpdate_t);
-    STEAM_CALLBACK(MenuState, onChatMessage, LobbyChatMsg_t);
-    CCallResult<MenuState, LobbyCreated_t> m_lobbyCreated;
-    void onLobbyCreated(LobbyCreated_t*, bool);
+    ////lobby callbacks and call results
+    //STEAM_CALLBACK(MenuState, onLobbyEnter, LobbyEnter_t);
+    //STEAM_CALLBACK(MenuState, onLobbyDataUpdate, LobbyDataUpdate_t);
+    //STEAM_CALLBACK(MenuState, onLobbyChatUpdate, LobbyChatUpdate_t);
+    //STEAM_CALLBACK(MenuState, onChatMessage, LobbyChatMsg_t);
+    //CCallResult<MenuState, LobbyCreated_t> m_lobbyCreated;
+    //void onLobbyCreated(LobbyCreated_t*, bool);
 
-    CCallResult<MenuState, LobbyMatchList_t> m_lobbyListResult;
-    void onLobbyListRecieved(LobbyMatchList_t*, bool);
+    //CCallResult<MenuState, LobbyMatchList_t> m_lobbyListResult;
+    //void onLobbyListRecieved(LobbyMatchList_t*, bool);
 
-    CCallResult<MenuState, LobbyEnter_t> m_lobbyJoined;
-    void onLobbyJoined(LobbyEnter_t*, bool);
+    //CCallResult<MenuState, LobbyEnter_t> m_lobbyJoined;
+    //void onLobbyJoined(LobbyEnter_t*, bool);
 
     void refreshLobbyView();
     void refreshBrowserView();

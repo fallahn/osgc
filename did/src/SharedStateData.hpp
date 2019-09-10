@@ -18,8 +18,6 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <steam/steam_api.h>
-
 #include "InputBinding.hpp"
 #include "ClientInfoManager.hpp"
 #include "ServerSharedStateData.hpp"
@@ -33,10 +31,6 @@ Copyright 2019 Matt Marchant
 
 struct SharedData final
 {
-    CSteamID serverID;
-    CSteamID lobbyID;
-    CSteamID host;
-
     InputBinding inputBinding;
     ClientInfoManager clientInformation;
     std::string error;

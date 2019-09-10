@@ -595,7 +595,7 @@ void RunningState::handleMessage(const xy::Message& msg)
 
             //tell clients which actor just lost its player
             ConnectionState state;
-            state.steamID = 0;
+            state.clientID = 0;
             state.actorID = id;
             m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable);
         }
@@ -679,7 +679,7 @@ void RunningState::spawnPlayer(std::uint64_t clientID)
 
             //broadcast to all clients that someone has joined
             ConnectionState state;
-            state.steamID = clientID;
+            state.clientID = clientID;
             state.actorID = entity.getComponent<Actor>().id;
             m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable);
 

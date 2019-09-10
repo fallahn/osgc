@@ -25,9 +25,7 @@ Copyright 2019 Matt Marchant
 #include "MixerChannels.hpp"
 #include "PacketTypes.hpp"
 #include "Packet.hpp"
-
-#include <steam/steam_api.h>
-#include <steam/steam_gameserver.h>
+#include "PluginExport.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -114,8 +112,7 @@ void MenuState::handleMessage(const xy::Message& msg)
             //already in a lobby - this message is also raised
             //when we inherit an existing one
 
-            auto handle = SteamMatchmaking()->CreateLobby(ELobbyType::k_ELobbyTypePublic, 4);
-            m_lobbyCreated.Set(handle, this, &MenuState::onLobbyCreated);
+            std::cout << "Join Lobby Here!\n";
         }
     }
 
@@ -162,7 +159,6 @@ bool MenuState::update(float dt)
     }
 #endif //XY_DEBUG
 
-    SteamAPI_RunCallbacks();
     m_uiScene.update(dt);
     m_gameScene.update(dt);
 
@@ -170,7 +166,7 @@ bool MenuState::update(float dt)
     {
         m_pingClock.restart();
         m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable);
-        std::cout << "Pinging " << m_sharedData.serverID.ConvertToUint64() << "...\n";
+        std::cout << "Pinging...\n";
     }
 
     return true;
@@ -224,7 +220,7 @@ void MenuState::loadAssets()
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
             //check we're host and allowed to do this
-            if (SteamMatchmaking()->GetLobbyOwner(m_sharedData.lobbyID) == SteamUser()->GetSteamID())
+            if (true) //TODO check we're the owner (friend only will probably go away anyway)
             {
                 auto checked = entity.getComponent<std::uint8_t>() == 0 ? 1 : 0;
                 entity.getComponent<std::uint8_t>() = checked;
@@ -233,12 +229,12 @@ void MenuState::loadAssets()
                 if (checked)
                 {
                     bounds.top = bounds.height;
-                    SteamMatchmaking()->SetLobbyType(m_sharedData.lobbyID, ELobbyType::k_ELobbyTypeFriendsOnly);
+                    //TODO set friends only
                 }
                 else
                 {
                     bounds.top = 0.f;
-                    SteamMatchmaking()->SetLobbyType(m_sharedData.lobbyID, ELobbyType::k_ELobbyTypePublic);
+                    //TODO set public ... except of course there's no match making!
                 }
                 entity.getComponent<xy::Sprite>().setTextureRect(bounds);
             }
@@ -292,9 +288,6 @@ void MenuState::loadAssets()
                     m_uiScene.destroyEntity(entity);
                 };
                 m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                auto result = SteamMatchmaking()->JoinLobby(entity.getComponent<CSteamID>());
-                m_lobbyJoined.Set(result, this, &MenuState::onLobbyJoined);
             }
             else
             {
@@ -307,7 +300,7 @@ void MenuState::loadAssets()
         [&](xy::Entity entity, sf::Uint64 flags)
     {
         if ((flags & xy::UISystem::Flags::LeftMouse)
-            && entity.getComponent<CSteamID>() == SteamUser()->GetSteamID())
+            /*&& TODO check this entity has our peer ID so we know it's the local player*/)
         {
             auto selected = entity.getComponent<std::uint8_t>() == 0 ? 1 : 0;
             auto bounds = entity.getComponent<xy::Sprite>().getTextureRect();
@@ -315,12 +308,12 @@ void MenuState::loadAssets()
             if (selected)
             {
                 bounds.top = bounds.height;
-                SteamMatchmaking()->SetLobbyMemberData(m_sharedData.lobbyID, "ready", "true");
+                //TODO set player ready
             }
             else
             {
                 bounds.top = 0.f;
-                SteamMatchmaking()->SetLobbyMemberData(m_sharedData.lobbyID, "ready", "false");
+                //TODO set player unready
             }
             entity.getComponent<std::uint8_t>() = selected;
             entity.getComponent<xy::Sprite>().setTextureRect(bounds);
@@ -451,11 +444,12 @@ void MenuState::createScene()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([](xy::Entity ent, sf::Uint64 flags)
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity ent, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            xy::App::quit();
+            requestStackClear();
+            requestStackPush(StateID::ParentState);
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -482,32 +476,32 @@ void MenuState::setLobbyView()
     //game too and a new host was made, assuming the 
     //game mode properly quits
 
-    if (m_sharedData.lobbyID.IsLobby())
-    {
-        xy::Command cmd;
-        cmd.targetFlags = Menu::CommandID::LobbyNode;
-        cmd.action = [](xy::Entity e, float)
-        {
-            e.getComponent<xy::Transform>().setPosition({});
-        };
-        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    //if (m_sharedData.lobbyID.IsLobby())
+    //{
+    //    xy::Command cmd;
+    //    cmd.targetFlags = Menu::CommandID::LobbyNode;
+    //    cmd.action = [](xy::Entity e, float)
+    //    {
+    //        e.getComponent<xy::Transform>().setPosition({});
+    //    };
+    //    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-        cmd.targetFlags = Menu::CommandID::MainNode;
-        cmd.action = [](xy::Entity e, float)
-        {
-            e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
-        };
-        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    //    cmd.targetFlags = Menu::CommandID::MainNode;
+    //    cmd.action = [](xy::Entity e, float)
+    //    {
+    //        e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+    //    };
+    //    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-        //allow players to join again if we're hosting
-        if (m_sharedData.host == SteamUser()->GetSteamID())
-        {
-            SteamMatchmaking()->SetLobbyJoinable(m_sharedData.lobbyID, true);
-        }
+    //    //allow players to join again if we're hosting
+    //    if (m_sharedData.host == SteamUser()->GetSteamID())
+    //    {
+    //        SteamMatchmaking()->SetLobbyJoinable(m_sharedData.lobbyID, true);
+    //    }
 
-        refreshLobbyView();
-        m_pingServer = true;
-    }
+    //    refreshLobbyView();
+    //    m_pingServer = true;
+    //}
 }
 
 void MenuState::handlePacket(const xy::NetEvent& evt)
@@ -524,7 +518,6 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
 
             m_gameLaunched = true;
         }
-        //m_sharedData.serverID = packet.sender;
         break;
     }
     case PacketID::CurrentSeed:

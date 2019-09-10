@@ -41,7 +41,7 @@ void serverMessageHandler(SharedData& sharedData, const xy::Message& msg)
             //if (sharedData.gameServer->getSteamID().IsValid())
             {
                 //sharedData.serverID = sharedData.gameServer->getSteamID();
-                xy::Logger::log("Created server instance " + std::to_string(sharedData.serverID.ConvertToUint64()), xy::Logger::Type::Info);
+                xy::Logger::log("Created server instance", xy::Logger::Type::Info);
                 newMsg->action = SystemEvent::ServerStarted;
             }
             /*else //TODO restore this when we unkludge

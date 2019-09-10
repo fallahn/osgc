@@ -20,8 +20,6 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/Assert.hpp>
 
-#include <steam/steam_api.h>
-
 #include <vector>
 #include <cstring>
 
@@ -72,22 +70,3 @@ namespace PacketID
         StartGame //lobby host wants server to start the game
     };
 }
-
-struct Packet final
-{
-    std::vector<std::uint8_t> bytes = { 0 };
-    std::size_t size = 0; //remember to add 1 if reading raw packet data!!
-    CSteamID sender;
-    std::uint8_t id() const
-    {
-        XY_ASSERT(!bytes.empty(), "No packet data");
-        return bytes[0];
-    }
-
-    template <typename T>
-    const T& as() const
-    {
-        XY_ASSERT(size == sizeof(T), "mismatch in data size");
-        return *reinterpret_cast<const T*>(&bytes[1]);
-    }
-};

@@ -26,8 +26,6 @@ Copyright 2019 Matt Marchant
 #include <SFML/Config.hpp>
 #include <SFML/System/Clock.hpp>
 
-#include <steam/steam_api.h>
-
 namespace sf
 {
     class Event;

@@ -76,19 +76,7 @@ void MenuState::buildLobby(sf::Font& font)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            if (m_sharedData.lobbyID.IsLobby())
-            {
-                SteamMatchmaking()->LeaveLobby(m_sharedData.lobbyID);
-            }
-
-            if (m_sharedData.serverID.IsValid())
-            {
-                SteamNetworking()->CloseP2PSessionWithUser(m_sharedData.serverID);
-            }
-
-            m_sharedData.lobbyID = {};
-            m_sharedData.serverID = {};
-            m_sharedData.host = {};
+            //TODO leave lobby
 
             //quit our local server
             auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
@@ -113,30 +101,10 @@ void MenuState::buildLobby(sf::Font& font)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            if (SteamMatchmaking()->GetLobbyOwner(m_sharedData.lobbyID) == SteamUser()->GetSteamID())
-            {
-                //check all lobby members are ready
-                auto memberCount = SteamMatchmaking()->GetNumLobbyMembers(m_sharedData.lobbyID);
-                for (auto i = 0; i < memberCount; ++i)
-                {
-                    auto member = SteamMatchmaking()->GetLobbyMemberByIndex(m_sharedData.lobbyID, i);
-                    std::string readyState = SteamMatchmaking()->GetLobbyMemberData(m_sharedData.lobbyID, member, "ready");
-                    if (readyState != "true")
-                    {
-                        return;
-                    }
-                }
+            //TODO check all users are ready and that we're the host
 
-                //raise a message telling all lobby members to start the game
-                const auto buns = Menu::ChatMessageID::StartGame;
-                SteamMatchmaking()->SendLobbyChatMsg(m_sharedData.lobbyID, &buns, 1);
-
-                //send a packet to server if we're host telling it to switch to game state
-                m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable);
-
-                //set the lobby not joinable while playing the game
-                SteamMatchmaking()->SetLobbyJoinable(m_sharedData.lobbyID, false);
-            }
+            //send a packet to server if we're host telling it to switch to game state
+            m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable);
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

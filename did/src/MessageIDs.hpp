@@ -18,8 +18,6 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <steam/steamclientpublic.h>
-
 #include <xyginext/core/Message.hpp>
 #include <xyginext/ecs/Entity.hpp>
 

@@ -1629,7 +1629,7 @@ void GameState::updateConnection(ConnectionState state)
     {
         auto idx = state.actorID - Actor::ID::PlayerOne;
 
-        if (state.steamID == 0)
+        if (state.clientID == 0)
         {
             m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
         }
