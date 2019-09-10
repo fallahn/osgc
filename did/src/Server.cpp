@@ -19,8 +19,8 @@ Copyright 2019 Matt Marchant
 #include "Server.hpp"
 #include "GlobalConsts.hpp"
 #include "Packet.hpp"
-#include "ServerRunningState.hpp"
-#include "ServerActiveState.hpp"
+#include "ServerGameState.hpp"
+#include "ServerLobbyState.hpp"
 #include "MessageIDs.hpp"
 
 #include <xyginext/core/Log.hpp>
@@ -38,7 +38,7 @@ GameServer::GameServer()
     m_running   (false)
 {
     m_sharedStateData.gameServer = this;
-    m_currentState = std::make_unique<ActiveState>(m_sharedStateData);
+    m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
 
     const char* defaultSeed = "buns";
     std::strcpy(m_sharedStateData.seedData.str, defaultSeed);
@@ -222,11 +222,11 @@ void GameServer::run()
             case StateID::Idle:
                 m_currentState = std::make_unique<IdleState>(m_sharedStateData);
                 break;
-            case StateID::Active:
-                m_currentState = std::make_unique<ActiveState>(m_sharedStateData);
+            case StateID::Lobby:
+                m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
                 break;
             case StateID::Running:
-                m_currentState = std::make_unique<RunningState>(m_sharedStateData);
+                m_currentState = std::make_unique<GameState>(m_sharedStateData);
                 break;
             }
             m_serverTime.restart();

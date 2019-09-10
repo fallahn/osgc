@@ -24,15 +24,13 @@ Copyright 2019 Matt Marchant
 
 namespace Server
 {
-    //TODO convert this to lobby state
-
-    class ActiveState final : public State
+    class LobbyState final : public State
     {
     public:
-        explicit ActiveState(SharedStateData&);
-        ~ActiveState();
+        explicit LobbyState(SharedStateData&);
+        ~LobbyState();
 
-        std::int32_t getID() const override { return StateID::Active; }
+        std::int32_t getID() const override { return StateID::Lobby; }
 
         void networkUpdate(float) override;
 

@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#include "ServerActiveState.hpp"
+#include "ServerLobbyState.hpp"
 #include "ServerSharedStateData.hpp"
 #include "Server.hpp"
 #include "Packet.hpp"
@@ -40,30 +40,30 @@ namespace
 
 }
 
-ActiveState::ActiveState(SharedStateData& sd)
+LobbyState::LobbyState(SharedStateData& sd)
     : m_sharedData  (sd)
 {
     setNextState(getID());
     xy::Logger::log("Server switched to active state");
 }
 
-ActiveState::~ActiveState()
+LobbyState::~LobbyState()
 {
 
 }
 
 //public
-void ActiveState::networkUpdate(float dt)
+void LobbyState::networkUpdate(float dt)
 {
 
 }
 
-void ActiveState::logicUpdate(float dt)
+void LobbyState::logicUpdate(float dt)
 {
 
 }
 
-void ActiveState::handlePacket(const xy::NetEvent& evt)
+void LobbyState::handlePacket(const xy::NetEvent& evt)
 {
     switch (evt.packet.getID())
     {
@@ -99,7 +99,7 @@ void ActiveState::handlePacket(const xy::NetEvent& evt)
     }
 }
 
-void ActiveState::handleMessage(const xy::Message& msg)
+void LobbyState::handleMessage(const xy::Message& msg)
 {
     if (msg.id == MessageID::ServerMessage)
     {
@@ -114,7 +114,7 @@ void ActiveState::handleMessage(const xy::Message& msg)
 }
 
 //private
-void ActiveState::broadcastClientInfo()
+void LobbyState::broadcastClientInfo()
 {
     for (const auto& [id, client] : m_sharedData.connectedClients)
     {

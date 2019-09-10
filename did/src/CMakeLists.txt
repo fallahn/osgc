@@ -56,10 +56,10 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Render3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SeagullSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerGameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerIdleState.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ServerActiveState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ServerLobbyState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerMessageHandler.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ServerRunningState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerRoundTimer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerStormDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ServerWeaponDirector.cpp

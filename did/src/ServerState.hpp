@@ -32,7 +32,7 @@ namespace Server
     {
         enum
         {
-            Idle, Active, Running
+            Idle, Lobby, Running
         };
     }
     struct SharedStateData;

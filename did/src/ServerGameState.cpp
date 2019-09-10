@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#include "ServerRunningState.hpp"
+#include "ServerGameState.hpp"
 #include "Packet.hpp"
 #include "ServerSharedStateData.hpp"
 #include "Server.hpp"
@@ -104,7 +104,7 @@ namespace
     };
 }
 
-RunningState::RunningState(SharedStateData& sd)
+GameState::GameState(SharedStateData& sd)
     : m_sharedData      (sd),
     m_scene             (sd.gameServer->getMessageBus(), 512),
     m_dayNightUpdateTime(0.f),
@@ -139,7 +139,7 @@ RunningState::RunningState(SharedStateData& sd)
 }
 
 //public
-void RunningState::networkUpdate(float dt)
+void GameState::networkUpdate(float dt)
 {
     //broadcast scene state - TODO will this be more efficient
     //to send only the visible actors to each player?
@@ -241,7 +241,7 @@ void RunningState::networkUpdate(float dt)
     m_dayNightUpdateTime += dt;
 }
 
-void RunningState::logicUpdate(float dt)
+void GameState::logicUpdate(float dt)
 {
     m_scene.update(dt);
 
@@ -264,7 +264,7 @@ void RunningState::logicUpdate(float dt)
     }
 }
 
-void RunningState::handlePacket(const xy::NetEvent& evt)
+void GameState::handlePacket(const xy::NetEvent& evt)
 {
     switch (evt.packet.getID())
     {
@@ -296,7 +296,7 @@ void RunningState::handlePacket(const xy::NetEvent& evt)
     }
 }
 
-void RunningState::handleMessage(const xy::Message& msg)
+void GameState::handleMessage(const xy::Message& msg)
 {
     switch (msg.id)
     {
@@ -607,7 +607,7 @@ void RunningState::handleMessage(const xy::Message& msg)
 }
 
 //private
-void RunningState::createScene()
+void GameState::createScene()
 {
     auto& mb = m_sharedData.gameServer->getMessageBus();
     m_scene.addSystem<xy::CommandSystem>(mb);
@@ -647,7 +647,7 @@ void RunningState::createScene()
     spawnMapActors();
 }
 
-void RunningState::spawnPlayer(std::uint64_t clientID)
+void GameState::spawnPlayer(std::uint64_t clientID)
 {
     //TODO would be nice to let players request a character from lobby menu
     {
@@ -708,7 +708,7 @@ void RunningState::spawnPlayer(std::uint64_t clientID)
     m_scene.setSystemActive<BotSystem>(true);
 }
 
-void RunningState::createPlayerEntity(std::size_t idx)
+void GameState::createPlayerEntity(std::size_t idx)
 {
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Global::BoatPositions[idx] + sf::Vector2f(0.f, Global::PlayerSpawnOffset));
@@ -770,7 +770,7 @@ void RunningState::createPlayerEntity(std::size_t idx)
     entity.getComponent<Carriable>().spawnPosition = entity.getComponent<xy::Transform>().getPosition();
 }
 
-void RunningState::spawnMapActors()
+void GameState::spawnMapActors()
 {
     const auto& actors = m_islandGenerator.getActorSpawns();
     for (const auto& spawn : actors)
@@ -847,7 +847,7 @@ void RunningState::spawnMapActors()
     }
 }
 
-xy::Entity RunningState::spawnActor(sf::Vector2f position, std::int32_t id)
+xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
 {
     auto entity = m_scene.createEntity();
     entity.addComponent<Actor>().id = static_cast<Actor::ID>(id);
@@ -1045,7 +1045,7 @@ xy::Entity RunningState::spawnActor(sf::Vector2f position, std::int32_t id)
     return entity;
 }
 
-void RunningState::endGame()
+void GameState::endGame()
 {
     //tally all stats
     RoundSummary summary;
@@ -1078,12 +1078,10 @@ void RunningState::endGame()
     //send stats to clients and notify clients game ended
     m_sharedData.gameServer->broadcastData(PacketID::EndOfRound, summary, xy::NetFlag::Reliable);
 
-    //TODO send player stats to steam - but not host if they quit or are a bot
-
-    setNextState(Server::StateID::Active); //set this to active and drop players back into lobby
+    setNextState(Server::StateID::Lobby); //set this to drop players back into lobby
 }
 
-void RunningState::doConCommand(const ConCommand::Data& data)
+void GameState::doConCommand(const ConCommand::Data& data)
 {
     switch (data.commandID)
     {

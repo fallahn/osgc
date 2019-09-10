@@ -33,10 +33,10 @@ namespace Server
         struct Data;
     }
 
-    class RunningState final : public State
+    class GameState final : public State
     {
     public:
-        explicit RunningState(SharedStateData&);
+        explicit GameState(SharedStateData&);
 
         std::int32_t getID() const override { return StateID::Running; }
 

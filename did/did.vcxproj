@@ -294,11 +294,11 @@
     <ClInclude Include="src\Revision.hpp" />
     <ClInclude Include="src\SeagullSystem.hpp" />
     <ClInclude Include="src\Server.hpp" />
-    <ClInclude Include="src\ServerActiveState.hpp" />
+    <ClInclude Include="src\ServerLobbyState.hpp" />
     <ClInclude Include="src\ServerMessages.hpp" />
     <ClInclude Include="src\ServerRandom.hpp" />
     <ClInclude Include="src\ServerRoundTimer.hpp" />
-    <ClInclude Include="src\ServerRunningState.hpp" />
+    <ClInclude Include="src\ServerGameState.hpp" />
     <ClInclude Include="src\ServerSharedStateData.hpp" />
     <ClInclude Include="src\ServerState.hpp" />
     <ClInclude Include="src\ServerStormDirector.hpp" />
@@ -398,10 +398,10 @@
     <ClCompile Include="src\SeagullSystem.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServerIdleState.cpp" />
-    <ClCompile Include="src\ServerActiveState.cpp" />
+    <ClCompile Include="src\ServerLobbyState.cpp" />
     <ClCompile Include="src\ServerMessageHandler.cpp" />
     <ClCompile Include="src\ServerRoundTimer.cpp" />
-    <ClCompile Include="src\ServerRunningState.cpp" />
+    <ClCompile Include="src\ServerGameState.cpp" />
     <ClCompile Include="src\ServerStormDirector.cpp" />
     <ClCompile Include="src\ServerWeaponDirector.cpp" />
     <ClCompile Include="src\ShadowCastSystem.cpp" />
