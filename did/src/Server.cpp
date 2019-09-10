@@ -34,12 +34,11 @@ Copyright 2019 Matt Marchant
 using namespace Server;
 
 GameServer::GameServer()
-    : m_running   (false)
+    : m_thread  (&GameServer::run, this),
+    m_running   (false)
 {
-    initServer();
-
     m_sharedStateData.gameServer = this;
-    m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+    m_currentState = std::make_unique<ActiveState>(m_sharedStateData);
 
     const char* defaultSeed = "buns";
     std::strcpy(m_sharedStateData.seedData.str, defaultSeed);
@@ -51,25 +50,36 @@ GameServer::GameServer()
 GameServer::~GameServer()
 {
     stop();
-    closeServer();
 }
 
 //public
 void GameServer::start()
 {
+    if (!m_host.start("", Global::GamePort, 4, 10)) //TODO constify channel count
+    {
+        xy::Logger::log("Failed to start netowrk host :(", xy::Logger::Type::Error);
+    }
+    else
     {
         xy::Logger::log("Launching Server Instance...", xy::Logger::Type::Info);
         m_running = true;
 
-        //don't switch state here - wait until first client has joined and become host
-        run();
+        m_thread.launch();
     }
 }
 
 void GameServer::stop()
 {
-    m_running = false;
-    xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
+    if (m_running)
+    {
+        m_running = false;
+        xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
+
+        m_thread.wait();
+        m_host.stop();
+
+        xy::Logger::log("Server Stopped.", xy::Logger::Type::Info);
+    }
 }
 
 //private
@@ -92,41 +102,22 @@ bool GameServer::pollNetwork(xy::NetEvent& evt)
     return false;
 }
 
-void GameServer::initServer()
-{
-    if (!m_host.start("", Global::GamePort, 4, 10))
-    {
-        xy::Logger::log("Failed to start Steam Server API", xy::Logger::Type::Error, xy::Logger::Output::All);
-        return;
-    }
-
-    //small delay to allow time to log on
-    sf::Clock clock;
-    while(clock.getElapsedTime().asSeconds() < 3.f){}
-}
-
-void GameServer::closeServer()
-{
-    m_host.stop();
-}
-
 void GameServer::clientConnect(const xy::NetEvent& evt)
 {
     if (m_currentState->getID() != StateID::Running  //don't join running games
         && m_sharedStateData.connectedClients.size() < m_maxPlayers)
     {
-        LOG("We're accepting a user connection without validating!! This must be rectified in the future.", xy::Logger::Type::Warning);
-        m_sharedStateData.connectedClients.insert(std::make_pair(evt.peer.getID(), evt.peer));
+        m_sharedStateData.connectedClients.insert(std::make_pair(evt.peer.getID(), ClientData()));
+        m_sharedStateData.connectedClients[evt.peer.getID()].peer = evt.peer;
 
         m_host.sendPacket(evt.peer, PacketID::CurrentSeed, m_sharedStateData.seedData, xy::NetFlag::Reliable);
 
         xy::Logger::log("Added user with ID: " + std::to_string(evt.peer.getID()), xy::Logger::Type::Info, xy::Logger::Output::All);
 
-        if (m_currentState->getID() == StateID::Idle)
+        if (m_sharedStateData.connectedClients.size() == 1)
         {
             //set joiner as host
             m_sharedStateData.hostClient = evt.peer;
-            m_currentState = std::make_unique<ActiveState>(m_sharedStateData);
         }
 
         auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
@@ -153,8 +144,9 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
     //the current one left, this is handled by the active state
     if (m_sharedStateData.connectedClients.empty())
     {
-        m_sharedStateData.hostClient = {};
-        m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+        /*m_sharedStateData.hostClient = {};
+        m_currentState = std::make_unique<IdleState>(m_sharedStateData);*/
+        //TODO we want to quit server but not in the middle of  the thread we're closing ;)
     }
 }
 
@@ -242,5 +234,5 @@ void GameServer::run()
     }
 
     //return to idle when stopped
-    m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+    //m_currentState = std::make_unique<IdleState>(m_sharedStateData);
 }

@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "Packet.hpp"
 #include "PacketTypes.hpp"
 #include "MessageIDs.hpp"
+#include "GlobalConsts.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
@@ -30,25 +31,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/Log.hpp>
 #include <xyginext/network/NetData.hpp>
 
+#include <cstring>
+
 using namespace Server;
 
 namespace
 {
-    struct TestCallback final
-    {
-        TestCallback(xy::Scene& s) : scene(s){}
 
-        void operator() (xy::Entity e, float dt)
-        {
-            timeout -= dt;
-            if (timeout < 0)
-            {
-                scene.destroyEntity(e);
-            }
-        }
-        float timeout = 10.f;
-        xy::Scene& scene;
-    };
 }
 
 ActiveState::ActiveState(SharedStateData& sd)
@@ -60,11 +49,7 @@ ActiveState::ActiveState(SharedStateData& sd)
 
 ActiveState::~ActiveState()
 {
-    //TODO do we need to tell connected clients to clear up?
-    //after all if they remain connected when this state is
-    //closed they ought to be changing state themselves.
 
-    //clients disconnecting from a lobby can tidy up locally.
 }
 
 //public
@@ -84,7 +69,7 @@ void ActiveState::handlePacket(const xy::NetEvent& evt)
     {
     default: break;
     case PacketID::StartGame:
-        //start game on request
+        //start game on request TODO check all players are ready first
         setNextState(Server::StateID::Running);
         m_sharedData.gameServer->broadcastData(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
         break;
@@ -99,6 +84,18 @@ void ActiveState::handlePacket(const xy::NetEvent& evt)
     case PacketID::RequestSeed:
         m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, xy::NetFlag::Reliable);
         break;
+    case PacketID::SupPlayerInfo:
+    {
+        //read out name string
+        std::vector<sf::Uint32> buffer(evt.packet.getSize() / sizeof(sf::Uint32));
+        std::memcpy(buffer.data(), (char*)evt.packet.getData(), evt.packet.getSize());
+
+        m_sharedData.connectedClients[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+
+        //update all clients
+        broadcastClientInfo();
+    }
+        break;
     }
 }
 
@@ -109,9 +106,24 @@ void ActiveState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<ServerEvent>();
         if (data.type == ServerEvent::ClientConnected)
         {
-            m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, xy::NetFlag::Reliable);
+            //request info from client such as name and ready state
+            m_sharedData.gameServer->sendData(PacketID::ReqPlayerInfo, std::uint8_t(0), data.id, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->sendData(PacketID::CurrentSeed, m_sharedData.seedData, data.id, xy::NetFlag::Reliable);
         }
     }
 }
 
 //private
+void ActiveState::broadcastClientInfo()
+{
+    for (const auto& [id, client] : m_sharedData.connectedClients)
+    {
+        auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
+        std::vector<char> buffer(sizeof(id) + size);
+
+        std::memcpy(buffer.data(), &id, sizeof(id));
+        std::memcpy(buffer.data() + sizeof(id), client.name.getData(), size);
+
+        m_sharedData.gameServer->broadcastData(PacketID::DeliverPlayerInfo, buffer.data(), std::size_t(size + sizeof(id)), xy::NetFlag::Reliable);
+    }
+}

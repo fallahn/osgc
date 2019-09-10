@@ -96,13 +96,14 @@ namespace Global
     };
 
     //default character names
-    static const std::array<std::string, 4u> PlayerNames =
+    static const std::array<sf::String, 4u> PlayerNames =
     {
         sf::String("Sir Rodney Boardshine"),
         sf::String("Coiffured Jean"),
         sf::String("Helena Squinteye"),
         sf::String("Barnacle Lars")
     };
+    static const std::size_t MaxNameSize = 80 * sizeof(sf::Uint32); //because utf32
 
     static const std::array<sf::Color, 4u> PlayerColours = 
     {

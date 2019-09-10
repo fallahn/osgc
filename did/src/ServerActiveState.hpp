@@ -44,5 +44,7 @@ namespace Server
 
     private:
         SharedStateData& m_sharedData;
+
+        void broadcastClientInfo();
     };
 }

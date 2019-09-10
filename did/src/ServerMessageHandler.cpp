@@ -29,12 +29,10 @@ void serverMessageHandler(SharedData& sharedData, const xy::Message& msg)
         if (data.action == SystemEvent::RequestStartServer
             && !sharedData.gameServer->running())
         {
-            sharedData.serverThread->launch();
+            sharedData.gameServer->start();
 
             sf::Clock clock;
-            while (/*!sharedData.gameServer->getSteamID().IsValid()
-                && */clock.getElapsedTime().asSeconds() < 3.f) {
-            }
+            while (clock.getElapsedTime().asSeconds() < 1.f) {} //TODO change this to while(notRunning) ? 
 
             auto newMsg = xy::App::getActiveInstance()->getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
 
@@ -55,7 +53,6 @@ void serverMessageHandler(SharedData& sharedData, const xy::Message& msg)
         else if (data.action == SystemEvent::RequestStopServer)
         {
             sharedData.gameServer->stop();
-            sharedData.serverThread->wait();
         }
     }
 }

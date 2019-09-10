@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/core/MessageBus.hpp>
 #include <xyginext/network/NetHost.hpp>
 
+#include <SFML/System/Thread.hpp>
+
 #include <atomic>
 #include <memory>
 #include <vector>
@@ -48,11 +50,16 @@ public:
 
     inline void sendData(std::uint8_t packetID, void* data, std::size_t size, std::uint64_t destination, xy::NetFlag sendType)
     {
-        m_host.sendPacket(m_sharedStateData.connectedClients[destination], packetID, data, size, sendType);
+        m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, size, sendType);
     }
 
     template <typename T>
     inline void sendData(std::uint8_t packetID, const T& data, std::uint64_t dest, xy::NetFlag sendType = xy::NetFlag::Unreliable);
+
+    inline void broadcastData(std::uint8_t packetID, void* data, std::size_t size, xy::NetFlag sendType)
+    {
+        m_host.broadcastPacket(packetID, data, size, sendType);
+    }
 
     template <typename T>
     inline void broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType = xy::NetFlag::Unreliable);
@@ -62,7 +69,7 @@ public:
     std::int32_t getServerTime() const { return m_serverTime.getElapsedTime().asMilliseconds(); }
 
 private:
-
+    sf::Thread m_thread;
     std::atomic<bool> m_running;
     std::unique_ptr<Server::State> m_currentState;
 
@@ -75,9 +82,6 @@ private:
     std::size_t m_maxPlayers;
 
     bool pollNetwork(xy::NetEvent&);
-
-    void initServer();
-    void closeServer();
 
     void clientConnect(const xy::NetEvent&);
     void clientDisconnect(const xy::NetEvent&);

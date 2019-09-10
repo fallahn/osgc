@@ -51,7 +51,6 @@ void onAbort(int)
 namespace
 {
     std::shared_ptr<GameServer> gameServer;
-    std::shared_ptr<sf::Thread> serverThread;
     std::shared_ptr<xy::NetClient> netClient;
 }
 
@@ -65,12 +64,10 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     auto& sd = std::any_cast<SharedData&>(*sharedData);
 
     sd.gameServer = std::make_shared<GameServer>();
-    sd.serverThread = std::make_shared<sf::Thread>(&GameServer::start, sd.gameServer.get());
     sd.netClient = std::make_shared<xy::NetClient>();
     sd.netClient->create(10); //TODO constify this and share with host channel count
 
     gameServer = sd.gameServer;
-    serverThread = sd.serverThread;
     netClient = sd.netClient;
 
     xy::AudioMixer::setLabel("Sound FX", MixerChannel::FX);
@@ -90,10 +87,8 @@ void end(xy::StateStack* ss)
     netClient->disconnect();
 
     gameServer->stop();
-    serverThread->wait();
 
     gameServer.reset();
-    serverThread.reset();
     netClient.reset();
 
     ss->unregisterState(StateID::Menu);

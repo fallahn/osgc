@@ -53,8 +53,8 @@ namespace PacketID
         WeatherUpdate, //uint8 containing current weather mode
         TreasureUpdate, //uint8 number of treasure remaining
         DebugUpdate, //contains state and entity ID
-        PhysicsUpdate, //data for client side physics interp
-        PhysicsSync, //data to sync physics state on the client
+        //PhysicsUpdate, //data for client side physics interp
+        //PhysicsSync, //data to sync physics state on the client
 
         //from client
         RequestMap, //client is requesting map
@@ -67,6 +67,10 @@ namespace PacketID
         RequestSeed, //ask the server for current seed
         SetSeed, //tell the server the current seed
         CurrentSeed, //tell the client the current seed
-        StartGame //lobby host wants server to start the game
+        StartGame, //lobby host wants server to start the game
+        ReqPlayerInfo, //ask client for player data
+        SupPlayerInfo, //info supplied by client
+        PlayerReadyState, //0 or 1 uint8
+        DeliverPlayerInfo, //info of clients from the server (id, name string)
     };
 }

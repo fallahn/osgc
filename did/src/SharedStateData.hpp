@@ -40,8 +40,6 @@ struct SharedData final
     //but it's a required fudge to enable this
     //struct to be std::any compatible
     std::shared_ptr<GameServer> gameServer;
-    std::shared_ptr<sf::Thread> serverThread;
-
     std::shared_ptr<xy::NetClient> netClient;
 };
 

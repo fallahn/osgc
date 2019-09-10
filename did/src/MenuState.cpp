@@ -108,11 +108,11 @@ void MenuState::handleMessage(const xy::Message& msg)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            //TODO make sure this only happens if we aren't
-            //already in a lobby - this message is also raised
-            //when we inherit an existing one
-
-            std::cout << "Join Lobby Here!\n";
+            if (!m_sharedData.netClient->connected())
+            {
+                m_sharedData.netClient->connect("127.0.0.1", Global::GamePort);
+                //TODO if failure then return to main menu
+            }
         }
     }
 
@@ -535,6 +535,12 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         //we know we connected so we can stop pinging
         m_pingServer = false;
 
+        break;
+    case PacketID::ReqPlayerInfo:
+        sendPlayerData();
+        break;
+    case PacketID::DeliverPlayerInfo:
+        refreshLobbyView(evt);
         break;
     }
 }

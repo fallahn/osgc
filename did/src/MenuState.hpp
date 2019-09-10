@@ -76,21 +76,9 @@ private:
 
     xy::Entity addCheckbox();
 
-    ////lobby callbacks and call results
-    //STEAM_CALLBACK(MenuState, onLobbyEnter, LobbyEnter_t);
-    //STEAM_CALLBACK(MenuState, onLobbyDataUpdate, LobbyDataUpdate_t);
-    //STEAM_CALLBACK(MenuState, onLobbyChatUpdate, LobbyChatUpdate_t);
-    //STEAM_CALLBACK(MenuState, onChatMessage, LobbyChatMsg_t);
-    //CCallResult<MenuState, LobbyCreated_t> m_lobbyCreated;
-    //void onLobbyCreated(LobbyCreated_t*, bool);
+    void sendPlayerData();
 
-    //CCallResult<MenuState, LobbyMatchList_t> m_lobbyListResult;
-    //void onLobbyListRecieved(LobbyMatchList_t*, bool);
-
-    //CCallResult<MenuState, LobbyEnter_t> m_lobbyJoined;
-    //void onLobbyJoined(LobbyEnter_t*, bool);
-
-    void refreshLobbyView();
+    void refreshLobbyView(const xy::NetEvent&);
     void refreshBrowserView();
 
     void handlePacket(const xy::NetEvent&);

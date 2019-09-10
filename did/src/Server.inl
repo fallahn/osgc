@@ -29,7 +29,7 @@ inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint
     }
 #endif
 
-    m_host.sendPacket(m_sharedStateData.connectedClients[destination], packetID, data, sendType);
+    m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, sendType);
 }
 
 template <typename T>

@@ -5,6 +5,7 @@
 #include "ClientInfoManager.hpp"
 #include "PacketTypes.hpp"
 #include "GlobalConsts.hpp"
+#include "Packet.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/resources/Resource.hpp>
@@ -23,6 +24,14 @@ namespace
 {
     const sf::Vector2f ItemStartPosition(202.f, 188.f);
     const float ItemVerticalSpacing = 76.f;
+}
+
+void MenuState::sendPlayerData()
+{
+    auto nameBytes = Global::PlayerNames[0].toUtf32(); //TODO replace this with local player info
+    auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), Global::MaxNameSize);
+
+    m_sharedData.netClient->sendPacket(PacketID::SupPlayerInfo, nameBytes.data(), size, xy::NetFlag::Reliable);
 }
 
 //void MenuState::onLobbyEnter(LobbyEnter_t* cb)
@@ -215,27 +224,58 @@ namespace
 //    }
 //}
 
-void MenuState::refreshLobbyView()
+void MenuState::refreshLobbyView(const xy::NetEvent& evt)
 {
-    ////clear existing
-    //xy::Command cmd;
-    //cmd.targetFlags = Menu::CommandID::LobbyItem;
-    //cmd.action = [&](xy::Entity entity, float)
-    //{
-    //    m_uiScene.destroyEntity(entity);
-    //};
-    //m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    //clear existing
+    xy::Command cmd;
+    cmd.targetFlags = Menu::CommandID::LobbyItem;
+    cmd.action = [&](xy::Entity entity, float)
+    {
+        m_uiScene.destroyEntity(entity);
+    };
+    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-    //auto& font = m_fontResource.get(Global::FineFont);
-    //auto owner = SteamMatchmaking()->GetLobbyOwner(m_sharedData.lobbyID);
-    ////this defers setting the ID by a frame so we don't accidentally delete the new item
-    //auto callback = [](xy::Entity entity, float)
-    //{
-    //    entity.getComponent<xy::CommandTarget>().ID = Menu::CommandID::LobbyItem;
-    //    entity.getComponent<xy::Callback>().active = false;
-    //};
+    auto& font = m_fontResource.get(Global::FineFont);
 
-    ////update member data
+    //this defers setting the ID by a frame so we don't accidentally delete the new item
+    auto callback = [](xy::Entity entity, float)
+    {
+        entity.getComponent<xy::CommandTarget>().ID = Menu::CommandID::LobbyItem;
+        entity.getComponent<xy::Callback>().active = false;
+    };
+
+    //update member data
+    //TODO only updating the host for now - this will eventually be redesigned and all player info updated
+    auto size = evt.packet.getSize();
+    size = std::min(Global::MaxNameSize, size - sizeof(sf::Uint64));
+
+    sf::Uint64 peerID = 0;
+    std::memcpy(&peerID, evt.packet.getData(), sizeof(peerID));
+
+    std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
+    std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(peerID), size);
+
+    if (peerID == m_sharedData.netClient->getPeer().getID())
+    {
+        auto rootEntity = m_uiScene.createEntity();
+        rootEntity.addComponent<xy::Transform>().setPosition(ItemStartPosition);
+        rootEntity.getComponent<xy::Transform>().move(0.f, ItemVerticalSpacing);
+        rootEntity.addComponent<xy::CommandTarget>();
+        rootEntity.addComponent<xy::Callback>().active = true;
+        rootEntity.getComponent<xy::Callback>().function = callback;
+
+        auto nameEntity = m_uiScene.createEntity();
+        nameEntity.addComponent<xy::Drawable>();
+        nameEntity.addComponent<xy::Text>(font).setString(sf::String::fromUtf32(buffer.begin(), buffer.end()));
+        nameEntity.getComponent<xy::Text>().setCharacterSize(50);
+        nameEntity.addComponent<xy::Transform>().setPosition(76.f, 0.f);
+        nameEntity.addComponent<xy::CommandTarget>().ID;
+        nameEntity.addComponent<xy::Callback>().active = true;
+        nameEntity.getComponent<xy::Callback>().function = callback;
+        rootEntity.getComponent<xy::Transform>().addChild(nameEntity.getComponent<xy::Transform>());
+    }
+
+
     //auto memberCount = SteamMatchmaking()->GetNumLobbyMembers(m_sharedData.lobbyID);
     //for (auto i = 0; i < memberCount; ++i)
     //{

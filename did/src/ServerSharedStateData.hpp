@@ -20,6 +20,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/network/NetData.hpp>
 
+#include <SFML/System/String.hpp>
+
 #include <map>
 
 class GameServer;
@@ -32,11 +34,18 @@ namespace Server
         std::size_t hash = 0;
     };
 
+    struct ClientData final
+    {
+        xy::NetPeer peer;
+        sf::String name = "Unknown";
+        bool ready = false;
+    };
+
     struct SharedStateData final
     {
         xy::NetPeer hostClient;
         GameServer* gameServer = nullptr;
-        std::map<std::uint64_t, xy::NetPeer> connectedClients;
+        std::map<std::uint64_t, ClientData> connectedClients;
         SeedData seedData;
     };
 }
