@@ -105,7 +105,7 @@ void MenuState::buildLobby(sf::Font& font)
             //TODO check all users are ready and that we're the host
 
             //send a packet to server if we're host telling it to switch to game state
-            m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable);
+            m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

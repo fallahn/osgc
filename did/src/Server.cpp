@@ -55,7 +55,7 @@ GameServer::~GameServer()
 //public
 void GameServer::start()
 {
-    if (!m_host.start("", Global::GamePort, 4, 10)) //TODO constify channel count
+    if (!m_host.start("", Global::GamePort, 4, Global::NetworkChannels))
     {
         xy::Logger::log("Failed to start netowrk host :(", xy::Logger::Type::Error);
     }
@@ -110,7 +110,7 @@ void GameServer::clientConnect(const xy::NetEvent& evt)
         m_sharedStateData.connectedClients.insert(std::make_pair(evt.peer.getID(), ClientData()));
         m_sharedStateData.connectedClients[evt.peer.getID()].peer = evt.peer;
 
-        m_host.sendPacket(evt.peer, PacketID::CurrentSeed, m_sharedStateData.seedData, xy::NetFlag::Reliable);
+        m_host.sendPacket(evt.peer, PacketID::CurrentSeed, m_sharedStateData.seedData, xy::NetFlag::Reliable, Global::ReliableChannel);
 
         xy::Logger::log("Added user with ID: " + std::to_string(evt.peer.getID()), xy::Logger::Type::Info, xy::Logger::Output::All);
 

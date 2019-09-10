@@ -65,7 +65,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
     sd.gameServer = std::make_shared<GameServer>();
     sd.netClient = std::make_shared<xy::NetClient>();
-    sd.netClient->create(10); //TODO constify this and share with host channel count
+    sd.netClient->create(Global::NetworkChannels);
 
     gameServer = sd.gameServer;
     netClient = sd.netClient;

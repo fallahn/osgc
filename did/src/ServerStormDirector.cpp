@@ -115,7 +115,7 @@ void StormDirector::setWeather(State state)
     m_stateClock.restart();
     m_strikeClock.restart();
 
-    m_sharedData.gameServer->broadcastData(PacketID::WeatherUpdate, std::uint8_t(m_state), xy::NetFlag::Reliable);
+    m_sharedData.gameServer->broadcastData(PacketID::WeatherUpdate, std::uint8_t(m_state), xy::NetFlag::Reliable, Global::ReliableChannel);
     LOG("Set weather to " + std::to_string(m_state), xy::Logger::Type::Info);
 
     auto* msg = postMessage<SceneEvent>(MessageID::SceneMessage);

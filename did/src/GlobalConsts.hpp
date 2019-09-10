@@ -126,4 +126,10 @@ namespace Global
 
     //point values
     static const std::uint16_t TreasureValue = 40;
+
+    //network stuff - TODO ths should probably be an enum
+    static const std::size_t NetworkChannels = 4;
+    static const std::uint8_t AnimationChannel = 1;
+    static const std::uint8_t ReliableChannel = 2;
+    static const std::uint8_t LowPriorityChannel = 3;
 }

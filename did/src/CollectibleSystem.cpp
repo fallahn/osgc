@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "Server.hpp"
 #include "ServerRandom.hpp"
 #include "MessageIDs.hpp"
+#include "GlobalConsts.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -99,7 +100,7 @@ void CollectibleSystem::process(float dt)
                             InventoryState state;
                             state.inventory = inventory;
                             state.parentID = otherEnt.getIndex();
-                            m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<std::uint64_t>(), xy::NetFlag::Reliable);
+                            m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<std::uint64_t>(), xy::NetFlag::Reliable, Global::ReliableChannel);
                         }
 
                         getScene()->destroyEntity(entity);

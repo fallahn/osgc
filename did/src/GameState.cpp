@@ -162,7 +162,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         {
             return;
         }
-        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable);
+        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
     });
 
     registerCommand("bots_enabled", [&](const std::string& param)
@@ -170,7 +170,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         Server::ConCommand::Data data;
         data.commandID = Server::ConCommand::BotEnable;
         data.value.asInt = (param == "0") ? 0 : 1;
-        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable);
+        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
     });
 
     registerCommand("spawn", [&](const std::string& param)
@@ -214,7 +214,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                 data.value.asInt = id;
                 data.position = m_inputParser.getPlayerEntity().getComponent<xy::Transform>().getPosition();
                 data.position.x += Global::TileSize;
-                m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable);
+                m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
             }
             else
             {
@@ -613,7 +613,7 @@ bool GameState::update(float dt)
     
     if (!m_sceneLoaded)
     {
-        m_sharedData.netClient->sendPacket(PacketID::RequestMap, std::uint8_t(0), xy::NetFlag::Reliable);
+        m_sharedData.netClient->sendPacket(PacketID::RequestMap, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
     }
     
     m_inputParser.update(dt);
@@ -990,7 +990,7 @@ void GameState::loadScene(const TileArray& tileArray)
     auto msg = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
     msg->type = MapEvent::Loaded;
 
-    m_sharedData.netClient->sendPacket(PacketID::RequestPlayer, std::uint8_t(0), xy::NetFlag::Reliable);
+    m_sharedData.netClient->sendPacket(PacketID::RequestPlayer, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
 
     //ships in the background
     auto cameraEntity = m_gameScene.getActiveCamera();

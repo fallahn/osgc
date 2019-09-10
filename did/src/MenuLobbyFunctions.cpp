@@ -31,7 +31,7 @@ void MenuState::sendPlayerData()
     auto nameBytes = Global::PlayerNames[0].toUtf32(); //TODO replace this with local player info
     auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), Global::MaxNameSize);
 
-    m_sharedData.netClient->sendPacket(PacketID::SupPlayerInfo, nameBytes.data(), size, xy::NetFlag::Reliable);
+    m_sharedData.netClient->sendPacket(PacketID::SupPlayerInfo, nameBytes.data(), size, xy::NetFlag::Reliable, Global::ReliableChannel);
 }
 
 //void MenuState::onLobbyEnter(LobbyEnter_t* cb)

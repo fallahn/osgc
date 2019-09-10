@@ -168,8 +168,7 @@ void GameState::networkUpdate(float dt)
             state.animation = anim.nextAnimation;
             state.serverID = actorComponent.serverID;
 
-            //TODO check how well this works - we might need to send these reliably
-            m_sharedData.gameServer->broadcastData(PacketID::AnimationUpdate, state);
+            m_sharedData.gameServer->broadcastData(PacketID::AnimationUpdate, state, xy::NetFlag::Reliable, Global::AnimationChannel);
 
             anim.currentAnimation = anim.nextAnimation;
         }
@@ -205,7 +204,7 @@ void GameState::networkUpdate(float dt)
             stats.livesLost = client.stats.livesLost;
             stats.shotsFired = client.stats.shotsFired;
 
-            m_sharedData.gameServer->broadcastData(PacketID::StatUpdate, stats, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::StatUpdate, stats, xy::NetFlag::Reliable, Global::LowPriorityChannel);
 
             client.sendStatsUpdate = false;
         }   
@@ -259,7 +258,7 @@ void GameState::logicUpdate(float dt)
         {
             m_roundTimer.start();
             //start client timers
-            m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::OneTreasureRemaining, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::OneTreasureRemaining, xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     }
 }
@@ -270,7 +269,7 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     {
     default: break;
     case PacketID::RequestMap:
-        m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData.data, Global::TileCount, evt.peer.getID(), xy::NetFlag::Reliable);
+        m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData.data, Global::TileCount, evt.peer.getID(), xy::NetFlag::Reliable, Global::ReliableChannel);
         break;
     case PacketID::RequestPlayer:
         spawnPlayer(evt.peer.getID());
@@ -329,7 +328,7 @@ void GameState::handleMessage(const xy::Message& msg)
             SceneState state;
             state.action = SceneState::EntityRemoved;
             state.serverID = data.entityID;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     }
         break;
@@ -345,7 +344,7 @@ void GameState::handleMessage(const xy::Message& msg)
         case PlayerEvent::Died:
             state.action = SceneState::PlayerDied;
             state.position = data.entity.getComponent<Player>().deathPosition;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
 
             for (auto& slot : m_playerSlots)
             {
@@ -480,7 +479,7 @@ void GameState::handleMessage(const xy::Message& msg)
                     }
                     break;
                 }
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, messageID, xy::NetFlag::Reliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, messageID, xy::NetFlag::Reliable, Global::ReliableChannel);
 
                 auto e = data.entity;
                 e.getComponent<xy::Transform>().setPosition(e.getComponent<Player>().spawnPosition);
@@ -489,15 +488,15 @@ void GameState::handleMessage(const xy::Message& msg)
             break;
         case PlayerEvent::Respawned:
             state.action = SceneState::PlayerSpawned;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
             break;
         case PlayerEvent::BeeHit:
             state.action = SceneState::Stung;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
             break;
         case PlayerEvent::Cursed:
             state.action = data.data == 0 ? SceneState::LostCurse : SceneState::GotCursed;
-            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
             break;
         case PlayerEvent::DidAction:
         {
@@ -523,7 +522,7 @@ void GameState::handleMessage(const xy::Message& msg)
             //based on player ID
 
             //update client scoreboards
-            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable, Global::ReliableChannel);
             LOG(std::to_string(data.entity.getComponent<Player>().playerNumber) + " stole treasure from " + std::to_string(data.data) + "\n", xy::Logger::Type::Info);
             break;
         case PlayerEvent::StashedTreasure:
@@ -538,23 +537,23 @@ void GameState::handleMessage(const xy::Message& msg)
             {
             default: break;
             case 0:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerOneScored, xy::NetFlag::Reliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerOneScored, xy::NetFlag::Reliable, Global::ReliableChannel);
                 break;
             case 1:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerTwoScored, xy::NetFlag::Reliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerTwoScored, xy::NetFlag::Reliable, Global::ReliableChannel);
                 break;
             case 2:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerThreeScored, xy::NetFlag::Reliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerThreeScored, xy::NetFlag::Reliable, Global::ReliableChannel);
                 break;
             case 3:
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerFourScored, xy::NetFlag::Reliable);
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::PlayerFourScored, xy::NetFlag::Reliable, Global::ReliableChannel);
                 break;
             }
 
             m_playerSlots[playerID].sendStatsUpdate = true;
 
             //update client scoreboard
-            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable, Global::ReliableChannel);
 
             //raises an event so client can play a sound
             {
@@ -562,7 +561,7 @@ void GameState::handleMessage(const xy::Message& msg)
                 state.action = SceneState::StashedTreasure;
                 state.position = data.entity.getComponent<xy::Transform>().getPosition();
                 state.serverID = data.entity.getIndex();
-                m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable);
+                m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::LowPriorityChannel);
             }
             break;
         }
@@ -597,7 +596,7 @@ void GameState::handleMessage(const xy::Message& msg)
             ConnectionState state;
             state.clientID = 0;
             state.actorID = id;
-            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     }
         break;
@@ -675,16 +674,16 @@ void GameState::spawnPlayer(std::uint64_t clientID)
             PlayerInfo info;
             info.actor = entity.getComponent<Actor>();
             info.position = entity.getComponent<xy::Transform>().getPosition();
-            m_sharedData.gameServer->sendData(PacketID::PlayerData, info, clientID, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->sendData(PacketID::PlayerData, info, clientID, xy::NetFlag::Reliable, Global::ReliableChannel);
 
             //broadcast to all clients that someone has joined
             ConnectionState state;
             state.clientID = clientID;
             state.actorID = entity.getComponent<Actor>().id;
-            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::ConnectionUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
 
             //let everyone know what the current score is
-            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable);
+            m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable, Global::ReliableChannel);
         }
         /*else
         {
@@ -702,7 +701,7 @@ void GameState::spawnPlayer(std::uint64_t clientID)
             state.actorID = actor.getComponent<Actor>().id;
             state.serverID = actor.getIndex();
             state.serverTime = m_sharedData.gameServer->getServerTime();
-            m_sharedData.gameServer->sendData(PacketID::ActorData, state, clientID, xy::NetFlag::Reliable);
+            m_sharedData.gameServer->sendData(PacketID::ActorData, state, clientID, xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     }
     m_scene.setSystemActive<BotSystem>(true);
@@ -1040,7 +1039,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
     state.actorID = entity.getComponent<Actor>().id;
     state.serverID = entity.getIndex();
     state.serverTime = m_sharedData.gameServer->getServerTime();
-    m_sharedData.gameServer->broadcastData(PacketID::ActorData, state, xy::NetFlag::Reliable);
+    m_sharedData.gameServer->broadcastData(PacketID::ActorData, state, xy::NetFlag::Reliable, Global::ReliableChannel);
 
     return entity;
 }
@@ -1076,7 +1075,7 @@ void GameState::endGame()
     }
 
     //send stats to clients and notify clients game ended
-    m_sharedData.gameServer->broadcastData(PacketID::EndOfRound, summary, xy::NetFlag::Reliable);
+    m_sharedData.gameServer->broadcastData(PacketID::EndOfRound, summary, xy::NetFlag::Reliable, Global::ReliableChannel);
 
     setNextState(Server::StateID::Lobby); //set this to drop players back into lobby
 }

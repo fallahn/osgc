@@ -19,7 +19,7 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 template <typename T>
-inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint64_t destination, xy::NetFlag sendType)
+inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint64_t destination, xy::NetFlag sendType, std::uint8_t channel)
 {
 #ifdef XY_DEBUG
     if (m_sharedStateData.connectedClients.count(destination) == 0)
@@ -29,11 +29,11 @@ inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint
     }
 #endif
 
-    m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, sendType);
+    m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, sendType, channel);
 }
 
 template <typename T>
-inline void GameServer::broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType)
+inline void GameServer::broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType, std::uint8_t channel)
 {
-    m_host.broadcastPacket(packetID, data, sendType);
+    m_host.broadcastPacket(packetID, data, sendType, channel);
 }

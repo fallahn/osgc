@@ -162,11 +162,11 @@ bool MenuState::update(float dt)
     m_uiScene.update(dt);
     m_gameScene.update(dt);
 
+    //TODO do we need this now?
     if (m_pingServer && m_pingClock.getElapsedTime().asSeconds() > PingTime)
     {
         m_pingClock.restart();
-        m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable);
-        std::cout << "Pinging...\n";
+        m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
     }
 
     return true;
