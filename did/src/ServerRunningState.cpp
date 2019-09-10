@@ -271,7 +271,6 @@ void RunningState::handlePacket(const xy::NetEvent& evt)
     default: break;
     case PacketID::RequestMap:
         m_sharedData.gameServer->sendData(PacketID::MapData, m_mapData.tileData.data, Global::TileCount, evt.peer.getID(), xy::NetFlag::Reliable);
-        std::cout << "sending map data\n";
         break;
     case PacketID::RequestPlayer:
         spawnPlayer(evt.peer.getID());
@@ -279,6 +278,8 @@ void RunningState::handlePacket(const xy::NetEvent& evt)
     case PacketID::ClientInput:
     {
         auto ip = evt.packet.as<InputUpdate>();
+
+        //if (m_playerSlots[ip.playerNumber].gameEntity.getComponent<Bot>().enabled) break;
 
         auto& playerIp = m_playerSlots[ip.playerNumber].gameEntity.getComponent<InputComponent>();
 
@@ -650,7 +651,7 @@ void RunningState::spawnPlayer(std::uint64_t clientID)
 {
     //TODO would be nice to let players request a character from lobby menu
     {
-        //if (clientID.IsValid()) //TODO would this be better by validating on the peer?
+        if (clientID > 0) //TODO would this be better by validating on the peer?
         {
             xy::Entity entity;
             for (auto& slot : m_playerSlots)

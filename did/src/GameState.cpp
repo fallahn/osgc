@@ -1087,6 +1087,12 @@ void GameState::loadScene(const TileArray& tileArray)
 
 void GameState::handlePacket(const xy::NetEvent& evt)
 {
+    if (evt.type == xy::NetEvent::ClientDisconnect)
+    {
+        handleDisconnect();
+        return;
+    }
+
     switch (evt.packet.getID())
     {
     default: 
@@ -1096,7 +1102,6 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     {
         TileArray mapData;
         std::memcpy(mapData.data, evt.packet.getData(), evt.packet.getSize());
-        std::cout << "packet size is " << evt.packet.getSize() << "\n";
         loadScene(mapData);
     }
         break;
@@ -1661,14 +1666,11 @@ void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)
     entity.getComponent<xy::Callback>().function = GhostFloatCallback(m_gameScene);
 }
 
-//void GameState::p2pSessionFail(P2PSessionConnectFail_t* cb)
-//{
-//    if (cb->m_steamIDRemote == m_sharedData.serverID)
-//    {
-//        m_inputParser.setEnabled(false);
-//
-//        //push error state
-//        m_sharedData.error = "Disconnected from server.";
-//        requestStackPush(StateID::Error);
-//    }
-//}
+void GameState::handleDisconnect()
+{
+    m_inputParser.setEnabled(false);
+
+    //push error state
+    m_sharedData.error = "Disconnected from server.";
+    requestStackPush(StateID::Error);
+}

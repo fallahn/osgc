@@ -49,7 +49,6 @@ public:
     inline void sendData(std::uint8_t packetID, void* data, std::size_t size, std::uint64_t destination, xy::NetFlag sendType)
     {
         m_host.sendPacket(m_sharedStateData.connectedClients[destination], packetID, data, size, sendType);
-        std::cout << "sending " << size << "bytes\n";
     }
 
     template <typename T>

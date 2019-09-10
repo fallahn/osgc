@@ -44,7 +44,7 @@ void serverMessageHandler(SharedData& sharedData, const xy::Message& msg)
                 xy::Logger::log("Created server instance " + std::to_string(sharedData.serverID.ConvertToUint64()), xy::Logger::Type::Info);
                 newMsg->action = SystemEvent::ServerStarted;
             }
-            /*else //TODO restire this when we unkludge
+            /*else //TODO restore this when we unkludge
             {
                 sharedData.serverID = {};
                 sharedData.gameServer->stop();

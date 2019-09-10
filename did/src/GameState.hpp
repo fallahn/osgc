@@ -133,5 +133,5 @@ private:
     void plotPath(const std::vector<sf::Vector2f>&);
     void loadAudio();
 
-    //STEAM_CALLBACK(GameState, p2pSessionFail, P2PSessionConnectFail_t);
+    void handleDisconnect();
 };
