@@ -39,15 +39,6 @@ source distribution.
 #include <xyginext/core/Log.hpp>
 
 #ifdef DD_DEBUG
-extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText)
-{
-    ::OutputDebugString(pchDebugText);
-
-    std::string msg(pchDebugText);
-    msg += ", Severity: " + std::to_string(nSeverity);
-    xy::Logger::log(msg, xy::Logger::Type::Info/*, xy::Logger::Output::All*/);
-}
-
 #include <csignal>
 void onAbort(int)
 {
@@ -60,7 +51,7 @@ void onAbort(int)
 namespace
 {
     std::shared_ptr<GameServer> gameServer;
-    std::shared_ptr<sf::Thread> serverThread;
+    std::shared_ptr<xy::NetClient> netClient;
 }
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
@@ -73,10 +64,11 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     auto& sd = std::any_cast<SharedData&>(*sharedData);
 
     sd.gameServer = std::make_shared<GameServer>();
-    sd.serverThread = std::make_shared<sf::Thread>(&GameServer::start, sd.gameServer.get());
+    sd.netClient = std::make_shared<xy::NetClient>();
+    sd.netClient->create(Global::NetworkChannels);
 
     gameServer = sd.gameServer;
-    serverThread = sd.serverThread;
+    netClient = sd.netClient;
 
     xy::AudioMixer::setLabel("Sound FX", MixerChannel::FX);
     xy::AudioMixer::setLabel("Music", MixerChannel::Music);
@@ -85,31 +77,19 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<ErrorState>(StateID::Error, sd);
     ss->registerState<GameState>(StateID::Game, sd);
 
-    if (!SteamAPI_Init())
-    {
-        boxer::show("Steam not running!\nPlease launch Steam before trying to run the game again.", "Error.");
-        return StateID::ParentState;
-    }
-
     gameServer->setMaxPlayers(4);
-
-#ifdef DD_DEBUG
-    SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook);
-#endif //DD_DEBUG
-    SteamUtils()->SetOverlayNotificationPosition(ENotificationPosition::k_EPositionTopRight);
 
     return StateID::Menu;
 }
 
 void end(xy::StateStack* ss)
 {
+    netClient->disconnect();
+
     gameServer->stop();
-    serverThread->wait();
 
     gameServer.reset();
-    serverThread.reset();
-
-    SteamAPI_Shutdown();
+    netClient.reset();
 
     ss->unregisterState(StateID::Menu);
     ss->unregisterState(StateID::Error);

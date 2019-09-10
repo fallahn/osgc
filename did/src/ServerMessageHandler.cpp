@@ -29,33 +29,30 @@ void serverMessageHandler(SharedData& sharedData, const xy::Message& msg)
         if (data.action == SystemEvent::RequestStartServer
             && !sharedData.gameServer->running())
         {
-            sharedData.serverThread->launch();
+            sharedData.gameServer->start();
 
             sf::Clock clock;
-            while (!sharedData.gameServer->getSteamID().IsValid()
-                && clock.getElapsedTime().asSeconds() < 3.f) {
-            }
+            while (clock.getElapsedTime().asSeconds() < 1.f) {} //TODO change this to while(notRunning) ? 
 
             auto newMsg = xy::App::getActiveInstance()->getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
 
-            if (sharedData.gameServer->getSteamID().IsValid())
+            //if (sharedData.gameServer->getSteamID().IsValid())
             {
-                sharedData.serverID = sharedData.gameServer->getSteamID();
-                xy::Logger::log("Created server instance " + std::to_string(sharedData.serverID.ConvertToUint64()), xy::Logger::Type::Info);
+                //sharedData.serverID = sharedData.gameServer->getSteamID();
+                xy::Logger::log("Created server instance", xy::Logger::Type::Info);
                 newMsg->action = SystemEvent::ServerStarted;
             }
-            else
+            /*else //TODO restore this when we unkludge
             {
                 sharedData.serverID = {};
                 sharedData.gameServer->stop();
                 xy::Logger::log("Failed creating game server instance", xy::Logger::Type::Error);
                 newMsg->action = SystemEvent::ServerStopped;
-            }
+            }*/
         }
         else if (data.action == SystemEvent::RequestStopServer)
         {
             sharedData.gameServer->stop();
-            sharedData.serverThread->wait();
         }
     }
 }

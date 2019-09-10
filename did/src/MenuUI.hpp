@@ -115,8 +115,8 @@ namespace Menu
 
     static const sf::Vector2f OffscreenPosition(0.f, -2000.f);
     static const sf::FloatRect ButtonArea({ 0.f, 0.f, 300.f, 70.f });
-    static const sf::Vector2f BackButtonPosition(1890.f, 960.f);
-    static const sf::Vector2f StartButtonPosition(30.f, 960.f);
+    static const sf::Vector2f StartButtonPosition(1890.f, 960.f);
+    static const sf::Vector2f BackButtonPosition(30.f, 960.f);
     static const sf::Vector2f SeedPosition(120.f, 760.f);
     static const sf::Vector2f FriendsPosition(120.f, 830.f);
 }

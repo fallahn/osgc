@@ -19,42 +19,21 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 template <typename T>
-void GameServer::sendData(std::uint8_t packetID, const T& data, CSteamID destination, EP2PSend sendType)
+inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint64_t destination, xy::NetFlag sendType, std::uint8_t channel)
 {
 #ifdef XY_DEBUG
-    if (!destination.IsValid())
+    if (m_sharedStateData.connectedClients.count(destination) == 0)
     {
-        std::cout << "Tried to send to invalid destination\n";
+        std::cout << "Tried to send to " << destination << ": invalid destination\n";
         return;
     }
 #endif
 
-    static std::vector<std::uint8_t> buffer(1024);
-    std::uint32_t dataSize = sizeof(T) + 1;
-    if (buffer.size() < dataSize)
-    {
-        buffer.resize(dataSize + 1);
-        //XY_ASSERT(buffer.size() < 256000, "Buffer size rather large!!");
-    }
-
-    buffer[0] = static_cast<std::uint8_t>(packetID);
-    std::memcpy(&buffer[1], &data, sizeof(T));
-    SteamGameServerNetworking()->SendP2PPacket(destination, buffer.data(), dataSize, sendType);
+    m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, sendType, channel);
 }
 
 template <typename T>
-void GameServer::broadcastData(std::uint8_t packetID, const T& data, EP2PSend sendType)
+inline void GameServer::broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType, std::uint8_t channel)
 {
-    for (auto client : m_sharedStateData.connectedClients)
-    {
-#ifdef XY_DEBUG
-        if (!client.id.IsValid())
-        {
-            std::cout << "Client ID is invalid\n";
-            return;
-        }
-#endif
-
-        sendData(packetID, data, client.id, sendType);
-    }
+    m_host.broadcastPacket(packetID, data, sendType, channel);
 }

@@ -78,14 +78,13 @@ void InventorySystem::handleMessage(const xy::Message& msg)
                 inventory.ammo = std::max(0, inventory.ammo - 1);
                 
                 //send update to client if not a bot
-                auto steamID = e.getComponent<CSteamID>();
-                if (steamID.IsValid())
+                if (e.getComponent<std::uint64_t>() > 0)
                 {
                     InventoryState state;
                     state.inventory = inventory;
                     state.parentID = e.getIndex();
 
-                    m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, e.getComponent<CSteamID>(), EP2PSend::k_EP2PSendReliable);
+                    m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, e.getComponent<std::uint64_t>(), xy::NetFlag::Reliable, Global::ReliableChannel);
                 }
             }
         }
@@ -180,7 +179,7 @@ void InventorySystem::sendUpdate(Inventory& inventory, std::uint32_t parentID)
     state.inventory = inventory;
     state.parentID = parentID;
 
-    m_sharedData.gameServer->broadcastData(PacketID::InventoryUpdate, state, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.gameServer->broadcastData(PacketID::InventoryUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
 
     inventory.sendUpdate = false;
 }

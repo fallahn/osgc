@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "NetworkClient.hpp"
 #include "SharedStateData.hpp"
+#include "Packet.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -47,12 +48,11 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Leave");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Selected] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
     {
@@ -75,19 +75,7 @@ void MenuState::buildLobby(sf::Font& font)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            if (m_sharedData.lobbyID.IsLobby())
-            {
-                SteamMatchmaking()->LeaveLobby(m_sharedData.lobbyID);
-            }
-
-            if (m_sharedData.serverID.IsValid())
-            {
-                SteamNetworking()->CloseP2PSessionWithUser(m_sharedData.serverID);
-            }
-
-            m_sharedData.lobbyID = {};
-            m_sharedData.serverID = {};
-            m_sharedData.host = {};
+            //TODO leave lobby
 
             //quit our local server
             auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
@@ -103,39 +91,21 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Start");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Selected] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            if (SteamMatchmaking()->GetLobbyOwner(m_sharedData.lobbyID) == SteamUser()->GetSteamID())
-            {
-                //check all lobby members are ready
-                auto memberCount = SteamMatchmaking()->GetNumLobbyMembers(m_sharedData.lobbyID);
-                for (auto i = 0; i < memberCount; ++i)
-                {
-                    auto member = SteamMatchmaking()->GetLobbyMemberByIndex(m_sharedData.lobbyID, i);
-                    std::string readyState = SteamMatchmaking()->GetLobbyMemberData(m_sharedData.lobbyID, member, "ready");
-                    if (readyState != "true")
-                    {
-                        return;
-                    }
-                }
+            //TODO check all users are ready and that we're the host
 
-                //raise a message telling all lobby members to start the game
-                const auto buns = Menu::ChatMessageID::StartGame;
-                SteamMatchmaking()->SendLobbyChatMsg(m_sharedData.lobbyID, &buns, 1);
-
-                //send a packet to server if we're host telling it to switch to game state
-                sendData(PacketID::StartGame, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
-
-                //set the lobby not joinable while playing the game
-                SteamMatchmaking()->SetLobbyJoinable(m_sharedData.lobbyID, false);
-            }
+            //send a packet to server if we're host telling it to switch to game state
+            m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

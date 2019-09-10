@@ -30,17 +30,17 @@ IdleState::IdleState(SharedStateData&)
 }
 
 //public
-void IdleState::networkUpdate(float dt)
+void IdleState::networkUpdate(float)
 {
 
 }
 
-void IdleState::logicUpdate(float dt)
+void IdleState::logicUpdate(float)
 {
 
 }
 
-void IdleState::handlePacket(const Packet& packet)
+void IdleState::handlePacket(const xy::NetEvent&)
 {
 
 }

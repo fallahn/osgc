@@ -20,8 +20,6 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/Assert.hpp>
 
-#include <steam/steam_api.h>
-
 #include <vector>
 #include <cstring>
 
@@ -55,8 +53,8 @@ namespace PacketID
         WeatherUpdate, //uint8 containing current weather mode
         TreasureUpdate, //uint8 number of treasure remaining
         DebugUpdate, //contains state and entity ID
-        PhysicsUpdate, //data for client side physics interp
-        PhysicsSync, //data to sync physics state on the client
+        //PhysicsUpdate, //data for client side physics interp
+        //PhysicsSync, //data to sync physics state on the client
 
         //from client
         RequestMap, //client is requesting map
@@ -69,25 +67,10 @@ namespace PacketID
         RequestSeed, //ask the server for current seed
         SetSeed, //tell the server the current seed
         CurrentSeed, //tell the client the current seed
-        StartGame //lobby host wants server to start the game
+        StartGame, //lobby host wants server to start the game
+        ReqPlayerInfo, //ask client for player data
+        SupPlayerInfo, //info supplied by client
+        PlayerReadyState, //0 or 1 uint8
+        DeliverPlayerInfo, //info of clients from the server (id, name string)
     };
 }
-
-struct Packet final
-{
-    std::vector<std::uint8_t> bytes = { 0 };
-    std::size_t size = 0; //remember to add 1 if reading raw packet data!!
-    CSteamID sender;
-    std::uint8_t id() const
-    {
-        XY_ASSERT(!bytes.empty(), "No packet data");
-        return bytes[0];
-    }
-
-    template <typename T>
-    const T& as() const
-    {
-        XY_ASSERT(size == sizeof(T), "mismatch in data size");
-        return *reinterpret_cast<const T*>(&bytes[1]);
-    }
-};

@@ -18,8 +18,6 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <steam/steam_api.h>
-
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/System/String.hpp>
@@ -31,7 +29,7 @@ struct ClientInfo final
 {
     sf::String name;
     sf::Texture avatar;
-    CSteamID steamID;
+    std::uint64_t clientID = 0;
 };
 
 class ClientInfoManager final

@@ -19,15 +19,14 @@ Copyright 2019 Matt Marchant
 #include "Server.hpp"
 #include "GlobalConsts.hpp"
 #include "Packet.hpp"
-#include "ServerRunningState.hpp"
-#include "ServerActiveState.hpp"
+#include "ServerGameState.hpp"
+#include "ServerLobbyState.hpp"
 #include "MessageIDs.hpp"
 
 #include <xyginext/core/Log.hpp>
+#include <xyginext/network/NetData.hpp>
 
 #include <SFML/System/Clock.hpp>
-
-#include <steam/steam_gameserver.h>
 
 #include <algorithm>
 #include <cstring>
@@ -35,12 +34,11 @@ Copyright 2019 Matt Marchant
 using namespace Server;
 
 GameServer::GameServer()
-    : m_running   (false)
+    : m_thread  (&GameServer::run, this),
+    m_running   (false)
 {
-    initSteamServer();
-
     m_sharedStateData.gameServer = this;
-    m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+    m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
 
     const char* defaultSeed = "buns";
     std::strcpy(m_sharedStateData.seedData.str, defaultSeed);
@@ -52,152 +50,93 @@ GameServer::GameServer()
 GameServer::~GameServer()
 {
     stop();
-    closeSteamServer();
 }
 
 //public
 void GameServer::start()
 {
-    if (SteamGameServer())
+    if (!m_host.start("", Global::GamePort, 4, Global::NetworkChannels))
+    {
+        xy::Logger::log("Failed to start netowrk host :(", xy::Logger::Type::Error);
+    }
+    else
     {
         xy::Logger::log("Launching Server Instance...", xy::Logger::Type::Info);
         m_running = true;
 
-        //don't switch state here - wait until first client has joined and become host
-        //m_currentState = std::make_unique<Server::ActiveState>(m_sharedStateData);
-        run();
-    }
-    else
-    {
-        xy::Logger::log("Failed to launch server, Steam services not found", xy::Logger::Type::Error, xy::Logger::Output::All);
+        m_thread.launch();
     }
 }
 
 void GameServer::stop()
 {
-    m_running = false;
-    xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
-}
-
-CSteamID GameServer::getSteamID() const
-{
     if (m_running)
     {
-        return SteamGameServer()->GetSteamID();
-    }
-    return {};
-}
+        m_running = false;
+        xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
 
-void GameServer::setMaxPlayers(std::uint8_t number)
-{
-    SteamGameServer()->SetMaxPlayerCount(number);
+        m_thread.wait();
+        m_host.stop();
+
+        xy::Logger::log("Server Stopped.", xy::Logger::Type::Info);
+    }
 }
 
 //private
-bool GameServer::pollNetwork(Packet& packet)
+bool GameServer::pollNetwork(xy::NetEvent& evt)
 {
     std::uint32_t incomingSize = 0;
-    if (SteamGameServerNetworking()->IsP2PPacketAvailable(&incomingSize))
+    if (m_host.pollEvent(evt))
     {
-        XY_ASSERT(incomingSize > 1, "packet probably too small!");
-        if (packet.bytes.size() < incomingSize)
+        //handle connect and disconnect
+        if (evt.type == xy::NetEvent::ClientConnect)
         {
-            packet.bytes.resize(incomingSize);
+            clientConnect(evt);
         }
-
-        SteamGameServerNetworking()->ReadP2PPacket(&packet.bytes[0], incomingSize, &incomingSize, &packet.sender);
-        packet.size = incomingSize - 1;
-
+        else if (evt.type == xy::NetEvent::ClientDisconnect)
+        {
+            clientDisconnect(evt);
+        }
         return true;
     }
     return false;
 }
 
-void GameServer::initSteamServer()
+void GameServer::clientConnect(const xy::NetEvent& evt)
 {
-    if (!SteamGameServer_Init(0, Global::AuthPort, Global::GamePort, Global::MasterServerPort, EServerMode::eServerModeAuthenticationAndSecure, "1.0.0.0"))
+    if (m_currentState->getID() != StateID::Running  //don't join running games
+        && m_sharedStateData.connectedClients.size() < m_maxPlayers)
     {
-        xy::Logger::log("Failed to start Steam Server API", xy::Logger::Type::Error, xy::Logger::Output::All);
-        return;
-    }
+        m_sharedStateData.connectedClients.insert(std::make_pair(evt.peer.getID(), ClientData()));
+        m_sharedStateData.connectedClients[evt.peer.getID()].peer = evt.peer;
 
-    if (SteamGameServer())
-    {
-        SteamGameServer()->SetModDir("DesertIslandDuel");
-        SteamGameServer()->SetProduct("DesertIslandDuel");
-        SteamGameServer()->SetGameDescription("Desert Island Duel");
-        SteamGameServer()->SetDedicatedServer(true);
-        SteamGameServer()->LogOnAnonymous();
+        m_host.sendPacket(evt.peer, PacketID::CurrentSeed, m_sharedStateData.seedData, xy::NetFlag::Reliable, Global::ReliableChannel);
 
-        //small delay to allow time to log on
-        sf::Clock clock;
-        while(clock.getElapsedTime().asSeconds() < 3.f){}
-    }
-}
+        xy::Logger::log("Added user with ID: " + std::to_string(evt.peer.getID()), xy::Logger::Type::Info, xy::Logger::Output::All);
 
-void GameServer::closeSteamServer()
-{
-    if (SteamGameServer())
-    {
-        SteamGameServer()->LogOff();
-        SteamGameServer_Shutdown();
-    }
-}
-
-void GameServer::p2pSessionRequest(P2PSessionRequest_t* cb)
-{
-    if (m_currentState->getID() != StateID::Running) //don't join running games
-    {
-        LOG("We're accepting a user connection without validating!! This must be rectified in the future.", xy::Logger::Type::Warning);
-        SteamGameServerNetworking()->AcceptP2PSessionWithUser(cb->m_steamIDRemote);
-        m_sharedStateData.connectedClients.emplace_back();
-        m_sharedStateData.connectedClients.back().id = cb->m_steamIDRemote;
-
-        m_sharedStateData.gameServer->sendData(PacketID::CurrentSeed, m_sharedStateData.seedData, cb->m_steamIDRemote, EP2PSend::k_EP2PSendReliable);
-
-        xy::Logger::log("Added user with ID: " + std::to_string(cb->m_steamIDRemote.ConvertToUint64()), xy::Logger::Type::Info, xy::Logger::Output::All);
-
-        if (m_currentState->getID() == StateID::Idle)
+        if (m_sharedStateData.connectedClients.size() == 1)
         {
             //set joiner as host
-            m_sharedStateData.gameHost = cb->m_steamIDRemote;
-            m_currentState = std::make_unique<ActiveState>(m_sharedStateData);
+            m_sharedStateData.hostClient = evt.peer;
         }
 
         auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
-        msg->steamID = cb->m_steamIDRemote;
+        msg->id = evt.peer.getID();
         msg->type = ServerEvent::ClientConnected;
     }
     else
     {
         std::cout << "Failed to accept client connection, server already in-game\n";
+        //TODO forcefully disconnect the new peer by sending refusal packet
     }
 }
 
-void GameServer::p2pSessionFail(P2PSessionConnectFail_t* cb)
+void GameServer::clientDisconnect(const xy::NetEvent& evt)
 {
-    m_sharedStateData.connectedClients.erase(
-        std::remove_if(m_sharedStateData.connectedClients.begin(), m_sharedStateData.connectedClients.end(),
-            [cb](const ConnectedClient& cc) 
-    {
-        return cc.id == cb->m_steamIDRemote;
-    }));
-
-    std::string error = "Unknown Reason";
-    switch (cb->m_eP2PSessionError)
-    {
-    default: break;
-    case EP2PSessionError::k_EP2PSessionErrorTimeout:
-        error = "Client timed out";
-        break;
-    case EP2PSessionError::k_EP2PSessionErrorMax:
-        error = "Firewall error";
-        break;
-    }
-    xy::Logger::log("Dropped client from server, reason: " + error, xy::Logger::Type::Info, xy::Logger::Output::All);
+    m_sharedStateData.connectedClients.erase(evt.peer.getID());
 
     auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
-    msg->steamID = cb->m_steamIDRemote;
+    msg->id = evt.peer.getID();
     msg->type = ServerEvent::ClientDisconnected;
 
 
@@ -205,8 +144,9 @@ void GameServer::p2pSessionFail(P2PSessionConnectFail_t* cb)
     //the current one left, this is handled by the active state
     if (m_sharedStateData.connectedClients.empty())
     {
-        m_sharedStateData.gameHost = {};
-        m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+        /*m_sharedStateData.hostClient = {};
+        m_currentState = std::make_unique<IdleState>(m_sharedStateData);*/
+        //TODO we want to quit server but not in the middle of  the thread we're closing ;)
     }
 }
 
@@ -236,10 +176,13 @@ void GameServer::run()
         }
         
         //do network pump
-        Packet packet;
-        while (pollNetwork(packet))
+        xy::NetEvent evt;
+        while (pollNetwork(evt))
         {
-            m_currentState->handlePacket(packet);
+            if (evt.type == xy::NetEvent::PacketReceived)
+            {
+                m_currentState->handlePacket(evt);
+            }
         }
 
         //network tick updates (usually broadcasts)
@@ -266,8 +209,6 @@ void GameServer::run()
             }
 
             m_currentState->logicUpdate(LogicStep);
-
-            SteamGameServer_RunCallbacks();
         }
         getOutClause = MaxUpdates;
 
@@ -281,11 +222,11 @@ void GameServer::run()
             case StateID::Idle:
                 m_currentState = std::make_unique<IdleState>(m_sharedStateData);
                 break;
-            case StateID::Active:
-                m_currentState = std::make_unique<ActiveState>(m_sharedStateData);
+            case StateID::Lobby:
+                m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
                 break;
             case StateID::Running:
-                m_currentState = std::make_unique<RunningState>(m_sharedStateData);
+                m_currentState = std::make_unique<GameState>(m_sharedStateData);
                 break;
             }
             m_serverTime.restart();
@@ -293,5 +234,5 @@ void GameServer::run()
     }
 
     //return to idle when stopped
-    m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+    //m_currentState = std::make_unique<IdleState>(m_sharedStateData);
 }

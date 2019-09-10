@@ -20,10 +20,10 @@ Copyright 2019 Matt Marchant
 
 #include <cstdint>
 
-struct Packet;
 namespace xy
 {
     class Message;
+    struct NetEvent;
 }
 
 namespace Server
@@ -32,7 +32,7 @@ namespace Server
     {
         enum
         {
-            Idle, Active, Running
+            Idle, Lobby, Running
         };
     }
     struct SharedStateData;
@@ -44,14 +44,14 @@ namespace Server
 
         virtual std::int32_t getID() const = 0;
 
-        //called at network tick rate (20fps)
+        //called at network tick rate (30fps)
         virtual void networkUpdate(float) = 0;
 
         //called at logic update rate (60fps)
         virtual void logicUpdate(float) = 0;
 
         //handles recieved packets from network pump
-        virtual void handlePacket(const Packet&) = 0;
+        virtual void handlePacket(const xy::NetEvent&) = 0;
 
         virtual void handleMessage(const xy::Message&) = 0;
 
@@ -75,7 +75,7 @@ namespace Server
 
         void logicUpdate(float) override;
 
-        void handlePacket(const Packet&) override;
+        void handlePacket(const xy::NetEvent&) override;
 
         void handleMessage(const xy::Message&) override;
     };

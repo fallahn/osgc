@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "Server.hpp"
 #include "ServerRandom.hpp"
 #include "MessageIDs.hpp"
+#include "GlobalConsts.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -94,12 +95,12 @@ void CollectibleSystem::process(float dt)
                     if (collected)
                     {
                         //only send if we're not a bot player
-                        if (otherEnt.getComponent<CSteamID>().IsValid())
+                        if (otherEnt.getComponent<std::uint64_t>() != 0)
                         {
                             InventoryState state;
                             state.inventory = inventory;
                             state.parentID = otherEnt.getIndex();
-                            m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<CSteamID>(), EP2PSend::k_EP2PSendReliable);
+                            m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<std::uint64_t>(), xy::NetFlag::Reliable, Global::ReliableChannel);
                         }
 
                         getScene()->destroyEntity(entity);

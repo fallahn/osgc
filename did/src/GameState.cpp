@@ -64,6 +64,7 @@ Copyright 2019 Matt Marchant
 #include "ClientDecoySystem.hpp"
 #include "ClientFlareSystem.hpp"
 #include "InterpolationSystem.hpp"
+#include "Packet.hpp"
 
 #include <xyginext/core/App.hpp>
 
@@ -94,12 +95,11 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Random.hpp>
 #include <xyginext/gui/Gui.hpp>
+#include <xyginext/network/NetData.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Audio/Listener.hpp>
-
-#include <steam/steam_api.h>
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -117,7 +117,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_gameScene         (ctx.appInstance.getMessageBus(), 512),
     m_uiScene           (ctx.appInstance.getMessageBus()),
     m_sharedData        (sd),
-    m_inputParser       (sd.inputBinding, sd.serverID),
+    m_inputParser       (sd.inputBinding, *sd.netClient),
     m_nameTagManager    (m_fontResource),
     m_summaryTexture    (m_fontResource),
     m_miniMap           (m_textureResource),
@@ -162,7 +162,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         {
             return;
         }
-        sendData(PacketID::ConCommand, data, m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
     });
 
     registerCommand("bots_enabled", [&](const std::string& param)
@@ -170,7 +170,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         Server::ConCommand::Data data;
         data.commandID = Server::ConCommand::BotEnable;
         data.value.asInt = (param == "0") ? 0 : 1;
-        sendData(PacketID::ConCommand, data, m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
     });
 
     registerCommand("spawn", [&](const std::string& param)
@@ -214,7 +214,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                 data.value.asInt = id;
                 data.position = m_inputParser.getPlayerEntity().getComponent<xy::Transform>().getPosition();
                 data.position.x += Global::TileSize;
-                sendData(PacketID::ConCommand, data, m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+                m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
             }
             else
             {
@@ -587,11 +587,11 @@ bool GameState::update(float dt)
     static std::size_t frames = 0;
     static float bw = 0.f;
 
-    Packet packet;
-    while (pollNetwork(packet))
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
     {
-        handlePacket(packet);
-        packetSize += packet.size + 1;
+        handlePacket(evt);
+        packetSize += evt.packet.getSize() + 1;
     }
 
     frames++;
@@ -604,18 +604,16 @@ bool GameState::update(float dt)
     }
     xy::Console::printStat("Incoming bw", std::to_string(bw) + "Kbps");
 #else
-    Packet packet;
-    while (pollNetwork(packet))
+    xy::NetEvent evt;
+    while (m_sharedData.netClient->pollEvent(evt))
     {
-        handlePacket(packet);
+        handlePacket(evt);
     }
 #endif //XY_DEBUG
-
-    SteamAPI_RunCallbacks();
     
     if (!m_sceneLoaded)
     {
-        sendData(PacketID::RequestMap, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+        m_sharedData.netClient->sendPacket(PacketID::RequestMap, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
     }
     
     m_inputParser.update(dt);
@@ -992,7 +990,7 @@ void GameState::loadScene(const TileArray& tileArray)
     auto msg = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
     msg->type = MapEvent::Loaded;
 
-    sendData(PacketID::RequestPlayer, std::uint8_t(0), m_sharedData.serverID, EP2PSend::k_EP2PSendReliable);
+    m_sharedData.netClient->sendPacket(PacketID::RequestPlayer, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
 
     //ships in the background
     auto cameraEntity = m_gameScene.getActiveCamera();
@@ -1087,22 +1085,29 @@ void GameState::loadScene(const TileArray& tileArray)
     //entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 }
 
-void GameState::handlePacket(const Packet& packet)
+void GameState::handlePacket(const xy::NetEvent& evt)
 {
-    switch (packet.id())
+    if (evt.type == xy::NetEvent::ClientDisconnect)
+    {
+        handleDisconnect();
+        return;
+    }
+
+    switch (evt.packet.getID())
     {
     default: 
         //std::cout << (int)packet.id() << "\n";
         break;
     case PacketID::MapData:
     {
-        const TileArray& mapData = packet.as<TileArray>();
+        TileArray mapData;
+        std::memcpy(mapData.data, evt.packet.getData(), evt.packet.getSize());
         loadScene(mapData);
     }
         break;
     case PacketID::ActorData:
     {
-        auto& state = packet.as<ActorState>();
+        const auto& state = evt.packet.as<ActorState>();
         if (m_inputParser.getPlayerEntity().getComponent<Actor>().serverID != state.serverID)
         {
             Actor actor;
@@ -1114,14 +1119,14 @@ void GameState::handlePacket(const Packet& packet)
         break;
     case PacketID::PlayerData:
     {
-        const auto& playerInfo = packet.as<PlayerInfo>();
+        const auto& playerInfo = evt.packet.as<PlayerInfo>();
         spawnActor(playerInfo.actor, playerInfo.position, 0, true);
         m_miniMap.setLocalPlayer(playerInfo.actor.id - Actor::ID::PlayerOne);
     }
         break;
     case PacketID::ActorUpdate:
     {
-        const auto& state = packet.as<ActorState>();
+        const auto& state = evt.packet.as<ActorState>();
 
         xy::Command cmd;
         cmd.targetFlags = CommandID::NetInterpolator;
@@ -1143,7 +1148,7 @@ void GameState::handlePacket(const Packet& packet)
         break;
     case PacketID::AnimationUpdate:
     {
-        const auto& state = packet.as<AnimationState>();
+        const auto& state = evt.packet.as<AnimationState>();
 
         xy::Command cmd;
         cmd.targetFlags = CommandID::NetInterpolator;
@@ -1161,7 +1166,7 @@ void GameState::handlePacket(const Packet& packet)
         break;
     case PacketID::PlayerUpdate:
     {
-        const auto& state = packet.as<ClientState>();
+        const auto& state = evt.packet.as<ClientState>();
         m_gameScene.getSystem<PlayerSystem>().reconcile(state, m_inputParser.getPlayerEntity());
     }
         break;
@@ -1169,27 +1174,27 @@ void GameState::handlePacket(const Packet& packet)
     {
         auto* msg = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
         msg->type = MapEvent::DayNightUpdate;
-        msg->value = packet.as<float>();
+        msg->value = evt.packet.as<float>();
     }
         break;
     case PacketID::CarriableUpdate:
-        updateCarriable(packet.as<CarriableState>());
+        updateCarriable(evt.packet.as<CarriableState>());
         break;
     case PacketID::InventoryUpdate:
-        updateInventory(packet.as<InventoryState>());
+        updateInventory(evt.packet.as<InventoryState>());
         break;
     case PacketID::SceneUpdate:
-        updateScene(packet.as<SceneState>());
+        updateScene(evt.packet.as<SceneState>());
         break;
     case PacketID::ConnectionUpdate:
-        updateConnection(packet.as<ConnectionState>());
+        updateConnection(evt.packet.as<ConnectionState>());
         break;
     case PacketID::EndOfRound:
         m_roundOver = true;
-        showRoundEnd(packet.as<RoundSummary>());
+        showRoundEnd(evt.packet.as<RoundSummary>());
         break;
     case PacketID::ServerMessage:
-        showServerMessage(packet.as<std::int32_t>());
+        showServerMessage(evt.packet.as<std::int32_t>());
         break;
     case PacketID::PathData:
     {
@@ -1205,7 +1210,7 @@ void GameState::handlePacket(const Packet& packet)
         break;
     case PacketID::PatchSync:
     {
-        auto data = packet.as<HoleState>();
+        auto data = evt.packet.as<HoleState>();
         xy::Command cmd;
         cmd.targetFlags = CommandID::NetInterpolator;
         cmd.action = [data](xy::Entity entity, float)
@@ -1221,7 +1226,7 @@ void GameState::handlePacket(const Packet& packet)
         break;
     case PacketID::ParrotLaunch:
     {
-        auto id = packet.as<std::uint32_t>();
+        auto id = evt.packet.as<std::uint32_t>();
         xy::Command cmd;
         cmd.targetFlags = CommandID::Parrot;
         cmd.action = [id](xy::Entity entity, float)
@@ -1237,17 +1242,17 @@ void GameState::handlePacket(const Packet& packet)
         break;
     case PacketID::StatUpdate:
     {
-        auto stats = packet.as<RoundStat>();
+        auto stats = evt.packet.as<RoundStat>();
         m_summaryStats.stats[stats.id - Actor::ID::PlayerOne] = stats;
         m_updateSummary = true;
     }
         break;
     case PacketID::WeatherUpdate:
-        m_gameScene.getSystem<DayNightSystem>().setStormLevel(packet.as<std::uint8_t>());
+        m_gameScene.getSystem<DayNightSystem>().setStormLevel(evt.packet.as<std::uint8_t>());
         break;
     case PacketID::TreasureUpdate:
     {
-        auto score = packet.as<std::uint8_t>();
+        auto score = evt.packet.as<std::uint8_t>();
         xy::Command cmd;
         cmd.targetFlags = UI::CommandID::TreasureScore;
         cmd.action = [score](xy::Entity ent, float)
@@ -1265,12 +1270,12 @@ void GameState::handlePacket(const Packet& packet)
     }
         break;
     case PacketID::RoundTime:
-        m_roundTime = packet.as<std::int32_t>();
+        m_roundTime = evt.packet.as<std::int32_t>();
         break;
 #ifdef XY_DEBUG
     case PacketID::DebugUpdate:
     {
-        auto state = packet.as<DebugState>();
+        auto state = evt.packet.as<DebugState>();
         xy::Command cmd;
         cmd.targetFlags = CommandID::DebugLabel;
         cmd.action = [state](xy::Entity entity, float)
@@ -1620,11 +1625,11 @@ void GameState::updateScene(SceneState state)
 
 void GameState::updateConnection(ConnectionState state)
 {
-    m_sharedData.clientInformation.updateClient(state);
+    //m_sharedData.clientInformation.updateClient(state);
     {
         auto idx = state.actorID - Actor::ID::PlayerOne;
 
-        if (state.steamID == 0)
+        if (state.clientID == 0)
         {
             m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
         }
@@ -1661,14 +1666,11 @@ void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)
     entity.getComponent<xy::Callback>().function = GhostFloatCallback(m_gameScene);
 }
 
-void GameState::p2pSessionFail(P2PSessionConnectFail_t* cb)
+void GameState::handleDisconnect()
 {
-    if (cb->m_steamIDRemote == m_sharedData.serverID)
-    {
-        m_inputParser.setEnabled(false);
+    m_inputParser.setEnabled(false);
 
-        //push error state
-        m_sharedData.error = "Disconnected from server.";
-        requestStackPush(StateID::Error);
-    }
+    //push error state
+    m_sharedData.error = "Disconnected from server.";
+    requestStackPush(StateID::Error);
 }

@@ -92,7 +92,7 @@ struct SceneState final
 
 struct ConnectionState final
 {
-    std::uint64_t steamID = 0;
+    std::uint64_t clientID = 0;
     Actor::ID actorID = Actor::ID::None;
 };
 

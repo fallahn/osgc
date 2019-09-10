@@ -50,23 +50,16 @@ bool ClientInfoManager::updateClient(const ConnectionState& state)
     auto& client = m_clientInfo[idx];
 
     {
-        if (!state.steamID)
+        if (state.clientID == 0)
         {
             //we're resetting a player
             client.avatar.loadFromImage(m_defaultImage);
-            client.steamID = {};
             client.name = Global::PlayerNames[idx];
             return true;
         }
         else //adding new info
         {
-            if (!client.steamID.IsValid()
-                || client.steamID.ConvertToUint64() != state.steamID)
-            {
-                client.steamID.SetFromUint64(state.steamID);
-                getSteamInfo(client);
-                return true;
-            }
+            //TODO pull new info from somewhere...
         }
     }
     return false;
@@ -74,13 +67,11 @@ bool ClientInfoManager::updateClient(const ConnectionState& state)
 
 const ClientInfo& ClientInfoManager::getClient(const ConnectionState& state) const
 {
-    if (state.steamID)
+    if (state.clientID > 0)
     {
-        CSteamID steamID;
-	    steamID.SetFromUint64(state.steamID);
         for (const auto& client : m_clientInfo)
         {
-            if (client.steamID == steamID)
+            if (client.clientID == state.clientID)
             {
                 return client;
             }
@@ -99,18 +90,19 @@ const ClientInfo& ClientInfoManager::getClient(std::int32_t idx) const
 //private
 void ClientInfoManager::getSteamInfo(ClientInfo& client)
 {
-    XY_ASSERT(client.steamID.IsValid(), "Not a valid client!");
+    XY_ASSERT(client.clientID > 0, "Not a valid client!");
 
-    auto codepoints = xy::Util::String::getCodepoints(SteamFriends()->GetFriendPersonaName(client.steamID));
-    client.name = sf::String::fromUtf16(codepoints.begin(), codepoints.end());
+    //auto codepoints = xy::Util::String::getCodepoints(SteamFriends()->GetFriendPersonaName(client.steamID));
+    //client.name = sf::String::fromUtf16(codepoints.begin(), codepoints.end());
+    client.name = "Fix Me";
 
-    auto avatarIdx = SteamFriends()->GetMediumFriendAvatar(client.steamID);
+    auto avatarIdx = 0;
 
     if (avatarIdx)
     {
         sf::Image img;
         img.create(avatarSize, avatarSize, sf::Color::Black);
-        SteamUtils()->GetImageRGBA(avatarIdx, const_cast<uint8*>(img.getPixelsPtr()), avatarSize * avatarSize * 4);
+        //TODO load some avatar image from somewhere
         client.avatar.loadFromImage(img);
     }
     else

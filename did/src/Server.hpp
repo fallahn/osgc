@@ -22,14 +22,15 @@ Copyright 2019 Matt Marchant
 #include "ServerSharedStateData.hpp"
 
 #include <xyginext/core/MessageBus.hpp>
-#include <steam/steam_gameserver.h>
+#include <xyginext/network/NetHost.hpp>
+
+#include <SFML/System/Thread.hpp>
 
 #include <atomic>
 #include <memory>
 #include <vector>
 #include <cstring>
 
-struct Packet;
 class GameServer final
 {
 public:
@@ -45,21 +46,30 @@ public:
     void stop();
     bool running() const { return m_running; }
 
-    CSteamID getSteamID() const;
-    void setMaxPlayers(std::uint8_t);
+    void setMaxPlayers(std::uint8_t maxPlayers) { m_maxPlayers = maxPlayers; }
+
+    inline void sendData(std::uint8_t packetID, void* data, std::size_t size, std::uint64_t destination, xy::NetFlag sendType, std::uint8_t channel = 0)
+    {
+        m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, size, sendType, channel);
+    }
 
     template <typename T>
-    void sendData(std::uint8_t packetID, const T& data, CSteamID dest, EP2PSend sendType = k_EP2PSendUnreliable);
+    inline void sendData(std::uint8_t packetID, const T& data, std::uint64_t dest, xy::NetFlag sendType = xy::NetFlag::Unreliable, std::uint8_t channel = 0);
+
+    inline void broadcastData(std::uint8_t packetID, void* data, std::size_t size, xy::NetFlag sendType, std::uint8_t channel = 0)
+    {
+        m_host.broadcastPacket(packetID, data, size, sendType, channel);
+    }
 
     template <typename T>
-    void broadcastData(std::uint8_t packetID, const T& data, EP2PSend sendType = k_EP2PSendUnreliable);
+    inline void broadcastData(std::uint8_t packetID, const T& data, xy::NetFlag sendType = xy::NetFlag::Unreliable, std::uint8_t channel = 0);
 
     xy::MessageBus& getMessageBus() { return m_messageBus; }
 
     std::int32_t getServerTime() const { return m_serverTime.getElapsedTime().asMilliseconds(); }
 
 private:
-
+    sf::Thread m_thread;
     std::atomic<bool> m_running;
     std::unique_ptr<Server::State> m_currentState;
 
@@ -67,14 +77,14 @@ private:
     xy::MessageBus m_messageBus;
 
     sf::Clock m_serverTime;
+    xy::NetHost m_host;
 
-    bool pollNetwork(Packet&);
+    std::size_t m_maxPlayers;
 
-    void initSteamServer();
-    void closeSteamServer();
+    bool pollNetwork(xy::NetEvent&);
 
-    STEAM_GAMESERVER_CALLBACK(GameServer, p2pSessionRequest, P2PSessionRequest_t);
-    STEAM_GAMESERVER_CALLBACK(GameServer, p2pSessionFail, P2PSessionConnectFail_t);
+    void clientConnect(const xy::NetEvent&);
+    void clientDisconnect(const xy::NetEvent&);
 
     void run();
 };

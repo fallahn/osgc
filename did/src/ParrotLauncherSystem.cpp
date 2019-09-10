@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "ServerSharedStateData.hpp"
 #include "Server.hpp"
 #include "MessageIDs.hpp"
+#include "GlobalConsts.hpp"
 
 ParrotLauncherSystem::ParrotLauncherSystem(xy::MessageBus& mb, Server::SharedStateData& sd)
     : xy::System(mb, typeid(ParrotLauncherSystem)),
@@ -78,7 +79,7 @@ void ParrotLauncherSystem::process(float dt)
                     {
                         launcher.launched = true;
                         launcher.currentLaunchTime = 12.f;
-                        m_sharedData.gameServer->broadcastData(PacketID::ParrotLaunch, entity.getIndex(), k_EP2PSendReliable);
+                        m_sharedData.gameServer->broadcastData(PacketID::ParrotLaunch, entity.getIndex(), xy::NetFlag::Reliable, Global::ReliableChannel);
                     }
                 }
             }
