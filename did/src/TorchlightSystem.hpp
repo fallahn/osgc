@@ -47,7 +47,7 @@ public:
 
     void handleMessage(const xy::Message&) override;
 
-    void process(float);
+    void process(float) override;
 
 private:
     float m_dayTime; //updated by server but interpolated to know how bright to make lights

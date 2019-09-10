@@ -38,7 +38,7 @@ public:
 
     void handleMessage(const xy::Message&) override;
 
-    void process(float) {}
+    void process(float) override {}
 
 private:
 

@@ -269,7 +269,7 @@ void MenuState::refreshLobbyView(const xy::NetEvent& evt)
         nameEntity.addComponent<xy::Text>(font).setString(sf::String::fromUtf32(buffer.begin(), buffer.end()));
         nameEntity.getComponent<xy::Text>().setCharacterSize(50);
         nameEntity.addComponent<xy::Transform>().setPosition(76.f, 0.f);
-        nameEntity.addComponent<xy::CommandTarget>().ID;
+        nameEntity.addComponent<xy::CommandTarget>();
         nameEntity.addComponent<xy::Callback>().active = true;
         nameEntity.getComponent<xy::Callback>().function = callback;
         rootEntity.getComponent<xy::Transform>().addChild(nameEntity.getComponent<xy::Transform>());
