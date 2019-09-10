@@ -11,8 +11,6 @@ endif()
 # Set up the project
 project(${PROJECT_NAME})
 
-message(AUTHOR_WARNING "Requires chipmunk built with FLOAT precision")
-
 # Set the path to our find modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
@@ -39,7 +37,6 @@ find_package(SFML ${SFML_MIN_VERSION} REQUIRED graphics window audio system)
 
 # Find xyginext
 find_package(XYGINEXT REQUIRED)
-find_package(STEAMWORKS)
 
 # X11 is required on unices
 # plus UI frameworks for message box
@@ -56,7 +53,6 @@ endif()
 include_directories(
   ${XYXT_INCLUDE_DIR}
   ${SFML_INCLUDE_DIR} 
-  ${STEAMWORKS_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
@@ -99,7 +95,6 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   ${SFML_LIBRARIES}
   ${SFML_DEPENDENCIES}
-  ${STEAMWORKS_LIBRARIES}
   ${XYXT_LIBRARIES})
 
 if (APPLE)

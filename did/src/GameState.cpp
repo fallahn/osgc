@@ -605,7 +605,7 @@ bool GameState::update(float dt)
     xy::Console::printStat("Incoming bw", std::to_string(bw) + "Kbps");
 #else
     xy::NetEvent evt;
-    while (m_sharedData.netClient->pollNetwork(evt))
+    while (m_sharedData.netClient->pollEvent(evt))
     {
         handlePacket(evt);
     }
