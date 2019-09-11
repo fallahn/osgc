@@ -44,12 +44,10 @@ void MenuState::buildOptions(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Selected] = mouseOver;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
+    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
     {
@@ -73,10 +71,12 @@ void MenuState::buildOptions(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Advanced");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Selected] = mouseOver;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
+    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
     {

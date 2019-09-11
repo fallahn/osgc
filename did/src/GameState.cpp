@@ -652,8 +652,8 @@ void GameState::loadResources()
     m_shaderResource.preload(ShaderID::ShadowShader, GroundVert, ShadowFrag);
 
     m_shaderResource.preload(ShaderID::SeaShader, SeaFrag, sf::Shader::Fragment);
-    m_shaderResource.preload(ShaderID::PlaneShader, GroundVertLit, SpriteFrag);
-    m_shaderResource.preload(ShaderID::LandShader, GroundVertLit, GroundFrag);
+    m_shaderResource.preload(ShaderID::PlaneShader, "#version 120\n#define WORLDPOS\n" + GroundVertLit, SpriteFrag);
+    m_shaderResource.preload(ShaderID::LandShader, "#version 120\n" + GroundVertLit, GroundFrag);
     m_shaderResource.preload(ShaderID::SkyShader, SkyFrag, sf::Shader::Fragment);
     m_shaderResource.preload(ShaderID::MoonShader, MoonFrag2, sf::Shader::Fragment);
     m_shaderResource.preload(ShaderID::SunsetShader, Sunset::Fragment, sf::Shader::Fragment);
@@ -1626,7 +1626,7 @@ void GameState::updateScene(SceneState state)
 void GameState::updateConnection(ConnectionState state)
 {
     //m_sharedData.clientInformation.updateClient(state);
-    {
+    /*{
         auto idx = state.actorID - Actor::ID::PlayerOne;
 
         if (state.clientID == 0)
@@ -1638,7 +1638,7 @@ void GameState::updateConnection(ConnectionState state)
             const auto& clientInfo = m_sharedData.clientInformation.getClient(state);
             m_nameTagManager.updateName(clientInfo.name, idx);
         }
-    }
+    }*/
 }
 
 void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)

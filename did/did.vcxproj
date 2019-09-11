@@ -128,6 +128,7 @@
       <PreprocessorDefinitions>XY_DEBUG;_ITERATOR_DEBUG_LEVEL=0;_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\extlibs\bin\msvc_x64\xygine\Debug;..\extlibs\bin\msvc_x64\sfml\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

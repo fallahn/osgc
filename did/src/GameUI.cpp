@@ -244,9 +244,9 @@ void GameState::loadUI()
     for (int i = Actor::ID::PlayerOne; i <= Actor::ID::PlayerFour; ++i)
     {
         auto idx = i - Actor::ID::PlayerOne;
-        ConnectionState state;
-        state.actorID = static_cast<Actor::ID>(i);
-        const auto& avatar = m_sharedData.clientInformation.getClient(state);
+        /*ConnectionState state;
+        state.actorID = static_cast<Actor::ID>(i);*/
+        const auto& avatar = m_sharedData.clientInformation.getClient(/*state*/idx);
 
         sf::Vector2f position(((xy::DefaultSceneSize.x / 4.f) * idx) + 20.f, 0.f);
 

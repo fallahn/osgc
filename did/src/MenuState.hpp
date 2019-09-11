@@ -43,6 +43,7 @@ class MenuState final : public xy::State
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    ~MenuState();
 
     xy::StateID stateID() const override { return StateID::Menu; }
     bool handleEvent(const sf::Event&) override;
@@ -66,6 +67,9 @@ private:
 
     bool m_gameLaunched;
 
+    sf::String* m_activeString;
+    void updateTextInput(const sf::Event&);
+
     void loadAssets();
     void createScene();
     void setLobbyView();
@@ -73,6 +77,9 @@ private:
     void buildBrowser(sf::Font&);
     void buildLobby(sf::Font&);
     void buildOptions(sf::Font&);
+
+    void buildNameEntry(sf::Font&);
+    void buildJoinEntry(sf::Font&);
 
     xy::Entity addCheckbox();
 
@@ -82,4 +89,7 @@ private:
     void refreshBrowserView();
 
     void handlePacket(const xy::NetEvent&);
+
+    void loadSettings();
+    void saveSettings();
 };

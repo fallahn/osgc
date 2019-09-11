@@ -42,44 +42,44 @@ ClientInfoManager::ClientInfoManager()
 }
 
 //public
-bool ClientInfoManager::updateClient(const ConnectionState& state)
-{
-    XY_ASSERT(state.actorID >= Actor::ID::PlayerOne, "Invalid actor ID");
+//bool ClientInfoManager::updateClient(const ConnectionState& state)
+//{
+//    XY_ASSERT(state.actorID >= Actor::ID::PlayerOne, "Invalid actor ID");
+//
+//    auto idx = state.actorID - Actor::ID::PlayerOne;
+//    auto& client = m_clientInfo[idx];
+//
+//    {
+//        if (state.clientID == 0)
+//        {
+//            //we're resetting a player
+//            client.avatar.loadFromImage(m_defaultImage);
+//            client.name = Global::PlayerNames[idx];
+//            return true;
+//        }
+//        else //adding new info
+//        {
+//            //TODO pull new info from somewhere...
+//        }
+//    }
+//    return false;
+//}
 
-    auto idx = state.actorID - Actor::ID::PlayerOne;
-    auto& client = m_clientInfo[idx];
-
-    {
-        if (state.clientID == 0)
-        {
-            //we're resetting a player
-            client.avatar.loadFromImage(m_defaultImage);
-            client.name = Global::PlayerNames[idx];
-            return true;
-        }
-        else //adding new info
-        {
-            //TODO pull new info from somewhere...
-        }
-    }
-    return false;
-}
-
-const ClientInfo& ClientInfoManager::getClient(const ConnectionState& state) const
-{
-    if (state.clientID > 0)
-    {
-        for (const auto& client : m_clientInfo)
-        {
-            if (client.clientID == state.clientID)
-            {
-                return client;
-            }
-        }
-    }
-    XY_ASSERT(state.actorID >= Actor::ID::PlayerOne, "Invalid actor ID");
-    return m_clientInfo[state.actorID - Actor::ID::PlayerOne];
-}
+//const ClientInfo& ClientInfoManager::getClient(const ConnectionState& state) const
+//{
+//    if (state.clientID > 0)
+//    {
+//        for (const auto& client : m_clientInfo)
+//        {
+//            if (client.clientID == state.clientID)
+//            {
+//                return client;
+//            }
+//        }
+//    }
+//    XY_ASSERT(state.actorID >= Actor::ID::PlayerOne, "Invalid actor ID");
+//    return m_clientInfo[state.actorID - Actor::ID::PlayerOne];
+//}
 
 const ClientInfo& ClientInfoManager::getClient(std::int32_t idx) const
 {
@@ -88,25 +88,23 @@ const ClientInfo& ClientInfoManager::getClient(std::int32_t idx) const
 }
 
 //private
-void ClientInfoManager::getSteamInfo(ClientInfo& client)
-{
-    XY_ASSERT(client.clientID > 0, "Not a valid client!");
-
-    //auto codepoints = xy::Util::String::getCodepoints(SteamFriends()->GetFriendPersonaName(client.steamID));
-    //client.name = sf::String::fromUtf16(codepoints.begin(), codepoints.end());
-    client.name = "Fix Me";
-
-    auto avatarIdx = 0;
-
-    if (avatarIdx)
-    {
-        sf::Image img;
-        img.create(avatarSize, avatarSize, sf::Color::Black);
-        //TODO load some avatar image from somewhere
-        client.avatar.loadFromImage(img);
-    }
-    else
-    {
-        client.avatar.loadFromImage(m_defaultImage);
-    }
-}
+//void ClientInfoManager::getSteamInfo(ClientInfo& client)
+//{
+//    XY_ASSERT(client.clientID > 0, "Not a valid client!");
+//
+//    client.name = "Fix Me";
+//
+//    auto avatarIdx = 0;
+//
+//    if (avatarIdx)
+//    {
+//        sf::Image img;
+//        img.create(avatarSize, avatarSize, sf::Color::Black);
+//        //TODO load some avatar image from somewhere
+//        client.avatar.loadFromImage(img);
+//    }
+//    else
+//    {
+//        client.avatar.loadFromImage(m_defaultImage);
+//    }
+//}

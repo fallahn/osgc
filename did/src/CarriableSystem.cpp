@@ -190,51 +190,53 @@ void CarriableSystem::tryGrab(xy::Entity entity)
     {
         auto& entTx = ent.getComponent<xy::Transform>();
 
-        if (ent.getComponent<Actor>().id == Actor::ID::Boat &&
-            (actor.id >= Actor::PlayerOne && actor.id <= Actor::PlayerFour))
+        if (ent.getComponent<Actor>().id == Actor::ID::Boat)
         {
-            auto& boat = ent.getComponent<Boat>();
-            const auto& player = entity.getComponent<Player>();
-            auto& carrier = entity.getComponent<Carrier>();
-
-            if (player.playerNumber != boat.playerNumber &&
-                boat.treasureCount > 0 &&
-                entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 0.5f).intersects(grabBox))
+            if(actor.id >= Actor::PlayerOne && actor.id <= Actor::PlayerFour)
             {
-                //sneaky stealage
-                XY_ASSERT(m_stashedIndex > 0, "Incorrect stashed treasure count");
-                auto treasureEnt = m_stashedTreasures[--m_stashedIndex];
-                auto& carriable = treasureEnt.getComponent<Carriable>();
+                auto& boat = ent.getComponent<Boat>();
+                const auto& player = entity.getComponent<Player>();
+                auto& carrier = entity.getComponent<Carrier>();
 
-                carrier.carryFlags |= carriable.type;
-                carrier.carriedEntity = treasureEnt;
+                if (player.playerNumber != boat.playerNumber &&
+                    boat.treasureCount > 0 &&
+                    entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 0.5f).intersects(grabBox))
+                {
+                    //sneaky stealage
+                    XY_ASSERT(m_stashedIndex > 0, "Incorrect stashed treasure count");
+                    auto treasureEnt = m_stashedTreasures[--m_stashedIndex];
+                    auto& carriable = treasureEnt.getComponent<Carriable>();
 
-                carriablePosition *= carriable.offsetMultiplier;
-                carriablePosition += tx.getPosition();
-                entTx.setPosition(carriablePosition);
+                    carrier.carryFlags |= carriable.type;
+                    carrier.carriedEntity = treasureEnt;
 
-                carriable.carried = true;
-                carriable.parentEntity = entity;
-                carriable.spawnPosition = carriablePosition;
-                carriable.stashed = false;
+                    carriablePosition *= carriable.offsetMultiplier;
+                    carriablePosition += tx.getPosition();
+                    entTx.setPosition(carriablePosition);
 
-                boat.treasureCount--;
+                    carriable.carried = true;
+                    carriable.parentEntity = entity;
+                    carriable.spawnPosition = carriablePosition;
+                    carriable.stashed = false;
 
-                //raise message so server can increase available treasure count and update boat animations
-                auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
-                msg->entity = entity;
-                msg->action = PlayerEvent::StoleTreasure;
-                msg->data = boat.playerNumber; //so we know who was stolen from
-                msg->position = carriablePosition;
+                    boat.treasureCount--;
 
-                //tell clients
-                CarriableState cs;
-                cs.action = CarriableState::PickedUp;
-                cs.carriableID = treasureEnt.getIndex();
-                cs.parentID = entity.getIndex();
-                cs.position = carriablePosition;
-                m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable, Global::ReliableChannel);
-                break;
+                    //raise message so server can increase available treasure count and update boat animations
+                    auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                    msg->entity = entity;
+                    msg->action = PlayerEvent::StoleTreasure;
+                    msg->data = boat.playerNumber; //so we know who was stolen from
+                    msg->position = carriablePosition;
+
+                    //tell clients
+                    CarriableState cs;
+                    cs.action = CarriableState::PickedUp;
+                    cs.carriableID = treasureEnt.getIndex();
+                    cs.parentID = entity.getIndex();
+                    cs.position = carriablePosition;
+                    m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable, Global::ReliableChannel);
+                    break;
+                }
             }
         }
         else

@@ -118,7 +118,7 @@ void main()
 
 static const std::string GroundVertLit =
 R"(
-#version 120
+
 #define LIGHT_COUNT 4
 
 uniform mat4 u_view;
@@ -137,9 +137,17 @@ const mat3 TangentMatrix = mat3(1.0,0.0,0.0,
 varying vec3 v_lightDir[LIGHT_COUNT];
 varying vec3 v_lightingNormal;
 
+#if defined(WORLDPOS)
+varying vec3 v_worldPosition;
+#endif
+
 void main()
 {
     vec4 vertex = vec4(gl_Vertex.x, gl_Vertex.z, gl_Vertex.y, gl_Vertex.w);
+
+#if defined(WORLDPOS)
+    v_worldPosition = vertex.xyz;
+#endif
 
     gl_Position = u_viewProjection * vertex;
     //gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
@@ -212,6 +220,8 @@ void main()
     gl_FragColor = vec4(ambient + diffuse, baseColour.a);//vec4(normal, 1.0);//
 })";
 
+//this was based on something from shader toy - although I've lost the link
+//if anyone knows who this should be credited to let me know...
 static const std::string SeaFrag =
 R"(
 #version 120

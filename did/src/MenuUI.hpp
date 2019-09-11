@@ -38,7 +38,11 @@ namespace Menu
             ReadyBox = 0x40,
             OptionsNode = 0x80,
 
-            PhysicsObject = 0x100
+            HostNameNode = 0x100,
+            JoinNameNode = 0x200,
+
+            NameText = 0x400,
+            IPText = 0x800
         };
     }
 

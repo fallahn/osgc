@@ -37,13 +37,13 @@ class ClientInfoManager final
 public:
     ClientInfoManager();
 
-    bool updateClient(const ConnectionState&);
+    //bool updateClient(const ConnectionState&);
 
-    const ClientInfo& getClient(const ConnectionState&) const;
+    //const ClientInfo& getClient(const ConnectionState&) const;
     const ClientInfo& getClient(std::int32_t) const;
 
 private:
     sf::Image m_defaultImage;
     std::array<ClientInfo, 4u> m_clientInfo;
-    void getSteamInfo(ClientInfo&);
+    //void getSteamInfo(ClientInfo&);
 };

@@ -50,8 +50,8 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Selected] = mouseOver;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
+    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
@@ -86,15 +86,15 @@ void MenuState::buildLobby(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //start button
+    //start button - TODO only add this if we're hosting
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Start");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Selected] = mouseOver;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::Unselected] = mouseOut;
+    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
@@ -102,8 +102,6 @@ void MenuState::buildLobby(sf::Font& font)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            //TODO check all users are ready and that we're the host
-
             //send a packet to server if we're host telling it to switch to game state
             m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
         }

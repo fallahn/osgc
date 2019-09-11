@@ -32,6 +32,9 @@ Copyright 2019 Matt Marchant
 struct SharedData final
 {
     InputBinding inputBinding;
+    sf::String clientName;
+    sf::String remoteIP;
+
     ClientInfoManager clientInformation;
     std::string error;
     Server::SeedData seedData;
