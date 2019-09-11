@@ -16,9 +16,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # enable some warnings in debug builds with gcc/clang
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wreorder")
+set(CMAKE_CXX_FLAGS "-msse4.1 -msse2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wreorder -msse4.1 -msse2")
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wreorder -Wheader-guard")
+set(CMAKE_CXX_FLAGS "-msse4.1 -msse2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wreorder -Wheader-guard -msse4.1 -msse2")
 endif()
 
 # Only works with SFML version 2.5 and above
