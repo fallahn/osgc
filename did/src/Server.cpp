@@ -39,7 +39,6 @@ GameServer::GameServer()
     m_nextFreeID(0)
 {
     m_sharedStateData.gameServer = this;
-    m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
 
     const char* defaultSeed = "buns";
     std::strcpy(m_sharedStateData.seedData.str, defaultSeed);
@@ -65,6 +64,8 @@ void GameServer::start()
     else
     {
         xy::Logger::log("Launching Server Instance...", xy::Logger::Type::Info);
+
+        m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
         m_running = true;
 
         m_thread.launch();
@@ -79,6 +80,8 @@ void GameServer::stop()
         xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
 
         m_thread.wait();
+
+        m_currentState.reset();
 
         xy::Logger::log("Server Stopped.", xy::Logger::Type::Info);
     }

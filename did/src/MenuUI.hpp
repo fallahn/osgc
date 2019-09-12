@@ -35,7 +35,7 @@ namespace Menu
             LobbyItem = 0x8,
             SeedText = 0x10,
             BrowserItem = 0x20,
-            ReadyBox = 0x40,
+            StartButton = 0x40,
             OptionsNode = 0x80,
 
             HostNameNode = 0x100,
@@ -120,6 +120,7 @@ namespace Menu
     static const sf::Vector2f OffscreenPosition(0.f, -2000.f);
     static const sf::FloatRect ButtonArea({ 0.f, 0.f, 300.f, 70.f });
     static const sf::Vector2f StartButtonPosition(1890.f, 960.f);
+    static const sf::Vector2f StartButtonPositionHidden(2890.f, 960.f);
     static const sf::Vector2f BackButtonPosition(30.f, 960.f);
     static const sf::Vector2f SeedPosition(120.f, 840.f);
     static const sf::Vector2f FriendsPosition(120.f, 830.f);

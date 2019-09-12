@@ -419,9 +419,6 @@
     <ClCompile Include="src\PathFinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MenuUIBrowser.cpp">
-      <Filter>Source Files\states</Filter>
-    </ClCompile>
     <ClCompile Include="src\MenuUILobby.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
@@ -553,9 +550,6 @@
     </ClCompile>
     <ClCompile Include="src\DogSystem.cpp">
       <Filter>Source Files\systems\Client</Filter>
-    </ClCompile>
-    <ClCompile Include="src\boxer\boxer_win.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ClientBeeSystem.cpp">
       <Filter>Source Files\systems\Client</Filter>

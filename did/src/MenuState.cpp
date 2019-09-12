@@ -669,7 +669,19 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
     default: break;
     case PacketID::HostID:
         m_sharedData.clientInformation.setHostID(evt.packet.as<std::uint64_t>());
-        //TODO update the 'start' button if we're hosting
+        
+        {
+            sf::Vector2f position = (m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID()) ?
+                Menu::StartButtonPosition : Menu::StartButtonPositionHidden;
+
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::StartButton;
+            cmd.action = [position](xy::Entity e, float)
+            {
+                e.getComponent<xy::Transform>().setPosition(position);
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
         break;
     case PacketID::RejectClient:
     {

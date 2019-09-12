@@ -69,10 +69,24 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
     {
     default: break;
     case PacketID::StartGame:
-        //start game on request TODO check all players are ready first
-        LOG("Check all players are ready!", xy::Logger::Type::Warning);
-        setNextState(Server::StateID::Running);
-        m_sharedData.gameServer->broadcastData(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
+        //start game on request, check all players are ready first
+    {
+        bool ready = false;
+        for (const auto& p : m_sharedData.connectedClients)
+        {
+            ready = p.second.ready;
+            if (!ready)
+            {
+                break;
+            }
+        }
+
+        if (ready)
+        {
+            setNextState(Server::StateID::Running);
+            m_sharedData.gameServer->broadcastData(PacketID::LaunchGame, std::uint8_t(0), xy::NetFlag::Reliable);
+        }
+    }
         break;
     case PacketID::SetSeed:
     {

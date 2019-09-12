@@ -329,7 +329,6 @@
     <ClCompile Include="src\BeeSystem.cpp" />
     <ClCompile Include="src\BoatSystem.cpp" />
     <ClCompile Include="src\BotSystem.cpp" />
-    <ClCompile Include="src\boxer\boxer_win.cpp" />
     <ClCompile Include="src\Camera3D.cpp" />
     <ClCompile Include="src\CarriableSystem.cpp" />
     <ClCompile Include="src\ClientBeeSystem.cpp" />
@@ -385,7 +384,6 @@
     <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuLobbyFunctions.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
-    <ClCompile Include="src\MenuUIBrowser.cpp" />
     <ClCompile Include="src\MenuUILobby.cpp" />
     <ClCompile Include="src\MenuUIOptions.cpp" />
     <ClCompile Include="src\MiniMap.cpp" />

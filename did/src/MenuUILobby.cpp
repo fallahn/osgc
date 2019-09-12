@@ -88,13 +88,14 @@ void MenuState::buildLobby(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //start button - TODO only add this if we're hosting
+    //start button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
+    entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPositionHidden);
     entity.addComponent<xy::Text>(font).setString("Start");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
     entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::StartButton;
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
