@@ -39,6 +39,7 @@ namespace Server
         xy::NetPeer peer;
         sf::String name = "Unknown";
         bool ready = false;
+        std::uint8_t playerID = 0;
     };
 
     struct SharedStateData final

@@ -111,6 +111,11 @@ void LobbyState::handleMessage(const xy::Message& msg)
             m_sharedData.gameServer->sendData(PacketID::ReqPlayerInfo, std::uint8_t(0), data.id, xy::NetFlag::Reliable);
             m_sharedData.gameServer->sendData(PacketID::CurrentSeed, m_sharedData.seedData, data.id, xy::NetFlag::Reliable);
         }
+        else if (data.type == ServerEvent::ClientDisconnected)
+        {
+            //broadcast player ident so clients can reset the slot
+            m_sharedData.gameServer->broadcastData(PacketID::PlayerLeft, std::uint8_t(data.id), xy::NetFlag::Reliable);
+        }
     }
 }
 
@@ -120,11 +125,11 @@ void LobbyState::broadcastClientInfo()
     for (const auto& [id, client] : m_sharedData.connectedClients)
     {
         auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
-        std::vector<char> buffer(sizeof(id) + size);
+        std::vector<char> buffer(sizeof(client.playerID) + size);
 
-        std::memcpy(buffer.data(), &id, sizeof(id));
-        std::memcpy(buffer.data() + sizeof(id), client.name.getData(), size);
+        std::memcpy(buffer.data(), &client.playerID, sizeof(client.playerID));
+        std::memcpy(buffer.data() + sizeof(client.playerID), client.name.getData(), size);
 
-        m_sharedData.gameServer->broadcastData(PacketID::DeliverPlayerInfo, buffer.data(), std::size_t(size + sizeof(id)), xy::NetFlag::Reliable);
+        m_sharedData.gameServer->broadcastData(PacketID::DeliverPlayerInfo, buffer.data(), std::size_t(size + sizeof(client.playerID)), xy::NetFlag::Reliable);
     }
 }

@@ -37,105 +37,105 @@ namespace
     const sf::Vector2f ItemOffset(80.f, 148.f);
 }
 
-void MenuState::buildBrowser(sf::Font& font)
-{
-    auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
-    auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
+//void MenuState::buildBrowser(sf::Font& font)
+//{
+//    auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
+//    auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
+//
+//    auto parentEntity = m_uiScene.createEntity();
+//    parentEntity.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+//    parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::BrowserNode;
+//
+//    //back button
+//    auto entity = m_uiScene.createEntity();
+//    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+//    entity.addComponent<xy::Text>(font).setString("Back");
+//    entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+//    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+//    entity.addComponent<xy::Drawable>();
+//    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
+//    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
+//    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+//    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
+//    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
+//        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
+//    {
+//        if (flags & xy::UISystem::Flags::LeftMouse)
+//        {
+//            parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+//
+//            xy::Command cmd;
+//            cmd.targetFlags = Menu::CommandID::MainNode;
+//            cmd.action = [](xy::Entity e, float)
+//            {
+//                e.getComponent<xy::Transform>().setPosition({});
+//            };
+//            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+//
+//            cmd.targetFlags = Menu::CommandID::BrowserItem;
+//            cmd.action = [&](xy::Entity entity, float)
+//            {
+//                m_uiScene.destroyEntity(entity);
+//            };
+//            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+//        }
+//    });
+//    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+//
+//    //refresh button
+//    entity = m_uiScene.createEntity();
+//    entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
+//    entity.addComponent<xy::Text>(font).setString("Refresh");
+//    entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+//    entity.addComponent<xy::Drawable>();
+//    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
+//    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
+//    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+//    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
+//        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
+//    {
+//        if (flags & xy::UISystem::Flags::LeftMouse)
+//        {
+//            //refreshBrowserView();
+//        }
+//    });
+//    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+//
+//    //background window
+//    entity = m_uiScene.createEntity();
+//    entity.addComponent<xy::Transform>();
+//    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/browser_window.png"));
+//    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+//    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+//    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
+//    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+//}
 
-    auto parentEntity = m_uiScene.createEntity();
-    parentEntity.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
-    parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::BrowserNode;
-
-    //back button
-    auto entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
-    entity.addComponent<xy::Text>(font).setString("Back");
-    entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
-    {
-        if (flags & xy::UISystem::Flags::LeftMouse)
-        {
-            parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
-
-            xy::Command cmd;
-            cmd.targetFlags = Menu::CommandID::MainNode;
-            cmd.action = [](xy::Entity e, float)
-            {
-                e.getComponent<xy::Transform>().setPosition({});
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            cmd.targetFlags = Menu::CommandID::BrowserItem;
-            cmd.action = [&](xy::Entity entity, float)
-            {
-                m_uiScene.destroyEntity(entity);
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-        }
-    });
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-
-    //refresh button
-    entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
-    entity.addComponent<xy::Text>(font).setString("Refresh");
-    entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
-    {
-        if (flags & xy::UISystem::Flags::LeftMouse)
-        {
-            refreshBrowserView();
-        }
-    });
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-
-    //background window
-    entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/browser_window.png"));
-    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
-    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-}
-
-void MenuState::refreshBrowserView()
-{
-    xy::Command cmd;
-    cmd.targetFlags = Menu::CommandID::BrowserItem;
-    cmd.action = [&](xy::Entity entity, float)
-    {
-        m_uiScene.destroyEntity(entity);
-    };
-    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-    auto& font = m_fontResource.get(Global::FineFont);
-
-    auto textEntity = m_uiScene.createEntity();
-    textEntity.addComponent<xy::Transform>().setPosition(ItemOffset);
-    textEntity.addComponent<xy::Text>(font).setString("Refreshing...");
-    textEntity.addComponent<xy::Drawable>();
-    textEntity.addComponent<xy::CommandTarget>();
-    textEntity.addComponent<xy::Callback>().active = true;
-    textEntity.getComponent<xy::Callback>().function = 
-        [](xy::Entity entity, float)
-    {
-        entity.getComponent<xy::CommandTarget>().ID = Menu::CommandID::BrowserItem;
-        entity.getComponent<xy::Callback>().active = false;
-    };
-}
+//void MenuState::refreshBrowserView()
+//{
+//    xy::Command cmd;
+//    cmd.targetFlags = Menu::CommandID::BrowserItem;
+//    cmd.action = [&](xy::Entity entity, float)
+//    {
+//        m_uiScene.destroyEntity(entity);
+//    };
+//    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+//
+//    auto& font = m_fontResource.get(Global::FineFont);
+//
+//    auto textEntity = m_uiScene.createEntity();
+//    textEntity.addComponent<xy::Transform>().setPosition(ItemOffset);
+//    textEntity.addComponent<xy::Text>(font).setString("Refreshing...");
+//    textEntity.addComponent<xy::Drawable>();
+//    textEntity.addComponent<xy::CommandTarget>();
+//    textEntity.addComponent<xy::Callback>().active = true;
+//    textEntity.getComponent<xy::Callback>().function = 
+//        [](xy::Entity entity, float)
+//    {
+//        entity.getComponent<xy::CommandTarget>().ID = Menu::CommandID::BrowserItem;
+//        entity.getComponent<xy::Callback>().active = false;
+//    };
+//}
 
 //void MenuState::onLobbyListRecieved(LobbyMatchList_t* list, bool failed)
 //{

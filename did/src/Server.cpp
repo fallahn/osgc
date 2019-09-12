@@ -35,7 +35,8 @@ using namespace Server;
 
 GameServer::GameServer()
     : m_thread  (&GameServer::run, this),
-    m_running   (false)
+    m_running   (false),
+    m_nextFreeID(0)
 {
     m_sharedStateData.gameServer = this;
     m_currentState = std::make_unique<LobbyState>(m_sharedStateData);
@@ -45,6 +46,8 @@ GameServer::GameServer()
 
     std::hash<std::string> hash;
     m_sharedStateData.seedData.hash = hash(std::string(defaultSeed));
+
+    m_freeIDs = { 0,1,2,3 };
 }
 
 GameServer::~GameServer()
@@ -76,7 +79,6 @@ void GameServer::stop()
         xy::Logger::log("Stopping Server...", xy::Logger::Type::Info);
 
         m_thread.wait();
-        m_host.stop();
 
         xy::Logger::log("Server Stopped.", xy::Logger::Type::Info);
     }
@@ -109,6 +111,7 @@ void GameServer::clientConnect(const xy::NetEvent& evt)
     {
         m_sharedStateData.connectedClients.insert(std::make_pair(evt.peer.getID(), ClientData()));
         m_sharedStateData.connectedClients[evt.peer.getID()].peer = evt.peer;
+        m_sharedStateData.connectedClients[evt.peer.getID()].playerID = m_freeIDs[m_nextFreeID++];
 
         m_host.sendPacket(evt.peer, PacketID::CurrentSeed, m_sharedStateData.seedData, xy::NetFlag::Reliable, Global::ReliableChannel);
 
@@ -126,27 +129,31 @@ void GameServer::clientConnect(const xy::NetEvent& evt)
     }
     else
     {
-        std::cout << "Failed to accept client connection, server already in-game\n";
-        //TODO forcefully disconnect the new peer by sending refusal packet
+        //forcefully disconnect the new peer by sending refusal packet
+        std::uint8_t reason = (m_sharedStateData.connectedClients.size() == m_maxPlayers) ? 0 : 1;
+        m_host.sendPacket(evt.peer, PacketID::RejectClient, reason, xy::NetFlag::Reliable, Global::ReliableChannel);
     }
 }
 
 void GameServer::clientDisconnect(const xy::NetEvent& evt)
 {
+    auto playerID = m_sharedStateData.connectedClients[evt.peer.getID()].playerID;
+    if (m_sharedStateData.connectedClients.size() > 1)
+    {
+        auto it = std::find(m_freeIDs.begin(), m_freeIDs.end(), playerID);
+        *it = m_freeIDs[--m_nextFreeID];
+        m_freeIDs[m_nextFreeID] = playerID;
+    }
     m_sharedStateData.connectedClients.erase(evt.peer.getID());
+    std::cout << "Erased " << evt.peer.getID() << "\n";
 
     auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
-    msg->id = evt.peer.getID();
+    msg->id = playerID;
     msg->type = ServerEvent::ClientDisconnected;
 
-
-    //when game host switches to a different client because
-    //the current one left, this is handled by the active state
     if (m_sharedStateData.connectedClients.empty())
     {
-        /*m_sharedStateData.hostClient = {};
-        m_currentState = std::make_unique<IdleState>(m_sharedStateData);*/
-        //TODO we want to quit server but not in the middle of  the thread we're closing ;)
+        m_running = false;
     }
 }
 
@@ -233,6 +240,5 @@ void GameServer::run()
         }
     }
 
-    //return to idle when stopped
-    //m_currentState = std::make_unique<IdleState>(m_sharedStateData);
+    m_host.stop();
 }

@@ -136,25 +136,51 @@ void MenuState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<SystemEvent>();
         if (data.action == SystemEvent::ServerStarted)
         {
-            xy::Command cmd;
-            cmd.targetFlags = Menu::CommandID::LobbyNode;
-            cmd.action = [](xy::Entity e, float)
-            {
-                e.getComponent<xy::Transform>().setPosition({});
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            cmd.targetFlags = Menu::CommandID::HostNameNode;
-            cmd.action = [](xy::Entity e, float)
-            {
-                e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
-            };
-            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
             if (!m_sharedData.netClient->connected())
             {
-                m_sharedData.netClient->connect("127.0.0.1", Global::GamePort);
-                //TODO if failure then return to main menu
+                if (m_sharedData.netClient->connect("127.0.0.1", Global::GamePort))
+                {
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::LobbyNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Transform>().setPosition({});
+                    };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                    cmd.targetFlags = Menu::CommandID::HostNameNode;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                    };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+                else
+                {
+                    m_sharedData.error = "Could not connect to server";
+                    requestStackPush(StateID::Error);
+
+                    m_sharedData.gameServer->stop();
+                }
+            }
+            else
+            {
+                //we're already connected, jump straight to lobby
+                xy::Command cmd;
+                cmd.targetFlags = Menu::CommandID::LobbyNode;
+                cmd.action = [](xy::Entity e, float)
+                {
+                    e.getComponent<xy::Transform>().setPosition({});
+                };
+                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                cmd.targetFlags = Menu::CommandID::HostNameNode;
+                cmd.action = [](xy::Entity e, float)
+                {
+                    e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                };
+                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
         }
     }
@@ -603,7 +629,6 @@ void MenuState::createScene()
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     buildLobby(font);
-    //buildBrowser(font);
     buildOptions(font);
 
     buildNameEntry(font);
@@ -652,6 +677,25 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
     switch (evt.packet.getID())
     {
     default: break;
+    case PacketID::RejectClient:
+    {
+        auto reason = evt.packet.as<std::uint8_t>();
+        switch(reason)
+        {
+        case 0:
+            m_sharedData.error = "Could not connect to server: game is full.";
+            break;
+        case 1:
+            m_sharedData.error = "Could not connect to server: game is in progress.";
+            break;
+        default:
+            m_sharedData.error = "Could not connect to server: Unknown.";
+            break;
+        }
+        requestStackPush(StateID::Error);
+        m_sharedData.netClient->disconnect();
+    }
+        break;
     case PacketID::LaunchGame:
     {
         if (!m_gameLaunched) //only try launching on the first time we receive this
@@ -683,7 +727,10 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         sendPlayerData();
         break;
     case PacketID::DeliverPlayerInfo:
-        refreshLobbyView(evt);
+        updateClientInfo(evt);
+        break;
+    case PacketID::PlayerLeft:
+        m_sharedData.clientInformation.resetClient(evt.packet.as<std::uint8_t>());
         break;
     }
 }
@@ -978,7 +1025,29 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
                         cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-                        //TODO actually join game
+                        if (m_sharedData.netClient->connect(m_sharedData.remoteIP.toAnsiString(), Global::GamePort))
+                        {
+                            //goto lobby
+                            xy::Command cmd;
+                            cmd.targetFlags = Menu::CommandID::LobbyNode;
+                            cmd.action = [](xy::Entity e, float)
+                            {
+                                e.getComponent<xy::Transform>().setPosition({});
+                            };
+                            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                            cmd.targetFlags = Menu::CommandID::JoinNameNode;
+                            cmd.action = [](xy::Entity e, float)
+                            {
+                                e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                            };
+                            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                        }
+                        else
+                        {
+                            m_sharedData.error = "Could not connect to server: attempt timed out";
+                            requestStackPush(StateID::Error);
+                        }
                     }
                 }
             });
@@ -990,15 +1059,9 @@ void MenuState::loadSettings()
 {
     auto settingsPath = xy::FileSystem::getConfigDirectory(getContext().appInstance.getApplicationName());
     
-    //if settings not found set some default values
-    if (!xy::FileSystem::fileExists(settingsPath + NameFile))
+    auto readFile = [](const std::string& src, sf::String& dst)
     {
-        m_sharedData.clientName = names[xy::Util::Random::value(0, names.size() - 1)];
-    }
-    else
-    {
-        //TODO wrap in a function so can nicely repeat for IP address
-        std::ifstream file(settingsPath + NameFile, std::ios::binary);
+        std::ifstream file(src, std::ios::binary);
         if (file.is_open() && file.good())
         {
             file.seekg(0, file.end);
@@ -1009,8 +1072,22 @@ void MenuState::loadSettings()
             file.read(buffer.data(), fileSize);
             file.close();
 
-            m_sharedData.clientName = sf::String::fromUtf32(buffer.begin(), buffer.end());
+            std::vector<sf::Uint32> converted(fileSize / sizeof(sf::Uint32));
+            std::memcpy(converted.data(), buffer.data(), fileSize);
+
+            dst = sf::String::fromUtf32(converted.begin(), converted.end());
         }
+    };
+
+
+    //if settings not found set some default values
+    if (!xy::FileSystem::fileExists(settingsPath + NameFile))
+    {
+        m_sharedData.clientName = names[xy::Util::Random::value(0, names.size() - 1)];
+    }
+    else
+    {
+        readFile(settingsPath + NameFile, m_sharedData.clientName);
     }
 
     if (!xy::FileSystem::fileExists(settingsPath + AddressFile))
@@ -1019,7 +1096,7 @@ void MenuState::loadSettings()
     }
     else
     {
-
+        readFile(settingsPath + AddressFile, m_sharedData.remoteIP);
     }
 }
 
@@ -1031,7 +1108,7 @@ void MenuState::saveSettings()
     if (file.is_open() && file.good())
     {
         auto codePoints = m_sharedData.clientName.toUtf32();
-        //file.write(reinterpret_cast<char*>(codePoints.data()), codePoints.size() * sizeof(sf::Uint32));
+        file.write(reinterpret_cast<char*>(codePoints.data()), codePoints.size() * sizeof(sf::Uint32));
         file.close();
     }
 
@@ -1039,7 +1116,7 @@ void MenuState::saveSettings()
     if (file.is_open() && file.good())
     {
         auto codePoints = m_sharedData.remoteIP.toUtf32();
-        //file.write(reinterpret_cast<char*>(codePoints.data()), codePoints.size() * sizeof(sf::Uint32));
+        file.write(reinterpret_cast<char*>(codePoints.data()), codePoints.size() * sizeof(sf::Uint32));
         file.close();
     }
 }

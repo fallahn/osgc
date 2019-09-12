@@ -28,6 +28,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/UIHitBox.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/Callback.hpp>
 
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
@@ -117,6 +118,29 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //player avatars
+    float xPos = 20.f;
+    const float xStride = (xy::DefaultSceneSize.x - (2 * xPos)) / 4.f;
+    xPos += (xStride / 2.f);
+    for (auto i = 0; i < 4; ++i)
+    {
+        //TODO character avatar as well as small icon/avatar
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xPos, 200.f);
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Centre);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function = [&, i](xy::Entity e, float)
+        {
+            e.getComponent<xy::Text>().setString(m_sharedData.clientInformation.getClient(i).name);
+        };
+        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+        //TODO add ready state checkbox
+
+        xPos += xStride;
+    }
+
     //seed text
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition);
@@ -126,18 +150,6 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::SeedText; //TODO move this to textbox text
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
     //TODO text input box
-
-    //friends text
-    entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::FriendsPosition);
-    entity.addComponent<xy::Text>(fineFont).setString("Friends Only");
-    entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
-    entity.addComponent<xy::Drawable>();
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-    
-    entity = addCheckbox();
-    entity.getComponent<xy::Transform>().setPosition(Menu::FriendsPosition.x + 360.f, Menu::FriendsPosition.y + 8.f);
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 xy::Entity MenuState::addCheckbox()

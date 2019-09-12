@@ -72,5 +72,7 @@ namespace PacketID
         SupPlayerInfo, //info supplied by client
         PlayerReadyState, //0 or 1 uint8
         DeliverPlayerInfo, //info of clients from the server (id, name string)
+        RejectClient, //0 server full, 1 game in progress
+        PlayerLeft, //player ID (not peer) so clients can default the avatar
     };
 }

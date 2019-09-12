@@ -79,7 +79,10 @@ private:
     sf::Clock m_serverTime;
     xy::NetHost m_host;
 
-    std::size_t m_maxPlayers;
+    std::size_t m_maxPlayers; //why is this a var? it's fixed at 4...
+
+    std::array<std::uint8_t, 4u> m_freeIDs = {};
+    std::size_t m_nextFreeID;
 
     bool pollNetwork(xy::NetEvent&);
 

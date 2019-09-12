@@ -74,7 +74,6 @@ private:
     void createScene();
     void setLobbyView();
 
-    void buildBrowser(sf::Font&);
     void buildLobby(sf::Font&);
     void buildOptions(sf::Font&);
 
@@ -84,9 +83,7 @@ private:
     xy::Entity addCheckbox();
 
     void sendPlayerData();
-
-    void refreshLobbyView(const xy::NetEvent&);
-    void refreshBrowserView();
+    void updateClientInfo(const xy::NetEvent&);
 
     void handlePacket(const xy::NetEvent&);
 
