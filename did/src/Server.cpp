@@ -83,6 +83,9 @@ void GameServer::stop()
 
         m_currentState.reset();
 
+        m_freeIDs = { 0,1,2,3, };
+        m_nextFreeID = 0;
+
         xy::Logger::log("Server Stopped.", xy::Logger::Type::Info);
     }
 }
@@ -140,18 +143,26 @@ void GameServer::clientConnect(const xy::NetEvent& evt)
 
 void GameServer::clientDisconnect(const xy::NetEvent& evt)
 {
-    auto playerID = m_sharedStateData.connectedClients[evt.peer.getID()].playerID;
+    //getting the ID will return 0 here, so we check the mapping
+    std::uint64_t peerID = 0;
+    for (const auto& [id, client] : m_sharedStateData.connectedClients)
+    {
+        if (client.peer == evt.peer)
+        {
+            peerID = id;
+            break;
+        }
+    }
+
+
+    auto playerID = m_sharedStateData.connectedClients[peerID].playerID;
     if (m_sharedStateData.connectedClients.size() > 1)
     {
         auto it = std::find(m_freeIDs.begin(), m_freeIDs.end(), playerID);
         *it = m_freeIDs[--m_nextFreeID];
         m_freeIDs[m_nextFreeID] = playerID;
     }
-    m_sharedStateData.connectedClients.erase(evt.peer.getID());
-    std::cout << "Erased " << evt.peer.getID() << "\n";
-
-    //TODO the peer ID is actually 0 at this point - so how do we know who disconnected?
-    //TODO if the host disconnected transfer ownership to next player..? Server ought to be dead by then though
+    m_sharedStateData.connectedClients.erase(peerID);
 
     auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
     msg->id = playerID;

@@ -29,9 +29,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/Sprite.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+
+#include <xyginext/graphics/SpriteSheet.hpp>
+
 
 void MenuState::buildLobby(sf::Font& font)
 {
@@ -76,8 +81,17 @@ void MenuState::buildLobby(sf::Font& font)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+            auto peerID = m_sharedData.netClient->getPeer().getID();
+
             //leave lobby
             m_sharedData.netClient->disconnect();
+
+            //stop the server if hosting
+            if (m_sharedData.clientInformation.getHostID() == peerID)
+            {
+                m_sharedData.gameServer->stop();
+                m_sharedData.clientInformation.setHostID(0);
+            }
 
             //quit our local server - does nothing if we're not host :)
             auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
@@ -120,13 +134,54 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);
+    std::array<std::string, 4u> spriteNames =
+    {
+        "player_one",
+        "player_two",
+        "player_three",
+        "player_four"
+    };
+
+    xy::SpriteSheet weaponSprites;
+    weaponSprites.loadFromFile("assets/sprites/weapons.spt", m_textureResource);
+    std::array<std::string, 4u> weaponNames =
+    {
+        "weapon_rodney",
+        "weapon_jean",
+        "weapon_rodney", "weapon_rodney"
+    };
+
+
     //player avatars
     float xPos = 20.f;
     const float xStride = (xy::DefaultSceneSize.x - (2 * xPos)) / 4.f;
     xPos += (xStride / 2.f);
     for (auto i = 0; i < 4; ++i)
     {
-        //TODO character avatar as well as small icon/avatar
+        //TODO small icon/avatar
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xPos, 280.f);
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(spriteNames[i]);
+        entity.addComponent<xy::SpriteAnimation>().play(spriteSheet.getAnimationIndex("idle_down", spriteNames[i]));
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+        entity.getComponent<xy::Transform>().setScale(5.f, 5.f);
+        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+        auto playerEnt = entity;
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        entity.addComponent<xy::Sprite>() = weaponSprites.getSprite(weaponNames[i]);
+        entity.addComponent<xy::SpriteAnimation>().play(weaponSprites.getAnimationIndex("sword_idle_front", weaponNames[i]));
+        auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
+        entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
+        playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos, 200.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);

@@ -41,6 +41,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
 
@@ -136,6 +137,11 @@ void MenuState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<SystemEvent>();
         if (data.action == SystemEvent::ServerStarted)
         {
+            for (auto i = 0; i < 4; ++i)
+            {
+                m_sharedData.clientInformation.resetClient(i);
+            }
+
             if (!m_sharedData.netClient->connected())
             {
                 if (m_sharedData.netClient->connect("127.0.0.1", Global::GamePort))
@@ -312,6 +318,7 @@ void MenuState::loadAssets()
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
+    m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
 
     m_gameScene.addSystem<xy::CommandSystem>(mb);
