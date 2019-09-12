@@ -37,15 +37,19 @@ void MenuState::sendPlayerData()
 void MenuState::updateClientInfo(const xy::NetEvent& evt)
 {
     auto size = evt.packet.getSize();
-    size = std::min(Global::MaxNameSize, size - sizeof(std::uint8_t));
+    size = std::min(Global::MaxNameSize, size - (sizeof(std::uint8_t) + sizeof(std::uint64_t)));
 
     std::uint8_t playerID = 0;
     std::memcpy(&playerID, evt.packet.getData(), sizeof(playerID));
 
+    std::uint64_t peerID = 0;
+    std::memcpy(&peerID, (char*)evt.packet.getData() + sizeof(playerID), sizeof(peerID));
+
     std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
-    std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(playerID), size);
+    std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(playerID) + sizeof(peerID), size);
 
     m_sharedData.clientInformation.getClient(playerID).name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+    m_sharedData.clientInformation.getClient(playerID).peerID = peerID;
 
     //TODO update avatar to show human player
 }

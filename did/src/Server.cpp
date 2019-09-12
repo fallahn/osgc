@@ -147,6 +147,9 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
     m_sharedStateData.connectedClients.erase(evt.peer.getID());
     std::cout << "Erased " << evt.peer.getID() << "\n";
 
+    //TODO the peer ID is actually 0 at this point - so how do we know who disconnected?
+    //TODO if the host disconnected transfer ownership to next player..? Server ought to be dead by then though
+
     auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
     msg->id = playerID;
     msg->type = ServerEvent::ClientDisconnected;

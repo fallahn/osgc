@@ -29,6 +29,8 @@ struct ClientInfo final
 {
     sf::String name;
     sf::Texture avatar;
+    std::uint64_t peerID = 0;
+    bool ready = true;
 };
 
 class ClientInfoManager final
@@ -41,7 +43,11 @@ public:
 
     void resetClient(std::int32_t);
 
+    void setHostID(std::uint64_t id) { m_host = id; }
+    std::uint64_t getHostID() const { return m_host; }
+
 private:
     sf::Image m_defaultImage;
     std::array<ClientInfo, 4u> m_clientInfo;
+    std::uint64_t m_host;
 };

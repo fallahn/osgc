@@ -70,9 +70,11 @@ namespace PacketID
         StartGame, //lobby host wants server to start the game
         ReqPlayerInfo, //ask client for player data
         SupPlayerInfo, //info supplied by client
-        PlayerReadyState, //0 or 1 uint8
+        SetReadyState, //0 or 1 uint8
+        GetReadyState, //2 bytes, playerID, ready status
         DeliverPlayerInfo, //info of clients from the server (id, name string)
         RejectClient, //0 server full, 1 game in progress
         PlayerLeft, //player ID (not peer) so clients can default the avatar
+        HostID, //peerID of lobby host
     };
 }

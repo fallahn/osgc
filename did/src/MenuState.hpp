@@ -39,6 +39,11 @@ namespace xy
     struct NetEvent;
 }
 
+struct Checkbox final
+{
+    std::uint8_t playerID = 0;
+};
+
 class MenuState final : public xy::State
 {
 public:
@@ -80,7 +85,7 @@ private:
     void buildNameEntry(sf::Font&);
     void buildJoinEntry(sf::Font&);
 
-    xy::Entity addCheckbox();
+    xy::Entity addCheckbox(std::uint8_t);
 
     void sendPlayerData();
     void updateClientInfo(const xy::NetEvent&);

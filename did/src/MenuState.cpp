@@ -342,24 +342,14 @@ void MenuState::loadAssets()
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            //check we're host and allowed to do this
-            if (true) //TODO check we're the owner (friend only will probably go away anyway)
-            {
-                auto checked = entity.getComponent<std::uint8_t>() == 0 ? 1 : 0;
-                entity.getComponent<std::uint8_t>() = checked;
+            auto& cb = entity.getComponent<Checkbox>();
+            auto& client = m_sharedData.clientInformation.getClient(cb.playerID);
 
-                auto bounds = entity.getComponent<xy::Sprite>().getTextureRect();
-                if (checked)
-                {
-                    bounds.top = bounds.height;
-                    //TODO set friends only
-                }
-                else
-                {
-                    bounds.top = 0.f;
-                    //TODO set public ... except of course there's no match making!
-                }
-                entity.getComponent<xy::Sprite>().setTextureRect(bounds);
+            if (client.peerID == m_sharedData.netClient->getPeer().getID())
+            {
+                //this is us, we're allowed to change
+                client.ready = !client.ready;
+                m_sharedData.netClient->sendPacket(PacketID::SetReadyState, client.ready ? std::uint8_t(1) : std::uint8_t(0), xy::NetFlag::Reliable);
             }
         }
     });
@@ -677,6 +667,10 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
     switch (evt.packet.getID())
     {
     default: break;
+    case PacketID::HostID:
+        m_sharedData.clientInformation.setHostID(evt.packet.as<std::uint64_t>());
+        //TODO update the 'start' button if we're hosting
+        break;
     case PacketID::RejectClient:
     {
         auto reason = evt.packet.as<std::uint8_t>();
@@ -731,6 +725,13 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         break;
     case PacketID::PlayerLeft:
         m_sharedData.clientInformation.resetClient(evt.packet.as<std::uint8_t>());
+        break;
+    case PacketID::GetReadyState:
+    {
+        std::uint16_t data = evt.packet.as<std::uint16_t>();
+        std::uint8_t playerID = (data >> 8) & 0xff;
+        m_sharedData.clientInformation.getClient(playerID).ready = (data & 0xff);
+    }
         break;
     }
 }

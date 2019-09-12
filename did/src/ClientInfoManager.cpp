@@ -30,6 +30,7 @@ namespace
 }
 
 ClientInfoManager::ClientInfoManager()
+    : m_host(0)
 {
     m_defaultImage.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/default_player.png");
     
@@ -57,6 +58,8 @@ void ClientInfoManager::resetClient(std::int32_t idx)
     auto& client = m_clientInfo[idx];
     client.name = Global::PlayerNames[idx];
     client.avatar.loadFromImage(m_defaultImage);
+    client.peerID = 0;
+    client.ready = true; //makes no actual odds, but looks like CPU players are ready
 }
 
 //private

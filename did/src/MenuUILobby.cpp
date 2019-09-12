@@ -76,9 +76,10 @@ void MenuState::buildLobby(sf::Font& font)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            //TODO leave lobby
+            //leave lobby
+            m_sharedData.netClient->disconnect();
 
-            //quit our local server
+            //quit our local server - does nothing if we're not host :)
             auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
             msg->action = SystemEvent::RequestStopServer;
 
@@ -129,6 +130,7 @@ void MenuState::buildLobby(sf::Font& font)
         entity.addComponent<xy::Transform>().setPosition(xPos, 200.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
         entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Centre);
+        entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().function = [&, i](xy::Entity e, float)
         {
@@ -136,7 +138,18 @@ void MenuState::buildLobby(sf::Font& font)
         };
         parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-        //TODO add ready state checkbox
+        //add ready state checkbox
+        entity = addCheckbox(i);
+        entity.getComponent<xy::Transform>().setPosition(xPos + 80.f, 740.f); //TODO const some position values
+        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xPos + 60.f, 740.f);
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Right);
+        entity.getComponent<xy::Text>().setString("Ready");
+        entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
+        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         xPos += xStride;
     }
@@ -152,17 +165,35 @@ void MenuState::buildLobby(sf::Font& font)
     //TODO text input box
 }
 
-xy::Entity MenuState::addCheckbox()
+xy::Entity MenuState::addCheckbox(std::uint8_t playerID)
 {
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Checkbox];
-    entity.addComponent<std::uint8_t>() = 0; //this is in lieu of a bool, we might replace this with a proper struct
+    entity.addComponent<Checkbox>().playerID = playerID;
 
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] = m_callbackIDs[Menu::CallbackID::CheckboxClicked];
+
+    //callback updates appearance based on current status
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float)
+    {
+        auto checked = m_sharedData.clientInformation.getClient(e.getComponent<Checkbox>().playerID).ready;
+        auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
+        if (checked)
+        {
+            bounds.top = bounds.height;
+        }
+        else
+        {
+            bounds.top = 0.f;
+        }
+        e.getComponent<xy::Sprite>().setTextureRect(bounds);
+    };
 
     return entity;
 }

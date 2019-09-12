@@ -103,7 +103,7 @@ namespace Global
         sf::String("Helena Squinteye"),
         sf::String("Barnacle Lars")
     };
-    static const std::size_t MaxNameSize = 80 * sizeof(sf::Uint32); //because utf32
+    static const std::size_t MaxNameSize = 40 * sizeof(sf::Uint32); //because utf32
 
     static const std::array<sf::Color, 4u> PlayerColours = 
     {
@@ -127,7 +127,7 @@ namespace Global
     //point values
     static const std::uint16_t TreasureValue = 40;
 
-    //network stuff - TODO ths should probably be an enum
+    //network stuff - TODO this should probably be an enum
     static const std::size_t NetworkChannels = 4;
     static const std::uint8_t AnimationChannel = 1;
     static const std::uint8_t ReliableChannel = 2;

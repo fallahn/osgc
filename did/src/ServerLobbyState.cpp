@@ -97,6 +97,16 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         broadcastClientInfo();
     }
         break;
+    case PacketID::SetReadyState:
+    {
+        auto ready = evt.packet.as<std::uint8_t>();
+        m_sharedData.connectedClients[evt.peer.getID()].ready = (ready == 1);
+
+        std::uint16_t data = m_sharedData.connectedClients[evt.peer.getID()].playerID << 8;
+        data |= ready;
+        m_sharedData.gameServer->broadcastData(PacketID::GetReadyState, data, xy::NetFlag::Reliable);
+    }
+        break;
     }
 }
 
@@ -125,11 +135,23 @@ void LobbyState::broadcastClientInfo()
     for (const auto& [id, client] : m_sharedData.connectedClients)
     {
         auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
-        std::vector<char> buffer(sizeof(client.playerID) + size);
+        std::vector<char> buffer(sizeof(client.playerID) + sizeof(id) + size);
 
         std::memcpy(buffer.data(), &client.playerID, sizeof(client.playerID));
-        std::memcpy(buffer.data() + sizeof(client.playerID), client.name.getData(), size);
+        std::memcpy(buffer.data() + sizeof(client.playerID), &id, sizeof(id));
+        std::memcpy(buffer.data() + sizeof(client.playerID) + sizeof(id), client.name.getData(), size);
 
-        m_sharedData.gameServer->broadcastData(PacketID::DeliverPlayerInfo, buffer.data(), std::size_t(size + sizeof(client.playerID)), xy::NetFlag::Reliable);
+        m_sharedData.gameServer->broadcastData(PacketID::DeliverPlayerInfo, buffer.data(), buffer.size(), xy::NetFlag::Reliable);
+
+        //client ready state
+        std::uint16_t data = client.playerID << 8;
+        if (client.ready)
+        {
+            data |= 1;
+        }
+        m_sharedData.gameServer->broadcastData(PacketID::GetReadyState, data, xy::NetFlag::Reliable);
     }
+
+    //broadcast host peerid
+    m_sharedData.gameServer->broadcastData(PacketID::HostID, m_sharedData.hostClient.getID(), xy::NetFlag::Reliable);
 }
