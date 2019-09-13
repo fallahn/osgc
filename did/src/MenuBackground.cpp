@@ -33,6 +33,7 @@ namespace
     sf::Shader* seaShader = nullptr;
     sf::Shader* skyShader = nullptr;
     sf::Shader* planeShader = nullptr;
+    sf::Shader* landShader = nullptr;
 
     xy::Entity camEnt;
 }
@@ -44,6 +45,10 @@ void MenuState::createBackground()
     skyShader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
     planeShader = &m_shaderResource.get(ShaderID::PlaneShader);
     planeShader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
+    landShader = &m_shaderResource.get(ShaderID::LandShader);
+    landShader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
+    landShader->setUniform("u_sunDirection", sf::Glsl::Vec3(1.f, 1.f, 1.f));
+    landShader->setUniform("u_normalTexture", m_textureResource.get("assets/images/menu_island_normal.png"));
 
     //sky
     auto entity = m_gameScene.createEntity();
@@ -66,10 +71,10 @@ void MenuState::createBackground()
 
     //island
     entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setScale(2.f, 2.f);
-    entity.addComponent<xy::Drawable>().setDepth(-9999);
-    entity.getComponent<xy::Drawable>().setShader(planeShader);
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(-9998);
+    entity.getComponent<xy::Drawable>().setShader(landShader);
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseTexture");
     entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/menu_island.png"));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 0.4f);
@@ -80,6 +85,25 @@ void MenuState::createBackground()
     {
         e.getComponent<xy::Transform>().rotate(3.f * dt);
     };
+
+
+    //waves
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setScale(2.1f, 2.1f);
+    entity.addComponent<xy::Drawable>().setDepth(-9999);
+    entity.getComponent<xy::Drawable>().setShader(planeShader);
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/menu_island_waves.png"));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 0.4f);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float dt)
+    {
+        e.getComponent<xy::Transform>().rotate(3.f * dt);
+    };
+
 
     //camera
     camEnt = m_gameScene.createEntity();
@@ -107,4 +131,7 @@ void MenuState::updateBackground(float dt)
     auto worldCam = sf::Glsl::Vec3(camera.worldPosition.x, camera.worldPosition.y, camera.worldPosition.z);
     planeShader->setUniform("u_viewProjection", viewProj);
     planeShader->setUniform("u_cameraWorldPosition", worldCam);
+
+    landShader->setUniform("u_viewProjection", viewProj);
+    landShader->setUniform("u_cameraWorldPosition", worldCam);
 }

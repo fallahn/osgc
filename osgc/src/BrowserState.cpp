@@ -216,6 +216,8 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
                 m_gameInstance.loadPlugin(path);
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            m_gameInstance.setArgsString("");
         }
     }
 

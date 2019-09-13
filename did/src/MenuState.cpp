@@ -335,6 +335,7 @@ void MenuState::loadAssets()
     m_shaderResource.preload(ShaderID::SeaShader, "#version 120\n#define ROTATE\n" +  SeaFrag, sf::Shader::Fragment);
     m_shaderResource.preload(ShaderID::PlaneShader, "#version 120\n#define WORLDPOS\n" + GroundVertLit, SpriteFrag);
     m_shaderResource.preload(ShaderID::SkyShader, SkyFrag, sf::Shader::Fragment);
+    m_shaderResource.preload(ShaderID::LandShader, "#version 120\n" + GroundVertLit, GroundFrag);
 
     auto& mb = getContext().appInstance.getMessageBus();
     m_uiScene.addSystem<xy::AudioSystem>(mb);
