@@ -651,7 +651,7 @@ void GameState::loadResources()
     m_shaderResource.preload(ShaderID::SpriteShaderUnlitTextured, "#version 120\n#define CULL_FADE\n" + SpriteVertex, "#version 120\n#define TEXTURED\n" + UnlitSpriteFrag);
     m_shaderResource.preload(ShaderID::ShadowShader, GroundVert, ShadowFrag);
 
-    m_shaderResource.preload(ShaderID::SeaShader, SeaFrag, sf::Shader::Fragment);
+    m_shaderResource.preload(ShaderID::SeaShader, "#version 120\n" + SeaFrag, sf::Shader::Fragment);
     m_shaderResource.preload(ShaderID::PlaneShader, "#version 120\n#define WORLDPOS\n" + GroundVertLit, SpriteFrag);
     m_shaderResource.preload(ShaderID::LandShader, "#version 120\n" + GroundVertLit, GroundFrag);
     m_shaderResource.preload(ShaderID::SkyShader, SkyFrag, sf::Shader::Fragment);
@@ -719,11 +719,11 @@ void GameState::loadResources()
     camera.setView(view.getSize());
     camera.setViewport(view.getViewport());
 
-    float fov = 0.6f; //0.55f FOV
-    float aspect = 16.f / 9.f;
+    const float fov = 0.6f; //0.55f FOV
+    const float aspect = 16.f / 9.f;
     cameraEntity.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, aspect, 0.1f, 1536.f); 
     cameraEntity.getComponent<xy::Transform>().setPosition(Global::IslandSize / 2.f);
-    cameraEntity.getComponent<xy::AudioListener>().setDepth(Camera3D::height);
+    cameraEntity.getComponent<xy::AudioListener>().setDepth(Camera3D::DefaultHeight);
 
     //actually requires fov in X not Y
     m_gameScene.getSystem<Render3DSystem>().setFOV(fov * aspect);

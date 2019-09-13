@@ -27,6 +27,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/Resource.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
+
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include <array>
 
@@ -75,8 +79,14 @@ private:
     sf::String* m_activeString;
     void updateTextInput(const sf::Event&);
 
+    xy::ShaderResource m_shaderResource;
+    sf::RenderTexture m_seaBuffer;
+    sf::Sprite m_seaSprite;
+    void updateBackground(float);
+
     void loadAssets();
     void createScene();
+    void createBackground();
     void setLobbyView();
 
     void buildLobby(sf::Font&);

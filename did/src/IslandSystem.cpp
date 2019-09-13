@@ -49,6 +49,8 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
     m_planeShader   (nullptr),
     m_landShader    (nullptr),
     m_currentTexture(nullptr),
+    m_normalMap     (nullptr),
+    m_waveMap       (nullptr),
     m_seaTexture    (nullptr),
     m_sunsetShader  (nullptr)
 {

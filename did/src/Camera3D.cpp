@@ -120,9 +120,9 @@ void Camera3DSystem::process(float dt)
         }
         tx.setPosition(txPosition);
 
-        camera.worldPosition = glm::vec3(txPosition.x, Camera3D::height, txPosition.y);
+        camera.worldPosition = glm::vec3(txPosition.x, camera.height, txPosition.y);
         camera.viewMatrix = glm::translate(glm::mat4(1.f), camera.worldPosition);
-        camera.viewMatrix = glm::rotate(camera.viewMatrix, -0.06f, glm::vec3(1.f, 0.f, 0.f));
+        camera.viewMatrix = glm::rotate(camera.viewMatrix, camera.pitch, glm::vec3(1.f, 0.f, 0.f));
         camera.viewMatrix = glm::inverse(camera.viewMatrix);
 
         camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;

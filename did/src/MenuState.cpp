@@ -27,6 +27,9 @@ Copyright 2019 Matt Marchant
 #include "Packet.hpp"
 #include "PluginExport.hpp"
 #include "SliderSystem.hpp"
+#include "ResourceIDs.hpp"
+#include "Camera3D.hpp"
+#include "Sprite3D.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -60,6 +63,9 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
+#include "IslandShaders.inl"
+#include "SpriteShader.inl"
+
     const sf::Vector2f MenuStart = { 40.f, 600.f };
     const float MenuSpacing = 80.f;
     const float PingTime = 1.f;
@@ -237,6 +243,8 @@ bool MenuState::update(float dt)
     }
 #endif //XY_DEBUG
 
+    updateBackground(dt);
+
     m_uiScene.update(dt);
     m_gameScene.update(dt);
 
@@ -252,6 +260,10 @@ bool MenuState::update(float dt)
 
 void MenuState::draw()
 {
+    m_seaBuffer.clear(sf::Color(0, 77, 179));
+    m_seaBuffer.draw(m_seaSprite, &m_shaderResource.get(ShaderID::SeaShader));
+    m_seaBuffer.display();
+
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
     rw.draw(m_uiScene);
@@ -314,6 +326,16 @@ void MenuState::updateTextInput(const sf::Event& evt)
 
 void MenuState::loadAssets()
 {
+    m_seaBuffer.create(static_cast<unsigned>(Global::IslandSize.x), static_cast<unsigned>(Global::IslandSize.y));
+    auto& seaTex = m_textureResource.get("assets/images/sea.png");
+    seaTex.setRepeated(true);
+    m_seaSprite.setTexture(seaTex);
+    m_seaSprite.setTextureRect({ 0, 0, static_cast<int>(m_seaBuffer.getSize().x), static_cast<int>(m_seaBuffer.getSize().y) });
+
+    m_shaderResource.preload(ShaderID::SeaShader, "#version 120\n#define ROTATE\n" +  SeaFrag, sf::Shader::Fragment);
+    m_shaderResource.preload(ShaderID::PlaneShader, "#version 120\n#define WORLDPOS\n" + GroundVertLit, SpriteFrag);
+    m_shaderResource.preload(ShaderID::SkyShader, SkyFrag, sf::Shader::Fragment);
+
     auto& mb = getContext().appInstance.getMessageBus();
     m_uiScene.addSystem<xy::AudioSystem>(mb);
     m_uiScene.addSystem<xy::UISystem>(mb);
@@ -329,6 +351,7 @@ void MenuState::loadAssets()
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
+    m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
 
     xy::SpriteSheet spriteSheet;
@@ -453,6 +476,8 @@ void MenuState::createScene()
     auto& camera = cameraEntity.getComponent<xy::Camera>();
     camera.setView(view.getSize());
     camera.setViewport(view.getViewport());
+
+    createBackground();
 
     auto& font = m_fontResource.get(Global::TitleFont);
     auto parentEntity = m_uiScene.createEntity();
@@ -805,6 +830,8 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_uiScene.createEntity();
@@ -965,6 +992,8 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_uiScene.createEntity();

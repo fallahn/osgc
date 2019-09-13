@@ -224,7 +224,7 @@ void main()
 //if anyone knows who this should be credited to let me know...
 static const std::string SeaFrag =
 R"(
-#version 120
+
 
 uniform float u_time;
 uniform sampler2D u_texture;
@@ -340,6 +340,16 @@ float rand(vec2 uv)
 void main()
 {
     vec2 uv = gl_TexCoord[0].xy + u_textureOffset;
+#if defined(ROTATE)
+    vec2 mid = vec2(0.5, 0.5);
+    float rotation = u_time * 0.04;
+
+    uv = vec2(
+      cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
+      cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
+    );
+
+#endif
     vec3 pos = vec3(uv * vec2(3.0, 1.0) - vec2(u_time * 0.03, 0.0), u_time * 0.01);
    
     float n = s_step(0.6, 1.0, snoise(pos * 60.0)) * 10.0;

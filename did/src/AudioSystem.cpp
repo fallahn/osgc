@@ -50,7 +50,7 @@ void AudioSystem::process(float dt)
     auto listenerPos = listenerEnt.getComponent<xy::Transform>().getWorldTransform().transformPoint({});
     const auto& listener = listenerEnt.getComponent<xy::AudioListener>();
 
-    sf::Listener::setPosition({ listenerPos.x, Camera3D::height, listenerPos.y - (Global::PlayerCameraOffset / 2.f) });
+    sf::Listener::setPosition({ listenerPos.x, Camera3D::DefaultHeight, listenerPos.y - (Global::PlayerCameraOffset / 2.f) });
     sf::Listener::setGlobalVolume(listener.getVolume() * xy::AudioMixer::getMasterVolume() * 100.f);
 
     auto& entities = getEntities();

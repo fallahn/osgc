@@ -30,9 +30,13 @@ struct Camera3D final
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 viewProjectionMatrix;
-    static constexpr float height = 40.f;
     glm::vec3 worldPosition;
     float shakeAmount = 0.f;
+
+    static constexpr float DefaultHeight = 40.f;
+    float pitch = -0.06f; //radians
+    float height = DefaultHeight;
+
     xy::Entity target;
 };
 
