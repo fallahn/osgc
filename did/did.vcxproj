@@ -310,6 +310,7 @@
     <ClInclude Include="src\SimpleShadowSystem.hpp" />
     <ClInclude Include="src\SkeletonSystem.hpp" />
     <ClInclude Include="src\SkullShieldSystem.hpp" />
+    <ClInclude Include="src\SliderSystem.hpp" />
     <ClInclude Include="src\SoundEffectsDirector.hpp" />
     <ClInclude Include="src\SpringFlower.hpp" />
     <ClInclude Include="src\Sprite3D.hpp" />
@@ -407,6 +408,7 @@
     <ClCompile Include="src\SimpleShadowSystem.cpp" />
     <ClCompile Include="src\SkeletonSystem.cpp" />
     <ClCompile Include="src\SkullShieldSystem.cpp" />
+    <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\SoundEffectsDirector.cpp" />
     <ClCompile Include="src\SpringFlower.cpp" />
     <ClCompile Include="src\Sprite3DSystem.cpp" />

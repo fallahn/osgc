@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "NetworkClient.hpp"
 #include "SharedStateData.hpp"
 #include "Packet.hpp"
+#include "SliderSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -48,6 +49,7 @@ void MenuState::buildLobby(sf::Font& font)
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
     parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::LobbyNode;
+    parentEntity.addComponent<Slider>().speed = Menu::SliderSpeed;
 
     //back button
     auto entity = m_uiScene.createEntity();
@@ -64,13 +66,15 @@ void MenuState::buildLobby(sf::Font& font)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+            parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
+            parentEntity.getComponent<Slider>().active = true;
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::MainNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition({});
+                e.getComponent<Slider>().target = {};
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -81,21 +85,19 @@ void MenuState::buildLobby(sf::Font& font)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-            auto peerID = m_sharedData.netClient->getPeer().getID();
-
             //leave lobby
             m_sharedData.netClient->disconnect();
 
             //stop the server if hosting
-            if (m_sharedData.clientInformation.getHostID() == peerID)
+            if (m_sharedData.gameServer->running())
             {
                 m_sharedData.gameServer->stop();
                 m_sharedData.clientInformation.setHostID(0);
             }
 
             //quit our local server - does nothing if we're not host :)
-            auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
-            msg->action = SystemEvent::RequestStopServer;
+            /*auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
+            msg->action = SystemEvent::RequestStopServer;*/
 
             m_pingServer = false;
         }

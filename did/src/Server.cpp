@@ -154,7 +154,6 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
         }
     }
 
-
     auto playerID = m_sharedStateData.connectedClients[peerID].playerID;
     if (m_sharedStateData.connectedClients.size() > 1)
     {
@@ -163,6 +162,8 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
         m_freeIDs[m_nextFreeID] = playerID;
     }
     m_sharedStateData.connectedClients.erase(peerID);
+
+    xy::Logger::log(std::to_string(peerID) + " disconnected", xy::Logger::Type::Info);
 
     auto* msg = m_messageBus.post<ServerEvent>(MessageID::ServerMessage);
     msg->id = playerID;

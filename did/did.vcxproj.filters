@@ -348,6 +348,9 @@
     <ClInclude Include="src\ServerGameState.hpp">
       <Filter>Header Files\server</Filter>
     </ClInclude>
+    <ClInclude Include="src\SliderSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FoliageGenerator.cpp">
@@ -589,6 +592,9 @@
     </ClCompile>
     <ClCompile Include="src\ServerGameState.cpp">
       <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SliderSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

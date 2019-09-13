@@ -66,6 +66,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/SimpleShadowSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SkeletonSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SkullShieldSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SpringFlower.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp

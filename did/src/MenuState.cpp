@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include "PacketTypes.hpp"
 #include "Packet.hpp"
 #include "PluginExport.hpp"
+#include "SliderSystem.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -151,14 +152,16 @@ void MenuState::handleMessage(const xy::Message& msg)
                     cmd.targetFlags = Menu::CommandID::LobbyNode;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<xy::Transform>().setPosition({});
+                        e.getComponent<Slider>().target = {};
+                        e.getComponent<Slider>().active = true;
                     };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
                     cmd.targetFlags = Menu::CommandID::HostNameNode;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                        e.getComponent<Slider>().target = Menu::OffscreenPosition;
+                        e.getComponent<Slider>().active = true;
                     };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
@@ -316,6 +319,7 @@ void MenuState::loadAssets()
     m_uiScene.addSystem<xy::UISystem>(mb);
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
+    m_uiScene.addSystem<SliderSystem>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
@@ -453,6 +457,7 @@ void MenuState::createScene()
     auto& font = m_fontResource.get(Global::TitleFont);
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>();
+    parentEntity.addComponent<Slider>().speed = Menu::SliderSpeed;
     parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::MainNode;
     parentEntity.addComponent<xy::AudioEmitter>().setSource("assets/sound/music/menu.ogg");
     parentEntity.getComponent<xy::AudioEmitter>().setChannel(MixerChannel::Music);
@@ -491,14 +496,16 @@ void MenuState::createScene()
             cmd.targetFlags = Menu::CommandID::MainNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                e.getComponent<Slider>().target = Menu::OffscreenPosition;
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
             cmd.targetFlags = Menu::CommandID::HostNameNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition({});
+                e.getComponent<Slider>().target = {};
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -536,14 +543,16 @@ void MenuState::createScene()
             cmd.targetFlags = Menu::CommandID::MainNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                e.getComponent<Slider>().target = Menu::OffscreenPosition;
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
             cmd.targetFlags = Menu::CommandID::JoinNameNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition({});
+                e.getComponent<Slider>().target = {};
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -583,13 +592,15 @@ void MenuState::createScene()
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+            parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
+            parentEntity.getComponent<Slider>().active = true;
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::OptionsNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition({});
+                e.getComponent<Slider>().target = {};
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -760,6 +771,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     auto parentEnt = m_uiScene.createEntity();
     parentEnt.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
     parentEnt.addComponent<xy::CommandTarget>().ID = Menu::CommandID::HostNameNode;
+    parentEnt.addComponent<Slider>().speed = Menu::SliderSpeed;
 
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
@@ -822,13 +834,15 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
             {
                 if (flags & xy::UISystem::Flags::LeftMouse)
                 {
-                    parentEnt.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                    parentEnt.getComponent<Slider>().target = Menu::OffscreenPosition;
+                    parentEnt.getComponent<Slider>().active = true;
 
                     xy::Command cmd;
                     cmd.targetFlags = Menu::CommandID::MainNode;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<xy::Transform>().setPosition({});
+                        e.getComponent<Slider>().target = {};
+                        e.getComponent<Slider>().active = true;
                     };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -884,6 +898,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     auto parentEnt = m_uiScene.createEntity();
     parentEnt.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
     parentEnt.addComponent<xy::CommandTarget>().ID = Menu::CommandID::JoinNameNode;
+    parentEnt.addComponent<Slider>().speed = Menu::SliderSpeed;
 
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
@@ -990,13 +1005,15 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
             {
                 if (flags & xy::UISystem::Flags::LeftMouse)
                 {
-                    parentEnt.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                    parentEnt.getComponent<Slider>().target = Menu::OffscreenPosition;
+                    parentEnt.getComponent<Slider>().active = true;
 
                     xy::Command cmd;
                     cmd.targetFlags = Menu::CommandID::MainNode;
                     cmd.action = [](xy::Entity e, float)
                     {
-                        e.getComponent<xy::Transform>().setPosition({});
+                        e.getComponent<Slider>().target = {};
+                        e.getComponent<Slider>().active = true;
                     };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -1052,14 +1069,16 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
                             cmd.targetFlags = Menu::CommandID::LobbyNode;
                             cmd.action = [](xy::Entity e, float)
                             {
-                                e.getComponent<xy::Transform>().setPosition({});
+                                e.getComponent<Slider>().target = {};
+                                e.getComponent<Slider>().active = true;
                             };
                             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
                             cmd.targetFlags = Menu::CommandID::JoinNameNode;
                             cmd.action = [](xy::Entity e, float)
                             {
-                                e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+                                e.getComponent<Slider>().target = Menu::OffscreenPosition;
+                                e.getComponent<Slider>().active = true;
                             };
                             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                         }

@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "MenuState.hpp"
 #include "GlobalConsts.hpp"
+#include "SliderSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -38,6 +39,7 @@ void MenuState::buildOptions(sf::Font& font)
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
     parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::OptionsNode;
+    parentEntity.addComponent<Slider>().speed = Menu::SliderSpeed;
 
     //back button
     auto entity = m_uiScene.createEntity();
@@ -53,13 +55,15 @@ void MenuState::buildOptions(sf::Font& font)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
-            parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+            parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
+            parentEntity.getComponent<Slider>().active = true;
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::MainNode;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Transform>().setPosition({});
+                e.getComponent<Slider>().target = {};
+                e.getComponent<Slider>().active = true;
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
