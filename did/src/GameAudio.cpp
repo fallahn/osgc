@@ -96,6 +96,7 @@ void GameState::loadAudio()
         xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, Global::IslandSize.x - (JungleOffset * 2.f), Global::IslandSize.y - (JungleOffset * 2.f) }, 128.f, 9);
 
     as.loadFromFile("assets/sound/jungle.xas");
+
     std::size_t parrotIndex = 0;
     for (auto i = 0u; i < points.size(); ++i)
     {
@@ -177,4 +178,22 @@ void GameState::loadAudio()
     entity.addComponent<xy::AudioEmitter>() = as.getEmitter("rain");
     entity.getComponent<xy::AudioEmitter>().setVolume(0.f);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::RainSound | CommandID::LoopedSound;
+
+    //day/night music
+    as.loadFromFile("assets/sound/music.xas");
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::AudioEmitter>() = as.getEmitter("music_day");
+    //default volume for fading back in again
+    entity.addComponent<float>() = entity.getComponent<xy::AudioEmitter>().getVolume();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::DaySound | CommandID::LoopedSound;
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::AudioEmitter>() = as.getEmitter("music_night");
+    //default volume for fading back in again
+    entity.addComponent<float>() = entity.getComponent<xy::AudioEmitter>().getVolume();
+    entity.getComponent<xy::AudioEmitter>().setVolume(0.f);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::NightSound | CommandID::LoopedSound;
 }

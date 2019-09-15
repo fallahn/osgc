@@ -1,0 +1,20 @@
+audioscape
+{
+    emitter music_day
+    {
+        path = "assets/sound/music/day.ogg"
+        streaming = true
+        looped = true
+        volume = 0.12
+        mixer_channel = 1
+    }
+
+    emitter music_night
+    {
+        path = "assets/sound/music/night.ogg"
+        streaming = true
+        looped = true
+        volume = 0.15
+        mixer_channel = 1
+    }    
+}
