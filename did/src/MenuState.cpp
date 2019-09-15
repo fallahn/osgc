@@ -39,6 +39,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
+#include <xyginext/ecs/components/AudioListener.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
@@ -54,6 +55,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/network/NetData.hpp>
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
@@ -488,8 +490,14 @@ void MenuState::createScene()
     parentEntity.addComponent<xy::AudioEmitter>().setSource("assets/sound/music/menu.ogg");
     parentEntity.getComponent<xy::AudioEmitter>().setChannel(MixerChannel::Music);
     parentEntity.getComponent<xy::AudioEmitter>().setLooped(true);
-    parentEntity.getComponent<xy::AudioEmitter>().setVolume(0.15f);
+    parentEntity.getComponent<xy::AudioEmitter>().setVolume(0.05f);
     parentEntity.getComponent<xy::AudioEmitter>().play();
+
+    xy::AudioScape as(m_audioResource);
+    as.loadFromFile("assets/sound/beach.xas");
+    m_uiScene.getActiveListener().addComponent<xy::AudioEmitter>() = as.getEmitter("sea_night");
+    m_uiScene.getActiveListener().getComponent<xy::AudioEmitter>().play();
+    m_uiScene.getActiveListener().getComponent<xy::AudioListener>().setDepth(200.f);
 
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(40.f, 40.f);

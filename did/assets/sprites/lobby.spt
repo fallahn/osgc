@@ -12,4 +12,24 @@ sprite_sheet lobby
 	{
 		bounds = 64, 0, 64, 64
 	}
+
+    sprite player_one
+    {
+        bounds = 128, 0, 64, 64
+    }
+
+    sprite player_two
+    {
+        bounds = 192, 0, 64, 64
+    }
+
+    sprite player_three
+    {
+        bounds = 192, 64, 64, 64
+    }
+
+    sprite player_four
+    {
+        bounds = 128, 64, 64, 64
+    }
 }

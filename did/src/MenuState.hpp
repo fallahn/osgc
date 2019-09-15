@@ -67,6 +67,7 @@ private:
 
     xy::TextureResource m_textureResource;
     xy::FontResource m_fontResource;
+    xy::AudioResource m_audioResource;
 
     std::array<xy::Sprite, Menu::SpriteID::Count> m_sprites = {};
     std::array<sf::Uint32, Menu::CallbackID::Count> m_callbackIDs = {};

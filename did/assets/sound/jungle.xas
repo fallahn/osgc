@@ -5,9 +5,9 @@ audio_scape
 		path = "assets/sound/effects/jungle_day.wav"
 		streaming = true
 		looped = true
-		min_distance = 10
+		min_distance = 18
 		attenuation = 0.5
-		volume = 0.1
+		volume = 0.15
 	}
 
 	emitter jungle_night
@@ -15,9 +15,9 @@ audio_scape
 		path = "assets/sound/effects/jungle_night.wav"
 		streaming = true
 		looped = true
-		min_distance = 10
+		min_distance = 18
 		attenuation = 0.5
-		volume = 0.15
+		volume = 0.2
 	}
 
 	emitter parrots01

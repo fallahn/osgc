@@ -6,7 +6,7 @@ audio_scape beach
         streaming = true
         min_distance = 12
         attenuation = 0.75
-        volume = 1
+        volume = 2
         looped = true
     }
 
@@ -16,7 +16,7 @@ audio_scape beach
         streaming = true
         min_distance = 12
         attenuation = 0.75
-        volume = 1
+        volume = 2
         looped = true
     }
 
@@ -26,6 +26,7 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 
     emitter seagull02
@@ -34,6 +35,7 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 
     emitter seagull03
@@ -42,6 +44,7 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 
     emitter seagull04
@@ -50,6 +53,7 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 
     emitter seagull05
@@ -58,6 +62,7 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 
     emitter seagull06
@@ -66,6 +71,7 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 
     emitter seagull07
@@ -74,5 +80,6 @@ audio_scape beach
         streaming = false
         min_distance = 10
         attenuation = 0.8
+        volume = 2
     }
 }
