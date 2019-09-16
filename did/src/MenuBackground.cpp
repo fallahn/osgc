@@ -127,8 +127,8 @@ void MenuState::createBackground()
     //waves
     std::array<float, 3> offsets =
     {
-        0.f, ((Wave::MaxScale - Wave::MaxScale) * 0.6f),
-        ((Wave::MaxScale - Wave::MinScale) * 0.8f)
+        0.f, ((Wave::MaxScale - Wave::MaxScale) * 0.4f),
+        ((Wave::MaxScale - Wave::MinScale) * 0.7f)
     };
     for (auto i = 0; i < 3; ++i)
     {
@@ -174,6 +174,9 @@ void MenuState::createBackground()
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
         entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
 
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+
         auto rootPos = boatPos[i] - (Global::IslandSize / 2.f);
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().function =
@@ -207,12 +210,12 @@ void MenuState::createBackground()
 
     //finally.... some trees!
     const auto& treeTex = m_textureResource.get("assets/images/menu_trees.png");
-    auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 384.f, 384.f }, 80.f, 12);
+    auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 440.f, 430.f }, 60.f, 12);
 
     for (auto pos : positions)
     {
-        pos.x += 576.f;
-        pos.y += 576.f;
+        pos.x += 526.f;
+        pos.y += 526.f;
 
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(pos);
@@ -223,7 +226,13 @@ void MenuState::createBackground()
         entity.addComponent<Sprite3D>(m_matrixPool);
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+        
+        float scaleMod = xy::Util::Random::value(0.05f, 0.18f);
+        float scale = 0.35f + scaleMod;
+        entity.getComponent<xy::Transform>().setScale(scale, -scale);
+
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
 
         auto rootPos = pos - (Global::IslandSize / 2.f);
         entity.addComponent<xy::Callback>().active = true;

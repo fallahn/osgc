@@ -370,7 +370,7 @@ void DayNightSystem::process(float dt)
     cmd.targetFlags = CommandID::RainSound;
     cmd.action = [&](xy::Entity e, float)
     {
-        e.getComponent<xy::AudioEmitter>().setVolume(m_stormAmount * 0.01f);
+        e.getComponent<xy::AudioEmitter>().setVolume(m_stormAmount * 0.11f);
     };
     getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 

@@ -255,6 +255,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                     if (entity.getComponent<xy::AudioEmitter>().getStatus() != xy::AudioEmitter::Playing)
                     {
                         entity.getComponent<xy::AudioEmitter>().play();
+                        entity.getComponent<xy::AudioEmitter>().setVolume(20.f);
                     }
                     break;
                 }
@@ -263,7 +264,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 if (data.index == AnimationID::Barrel::Break)
                 {
                     playSound(m_audioResource.get(paths[BarrelBreak]),
-                        data.entity.getComponent<xy::Transform>().getPosition()).setVolume(2.f);
+                        data.entity.getComponent<xy::Transform>().getPosition()).setVolume(20.f);
                 }
                 else if (data.index == AnimationID::Barrel::Explode)
                 {
@@ -275,7 +276,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 if (data.index == AnimationID::Die)
                 {
                     playSound(m_audioResource.get(paths[DecoyDie]),
-                        data.entity.getComponent<xy::Transform>().getPosition()).setVolume(2.f);
+                        data.entity.getComponent<xy::Transform>().getPosition()).setVolume(20.f);
                 }
                 break;
             }
@@ -289,13 +290,13 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
                 auto& emitter = playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Pistol01, AudioID::Pistol06)]),
                     data.entity.getComponent<xy::Transform>().getWorldPosition());
-                emitter.setVolume(2.f);
+                emitter.setVolume(20.f);
                 emitter.setPitch(xy::Util::Random::value(0.8f, 1.3f));
             }
                 break;
             case Inventory::Shovel:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Dig01, AudioID::Dig03)]),
-                    data.entity.getComponent<xy::Transform>().getWorldPosition());
+                    data.entity.getComponent<xy::Transform>().getWorldPosition()).setVolume(5.f);
                 break;
             case Inventory::Sword:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Sword01, AudioID::Sword04)]),
@@ -314,15 +315,15 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default: break;
             case Actor::ID::Coin:
-                playSound(m_audioResource.get(paths[AudioID::CollectCoin]), data.position).setVolume(2.5f);
+                playSound(m_audioResource.get(paths[AudioID::CollectCoin]), data.position).setVolume(25.f);
                 break;
             case Actor::ID::Food:
-                playSound(m_audioResource.get(paths[AudioID::CollectFood]), data.position).setVolume(3.f);
+                playSound(m_audioResource.get(paths[AudioID::CollectFood]), data.position).setVolume(30.f);
                 break;
             case Actor::ID::Ammo:
             {
                 auto& emitter = playSound(m_audioResource.get(paths[AudioID::SwitchPistol]), data.position);
-                emitter.setVolume(3.f);
+                emitter.setVolume(30.f);
                 emitter.setPitch(1.3f);
             }
                 break;
@@ -331,7 +332,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
                 //scored in a boat I guess...
                 auto& emitter = playSound(m_audioResource.get(paths[AudioID::Scored]), data.position);
-                emitter.setVolume(3.f);
+                emitter.setVolume(30.f);
                 emitter.setAttenuation(2.f);
 
                 //triggerTimes[AudioID::Scored] = 0.5f;
@@ -379,7 +380,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             auto& emitter = playSound(m_audioResource.get(paths[xy::Util::Random::value(static_cast<int>(AudioID::Thunder01),
                 static_cast<int>(AudioID::Thunder03))]), data.position);
             
-            emitter.setVolume(data.value);
+            emitter.setVolume(data.value * 10.f); //tis a kludge for now (and probably forever...)
             emitter.setAttenuation(0.05f);
             emitter.setMinDistance(420.f);
         }
@@ -388,14 +389,14 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             auto& emitter = playSound(m_audioResource.get(paths[AudioID::LightningStrike]), data.position);
             emitter.setAttenuation(2.f);
             emitter.setMinDistance(4.f);
-            emitter.setVolume(2.5f);
+            emitter.setVolume(25.f);
         }
         else if (data.type == MapEvent::ItemInWater)
         {
             auto& emitter = playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Splash01, AudioID::Splash04)]), data.position);
             emitter.setAttenuation(2.f);
             emitter.setMinDistance(4.f);
-            emitter.setVolume(2.5f);
+            emitter.setVolume(25.f);
         }
         else if (data.type == MapEvent::Explosion)
         {
@@ -436,19 +437,19 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             default:break;
             case Actor::ID::PlayerOne:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::RodneySpawn01, AudioID::RodneySpawn02)]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerTwo:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::JeanSpawn01, AudioID::JeanSpawn02)]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerThree:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::HelenaSpawn01, AudioID::HelenaSpawn02)]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerFour:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::LarsSpawn01, AudioID::LarsSpawn02)]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             }
             break;
@@ -471,19 +472,19 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             default:break;
             case Actor::ID::PlayerOne:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::RodneyDie01, AudioID::RodneyDie04)]),
-                    position).setVolume(4.5f);
+                    position).setVolume(45.f);
                 break;
             case Actor::ID::PlayerTwo:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::JeanDie01, AudioID::JeanDie04)]),
-                    position).setVolume(4.5f);
+                    position).setVolume(45.f);
                 break;
             case Actor::ID::PlayerThree:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::HelenaDie01, AudioID::HelenaDie03)]),
-                    position).setVolume(4.5f);
+                    position).setVolume(45.f);
                 break;
             case Actor::ID::PlayerFour:
                 playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::LarsDie01, AudioID::LarsDie04)]),
-                    position).setVolume(4.5f);
+                    position).setVolume(45.f);
                 break;
             }
             break;
@@ -499,24 +500,24 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 default:break;
                 case Actor::ID::PlayerOne:
                     playSound(m_audioResource.get(paths[AudioID::RodneyScore01]),
-                        position).setVolume(4.5f);
+                        position).setVolume(45.f);
                     break;
                 case Actor::ID::PlayerTwo:
                     playSound(m_audioResource.get(paths[AudioID::JeanScore01]),
-                        position).setVolume(4.5f);
+                        position).setVolume(45.f);
                     break;
                 case Actor::ID::PlayerThree:
                     playSound(m_audioResource.get(paths[AudioID::HelenaScore01]),
-                        position).setVolume(4.5f);
+                        position).setVolume(45.f);
                     break;
                 case Actor::ID::PlayerFour:
                     playSound(m_audioResource.get(paths[AudioID::LarsScore01]),
-                        position).setVolume(4.5f);
+                        position).setVolume(45.f);
                     break;
                 }
 
                 auto& emitter = playSound(m_audioResource.get(paths[AudioID::Scored]), position);
-                emitter.setVolume(3.f);
+                emitter.setVolume(30.f);
                 emitter.setAttenuation(2.f);
             }
             break;
@@ -535,19 +536,19 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             default:break;
             case Actor::ID::PlayerOne:
                 playSound(m_audioResource.get(paths[AudioID::RodneyPickup01]), 
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerTwo:
                 playSound(m_audioResource.get(paths[AudioID::JeanPickup01]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerThree:
                 playSound(m_audioResource.get(paths[AudioID::HelenaPickup01]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerFour:
                 playSound(m_audioResource.get(paths[AudioID::LarsPickup01]),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(4.5f);
+                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             }
         }
@@ -608,7 +609,7 @@ xy::AudioEmitter& SFXDirector::playSound(sf::SoundBuffer& buffer, sf::Vector2f p
     //must reset values here incase they were changed prior to recycling from pool
     emitter.setAttenuation(1.f);
     emitter.setMinDistance(5.f);
-    emitter.setVolume(1.f);
+    emitter.setVolume(10.f);
     emitter.setPitch(1.f);
     emitter.play();
     return emitter;

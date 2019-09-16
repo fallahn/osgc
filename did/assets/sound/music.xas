@@ -5,7 +5,7 @@ audioscape
         path = "assets/sound/music/day.ogg"
         streaming = true
         looped = true
-        volume = 0.12
+        volume = 1.2
         mixer_channel = 1
     }
 
@@ -14,7 +14,7 @@ audioscape
         path = "assets/sound/music/night.ogg"
         streaming = true
         looped = true
-        volume = 0.15
+        volume = 20
         mixer_channel = 1
     }    
 }

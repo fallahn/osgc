@@ -640,6 +640,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::AudioEmitter>().setSource(m_audioResource.get("assets/sound/effects/bird_flight.wav"));
         entity.getComponent<xy::AudioEmitter>().setAttenuation(1.f);
         entity.getComponent<xy::AudioEmitter>().setMinDistance(20.f);
+        entity.getComponent<xy::AudioEmitter>().setVolume(9.f);
         return; //skip shadows
     case Actor::TreasureSpawn:
     case Actor::AmmoSpawn:

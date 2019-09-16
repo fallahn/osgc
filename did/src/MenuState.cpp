@@ -532,7 +532,7 @@ void MenuState::createScene()
     parentEntity.addComponent<xy::AudioEmitter>().setSource("assets/sound/music/menu.ogg");
     parentEntity.getComponent<xy::AudioEmitter>().setChannel(MixerChannel::Music);
     parentEntity.getComponent<xy::AudioEmitter>().setLooped(true);
-    parentEntity.getComponent<xy::AudioEmitter>().setVolume(0.05f);
+    parentEntity.getComponent<xy::AudioEmitter>().setVolume(0.5f);
     parentEntity.getComponent<xy::AudioEmitter>().play();
 
     xy::AudioScape as(m_audioResource);
@@ -545,6 +545,9 @@ void MenuState::createScene()
     entity.addComponent<xy::Transform>().setPosition(40.f, 40.f);
     entity.addComponent<xy::Text>(font).setString("Desert Island Duel");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour({ 234,181,68 });
+    entity.getComponent<xy::Text>().setOutlineColour({ 225,161,70 });
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
     

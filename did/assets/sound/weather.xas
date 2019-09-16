@@ -7,7 +7,7 @@ audio_scape weather
         min_distance = 512
         attenuation = 0.1
         looped = true
-        volume = 0.2
+        volume = 10
     }
 
     emitter thunder01
@@ -15,7 +15,7 @@ audio_scape weather
     	path = "assets/sound/effects/thunder01.wav"
     	streaming = false
     	min_distance = 5
-    	volume = 2
+    	volume = 20
     	attenuation = 1
     }
 
@@ -24,7 +24,7 @@ audio_scape weather
     	path = "assets/sound/effects/thunder02.wav"
     	streaming = false
     	min_distance = 5
-    	volume = 2
+    	volume = 20
     	attenuation = 1
     }
 
@@ -33,7 +33,7 @@ audio_scape weather
     	path = "assets/sound/effects/thunder03.wav"
     	streaming = false
     	min_distance = 5
-    	volume = 2
+    	volume = 20
     	attenuation = 1
     }
 }

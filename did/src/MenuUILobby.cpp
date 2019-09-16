@@ -292,7 +292,7 @@ void MenuState::buildLobby(sf::Font& font)
     //host icon
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(-100.f, -100.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Host];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
