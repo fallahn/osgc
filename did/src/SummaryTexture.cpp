@@ -46,12 +46,23 @@ namespace
         sf::Vector2f(1250.f, 452.f),
         sf::Vector2f(90.f, 452.f)
     };
+
+    std::array<sf::IntRect, 5u> AvatarRects =
+    {
+        sf::IntRect(128, 0, 64, 64),
+        sf::IntRect(192, 0, 64, 64),
+        sf::IntRect(192, 64, 64, 64),
+        sf::IntRect(128, 64, 64, 64),
+        sf::IntRect(0, 64, 64, 64)
+    };
 }
 
 SummaryTexture::SummaryTexture(xy::FontResource& fr)
     : m_font(fr.get(Global::FineFont))
 {
     m_texture.create(TextureWidth, TextureHeight);
+
+    m_avatarTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/lobby.png");
 }
 
 //public
@@ -85,7 +96,15 @@ void SummaryTexture::update(const RoundSummary& summary, const ClientInfoManager
         text.setPosition(NamePositions[i]);
         m_texture.draw(text);
 
-        sprite.setTexture(info.avatar);
+        sprite.setTexture(m_avatarTexture);
+        if (manager.getClient(i).peerID > 0)
+        {
+            sprite.setTextureRect(AvatarRects[i]);
+        }
+        else
+        {
+            sprite.setTextureRect(AvatarRects.back());
+        }
         sprite.setPosition(AvatarPositions[i]);
         m_texture.draw(sprite);
     }

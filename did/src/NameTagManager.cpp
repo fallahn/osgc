@@ -18,6 +18,7 @@ Copyright 2019 Matt Marchant
 
 #include "NameTagManager.hpp"
 #include "GlobalConsts.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/core/Log.hpp>
@@ -31,7 +32,7 @@ namespace
     const sf::Uint32 LabelHeight = 32;
 }
 
-NameTagManager::NameTagManager(xy::FontResource& fr)
+NameTagManager::NameTagManager(SharedData& sd, xy::FontResource& fr)
     : m_font(fr.get(Global::BoldFont))
 {
     for (auto i = 0u; i < m_textures.size(); ++i)
@@ -42,7 +43,7 @@ NameTagManager::NameTagManager(xy::FontResource& fr)
         }
         else
         {
-            updateName(Global::PlayerNames[i], i);
+            updateName(sd.clientInformation.getClient(i).name, i);
         }
     }
 }

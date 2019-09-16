@@ -33,10 +33,12 @@ namespace xy
     class FontResource;
 }
 
+struct SharedData;
+
 class NameTagManager final
 {
 public:
-    explicit NameTagManager(xy::FontResource&);
+    explicit NameTagManager(SharedData&, xy::FontResource&);
 
     const sf::Texture& getTexture(std::size_t) const;
     void updateName(const sf::String&, std::size_t);

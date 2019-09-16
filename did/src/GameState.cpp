@@ -118,7 +118,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_uiScene           (ctx.appInstance.getMessageBus()),
     m_sharedData        (sd),
     m_inputParser       (sd.inputBinding, *sd.netClient),
-    m_nameTagManager    (m_fontResource),
+    m_nameTagManager    (sd, m_fontResource),
     m_summaryTexture    (m_fontResource),
     m_miniMap           (m_textureResource),
     m_foliageGenerator  (m_textureResource, m_shaderResource, m_modelMatrices),

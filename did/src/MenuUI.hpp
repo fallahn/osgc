@@ -88,7 +88,11 @@ namespace Menu
         {
             Host,
             Checkbox,
-            BrowserItem,
+            PlayerOne,
+            PlayerTwo,
+            PlayerThree,
+            PlayerFour,
+            Bot,
             Count
         };
     }

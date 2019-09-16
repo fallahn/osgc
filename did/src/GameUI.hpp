@@ -61,6 +61,19 @@ namespace UI
         };
     }
 
+    namespace SpriteID
+    {
+        enum
+        {
+            PlayerOneIcon,
+            PlayerTwoIcon,
+            PlayerThreeIcon,
+            PlayerFourIcon,
+            Bot,
+            Count
+        };
+    }
+
     static const sf::Vector2f RoundScreenOffPosition(xy::DefaultSceneSize.x + 64.f, (xy::DefaultSceneSize.y - 768.f) / 2.f);
     static const sf::Vector2f RoundScreenOnPosition((xy::DefaultSceneSize.x - 1664.f) / 2.f, ((xy::DefaultSceneSize.y - 768.f) / 2.f) + 32.f);
     static const sf::Vector2f TreasureScorePosition(1664.f / 2.f, 80.f); //relative to scoreboard

@@ -61,6 +61,8 @@ namespace
     const sf::Vector2f AmmoTextPosition(AmmoPosition.x + 100.f, AmmoPosition.y + 6.f);
     const sf::Vector2f TreasureTextPosition(TreasurePosition.x + 100.f, AmmoTextPosition.y);
 
+    std::array<xy::Sprite, UI::SpriteID::Count> Avatars;
+
     const std::array<sf::Color, 4u> PlayerColours = 
     {
         sf::Color(128,25,8),
@@ -163,6 +165,14 @@ void GameState::loadUI()
 
 
     xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/lobby.spt", m_textureResource);
+    Avatars[UI::SpriteID::Bot] = spriteSheet.getSprite("bot_icon");
+    Avatars[UI::SpriteID::PlayerOneIcon] = spriteSheet.getSprite("player_one");
+    Avatars[UI::SpriteID::PlayerTwoIcon] = spriteSheet.getSprite("player_two");
+    Avatars[UI::SpriteID::PlayerThreeIcon] = spriteSheet.getSprite("player_three");
+    Avatars[UI::SpriteID::PlayerFourIcon] = spriteSheet.getSprite("player_four");
+
+
     spriteSheet.loadFromFile("assets/sprites/hud.spt", m_textureResource);
 
     //inventory display
@@ -244,24 +254,38 @@ void GameState::loadUI()
     for (int i = Actor::ID::PlayerOne; i <= Actor::ID::PlayerFour; ++i)
     {
         auto idx = i - Actor::ID::PlayerOne;
-        /*ConnectionState state;
-        state.actorID = static_cast<Actor::ID>(i);*/
-        const auto& avatar = m_sharedData.clientInformation.getClient(/*state*/idx);
 
         sf::Vector2f position(((xy::DefaultSceneSize.x / 4.f) * idx) + 20.f, 0.f);
 
+        //avatar
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(position);
-        entity.addComponent<xy::Sprite>(avatar.avatar);
+        entity.addComponent<xy::Sprite>() = Avatars[UI::SpriteID::Bot];
         entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [&, idx](xy::Entity e, float)
+        {
+            if (m_sharedData.clientInformation.getClient(idx).peerID > 0)
+            {
+                e.getComponent<xy::Sprite>().setTextureRect(Avatars[idx].getTextureRect());
+            }
+            else
+            {
+                e.getComponent<xy::Sprite>().setTextureRect(Avatars[UI::SpriteID::Bot].getTextureRect());
+            }
+        };
+
         controlTx.addChild(entity.getComponent<xy::Transform>());
 
+        //name
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(position + sf::Vector2f(84.f, 0.f));
         entity.addComponent<xy::Sprite>(m_nameTagManager.getTexture(idx));
         entity.addComponent<xy::Drawable>();
         controlTx.addChild(entity.getComponent<xy::Transform>());
 
+        //health bar
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(position + sf::Vector2f(84.f, 42.f));
         entity.addComponent<HealthBar>().colour = PlayerColours[idx];
@@ -271,6 +295,7 @@ void GameState::loadUI()
         entity.addComponent<std::uint32_t>() = i;
         controlTx.addChild(entity.getComponent<xy::Transform>());
 
+        //treasure icon
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setScale(0.5f, 0.5f);
         entity.getComponent<xy::Transform>().setPosition(position + sf::Vector2f(390.f, 10.f));
@@ -280,6 +305,7 @@ void GameState::loadUI()
         entity.addComponent<xy::CommandTarget>().ID = treasureIDs[idx];
         controlTx.addChild(entity.getComponent<xy::Transform>());
 
+        //dead icon
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setScale(2.f, 2.f);
         entity.getComponent<xy::Transform>().setPosition(position);

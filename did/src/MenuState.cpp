@@ -371,7 +371,13 @@ void MenuState::loadAssets()
     spriteSheet.loadFromFile("assets/sprites/lobby.spt", m_textureResource);
     m_sprites[Menu::SpriteID::Checkbox] = spriteSheet.getSprite("checkbox");
     m_sprites[Menu::SpriteID::Host] = spriteSheet.getSprite("host");
-    m_sprites[Menu::SpriteID::BrowserItem] = xy::Sprite(m_textureResource.get("assets/images/browser_item.png"));
+    m_sprites[Menu::SpriteID::Bot] = spriteSheet.getSprite("bot_icon");
+    m_sprites[Menu::SpriteID::PlayerOne] = spriteSheet.getSprite("player_one");
+    m_sprites[Menu::SpriteID::PlayerTwo] = spriteSheet.getSprite("player_two");
+    m_sprites[Menu::SpriteID::PlayerThree] = spriteSheet.getSprite("player_three");
+    m_sprites[Menu::SpriteID::PlayerFour] = spriteSheet.getSprite("player_four");
+
+    //m_sprites[Menu::SpriteID::BrowserItem] = xy::Sprite(m_textureResource.get("assets/images/browser_item.png"));
 
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
@@ -495,6 +501,13 @@ void MenuState::createScene()
     auto& font = m_fontResource.get(Global::TitleFont);
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>();
+
+    //if we're already connected to a game (ie we just finished one) hide this menu
+    if (m_sharedData.netClient->connected())
+    {
+        parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+    }
+
     parentEntity.addComponent<Slider>().speed = Menu::SliderSpeed;
     parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::MainNode;
     parentEntity.addComponent<xy::AudioEmitter>().setSource("assets/sound/music/menu.ogg");

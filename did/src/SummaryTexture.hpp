@@ -43,4 +43,5 @@ public:
 private:
     sf::RenderTexture m_texture;
     sf::Font& m_font;
+    sf::Texture m_avatarTexture;
 };

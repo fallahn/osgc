@@ -32,4 +32,9 @@ sprite_sheet lobby
     {
         bounds = 128, 64, 64, 64
     }
+
+    sprite bot_icon
+    {
+        bounds = 0, 64, 64, 64
+    }
 }

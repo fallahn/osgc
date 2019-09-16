@@ -47,7 +47,11 @@ void MenuState::buildLobby(sf::Font& font)
     auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
 
     auto parentEntity = m_uiScene.createEntity();
-    parentEntity.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+    parentEntity.addComponent<xy::Transform>();
+    if (!m_sharedData.netClient->connected()) //hide this until joining a game
+    {
+        parentEntity.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
+    }
     parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::LobbyNode;
     parentEntity.addComponent<Slider>().speed = Menu::SliderSpeed;
 
@@ -162,7 +166,27 @@ void MenuState::buildLobby(sf::Font& font)
     xPos += (xStride / 2.f);
     for (auto i = 0; i < 4; ++i)
     {
-        //TODO small icon/avatar
+        //small icon/avatar
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xPos - 160.f, 740.f);
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Bot];
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [&,i](xy::Entity e, float)
+        {
+            if (m_sharedData.clientInformation.getClient(i).peerID == 0)
+            {
+                e.getComponent<xy::Sprite>().setTextureRect(m_sprites[Menu::SpriteID::Bot].getTextureRect());
+            }
+            else
+            {
+                e.getComponent<xy::Sprite>().setTextureRect(m_sprites[Menu::SpriteID::PlayerOne + i].getTextureRect());
+            }
+        };
+        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+        //large avatar
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos, 280.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
