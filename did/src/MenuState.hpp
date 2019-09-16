@@ -79,6 +79,7 @@ private:
     bool m_gameLaunched;
 
     sf::String* m_activeString;
+    sf::String m_seedDisplayString;
     void updateTextInput(const sf::Event&);
 
 

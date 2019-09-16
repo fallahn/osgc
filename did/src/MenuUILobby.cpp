@@ -247,9 +247,47 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Text>(fineFont).setString("Seed: ");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::SeedText; //TODO move this to textbox text
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-    //TODO text input box
+
+    //text background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition.x + 130.f, Menu::SeedPosition.y);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/text_input.png"));
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseDown] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse //only editable if hosting
+                    && m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID())
+                {
+                    m_activeString = &m_seedDisplayString;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::SeedText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    auto position = entity.getComponent<xy::Transform>().getPosition();
+    position.x += bounds.width / 2.f;
+    position.y += bounds.height / 2.f;
+
+    //seed text
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 0.5f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.getComponent<xy::Drawable>().setCroppingArea({ -232.f, -30.f, 464.f, 120.f });
+    entity.addComponent<xy::Text>(font);// .setString(m_sharedData.clientName);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
+    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::SeedText;
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //host icon
     entity = m_uiScene.createEntity();

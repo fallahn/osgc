@@ -278,11 +278,22 @@ void MenuState::updateTextInput(const sf::Event& evt)
 {
     if (m_activeString != nullptr)
     {
-        std::size_t maxChar = (m_activeString == &m_sharedData.remoteIP)
-            ? 15 : Global::MaxNameSize / sizeof(sf::Uint32);
+        std::size_t maxChar = (m_activeString != &m_sharedData.remoteIP)
+            ? Global::MaxNameSize / sizeof(sf::Uint32) : 15;
 
-        std::uint32_t targetFlags = (m_activeString != &m_sharedData.clientName)
-            ? Menu::CommandID::IPText : Menu::CommandID::NameText;
+        std::uint32_t targetFlags = 0;
+        if (m_activeString == &m_sharedData.clientName) 
+        {
+            targetFlags = Menu::CommandID::NameText;
+        }
+        else if (m_activeString == &m_sharedData.remoteIP)
+        {
+            targetFlags = Menu::CommandID::IPText;
+        }
+        else
+        {
+            targetFlags = Menu::CommandID::SeedText;
+        }
 
         auto updateText = [&, targetFlags]()
         {
@@ -317,10 +328,18 @@ void MenuState::updateTextInput(const sf::Event& evt)
             }
             else if (evt.key.code == sf::Keyboard::Return)
             {
+                //send the seed if that's what we updated
+                if (m_activeString == &m_seedDisplayString)
+                {
+                    Server::SeedData sd;
+                    std::strcpy(sd.str, m_seedDisplayString.toAnsiString().c_str());
+                    m_sharedData.netClient->sendPacket(PacketID::SetSeed, sd, xy::NetFlag::Reliable);
+                }
+
                 m_activeString = nullptr;
 
                 xy::Command cmd;
-                cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText;
+                cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText | Menu::CommandID::SeedText;
                 cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                 m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
@@ -778,12 +797,13 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
     case PacketID::CurrentSeed:
     {
         m_sharedData.seedData = evt.packet.as<Server::SeedData>();
+        m_seedDisplayString = m_sharedData.seedData.str;
 
         xy::Command cmd;
         cmd.targetFlags = Menu::CommandID::SeedText;
-        cmd.action = [&](xy::Entity entity, float)
+        cmd.action = [&](xy::Entity e, float)
         {
-            entity.getComponent<xy::Text>().setString("Seed: " + std::string(m_sharedData.seedData.str));
+            e.getComponent<xy::Text>().setString(m_seedDisplayString);
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
