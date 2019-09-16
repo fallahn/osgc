@@ -88,6 +88,8 @@ private:
     sf::Sprite m_seaSprite;
     void updateBackground(float);
 
+    void updateHostInfo(std::uint64_t);
+
     void loadAssets();
     void createScene();
     void createBackground();

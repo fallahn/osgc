@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "SharedStateData.hpp"
 #include "Packet.hpp"
 #include "SliderSystem.hpp"
+#include "MenuUI.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -38,6 +39,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 
+namespace
+{
+    
+}
 
 void MenuState::buildLobby(sf::Font& font)
 {
@@ -188,7 +193,7 @@ void MenuState::buildLobby(sf::Font& font)
 
         //large avatar
         entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xPos, 280.f);
+        entity.addComponent<xy::Transform>().setPosition(xPos, 330.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
         entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(spriteNames[i]);
         entity.addComponent<xy::SpriteAnimation>().play(spriteSheet.getAnimationIndex("idle_down", spriteNames[i]));
@@ -245,6 +250,16 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::SeedText; //TODO move this to textbox text
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
     //TODO text input box
+
+    //host icon
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(-100.f, -100.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Host];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::HostIcon;
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 xy::Entity MenuState::addCheckbox(std::uint8_t playerID)

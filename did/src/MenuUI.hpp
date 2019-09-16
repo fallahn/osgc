@@ -42,7 +42,8 @@ namespace Menu
             JoinNameNode = 0x200,
 
             NameText = 0x400,
-            IPText = 0x800
+            IPText = 0x800,
+            HostIcon = 0x1000
         };
     }
 
