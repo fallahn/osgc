@@ -319,6 +319,7 @@
     <ClInclude Include="src\TimedCarriableSystem.hpp" />
     <ClInclude Include="src\TorchlightSystem.hpp" />
     <ClInclude Include="src\GameUI.hpp" />
+    <ClInclude Include="src\WaveSystem.hpp" />
     <ClInclude Include="src\WetPatchDirector.hpp" />
     <ClInclude Include="src\XPSystem.hpp" />
   </ItemGroup>

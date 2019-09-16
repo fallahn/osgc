@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "ResourceIDs.hpp"
 #include "Camera3D.hpp"
 #include "GlobalConsts.hpp"
+#include "WaveSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -88,22 +89,30 @@ void MenuState::createBackground()
 
 
     //waves
-    entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setScale(2.1f, 2.1f);
-    entity.addComponent<xy::Drawable>().setDepth(-9999);
-    entity.getComponent<xy::Drawable>().setShader(planeShader);
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/menu_island_waves.png"));
-    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 0.4f);
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function =
-        [](xy::Entity e, float dt)
+    std::array<float, 3> offsets =
     {
-        e.getComponent<xy::Transform>().rotate(3.f * dt);
+        0.f, ((Wave::MaxScale - Wave::MaxScale) * 0.6f),
+        ((Wave::MaxScale - Wave::MinScale) * 0.8f)
     };
-
+    for (auto i = 0; i < 3; ++i)
+    {
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().setDepth(-9999);
+        entity.getComponent<xy::Drawable>().setShader(planeShader);
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/menu_island_waves.png"));
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 0.4f);
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        entity.addComponent<Wave>().currentScale = Wave::MinScale + offsets[i];
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [](xy::Entity e, float dt)
+        {
+            e.getComponent<xy::Transform>().rotate(3.f * dt);
+        };
+    }
 
     //camera
     camEnt = m_gameScene.createEntity();

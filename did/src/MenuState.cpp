@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include "ResourceIDs.hpp"
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
+#include "WaveSystem.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -352,7 +353,8 @@ void MenuState::loadAssets()
 
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
-    m_gameScene.addSystem<xy::TextSystem>(mb);
+    m_gameScene.addSystem<WaveSystem>(mb);
+    //m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);

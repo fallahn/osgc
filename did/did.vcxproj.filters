@@ -351,6 +351,9 @@
     <ClInclude Include="src\SliderSystem.hpp">
       <Filter>Header Files\systems\client</Filter>
     </ClInclude>
+    <ClInclude Include="src\WaveSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FoliageGenerator.cpp">
