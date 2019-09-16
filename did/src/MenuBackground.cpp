@@ -30,8 +30,10 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/Camera.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/util/Random.hpp>
 
 namespace
 {
@@ -75,6 +77,12 @@ void MenuState::createBackground()
     camEnt.getComponent<Camera3D>().pitch = -0.18f;
     camEnt.getComponent<Camera3D>().height = 200.f;
     camEnt.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y - 140.f);
+
+    auto view = getContext().defaultView;
+    auto& camera = camEnt.addComponent<xy::Camera>();
+    camera.setView(view.getSize());
+    camera.setViewport(view.getViewport());
+
     m_gameScene.setActiveCamera(camEnt);
 
     //sky
@@ -198,6 +206,37 @@ void MenuState::createBackground()
     }
 
     //finally.... some trees!
+    const auto& treeTex = m_textureResource.get("assets/images/menu_trees.png");
+    auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 384.f, 384.f }, 80.f, 12);
+
+    for (auto pos : positions)
+    {
+        pos.x += 576.f;
+        pos.y += 576.f;
+
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(pos);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Sprite>(treeTex);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShader));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+
+        auto rootPos = pos - (Global::IslandSize / 2.f);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [rootPos, &islandTx](xy::Entity e, float)
+        {
+            sf::Transform tx;
+            tx.translate(islandTx.getPosition());
+            tx.rotate(islandTx.getRotation());
+
+            e.getComponent<xy::Transform>().setPosition(tx.transformPoint(rootPos));
+        };
+    }
 }
 
 void MenuState::updateBackground(float dt)
