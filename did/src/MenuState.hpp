@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "StateIDs.hpp"
 #include "MenuUI.hpp"
 #include "InputParser.hpp"
+#include "MatrixPool.hpp"
 
 #include <xyginext/core/State.hpp>
 
@@ -80,6 +81,8 @@ private:
     sf::String* m_activeString;
     void updateTextInput(const sf::Event&);
 
+
+    MatrixPool m_matrixPool;
     xy::ShaderResource m_shaderResource;
     sf::RenderTexture m_seaBuffer;
     sf::Sprite m_seaSprite;

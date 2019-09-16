@@ -31,6 +31,7 @@ Copyright 2019 Matt Marchant
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
 #include "WaveSystem.hpp"
+#include "FlappySailSystem.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -339,6 +340,12 @@ void MenuState::loadAssets()
     m_shaderResource.preload(ShaderID::PlaneShader, "#version 120\n#define WORLDPOS\n" + GroundVertLit, SpriteFrag);
     m_shaderResource.preload(ShaderID::SkyShader, SkyFrag, sf::Shader::Fragment);
     m_shaderResource.preload(ShaderID::LandShader, "#version 120\n" + GroundVertLit, GroundFrag);
+    m_shaderResource.preload(ShaderID::SpriteShader, "#version 120\n#define LIGHTING\n" + SpriteVertex, SpriteFrag);
+
+    std::vector<sf::Shader*> spriteShaders =
+    {
+        &m_shaderResource.get(ShaderID::SpriteShader),
+    };
 
     auto& mb = getContext().appInstance.getMessageBus();
     m_uiScene.addSystem<xy::AudioSystem>(mb);
@@ -354,7 +361,8 @@ void MenuState::loadAssets()
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
     m_gameScene.addSystem<WaveSystem>(mb);
-    //m_gameScene.addSystem<xy::TextSystem>(mb);
+    m_gameScene.addSystem<Sprite3DSystem>(mb, spriteShaders);
+    m_gameScene.addSystem<FlappySailSystem>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);

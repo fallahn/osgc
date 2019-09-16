@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include "Camera3D.hpp"
 #include "GlobalConsts.hpp"
 #include "WaveSystem.hpp"
+#include "Sprite3D.hpp"
+#include "FlappySailSystem.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -28,6 +30,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 namespace
 {
@@ -37,6 +41,14 @@ namespace
     sf::Shader* landShader = nullptr;
 
     xy::Entity camEnt;
+
+    std::array<sf::FloatRect, 4u> sailColours =
+    {
+        sf::FloatRect(80.f, 216.f, 49.f, 60.f),
+        { 131.f, 216.f, 49.f, 60.f },
+        { 182.f, 216.f, 49.f, 60.f },
+        { 80.f, 278.f, 49.f, 60.f }
+    };
 }
 
 void MenuState::createBackground()
@@ -50,6 +62,20 @@ void MenuState::createBackground()
     landShader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
     landShader->setUniform("u_sunDirection", sf::Glsl::Vec3(1.f, 1.f, 1.f));
     landShader->setUniform("u_normalTexture", m_textureResource.get("assets/images/menu_island_normal.png"));
+
+    m_shaderResource.get(ShaderID::SpriteShader).setUniform("u_lightAmount", 1.f);
+    m_shaderResource.get(ShaderID::SpriteShader).setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
+
+    //camera
+    camEnt = m_gameScene.createEntity();
+    camEnt.addComponent<xy::Transform>();
+    const float fov = 0.6f; //0.55f FOV
+    const float aspect = 16.f / 9.f;
+    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, aspect, 0.1f, 1536.f);
+    camEnt.getComponent<Camera3D>().pitch = -0.18f;
+    camEnt.getComponent<Camera3D>().height = 200.f;
+    camEnt.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y - 140.f);
+    m_gameScene.setActiveCamera(camEnt);
 
     //sky
     auto entity = m_gameScene.createEntity();
@@ -86,6 +112,8 @@ void MenuState::createBackground()
     {
         e.getComponent<xy::Transform>().rotate(3.f * dt);
     };
+    //this is used below to update positions of island items
+    const auto& islandTx = entity.getComponent<xy::Transform>();
 
 
     //waves
@@ -114,15 +142,62 @@ void MenuState::createBackground()
         };
     }
 
-    //camera
-    camEnt = m_gameScene.createEntity();
-    camEnt.addComponent<xy::Transform>();
-    const float fov = 0.6f; //0.55f FOV
-    const float aspect = 16.f / 9.f;
-    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, aspect, 0.1f, 1536.f);
-    camEnt.getComponent<Camera3D>().pitch = -0.18f;
-    camEnt.getComponent<Camera3D>().height = 200.f;
-    camEnt.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y - 140.f);
+    //boats
+    std::array<sf::Vector2f, 4u> boatPos =
+    {
+        sf::Vector2f(462.f, 455.f),
+        {1066.f, 457.f},
+        {978.f, 1007.f},
+        {459.f, 1044.f}
+    };
+
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/boat.spt", m_textureResource);
+    for (auto i = 0; i < 4; ++i)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(boatPos[i]);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("boat");
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShader));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+
+        auto rootPos = boatPos[i] - (Global::IslandSize / 2.f);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [rootPos, &islandTx](xy::Entity e, float)
+        {
+            sf::Transform tx;
+            tx.translate(islandTx.getPosition());
+            tx.rotate(islandTx.getRotation());
+
+            e.getComponent<xy::Transform>().setPosition(tx.transformPoint(rootPos));
+        };
+
+        //add the sails
+        auto sailEnt = m_gameScene.createEntity();
+        sailEnt.addComponent<xy::Transform>().setPosition(50.f, 0.01f);
+        sailEnt.getComponent<xy::Transform>().setScale(0.5f, 0.5f);
+        sailEnt.addComponent<xy::Drawable>().setTexture(spriteSheet.getSprite("boat").getTexture());
+        sailEnt.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShader));
+        sailEnt.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+
+        sailEnt.addComponent<FlappySail>().clothRect = sailColours[i];
+        sailEnt.getComponent<FlappySail>().poleRect = { 0.f, 216.f, 74.f, 64.f };
+
+        sailEnt.addComponent<Sprite3D>(m_matrixPool).needsCorrection = false;
+        sailEnt.getComponent<Sprite3D>().verticalOffset = -10.2f;
+        sailEnt.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        sailEnt.getComponent<xy::Drawable>().bindUniform("u_modelMat", &sailEnt.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        entity.getComponent<xy::Transform>().addChild(sailEnt.getComponent<xy::Transform>());
+    }
+
+    //finally.... some trees!
 }
 
 void MenuState::updateBackground(float dt)
