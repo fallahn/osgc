@@ -46,6 +46,7 @@ LobbyState::LobbyState(SharedStateData& sd)
     setNextState(getID());
     xy::Logger::log("Server switched to active state");
 
+    m_sharedData.connectedClients.erase(0);
     for (auto& client : m_sharedData.connectedClients)
     {
         client.second.ready = false; //reset the state for any currently connected players
@@ -120,7 +121,7 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
     case PacketID::SetReadyState:
     {
         auto ready = evt.packet.as<std::uint8_t>();
-        m_sharedData.connectedClients[evt.peer.getID()].ready = (ready == 1);
+        m_sharedData.connectedClients[evt.peer.getID()].ready = (ready != 0);
 
         std::uint16_t data = m_sharedData.connectedClients[evt.peer.getID()].playerID << 8;
         data |= ready;

@@ -73,7 +73,7 @@ namespace Server
         " was haunted to death",
         " got the fright of their life",
         " got spooked",
-        " was scared out of their skin.\nAnd their body.",
+        " was scared out of their wits.\nAnd their body.",
 
         " has increased their booty",
         " is coining it in",

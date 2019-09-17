@@ -115,7 +115,6 @@ namespace
 
                 if (m_timeSource == 0)
                 {
-                    e.getComponent<xy::Text>().setFillColour(sf::Color::Transparent);
                     e.getComponent<xy::Callback>().active = false;
                 }
             } 

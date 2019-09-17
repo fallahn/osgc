@@ -731,10 +731,14 @@ void MenuState::setLobbyView()
 {
     if (m_sharedData.netClient->connected())
     {
-        //enable start button if we're the host
-        updateHostInfo(m_sharedData.clientInformation.getHostID());
 
-        //and request a seed update
+        for (auto i = 0; i < 4; ++i)
+        {
+            auto& client = m_sharedData.clientInformation.getClient(i);
+            client.ready = (client.peerID == 0) ? true : false;
+        }
+
+        //request a seed update (also sends all client data)
         m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
     }
 }
