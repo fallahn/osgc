@@ -108,15 +108,15 @@ D - Right
 
 LCtrl/Controller B - Pick up/drop
 Space/Controller A - Use Item
-LShift/Controller Y - Strafe
+LShift/Controller RB - Strafe
 
 Q/Controller LB - Previous Item
-E/Controller RB - Next Item
+E/Controller Y - Next Item
 Z/Controller X - Show/Zoom Map
 M/Controller Back - Show Map
-Tab/Controller Start - Show Scoreboard
+Tab - Show Scoreboard
 
-Esc/P/Pause - Show options Menu
+Esc/P/Pause/Controller Start - Show options Menu
 
 Custom keybinds coming soon!)";
 

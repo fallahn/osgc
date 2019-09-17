@@ -63,7 +63,7 @@ struct InputBinding final
     };
     std::array<sf::Uint32, 7u> buttons =
     {
-        {6, 2, 0, 1, 5, 4, 3} //Back, X, A, B , LB, RB, Y
+        {6, 2, 0, 1, 5, 3, 4} //Back, X, A, B , LB, RB, Y
     };
     sf::Uint32 controllerID = 0;
 };

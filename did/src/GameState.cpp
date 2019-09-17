@@ -373,13 +373,10 @@ bool GameState::handleEvent(const sf::Event& evt)
             }
             else if (evt.joystickButton.button == 7 && !m_roundOver)
             {
-                hideScores();
-            }
-            //TODO pause screen (I can't remember the mapping right now)
-            /*else if (evt.joystickButton.button == 6)
-            {
+                //hideScores();
+                //lets use this to show options instead
                 requestStackPush(StateID::Pause);
-            }*/
+            }
         }
     }
     else if (evt.type == sf::Event::KeyPressed)
@@ -396,7 +393,8 @@ bool GameState::handleEvent(const sf::Event& evt)
         {
             if (evt.joystickButton.button == 7 && !m_roundOver)
             {
-                showScores();
+                //showScores();
+                //TODO bind this to something like Right Stick Click
             }
         }
     }
@@ -1642,13 +1640,21 @@ void GameState::updateConnection(ConnectionState state)
 {
     auto idx = state.actorID - Actor::ID::PlayerOne;
 
-    auto& client = m_sharedData.clientInformation.getClient(idx);
-    auto oldName = client.name;
-    printMessage(oldName + " left the game");
+    if (state.clientID == 0)
+    {
+        //someone left
+        auto& client = m_sharedData.clientInformation.getClient(idx);
+        auto oldName = client.name;
+        printMessage(oldName + " left the game");
 
-    client.name = Global::PlayerNames[idx];
-    client.peerID = 0;
-    m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
+        client.name = Global::PlayerNames[idx];
+        client.peerID = 0;
+        m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
+    }
+    else
+    {
+        //someone joined... do we actually need to handle this?
+    }
 }
 
 void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)

@@ -45,23 +45,32 @@ void HealthBarSystem::process(float)
         if (healthBar.lastHealth != healthBar.health)
         {
             auto& verts = drawable.getVertices();
-            verts.resize(8);
 
-            float health = healthBar.size.x / MaxHealth;
-            health *= healthBar.health;
-            health = std::max(0.f, health - healthBar.outlineThickness);
+            //hide when no health and parented to actor (but not on UI)
+            if (healthBar.health <= 0 && healthBar.parent.isValid())
+            {
+                verts.clear();
+            }
+            else
+            {
+                verts.resize(8);
 
-            verts[0] = { sf::Vector2f(), sf::Color::Black };
-            verts[1] = { sf::Vector2f(healthBar.size.x, 0.f), sf::Color::Black };
-            verts[2] = { healthBar.size, sf::Color::Black };
-            verts[3] = { sf::Vector2f(0.f, healthBar.size.y), sf::Color::Black };
+                float health = healthBar.size.x / MaxHealth;
+                health *= healthBar.health;
+                health = std::max(0.f, health - healthBar.outlineThickness);
 
-            verts[4] = { sf::Vector2f(healthBar.outlineThickness, healthBar.outlineThickness), healthBar.colour };
-            verts[5] = { sf::Vector2f(health, healthBar.outlineThickness), healthBar.colour };
-            verts[6] = { sf::Vector2f(health, healthBar.size.y - healthBar.outlineThickness), healthBar.colour };
-            verts[7] = { sf::Vector2f(healthBar.outlineThickness, healthBar.size.y - healthBar.outlineThickness), healthBar.colour };
+                verts[0] = { sf::Vector2f(), sf::Color::Black };
+                verts[1] = { sf::Vector2f(healthBar.size.x, 0.f), sf::Color::Black };
+                verts[2] = { healthBar.size, sf::Color::Black };
+                verts[3] = { sf::Vector2f(0.f, healthBar.size.y), sf::Color::Black };
 
-            for (auto& v : verts) v.texCoords = v.position;
+                verts[4] = { sf::Vector2f(healthBar.outlineThickness, healthBar.outlineThickness), healthBar.colour };
+                verts[5] = { sf::Vector2f(health, healthBar.outlineThickness), healthBar.colour };
+                verts[6] = { sf::Vector2f(health, healthBar.size.y - healthBar.outlineThickness), healthBar.colour };
+                verts[7] = { sf::Vector2f(healthBar.outlineThickness, healthBar.size.y - healthBar.outlineThickness), healthBar.colour };
+
+                for (auto& v : verts) v.texCoords = v.position;
+            }
 
             healthBar.lastHealth = healthBar.health;
             drawable.updateLocalBounds();

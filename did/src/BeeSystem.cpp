@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "CollisionBounds.hpp"
 #include "MessageIDs.hpp"
 #include "DecoySystem.hpp"
+#include "PlayerSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
@@ -174,7 +175,16 @@ void BeeSystem::process(float dt)
                         {
                             return a.getComponent<Actor>().id > b.getComponent<Actor>().id; 
                         });
-                        bee.target = result[0];
+
+                        //ignore dead players
+                        result.erase(std::remove_if(result.begin(), result.end(), 
+                            [](const xy::Entity e) 
+                            {
+                                return (e.getComponent<Actor>().id != Actor::ID::Decoy
+                                    && e.getComponent<Player>().sync.state == Player::Dead);
+                            }), result.end());
+
+                        bee.target = result.empty() ? xy::Entity() : result[0];
                         continue;
                     }
                 }
