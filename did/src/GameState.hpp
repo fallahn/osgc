@@ -134,4 +134,6 @@ private:
     void loadAudio();
 
     void handleDisconnect();
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

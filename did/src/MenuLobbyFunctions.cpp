@@ -93,3 +93,18 @@ void MenuState::updateHostInfo(std::uint64_t hostID)
         }
     }
 }
+
+void MenuState::applySeed()
+{
+    if (m_activeString == &m_seedDisplayString)
+    {
+        Server::SeedData sd;
+        std::strcpy(sd.str, m_seedDisplayString.toAnsiString().c_str());
+        m_sharedData.netClient->sendPacket(PacketID::SetSeed, sd, xy::NetFlag::Reliable);
+
+        xy::Command cmd;
+        cmd.targetFlags = Menu::CommandID::SeedText;
+        cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
+        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
+}

@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "ClientInfoManager.hpp"
 #include "ServerSharedStateData.hpp"
 #include "Server.hpp"
+#include "LoadingScreen.hpp"
 
 #include <xyginext/network/NetClient.hpp>
 
@@ -38,6 +39,8 @@ struct SharedData final
     ClientInfoManager clientInformation;
     std::string error;
     Server::SeedData seedData;
+
+    LoadingScreen loadingScreen;
 
     //these strictly shouldn't be shared
     //but it's a required fudge to enable this

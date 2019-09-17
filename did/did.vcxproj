@@ -269,6 +269,7 @@
     <ClInclude Include="src\InventorySystem.hpp" />
     <ClInclude Include="src\IslandGenerator.hpp" />
     <ClInclude Include="src\IslandSystem.hpp" />
+    <ClInclude Include="src\LoadingScreen.hpp" />
     <ClInclude Include="src\MatrixPool.hpp" />
     <ClInclude Include="src\MenuGame.hpp" />
     <ClInclude Include="src\MenuPlayerSystem.hpp" />
@@ -383,6 +384,7 @@
     <ClCompile Include="src\InventorySystem.cpp" />
     <ClCompile Include="src\IslandGenerator.cpp" />
     <ClCompile Include="src\IslandSystem.cpp" />
+    <ClCompile Include="src\LoadingScreen.cpp" />
     <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuBackground.cpp" />
     <ClCompile Include="src\MenuLobbyFunctions.cpp" />

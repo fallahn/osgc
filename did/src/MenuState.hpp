@@ -73,15 +73,12 @@ private:
     std::array<xy::Sprite, Menu::SpriteID::Count> m_sprites = {};
     std::array<sf::Uint32, Menu::CallbackID::Count> m_callbackIDs = {};
 
-    bool m_pingServer;
-    sf::Clock m_pingClock;
-
     bool m_gameLaunched;
 
     sf::String* m_activeString;
     sf::String m_seedDisplayString;
     void updateTextInput(const sf::Event&);
-
+    void applySeed();
 
     MatrixPool m_matrixPool;
     xy::ShaderResource m_shaderResource;
@@ -111,4 +108,6 @@ private:
 
     void loadSettings();
     void saveSettings();
+
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

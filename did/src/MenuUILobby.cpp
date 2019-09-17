@@ -103,12 +103,6 @@ void MenuState::buildLobby(sf::Font& font)
                 m_sharedData.gameServer->stop();
                 m_sharedData.clientInformation.setHostID(0);
             }
-
-            //quit our local server - does nothing if we're not host :)
-            /*auto* msg = getContext().appInstance.getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
-            msg->action = SystemEvent::RequestStopServer;*/
-
-            m_pingServer = false;
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -130,6 +124,9 @@ void MenuState::buildLobby(sf::Font& font)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
+            //apply the seed if it hasn't been already
+            applySeed();
+
             //send a packet to server if we're host telling it to switch to game state
             m_sharedData.netClient->sendPacket(PacketID::StartGame, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
         }

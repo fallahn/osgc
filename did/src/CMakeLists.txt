@@ -40,6 +40,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InventorySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuBackground.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuLobbyFunctions.cpp

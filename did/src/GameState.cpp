@@ -1674,3 +1674,11 @@ void GameState::handleDisconnect()
     m_sharedData.error = "Disconnected from server.";
     requestStackPush(StateID::Error);
 }
+
+void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    //TODO possibly need to keep updating network events here to prevent timing out in loading loading sessions
+
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
+}

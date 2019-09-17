@@ -90,7 +90,6 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_uiScene       (ctx.appInstance.getMessageBus()),
     m_gameScene     (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
-    m_pingServer    (false),
     m_gameLaunched  (false),
     m_activeString  (nullptr)
 {
@@ -252,13 +251,6 @@ bool MenuState::update(float dt)
     m_uiScene.update(dt);
     m_gameScene.update(dt);
 
-    //TODO do we need this now?
-    if (m_pingServer && m_pingClock.getElapsedTime().asSeconds() > PingTime)
-    {
-        m_pingClock.restart();
-        m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
-    }
-
     return true;
 }
 
@@ -329,12 +321,7 @@ void MenuState::updateTextInput(const sf::Event& evt)
             else if (evt.key.code == sf::Keyboard::Return)
             {
                 //send the seed if that's what we updated
-                if (m_activeString == &m_seedDisplayString)
-                {
-                    Server::SeedData sd;
-                    std::strcpy(sd.str, m_seedDisplayString.toAnsiString().c_str());
-                    m_sharedData.netClient->sendPacket(PacketID::SetSeed, sd, xy::NetFlag::Reliable);
-                }
+                applySeed();
 
                 m_activeString = nullptr;
 
@@ -724,39 +711,14 @@ void MenuState::createScene()
 
 void MenuState::setLobbyView()
 {
-    //check if we already have a lobby set, ie
-    //if we were just in a game or were invited
+    if (m_sharedData.netClient->connected())
+    {
+        //enable start button if we're the host
+        updateHostInfo(m_sharedData.clientInformation.getHostID());
 
-    //in theory this should handle if a host quits the
-    //game too and a new host was made, assuming the 
-    //game mode properly quits
-
-    //if (m_sharedData.lobbyID.IsLobby())
-    //{
-    //    xy::Command cmd;
-    //    cmd.targetFlags = Menu::CommandID::LobbyNode;
-    //    cmd.action = [](xy::Entity e, float)
-    //    {
-    //        e.getComponent<xy::Transform>().setPosition({});
-    //    };
-    //    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-    //    cmd.targetFlags = Menu::CommandID::MainNode;
-    //    cmd.action = [](xy::Entity e, float)
-    //    {
-    //        e.getComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
-    //    };
-    //    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-    //    //allow players to join again if we're hosting
-    //    if (m_sharedData.host == SteamUser()->GetSteamID())
-    //    {
-    //        SteamMatchmaking()->SetLobbyJoinable(m_sharedData.lobbyID, true);
-    //    }
-
-    //    refreshLobbyView();
-    //    m_pingServer = true;
-    //}
+        //and request a seed update
+        m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
+    }
 }
 
 void MenuState::handlePacket(const xy::NetEvent& evt)
@@ -810,9 +772,6 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
-        //we know we connected so we can stop pinging
-        m_pingServer = false;
-
         break;
     case PacketID::ReqPlayerInfo:
         sendPlayerData();
@@ -1229,4 +1188,10 @@ void MenuState::saveSettings()
         file.write(reinterpret_cast<char*>(codePoints.data()), codePoints.size() * sizeof(sf::Uint32));
         file.close();
     }
+}
+
+void MenuState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    m_sharedData.loadingScreen.update(dt);
+    rw.draw(m_sharedData.loadingScreen);
 }

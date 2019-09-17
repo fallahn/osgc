@@ -354,6 +354,9 @@
     <ClInclude Include="src\WaveSystem.hpp">
       <Filter>Header Files\systems\client</Filter>
     </ClInclude>
+    <ClInclude Include="src\LoadingScreen.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FoliageGenerator.cpp">
@@ -601,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="src\MenuBackground.cpp">
       <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LoadingScreen.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

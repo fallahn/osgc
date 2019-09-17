@@ -45,6 +45,11 @@ LobbyState::LobbyState(SharedStateData& sd)
 {
     setNextState(getID());
     xy::Logger::log("Server switched to active state");
+
+    for (auto& client : m_sharedData.connectedClients)
+    {
+        client.second.ready = false; //reset the state for any currently connected players
+    }
 }
 
 LobbyState::~LobbyState()
@@ -98,6 +103,7 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         break;
     case PacketID::RequestSeed:
         m_sharedData.gameServer->broadcastData(PacketID::CurrentSeed, m_sharedData.seedData, xy::NetFlag::Reliable);
+        broadcastClientInfo();
         break;
     case PacketID::SupPlayerInfo:
     {
@@ -148,6 +154,7 @@ void LobbyState::broadcastClientInfo()
 {
     for (const auto& [id, client] : m_sharedData.connectedClients)
     {
+        //send the player number (0 - 3), peer ID and name of client
         auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
         std::vector<char> buffer(sizeof(client.playerID) + sizeof(id) + size);
 
