@@ -114,7 +114,7 @@ namespace
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State         (ss, ctx),
-    m_gameScene         (ctx.appInstance.getMessageBus(), 512),
+    m_gameScene         (ctx.appInstance.getMessageBus(), 1024),
     m_uiScene           (ctx.appInstance.getMessageBus()),
     m_sharedData        (sd),
     m_inputParser       (sd.inputBinding, *sd.netClient),
@@ -341,10 +341,20 @@ bool GameState::handleEvent(const sf::Event& evt)
             zoomMap();
         }
         //else if (evt.key.code == sf::Keyboard::End) m_gameScene.getActiveCamera().getComponent<Camera3D>().shakeAmount = 1.f;
+        else if (evt.key.code == sf::Keyboard::P ||
+            evt.key.code == sf::Keyboard::Pause)
+        {
+            requestStackPush(StateID::Pause);
+        }
 #ifdef XY_DEBUG
         else if (evt.key.code == sf::Keyboard::Escape)
         {
             xy::App::quit();
+        }
+#else
+        else if (evt.key.code == sf::Keyboard::Escape)
+        {
+            requestStackPush(StateID::Pause);
         }
 #endif
     }
@@ -365,6 +375,11 @@ bool GameState::handleEvent(const sf::Event& evt)
             {
                 hideScores();
             }
+            //TODO pause screen (I can't remember the mapping right now)
+            /*else if (evt.joystickButton.button == 6)
+            {
+                requestStackPush(StateID::Pause);
+            }*/
         }
     }
     else if (evt.type == sf::Event::KeyPressed)

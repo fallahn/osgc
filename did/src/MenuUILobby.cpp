@@ -66,6 +66,9 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Text>(font).setString("Leave");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -113,6 +116,9 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Text>(font).setString("Start");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::StartButton;
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;

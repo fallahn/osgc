@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/network/NetData.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/System/Clock.hpp>
 
@@ -33,6 +34,18 @@ Copyright 2019 Matt Marchant
 
 using namespace Server;
 
+namespace
+{
+    std::vector<const char*> RandomSeeds =
+    {
+        "buns", "flaps", "dicketry", "speef",
+        "cleftwhistle", "aubergine", "gargantua",
+        "supremebeing", "legs", "buchanan", "estoban",
+        "beardweevils", "kitchen", "queensbury",
+        "gigglestick", "trampled", "tubafoor"
+    };
+}
+
 GameServer::GameServer()
     : m_thread  (&GameServer::run, this),
     m_running   (false),
@@ -40,7 +53,7 @@ GameServer::GameServer()
 {
     m_sharedStateData.gameServer = this;
 
-    const char* defaultSeed = "buns";
+    const char* defaultSeed = RandomSeeds[xy::Util::Random::value(0, RandomSeeds.size() - 1)];
     std::strcpy(m_sharedStateData.seedData.str, defaultSeed);
 
     std::hash<std::string> hash;

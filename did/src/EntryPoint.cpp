@@ -34,6 +34,7 @@ source distribution.
 #include "boxer/boxer.h"
 #include "MixerChannels.hpp"
 #include "SharedStateData.hpp"
+#include "PauseState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -76,6 +77,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<MenuState>(StateID::Menu, sd);
     ss->registerState<ErrorState>(StateID::Error, sd);
     ss->registerState<GameState>(StateID::Game, sd);
+    ss->registerState<PauseState>(StateID::Pause, sd);
 
     gameServer->setMaxPlayers(4);
 
@@ -94,6 +96,7 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::Menu);
     ss->unregisterState(StateID::Error);
     ss->unregisterState(StateID::Game);
+    ss->unregisterState(StateID::Pause);
 
 #ifdef XY_DEBUG
     signal(SIGABRT, SIG_DFL);

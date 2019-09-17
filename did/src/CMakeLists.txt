@@ -52,6 +52,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ParrotLauncherSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ParrotSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PathFinder.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/PauseState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RainSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Render3DSystem.cpp

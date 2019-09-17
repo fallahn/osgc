@@ -101,6 +101,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     setLobbyView();
 
+    xy::App::setMouseCursorVisible(true);
+
     quitLoadingScreen();
 }
 
@@ -388,12 +390,12 @@ void MenuState::loadAssets()
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
     {
-        entity.getComponent<xy::Text>().setFillColour(sf::Color::Red);
+        entity.getComponent<xy::Text>().setFillColour(Global::OuterTextColour);
     });
     m_callbackIDs[Menu::CallbackID::TextUnselected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
     {
-        entity.getComponent<xy::Text>().setFillColour(sf::Color::White);
+        entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     });
 
     m_callbackIDs[Menu::CallbackID::CheckboxClicked] = m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -532,8 +534,8 @@ void MenuState::createScene()
     entity.addComponent<xy::Transform>().setPosition(40.f, 40.f);
     entity.addComponent<xy::Text>(font).setString("Desert Island Duel");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
-    entity.getComponent<xy::Text>().setFillColour({ 234,181,68 });
-    entity.getComponent<xy::Text>().setOutlineColour({ 225,161,70 });
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -549,6 +551,9 @@ void MenuState::createScene()
     entity.addComponent<xy::Transform>().setPosition(MenuStart);
     entity.addComponent<xy::Text>(font).setString("Host");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -596,6 +601,9 @@ void MenuState::createScene()
     entity.getComponent<xy::Transform>().move(0.f, MenuSpacing);
     entity.addComponent<xy::Text>(font).setString("Join");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -649,6 +657,9 @@ void MenuState::createScene()
     entity.getComponent<xy::Transform>().move(0.f, MenuSpacing * 2.f);
     entity.addComponent<xy::Text>(font).setString("Options");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -679,6 +690,9 @@ void MenuState::createScene()
     entity.getComponent<xy::Transform>().move(0.f, MenuSpacing * 3.f);
     entity.addComponent<xy::Text>(font).setString("Quit");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -831,7 +845,8 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
@@ -853,6 +868,9 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(largeFont).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
@@ -894,6 +912,9 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(largeFont).setString("Next");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
@@ -992,8 +1013,8 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
@@ -1026,6 +1047,9 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(largeFont).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
@@ -1072,6 +1096,9 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.addComponent<xy::Text>(largeFont).setString("Join");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];

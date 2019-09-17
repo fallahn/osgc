@@ -286,6 +286,7 @@
     <ClInclude Include="src\ParrotLauncherSystem.hpp" />
     <ClInclude Include="src\ParrotSystem.hpp" />
     <ClInclude Include="src\PathFinder.hpp" />
+    <ClInclude Include="src\PauseState.hpp" />
     <ClInclude Include="src\PlayerStats.hpp" />
     <ClInclude Include="src\PlayerSystem.hpp" />
     <ClInclude Include="src\PluginExport.hpp" />
@@ -396,6 +397,7 @@
     <ClCompile Include="src\ParrotLauncherSystem.cpp" />
     <ClCompile Include="src\ParrotSystem.cpp" />
     <ClCompile Include="src\PathFinder.cpp" />
+    <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\PlayerSystem.cpp" />
     <ClCompile Include="src\RainSystem.cpp" />
     <ClCompile Include="src\Render3DSystem.cpp" />

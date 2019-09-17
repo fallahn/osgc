@@ -51,8 +51,10 @@ LoadingScreen::LoadingScreen()
 //public
 void LoadingScreen::update(float dt)
 {
-    m_sprite.move(400.f * dt, 0.f);
-
+    if (m_currentFrame < 4)
+    {
+        m_sprite.move(400.f * dt, 0.f);
+    }
 
     m_currentFrameTime += dt;
     if (m_currentFrameTime > frametime)

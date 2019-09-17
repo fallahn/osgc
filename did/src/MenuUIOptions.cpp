@@ -46,6 +46,9 @@ void MenuState::buildOptions(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -76,6 +79,9 @@ void MenuState::buildOptions(sf::Font& font)
     entity.addComponent<xy::Text>(font).setString("Advanced");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -110,6 +116,8 @@ Z/Controller X - Show/Zoom Map
 M/Controller Back - Show Map
 Tab/Controller Start - Show Scoreboard
 
+Esc/P/Pause - Show options Menu
+
 Custom keybinds coming soon!)";
 
     entity = m_uiScene.createEntity();
@@ -118,5 +126,8 @@ Custom keybinds coming soon!)";
     entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont));
     entity.getComponent<xy::Text>().setString(helpString);
     entity.getComponent<xy::Text>().setCharacterSize(40);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    /*entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);*/
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
