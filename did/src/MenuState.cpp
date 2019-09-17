@@ -70,7 +70,7 @@ namespace
 #include "IslandShaders.inl"
 #include "SpriteShader.inl"
 
-    const sf::Vector2f MenuStart = { 40.f, 600.f };
+    const sf::Vector2f MenuStart = { 120.f, 600.f };
     const float MenuSpacing = 80.f;
     const float PingTime = 1.f;
 
@@ -325,12 +325,15 @@ void MenuState::updateTextInput(const sf::Event& evt)
                 //send the seed if that's what we updated
                 applySeed();
 
-                m_activeString = nullptr;
+                if (!m_activeString->isEmpty())
+                {
+                    m_activeString = nullptr;
 
-                xy::Command cmd;
-                cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText | Menu::CommandID::SeedText;
-                cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
-                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText | Menu::CommandID::SeedText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
             }
         }
     }
@@ -530,8 +533,9 @@ void MenuState::createScene()
     m_uiScene.getActiveListener().getComponent<xy::AudioEmitter>().play();
     m_uiScene.getActiveListener().getComponent<xy::AudioListener>().setDepth(200.f);
 
+
     auto entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(40.f, 40.f);
+    entity.addComponent<xy::Transform>().setPosition(MenuStart.x, 40.f);
     entity.addComponent<xy::Text>(font).setString("Desert Island Duel");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
@@ -839,6 +843,17 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     auto& font = m_fontResource.get(Global::FineFont);
 
     entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Text>(largeFont).setString("Host Game");
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 2.5f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
@@ -1008,11 +1023,23 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     auto& font = m_fontResource.get(Global::FineFont);
 
     entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Text>(largeFont).setString("Join Game");
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 2.5f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);

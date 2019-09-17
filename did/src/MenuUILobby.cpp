@@ -286,7 +286,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 0.5f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.getComponent<xy::Drawable>().setCroppingArea({ -232.f, -30.f, 464.f, 120.f });
-    entity.addComponent<xy::Text>(font);// .setString(m_sharedData.clientName);
+    entity.addComponent<xy::Text>(fineFont);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::SeedText;

@@ -17,6 +17,7 @@
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/UIHitBox.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/System/String.hpp>
 
@@ -98,6 +99,23 @@ void MenuState::applySeed()
 {
     if (m_activeString == &m_seedDisplayString)
     {
+        if (m_activeString->isEmpty())
+        {
+            //don't have empty seeds
+            *m_activeString = std::to_string(xy::Util::Random::value(5423412, 47235525));
+
+            auto* seedString = m_activeString;
+
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::SeedText;
+            cmd.action = [seedString](xy::Entity entity, float)
+            {
+                auto& text = entity.getComponent<xy::Text>();
+                text.setString(*seedString);
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+
         Server::SeedData sd;
         std::strcpy(sd.str, m_seedDisplayString.toAnsiString().c_str());
         m_sharedData.netClient->sendPacket(PacketID::SetSeed, sd, xy::NetFlag::Reliable);
