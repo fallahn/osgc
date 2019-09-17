@@ -40,6 +40,7 @@ namespace Server
         sf::String name = "Unknown";
         bool ready = false;
         std::uint8_t playerID = 0;
+        std::size_t xp = 0;
     };
 
     struct SharedStateData final

@@ -572,7 +572,6 @@ void GameState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<ServerEvent>();
         if (data.type == ServerEvent::ClientDisconnected)
         {
-            //TODO quit back to idle state if all connections are dropped
             Actor::ID id = Actor::None;
             
             //remove from active list
@@ -587,6 +586,7 @@ void GameState::handleMessage(const xy::Message& msg)
                     slot.stats.reset();
                     id = slot.gameEntity.getComponent<Actor>().id;
                     slot.gameEntity.getComponent<Bot>().enabled = true;
+                    slot.sendStatsUpdate = true; //update the remaining clients
                     //slot.gameEntity.getComponent<CollisionComponent>().collidesTerrain = false;
                     break;
                 }
@@ -661,6 +661,7 @@ void GameState::spawnPlayer(std::uint64_t clientID)
                     slot.available = false;
                     slot.clientID = clientID;
                     slot.stats.reset();
+                    slot.stats.totalXP = m_sharedData.connectedClients[clientID].xp;
                     entity = slot.gameEntity;
                     entity.getComponent<std::uint64_t>() = clientID;
                     entity.getComponent<Bot>().enabled = false;
@@ -1071,7 +1072,11 @@ void GameState::endGame()
         m_playerSlots[i].stats.currentLevel = XP::calcLevel(m_playerSlots[i].stats.totalXP);
 
         //TODO send level and total XP to client
-        //might do this per client as no-one strictly needs to know everyone else's xp
+        //this was oringally meant for steam or some other service which can keep a (secure)
+        //running tally. As this is not currently the case we'll just tally for the current
+        //number of games played this session.
+
+        m_sharedData.connectedClients[m_playerSlots[i].clientID].xp = m_playerSlots[i].stats.totalXP;
     }
 
     //send stats to clients and notify clients game ended

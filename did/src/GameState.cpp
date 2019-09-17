@@ -1625,20 +1625,15 @@ void GameState::updateScene(SceneState state)
 
 void GameState::updateConnection(ConnectionState state)
 {
-    //m_sharedData.clientInformation.updateClient(state);
-    /*{
-        auto idx = state.actorID - Actor::ID::PlayerOne;
+    auto idx = state.actorID - Actor::ID::PlayerOne;
 
-        if (state.clientID == 0)
-        {
-            m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
-        }
-        else
-        {
-            const auto& clientInfo = m_sharedData.clientInformation.getClient(state);
-            m_nameTagManager.updateName(clientInfo.name, idx);
-        }
-    }*/
+    auto& client = m_sharedData.clientInformation.getClient(idx);
+    auto oldName = client.name;
+    printMessage(oldName + " left the game");
+
+    client.name = Global::PlayerNames[idx];
+    client.peerID = 0;
+    m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
 }
 
 void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)

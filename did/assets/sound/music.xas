@@ -14,7 +14,7 @@ audioscape
         path = "assets/sound/music/night.ogg"
         streaming = true
         looped = true
-        volume = 20
+        volume = 25
         mixer_channel = 1
     }    
 }
