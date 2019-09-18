@@ -71,6 +71,8 @@ void LoadingScreen::update(float dt)
         m_sprite.move(400.f * dt, 0.f);
     }
 
+    auto oldTime = m_currentFrameTime;
+
     m_currentFrameTime += dt;
     if (m_currentFrameTime > frametime)
     {
@@ -83,6 +85,14 @@ void LoadingScreen::update(float dt)
         {
             m_sprite.setPosition(static_cast<float>(m_frameSize.x) * scale, 0.f);
         }
+    }
+
+    //pick a new message every 3 seconds or so
+    auto prev = static_cast<std::int32_t>(oldTime) % 3;
+    auto next = static_cast<std::int32_t>(m_currentFrameTime) % 3;
+    if (prev == 0 && next == 1)
+    {
+        updateMessage();
     }
 }
 

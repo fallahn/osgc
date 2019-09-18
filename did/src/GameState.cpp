@@ -224,8 +224,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     });
 #endif
 
+    update(0.f); //gets scene ready to draw before first frame
     quitLoadingScreen();   
-    clearScreen();
 }
 
 //public
@@ -589,6 +589,20 @@ void GameState::handleMessage(const xy::Message& msg)
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
     }
+    else if (msg.id == xy::Message::StateMessage)
+    {
+        const auto& data = msg.getData<xy::Message::StateEvent>();
+        if (data.type == xy::Message::StateEvent::Pushed
+            && data.id == StateID::Pause)
+        {
+            m_inputParser.setEnabled(false);
+        }
+        else if (data.type == xy::Message::StateEvent::Popped
+            && data.id == StateID::Pause)
+        {
+            m_inputParser.setEnabled(true);
+        }
+    }
 
     m_miniMap.handleMessage(msg);
     m_gameScene.forwardMessage(msg);
@@ -658,19 +672,6 @@ void GameState::draw()
 }
 
 //private
-void GameState::clearScreen()
-{
-    sf::Image img;
-    img.create(1, 1, sf::Color::Black);
-    sf::Texture t;
-    t.loadFromImage(img);
-    sf::Sprite spr(t);
-    spr.setScale(xy::DefaultSceneSize);
-    getContext().renderWindow.clear();
-    getContext().renderWindow.draw(spr);
-    getContext().renderWindow.display();
-}
-
 void GameState::loadResources()
 {
     m_shaderResource.preload(ShaderID::SpriteShader, "#version 120\n#define LIGHTING\n" + SpriteVertex, SpriteFrag);

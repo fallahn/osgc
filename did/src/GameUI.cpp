@@ -564,7 +564,6 @@ void GameState::showRoundEnd(const RoundSummary& summary)
         if ((id >= Actor::ID::PlayerOne && id <= Actor::ID::PlayerFour) || id == Actor::ID::Skeleton)
         {
             entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
-            LOG("Stop weapon anim too!", xy::Logger::Type::Warning);
         }
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);

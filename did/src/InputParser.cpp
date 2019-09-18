@@ -31,7 +31,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float deadZone = 20.f;
+    const float deadZone = 46.f;
 }
 
 InputParser::InputParser(const InputBinding& ib, xy::NetClient& connection)

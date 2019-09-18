@@ -127,9 +127,9 @@ D - Right
 
 LCtrl/Controller B - Pick up/drop
 Space/Controller A - Use Item
-LShift/Controller RB - Strafe
+LShift/Controller LB - Strafe
 
-Q/Controller LB - Previous Item
+Q/Controller RB - Previous Item
 E/Controller Y - Next Item
 Z/Controller X - Show/Zoom Map
 M/Controller Back - Show Map

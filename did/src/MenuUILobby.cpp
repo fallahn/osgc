@@ -216,11 +216,15 @@ void MenuState::buildLobby(sf::Font& font)
         entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
         playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         
+        //player name
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos, 200.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
         entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Centre);
         entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
+        entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+        entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+        entity.getComponent<xy::Text>().setOutlineThickness(1.f);
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().function = [&, i](xy::Entity e, float)
         {
@@ -239,6 +243,9 @@ void MenuState::buildLobby(sf::Font& font)
         entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Right);
         entity.getComponent<xy::Text>().setString("Ready");
         entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
+        entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+        entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+        entity.getComponent<xy::Text>().setOutlineThickness(1.f);
         parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         xPos += xStride;
@@ -249,6 +256,9 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition);
     entity.addComponent<xy::Text>(fineFont).setString("Seed: ");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
