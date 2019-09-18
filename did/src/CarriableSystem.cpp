@@ -41,7 +41,7 @@ sf::Vector2f operator * (sf::Vector2f l, sf::Vector2f r)
 
 namespace
 {
-    const float GrabOffset = 8.f;
+    const float GrabOffset = 6.f;
 }
 
 CarriableSystem::CarriableSystem(xy::MessageBus& mb, Server::SharedStateData& sd)
@@ -184,7 +184,7 @@ void CarriableSystem::tryGrab(xy::Entity entity)
 
     auto grabPosition = tx.getPosition() + grabOffset;
     //try with a bigger box than a point
-    sf::FloatRect grabBox(grabPosition.x - 4.f, grabPosition.y - 4.f, 8.f, 8.f);
+    sf::FloatRect grabBox(grabPosition.x - 5.f, grabPosition.y - 5.f, 10.f, 10.f);
 
     for (auto ent : entities)
     {

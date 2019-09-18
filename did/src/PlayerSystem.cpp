@@ -171,6 +171,10 @@ void PlayerSystem::reconcile(const ClientState& state, xy::Entity entity)
     //so that the local system doesn't try to reset the state
     player.curseTimer = CurseTime;
 
+    //the same is true for the respawn timer
+    player.respawn = RespawnTime;
+
+
     auto& tx = entity.getComponent<xy::Transform>();
     tx.setPosition(state.position);
 

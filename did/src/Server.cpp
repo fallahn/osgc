@@ -38,7 +38,7 @@ namespace
 {
     std::vector<const char*> RandomSeeds =
     {
-        "buns", "flaps", "dicketry", "speef",
+        "buns", "flaps", "luminescence", "speef",
         "cleftwhistle", "aubergine", "gargantua",
         "supremebeing", "legs", "buchanan", "estoban",
         "beardweevils", "kitchen", "queensbury",

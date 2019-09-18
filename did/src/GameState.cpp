@@ -580,6 +580,7 @@ void GameState::handleMessage(const xy::Message& msg)
             }
             else
             {
+                LOG("Client player respawned", xy::Logger::Type::Info);
                 cmd.action = [](xy::Entity entity, float)
                 {
                     entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
@@ -1594,13 +1595,11 @@ void GameState::updateScene(SceneState state)
                     m_gameScene.getSystem<Camera3DSystem>().setActive(true);
                     m_gameScene.getSystem<Camera3DSystem>().enableChase(true);
                 }
-                else
-                {
-                    //raise message for remote players
-                    auto* msg = getContext().appInstance.getMessageBus().post<PlayerEvent>(MessageID::PlayerMessage);
-                    msg->action = PlayerEvent::Respawned;
-                    msg->entity = entity;
-                }
+
+                //raise message for remote players
+                auto* msg = getContext().appInstance.getMessageBus().post<PlayerEvent>(MessageID::PlayerMessage);
+                msg->action = PlayerEvent::Respawned;
+                msg->entity = entity;
             }
         };
     }
