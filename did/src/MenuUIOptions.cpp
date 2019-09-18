@@ -41,8 +41,29 @@ void MenuState::buildOptions(sf::Font& font)
     parentEntity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::OptionsNode;
     parentEntity.addComponent<Slider>().speed = Menu::SliderSpeed;
 
-    //back button
+    //background
     auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/browser_window.png"));
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //title
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 30.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Text>(font).setString("Controls");
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //back button
+    entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
     entity.addComponent<xy::Text>(font).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
@@ -99,9 +120,7 @@ void MenuState::buildOptions(sf::Font& font)
 
 
     auto helpString =
-R"(Controls:
-
-W - Up
+R"(W - Up
 S - Down
 A - Left
 D - Right
@@ -116,12 +135,10 @@ Z/Controller X - Show/Zoom Map
 M/Controller Back - Show Map
 Tab - Show Scoreboard
 
-Esc/P/Pause/Controller Start - Show options Menu
-
-Custom keybinds coming soon!)";
+Esc/P/Pause/Controller Start - Show options Menu)";
 
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(120.f, 80.f);
+    entity.addComponent<xy::Transform>().setPosition(120.f, 180.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont));
     entity.getComponent<xy::Text>().setString(helpString);

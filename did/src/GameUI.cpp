@@ -534,6 +534,9 @@ void GameState::showRoundEnd(const RoundSummary& summary)
         entity.getComponent<xy::Text>().setFont(m_fontResource.get(Global::TitleFont));
         entity.getComponent<xy::Text>().setString("Winner!");
         entity.getComponent<xy::Text>().setCharacterSize(120);
+        entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+        entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+        entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     };
     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -542,7 +545,7 @@ void GameState::showRoundEnd(const RoundSummary& summary)
     cmd.action = [](xy::Entity e, float)
     {
         e.getComponent<xy::Callback>().active = false;
-        //e.getComponent<xy::Text>().setFillColour(sf::Color::Transparent);
+        e.getComponent<xy::Text>().setFillColour(sf::Color::Transparent);
     };
     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
@@ -561,6 +564,7 @@ void GameState::showRoundEnd(const RoundSummary& summary)
         if ((id >= Actor::ID::PlayerOne && id <= Actor::ID::PlayerFour) || id == Actor::ID::Skeleton)
         {
             entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
+            LOG("Stop weapon anim too!", xy::Logger::Type::Warning);
         }
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -573,8 +577,9 @@ void GameState::showRoundEnd(const RoundSummary& summary)
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-    //disable unnecessary systems
-    m_gameScene.setSystemActive<ClientWeaponSystem>(false);
+    //disable unnecessary systems - why is this unnecessary?
+    //disabling it breaks the weapon animations
+    //m_gameScene.setSystemActive<ClientWeaponSystem>(false);
 }
 
 void GameState::showEndButton()

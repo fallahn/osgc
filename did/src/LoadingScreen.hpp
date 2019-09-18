@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Font.hpp>
 
 #include <vector>
 
@@ -36,10 +38,14 @@ private:
     sf::Sprite m_sprite;
     sf::Texture m_texture;
 
+    sf::Font m_font;
+    sf::Text m_text;
+
     std::int32_t m_currentFrame;
     static constexpr std::size_t MaxFrames = 16;
     float m_currentFrameTime;
     sf::Vector2i m_frameSize;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    void updateMessage();
 };

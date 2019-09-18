@@ -17,8 +17,10 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "LoadingScreen.hpp"
+#include "GlobalConsts.hpp"
 
 #include <xyginext/core/FileSystem.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -31,6 +33,13 @@ namespace
     const float scale = 4.f;
 
     const std::int32_t FrameCountX = 4;
+
+    const std::array<std::string, 3> randomMessages =
+    {
+        "Strafe when fighting!",
+        "Use a decoy to distract the bees",
+        "Zombies are scared of light!"
+    };
 }
 
 LoadingScreen::LoadingScreen()
@@ -46,6 +55,12 @@ LoadingScreen::LoadingScreen()
     m_sprite.setTextureRect({ {}, m_frameSize });
     m_sprite.setScale(-scale, scale);
     m_sprite.setPosition(static_cast<float>(m_frameSize.x) * scale, 0.f);
+
+    m_font.loadFromFile(xy::FileSystem::getResourcePath() + Global::FineFont);
+    m_text.setFont(m_font);
+    m_text.setFillColor(Global::InnerTextColour);
+    m_text.setCharacterSize(Global::LobbyTextSize);
+    updateMessage();
 }
 
 //public
@@ -75,4 +90,12 @@ void LoadingScreen::update(float dt)
 void LoadingScreen::draw(sf::RenderTarget& rt, sf::RenderStates) const
 {
     rt.draw(m_sprite);
+    rt.draw(m_text);
+}
+
+void LoadingScreen::updateMessage()
+{
+    m_text.setString(randomMessages[xy::Util::Random::value(0, randomMessages.size() - 1)]);
+    m_text.setOrigin(m_text.getLocalBounds().width / 2.f, m_text.getLocalBounds().height / 2.f);
+    m_text.setPosition(xy::DefaultSceneSize.x / 2.f, 980.f);
 }

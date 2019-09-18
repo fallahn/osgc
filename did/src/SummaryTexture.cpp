@@ -73,6 +73,9 @@ void SummaryTexture::update(const RoundSummary& summary, const ClientInfoManager
     sf::Text text;
     text.setFont(m_font);
     text.setCharacterSize(36);
+    text.setFillColor(Global::InnerTextColour);
+    text.setOutlineColor(Global::OuterTextColour);
+    text.setOutlineThickness(1.f);
 
     //TODO other text properties
 
@@ -99,10 +102,12 @@ void SummaryTexture::update(const RoundSummary& summary, const ClientInfoManager
         sprite.setTexture(m_avatarTexture);
         if (manager.getClient(i).peerID > 0)
         {
+            //human
             sprite.setTextureRect(AvatarRects[i]);
         }
         else
         {
+            //cpu/bot
             sprite.setTextureRect(AvatarRects.back());
         }
         sprite.setPosition(AvatarPositions[i]);
