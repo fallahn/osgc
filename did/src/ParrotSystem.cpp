@@ -126,6 +126,7 @@ void ParrotSystem::onEntityAdded(xy::Entity entity)
         parrot.vertices[2] = sf::Vertex(sf::Vector2f(16.f, 16.f), sf::Vector2f(32.f, 32.f));
         parrot.vertices[3] = sf::Vertex(sf::Vector2f(-16.f, 16.f), sf::Vector2f(0.f, 32.f));
 
-        parrot.setPosition(HomePosition + sf::Vector2f((++i * 12.f), i * -14.f));
+        i++;
+        parrot.setPosition(HomePosition + sf::Vector2f(i * 12.f, i * -14.f));
     }
 }

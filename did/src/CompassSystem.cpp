@@ -102,57 +102,67 @@ void CompassSystem::process(float)
 
         sf::Uint8 compassAlpha = 0;
 
-        for (auto i = 0u; i < m_playerPoints.size(); ++i)
+        if (parent.getComponent<Player>().sync.state != Player::Dead)
         {
-            if (i != currentId)
+            for (auto i = 0u; i < m_playerPoints.size(); ++i)
             {
-                auto direction = m_playerPoints[i] - position;
-                auto rotation = xy::Util::Vector::rotation(direction);
-                auto colour = Global::PlayerColours[i];
-                auto len2 = xy::Util::Vector::lengthSquared(direction);
-                if (len2 > ViewRadiusSqr)
+                if (i != currentId)
                 {
-                    float diff = len2 - ViewRadiusSqr;
-                    float alpha = 1.f - xy::Util::Math::clamp(diff / 6000.f, 0.f, 1.f);
-                    colour.a = static_cast<sf::Uint8>(255.f * alpha);
+                    auto direction = m_playerPoints[i] - position;
+                    auto rotation = xy::Util::Vector::rotation(direction);
+                    auto colour = Global::PlayerColours[i];
+                    auto len2 = xy::Util::Vector::lengthSquared(direction);
+                    if (len2 > ViewRadiusSqr)
+                    {
+                        float diff = len2 - ViewRadiusSqr;
+                        float alpha = 1.f - xy::Util::Math::clamp(diff / 6000.f, 0.f, 1.f);
+                        colour.a = static_cast<sf::Uint8>(255.f * alpha);
+                    }
+
+                    //use the least transparent value for the compass background
+                    if (colour.a > compassAlpha)
+                    {
+                        compassAlpha = colour.a;
+                    }
+
+                    sf::Transform xForm;
+                    xForm.rotate(rotation);
+                    xForm.scale(0.5f, 0.5f);
+
+                    verts[currVert].position = xForm.transformPoint({ -TextureHalfWidth, -TextureHalfHeight }) + position;
+                    verts[currVert].color = colour;
+                    currVert++;
+
+                    verts[currVert].texCoords = { NeedleWidth, 0.f };
+                    verts[currVert].position = xForm.transformPoint({ TextureHalfWidth, -TextureHalfHeight }) + position;
+                    verts[currVert].color = colour;
+                    currVert++;
+
+                    verts[currVert].texCoords = { NeedleWidth, NeedleHeight };
+                    verts[currVert].position = xForm.transformPoint({ TextureHalfWidth, TextureHalfHeight }) + position;
+                    verts[currVert].color = colour;
+                    currVert++;
+
+                    verts[currVert].texCoords = { 0.f, NeedleHeight };
+                    verts[currVert].position = xForm.transformPoint({ -TextureHalfWidth, TextureHalfHeight }) + position;
+                    verts[currVert].color = colour;
+                    currVert++;
                 }
+            }
 
-                //use the least transparent value for the compass background
-                if (colour.a > compassAlpha)
-                {
-                    compassAlpha = colour.a;
-                }
-
-                sf::Transform xForm;
-                xForm.rotate(rotation);
-                xForm.scale(0.5f, 0.5f);
-
-                verts[currVert].position = xForm.transformPoint({ -TextureHalfWidth, -TextureHalfHeight }) + position;
-                verts[currVert].color = colour;
-                currVert++;
-
-                verts[currVert].texCoords = { NeedleWidth, 0.f };
-                verts[currVert].position = xForm.transformPoint({ TextureHalfWidth, -TextureHalfHeight }) + position;
-                verts[currVert].color = colour;
-                currVert++;
-
-                verts[currVert].texCoords = { NeedleWidth, NeedleHeight };
-                verts[currVert].position = xForm.transformPoint({ TextureHalfWidth, TextureHalfHeight }) + position;
-                verts[currVert].color = colour;
-                currVert++;
-
-                verts[currVert].texCoords = { 0.f, NeedleHeight };
-                verts[currVert].position = xForm.transformPoint({ -TextureHalfWidth, TextureHalfHeight }) + position;
-                verts[currVert].color = colour;
-                currVert++;
+            for (auto i = 0; i < 4; ++i)
+            {
+                verts[i].color.a = compassAlpha / 4;
             }
         }
-
-        for (auto i = 0; i < 4; ++i)
+        else
         {
-            verts[i].color.a = compassAlpha / 4;
+            //hide compass
+            for (auto& v : verts)
+            {
+                v.color.a = 0;
+            }
         }
-
         drawable.updateLocalBounds();
     }
 

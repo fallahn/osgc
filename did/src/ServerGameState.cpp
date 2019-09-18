@@ -278,8 +278,6 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     {
         auto ip = evt.packet.as<InputUpdate>();
 
-        //if (m_playerSlots[ip.playerNumber].gameEntity.getComponent<Bot>().enabled) break;
-
         auto& playerIp = m_playerSlots[ip.playerNumber].gameEntity.getComponent<InputComponent>();
 
         //update player input history

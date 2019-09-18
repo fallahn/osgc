@@ -91,6 +91,19 @@ namespace
         Target,
         None
     };
+
+#ifdef XY_DEBUG
+    //used for printing actors in debug mode
+    static const std::vector<std::string> ActorNames =
+    {
+        "None", "Player One", "Player Two", "Player Three", "Player Four",
+        "Skeleton", "Barrel", "Crab", "Boat", "Treasure", "Ammo", "Coin",
+        "Food", "Lantern", "Treasure Spawn", "Ammo Spawn", "Coin Spawn",
+        "Weapon", "Fire", "Parrot", "Explosion", "Dirt Spray", "Lightning",
+        "Bees", "Skull Shield", "Skull Item", "Smoke Puff", "Flare", "Flare Item",
+        "Decoy", "Decoy Item", "Magnet", "Impact"
+    };
+#endif
 }
 
 BotSystem::BotSystem(xy::MessageBus& mb, PathFinder& pf, std::size_t seed)
@@ -182,13 +195,13 @@ void BotSystem::handleMessage(const xy::Message& msg)
                     bot.movementTimer = 0.f;
                     bot.resetState();
                     bot.targetPoint = m_destinationPoints[Server::getRandomInt(0, m_destinationPoints.size() - 1)];
-                    std::cout << "Reset bot " << (int)entity.getComponent<Player>().playerNumber << "!\n";
+                    LOG("Reset bot " + ActorNames[entity.getComponent<Actor>().id], xy::Logger::Type::Info);
                 }
             }
         }
         else if (data.action == PlayerEvent::Died)
         {
-            LOG("detected player death", xy::Logger::Type::Info);
+            //LOG("detected player death", xy::Logger::Type::Info);
 
             //tell anyone fighting the dead player to stop fighting
             auto& entities = getEntities();
@@ -203,7 +216,7 @@ void BotSystem::handleMessage(const xy::Message& msg)
                     bot.state = Bot::State::Searching;
                     bot.path.clear();
                     bot.targetPoint = {};
-                    LOG("gave up fighting", xy::Logger::Type::Info);
+                    LOG(ActorNames[entity.getComponent<Actor>().id] + " gave up fighting, " + ActorNames[data.entity.getComponent<Actor>().id] + " dead", xy::Logger::Type::Info);
                 }
             }
         }
@@ -590,20 +603,30 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     auto targetActor = bot.targetEntity.getComponent<Actor>();
     auto actorID = targetActor.id;
     bool validActor = false;
+    bool validState = true;
     switch (actorID)
     {
     default: break;
-    case Actor::Skeleton:
-    case Actor::Barrel:
     case Actor::PlayerOne:
     case Actor::PlayerTwo:
     case Actor::PlayerThree:
     case Actor::PlayerFour:
+        //this is a kludge because normally we wouldn't have client side bots
+#ifdef XY_DEBUG
+        if (bot.targetEntity.hasComponent<Player>())
+        {
+            validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
+        }
+#else
+        validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
+#endif
+    case Actor::Skeleton:
+    case Actor::Barrel:
         validActor = true;
         break;
     }
 
-    if (!validActor)
+    if (!(validActor && validState))
     {
         bot.popState();
         bot.sweepTimer = SweepTime;
@@ -614,12 +637,14 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     auto position = entity.getComponent<xy::Transform>().getPosition();
     auto direction = bot.targetEntity.getComponent<xy::Transform>().getPosition() - position;
     auto len2 = xy::Util::Vector::lengthSquared(direction);
-    if (len2 > MaxFightDistance)
+    //TODO this confuses the bot as the distance is so much smaller than the search area
+    //TODO replace with raycast to check target is not obstructed
+    /*if (len2 > MaxFightDistance)
     {
-        LOG("enemy too far away", xy::Logger::Type::Info);
+        LOG(ActorNames[entity.getComponent<Actor>().id] + ": enemy too far away", xy::Logger::Type::Info);
         bot.popState();
         return;
-    }
+    }*/
 
     auto fightingDistance = IdealSwordFightingDistance;
     auto minFightingDistance = MinSwordFightingDistance;
@@ -753,10 +778,12 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         }
 
         //flee mode so we can't fight again until certain conditions are met
+        //TODO this doesn't reall work, it just makes ethe ot give up fighting
+        //until it gets pummeled to death :/
         if (inventory.ammo == 0
             && inventory.health < otherHealth)
         {
-            LOG("Run away!!", xy::Logger::Type::Info);
+            LOG(ActorNames[entity.getComponent<Actor>().id] + ": Run away!!", xy::Logger::Type::Info);
             bot.fleeing = true;
             bot.resetState();
             return;
@@ -810,7 +837,7 @@ void BotSystem::updateCapturing(xy::Entity entity)
             bot.targetPoint.y -= Global::TileSize * 2.f;
         }
         bot.path.push_back(bot.targetPoint);
-        LOG("Dropped treasure in boat!", xy::Logger::Type::Info);
+        LOG(ActorNames[entity.getComponent<Actor>().id] + ": Dropped treasure in boat!", xy::Logger::Type::Info);
     }
 
     //we might have collided with something so move away and await new path
@@ -844,7 +871,7 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
             bot.path.clear();
             bot.pathRequested = false;
 
-            LOG("picked up treasure!", xy::Logger::Type::Info);
+            LOG(ActorNames[entity.getComponent<Actor>().id] + ": picked up treasure!", xy::Logger::Type::Info);
             bot.targetPoint = entity.getComponent<Player>().spawnPosition;
             bot.targetPoint.y -= Global::PlayerSpawnOffset;
             requestPath(entity);       
@@ -975,12 +1002,23 @@ void BotSystem::wideSweep(xy::Entity entity)
 
     //TODO we need to include some sort of raycast to target and check
     //that there are no solid tiles in the way (we shouldn't be able to see through trees)
-    if (bot.state != Bot::State::Fighting && bot.state != Bot::State::Capturing/* && !bot.fleeing*/)
+    if (bot.state != Bot::State::Fighting && bot.state != Bot::State::Capturing)
     {
         auto position = entity.getComponent<xy::Transform>().getPosition();
 
-        static const float Radius = Global::LightRadius * 0.9f;
-        sf::FloatRect bounds(-Radius, -Radius, Radius * 2.f, Radius * 2.f);
+        sf::FloatRect bounds;
+        if (isDay())
+        {
+            //large visible area, approx what the player sees on screen (without accounting for perspective)
+            bounds = { -160.f, -288.f, 320.f, 320.f }; //a 10x10 tile square
+        }
+        else
+        {
+            //only see approx light area
+            static const float Radius = Global::LightRadius * 0.9f;
+            bounds = { -Radius, -Radius, Radius * 2.f, Radius * 2.f };
+        }
+
         bounds.left += position.x;
         bounds.top += position.y;
 
@@ -1013,7 +1051,22 @@ void BotSystem::wideSweep(xy::Entity entity)
             case Actor::PlayerTwo:
             case Actor::PlayerThree:
             case Actor::PlayerFour:
-                result = SweepResult::Fight;
+            {
+                auto position = entity.getComponent<xy::Transform>().getPosition();
+                auto direction = ent.getComponent<xy::Transform>().getPosition() - position;
+                auto len2 = xy::Util::Vector::lengthSquared(direction);
+
+                if (len2 < MaxFightDistance/* && !obstructed(dir)*/)
+                {
+                    //only target if close enough and not obstructed
+                    result = SweepResult::Fight;
+                }
+                else
+                {
+                    //try path to target
+                    result = SweepResult::Target;
+                }
+            }
                 break;
             case Actor::Treasure:
             case Actor::Coin:
@@ -1028,27 +1081,30 @@ void BotSystem::wideSweep(xy::Entity entity)
             }
 
             //fighting is higher priority than getting items
-            if (/*!bot.fleeing &&*/ result == SweepResult::Fight)
+            if (result == SweepResult::Fight)
             {
                 //TODO raycast to make sure target is not the other side
                 //of a terrain collidable.
 
-                //if carrying something, drop it
-                if (entity.getComponent<Carrier>().carryFlags & (Carrier::Torch | Carrier::Treasure))
+                if (!bot.fleeing)
                 {
-                    bot.inputMask |= InputFlag::CarryDrop;
+                    //if carrying something, drop it
+                    if (entity.getComponent<Carrier>().carryFlags & (Carrier::Torch | Carrier::Treasure))
+                    {
+                        bot.inputMask |= InputFlag::CarryDrop;
+                    }
+
+                    bot.pushState();
+
+                    bot.path.clear();
+                    bot.pathRequested = false;
+                    bot.targetEntity = ent;
+                    bot.targetType = Bot::Target::Enemy;
+                    bot.state = Bot::State::Fighting;
+                    bot.movementTimer = 0.f;
+                    bot.fightTimer = 0.f;
+                    LOG(ActorNames[entity.getComponent<Actor>().id] + ": Found enemy - " + ActorNames[ent.getComponent<Actor>().id], xy::Logger::Type::Info);
                 }
-
-                bot.pushState();
-
-                bot.path.clear();
-                bot.pathRequested = false;
-                bot.targetEntity = ent;
-                bot.targetType = Bot::Target::Enemy;
-                bot.state = Bot::State::Fighting;
-                bot.movementTimer = 0.f;
-                bot.fightTimer = 0.f;
-                LOG("Found an enemy!", xy::Logger::Type::Info);
                 return;
             }
             else if (result == SweepResult::Target
@@ -1098,7 +1154,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
 
                 //plot path to collectable
-                LOG("Found " + std::to_string(actor.id) + " attempting to grab!", xy::Logger::Type::Info);
+                LOG(ActorNames[entity.getComponent<Actor>().id] + ": Found " + ActorNames[actor.id] + " attempting to grab!", xy::Logger::Type::Info);
 
                 bot.pushState();
 
@@ -1123,6 +1179,14 @@ void BotSystem::wideSweep(xy::Entity entity)
                 case Actor::Ammo:
                 case Actor::Coin:
                     bot.targetType = Bot::Target::Collectable;
+                    break;
+                case Actor::Skeleton:
+                case Actor::Barrel:
+                case Actor::PlayerOne:
+                case Actor::PlayerTwo:
+                case Actor::PlayerThree:
+                case Actor::PlayerFour:
+                    bot.targetType = Bot::Target::Enemy;
                     break;
                 }
 

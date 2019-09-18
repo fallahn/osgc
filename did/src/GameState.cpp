@@ -131,7 +131,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     xy::App::setMouseCursorVisible(false);
 
-    launchLoadingScreen();
+    launchLoadingScreen();    
     loadResources();
 
     m_summaryStats.stats[0].id = Actor::ID::PlayerOne;
@@ -225,6 +225,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 #endif
 
     quitLoadingScreen();   
+    clearScreen();
 }
 
 //public
@@ -656,6 +657,19 @@ void GameState::draw()
 }
 
 //private
+void GameState::clearScreen()
+{
+    sf::Image img;
+    img.create(1, 1, sf::Color::Black);
+    sf::Texture t;
+    t.loadFromImage(img);
+    sf::Sprite spr(t);
+    spr.setScale(xy::DefaultSceneSize);
+    getContext().renderWindow.clear();
+    getContext().renderWindow.draw(spr);
+    getContext().renderWindow.display();
+}
+
 void GameState::loadResources()
 {
     m_shaderResource.preload(ShaderID::SpriteShader, "#version 120\n#define LIGHTING\n" + SpriteVertex, SpriteFrag);

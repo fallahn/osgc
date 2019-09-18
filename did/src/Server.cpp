@@ -99,6 +99,8 @@ void GameServer::stop()
         m_freeIDs = { 0,1,2,3, };
         m_nextFreeID = 0;
 
+        m_sharedStateData.connectedClients.clear(); //don't want to maintain expired data between runs
+
         xy::Logger::log("Server Stopped.", xy::Logger::Type::Info);
     }
 }

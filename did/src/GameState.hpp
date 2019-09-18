@@ -108,6 +108,7 @@ private:
     bool m_updateSummary;
     RoundSummary m_summaryStats;
 
+    void clearScreen(); //renders a black screen before displaying game
     void loadResources();
     void loadUI();
     void loadRoundEnd();
