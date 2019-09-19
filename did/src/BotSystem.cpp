@@ -633,18 +633,18 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         return;
     }
 
-    //if target far away they escaped or died so drop back to last state (sweep should find any dropped items)
+    //if target blocked then quit and drop back to last state (sweep should find any dropped items)
     auto position = entity.getComponent<xy::Transform>().getPosition();
-    auto direction = bot.targetEntity.getComponent<xy::Transform>().getPosition() - position;
-    auto len2 = xy::Util::Vector::lengthSquared(direction);
-    //TODO this confuses the bot as the distance is so much smaller than the search area
-    //TODO replace with raycast to check target is not obstructed
-    /*if (len2 > MaxFightDistance)
+    auto targetPosition = bot.targetEntity.getComponent<xy::Transform>().getPosition();// -position;
+    
+    //for some reason enabling this causes a strange exception
+    /*if (m_pathFinder.rayTest(position, targetPosition))
     {
-        LOG(ActorNames[entity.getComponent<Actor>().id] + ": enemy too far away", xy::Logger::Type::Info);
+        LOG(ActorNames[entity.getComponent<Actor>().id] + ": enemy was obscured", xy::Logger::Type::Info);
         bot.popState();
         return;
     }*/
+
 
     auto fightingDistance = IdealSwordFightingDistance;
     auto minFightingDistance = MinSwordFightingDistance;
@@ -660,6 +660,8 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     }
 
     //else try to move within fighting distance (but not on top of target)
+    auto direction = targetPosition - position;
+    auto len2 = xy::Util::Vector::lengthSquared(direction);
     if (len2 > fightingDistance)
     {
         moveToPoint(direction, bot);
@@ -778,7 +780,7 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         }
 
         //flee mode so we can't fight again until certain conditions are met
-        //TODO this doesn't reall work, it just makes ethe ot give up fighting
+        //TODO this doesn't really work, it just makes ethe ot give up fighting
         //until it gets pummeled to death :/
         if (inventory.ammo == 0
             && inventory.health < otherHealth)
@@ -1053,10 +1055,11 @@ void BotSystem::wideSweep(xy::Entity entity)
             case Actor::PlayerFour:
             {
                 auto position = entity.getComponent<xy::Transform>().getPosition();
-                auto direction = ent.getComponent<xy::Transform>().getPosition() - position;
+                auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+                auto direction = targetPosition - position;
                 auto len2 = xy::Util::Vector::lengthSquared(direction);
 
-                if (len2 < MaxFightDistance/* && !obstructed(dir)*/)
+                if (len2 < MaxFightDistance && !m_pathFinder.rayTest(position, targetPosition))
                 {
                     //only target if close enough and not obstructed
                     result = SweepResult::Fight;

@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #include "PathFinder.hpp"
 
+#include <xyginext/core/Assert.hpp>
+
 #include <SFML/System/Lock.hpp>
 #include <SFML/System/Sleep.hpp>
 
@@ -80,9 +82,18 @@ PathFinder::~PathFinder()
 }
 
 //public
+void PathFinder::setGridSize(const sf::Vector2i& gs)
+{
+    XY_ASSERT(gs.x > 0 && gs.y > 0, "Invalid grid size");
+    m_gridSize = gs;
+    m_collisionArray.resize(gs.x * gs.y, 0);
+}
+
 void PathFinder::addSolidTile(const sf::Vector2i& tileCoord)
 {
+    XY_ASSERT(m_gridSize.x > 0 && m_gridSize.y > 0, "Grid size not set");
     m_soldTiles.push_back(tileCoord);
+    m_collisionArray[(m_gridSize.x * tileCoord.y) + tileCoord.x] = 1;
 }
 
 std::vector<sf::Vector2f> PathFinder::plotPath(const sf::Vector2i& start, const sf::Vector2i& end) const
@@ -160,6 +171,49 @@ void PathFinder::plotPathAsync(const sf::Vector2i& start, const sf::Vector2i& en
 
     sf::Lock lock(m_mutex);
     m_pendingQueue.push_back(job);
+}
+
+bool PathFinder::rayTest(sf::Vector2f start, sf::Vector2f end) const
+{
+    //based on http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html 
+
+    std::int32_t x0 = static_cast<std::int32_t>(start.x / m_tileSize.x);
+    std::int32_t y0 = static_cast<std::int32_t>(start.y / m_tileSize.y);
+
+    std::int32_t x1 = static_cast<std::int32_t>(end.x / m_tileSize.x);
+    std::int32_t y1 = static_cast<std::int32_t>(end.y / m_tileSize.y);
+
+    std::int32_t dx = std::abs(x1 - x0);
+    std::int32_t dy = std::abs(y1 - y0);
+    std::int32_t x = x0;
+    std::int32_t y = y0;
+    std::int32_t n = 1 + dx + dy;
+    std::int32_t x_inc = (x1 > x0) ? 1 : -1;
+    std::int32_t y_inc = (y1 > y0) ? 1 : -1;
+    std::int32_t error = dx - dy;
+    dx *= 2;
+    dy *= 2;
+
+    for (; n > 0; --n)
+    {
+        if (m_collisionArray[(y * m_gridSize.x) + x] == 1)
+        {
+            //LOG("Found ray collision at " + std::to_string(x) + ", " + std::to_string(y), xy::Logger::Type::Info);
+            return true;
+        }
+
+        if (error > 0)
+        {
+            x += x_inc;
+            error -= dy;
+        }
+        else
+        {
+            y += y_inc;
+            error += dx;
+        }
+    }
+    return false;
 }
 
 //private

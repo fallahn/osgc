@@ -40,7 +40,7 @@ public:
     const PathFinder& operator = (const PathFinder&) = delete;
 
     //set the tile count in the x and y directions
-    void setGridSize(const sf::Vector2i& gs) { m_gridSize = gs; }
+    void setGridSize(const sf::Vector2i& gs);
     //set the size of a tile in world units
     void setTileSize(const sf::Vector2f& ts) { m_tileSize = ts; }
     //applies an offset from the default node position of tile centre
@@ -54,6 +54,10 @@ public:
     std::vector<sf::Vector2f> plotPath(const sf::Vector2i&, const sf::Vector2i&) const;
     //plots a path asyncronously to prevent blocking
     void plotPathAsync(const sf::Vector2i&, const sf::Vector2i&, std::vector<sf::Vector2f>&);
+
+    //returns true if a ray collides with the grid
+    //params are world coords.
+    bool rayTest(sf::Vector2f, sf::Vector2f) const;
 
 private:
     struct Node final
@@ -76,6 +80,9 @@ private:
     sf::Vector2f m_tileSize;
     sf::Vector2f m_gridOffset;
     std::vector<sf::Vector2i> m_soldTiles;
+
+    //used for ray testing
+    std::vector<std::int32_t> m_collisionArray;
 
     bool collides(const sf::Vector2i&) const;
     Node::Ptr nodeOnList(const std::set<Node::Ptr>&, const sf::Vector2i&) const;

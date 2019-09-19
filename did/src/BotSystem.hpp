@@ -157,7 +157,7 @@ public:
     void process(float) override;
 
 private:
-    PathFinder & m_pathFinder;
+    PathFinder& m_pathFinder;
     std::int32_t m_timeAccumulator;
     std::vector<sf::Vector2f> m_destinationPoints;
 
