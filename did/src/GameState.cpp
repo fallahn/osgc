@@ -227,6 +227,10 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
             });
     }
 
+    registerCommand("seed", [&](const std::string&)
+        {xy::Console::print(m_sharedData.seedData.str); }
+    );
+
     update(0.f); //gets scene ready to draw before first frame
     quitLoadingScreen();   
 }

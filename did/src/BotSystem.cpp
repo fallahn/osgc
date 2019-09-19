@@ -46,9 +46,9 @@ Copyright 2019 Matt Marchant
 
 #include <algorithm>
 
-#define NO_LOG
+//define NO_LOG
 #ifdef NO_LOG
-#undef LOG(message, type)
+#undef LOG
 #define LOG(x,y)
 #endif
 
@@ -321,6 +321,12 @@ void BotSystem::process(float dt)
                 bot.sweepTimer = 0.f;
             }
 
+            bot.fleeTimer += dt;
+            if (bot.fleeTimer > Bot::FleeTime)
+            {
+                bot.fleeing = false;
+            }
+
             //make sure we're properly completing paths
             if (bot.path.size() == 1)
             {
@@ -406,7 +412,7 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
         if (bot.searchTimer > SearchTime)
         {
             bot.searchTimer = 0.f;
-            bot.fleeing = false;
+            //bot.fleeing = false;
 
             auto bounds = entity.getComponent<CollisionComponent>().bounds * 4.f;
             bounds.left += position.x;
@@ -793,6 +799,7 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         {
             LOG(ActorNames[entity.getComponent<Actor>().id] + ": Run away!!", xy::Logger::Type::Info);
             bot.fleeing = true;
+            bot.fleeTimer = 0.f;
             bot.resetState();
             return;
         }
@@ -1017,8 +1024,6 @@ void BotSystem::wideSweep(xy::Entity entity)
         bot.inputMask |= InputFlag::CarryDrop;
     }
 
-    //TODO we need to include some sort of raycast to target and check
-    //that there are no solid tiles in the way (we shouldn't be able to see through trees)
     if (bot.state != Bot::State::Fighting && bot.state != Bot::State::Capturing)
     {
         auto position = entity.getComponent<xy::Transform>().getPosition();
@@ -1101,9 +1106,6 @@ void BotSystem::wideSweep(xy::Entity entity)
             //fighting is higher priority than getting items
             if (result == SweepResult::Fight)
             {
-                //TODO raycast to make sure target is not the other side
-                //of a terrain collidable.
-
                 if (!bot.fleeing)
                 {
                     //if carrying something, drop it
@@ -1181,7 +1183,6 @@ void BotSystem::wideSweep(xy::Entity entity)
                 bot.pathRequested = false;
                 bot.targetEntity = ent;
                 bot.targetPoint = ent.getComponent<xy::Transform>().getWorldPosition();
-                //bot.targetType = (actor.id == Actor::ID::Treasure || actor.id == Actor::Boat) ? Bot::Target::Treasure : Bot::Target::Collectable;
                 bot.state = Bot::State::Targeting;
 
                 switch (actor.id)

@@ -44,7 +44,7 @@ LobbyState::LobbyState(SharedStateData& sd)
     : m_sharedData  (sd)
 {
     setNextState(getID());
-    xy::Logger::log("Server switched to active state");
+    xy::Logger::log("Server switched to lobby state");
 
     m_sharedData.connectedClients.erase(0);
     for (auto& client : m_sharedData.connectedClients)
