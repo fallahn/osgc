@@ -906,11 +906,20 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
         return;
     }
 
+
+
     auto dir = bot.targetPoint//Entity.getComponent<xy::Transform>().getPosition() 
         - entity.getComponent<xy::Transform>().getPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dir);
     if (len2 < 1024.f)
     {
+        if (bot.targetType == Bot::Target::Enemy)
+        {
+            //target probably moved, unless it was a barrel
+            bot.popState();
+            return;
+        }
+
         if (bot.targetType == Bot::Target::Collectable)
         {
             moveToPoint(dir, bot);
@@ -1042,7 +1051,7 @@ void BotSystem::wideSweep(xy::Entity entity)
             }
 
             const auto& actor = ent.getComponent<Actor>();
-
+            
             SweepResult result = SweepResult::None;
             switch (actor.id)
             {
@@ -1157,7 +1166,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
 
                 //plot path to collectable
-                LOG(ActorNames[entity.getComponent<Actor>().id] + ": Found " + ActorNames[actor.id] + " attempting to grab!", xy::Logger::Type::Info);
+                LOG(ActorNames[entity.getComponent<Actor>().id] + ": Found " + ActorNames[actor.id] + " attempting to path!", xy::Logger::Type::Info);
 
                 bot.pushState();
 
@@ -1194,7 +1203,8 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
 
                 //if we're already close skip path finding
-                if (xy::Util::Vector::lengthSquared(bot.targetPoint - position) < MinTargetArea)
+                if ((xy::Util::Vector::lengthSquared(bot.targetPoint - position) < MinTargetArea)
+                    && !m_pathFinder.rayTest(position, bot.targetPoint))
                 {
                     bot.path.push_back(bot.targetPoint);
                 }
