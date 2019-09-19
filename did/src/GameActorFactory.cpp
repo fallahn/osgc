@@ -875,7 +875,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         cameraEntity.getComponent<Camera3D>().target = entity;
 
         m_inputParser.setPlayerEntity(entity, entity.getComponent<Player>().playerNumber);
-        entity.addComponent<Bot>().enabled = true; //this component is required by the input parser
+        entity.addComponent<Bot>().enabled;// = true; //this component is required by the input parser
 
         auto compassEntity = m_gameScene.createEntity();
         compassEntity.addComponent<xy::Drawable>();

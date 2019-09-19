@@ -192,15 +192,20 @@ void CarriableSystem::tryGrab(xy::Entity entity)
 
         if (ent.getComponent<Actor>().id == Actor::ID::Boat)
         {
+            //LOG("Grabbing in boat area", xy::Logger::Type::Info);
             if(actor.id >= Actor::PlayerOne && actor.id <= Actor::PlayerFour)
             {
                 auto& boat = ent.getComponent<Boat>();
                 const auto& player = entity.getComponent<Player>();
                 auto& carrier = entity.getComponent<Carrier>();
 
+                auto boatArea = entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 0.7f);
+                //std::cout << boatArea.left << ", " << boatArea.top << ", " << boatArea.width << ", " << boatArea.height << "\n";
+                //std::cout << grabBox.left << ", " << grabBox.top << ", " << grabBox.width << ", " << grabBox.height << "\n";
+
                 if (player.playerNumber != boat.playerNumber &&
                     boat.treasureCount > 0 &&
-                    entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 0.5f).intersects(grabBox))
+                    boatArea.intersects(grabBox))
                 {
                     //sneaky stealage
                     XY_ASSERT(m_stashedIndex > 0, "Incorrect stashed treasure count");
@@ -243,7 +248,7 @@ void CarriableSystem::tryGrab(xy::Entity entity)
         {
             auto& carriable = ent.getComponent<Carriable>();
             if (!carriable.carried &&
-                entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 0.5f).intersects(grabBox))
+                entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 0.4f).intersects(grabBox))
             {
                 auto& carrier = entity.getComponent<Carrier>();
                 carrier.carryFlags |= carriable.type;

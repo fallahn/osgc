@@ -46,6 +46,12 @@ Copyright 2019 Matt Marchant
 
 #include <algorithm>
 
+#define NO_LOG
+#ifdef NO_LOG
+#undef LOG(message, type)
+#define LOG(x,y)
+#endif
+
 /*
 Behaviour:
     Searching - 

@@ -288,7 +288,10 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     }
         break;
     case PacketID::ConCommand:
-        doConCommand(evt.packet.as<ConCommand::Data>());
+        if (evt.peer == m_sharedData.hostClient)
+        {
+            doConCommand(evt.packet.as<ConCommand::Data>());
+        }
         break;
     }
 }

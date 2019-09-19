@@ -139,90 +139,93 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_summaryStats.stats[2].id = Actor::ID::PlayerThree;
     m_summaryStats.stats[3].id = Actor::ID::PlayerFour;
 
-#ifdef XY_DEBUG
+
     //register some console commands
-    registerCommand("set_storm", [&](const std::string& param)
+    if (m_sharedData.netClient->getPeer().getID() ==
+        m_sharedData.clientInformation.getHostID())
     {
-        Server::ConCommand::Data data;
-        data.commandID = Server::ConCommand::Weather;
-
-        if (param == "0")
-        {
-            data.value.asInt = 0;
-        }
-        else if (param == "1")
-        {
-            data.value.asInt = 1;
-        }
-        else if (param == "2")
-        {
-            data.value.asInt = 2;
-        }
-        else
-        {
-            return;
-        }
-        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
-    });
-
-    registerCommand("bots_enabled", [&](const std::string& param)
-    {
-        Server::ConCommand::Data data;
-        data.commandID = Server::ConCommand::BotEnable;
-        data.value.asInt = (param == "0") ? 0 : 1;
-        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
-    });
-
-    registerCommand("spawn", [&](const std::string& param)
-    {
-        if (!param.empty())
-        {
-            Actor::ID id = Actor::None;
-            if (param == "decoy_item")
-            {
-                id = Actor::DecoyItem;
-            }
-            else if (param == "decoy")
-            {
-                id = Actor::Decoy;
-            }
-            else if (param == "crab")
-            {
-                id = Actor::Crab;
-            }
-            else if (param == "flare_item")
-            {
-                id = Actor::FlareItem;
-            }
-            else if (param == "flare")
-            {
-                id = Actor::Flare;
-            }
-            else if (param == "skull_item")
-            {
-                id = Actor::SkullItem;
-            }
-            else if (param == "skull_shield")
-            {
-                id = Actor::SkullShield;
-            }
-
-            if (id != Actor::None)
+        registerCommand("set_storm", [&](const std::string& param)
             {
                 Server::ConCommand::Data data;
-                data.commandID = Server::ConCommand::Spawn;
-                data.value.asInt = id;
-                data.position = m_inputParser.getPlayerEntity().getComponent<xy::Transform>().getPosition();
-                data.position.x += Global::TileSize;
+                data.commandID = Server::ConCommand::Weather;
+
+                if (param == "0")
+                {
+                    data.value.asInt = 0;
+                }
+                else if (param == "1")
+                {
+                    data.value.asInt = 1;
+                }
+                else if (param == "2")
+                {
+                    data.value.asInt = 2;
+                }
+                else
+                {
+                    return;
+                }
                 m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
-            }
-            else
+            });
+
+        registerCommand("bots_enabled", [&](const std::string& param)
             {
-                xy::Console::print(param + ": Actor not found.");
-            }
-        }
-    });
-#endif
+                Server::ConCommand::Data data;
+                data.commandID = Server::ConCommand::BotEnable;
+                data.value.asInt = (param == "0") ? 0 : 1;
+                m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
+            });
+
+        registerCommand("spawn", [&](const std::string& param)
+            {
+                if (!param.empty())
+                {
+                    Actor::ID id = Actor::None;
+                    if (param == "decoy_item")
+                    {
+                        id = Actor::DecoyItem;
+                    }
+                    else if (param == "decoy")
+                    {
+                        id = Actor::Decoy;
+                    }
+                    else if (param == "crab")
+                    {
+                        id = Actor::Crab;
+                    }
+                    else if (param == "flare_item")
+                    {
+                        id = Actor::FlareItem;
+                    }
+                    else if (param == "flare")
+                    {
+                        id = Actor::Flare;
+                    }
+                    else if (param == "skull_item")
+                    {
+                        id = Actor::SkullItem;
+                    }
+                    else if (param == "skull_shield")
+                    {
+                        id = Actor::SkullShield;
+                    }
+
+                    if (id != Actor::None)
+                    {
+                        Server::ConCommand::Data data;
+                        data.commandID = Server::ConCommand::Spawn;
+                        data.value.asInt = id;
+                        data.position = m_inputParser.getPlayerEntity().getComponent<xy::Transform>().getPosition();
+                        data.position.x += Global::TileSize;
+                        m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
+                    }
+                    else
+                    {
+                        xy::Console::print(param + ": Actor not found.");
+                    }
+                }
+            });
+    }
 
     update(0.f); //gets scene ready to draw before first frame
     quitLoadingScreen();   
@@ -592,10 +595,16 @@ void GameState::handleMessage(const xy::Message& msg)
     else if (msg.id == xy::Message::StateMessage)
     {
         const auto& data = msg.getData<xy::Message::StateEvent>();
-        if (data.type == xy::Message::StateEvent::Pushed
-            && data.id == StateID::Pause)
+        if (data.type == xy::Message::StateEvent::Pushed)
         {
-            m_inputParser.setEnabled(false);
+            if (data.id == StateID::Pause)
+            {
+                m_inputParser.setEnabled(false);
+            }
+            if (data.id == StateID::Error)
+            {
+                m_sharedData.netClient->disconnect();
+            }
         }
         else if (data.type == xy::Message::StateEvent::Popped
             && data.id == StateID::Pause)
@@ -700,7 +709,9 @@ void GameState::loadResources()
     auto& mb = getContext().appInstance.getMessageBus();
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
+#ifdef XY_DEBUG
     m_gameScene.addSystem<BotSystem>(mb, m_pathFinder, m_sharedData.seedData.hash);
+#endif
     m_gameScene.addSystem<PlayerSystem>(mb);
     m_gameScene.addSystem<DepthAnimationSystem>(mb);
     m_gameScene.addSystem<SpringFlowerSystem>(mb);
