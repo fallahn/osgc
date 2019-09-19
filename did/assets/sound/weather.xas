@@ -10,6 +10,16 @@ audio_scape weather
         volume = 10
     }
 
+    emitter wind
+    {
+        path = "assets/sound/effects/wind.wav"
+        streaming = true
+        min_distance = 512
+        attenuation = 0.1
+        looped = true
+        volume = 12
+    }
+
     emitter thunder01
     {
     	path = "assets/sound/effects/thunder01.wav"
