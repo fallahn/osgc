@@ -56,10 +56,7 @@ struct MiniMapData final
     float targetScale = 0.5f;
 };
 
-class GameState final : public xy::State
-#ifdef XY_DEBUG
-    , public xy::ConsoleClient
-#endif
+class GameState final : public xy::State, public xy::ConsoleClient
 {
 public:
     GameState(xy::StateStack&, xy::State::Context, SharedData&);

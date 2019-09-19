@@ -713,9 +713,9 @@ void GameState::loadResources()
     auto& mb = getContext().appInstance.getMessageBus();
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
-#ifdef XY_DEBUG
+//#ifdef XY_DEBUG
     m_gameScene.addSystem<BotSystem>(mb, m_pathFinder, m_sharedData.seedData.hash);
-#endif
+//#endif
     m_gameScene.addSystem<PlayerSystem>(mb);
     m_gameScene.addSystem<DepthAnimationSystem>(mb);
     m_gameScene.addSystem<SpringFlowerSystem>(mb);
