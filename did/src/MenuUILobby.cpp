@@ -39,6 +39,8 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/graphics/SpriteSheet.hpp>
 
+#include <SFML/Window/Mouse.hpp>
+
 namespace
 {
     
@@ -251,15 +253,52 @@ void MenuState::buildLobby(sf::Font& font)
         xPos += xStride;
     }
 
+    //tip text
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition);
+    entity.getComponent<xy::Transform>().setOrigin(-30.f, 20.f);
+    entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
+    entity.addComponent<xy::Text>(fineFont).setString("Type anything to change how the island is generated");
+    entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
+    entity.getComponent<xy::Text>().setFillColour(/*Global::InnerTextColour*/sf::Color::White);
+    entity.getComponent<xy::Text>().setOutlineColour(/*Global::OuterTextColour*/sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [](xy::Entity e, float)
+    {
+        auto mousePos = xy::App::getRenderWindow()->mapPixelToCoords(sf::Mouse::getPosition(*xy::App::getRenderWindow()));
+        e.getComponent<xy::Transform>().setPosition(mousePos);
+    };
+    auto& textTx = entity.getComponent<xy::Transform>();
+
     //seed text
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition);
-    entity.addComponent<xy::Text>(fineFont).setString("Seed: ");
+    entity.addComponent<xy::Text>(fineFont).setString("Seed:                      (?)");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>();
+    bounds = xy::Text::getLocalBounds(entity);
+    auto charWidth = bounds.width / 31.f;
+    bounds.left = charWidth * 28.f;
+    bounds.width = charWidth * 3.f;
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([&textTx](xy::Entity, sf::Vector2f) 
+            {
+                textTx.setScale(1.f, 1.f);
+            });
+
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([&textTx](xy::Entity, sf::Vector2f)
+            {
+                textTx.setScale(0.f, 0.f);
+            });
+
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //text background
