@@ -341,10 +341,12 @@ void BotSystem::process(float dt)
             }
 
             bot.fleeTimer += dt;
-            if (bot.fleeTimer > Bot::FleeTime
-                || entity.getComponent<CollisionComponent>().water > 0)
+            if (bot.fleeing &&
+                (bot.fleeTimer > Bot::FleeTime
+                || entity.getComponent<CollisionComponent>().water > 0))
             {
                 bot.fleeing = false;
+                bot.popState();
             }
 
             //make sure we're properly completing paths
@@ -1129,10 +1131,15 @@ void BotSystem::wideSweep(xy::Entity entity)
                     //only target if close enough and not obstructed
                     result = SweepResult::Fight;
                 }
+                else if (bot.state != Bot::State::Targeting)
+                {
+                    //try path to target if not already doing so
+                    result = SweepResult::Target;
+                }
                 else
                 {
-                    //try path to target
-                    result = SweepResult::Target;
+                    //we already have better things to do that seek out an enemy
+                    continue;
                 }
             }
                 break;
@@ -1185,9 +1192,33 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
                 return;
             }
-            else if (result == SweepResult::Target
-                && bot.state != Bot::State::Targeting)
+            else if (result == SweepResult::Target)
             {
+                //TODO barrels / food should increase in priority when health is low
+
+                //if we're aleady targeting only chose new target if it's closer
+                //and more valuable (based on actor id)
+                if (bot.state == Bot::State::Targeting)
+                {
+                    auto pos = entity.getComponent<xy::Transform>().getPosition();
+                    auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+
+                    auto newDist = xy::Util::Vector::lengthSquared(targetPosition - position);
+                    auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - position);
+
+                    if (newDist > currDist
+                        || actor.id > bot.targetEntity.getComponent<Actor>().id)
+                    {
+                        continue;
+                    }
+                }
+
+                if (ent == bot.targetEntity)
+                {
+                    //already targeted, skip
+                    continue;
+                }
+
                 //ignore ammo if inventory full
                 if (actor.id == Actor::ID::Ammo
                     && entity.getComponent<Inventory>().ammo == Inventory::MaxAmmo)

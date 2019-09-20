@@ -671,7 +671,7 @@ bool GameState::update(float dt)
         m_summaryTexture.update(m_summaryStats, m_sharedData.clientInformation);
         m_updateSummary = false;
     }
-
+    
     return false;
 }
 

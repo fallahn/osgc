@@ -258,12 +258,12 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition);
     entity.getComponent<xy::Transform>().setOrigin(-30.f, 20.f);
     entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
-    entity.addComponent<xy::Text>(fineFont).setString("Type anything to change how the island is generated");
+    entity.addComponent<xy::Text>(fineFont).setString("Change this phrase to change how the island is generated");
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
     entity.getComponent<xy::Text>().setFillColour(/*Global::InnerTextColour*/sf::Color::White);
     entity.getComponent<xy::Text>().setOutlineColour(/*Global::OuterTextColour*/sf::Color::Black);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(100);
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =
         [](xy::Entity e, float)
@@ -281,7 +281,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     bounds = xy::Text::getLocalBounds(entity);
     auto charWidth = bounds.width / 31.f;
     bounds.left = charWidth * 28.f;

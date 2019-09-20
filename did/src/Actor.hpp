@@ -32,14 +32,19 @@ struct Actor final
         PlayerThree,
         PlayerFour, //Don't alter the player enum values!
         Skeleton,
-        Barrel,
-        Crab,
+
         Boat,
         Treasure,
-        Ammo,
         Coin,
+        Barrel,
+        Ammo,
         Food,
         Lantern,
+        FlareItem,
+        DecoyItem,
+        SkullItem,
+        Crab,
+
         TreasureSpawn,
         AmmoSpawn,
         CoinSpawn,
@@ -51,12 +56,9 @@ struct Actor final
         Lightning,
         Bees,
         SkullShield,
-        SkullItem,
         SmokePuff,
         Flare,
-        FlareItem,
         Decoy,
-        DecoyItem,
         Magnet,
         Impact
     }id = None;
