@@ -285,24 +285,30 @@ void BotSystem::process(float dt)
 
         if (bot.enabled)
         {
-            switch (bot.state)
+            //target may have become invalidated
+            /*if (!bot.targetEntity.isValid()
+                || bot.targetEntity.destroyed())
             {
-            default: break;
-            case Bot::State::Searching:
-                updateSearching(entity, dt);
-                break;
-            case Bot::State::Digging:
-                updateDigging(entity, dt);
-                break;
-            case Bot::State::Fighting:
-                updateFighting(entity, dt);
-                break;
-            case Bot::State::Capturing:
-                updateCapturing(entity);
-                break;
-            case Bot::State::Targeting:
-                updateTargeting(entity, dt);
-                break;
+                bot.popState();
+            }*/
+
+            //do a sweep to see if nearby items, other players or enemies are nearby
+            bot.sweepTimer += dt;
+            if (bot.sweepTimer > SweepTime
+                && !bot.fleeing)
+            {
+                wideSweep(entity);
+                bot.sweepTimer = 0.f;
+            }
+
+            //checkc if we're done fleeing
+            bot.fleeTimer += dt;
+            if (bot.fleeing &&
+                (bot.fleeTimer > Bot::FleeTime
+                || entity.getComponent<CollisionComponent>().water > 0))
+            {
+                bot.fleeing = false;
+                bot.popState();
             }
 
             const auto inventory = entity.getComponent<Inventory>();
@@ -327,26 +333,28 @@ void BotSystem::process(float dt)
                     bot.inputMask |= InputFlag::Action;
                 }
             }
-
             //track health
             bot.previousHealth = inventory.health;
 
-            //do a sweep to see if nearby items, other players or enemies are nearby
-            bot.sweepTimer += dt;
-            if (bot.sweepTimer > SweepTime
-                && !bot.fleeing)
+            //update current state
+            switch (bot.state)
             {
-                wideSweep(entity);
-                bot.sweepTimer = 0.f;
-            }
-
-            bot.fleeTimer += dt;
-            if (bot.fleeing &&
-                (bot.fleeTimer > Bot::FleeTime
-                || entity.getComponent<CollisionComponent>().water > 0))
-            {
-                bot.fleeing = false;
-                bot.popState();
+            default: break;
+            case Bot::State::Searching:
+                updateSearching(entity, dt);
+                break;
+            case Bot::State::Digging:
+                updateDigging(entity, dt);
+                break;
+            case Bot::State::Fighting:
+                updateFighting(entity, dt);
+                break;
+            case Bot::State::Capturing:
+                updateCapturing(entity);
+                break;
+            case Bot::State::Targeting:
+                updateTargeting(entity, dt);
+                break;
             }
 
             //make sure we're properly completing paths
@@ -646,15 +654,10 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     case Actor::PlayerTwo:
     case Actor::PlayerThree:
     case Actor::PlayerFour:
-        //this is a kludge because normally we wouldn't have client side bots
-//#ifdef XY_DEBUG
         if (bot.targetEntity.hasComponent<Player>())
         {
             validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
         }
-//#else
-//        validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
-//#endif
     case Actor::Skeleton:
     case Actor::Barrel:
         validActor = true;
@@ -1207,7 +1210,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                     auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - position);
 
                     if (newDist > currDist
-                        || actor.id > bot.targetEntity.getComponent<Actor>().id)
+                        || (bot.targetEntity.hasComponent<Actor>() && actor.id > bot.targetEntity.getComponent<Actor>().id))
                     {
                         continue;
                     }

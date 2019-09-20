@@ -171,7 +171,7 @@ void MenuState::buildLobby(sf::Font& font)
 
 
     //player avatars
-    float xPos = 20.f;
+    float xPos = 40.f;
     const float xStride = (xy::DefaultSceneSize.x - (2 * xPos)) / 4.f;
     xPos += (xStride / 2.f);
     for (auto i = 0; i < 4; ++i)
