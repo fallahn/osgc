@@ -57,6 +57,8 @@ void ClientInfoManager::resetClient(std::int32_t idx)
     client.name = Global::PlayerNames[idx];
     client.peerID = 0;
     client.ready = true; //makes no actual odds, but looks like CPU players are ready
+    client.gamesPlayed = 0;
+    client.score = 0;
 }
 
 //private

@@ -35,6 +35,6 @@ struct PlayerStats final
     std::uint16_t foesSlain = 0;
     std::uint16_t livesLost = 0;
     std::uint16_t roundXP = 0;
-    std::size_t totalXP = 0;
-    std::size_t currentLevel = 1;
+    std::uint32_t totalXP = 0;
+    std::uint32_t currentLevel = 1;
 };

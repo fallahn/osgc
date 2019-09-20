@@ -480,6 +480,12 @@ void GameState::toggleUI()
 
 void GameState::showRoundEnd(const RoundSummary& summary)
 {
+    for (auto i = 0u; i < 4; ++i)
+    {
+        m_sharedData.clientInformation.getClient(i).score += summary.stats[i].roundXP;
+        m_sharedData.clientInformation.getClient(i).gamesPlayed++;
+    }
+    
     //send message to menu items with stat info
     m_summaryTexture.update(summary, m_sharedData.clientInformation, true);
 

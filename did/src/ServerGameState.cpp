@@ -1077,7 +1077,7 @@ void GameState::endGame()
         //running tally. As this is not currently the case we'll just tally for the current
         //number of games played this session.
 
-        if (m_playerSlots[i].clientID != 0) //don't add bots
+        if (m_playerSlots[i].clientID != 0) //don't add bots, this will insert an empty slot in connectedClients otherwise
         {
             m_sharedData.connectedClients[m_playerSlots[i].clientID].xp = m_playerSlots[i].stats.totalXP;
         }

@@ -30,6 +30,8 @@ struct ClientInfo final
     sf::String name;
     std::uint64_t peerID = 0;
     bool ready = true;
+    std::uint32_t score = 0; //this is updated by the round summary
+    std::uint32_t gamesPlayed = 0; //as is this
 };
 
 class ClientInfoManager final

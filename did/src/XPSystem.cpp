@@ -30,11 +30,11 @@ Level   XP      Difference
 5       1000    400
 */
 
-std::size_t XP::calcLevel(std::size_t xpAmount)
+std::uint32_t XP::calcLevel(std::uint32_t xpAmount)
 {
-    std::size_t level = 0;
-    std::size_t difference = 100;
-    std::size_t currentXP = 0;
+    std::uint32_t level = 0;
+    std::uint32_t difference = 100;
+    std::uint32_t currentXP = 0;
 
     while (currentXP < xpAmount)
     {
@@ -50,9 +50,9 @@ players are awarded a bigger score when beating someone much
 higher ranked than them. Someone less the 5 levels below will
 award 0 XP
 */
-std::size_t XP::calcPlayerScore(std::uint64_t difference)
+std::uint32_t XP::calcPlayerScore(std::uint32_t difference)
 {
-    difference = std::max(std::uint64_t(-5), difference);
+    difference = std::max(std::uint32_t(-5), difference);
     difference += 5;
     return difference * PlayerScore;
 }

@@ -25,19 +25,19 @@ namespace XP
 {
     //base scores which are multiplied during the game
     //before being awarded
-    static constexpr std::size_t TreasureScore = 1;
-    static constexpr std::size_t SkellyScore = 10;
-    static constexpr std::size_t PlayerScore = 3;
+    static constexpr std::uint32_t TreasureScore = 1;
+    static constexpr std::uint32_t SkellyScore = 10;
+    static constexpr std::uint32_t PlayerScore = 3;
     //life bonus is awarded for each life under 5 not lost
     //eg 0 lives lost is 5x this score, 5 lives lost is 0
-    static constexpr std::size_t LifeBonus = 5;
-    static constexpr std::size_t BotScore = 1;
+    static constexpr std::uint32_t LifeBonus = 5;
+    static constexpr std::uint32_t BotScore = 1;
 
 
     //calculates the player level from current XP
-    std::size_t calcLevel(std::size_t xp);
+    std::uint32_t calcLevel(std::uint32_t xp);
 
     //calculates how much you actually earn from beating
     //a player depending on the difference in levels
-    std::size_t calcPlayerScore(std::uint64_t difference);
+    std::uint32_t calcPlayerScore(std::uint32_t difference);
 }

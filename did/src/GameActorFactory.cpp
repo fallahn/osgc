@@ -796,21 +796,21 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
 
         auto halfSize = Global::IslandSize / 2.f;
         std::size_t playerNumber = 0;
-        Actor::ID id = Actor::ID::PlayerOne;
+        //Actor::ID id = Actor::ID::PlayerOne;
         if (position.x > halfSize.x && position.y < halfSize.y)
         {
             playerNumber = 1;
-            id = Actor::PlayerTwo;
+            //id = Actor::PlayerTwo;
         }
         else if (position.x > halfSize.x && position.y > halfSize.y)
         {
             playerNumber = 2;
-            id = Actor::PlayerThree;
+            //id = Actor::PlayerThree;
         }
         else if (position.x < halfSize.x && position.y > halfSize.y)
         {
             playerNumber = 3;
-            id = Actor::PlayerFour;
+            //id = Actor::PlayerFour;
         }
 
         //spawnDog(id);
