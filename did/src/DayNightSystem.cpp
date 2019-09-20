@@ -374,6 +374,19 @@ void DayNightSystem::process(float dt)
     };
     getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+    cmd.targetFlags = CommandID::WindSound;
+    cmd.action = [&](xy::Entity e, float)
+    {
+        auto& audio = e.getComponent<xy::AudioEmitter>();
+
+        if (m_doLightning || //lightning might be disabled before fading out
+            ((m_stormAmount > m_targetStormAmount) && audio.getVolume() > 0))
+        {
+            e.getComponent<xy::AudioEmitter>().setVolume(m_stormAmount * 0.11f);
+        }
+    };
+    getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
+
     //PRINT("Storm amount", std::to_string(m_stormAmount));
 
     //sun colour

@@ -179,6 +179,12 @@ void GameState::loadAudio()
     entity.getComponent<xy::AudioEmitter>().setVolume(0.f);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::RainSound | CommandID::LoopedSound;
 
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Global::IslandSize / 2.f);
+    entity.addComponent<xy::AudioEmitter>() = as.getEmitter("wind");
+    entity.getComponent<xy::AudioEmitter>().setVolume(0.f);
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::WindSound | CommandID::LoopedSound;
+
     //day/night music
     as.loadFromFile("assets/sound/music.xas");
 

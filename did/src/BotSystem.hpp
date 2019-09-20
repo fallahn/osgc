@@ -108,7 +108,7 @@ struct Bot final
     {
         if (!stateStack.empty())
         {
-            auto& settings = stateStack.back();
+            const auto& settings = stateStack.back();
             state = settings.state;
             targetPoint = settings.targetPoint;
             targetEntity = settings.targetEntity;

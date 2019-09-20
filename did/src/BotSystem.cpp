@@ -80,9 +80,9 @@ namespace
     const float SweepTime = 1.f; //how frequently to sweep the area for interfering events
     const float SearchTime = 0.6f; //how frequently to search nearby area for dig spots
 
-    const float MaxMoveTime = 4.f; //if we didn't find a new node in time, reset the path
+    const float MaxMoveTime = 3.f; //if we didn't find a new node in time, reset the path
 
-    const float MaxFightDistance = 160.f * 160.f; //approx 5 tiles radius
+    const float MaxFightDistance = 96.f * 96.f; //approx 3 tiles radius
     const float IdealSwordFightingDistance = 24.f * 24.f;
     const float MinSwordFightingDistance = 16.f * 16.f;
     const float IdealPistolFightingDistance = 96.f * 96.f;
@@ -207,8 +207,6 @@ void BotSystem::handleMessage(const xy::Message& msg)
         }
         else if (data.action == PlayerEvent::Died)
         {
-            //LOG("detected player death", xy::Logger::Type::Info);
-
             //tell anyone fighting the dead player to stop fighting
             auto& entities = getEntities();
             for (auto entity : entities)
@@ -234,13 +232,33 @@ void BotSystem::handleMessage(const xy::Message& msg)
                 auto& bot = ent.getComponent<Bot>();
                 if (bot.enabled) 
                 {
-                    //TODO check not already running into the sea
-                    //TODO check if carrying a decoy and drop that instead
+                    //check if carrying a decoy and deploy
+                    if (ent.getComponent<Carrier>().carryFlags & Carrier::Decoy)
+                    {
+                        bot.inputMask |= InputFlag::CarryDrop;
+                    }
+                    else if (!bot.fleeing)
+                    {
+                        LOG(ActorNames[ent.getComponent<Actor>().id] + ": flee bees!", xy::Logger::Type::Info);
+                        //run away
+                        bot.pushState();
+                        bot.resetState();
 
-                    //push current state
-                    bot.pushState();
+                        bot.fleeing = true;
+                        bot.fleeTimer = 0.f;
 
-                    //add fleeing state
+                        auto pos = ent.getComponent<xy::Transform>().getPosition();
+                        if (pos.x < (Global::IslandSize.x / 2.f))
+                        {
+                            pos.x = 0.f;
+                        }
+                        else
+                        {
+                            pos.x = Global::IslandSize.x;
+                        }
+                        bot.targetPoint = pos;
+                        requestPath(ent);
+                    }
                 }
             }
         }
@@ -315,14 +333,16 @@ void BotSystem::process(float dt)
 
             //do a sweep to see if nearby items, other players or enemies are nearby
             bot.sweepTimer += dt;
-            if (bot.sweepTimer > SweepTime)
+            if (bot.sweepTimer > SweepTime
+                && !bot.fleeing)
             {
                 wideSweep(entity);
                 bot.sweepTimer = 0.f;
             }
 
             bot.fleeTimer += dt;
-            if (bot.fleeTimer > Bot::FleeTime)
+            if (bot.fleeTimer > Bot::FleeTime
+                || entity.getComponent<CollisionComponent>().water > 0)
             {
                 bot.fleeing = false;
             }
@@ -387,6 +407,7 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
     //request new path if needed
     if ((bot.path.empty() && !bot.pathRequested))
     {
+        bot.fleeing = false;
         if (bot.stateStack.empty())
         {
             bot.targetPoint = m_destinationPoints[bot.pointIndex];
@@ -409,10 +430,10 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
 
         //check for diggable holes
         bot.searchTimer += dt;
-        if (bot.searchTimer > SearchTime)
+        if (bot.searchTimer > SearchTime
+            && !bot.fleeing)
         {
             bot.searchTimer = 0.f;
-            //bot.fleeing = false;
 
             auto bounds = entity.getComponent<CollisionComponent>().bounds * 4.f;
             bounds.left += position.x;
@@ -624,14 +645,14 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     case Actor::PlayerThree:
     case Actor::PlayerFour:
         //this is a kludge because normally we wouldn't have client side bots
-#ifdef XY_DEBUG
+//#ifdef XY_DEBUG
         if (bot.targetEntity.hasComponent<Player>())
         {
             validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
         }
-#else
-        validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
-#endif
+//#else
+//        validState = bot.targetEntity.getComponent<Player>().sync.state != Player::Dead;
+//#endif
     case Actor::Skeleton:
     case Actor::Barrel:
         validActor = true;
@@ -650,12 +671,23 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     auto targetPosition = bot.targetEntity.getComponent<xy::Transform>().getPosition();// -position;
     
     //for some reason enabling this causes a strange exception
+    //where 'this' pointer becomes invalid. Sounds like a horrible
+    //memory corruption bug...
     /*if (m_pathFinder.rayTest(position, targetPosition))
     {
         LOG(ActorNames[entity.getComponent<Actor>().id] + ": enemy was obscured", xy::Logger::Type::Info);
         bot.popState();
         return;
     }*/
+    auto direction = targetPosition - position;
+    auto len2 = xy::Util::Vector::lengthSquared(direction);
+    if (len2 > 4096 && actorID != Actor::Barrel
+        && bot.path.empty()) //approx 2 tile radius
+    {
+        LOG(ActorNames[entity.getComponent<Actor>().id] + ": enemy was too far", xy::Logger::Type::Info);
+        bot.popState();
+        return;
+    }
 
 
     auto fightingDistance = IdealSwordFightingDistance;
@@ -672,8 +704,6 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     }
 
     //else try to move within fighting distance (but not on top of target)
-    auto direction = targetPosition - position;
-    auto len2 = xy::Util::Vector::lengthSquared(direction);
     if (len2 > fightingDistance)
     {
         moveToPoint(direction, bot);
@@ -792,15 +822,29 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         }
 
         //flee mode so we can't fight again until certain conditions are met
-        //TODO this doesn't really work, it just makes ethe ot give up fighting
-        //until it gets pummeled to death :/
         if (inventory.ammo == 0
             && inventory.health < otherHealth)
         {
             LOG(ActorNames[entity.getComponent<Actor>().id] + ": Run away!!", xy::Logger::Type::Info);
+            bot.pushState();
+            bot.resetState();
+
+            //look for the furthest exit (to give best chance to run)
             bot.fleeing = true;
             bot.fleeTimer = 0.f;
-            bot.resetState();
+
+            auto pos = position;
+            if (pos.x > (Global::IslandSize.x / 2.f))
+            {
+                pos.x = 0.f;
+            }
+            else
+            {
+                pos.x = Global::IslandSize.x;
+            }
+            bot.targetPoint = pos;
+            requestPath(entity);
+
             return;
         }
     }
@@ -924,11 +968,12 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
     auto dir = bot.targetPoint//Entity.getComponent<xy::Transform>().getPosition() 
         - entity.getComponent<xy::Transform>().getPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dir);
-    if (len2 < 1024.f)
+    if (len2 < 1024.f) //arbitrary distance somewhere close to target
     {
         if (bot.targetType == Bot::Target::Enemy)
         {
             //target probably moved, unless it was a barrel
+            //in which case the next sweep will find it
             bot.popState();
             return;
         }
@@ -1106,6 +1151,19 @@ void BotSystem::wideSweep(xy::Entity entity)
             //fighting is higher priority than getting items
             if (result == SweepResult::Fight)
             {
+                if (bot.state == Bot::State::Digging)
+                {
+                    //only change state if enemy is near
+                    auto position = entity.getComponent<xy::Transform>().getPosition();
+                    auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+                    auto direction = targetPosition - position;
+                    auto len2 = xy::Util::Vector::lengthSquared(direction);
+                    if (len2 > 4096) //approx 2 tile radius
+                    {
+                        return;
+                    }
+                }
+
                 if (!bot.fleeing)
                 {
                     //if carrying something, drop it
