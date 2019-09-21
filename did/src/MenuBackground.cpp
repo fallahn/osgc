@@ -227,8 +227,8 @@ void MenuState::createBackground()
         entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
         
-        float scaleMod = xy::Util::Random::value(0.05f, 0.18f);
-        float scale = 0.35f + scaleMod;
+        float scaleMod = xy::Util::Random::value(0.05f, 0.28f);
+        float scale = 0.3f + scaleMod;
         entity.getComponent<xy::Transform>().setScale(scale, -scale);
 
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();

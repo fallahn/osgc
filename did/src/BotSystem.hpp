@@ -54,7 +54,7 @@ struct Bot final
     float fightTimer = 0.f; //try restarting a fight if this expires
     float itemTimer = 0.f; //try using an item if we're carrying one??
     float fleeTimer = 0.f; //flee until this expires
-    static constexpr float FleeTime = 10.f;
+    static constexpr float FleeTime = 7.f;
 
     xy::Entity targetEntity; //might be a hole, treasure or another player
     enum class Target

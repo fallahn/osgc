@@ -42,7 +42,7 @@ Copyright 2019 Matt Marchant
 namespace
 {
     const std::size_t MaxTextures = Global::MaxFoliage;
-    const sf::Uint32 FoliageHeight = 128u;
+    const sf::Uint32 FoliageHeight = 256u;// 128u;
     const sf::Vector2f FarScale(0.87f, 0.87f);
     const sf::Vector2f NearScale(0.6f, 0.6f);
 }
@@ -95,6 +95,8 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
         //draw a variety of foliages making sure they fit on the texture
         auto drawFoliage = [&](const std::vector<sf::Sprite>& sprites, float spacing = 1.2f)
         {
+            const float width = f.width * 2.f;
+
             if (sprites.empty())
             {
                 return;
@@ -112,27 +114,28 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
                     sf::FloatRect spriteRect = sprite.getLocalBounds();
 
                     //check we didn't start this pass too far to the end
-                    if (position.x + spriteRect.width > f.width)
+                    if (position.x + spriteRect.width > width)
                     {
-                        position.x = std::max(0.f, f.width - spriteRect.width);
+                        position.x = std::max(0.f, width - spriteRect.width);
                     }
 
                     //if sprite is too wide then scale
                     auto currScale = sprite.getScale();
-                    if (spriteRect.width > f.width)
+                    if (spriteRect.width > width)
                     {
-                        float scale = f.width / spriteRect.width;
+                        float scale = width / spriteRect.width;
                         sprite.setScale(scale * currScale.x, scale * currScale.y);
                     }
 
+                    //actually draw to texture
                     sprite.setPosition(position);
                     m_textures[m_textureIndex]->draw(sprite);
                     position.x += (spriteRect.width * spacing) + xy::Util::Random::value(-30.f * spacing, -10.f * spacing);
 
                     //if we got to the edge tidy up current pass
-                    if (position.x + spriteRect.width > f.width)
+                    if (position.x + spriteRect.width > width)
                     {
-                        position.x = std::max(0.f, f.width - spriteRect.width);
+                        position.x = std::max(0.f, width - spriteRect.width);
                         sprite.setPosition(position);
                         if(i==0)m_textures[m_textureIndex]->draw(sprite);
                         passComplete = true;
@@ -146,11 +149,28 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
         };
 
         m_textures[m_textureIndex] = std::make_unique<sf::RenderTexture>();
-        m_textures[m_textureIndex]->create(static_cast<sf::Uint32>(f.width), FoliageHeight);
+        m_textures[m_textureIndex]->create(static_cast<sf::Uint32>(f.width * 2.f), FoliageHeight);
         m_textures[m_textureIndex]->clear(sf::Color::Transparent);
 
         drawFoliage(m_farSprites, 0.8f);
-        //drawFoliage(m_midSprites, 3.f);
+
+        //mid sprites are less frequent, such as heads or gravestones
+        if (!m_midSprites.empty())
+        {
+            if (xy::Util::Random::value(0, 6) == 0)
+            {
+                auto count = (f.width > (Global::TileSize * 2.5f)) ? xy::Util::Random::value(1, 2) : 1;
+                for (auto i = 0; i < count; ++i)
+                {
+                    auto& sprite = m_midSprites[xy::Util::Random::value(0, m_midSprites.size() - 1)];
+                    sf::FloatRect spriteRect = sprite.getLocalBounds();
+                    sf::Vector2f position(static_cast<float>(xy::Util::Random::value(0, static_cast<int>((f.width * 2.f) - spriteRect.width))), static_cast<float>(FoliageHeight));
+                    sprite.setPosition(position);
+                    m_textures[m_textureIndex]->draw(sprite);
+                }
+            }
+        }
+
         drawFoliage(m_nearSprites);
 
         m_textures[m_textureIndex]->display();
@@ -168,7 +188,8 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
         entity.getComponent<xy::Drawable>().setCulled(false);
         entity.addComponent<xy::Transform>().setPosition(f.position);
         entity.getComponent<xy::Transform>().move(Global::TileSize / 4.f, 0.f);
-        entity.getComponent<xy::Transform>().setScale(1.f, -1.f);
+        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f); //texture causes this to be double size
+        //entity.getComponent<xy::Transform>().setScale(1.f, -1.f);
 
         //wavy trees:
         entity = scene.createEntity();

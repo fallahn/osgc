@@ -28,10 +28,10 @@ namespace
 
     std::array<sf::Vector2f, 4u> HostPositions =
     {
-        sf::Vector2f(255.f, 680.f),
-        {725.f, 680.f},
-        {1195.f, 680.f},
-        {1665.f, 680.f}
+        sf::Vector2f(255.f, 660.f),
+        {725.f, 660.f},
+        {1195.f, 660.f},
+        {1665.f, 660.f}
     };
 }
 

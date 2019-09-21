@@ -94,6 +94,9 @@ namespace Menu
             PlayerThree,
             PlayerFour,
             Bot,
+            TitleBar,
+            PlayerFrame,
+            TextInput,
             Count
         };
     }
@@ -129,6 +132,7 @@ namespace Menu
     static const sf::Vector2f BackButtonPosition(30.f, 960.f);
     static const sf::Vector2f SeedPosition(120.f, 840.f);
     static const sf::Vector2f FriendsPosition(120.f, 830.f);
+    static const sf::Vector2f TitlePosition(xy::DefaultSceneSize.x / 2.f, 168.f);
 
     static const float SliderSpeed = 8.f;
 }

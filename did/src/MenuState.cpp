@@ -388,7 +388,10 @@ void MenuState::loadAssets()
     m_sprites[Menu::SpriteID::PlayerThree] = spriteSheet.getSprite("player_three");
     m_sprites[Menu::SpriteID::PlayerFour] = spriteSheet.getSprite("player_four");
 
-    //m_sprites[Menu::SpriteID::BrowserItem] = xy::Sprite(m_textureResource.get("assets/images/browser_item.png"));
+    spriteSheet.loadFromFile("assets/sprites/menu_ui.spt", m_textureResource);
+    m_sprites[Menu::SpriteID::TitleBar] = spriteSheet.getSprite("title_bar");
+    m_sprites[Menu::SpriteID::TextInput] = spriteSheet.getSprite("text_input");
+    m_sprites[Menu::SpriteID::PlayerFrame] = spriteSheet.getSprite("player_frame");
 
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
@@ -535,13 +538,24 @@ void MenuState::createScene()
 
 
     auto entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(MenuStart.x, 40.f);
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+            
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.getComponent<xy::Transform>().move(0.f, -46.f);
     entity.addComponent<xy::Text>(font).setString("Desert Island Duel");
     entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
     
     auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
@@ -822,10 +836,32 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     parentEnt.addComponent<Slider>().speed = Menu::SliderSpeed;
 
     auto entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/text_input.png"));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.getComponent<xy::Transform>().move(0.f, -46.f);
+    entity.addComponent<xy::Text>(largeFont).setString("Host Game");
+    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 320.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TextInput];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseDown] =
@@ -847,19 +883,8 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     auto& font = m_fontResource.get(Global::FineFont);
 
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-    entity.addComponent<xy::Text>(largeFont).setString("Host Game");
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
-    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
-    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
-    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-
-    entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 2.5f);
+    entity.getComponent<xy::Transform>().move(0.f, bounds.height * 2.5f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -871,7 +896,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
 
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 0.5f);
+    entity.getComponent<xy::Transform>().move(0.f, (-bounds.height * 0.5f) + 320.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.getComponent<xy::Drawable>().setCroppingArea({ -232.f, -30.f, 464.f, 120.f });
     entity.addComponent<xy::Text>(font).setString(m_sharedData.clientName);
@@ -969,10 +994,32 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     parentEnt.addComponent<Slider>().speed = Menu::SliderSpeed;
 
     auto entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/text_input.png"));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.getComponent<xy::Transform>().move(0.f, -46.f);
+    entity.addComponent<xy::Text>(largeFont).setString("Join Game");
+    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, 320.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TextInput];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseDown] =
@@ -998,10 +1045,10 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/text_input.png"));
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TextInput];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, bounds.height * 1.4f);
+    entity.getComponent<xy::Transform>().move(0.f, (bounds.height * 1.4f) + 320.f);
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseDown] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -1027,19 +1074,8 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     auto& font = m_fontResource.get(Global::FineFont);
 
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 40.f);
-    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-    entity.addComponent<xy::Text>(largeFont).setString("Join Game");
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
-    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
-    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
-    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-
-    entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 2.5f);
+    entity.getComponent<xy::Transform>().move(0.f, bounds.height * 2.5f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(font).setString("Enter Your Name");
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -1051,7 +1087,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
 
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 0.5f);
+    entity.getComponent<xy::Transform>().move(0.f, (-bounds.height * 0.5f) + 320.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.getComponent<xy::Drawable>().setCroppingArea({ -232.f, -30.f, 464.f, 120.f });
     entity.addComponent<xy::Text>(font).setString(m_sharedData.clientName);
@@ -1062,7 +1098,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
 
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, bounds.height * 0.9f);
+    entity.getComponent<xy::Transform>().move(0.f, (bounds.height * 0.9f) + 320.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.getComponent<xy::Drawable>().setCroppingArea({ -232.f, -30.f, 464.f, 120.f });
     entity.addComponent<xy::Text>(font).setString(m_sharedData.remoteIP);

@@ -142,13 +142,13 @@ void MenuState::buildLobby(sf::Font& font)
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //background window
-    entity = m_uiScene.createEntity();
+    /*entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/browser_window.png"));
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());*/
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);
@@ -176,6 +176,15 @@ void MenuState::buildLobby(sf::Font& font)
     xPos += (xStride / 2.f);
     for (auto i = 0; i < 4; ++i)
     {
+        //background
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(xPos, 160.f);
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+        entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::PlayerFrame];
+        auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        
         //small icon/avatar
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos - 160.f, 740.f);
@@ -198,7 +207,7 @@ void MenuState::buildLobby(sf::Font& font)
 
         //large avatar
         entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xPos, 340.f);
+        entity.addComponent<xy::Transform>().setPosition(xPos - 12.f, 340.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
         entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(spriteNames[i]);
         entity.addComponent<xy::SpriteAnimation>().play(spriteSheet.getAnimationIndex("idle_down", spriteNames[i]));
@@ -220,10 +229,10 @@ void MenuState::buildLobby(sf::Font& font)
         
         //player name
         entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xPos, 170.f);
+        entity.addComponent<xy::Transform>().setPosition(xPos, 180.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
         entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Centre);
-        entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
+        entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize - 8);
         entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
         entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
         entity.getComponent<xy::Text>().setOutlineThickness(1.f);
@@ -236,7 +245,7 @@ void MenuState::buildLobby(sf::Font& font)
 
         //current score
         entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xPos, 250.f);
+        entity.addComponent<xy::Transform>().setPosition(xPos, 240.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
         entity.addComponent<xy::Text>(fineFont).setAlignment(xy::Text::Alignment::Centre);
         entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 10);
@@ -302,7 +311,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-    bounds = xy::Text::getLocalBounds(entity);
+    auto bounds = xy::Text::getLocalBounds(entity);
     auto charWidth = bounds.width / 31.f;
     bounds.left = charWidth * 28.f;
     bounds.width = charWidth * 3.f;
@@ -325,7 +334,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition.x + 130.f, Menu::SeedPosition.y);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/text_input.png"));
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TextInput];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseDown] =

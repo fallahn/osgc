@@ -13,43 +13,43 @@ sprite_sheet foliage
 		bounds=224,0,210,64
 	}
 
-	sprite mid_one
+	sprite rock_one
 	{
-		bounds = 0,64,64,128
+		bounds = 0,160,64,32
 	}
 
-	sprite mid_two
+	sprite rock_two
 	{
-		bounds = 64,64,64,128
+		bounds = 64,160,96,32
 	}
 
-	sprite mid_three
+	sprite rock_three
 	{
-		bounds = 128,64,64,128
+		bounds = 0,192,96,31
 	}
 
-	sprite mid_four
+	sprite mid_head
 	{
-		bounds = 192,64,64,128
+		bounds = 0,64,64,95
 	}
 
-	sprite mid_five
+	sprite mid_grave
 	{
-		bounds = 256,64,80,128
+		bounds = 64,64,64,63
 	}
 
 	sprite near_one
 	{
-		bounds =0,208,80,48
+		bounds =0,224,80,32
 	}
 
 	sprite near_two
 	{
-		bounds = 96,208,96,48
+		bounds = 99,192,96,64
 	}
 
 	sprite near_three
 	{
-		bounds = 192,208,80,48
+		bounds = 195,224,80,32
 	}
 }

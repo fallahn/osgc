@@ -1082,7 +1082,7 @@ void BotSystem::wideSweep(xy::Entity entity)
         if (isDay())
         {
             //large visible area, approx what the player sees on screen (without accounting for perspective)
-            bounds = { -160.f, -288.f, 320.f, 320.f }; //a 10x10 tile square
+            bounds = { -160.f, -288.f, 320.f, 480.f }; //a 10x15 tile square
         }
         else
         {
@@ -1134,7 +1134,8 @@ void BotSystem::wideSweep(xy::Entity entity)
                     //only target if close enough and not obstructed
                     result = SweepResult::Fight;
                 }
-                else if (bot.state != Bot::State::Targeting)
+                else if (bot.state != Bot::State::Targeting
+                    && actor.id != Actor::Skeleton)
                 {
                     //try path to target if not already doing so
                     result = SweepResult::Target;
@@ -1195,7 +1196,8 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
                 return;
             }
-            else if (result == SweepResult::Target)
+            else if (result == SweepResult::Target
+                && bot.state != Bot::State::Digging)
             {
                 //TODO barrels / food should increase in priority when health is low
 

@@ -1,0 +1,20 @@
+spritesheet menu_ui
+{
+    src="assets/images/menu_ui.png"
+
+    sprite title_bar
+    {
+        bounds = 0,0,1576,256
+    }
+
+    sprite player_frame
+    {
+        bounds = 0, 256, 384,920
+    }
+
+    sprite text_input
+    {
+        bounds = 384,256,480,64
+    }
+
+}
