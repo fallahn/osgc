@@ -8,7 +8,7 @@ Some images of OSGC in action, on various platforms
 
 ![Drone Drop](linux01.png?raw=true "Drone Drop plugin")
 
-![Desert Island Duel](pirates01.png?raw=true "Desert Island Duel plugin")
+![Desert Island Duel](pirates_01.png?raw=true "Desert Island Duel plugin")
 
 ![OSGC Browser](windows01.png?raw=true "OSGC Browser")
 
@@ -16,7 +16,7 @@ Some images of OSGC in action, on various platforms
 
 ![Drone Drop](macos02.png?raw=true "Drone Drop plugin")
 
-![Desert Island Duel](pirates03.png?raw=true "Desert Island Duel plugin")
+![Desert Island Duel](pirates_03.png?raw=true "Desert Island Duel plugin")
 
 ![Back To Computer](windows04.png?raw=true "Back To Computer Plugin")
 
@@ -26,7 +26,7 @@ Some images of OSGC in action, on various platforms
 
 ![OSGC Browser](windows02.png?raw=true "OSGC Browser")
 
-![Desert Island Duel](pirates05.png?raw=true "Desert Island Duel plugin")
+![Desert Island Duel](pirates_05.png?raw=true "Desert Island Duel plugin")
 
 ![Space Racers](macos05.png?raw=true "Space Racers plugin")
 
@@ -34,4 +34,4 @@ Some images of OSGC in action, on various platforms
 
 ![Space Racers](macos03.png?raw=true "Space Racers plugin")
 
-![Desert Island Duel](pirates08.png?raw=true "Desert Island Duel plugin")
+![Desert Island Duel](pirates_08.png?raw=true "Desert Island Duel plugin")

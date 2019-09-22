@@ -3,7 +3,7 @@ Desert Island Duel
 
 A 1-4 player multplayer online game (with bots), Desert Island Duel pits four mighty pirates against each other in their search for treasure. Follow your map, dig in the sand and reap the booty! Sound simple? Don't count on it! Not only are there 3 other pirates awaiting to thwart your every move there are skeletons at night (thanks to the full day/night cycle), booby traps, bees, bad weather and more!
 
-![Desert Island Duel](../screens/pirates44.png?raw=true "Desert Island Duel plugin")
+![Desert Island Duel](../screens/pirates_44.png?raw=true "Desert Island Duel plugin")
 
 ##### How to play
 Each player starts on one corner of the island, near their boat. Using the map (press M to enlarge) dig at the marked points to uncover treasure chests, coins, or ammo. On uncovering a chest grab it and return it to your boat before another player takes it! Of course the pirating doesn't stop there - if you see somebody else's boat unattended, grab their treasure for yourself, quick!
