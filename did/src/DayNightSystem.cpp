@@ -382,7 +382,7 @@ void DayNightSystem::process(float dt)
         if (m_doLightning || //lightning might be disabled before fading out
             ((m_stormAmount > m_targetStormAmount) && audio.getVolume() > 0))
         {
-            e.getComponent<xy::AudioEmitter>().setVolume(m_stormAmount * 0.11f);
+            e.getComponent<xy::AudioEmitter>().setVolume(m_stormAmount * 0.41f);
         }
     };
     getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);

@@ -29,7 +29,7 @@ namespace Server
 {
     struct SeedData final
     {
-        static constexpr std::size_t MaxChar = 15;
+        static constexpr std::size_t MaxChar = 16;
         char str[MaxChar] = {};
         std::size_t hash = 0;
     };

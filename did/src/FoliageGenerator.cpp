@@ -127,6 +127,13 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
                         sprite.setScale(scale * currScale.x, scale * currScale.y);
                     }
 
+                    //occasionally flip for variation
+                    /*if (xy::Util::Random::value(0, 3) == 0)
+                    {
+                        sprite.scale(-1.f, 1.f);
+                        sprite.setOrigin(spriteRect.width, 0.f);
+                    }*/
+
                     //actually draw to texture
                     sprite.setPosition(position);
                     m_textures[m_textureIndex]->draw(sprite);
@@ -159,14 +166,27 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
         {
             if (xy::Util::Random::value(0, 6) == 0)
             {
+                auto xPos = static_cast<float>(xy::Util::Random::value(0, static_cast<int>((f.width * 2.f) - 128.f))); //magic number just to stop sprite going off end
                 auto count = (f.width > (Global::TileSize * 2.5f)) ? xy::Util::Random::value(1, 2) : 1;
                 for (auto i = 0; i < count; ++i)
                 {
                     auto& sprite = m_midSprites[xy::Util::Random::value(0, m_midSprites.size() - 1)];
                     sf::FloatRect spriteRect = sprite.getLocalBounds();
-                    sf::Vector2f position(static_cast<float>(xy::Util::Random::value(0, static_cast<int>((f.width * 2.f) - spriteRect.width))), static_cast<float>(FoliageHeight));
+                    sf::Vector2f position(xPos, static_cast<float>(FoliageHeight));
                     sprite.setPosition(position);
+
+                    //flip occasionally
+                    if (xy::Util::Random::value(0, 4) == 0)
+                    {
+                        sprite.setScale(-1.f, 1.f);
+                        sprite.setOrigin(spriteRect.width, 0.f);
+                    }
+
                     m_textures[m_textureIndex]->draw(sprite);
+
+                    //add some minimum distance to reduce likelyhood of items overlapping
+                    xPos += (f.width - xPos) / 2.f;
+                    xPos = xy::Util::Random::value(xPos, (f.width * 2.f) - 128.f);
                 }
             }
         }
