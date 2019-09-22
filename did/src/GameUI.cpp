@@ -612,7 +612,7 @@ void GameState::showEndButton()
     entity.addComponent<xy::CommandTarget>().ID = 0;
     entity.addComponent<xy::Callback>().function = UISlideCallback(getContext().appInstance.getMessageBus());
     entity.getComponent<xy::Callback>().active = true;
-    entity.addComponent<sf::Vector2f>() = { xy::DefaultSceneSize.x / 2.f, 938.f };
+    entity.addComponent<sf::Vector2f>() = { xy::DefaultSceneSize.x / 2.f, 942.f };
     entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y + 64.f);
 }
 

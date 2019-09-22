@@ -150,6 +150,51 @@ void MenuState::createBackground()
         };
     }
 
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/barrel.spt", m_textureResource);
+
+    //barrels
+    std::array<sf::Vector2f, 8u> barrelPos =
+    {
+        sf::Vector2f(762.f, 455.f),
+        {1066.f, 597.f},
+        {1048.f, 807.f},
+        {759.f, 1044.f},
+        {478.f, 667.f},
+        {469.f, 644.f},
+        {978.f, 527.f},
+        {477.f, 924.f}
+    };
+
+    for (auto i = 0u; i < 8u; ++i)
+    {
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(barrelPos[i]);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("barrel01");
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShader));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+
+        auto rootPos = barrelPos[i] - (Global::IslandSize / 2.f);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [rootPos, &islandTx](xy::Entity e, float)
+        {
+            sf::Transform tx;
+            tx.translate(islandTx.getPosition());
+            tx.rotate(islandTx.getRotation());
+
+            e.getComponent<xy::Transform>().setPosition(tx.transformPoint(rootPos));
+        };
+    }
+
     //boats
     std::array<sf::Vector2f, 4u> boatPos =
     {
@@ -159,7 +204,6 @@ void MenuState::createBackground()
         {459.f, 1044.f}
     };
 
-    xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/boat.spt", m_textureResource);
     for (auto i = 0; i < 4; ++i)
     {
@@ -212,15 +256,33 @@ void MenuState::createBackground()
     const auto& treeTex = m_textureResource.get("assets/images/menu_trees.png");
     auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 440.f, 430.f }, 60.f, 12);
 
+    spriteSheet.loadFromFile("assets/sprites/foliage.spt", m_textureResource);
+
     for (auto pos : positions)
     {
         pos.x += 526.f;
         pos.y += 526.f;
 
+        auto head = xy::Util::Random::value(0, 10);
+
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(pos);
         entity.addComponent<xy::Drawable>();
-        entity.addComponent<xy::Sprite>(treeTex);
+        if (head == 0)
+        {
+            if (xy::Util::Random::value(0, 1) == 0)
+            {
+                entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("mid_head");
+            }
+            else
+            {
+                entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("mid_grave");
+            }
+        }
+        else
+        {
+            entity.addComponent<xy::Sprite>(treeTex);
+        }
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShader));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Sprite3D>(m_matrixPool);
@@ -230,8 +292,20 @@ void MenuState::createBackground()
         float scaleMod = xy::Util::Random::value(0.05f, 0.28f);
         float scale = 0.3f + scaleMod;
         entity.getComponent<xy::Transform>().setScale(scale, -scale);
+        if ((xy::Util::Random::value(0, 10) % 3) == 0)
+        {
+            entity.getComponent<xy::Transform>().scale(-1.f, 1.f);
+        }
 
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        if (head != 0)
+        {
+            bounds.width /= 3.f;
+            auto offset = xy::Util::Random::value(0, 2);
+            bounds.left = offset * bounds.width;
+            entity.getComponent<xy::Sprite>().setTextureRect(bounds);
+        }
+
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
 
         auto rootPos = pos - (Global::IslandSize / 2.f);
