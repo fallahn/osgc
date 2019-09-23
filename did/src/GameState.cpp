@@ -174,6 +174,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                 data.commandID = Server::ConCommand::BotEnable;
                 data.value.asInt = (param == "0") ? 0 : 1;
                 m_sharedData.netClient->sendPacket(PacketID::ConCommand, data, xy::NetFlag::Reliable, Global::LowPriorityChannel);
+
+                xy::Console::print("Set bots enabled to " + param);
             });
 
         registerCommand("spawn", [&](const std::string& param)
@@ -1447,6 +1449,7 @@ void GameState::updateCarriable(const CarriableState& state)
             }
         };
         m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
     }
     else
     {
@@ -1454,6 +1457,21 @@ void GameState::updateCarriable(const CarriableState& state)
         auto* msg = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
         msg->type = MapEvent::ItemInWater;
         msg->position = state.position;
+
+        //reset the position
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::NetInterpolator;
+        cmd.action = [&, state](xy::Entity ent, float)
+        {
+            //ent is carriable item
+            if (ent.getComponent<Actor>().serverID == state.carriableID)
+            {
+                auto position = ent.getComponent<Carriable>().spawnPosition;
+                ent.getComponent<InterpolationComponent>().resetPosition(position);
+                ent.getComponent<xy::Transform>().setPosition(position);
+            }
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
 }
 

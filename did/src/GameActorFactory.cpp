@@ -577,6 +577,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Torch;
+        entity.getComponent<Carriable>().spawnPosition = position; //there's no clientside system to set this
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
 
         m_gameScene.getSystem<ShadowCastSystem>().addLight(entity);
@@ -593,6 +594,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Treasure; //used to sync carry state with server
+        entity.getComponent<Carriable>().spawnPosition = position;
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
         addShadow(entity);
         break;
@@ -603,6 +605,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Decoy; //used to sync carry state with server
+        entity.getComponent<Carriable>().spawnPosition = position;
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
         addShadow(entity);
         break;
@@ -613,6 +616,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Mine; //used to sync carry state with server
+        entity.getComponent<Carriable>().spawnPosition = position;
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
         addShadow(entity);
         break;
@@ -623,6 +627,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::SpookySkull; //used to sync carry state with server
+        entity.getComponent<Carriable>().spawnPosition = position;
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
         addShadow(entity);
         break;
@@ -633,6 +638,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flare; //used to sync carry state with server
+        entity.getComponent<Carriable>().spawnPosition = position;
         entity.getComponent<Carriable>().offsetMultiplier = Carriable::FlareOffset;
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::FlareItem];

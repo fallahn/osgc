@@ -115,7 +115,7 @@ void CarriableSystem::process(float)
             position *= carriable.offsetMultiplier;
             entity.getComponent<xy::Transform>().setPosition(position + carriable.parentEntity.getComponent<xy::Transform>().getPosition());
         }
-        else
+        else //TODO try moving this to the tryDrop() function
         {
             //was dropped in the sea so teleport back to spawn
             const auto& collision = entity.getComponent<CollisionComponent>();
@@ -130,9 +130,23 @@ void CarriableSystem::process(float)
                 m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable, Global::ReliableChannel);
 
                 entity.getComponent<xy::Transform>().setPosition(carriable.spawnPosition);
+
+                //because a dropped item becomes static we force a position update to the clients
+                /*const auto& actor = entity.getComponent<Actor>();
+
+                ActorState state;
+                state.serverID = actor.serverID;
+                state.actorID = actor.id;
+                state.direction = actor.direction;
+                state.position = carriable.spawnPosition;
+                state.serverTime = m_sharedData.gameServer->getServerTime();
+
+                m_sharedData.gameServer->broadcastData(PacketID::ActorUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);*/
             }
         }
-        entity.getComponent<Actor>().nonStatic = carriable.carried; //only send client data when being carried
+        //this breaks clientside updates of items dropped in the water...
+        //probably only a negligable optimisation so disabled unless otherwise needed
+        entity.getComponent<Actor>().nonStatic = true;// carriable.carried; //only send client data when being carried
     }
 }
 

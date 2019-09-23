@@ -909,7 +909,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Barrel | QuadTreeFilter::BotQuery);
         entity.addComponent<Inventory>().health = 1;
         //use inventory properties to define what's in the barrel (mostly items)
-        if (Server::getRandomInt(0, 4) == 0)
+        if (Server::getRandomInt(0, 8) == 0)
         {
             entity.getComponent<Inventory>().weapon = Barrel::Explosive;
         }
@@ -1004,7 +1004,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         break;
     case Actor::DecoyItem:
         entity.addComponent<CollisionComponent>().bounds = Global::LanternBounds;
-        entity.getComponent<CollisionComponent>().collidesTerrain = false;
+        //entity.getComponent<CollisionComponent>().collidesTerrain = false; //this (and all below) need to collide with water
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::DecoyItem | QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flags::Decoy;
@@ -1014,7 +1014,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         break;
     case Actor::MineItem:
         entity.addComponent<CollisionComponent>().bounds = Global::LanternBounds;
-        entity.getComponent<CollisionComponent>().collidesTerrain = false;
+        //entity.getComponent<CollisionComponent>().collidesTerrain = false;
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::MineItem | QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flags::Mine;
@@ -1025,7 +1025,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         break;
     case Actor::FlareItem:
         entity.addComponent<CollisionComponent>().bounds = Global::LanternBounds;
-        entity.getComponent<CollisionComponent>().collidesTerrain = false;
+        //entity.getComponent<CollisionComponent>().collidesTerrain = false;
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::FlareItem | QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flags::Flare;
@@ -1036,7 +1036,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         break;
     case Actor::SkullItem:
         entity.addComponent<CollisionComponent>().bounds = Global::LanternBounds;
-        entity.getComponent<CollisionComponent>().collidesTerrain = false;
+        //entity.getComponent<CollisionComponent>().collidesTerrain = false;
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::SkullItem | QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flags::SpookySkull;
