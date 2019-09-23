@@ -43,6 +43,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/util/Math.hpp>
 
 #include <algorithm>
 
@@ -1414,6 +1415,11 @@ void BotSystem::requestPath(xy::Entity entity)
 {
     auto& bot = entity.getComponent<Bot>();
     auto position = entity.getComponent<xy::Transform>().getPosition();
+
+    //clamp the start position to island bounds so we generate
+    //a valid path when the bot is in the sea
+    position.x = xy::Util::Math::clamp(position.x, 0.f, Global::IslandSize.x);
+    position.y = xy::Util::Math::clamp(position.y, 0.f, Global::IslandSize.y);
 
     sf::Vector2i start(position / Global::TileSize);
     sf::Vector2i end(bot.targetPoint / Global::TileSize);

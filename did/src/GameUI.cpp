@@ -623,6 +623,9 @@ void GameState::showServerMessage(std::int32_t messageID)
     switch (messageID)
     {
     default: break;
+    case Server::Message::FinalTreasureFound:
+        msgString = Server::messages[Server::Message::FinalTreasureFound];
+        break;
     case Server::Message::OneTreasureRemaining:
         msgString = Server::messages[Server::Message::OneTreasureRemaining];
         break;
@@ -729,9 +732,8 @@ void GameState::showServerMessage(std::int32_t messageID)
         break;
     }
 
-    if (messageID == Server::Message::OneTreasureRemaining)
+    auto makeBigText = [&]()
     {
-        //BIG
         auto entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x, 310.f);
         entity.addComponent<xy::Text>(m_fontResource.get(Global::TitleFont));
@@ -740,7 +742,7 @@ void GameState::showServerMessage(std::int32_t messageID)
         entity.getComponent<xy::Text>().setFillColour(UI::Colour::MessageText);
         entity.addComponent<xy::Drawable>();
         auto width = xy::Text::getLocalBounds(entity).width;
-        entity.addComponent<xy::Callback>().function = 
+        entity.addComponent<xy::Callback>().function =
             [&, width](xy::Entity ent, float dt)
         {
             ent.getComponent<xy::Transform>().move(-530.f * dt, 0.f);
@@ -750,6 +752,12 @@ void GameState::showServerMessage(std::int32_t messageID)
             }
         };
         entity.getComponent<xy::Callback>().active = true;
+    };
+
+    if (messageID == Server::Message::OneTreasureRemaining)
+    {
+        //BIG
+        makeBigText();
 
         //tell the treasure icon to flash
         xy::Command cmd;
@@ -767,6 +775,10 @@ void GameState::showServerMessage(std::int32_t messageID)
             e.getComponent<xy::Callback>().active = true;
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
+    else if (messageID == Server::Message::FinalTreasureFound)
+    {
+        makeBigText();
     }
     else
     {

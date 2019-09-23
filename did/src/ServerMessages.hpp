@@ -52,6 +52,7 @@ namespace Server
             PlayerTwoDiedFromBees,
             PlayerThreeDiedFromBees,
             PlayerFourDiedFromBees,
+            FinalTreasureFound,
             Count
         };
     }
@@ -88,6 +89,8 @@ namespace Server
         " was buzzzted",
         " was overcome by a stinging\nsensation",
         " succumbed to mis-beehaviour",
-        " angered the hive"
+        " angered the hive",
+
+        "Final Treasure Found!"
     };
 }

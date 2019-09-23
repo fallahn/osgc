@@ -1,0 +1,9 @@
+spritesheet mine
+{
+    src="assets/images/mine.png"
+
+    sprite mine_item
+    {
+        bounds = 0,0,32,32
+    }
+}

@@ -39,8 +39,9 @@ namespace QuadTreeFilter
         FlareItem = 0x4000,
         SkullItem = 0x8000,
         SkullShield = 0x10000,
+        MineItem = 0x200000,
 
-        Carriable = Light | Treasure | DecoyItem | FlareItem | SkullItem | Boat, //boats aren't carrible but can have treasure taken from them
+        Carriable = Light | Treasure | DecoyItem | FlareItem | SkullItem | MineItem | Boat, //boats aren't carrible but can have treasure taken from them
         Collidable = Player | Collectable | Skeleton | Boat | SpawnArea | ParrotLauncher | Barrel | Explosion | SkullShield
     };
 }

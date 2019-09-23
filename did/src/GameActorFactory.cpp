@@ -606,6 +606,16 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
         addShadow(entity);
         break;
+    case Actor::MineItem:
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::MineItem];
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::MineItem].getTexture());
+        entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
+        entity.addComponent<Carriable>().type = Carrier::Mine; //used to sync carry state with server
+        entity.addComponent<xy::Callback>().function = ClientCarriableCallback(position);
+        addShadow(entity);
+        break;
     case Actor::SkullItem:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::SkullItem];
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
@@ -646,7 +656,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
     case Actor::AmmoSpawn:
     case Actor::CoinSpawn:
         m_miniMap.addCross(position);
-
+    case Actor::MineSpawn: //don't draw these on the minimap
         entity.getComponent<AnimationModifier>().animationMap = { 0, 1, 2, 3 };
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::WetPatch];
         entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, Global::TileSize, Global::TileSize });
@@ -664,6 +674,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::CommandTarget>().ID = CommandID::NetInterpolator;
 
         //scatter some grass
+        if(actor.id != Actor::MineSpawn)
         {
             static const float offsetPos = 24.f + (Global::TileSize / 2.f);
             static size_t posIdx = 0;
@@ -875,7 +886,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         cameraEntity.getComponent<Camera3D>().target = entity;
 
         m_inputParser.setPlayerEntity(entity, entity.getComponent<Player>().playerNumber);
-        entity.addComponent<Bot>().enabled = true; //this component is required by the input parser
+        entity.addComponent<Bot>();// .enabled = true; //this component is required by the input parser
 
         auto compassEntity = m_gameScene.createEntity();
         compassEntity.addComponent<xy::Drawable>();

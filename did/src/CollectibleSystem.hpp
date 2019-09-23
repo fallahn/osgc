@@ -27,6 +27,7 @@ namespace Server
 
 struct Collectible final
 {
+    static constexpr float DespawnTime = 60.f;
     std::int32_t value = 0;
     enum class Type
     {
@@ -35,7 +36,7 @@ struct Collectible final
         Food
     }type = Type::Ammo;
     float collectionTime = 1.f; //not collectible until 0
-    float lifeTime = 30.f; //despawn after a while
+    float lifeTime = DespawnTime; //despawn after a while
     sf::Vector2f velocity;
 };
 

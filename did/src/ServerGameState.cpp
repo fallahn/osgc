@@ -951,6 +951,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
     case Actor::AmmoSpawn:
     case Actor::TreasureSpawn:
     case Actor::CoinSpawn:
+    case Actor::MineSpawn:
         entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, Global::TileSize, Global::TileSize });
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::WetPatch);
         entity.addComponent<WetPatch>();
@@ -993,6 +994,13 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Treasure | QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flags::Treasure;
         entity.getComponent<Carriable>().spawnPosition = position;
+        {
+            //broadcast message if last treasure
+            if (m_remainingTreasure == 1)
+            {
+                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::FinalTreasureFound, xy::NetFlag::Reliable, Global::ReliableChannel);
+            }
+        }
         break;
     case Actor::DecoyItem:
         entity.addComponent<CollisionComponent>().bounds = Global::LanternBounds;
@@ -1002,6 +1010,17 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.addComponent<Carriable>().type = Carrier::Flags::Decoy;
         entity.getComponent<Carriable>().spawnPosition = position;
         entity.getComponent<Carriable>().action = [&](xy::Entity e) { spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Decoy); };
+        entity.addComponent<TimedCarriable>();
+        break;
+    case Actor::MineItem:
+        entity.addComponent<CollisionComponent>().bounds = Global::LanternBounds;
+        entity.getComponent<CollisionComponent>().collidesTerrain = false;
+        entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::MineItem | QuadTreeFilter::BotQuery);
+        entity.addComponent<Carriable>().type = Carrier::Flags::Mine;
+        entity.getComponent<Carriable>().spawnPosition = position;
+        entity.getComponent<Carriable>().action = 
+            [&](xy::Entity e) { spawnActor(e.getComponent<xy::Transform>().getPosition() - sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f), Actor::MineSpawn); };
         entity.addComponent<TimedCarriable>();
         break;
     case Actor::FlareItem:

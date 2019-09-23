@@ -51,8 +51,8 @@ namespace
     //we shuffle this each time a new system is created
     std::array<Actor::ID, 14u> Items = 
     {
-        Actor::Food, Actor::Food ,Actor::Food, Actor::Food,
-        Actor::Ammo, Actor::Ammo, Actor::Ammo, Actor::Ammo,
+        Actor::Food, Actor::Food ,Actor::Food, Actor::MineItem,
+        Actor::Ammo, Actor::Ammo, Actor::Ammo, Actor::MineItem,
         Actor::DecoyItem, Actor::DecoyItem,
         Actor::FlareItem, Actor::FlareItem,
         Actor::SkullItem, Actor::SkullItem

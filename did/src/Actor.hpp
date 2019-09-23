@@ -43,11 +43,13 @@ struct Actor final
         FlareItem,
         DecoyItem,
         SkullItem,
+        MineItem,
         Crab,
 
         TreasureSpawn,
         AmmoSpawn,
         CoinSpawn,
+        MineSpawn,
         Weapon,
         Fire,
         Parrot,

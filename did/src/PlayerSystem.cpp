@@ -318,7 +318,7 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
                         //raise message to drop what we're carrying
                         msg->action = PlayerEvent::DroppedCarrying;
                     }
-                    else
+                    else if(entity.getComponent<CollisionComponent>().water == 0)
                     {
                         //perform that items action
                         msg->action = PlayerEvent::ActivatedItem;

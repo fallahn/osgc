@@ -134,6 +134,8 @@ void DigDirector::handleMessage(const xy::Message& msg)
                                     //spawn an item
                                     auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                                     msg->position = position;
+                                    msg->type = ActorEvent::RequestSpawn;
+
                                     switch (e.getComponent<Actor>().id)
                                     {
                                     default:
@@ -145,6 +147,9 @@ void DigDirector::handleMessage(const xy::Message& msg)
                                         break;
                                     case Actor::ID::AmmoSpawn:
                                         msg->id = Actor::ID::Ammo;
+                                        break;
+                                    case Actor::ID::MineSpawn:
+                                        msg->id = Actor::ID::Explosion;
                                         break;
                                     }
 

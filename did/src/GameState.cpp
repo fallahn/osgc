@@ -209,6 +209,10 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                     {
                         id = Actor::SkullShield;
                     }
+                    else if (param == "mine_item")
+                    {
+                        id = Actor::MineItem;
+                    }
 
                     if (id != Actor::None)
                     {
@@ -964,6 +968,9 @@ void GameState::loadResources()
     m_animationMaps[SpriteID::FlareItem][AnimationID::WalkUp] = flareItemCarried;
     m_animationMaps[SpriteID::FlareItem][AnimationID::WalkLeft] = flareItemCarried;
     m_animationMaps[SpriteID::FlareItem][AnimationID::WalkRight] = flareItemCarried;
+
+    spriteSheet.loadFromFile("assets/sprites/mine.spt", m_textureResource);
+    m_sprites[SpriteID::MineItem] = spriteSheet.getSprite("mine_item");
 
     spriteSheet.loadFromFile("assets/sprites/impact.spt", m_textureResource);
     m_sprites[SpriteID::Impact] = spriteSheet.getSprite("impact");

@@ -74,6 +74,7 @@ namespace SpriteID
         FlareItem,
         SkullShield,
         SkullItem,
+        MineItem,
         SmokePuff,
         Impact,
         Count

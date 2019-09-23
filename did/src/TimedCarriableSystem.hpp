@@ -26,7 +26,7 @@ Copyright 2019 Matt Marchant
 struct TimedCarriable final
 {
     float currentTime = 0.f;
-    static constexpr float Timeout = 15.f;
+    static constexpr float Timeout = 40.f;
 };
 
 class TimedCarriableSystem final : public xy::System

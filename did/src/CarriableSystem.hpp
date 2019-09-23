@@ -37,7 +37,8 @@ struct Carrier final
         Decoy = 0x20,
         Flare = 0x40,
         Magnet = 0x80,
-        SpookySkull = 0x100
+        SpookySkull = 0x100,
+        Mine = 0x200
     };
 
     std::int32_t carryFlags = 0;
