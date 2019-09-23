@@ -272,7 +272,7 @@ void MenuState::updateTextInput(const sf::Event& evt)
 {
     if (m_activeString != nullptr)
     {
-        std::size_t maxChar = (m_activeString != &m_sharedData.remoteIP)
+        std::size_t maxChar = (m_activeString == &m_sharedData.clientName)
             ? Global::MaxNameSize / sizeof(sf::Uint32) : 15;
 
         std::uint32_t targetFlags = 0;
@@ -392,6 +392,7 @@ void MenuState::loadAssets()
     m_sprites[Menu::SpriteID::TitleBar] = spriteSheet.getSprite("title_bar");
     m_sprites[Menu::SpriteID::TextInput] = spriteSheet.getSprite("text_input");
     m_sprites[Menu::SpriteID::PlayerFrame] = spriteSheet.getSprite("player_frame");
+    m_sprites[Menu::SpriteID::RandomButton] = spriteSheet.getSprite("random_button");
 
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)

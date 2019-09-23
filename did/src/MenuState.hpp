@@ -79,6 +79,7 @@ private:
     sf::String m_seedDisplayString;
     void updateTextInput(const sf::Event&);
     void applySeed();
+    void randomiseSeed();
 
     MatrixPool m_matrixPool;
     xy::ShaderResource m_shaderResource;

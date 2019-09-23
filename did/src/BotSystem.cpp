@@ -91,6 +91,9 @@ namespace
     //if a target is closer than this then we don't calc a path (see sweep())
     const float MinTargetArea = ((Global::TileSize * 2.f) * (Global::TileSize * 2.f)); 
 
+    const sf::FloatRect DaySearchArea(-160.f, -288.f, 320.f, 480.f); //a 10x15 tile square
+    const sf::FloatRect NightSearchArea(-Global::LightRadius, -Global::LightRadius, Global::LightRadius * 2.f, Global::LightRadius * 2.f);
+
     enum class SweepResult
     {
         Fight,
@@ -445,7 +448,7 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
         {
             bot.searchTimer = 0.f;
 
-            auto bounds = entity.getComponent<CollisionComponent>().bounds * 4.f;
+            auto bounds = isDay() ? DaySearchArea : NightSearchArea;// entity.getComponent<CollisionComponent>().bounds * 4.f;
             bounds.left += position.x;
             bounds.top += position.y;
 
@@ -488,6 +491,11 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
                     }
                 }
             }
+            //else
+            //{
+            //    //do a sweep for other targets
+            //    wideSweep(entity);
+            //}
         }
     }
 }
@@ -1082,13 +1090,12 @@ void BotSystem::wideSweep(xy::Entity entity)
         if (isDay())
         {
             //large visible area, approx what the player sees on screen (without accounting for perspective)
-            bounds = { -160.f, -288.f, 320.f, 480.f }; //a 10x15 tile square
+            bounds = DaySearchArea;
         }
         else
         {
             //only see approx light area
-            static const float Radius = Global::LightRadius * 0.9f;
-            bounds = { -Radius, -Radius, Radius * 2.f, Radius * 2.f };
+            bounds = NightSearchArea;
         }
 
         bounds.left += position.x;

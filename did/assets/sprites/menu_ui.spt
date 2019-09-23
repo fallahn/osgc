@@ -17,4 +17,9 @@ spritesheet menu_ui
         bounds = 384,256,480,64
     }
 
+    sprite random_button
+    {
+        bounds = 896,256,192,64
+    }
+
 }

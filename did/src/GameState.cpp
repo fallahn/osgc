@@ -1002,16 +1002,16 @@ void GameState::loadScene(const TileArray& tileArray)
     }
 
     //make boats impassable to path finder
-    /*for (auto c : Global::TileExclusionCorners)
+    //we need to keep the position tile clear so bots can find it
+    //when dropping treasure, so let's place impassable tiles either side
+    for (auto i = 0u; i < Global::BoatPositions.size(); ++i)
     {
-        for (auto y = 0; y < Global::TileExclusionX; ++y)
-        {
-            for (auto x = 0; x < Global::TileExclusionY; ++x)
-            {
-                m_pathFinder.addSolidTile({ c.x + x, c.y + y });
-            }
-        }
-    }*/
+        sf::Vector2i boatTile = sf::Vector2i(Global::BoatPositions[i] / Global::TileSize);
+        int x = std::max(0, boatTile.x - 1);
+        m_pathFinder.addSolidTile({ x, boatTile.y });
+        x = std::min(static_cast<int>(Global::TileCountX), x + 2);
+        m_pathFinder.addSolidTile({ x, boatTile.y });
+    }
 
 
     //load from island generator

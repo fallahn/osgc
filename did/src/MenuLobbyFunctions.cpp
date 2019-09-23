@@ -102,7 +102,7 @@ void MenuState::applySeed()
         if (m_activeString->isEmpty())
         {
             //don't have empty seeds
-            *m_activeString = std::to_string(xy::Util::Random::value(5423412, 47235525));
+            randomiseSeed();
 
             auto* seedString = m_activeString;
 
@@ -125,4 +125,19 @@ void MenuState::applySeed()
         cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
+}
+
+void MenuState::randomiseSeed()
+{
+    m_activeString = &m_seedDisplayString;
+    auto string = std::to_string(xy::Util::Random::value(5423412, 47235525));
+
+    auto passes = xy::Util::Random::value(0, 10);
+    for (auto i = 0; i < passes; ++i)
+    {
+        //add a random char
+        string[xy::Util::Random::value(0, string.size() - 1)] = static_cast<char>(xy::Util::Random::value(32, 126));
+    }
+    std::shuffle(string.begin(), string.end(), xy::Util::Random::rndEngine);
+    *m_activeString = string;
 }

@@ -96,6 +96,7 @@ namespace Menu
             Bot,
             TitleBar,
             PlayerFrame,
+            RandomButton,
             TextInput,
             Count
         };

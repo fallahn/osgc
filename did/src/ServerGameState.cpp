@@ -654,8 +654,8 @@ void GameState::spawnPlayer(std::uint64_t clientID)
         if (clientID > 0) //TODO would this be better by validating on the peer?
         {
             xy::Entity entity;
-            for (auto& slot : m_playerSlots)
-            //auto& slot = m_playerSlots[3];
+            //for (auto& slot : m_playerSlots)
+            auto& slot = m_playerSlots[m_sharedData.connectedClients[clientID].playerID];
             {
                 if (slot.available)
                 {
@@ -667,7 +667,7 @@ void GameState::spawnPlayer(std::uint64_t clientID)
                     entity.getComponent<std::uint64_t>() = clientID;
                     entity.getComponent<Bot>().enabled = false;
                     //////entity.getComponent<CollisionComponent>().collidesTerrain = true;
-                    break;
+                    //break;
                 }
             }
             entity.getComponent<Inventory>().reset();
@@ -706,6 +706,12 @@ void GameState::spawnPlayer(std::uint64_t clientID)
             m_sharedData.gameServer->sendData(PacketID::ActorData, state, clientID, xy::NetFlag::Reliable, Global::ReliableChannel);
         }
     }
+
+    for (auto& client : m_playerSlots)
+    {
+        client.sendStatsUpdate = true; //update all clients
+    }
+
     m_scene.setSystemActive<BotSystem>(true);
 }
 
@@ -834,17 +840,13 @@ void GameState::spawnMapActors()
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Boat | QuadTreeFilter::BotQuery);
 
         //make boats impassable to path finder
-        //TODO make this small enough so that bots can steal treasure
-        /*for (auto c : Global::TileExclusionCorners)
-        {
-            for (auto y = 0; y < Global::TileExclusionX; ++y)
-            {
-                for (auto x = 0; x < Global::TileExclusionY; ++x)
-                {
-                    m_pathFinder.addSolidTile({ c.x + x, c.y + y });
-                }
-            }
-        }*/
+        //we need to keep the position tile clear so bots can find it
+        //when dropping treasure, so let's place impassable tiles either side
+        sf::Vector2i boatTile = sf::Vector2i(Global::BoatPositions[i] / Global::TileSize);
+        int x = std::max(0, boatTile.x - 1);
+        m_pathFinder.addSolidTile({ x, boatTile.y });
+        x = std::min(static_cast<int>(Global::TileCountX), x + 2);
+        m_pathFinder.addSolidTile({ x, boatTile.y });
     }
 }
 

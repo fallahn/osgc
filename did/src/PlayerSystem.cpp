@@ -86,7 +86,7 @@ void PlayerSystem::process(float dt)
         std::size_t idx = (input.currentInput + input.history.size() - 1) % input.history.size();
 
         if (player.sync.state == Player::Alive
-            && inventory.health == 0)
+            && inventory.health == 0) //TODO on the client this only wants to happen when the server says so, else it happens twice, once locally
         {
             player.sync.state = Player::Dead;
             player.respawn = RespawnTime;
@@ -95,7 +95,7 @@ void PlayerSystem::process(float dt)
             player.curseTimer = 0.f;
 
             //need to drop anything carried
-            if (entity.getComponent<Carrier>().carryFlags & (Carrier::Torch | Carrier::Treasure))
+            if (entity.getComponent<Carrier>().carryFlags /*& (Carrier::Torch | Carrier::Treasure)*/)
             {
                 auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
                 msg->entity = entity;

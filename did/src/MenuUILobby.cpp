@@ -141,14 +141,6 @@ void MenuState::buildLobby(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //background window
-    /*entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/browser_window.png"));
-    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
-    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
-    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());*/
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);
@@ -368,6 +360,27 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::SeedText;
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //randomise button
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::RandomButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeString = &m_seedDisplayString;
+                    m_activeString->clear();
+                    applySeed();
+                    m_activeString = nullptr;
+                }
+            });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //host icon
