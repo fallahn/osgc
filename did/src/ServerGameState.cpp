@@ -371,7 +371,7 @@ void GameState::handleMessage(const xy::Message& msg)
                                 slot.stats.currentLevel;
                             auto score = XP::calcPlayerScore(difference);
                             m_playerSlots[damager - Actor::PlayerOne].stats.roundXP += score;
-                            std::cout << "Player Score XP: " << score << "\n";
+                            //std::cout << "Player Score XP: " << score << "\n";
                         }
                     }
                 }
@@ -843,10 +843,14 @@ void GameState::spawnMapActors()
         //we need to keep the position tile clear so bots can find it
         //when dropping treasure, so let's place impassable tiles either side
         sf::Vector2i boatTile = sf::Vector2i(Global::BoatPositions[i] / Global::TileSize);
-        int x = std::max(0, boatTile.x - 1);
-        m_pathFinder.addSolidTile({ x, boatTile.y });
-        x = std::min(static_cast<int>(Global::TileCountX), x + 2);
-        m_pathFinder.addSolidTile({ x, boatTile.y });
+
+        for (auto j = 1; j < 3; ++j)
+        {
+            int x = std::max(0, boatTile.x - j);
+            m_pathFinder.addSolidTile({ x, boatTile.y });
+            x = std::min(static_cast<int>(Global::TileCountX), boatTile.x + j);
+            m_pathFinder.addSolidTile({ x, boatTile.y });
+        }
     }
 }
 

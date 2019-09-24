@@ -17,6 +17,7 @@ Barrels frequently wash ashore and can contain health (in the form of food), coi
  * Flares. These look like rockets and are found in barrels. Launch one of these to call in a barrage of canon fire from your offshore galleon.
  * Decoys. The creepy looking decoys are actually your friend! Place one down to distract bees or skeletons that may otherwise attack you.
  * Spooky Skull. These haunted skulls will, when placed, put up a small shield which will curse any player who touches it, reversing their controls for a short amount of time. Place one by your boat for added security!
+ * Mines. These ominous black devices can be buried anywhere and look like any other buried treasure - but contain an explosive booby trap!
 
 
 ###### Weather

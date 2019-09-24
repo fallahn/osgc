@@ -800,7 +800,7 @@ void GameState::processMessageQueue()
         m_messageQueue.pop();
 
         auto entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - 40.f, -20.f);
+        entity.addComponent<xy::Transform>();
         entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont));
         entity.getComponent<xy::Text>().setString(msgString);
         entity.getComponent<xy::Text>().setCharacterSize(32);
@@ -810,6 +810,9 @@ void GameState::processMessageQueue()
         entity.addComponent<xy::Callback>().function = ServerMessageCallback(m_uiScene, getContext().appInstance.getMessageBus());
         entity.getComponent<xy::Callback>().active = true;
         entity.addComponent<xy::CommandTarget>().ID = UI::CommandID::ServerMessage;
+
+        auto bounds = xy::Text::getLocalBounds(entity);
+        entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - 40.f, /*-20.f*/-bounds.height);
 
         m_canShowMessage = false;
     }

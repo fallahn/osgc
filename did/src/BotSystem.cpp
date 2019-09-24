@@ -329,7 +329,7 @@ void BotSystem::process(float dt)
             }
 
             //if we have an item is it time to use it?
-            if (entity.getComponent<Carrier>().carryFlags & (Carrier::Flare | Carrier::SpookySkull | Carrier::Decoy))
+            if (entity.getComponent<Carrier>().carryFlags & (Carrier::Flare | Carrier::SpookySkull | Carrier::Decoy | Carrier::Mine))
             {
                 bot.itemTimer -= dt;
                 if (bot.itemTimer < 0)
@@ -995,12 +995,10 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
         return;
     }
 
-
-
     auto dir = bot.targetPoint//Entity.getComponent<xy::Transform>().getPosition() 
         - entity.getComponent<xy::Transform>().getPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dir);
-    if (len2 < 1024.f) //arbitrary distance somewhere close to target
+    if (len2 < /*1024.f*/768.f) //arbitrary distance somewhere close to target
     {
         if (bot.targetType == Bot::Target::Enemy)
         {
