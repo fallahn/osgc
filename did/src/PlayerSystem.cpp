@@ -174,6 +174,17 @@ void PlayerSystem::reconcile(const ClientState& state, xy::Entity entity)
     //the same is true for the respawn timer
     player.respawn = RespawnTime;
 
+    //letting the health drop to zero locally before re-syncing
+    //causes the 'died' event to be raised twice, once locally
+    //and once after reconciling. This fudges around that...
+    if (player.sync.state == Player::Dead)
+    {
+        entity.getComponent<Inventory>().health = 0;
+    }
+    else
+    {
+        entity.getComponent<Inventory>().health = 1;
+    }
 
     auto& tx = entity.getComponent<xy::Transform>();
     tx.setPosition(state.position);

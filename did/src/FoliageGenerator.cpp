@@ -186,7 +186,16 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
 
                     //add some minimum distance to reduce likelyhood of items overlapping
                     xPos += (f.width - xPos) / 2.f;
-                    xPos = xy::Util::Random::value(xPos, (f.width * 2.f) - 128.f);
+                    auto maxPos = (f.width * 2.f) - 128.f;
+
+                    if (xPos < maxPos)
+                    {
+                        xPos = xy::Util::Random::value(xPos, maxPos);
+                    }
+                    else
+                    {
+                        xPos = maxPos;
+                    }
                 }
             }
         }

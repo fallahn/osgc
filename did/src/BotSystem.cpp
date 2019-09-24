@@ -47,7 +47,7 @@ Copyright 2019 Matt Marchant
 
 #include <algorithm>
 
-//define NO_LOG
+#define NO_LOG
 #ifdef NO_LOG
 #undef LOG
 #define LOG(x,y)
@@ -449,54 +449,72 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
         {
             bot.searchTimer = 0.f;
 
-            auto bounds = isDay() ? DaySearchArea : NightSearchArea;// entity.getComponent<CollisionComponent>().bounds * 4.f;
+            auto bounds = isDay() ? DaySearchArea : NightSearchArea;
             bounds.left += position.x;
             bounds.top += position.y;
 
             const auto& tree = getScene()->getSystem<xy::DynamicTreeSystem>();
-            auto patches = tree.query(bounds, QuadTreeFilter::WetPatch);
-            if (!patches.empty())
+            auto patches = tree.query(bounds, QuadTreeFilter::WetPatch | QuadTreeFilter::Boat);
+
+            for (auto found : patches)
             {
-                //skip any patches already dug
-                const auto& patch = patches.front().getComponent<WetPatch>();
-
-                if (patch.state != WetPatch::OneHundred)
+                //skip if not line of sight
+                if (!m_pathFinder.rayTest(position, found.getComponent<xy::Transform>().getPosition()))
                 {
-                    const auto& patchTx = patches.front().getComponent<xy::Transform>();
-
-                    bot.path.clear();
-                    bot.targetPoint = patchTx.getWorldPosition() + sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f);
-
-                    //we don't want to end up right on top of the wet patch
-                    auto position = entity.getComponent<xy::Transform>().getPosition();
-                    if (position.x > bot.targetPoint.x)
+                    if (found.getComponent<Actor>().id == Actor::Boat)
                     {
-                        bot.targetPoint.x += Global::TileSize;
+                        if (found.getComponent<Boat>().treasureCount > 0
+                            && found.getComponent<Boat>().playerNumber != entity.getComponent<Player>().playerNumber)
+                        {
+                            bot.targetEntity = found;
+                            bot.path.clear();
+                            bot.pathRequested = false;
+                            bot.targetEntity = found;
+                            bot.targetPoint = found.getComponent<xy::Transform>().getPosition();
+                            bot.state = Bot::State::Targeting;
+                            bot.targetType = Bot::Target::Treasure;
+                            return;
+                        }
                     }
                     else
                     {
-                        bot.targetPoint.x -= Global::TileSize;
-                    }
-                    bot.targetPoint.y += 2.f;
+                        //skip any patches already dug
+                        const auto& patch = found.getComponent<WetPatch>();
+                        if (patch.state != WetPatch::OneHundred)
+                        {
+                            const auto& patchTx = found.getComponent<xy::Transform>();
 
-                    bot.targetEntity = patches.front();
-                    bot.targetType = Bot::Target::Hole;
-                    bot.state = Bot::State::Digging;
+                            bot.path.clear();
+                            bot.targetPoint = patchTx.getWorldPosition() + sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f);
 
-                    requestPath(entity);
+                            //we don't want to end up right on top of the wet patch
+                            auto position = entity.getComponent<xy::Transform>().getPosition();
+                            if (position.x > bot.targetPoint.x)
+                            {
+                                bot.targetPoint.x += Global::TileSize;
+                            }
+                            else
+                            {
+                                bot.targetPoint.x -= Global::TileSize;
+                            }
+                            bot.targetPoint.y += 2.f;
 
-                    //drop the light if we're carrying it
-                    if (entity.getComponent<Carrier>().carryFlags & (Carrier::Torch))
-                    {
-                        bot.inputMask |= InputFlag::CarryDrop;
+                            bot.targetEntity = found;
+                            bot.targetType = Bot::Target::Hole;
+                            bot.state = Bot::State::Digging;
+
+                            requestPath(entity);
+
+                            //drop the light if we're carrying it
+                            if (entity.getComponent<Carrier>().carryFlags & (Carrier::Torch))
+                            {
+                                bot.inputMask |= InputFlag::CarryDrop;
+                            }
+                            return;
+                        }
                     }
                 }
             }
-            //else
-            //{
-            //    //do a sweep for other targets
-            //    wideSweep(entity);
-            //}
         }
     }
 }

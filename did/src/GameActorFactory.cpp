@@ -892,7 +892,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         cameraEntity.getComponent<Camera3D>().target = entity;
 
         m_inputParser.setPlayerEntity(entity, entity.getComponent<Player>().playerNumber);
-        entity.addComponent<Bot>();// .enabled = true; //this component is required by the input parser
+        entity.addComponent<Bot>().enabled = true; //this component is required by the input parser
 
         auto compassEntity = m_gameScene.createEntity();
         compassEntity.addComponent<xy::Drawable>();
@@ -907,25 +907,21 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         {
             const auto& bot = entity.getComponent<Bot>();
 
-            std::string strState;
-            switch (bot.state)
+            static const std::array<std::string, 5> stateStrings =
             {
-            case Bot::State::Capturing:
-                strState = "Capturing";
-                break;
-            case Bot::State::Digging:
-                strState = "Digging";
-                break;
-            case Bot::State::Fighting:
-                strState = "Fighting";
-                break;
-            case Bot::State::Searching:
-                strState = "Searching";
-                break;
-            case Bot::State::Targeting:
-                strState = "Targeting " + std::to_string((int)bot.targetType) + " at " + std::to_string(bot.targetPoint.x) + ", " + std::to_string(bot.targetPoint.y);
-                break;
+                "Searching", "Digging", "Fighting", "Targeting", "Capturing"
+            };
+            static const std::array<std::string, 7> targetStrings =
+            {
+                " None", " Hole", " Treasure", " Light", " Collectible", " Enemy", " Item"
+            };
+
+            std::string strState = stateStrings[(int)bot.state];
+            if (bot.state == Bot::State::Targeting)
+            {
+                strState += targetStrings[(int)bot.targetType] + " at " + std::to_string(bot.targetPoint.x) + ", " + std::to_string(bot.targetPoint.y);
             }
+
             xy::App::printStat("Bot State", strState);
 
             auto position = entity.getComponent<xy::Transform>().getPosition();

@@ -760,7 +760,7 @@ void GameState::loadResources()
     m_gameScene.getSystem<Camera3DSystem>().enableChase(true);
     m_gameScene.getSystem<Camera3DSystem>().setActive(false);
 
-    m_gameScene.addDirector<SFXDirector>(/*m_audioResource*/);
+    m_gameScene.addDirector<SFXDirector>();
 
     //set up camera
     auto view = getContext().defaultView;
