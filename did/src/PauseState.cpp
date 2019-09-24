@@ -36,6 +36,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/gui/Gui.hpp>
 
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Image.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Clock.hpp>
 
@@ -243,14 +244,15 @@ void PauseState::build()
     m_scene.addSystem<xy::RenderSystem>(mb);
 
     //background
-    auto background = m_resources.load<sf::Texture>("assets/images/summary_window.png");
+    sf::Image img;
+    img.create(1, 1, sf::Color(0,0,0,130));
+    m_backgroundTexture.loadFromImage(img);
 
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.addComponent<xy::Transform>().setScale(xy::DefaultSceneSize);
     entity.addComponent<xy::Drawable>().setDepth(-100);
-    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(background));
-    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::Sprite>(m_backgroundTexture);
+
 
     //text
     auto fontID = m_resources.load<sf::Font>(Global::FineFont);

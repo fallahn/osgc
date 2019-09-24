@@ -210,17 +210,18 @@ namespace
 
     std::array<float, AudioID::Count> triggerTimes = {};
 
+    std::array<std::size_t, AudioID::Count> audioHandles = {};
+
     const std::size_t MinEntities = 32;
 }
 
-SFXDirector::SFXDirector(xy::AudioResource& ar)
-    : m_audioResource   (ar),
-    m_nextFreeEntity    (0)
+SFXDirector::SFXDirector()
+    : m_nextFreeEntity    (0)
 {
     //pre-load sounds
-    for (const auto& str : paths)
+    for (auto i = 0; i < AudioID::Count; ++i)
     {
-        m_audioResource.get(str);
+        audioHandles[i] = m_audioResource.load<sf::SoundBuffer>(paths[i]);
     }
 }
 
@@ -263,7 +264,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             case Actor::ID::Barrel:
                 if (data.index == AnimationID::Barrel::Break)
                 {
-                    playSound(m_audioResource.get(paths[BarrelBreak]),
+                    playSound(BarrelBreak,
                         data.entity.getComponent<xy::Transform>().getPosition()).setVolume(20.f);
                 }
                 else if (data.index == AnimationID::Barrel::Explode)
@@ -275,7 +276,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             case Actor::Decoy:
                 if (data.index == AnimationID::Die)
                 {
-                    playSound(m_audioResource.get(paths[DecoyDie]),
+                    playSound(DecoyDie,
                         data.entity.getComponent<xy::Transform>().getPosition()).setVolume(20.f);
                 }
                 break;
@@ -288,18 +289,18 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             case Inventory::Pistol:
             {
-                auto& emitter = playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Pistol01, AudioID::Pistol06)]),
+                auto& emitter = playSound(xy::Util::Random::value(AudioID::Pistol01, AudioID::Pistol06),
                     data.entity.getComponent<xy::Transform>().getWorldPosition());
                 emitter.setVolume(20.f);
                 emitter.setPitch(xy::Util::Random::value(0.8f, 1.3f));
             }
                 break;
             case Inventory::Shovel:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Dig01, AudioID::Dig03)]),
+                playSound(xy::Util::Random::value(AudioID::Dig01, AudioID::Dig03),
                     data.entity.getComponent<xy::Transform>().getWorldPosition()).setVolume(5.f);
                 break;
             case Inventory::Sword:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Sword01, AudioID::Sword04)]),
+                playSound(xy::Util::Random::value(AudioID::Sword01, AudioID::Sword04),
                     data.entity.getComponent<xy::Transform>().getWorldPosition()).setPitch(xy::Util::Random::value(0.9f, 1.3f));
                 break;
             default: break;
@@ -315,14 +316,14 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default: break;
             case Actor::ID::Coin:
-                playSound(m_audioResource.get(paths[AudioID::CollectCoin]), data.position).setVolume(25.f);
+                playSound(AudioID::CollectCoin, data.position).setVolume(25.f);
                 break;
             case Actor::ID::Food:
-                playSound(m_audioResource.get(paths[AudioID::CollectFood]), data.position).setVolume(30.f);
+                playSound(AudioID::CollectFood, data.position).setVolume(30.f);
                 break;
             case Actor::ID::Ammo:
             {
-                auto& emitter = playSound(m_audioResource.get(paths[AudioID::SwitchPistol]), data.position);
+                auto& emitter = playSound(AudioID::SwitchPistol, data.position);
                 emitter.setVolume(30.f);
                 emitter.setPitch(1.3f);
             }
@@ -331,7 +332,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 //if(triggerTimes[AudioID::Scored] < 0)
             {
                 //scored in a boat I guess...
-                auto& emitter = playSound(m_audioResource.get(paths[AudioID::Scored]), data.position);
+                auto& emitter = playSound(AudioID::Scored, data.position);
                 emitter.setVolume(30.f);
                 emitter.setAttenuation(2.f);
 
@@ -346,13 +347,24 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default: break;
             case Inventory::Shovel:
-                playSound(m_audioResource.get(paths[AudioID::SwitchShovel]), data.position);
+                playSound(AudioID::SwitchShovel, data.position);
                 break;
             case Inventory::Pistol:
-                playSound(m_audioResource.get(paths[AudioID::SwitchPistol]), data.position);
+                playSound(AudioID::SwitchPistol, data.position);
                 break;
             case Inventory::Sword:
-                playSound(m_audioResource.get(paths[AudioID::SwitchSword]), data.position);
+                playSound(AudioID::SwitchSword, data.position);
+                break;
+            }
+        }
+        else if (data.type == ActorEvent::Spawned)
+        {
+            switch (data.id)
+            {
+            default: break;
+            case Actor::ID::MineSpawn:
+                playSound(xy::Util::Random::value(AudioID::Dig01, AudioID::Dig03),
+                    data.position).setVolume(5.f);
                 break;
             }
         }
@@ -365,10 +377,10 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         default: break;
         case UIEvent::MiniMapHide:
         case UIEvent::MiniMapShow:
-            playSound(m_audioResource.get(paths[AudioID::MiniMapOpen]));
+            playSound(AudioID::MiniMapOpen);
             break;
         case UIEvent::MiniMapZoom:
-            playSound(m_audioResource.get(paths[AudioID::MiniMapClosed]));
+            playSound(AudioID::MiniMapClosed);
             break;
         }
     }
@@ -377,8 +389,8 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<MapEvent>();
         if (data.type == MapEvent::LightningFlash)
         {
-            auto& emitter = playSound(m_audioResource.get(paths[xy::Util::Random::value(static_cast<int>(AudioID::Thunder01),
-                static_cast<int>(AudioID::Thunder03))]), data.position);
+            auto& emitter = playSound(xy::Util::Random::value(static_cast<int>(AudioID::Thunder01),
+                static_cast<int>(AudioID::Thunder03)), data.position);
             
             emitter.setVolume(data.value * 10.f); //tis a kludge for now (and probably forever...)
             emitter.setAttenuation(0.05f);
@@ -386,22 +398,21 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         }
         else if (data.type == MapEvent::LightningStrike)
         {
-            auto& emitter = playSound(m_audioResource.get(paths[AudioID::LightningStrike]), data.position);
+            auto& emitter = playSound(AudioID::LightningStrike, data.position);
             emitter.setAttenuation(2.f);
             emitter.setMinDistance(4.f);
             emitter.setVolume(25.f);
         }
         else if (data.type == MapEvent::ItemInWater)
         {
-            auto& emitter = playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Splash01, AudioID::Splash04)]), data.position);
+            auto& emitter = playSound(xy::Util::Random::value(AudioID::Splash01, AudioID::Splash04), data.position);
             emitter.setAttenuation(2.f);
             emitter.setMinDistance(4.f);
             emitter.setVolume(25.f);
         }
         else if (data.type == MapEvent::Explosion)
         {
-            playSound(m_audioResource.get(paths[BarrelExplode]),
-                data.position);
+            playSound(BarrelExplode, data.position);
         }
     }
     else if (msg.id == MessageID::PlayerMessage)
@@ -422,7 +433,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             if (data.entity.getComponent<Inventory>().weapon == Inventory::Sword)
             {
                 //clang if we both have swords
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::Clash01, AudioID::Clash04)]), 
+                playSound(xy::Util::Random::value(AudioID::Clash01, AudioID::Clash04), 
                     data.entity.getComponent<xy::Transform>().getPosition()).setPitch(xy::Util::Random::value(0.8f, 1.3f));
             }
             else
@@ -436,19 +447,19 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default:break;
             case Actor::ID::PlayerOne:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::RodneySpawn01, AudioID::RodneySpawn02)]),
+                playSound(xy::Util::Random::value(AudioID::RodneySpawn01, AudioID::RodneySpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerTwo:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::JeanSpawn01, AudioID::JeanSpawn02)]),
+                playSound(xy::Util::Random::value(AudioID::JeanSpawn01, AudioID::JeanSpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerThree:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::HelenaSpawn01, AudioID::HelenaSpawn02)]),
+                playSound(xy::Util::Random::value(AudioID::HelenaSpawn01, AudioID::HelenaSpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerFour:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::LarsSpawn01, AudioID::LarsSpawn02)]),
+                playSound(xy::Util::Random::value(AudioID::LarsSpawn01, AudioID::LarsSpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             }
@@ -471,19 +482,19 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default:break;
             case Actor::ID::PlayerOne:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::RodneyDie01, AudioID::RodneyDie04)]),
+                playSound(xy::Util::Random::value(AudioID::RodneyDie01, AudioID::RodneyDie04),
                     position).setVolume(45.f);
                 break;
             case Actor::ID::PlayerTwo:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::JeanDie01, AudioID::JeanDie04)]),
+                playSound(xy::Util::Random::value(AudioID::JeanDie01, AudioID::JeanDie04),
                     position).setVolume(45.f);
                 break;
             case Actor::ID::PlayerThree:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::HelenaDie01, AudioID::HelenaDie03)]),
+                playSound(xy::Util::Random::value(AudioID::HelenaDie01, AudioID::HelenaDie03),
                     position).setVolume(45.f);
                 break;
             case Actor::ID::PlayerFour:
-                playSound(m_audioResource.get(paths[xy::Util::Random::value(AudioID::LarsDie01, AudioID::LarsDie04)]),
+                playSound(xy::Util::Random::value(AudioID::LarsDie01, AudioID::LarsDie04),
                     position).setVolume(45.f);
                 break;
             }
@@ -499,24 +510,24 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 {
                 default:break;
                 case Actor::ID::PlayerOne:
-                    playSound(m_audioResource.get(paths[AudioID::RodneyScore01]),
+                    playSound(AudioID::RodneyScore01,
                         position).setVolume(45.f);
                     break;
                 case Actor::ID::PlayerTwo:
-                    playSound(m_audioResource.get(paths[AudioID::JeanScore01]),
+                    playSound(AudioID::JeanScore01,
                         position).setVolume(45.f);
                     break;
                 case Actor::ID::PlayerThree:
-                    playSound(m_audioResource.get(paths[AudioID::HelenaScore01]),
+                    playSound(AudioID::HelenaScore01,
                         position).setVolume(45.f);
                     break;
                 case Actor::ID::PlayerFour:
-                    playSound(m_audioResource.get(paths[AudioID::LarsScore01]),
+                    playSound(AudioID::LarsScore01,
                         position).setVolume(45.f);
                     break;
                 }
 
-                auto& emitter = playSound(m_audioResource.get(paths[AudioID::Scored]), position);
+                auto& emitter = playSound(AudioID::Scored, position);
                 emitter.setVolume(30.f);
                 emitter.setAttenuation(2.f);
             }
@@ -535,19 +546,19 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default:break;
             case Actor::ID::PlayerOne:
-                playSound(m_audioResource.get(paths[AudioID::RodneyPickup01]), 
+                playSound(AudioID::RodneyPickup01, 
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerTwo:
-                playSound(m_audioResource.get(paths[AudioID::JeanPickup01]),
+                playSound(AudioID::JeanPickup01,
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerThree:
-                playSound(m_audioResource.get(paths[AudioID::HelenaPickup01]),
+                playSound(AudioID::HelenaPickup01,
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             case Actor::ID::PlayerFour:
-                playSound(m_audioResource.get(paths[AudioID::LarsPickup01]),
+                playSound(AudioID::LarsPickup01,
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             }
@@ -596,16 +607,16 @@ void SFXDirector::resizeEntities(std::size_t size)
     {
         m_entities[i] = getScene().createEntity();
         m_entities[i].addComponent<xy::Transform>();
-        m_entities[i].addComponent<xy::AudioEmitter>().setSource(m_audioResource.get("placeholder"));
+        m_entities[i].addComponent<xy::AudioEmitter>();
     }
 }
 
-xy::AudioEmitter& SFXDirector::playSound(sf::SoundBuffer& buffer, sf::Vector2f position)
+xy::AudioEmitter& SFXDirector::playSound(std::int32_t audioID, sf::Vector2f position)
 {
     auto entity = getNextFreeEntity();
     entity.getComponent<xy::Transform>().setPosition(position);
     auto& emitter = entity.getComponent<xy::AudioEmitter>();
-    emitter.setSource(buffer);
+    emitter.setSource(m_audioResource.get<sf::SoundBuffer>(audioHandles[audioID]));
     //must reset values here incase they were changed prior to recycling from pool
     emitter.setAttenuation(1.f);
     emitter.setMinDistance(5.f);

@@ -21,13 +21,14 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Director.hpp>
 #include <xyginext/ecs/Entity.hpp>
 
+#include <xyginext/resources/ResourceHandler.hpp>
+
 #include <SFML/System/Vector2.hpp>
 
 #include <vector>
 
 namespace xy
 {
-    class AudioResource;
     class AudioEmitter;
 }
 
@@ -40,20 +41,19 @@ class SFXDirector final : public xy::Director
 {
 public:
 
-    explicit SFXDirector(xy::AudioResource&);
+    explicit SFXDirector();
 
     void handleEvent(const sf::Event&) override {}
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
 private:
-
-    xy::AudioResource& m_audioResource;
+    xy::ResourceHandler m_audioResource;
 
     std::vector<xy::Entity> m_entities;
     std::size_t m_nextFreeEntity;
 
     xy::Entity getNextFreeEntity();
     void resizeEntities(std::size_t);
-    xy::AudioEmitter& playSound(sf::SoundBuffer&, sf::Vector2f = {});
+    xy::AudioEmitter& playSound(std::int32_t, sf::Vector2f = {});
 };

@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 
+#include <SFML/Graphics/Texture.hpp>
+
 struct SharedData;
 class PauseState final : public xy::State
 {
@@ -41,6 +43,7 @@ private:
     xy::Scene m_scene;
     SharedData& m_sharedData;
     xy::ResourceHandler m_resources;
+    sf::Texture m_backgroundTexture;
 
     std::size_t m_selectedIndex;
 
