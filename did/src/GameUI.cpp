@@ -543,6 +543,7 @@ void GameState::showRoundEnd(const RoundSummary& summary)
         entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
         entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
         entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+        entity.getComponent<xy::Transform>().move(0.f, -46.f);
     };
     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 

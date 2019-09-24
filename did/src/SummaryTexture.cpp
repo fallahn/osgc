@@ -73,9 +73,9 @@ void SummaryTexture::update(const RoundSummary& summary, const ClientInfoManager
     sf::Text text;
     text.setFont(m_font);
     text.setCharacterSize(36);
-    text.setFillColor(Global::InnerTextColour);
-    text.setOutlineColor(Global::OuterTextColour);
-    text.setOutlineThickness(1.f);
+    text.setFillColor(/*Global::InnerTextColour*/sf::Color::Black);
+    //text.setOutlineColor(Global::OuterTextColour);
+    //text.setOutlineThickness(1.f);
 
     //TODO other text properties
 

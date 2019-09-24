@@ -14,7 +14,7 @@ Barrels frequently wash ashore and can contain health (in the form of food), coi
 
 ###### Items
 
- * Flares. These look like rockets and are found in barrels. Launch one of these to call in a barrage of canon fire from your offshore galleon.
+ * Flares. These look like rockets and are found in barrels. Launch one of these to call in a barrage of cannon fire from your offshore galleon.
  * Decoys. The creepy looking decoys are actually your friend! Place one down to distract bees or skeletons that may otherwise attack you.
  * Spooky Skull. These haunted skulls will, when placed, put up a small shield which will curse any player who touches it, reversing their controls for a short amount of time. Place one by your boat for added security!
  * Mines. These ominous black devices can be buried anywhere and look like any other buried treasure - but contain an explosive booby trap!
@@ -47,7 +47,7 @@ Every pirate has a trusty sword as well as a pistol. Pistols are powerful, have 
 This assumes the default xinput style controller layout on Windows. Custom keybinds and controller input is coming Soon™
 
 ###### Hosting a Game
-Click host on the main menu to host a new game. The host can shoose to update the 'seed' a random word or phrase which is used to change how the island is generated, it can be almost anything you like! Remember the seeds for your favourite islands as using the same seed will regenerate the same one each time (although not necessarily with the same treasure...). Hosting requires port 20715 to be open on the host computer, and any relevant NAT/port forwarding done to allow other players to join across the internet.
+Click host on the main menu to host a new game. The host can choose to update the 'seed' a random word or phrase which is used to change how the island is generated, it can be almost anything you like! Remember the seeds for your favourite islands as using the same seed will regenerate the same one each time (although not necessarily with the same treasure...). Hosting requires port 20715 to be open on the host computer, and any relevant NAT/port forwarding done to allow other players to join across the internet.
 
 ###### Joining a Game
 To join a game, hit join from the main menu. When prompted enter a name for your character, and the IP address of the game you'd like to join. Port 20715 will need to be open for outgoing connections. Click join to attempt to join the host's lobby.
@@ -67,6 +67,7 @@ While the game is running there are a few console commands available. Open the c
         flare
         skull_item
         skull_shield
+        mine_item
     seed - shows the current map seed
 
 Note some of the above commands are only available to the current game host. For a list of available commands at run time type `help`.

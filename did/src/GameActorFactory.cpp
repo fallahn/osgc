@@ -680,7 +680,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::CommandTarget>().ID = CommandID::NetInterpolator;
 
         //scatter some grass
-        if(actor.id != Actor::MineSpawn)
+        if (actor.id != Actor::MineSpawn)
         {
             static const float offsetPos = 24.f + (Global::TileSize / 2.f);
             static size_t posIdx = 0;
@@ -720,8 +720,14 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
                 posIdx = (posIdx + xy::Util::Random::value(1, 3)) % grassOffsets.size();
             }
         }
+        {
+            //raise a message because we return from here
+            auto* msg = getContext().appInstance.getMessageBus().post<ActorEvent>(MessageID::ActorMessage);
+            msg->type = ActorEvent::Spawned;
+            msg->position = position;
+            msg->id = actor.id;
+        }
 
-        //break;
         return; //static sprites don't need shadows
     case Actor::Ammo:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Ammo];
