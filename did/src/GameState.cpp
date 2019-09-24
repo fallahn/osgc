@@ -1372,6 +1372,7 @@ void GameState::updateCarriable(const CarriableState& state)
             {
                 //ent is carriable item
                 ent.getComponent<InterpolationComponent>().resetPosition(state.position);
+                ent.getComponent<InterpolationComponent>().setEnabled(true);
                 ent.getComponent<xy::Transform>().setPosition(state.position);
 
                 //treasure which had been stashed will have had its depth put out of
@@ -1414,6 +1415,7 @@ void GameState::updateCarriable(const CarriableState& state)
             if (ent.getComponent<Actor>().serverID == state.carriableID)
             {
                 ent.getComponent<InterpolationComponent>().resetPosition(state.position);
+                ent.getComponent<InterpolationComponent>().setEnabled(false);
                 ent.getComponent<xy::Transform>().setPosition(state.position);
 
                 xy::Command cmd2;
@@ -1468,7 +1470,20 @@ void GameState::updateCarriable(const CarriableState& state)
             {
                 auto position = ent.getComponent<Carriable>().spawnPosition;
                 ent.getComponent<InterpolationComponent>().resetPosition(position);
+                ent.getComponent<InterpolationComponent>().setEnabled(false);
                 ent.getComponent<xy::Transform>().setPosition(position);
+
+                //we have to reapply the position a frame later client-side
+                xy::Command cmd2;
+                cmd2.targetFlags = CommandID::NetInterpolator;
+                cmd2.action = [state, position](xy::Entity e, float)
+                {
+                    if (e.getComponent<Actor>().serverID == state.carriableID)
+                    {
+                        e.getComponent<xy::Transform>().setPosition(position);
+                    }
+                };
+                m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
             }
         };
         m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
