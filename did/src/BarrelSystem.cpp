@@ -64,7 +64,8 @@ BarrelSystem::BarrelSystem(xy::MessageBus& mb, Server::SharedStateData& sd)
     m_sharedData(sd),
     m_spawnIndex(0),
     m_spawnTimer(0.f),
-    m_itemIndex (0)
+    m_itemIndex (0),
+    m_mineCount (0)
 {
     requireComponent<Barrel>();
     requireComponent<xy::Transform>();
@@ -76,7 +77,17 @@ BarrelSystem::BarrelSystem(xy::MessageBus& mb, Server::SharedStateData& sd)
 //public
 void BarrelSystem::handleMessage(const xy::Message& msg)
 {
-
+    if (msg.id == MessageID::ActorMessage)
+    {
+        //count how many mines were placed so they
+        //can have their spawns limited.
+        const auto& data = msg.getData<ActorEvent>();
+        if (data.id == Actor::MineSpawn
+            && data.type == ActorEvent::Spawned)
+        {
+            m_mineCount++;
+        }
+    }
 }
 
 void BarrelSystem::process(float dt)
@@ -189,6 +200,16 @@ void BarrelSystem::updateBeached(xy::Entity entity)
                 Actor::ID::Coin : Items[m_itemIndex];
 
             m_itemIndex = (m_itemIndex + 1) % Items.size();
+
+            //mines create non-despawning ents when placed
+            //so limit the total number spawned to prevent
+            //flooding a long-running game.
+            if (msg->id == Actor::MineItem
+                && m_mineCount == MaxMines)
+            {
+                //let's just go with coins
+                msg->id = Actor::Coin;
+            }
 
             //rarely a poop snail
             if (Server::getRandomInt(0, 16) == 0)

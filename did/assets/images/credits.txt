@@ -1,2 +1,4 @@
 red_drapes.png https://opengameart.org/node/79123 Created by Jordan Irwin (AntumDeluge)
 crown / treasure chest https://opengameart.org/content/gold-treasure-icons Clint Bellanger
+
+If there are any credits missing from this file please post an issue at https://github.com/fallahn/osgc with a link to the orignal asset and credit requirement, thanks!

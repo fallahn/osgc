@@ -65,6 +65,9 @@ private:
 
     std::size_t m_itemIndex;
 
+    std::size_t m_mineCount;
+    static constexpr std::size_t MaxMines = 10;
+
     void spawn();
     void updateFloating(xy::Entity, float);
     void updateBeached(xy::Entity);

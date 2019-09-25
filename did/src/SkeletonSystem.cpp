@@ -41,6 +41,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <array>
 
@@ -420,7 +421,7 @@ void SkeletonSystem::updateDying(xy::Entity entity, float dt)
     {
         auto position = entity.getComponent<xy::Transform>().getPosition();
 
-        //chance to spawn a coin
+        //chance to spawn a coin or two
         auto chance = Server::getRandomInt(0, 3);
         if (chance == 0 && /*!isDayTime() &&*/ entity.getComponent<CollisionComponent>().water == 0)
         {
@@ -428,6 +429,15 @@ void SkeletonSystem::updateDying(xy::Entity entity, float dt)
             msg->id = Actor::ID::Coin;
             msg->position = position;
             msg->type = ActorEvent::RequestSpawn;
+
+            //second coin if we're lucky
+            if (xy::Util::Random::value(0, 5) == 0)
+            {
+                msg = postMessage<ActorEvent>(MessageID::ActorMessage);
+                msg->id = Actor::ID::Coin;
+                msg->position = position;
+                msg->type = ActorEvent::RequestSpawn;
+            }
         }
 
         //raise actor message saying skeleton died
