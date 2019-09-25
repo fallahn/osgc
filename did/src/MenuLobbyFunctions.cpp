@@ -28,10 +28,10 @@ namespace
 
     std::array<sf::Vector2f, 4u> HostPositions =
     {
-        sf::Vector2f(255.f, 660.f),
-        {725.f, 660.f},
-        {1195.f, 660.f},
-        {1665.f, 660.f}
+        sf::Vector2f(255.f, 560.f),
+        {725.f, 560.f},
+        {1195.f, 560.f},
+        {1665.f, 560.f}
     };
 }
 
@@ -59,6 +59,19 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
 
     m_sharedData.clientInformation.getClient(playerID).name = sf::String::fromUtf32(buffer.begin(), buffer.end());
     m_sharedData.clientInformation.getClient(playerID).peerID = peerID;
+
+    //print a message
+    m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + " joined the game");
+
+    if (m_chatBuffer.size() > MaxChatSize)
+    {
+        m_chatBuffer.pop_front();
+    }
+
+    xy::Command cmd;
+    cmd.targetFlags = Menu::CommandID::ChatOutText;
+    cmd.action = std::bind(&MenuState::updateChatOutput, this, std::placeholders::_1, std::placeholders::_2);
+    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
 void MenuState::updateHostInfo(std::uint64_t hostID)
@@ -140,4 +153,81 @@ void MenuState::randomiseSeed()
     }
     std::shuffle(string.begin(), string.end(), xy::Util::Random::rndEngine);
     *m_activeString = string;
+}
+
+void MenuState::sendChat()
+{
+    if (m_activeString == &m_chatInDisplayString
+        && !m_chatInDisplayString.isEmpty())
+    {
+        auto stringBytes = m_chatInDisplayString.toUtf32();
+        std::vector<std::uint8_t> buffer((stringBytes.size() * sizeof(sf::Uint32)) + (2 * sizeof(std::uint8_t)));
+        buffer[0] = m_sharedData.clientInformation.getClientFromPeer(m_sharedData.netClient->getPeer().getID());
+        buffer[1] = static_cast<std::uint8_t>(stringBytes.size() * sizeof(sf::Uint32));
+
+        std::memcpy(&buffer[2], stringBytes.data(), stringBytes.size() * sizeof(sf::Uint32));
+
+        if (buffer[0] != 255)
+        {
+            m_sharedData.netClient->sendPacket(PacketID::ChatMessage, buffer.data(), buffer.size(), xy::NetFlag::Reliable);
+        }
+
+        m_chatInDisplayString.clear();
+
+        xy::Command cmd;
+        cmd.targetFlags = Menu::CommandID::ChatInText;
+        cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setString(""); };
+        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
+}
+
+void MenuState::receiveChat(const xy::NetEvent& evt)
+{
+    if (evt.packet.getSize() > 2)
+    {
+        auto dataSize = std::min(evt.packet.getSize(), (Menu::MaxChatChar) * sizeof(sf::Uint32) + 2);
+
+        std::vector<std::uint8_t> buffer(dataSize);
+        std::memcpy(buffer.data(), evt.packet.getData(), dataSize);
+
+        auto playerID = buffer[0];
+        auto strSize = buffer[1];
+
+        sf::String chatString;
+
+        if (strSize >= sizeof(sf::Uint32))
+        {
+            std::vector<sf::Uint32> stringBuf(strSize / sizeof(sf::Uint32));
+            std::memcpy(stringBuf.data(), &buffer[2], strSize);
+            chatString = sf::String::fromUtf32(stringBuf.begin(), stringBuf.end());
+
+            if (playerID < 4)
+            {
+                m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + ": " + chatString);
+                if (m_chatBuffer.size() > MaxChatSize)
+                {
+                    m_chatBuffer.pop_front();
+                }
+
+                xy::Command cmd;
+                cmd.targetFlags = Menu::CommandID::ChatOutText;
+                cmd.action = std::bind(&MenuState::updateChatOutput, this, std::placeholders::_1, std::placeholders::_2);
+                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
+        }
+    }
+    else
+    {
+        xy::Logger::log("Chat message packet too small", xy::Logger::Type::Error);
+    }
+}
+
+void MenuState::updateChatOutput(xy::Entity e, float)
+{
+    sf::String outStr;
+    for (const auto& str : m_chatBuffer)
+    {
+        outStr += str + "\n";
+    }
+    e.getComponent<xy::Text>().setString(outStr);
 }

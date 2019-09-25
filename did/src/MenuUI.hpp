@@ -43,7 +43,10 @@ namespace Menu
 
             NameText = 0x400,
             IPText = 0x800,
-            HostIcon = 0x1000
+            HostIcon = 0x1000,
+
+            ChatInText = 0x2000,
+            ChatOutText = 0x4000
         };
     }
 
@@ -98,6 +101,8 @@ namespace Menu
             PlayerFrame,
             RandomButton,
             TextInput,
+            ChatBox,
+            ChatButton,
             Count
         };
     }
@@ -131,9 +136,14 @@ namespace Menu
     static const sf::Vector2f StartButtonPosition(1890.f, 960.f);
     static const sf::Vector2f StartButtonPositionHidden(2890.f, 960.f);
     static const sf::Vector2f BackButtonPosition(30.f, 960.f);
-    static const sf::Vector2f SeedPosition(120.f, 840.f);
+    static const sf::Vector2f SeedPosition(210.f, 768.f);
+    static const sf::Vector2f ChatInputPosition(210.f, 860.f);
+    static const sf::Vector2f ChatBoxPosition(940.f, 768.f);
     static const sf::Vector2f FriendsPosition(120.f, 830.f);
     static const sf::Vector2f TitlePosition(xy::DefaultSceneSize.x / 2.f, 168.f);
 
     static const float SliderSpeed = 8.f;
+
+    const std::size_t MaxChatChar = 40;
+    const std::size_t MaxSeedChar = 15;
 }

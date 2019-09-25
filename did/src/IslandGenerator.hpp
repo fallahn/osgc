@@ -89,6 +89,7 @@ public:
 
 private:
 
+    std::size_t m_treasureCount;
     bool m_edgesProcessed;
 
     void heightNoise(int);
@@ -102,5 +103,4 @@ private:
     sf::RenderTexture m_waveTexture;
 
     std::vector<ActorSpawn> m_actorSpawns;
-    std::size_t m_treasureCount;
 };

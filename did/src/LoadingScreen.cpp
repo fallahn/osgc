@@ -43,8 +43,8 @@ namespace
 }
 
 LoadingScreen::LoadingScreen()
-    : m_currentFrameTime    (0.f),
-    m_currentFrame          (0)
+    : m_currentFrame    (0),
+    m_currentFrameTime  (0.f)
 {
     m_texture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/poopsnail.png");
     m_sprite.setTexture(m_texture);

@@ -128,6 +128,16 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         m_sharedData.gameServer->broadcastData(PacketID::GetReadyState, data, xy::NetFlag::Reliable);
     }
         break;
+    case PacketID::ChatMessage:
+        //we should have some sanity checks on this
+        static auto const MaxSize = 166; //maxchar * sizeof(uint32) + 2 bytes
+        if (evt.packet.getSize() < MaxSize //packet is not arbitrarily large...
+            && evt.packet.getSize() > 2 //we actually have a string
+            && ((const std::uint8_t*)evt.packet.getData())[1] >= sizeof(sf::Uint32))
+        {
+            m_sharedData.gameServer->broadcastData(PacketID::ChatMessage, evt.packet.getData(), evt.packet.getSize(), xy::NetFlag::Reliable);
+        }
+        break;
     }
 }
 

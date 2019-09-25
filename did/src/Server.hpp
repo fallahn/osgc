@@ -48,7 +48,7 @@ public:
 
     void setMaxPlayers(std::uint8_t maxPlayers) { m_maxPlayers = maxPlayers; }
 
-    inline void sendData(std::uint8_t packetID, void* data, std::size_t size, std::uint64_t destination, xy::NetFlag sendType, std::uint8_t channel = 0)
+    inline void sendData(std::uint8_t packetID, const void* data, std::size_t size, std::uint64_t destination, xy::NetFlag sendType, std::uint8_t channel = 0)
     {
         m_host.sendPacket(m_sharedStateData.connectedClients[destination].peer, packetID, data, size, sendType, channel);
     }
@@ -56,7 +56,7 @@ public:
     template <typename T>
     inline void sendData(std::uint8_t packetID, const T& data, std::uint64_t dest, xy::NetFlag sendType = xy::NetFlag::Unreliable, std::uint8_t channel = 0);
 
-    inline void broadcastData(std::uint8_t packetID, void* data, std::size_t size, xy::NetFlag sendType, std::uint8_t channel = 0)
+    inline void broadcastData(std::uint8_t packetID, const void* data, std::size_t size, xy::NetFlag sendType, std::uint8_t channel = 0)
     {
         m_host.broadcastPacket(packetID, data, size, sendType, channel);
     }

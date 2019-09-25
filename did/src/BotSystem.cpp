@@ -1179,6 +1179,7 @@ void BotSystem::wideSweep(xy::Entity entity)
             case Actor::SkullItem:
             case Actor::FlareItem:
             case Actor::DecoyItem:
+            case Actor::MineItem:
                 result = SweepResult::Target;
                 break;
             }
@@ -1285,7 +1286,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
 
                 //skip items if we're carrying something or they are carried by someone else
-                if ((actor.id == Actor::FlareItem || actor.id == Actor::DecoyItem || actor.id == Actor::SkullItem)
+                if ((actor.id == Actor::FlareItem || actor.id == Actor::DecoyItem || actor.id == Actor::SkullItem || actor.id == Actor::MineItem)
                     && (entity.getComponent<Carrier>().carryFlags != 0 || ent.getComponent<Carriable>().carried))
                 {
                     continue;

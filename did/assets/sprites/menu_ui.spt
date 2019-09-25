@@ -22,4 +22,13 @@ spritesheet menu_ui
         bounds = 896,256,192,64
     }
 
+    sprite chatbox
+    {
+        bounds = 384,384, 768,169
+    }
+
+    sprite chat_button
+    {
+        bounds = 1088,256,64,64
+    }
 }

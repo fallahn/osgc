@@ -42,6 +42,8 @@ public:
     const ClientInfo& getClient(std::int32_t) const;
     ClientInfo& getClient(std::int32_t);
 
+    std::uint8_t getClientFromPeer(std::uint64_t) const;
+
     void resetClient(std::int32_t);
 
     void setHostID(std::uint64_t id) { m_host = id; }

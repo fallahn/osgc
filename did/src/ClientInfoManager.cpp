@@ -51,6 +51,18 @@ const ClientInfo& ClientInfoManager::getClient(std::int32_t idx) const
     return m_clientInfo[idx];
 }
 
+std::uint8_t ClientInfoManager::getClientFromPeer(std::uint64_t peer) const
+{
+    for (auto i = 0u; i < m_clientInfo.size(); ++i)
+    {
+        if (m_clientInfo[i].peerID == peer)
+        {
+            return i;
+        }
+    }
+    return 255;
+}
+
 void ClientInfoManager::resetClient(std::int32_t idx)
 {
     auto& client = m_clientInfo[idx];

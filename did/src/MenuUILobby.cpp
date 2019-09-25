@@ -99,6 +99,13 @@ void MenuState::buildLobby(sf::Font& font)
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+            //clear the chat history
+            m_chatBuffer.clear();
+
+            cmd.targetFlags = Menu::CommandID::ChatOutText;
+            cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setString(""); };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
             //leave lobby
             m_sharedData.netClient->disconnect();
 
@@ -161,6 +168,10 @@ void MenuState::buildLobby(sf::Font& font)
         "weapon_rodney", "weapon_rodney"
     };
 
+    //root node for avatars to move easily arrange them
+    auto avatarEnt = m_uiScene.createEntity();
+    avatarEnt.addComponent<xy::Transform>().setPosition(0.f, -100.f);
+    parentEntity.getComponent<xy::Transform>().addChild(avatarEnt.getComponent<xy::Transform>());
 
     //player avatars
     float xPos = 40.f;
@@ -175,7 +186,7 @@ void MenuState::buildLobby(sf::Font& font)
         entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::PlayerFrame];
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         
         //small icon/avatar
         entity = m_uiScene.createEntity();
@@ -195,7 +206,7 @@ void MenuState::buildLobby(sf::Font& font)
                 e.getComponent<xy::Sprite>().setTextureRect(m_sprites[Menu::SpriteID::PlayerOne + i].getTextureRect());
             }
         };
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //large avatar
         entity = m_uiScene.createEntity();
@@ -206,7 +217,7 @@ void MenuState::buildLobby(sf::Font& font)
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
         entity.getComponent<xy::Transform>().setScale(5.f, 5.f);
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         auto playerEnt = entity;
         entity = m_uiScene.createEntity();
@@ -217,7 +228,7 @@ void MenuState::buildLobby(sf::Font& font)
         auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
         entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
-        playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         
         //player name
         entity = m_uiScene.createEntity();
@@ -233,7 +244,7 @@ void MenuState::buildLobby(sf::Font& font)
         {
             e.getComponent<xy::Text>().setString(m_sharedData.clientInformation.getClient(i).name);
         };
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //current score
         entity = m_uiScene.createEntity();
@@ -253,12 +264,12 @@ void MenuState::buildLobby(sf::Font& font)
             
             e.getComponent<xy::Text>().setString(str);
         };
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //add ready state checkbox
         entity = addCheckbox(i);
         entity.getComponent<xy::Transform>().setPosition(xPos + 80.f, 740.f); //TODO const some position values
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos + 60.f, 740.f);
@@ -269,7 +280,7 @@ void MenuState::buildLobby(sf::Font& font)
         entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
         entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
         entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-        parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         xPos += xStride;
     }
@@ -292,7 +303,17 @@ void MenuState::buildLobby(sf::Font& font)
         auto mousePos = xy::App::getRenderWindow()->mapPixelToCoords(sf::Mouse::getPosition(*xy::App::getRenderWindow()));
         e.getComponent<xy::Transform>().setPosition(mousePos);
     };
-    auto& textTx = entity.getComponent<xy::Transform>();
+    auto toolTip = entity;
+
+    //plank background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(0.f, (xy::DefaultSceneSize.y / 4.f) + 40.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far - 10);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //seed text
     entity = m_uiScene.createEntity();
@@ -303,21 +324,25 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-    auto bounds = xy::Text::getLocalBounds(entity);
+    bounds = xy::Text::getLocalBounds(entity);
     auto charWidth = bounds.width / 31.f;
     bounds.left = charWidth * 28.f;
     bounds.width = charWidth * 3.f;
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([&textTx](xy::Entity, sf::Vector2f) 
+        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([&, toolTip](xy::Entity, sf::Vector2f) mutable
             {
-                textTx.setScale(1.f, 1.f);
+                if (m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID())
+                {
+                    toolTip.getComponent<xy::Text>().setString("Change this phrase to change how the island is generated");
+                    toolTip.getComponent<xy::Transform>().setScale(1.f, 1.f);
+                }
             });
 
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([&textTx](xy::Entity, sf::Vector2f)
+        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([toolTip](xy::Entity, sf::Vector2f) mutable
             {
-                textTx.setScale(0.f, 0.f);
+                toolTip.getComponent<xy::Transform>().setScale(0.f, 0.f);
             });
 
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -364,7 +389,7 @@ void MenuState::buildLobby(sf::Font& font)
 
     //randomise button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y);
+    entity.addComponent<xy::Transform>().setPosition(/*Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y*/xy::DefaultSceneSize.x / 2.f, 1020.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::RandomButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -373,7 +398,8 @@ void MenuState::buildLobby(sf::Font& font)
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
             [&](xy::Entity e, sf::Uint64 flags)
             {
-                if (flags & xy::UISystem::LeftMouse)
+                if (flags & xy::UISystem::LeftMouse
+                    && m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID())
                 {
                     m_activeString = &m_seedDisplayString;
                     m_activeString->clear();
@@ -381,7 +407,156 @@ void MenuState::buildLobby(sf::Font& font)
                     m_activeString = nullptr;
                 }
             });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([&, toolTip](xy::Entity, sf::Vector2f) mutable
+            {
+                if (m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID())
+                {
+                    toolTip.getComponent<xy::Text>().setString("Click to randomise seed");
+                    toolTip.getComponent<xy::Transform>().setScale(1.f, 1.f);
+                }
+            });
+
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback([toolTip](xy::Entity, sf::Vector2f) mutable
+            {
+                toolTip.getComponent<xy::Transform>().setScale(0.f, 0.f);
+            });
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //chat input
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatInputPosition);
+    entity.addComponent<xy::Text>(fineFont).setString("Chat:");
+    entity.getComponent<xy::Text>().setCharacterSize(Global::LobbyTextSize);
+    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
+    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //text background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatInputPosition.x + 130.f, Menu::ChatInputPosition.y);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TextInput];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseDown] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeString = &m_chatInDisplayString;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::ChatInText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+
+    position = entity.getComponent<xy::Transform>().getPosition();
+    position.x += bounds.width - 24.f;
+    position.y += bounds.height / 2.f;
+
+    //chat input text
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().move(0.f, -bounds.height * 0.5f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.getComponent<xy::Drawable>().setCroppingArea({ -444.f, -30.f, 444.f, 120.f });
+    entity.addComponent<xy::Text>(fineFont);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
+    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::ChatInText;
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //blinkenlights
+    m_textureResource.setFallbackColour(sf::Color::Red);
+    auto& cursorTex = m_textureResource.get();
+    sf::Vector2f texSize(cursorTex.getSize());
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.getComponent<xy::Transform>().move(6.f, -18.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Sprite>(cursorTex);
+    entity.getComponent<xy::Transform>().setScale(4.f / texSize.x, 36.f / texSize.y);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        if (m_activeString == &m_chatInDisplayString)
+        {
+            //flash
+            static float timer = 0.f;
+            timer += dt;
+            if (timer > 0.25f)
+            {
+                timer = 0.f;
+                auto c = e.getComponent<xy::Sprite>().getColour();
+                if (c.a == 0)
+                {
+                    c = sf::Color::Red;
+                }
+                else
+                {
+                    c = sf::Color::Transparent;
+                }
+                e.getComponent<xy::Sprite>().setColour(c);
+            }
+        }
+        else
+        {
+            e.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+        }
+    };
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //chat button
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatInputPosition.x + 620.f, Menu::ChatInputPosition.y);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ChatButton];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_activeString = &m_chatInDisplayString;
+                    sendChat();
+                    m_activeString = nullptr;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::ChatInText;
+                    cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ChatBox];
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //chat output text
+    auto& chatFont = m_fontResource.get("assets/fonts/ProggyClean.ttf");
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition + sf::Vector2f(4.f, 0.f));
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Text>(chatFont).setFillColour(sf::Color::White);
+    entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.getComponent<xy::Drawable>().setCroppingArea(m_sprites[Menu::SpriteID::ChatBox].getTextureBounds());
+    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::ChatOutText;
 
     //host icon
     entity = m_uiScene.createEntity();

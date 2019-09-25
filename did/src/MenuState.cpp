@@ -273,7 +273,9 @@ void MenuState::updateTextInput(const sf::Event& evt)
     if (m_activeString != nullptr)
     {
         std::size_t maxChar = (m_activeString == &m_sharedData.clientName)
-            ? Global::MaxNameSize / sizeof(sf::Uint32) : 15;
+            ? Global::MaxNameSize / sizeof(sf::Uint32) :
+            (m_activeString == &m_chatInDisplayString)
+            ? Menu::MaxChatChar : Menu::MaxSeedChar;
 
         std::uint32_t targetFlags = 0;
         if (m_activeString == &m_sharedData.clientName) 
@@ -283,6 +285,10 @@ void MenuState::updateTextInput(const sf::Event& evt)
         else if (m_activeString == &m_sharedData.remoteIP)
         {
             targetFlags = Menu::CommandID::IPText;
+        }
+        else if (m_activeString == &m_chatInDisplayString)
+        {
+            targetFlags = Menu::CommandID::ChatInText;
         }
         else
         {
@@ -325,12 +331,15 @@ void MenuState::updateTextInput(const sf::Event& evt)
                 //send the seed if that's what we updated
                 applySeed();
 
-                if (!m_activeString->isEmpty())
+                //or the chat text
+                sendChat();
+
+                if (/*m_activeString && */!m_activeString->isEmpty()) //this will keep the chat line active
                 {
                     m_activeString = nullptr;
 
                     xy::Command cmd;
-                    cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText | Menu::CommandID::SeedText;
+                    cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText | Menu::CommandID::SeedText | Menu::CommandID::ChatInText;
                     cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setFillColour(sf::Color::White); };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
@@ -393,6 +402,8 @@ void MenuState::loadAssets()
     m_sprites[Menu::SpriteID::TextInput] = spriteSheet.getSprite("text_input");
     m_sprites[Menu::SpriteID::PlayerFrame] = spriteSheet.getSprite("player_frame");
     m_sprites[Menu::SpriteID::RandomButton] = spriteSheet.getSprite("random_button");
+    m_sprites[Menu::SpriteID::ChatBox] = spriteSheet.getSprite("chatbox");
+    m_sprites[Menu::SpriteID::ChatButton] = spriteSheet.getSprite("chat_button");
 
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
@@ -817,7 +828,23 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         updateClientInfo(evt);
         break;
     case PacketID::PlayerLeft:
-        m_sharedData.clientInformation.resetClient(evt.packet.as<std::uint8_t>());
+    {
+        //print a chaat message and remove from client data
+        auto playerID = evt.packet.as<std::uint8_t>();
+        m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + " left the game");
+
+        if (m_chatBuffer.size() > MaxChatSize)
+        {
+            m_chatBuffer.pop_front();
+        }
+
+        xy::Command cmd;
+        cmd.targetFlags = Menu::CommandID::ChatOutText;
+        cmd.action = std::bind(&MenuState::updateChatOutput, this, std::placeholders::_1, std::placeholders::_2);
+        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        m_sharedData.clientInformation.resetClient(playerID);
+    }
         break;
     case PacketID::GetReadyState:
     {
@@ -825,6 +852,9 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         std::uint8_t playerID = (data >> 8) & 0xff;
         m_sharedData.clientInformation.getClient(playerID).ready = (data & 0xff);
     }
+        break;
+    case PacketID::ChatMessage:
+        receiveChat(evt);
         break;
     }
 }

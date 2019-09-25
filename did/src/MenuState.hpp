@@ -34,6 +34,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Sprite.hpp>
 
 #include <array>
+#include <deque>
 
 struct SharedData;
 struct ActorState;
@@ -77,9 +78,15 @@ private:
 
     sf::String* m_activeString;
     sf::String m_seedDisplayString;
+    sf::String m_chatInDisplayString;
+    std::deque<sf::String> m_chatBuffer;
+    static constexpr std::size_t MaxChatSize = 6;
     void updateTextInput(const sf::Event&);
     void applySeed();
     void randomiseSeed();
+    void sendChat();
+    void receiveChat(const xy::NetEvent&);
+    void updateChatOutput(xy::Entity, float);
 
     MatrixPool m_matrixPool;
     xy::ShaderResource m_shaderResource;
