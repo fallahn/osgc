@@ -1016,7 +1016,7 @@ void GameState::loadScene(const TileArray& tileArray)
     for (auto i = 0u; i < Global::BoatPositions.size(); ++i)
     {
         sf::Vector2i boatTile = sf::Vector2i(Global::BoatPositions[i] / Global::TileSize);
-        for (auto j = 1; j < 3; ++j)
+        for (auto j = 1; j < 4; ++j)
         {
             int x = std::max(0, boatTile.x - j);
             m_pathFinder.addSolidTile({ x, boatTile.y });

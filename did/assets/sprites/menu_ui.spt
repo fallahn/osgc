@@ -24,7 +24,7 @@ spritesheet menu_ui
 
     sprite chatbox
     {
-        bounds = 384,384, 768,169
+        bounds = 384,384, 768,168
     }
 
     sprite chat_button

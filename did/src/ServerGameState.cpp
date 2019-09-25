@@ -844,11 +844,11 @@ void GameState::spawnMapActors()
         //when dropping treasure, so let's place impassable tiles either side
         sf::Vector2i boatTile = sf::Vector2i(Global::BoatPositions[i] / Global::TileSize);
 
-        for (auto j = 1; j < 3; ++j)
+        for (auto j = 1; j < 4; ++j)
         {
             int x = std::max(0, boatTile.x - j);
             m_pathFinder.addSolidTile({ x, boatTile.y });
-            x = std::min(static_cast<int>(Global::TileCountX), boatTile.x + j);
+            x = std::min(static_cast<int>(Global::TileCountX - 1), boatTile.x + j);
             m_pathFinder.addSolidTile({ x, boatTile.y });
         }
     }

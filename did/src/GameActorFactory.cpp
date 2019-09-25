@@ -670,7 +670,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<WetPatch>(); //required to sync with server so client bots know to dig here
         entity.getComponent<xy::SpriteAnimation>().play(0);
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::LandShader));
-        entity.getComponent<xy::Drawable>().setDepth(Global::MaxSortingDepth - 1);
+        entity.getComponent<xy::Drawable>().setDepth(Global::MaxSortingDepth - 2);
         entity.getComponent<xy::Drawable>().bindUniform("u_diffuseTexture", *m_sprites[SpriteID::WetPatch].getTexture());
         entity.getComponent<xy::Drawable>().bindUniform("u_normalTexture", *m_sprites[SpriteID::WetPatch].getTexture());
         entity.getComponent<xy::Drawable>().bindUniform("u_normalUVOffset", -0.5f);
@@ -719,6 +719,11 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
 
                 posIdx = (posIdx + xy::Util::Random::value(1, 3)) % grassOffsets.size();
             }
+        }
+        else
+        {
+            //incase mine is planted on top of existing treasure
+            entity.getComponent<xy::Drawable>().setDepth(Global::MaxSortingDepth - 1);
         }
         {
             //raise a message because we return from here

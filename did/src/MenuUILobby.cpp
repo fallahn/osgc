@@ -551,11 +551,14 @@ void MenuState::buildLobby(sf::Font& font)
     //chat output text
     auto& chatFont = m_fontResource.get("assets/fonts/ProggyClean.ttf");
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition + sf::Vector2f(4.f, 0.f));
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition + sf::Vector2f(12.f, -6.f));
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(chatFont).setFillColour(sf::Color::White);
     entity.getComponent<xy::Text>().setCharacterSize(32);
-    entity.getComponent<xy::Drawable>().setCroppingArea(m_sprites[Menu::SpriteID::ChatBox].getTextureBounds());
+    bounds = m_sprites[Menu::SpriteID::ChatBox].getTextureBounds();
+    bounds.width -= 24.f;
+    //bounds.height -= 24.f;
+    entity.getComponent<xy::Drawable>().setCroppingArea(bounds);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::ChatOutText;
 
     //host icon
