@@ -726,7 +726,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
             entity.getComponent<xy::Drawable>().setDepth(Global::MaxSortingDepth - 1);
             //this is a fudge to stop client bots digging their own traps - doesn't
             //affect when playing with human players
-            entity.getComponent<WetPatch>().owner = 0;
+            entity.getComponent<WetPatch>().owner = Actor::PlayerOne;
         }
         {
             //raise a message because we return from here

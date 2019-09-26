@@ -73,10 +73,10 @@ namespace
 
     const std::array<sf::Vector2f, 4u> TrophyPositions =
     {
-        sf::Vector2f(90.f, 316.f),
-        sf::Vector2f(1250.f, 316.f),
-        sf::Vector2f(1250.f, 656.f),
-        sf::Vector2f(90.f, 656.f)
+        sf::Vector2f(100.f, 316.f),
+        sf::Vector2f(1260.f, 316.f),
+        sf::Vector2f(1260.f, 656.f),
+        sf::Vector2f(100.f, 656.f)
     };
 
     class TreasureFlash final

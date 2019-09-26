@@ -41,10 +41,10 @@ namespace
 
     std::array<sf::Vector2f, 4u> AvatarPositions =
     {
-        sf::Vector2f(90.f, 112.f),
-        sf::Vector2f(1250.f, 112.f),
-        sf::Vector2f(1250.f, 452.f),
-        sf::Vector2f(90.f, 452.f)
+        sf::Vector2f(100.f, 126.f),
+        sf::Vector2f(1260.f, 126.f),
+        sf::Vector2f(1260.f, 466.f),
+        sf::Vector2f(100.f, 466.f)
     };
 
     std::array<sf::IntRect, 5u> AvatarRects =
