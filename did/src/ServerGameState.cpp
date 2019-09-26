@@ -558,11 +558,11 @@ void GameState::handleMessage(const xy::Message& msg)
 
             //raises an event so client can play a sound
             {
-                SceneState state;
-                state.action = SceneState::StashedTreasure;
-                state.position = data.entity.getComponent<xy::Transform>().getPosition();
-                state.serverID = data.entity.getIndex();
-                m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::LowPriorityChannel);
+                SceneState ss;
+                ss.action = SceneState::StashedTreasure;
+                ss.position = data.entity.getComponent<xy::Transform>().getPosition();
+                ss.serverID = data.entity.getIndex();
+                m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, ss, xy::NetFlag::Reliable, Global::LowPriorityChannel);
             }
             break;
         }
@@ -1013,7 +1013,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::DecoyItem | QuadTreeFilter::BotQuery);
         entity.addComponent<Carriable>().type = Carrier::Flags::Decoy;
         entity.getComponent<Carriable>().spawnPosition = position;
-        entity.getComponent<Carriable>().action = [&](xy::Entity e) { spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Decoy); };
+        entity.getComponent<Carriable>().action = [&](xy::Entity e, std::uint8_t) { spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Decoy); };
         entity.addComponent<TimedCarriable>();
         break;
     case Actor::MineItem:
@@ -1024,7 +1024,11 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.addComponent<Carriable>().type = Carrier::Flags::Mine;
         entity.getComponent<Carriable>().spawnPosition = position;
         entity.getComponent<Carriable>().action = 
-            [&](xy::Entity e) { spawnActor(e.getComponent<xy::Transform>().getPosition() - sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f), Actor::MineSpawn); };
+            [&](xy::Entity e, std::uint8_t playerID) 
+        { 
+            auto mineEnt = spawnActor(e.getComponent<xy::Transform>().getPosition() - sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f), Actor::MineSpawn);
+            mineEnt.getComponent<WetPatch>().owner = playerID;
+        };
         entity.addComponent<TimedCarriable>();
         break;
     case Actor::FlareItem:
@@ -1035,7 +1039,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.addComponent<Carriable>().type = Carrier::Flags::Flare;
         entity.getComponent<Carriable>().spawnPosition = position;
         entity.getComponent<Carriable>().offsetMultiplier = Carriable::FlareOffset;
-        entity.getComponent<Carriable>().action = [&](xy::Entity e) { spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Flare); };
+        entity.getComponent<Carriable>().action = [&](xy::Entity e, std::uint8_t) { spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Flare); };
         entity.addComponent<TimedCarriable>();
         break;
     case Actor::SkullItem:
@@ -1046,10 +1050,10 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.addComponent<Carriable>().type = Carrier::Flags::SpookySkull;
         entity.getComponent<Carriable>().spawnPosition = position;
         //entity.getComponent<Carriable>().offsetMultiplier = Carriable::FlareOffset;
-        entity.getComponent<Carriable>().action = [&](xy::Entity e)
+        entity.getComponent<Carriable>().action = [&](xy::Entity e, std::uint8_t playerID)
         {
             auto shieldEnt = spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::SkullShield); 
-            shieldEnt.getComponent<SkullShield>().owner = e.getComponent<Carriable>().parentEntity.getComponent<Player>().playerNumber;
+            shieldEnt.getComponent<SkullShield>().owner = playerID;
         };
         entity.addComponent<TimedCarriable>();
         break;

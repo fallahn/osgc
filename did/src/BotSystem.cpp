@@ -289,23 +289,25 @@ void BotSystem::process(float dt)
 
         if (bot.enabled)
         {
-            //target may have become invalidated
-            /*if (!bot.targetEntity.isValid()
-                || bot.targetEntity.destroyed())
+            //if for some reason we popped a state and the 
+            //previous target is now a long way away, reset the state
+            auto dir = bot.targetPoint - entity.getComponent<xy::Transform>().getPosition();
+            if (bot.state == Bot::State::Targeting &&
+                xy::Util::Vector::lengthSquared(dir) > std::pow((25.f * Global::TileSize), 2.f))
             {
-                bot.popState();
-            }*/
+                bot.resetState();
+            }
 
             //do a sweep to see if nearby items, other players or enemies are nearby
             bot.sweepTimer += dt;
             if (bot.sweepTimer > SweepTime
                 && !bot.fleeing)
             {
-                wideSweep(entity);
                 bot.sweepTimer = 0.f;
+                wideSweep(entity);
             }
 
-            //checkc if we're done fleeing
+            //check if we're done fleeing
             bot.fleeTimer += dt;
             if (bot.fleeing &&
                 (bot.fleeTimer > Bot::FleeTime
@@ -478,9 +480,10 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
                     }
                     else
                     {
-                        //skip any patches already dug
+                        //skip any patches already dug, or have our own booby trap
                         const auto& patch = found.getComponent<WetPatch>();
-                        if (patch.state != WetPatch::OneHundred)
+                        if (patch.state != WetPatch::OneHundred
+                            && patch.owner != entity.getComponent<Player>().playerNumber)
                         {
                             const auto& patchTx = found.getComponent<xy::Transform>();
 
@@ -488,7 +491,6 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
                             bot.targetPoint = patchTx.getWorldPosition() + sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f);
 
                             //we don't want to end up right on top of the wet patch
-                            auto position = entity.getComponent<xy::Transform>().getPosition();
                             if (position.x > bot.targetPoint.x)
                             {
                                 bot.targetPoint.x += Global::TileSize;
@@ -522,7 +524,38 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
 void BotSystem::updateDigging(xy::Entity entity, float dt)
 {
     auto& bot = entity.getComponent<Bot>();
-    
+
+    //if we're in the water for some reason, path to land
+    if (entity.getComponent<CollisionComponent>().water > 0)
+    {
+        const auto position = entity.getComponent<xy::Transform>().getPosition();
+        sf::Vector2f target = position;
+        const float minBounds = 20.f;
+        if (position.x < minBounds)
+        {
+            target.x = 200.f;
+        }
+        else if (position.x > (Global::IslandSize.x - minBounds))
+        {
+            target.x = Global::IslandSize.x - 200.f;
+        }
+
+        if (position.y < minBounds)
+        {
+            target.y = 200.f;
+        }
+        else if (position.y > (Global::IslandSize.y - minBounds))
+        {
+            target.y = Global::IslandSize.y - 200.f;
+        }
+
+        bot.resetState();
+        bot.targetPoint = target;
+        bot.path.push_back(target);
+        bot.sweepTimer = -4.f;
+        return;
+    }
+ 
     //follow path to patch if path exists
     if (!bot.path.empty())
     {
@@ -843,43 +876,43 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
 
 
     //run away if health too low
-    if (inventory.health < (Inventory::MaxHealth / 3)
-        && actorID != Actor::Barrel) //these aren't scary. Usually
-    {
-        auto otherHealth = Inventory::MaxHealth;
-        if (targetActor.serverID == targetActor.entityID)
-        {
-            //must be a server ent - client ents don't have an inventory.
-            otherHealth = bot.targetEntity.getComponent<Inventory>().health;
-        }
-
-        //flee mode so we can't fight again until certain conditions are met
-        if (inventory.ammo == 0
-            && inventory.health < otherHealth)
-        {
-            LOG(ActorNames[entity.getComponent<Actor>().id] + ": Run away!!", xy::Logger::Type::Info);
-            bot.pushState();
-            bot.resetState();
-
-            //look for the furthest exit (to give best chance to run)
-            bot.fleeing = true;
-            bot.fleeTimer = 0.f;
-
-            auto pos = position;
-            if (pos.x > (Global::IslandSize.x / 2.f))
-            {
-                pos.x = 0.f;
-            }
-            else
-            {
-                pos.x = Global::IslandSize.x;
-            }
-            bot.targetPoint = pos;
-            requestPath(entity);
-
-            return;
-        }
-    }
+    //if (inventory.health < (Inventory::MaxHealth / 3)
+    //    && actorID != Actor::Barrel) //these aren't scary. Usually
+    //{
+    //    auto otherHealth = Inventory::MaxHealth;
+    //    if (targetActor.serverID == targetActor.entityID)
+    //    {
+    //        //must be a server ent - client ents don't have an inventory.
+    //        otherHealth = bot.targetEntity.getComponent<Inventory>().health;
+    //    }
+    //
+    //    //flee mode so we can't fight again until certain conditions are met
+    //    if (inventory.ammo == 0
+    //        && inventory.health < otherHealth)
+    //    {
+    //        LOG(ActorNames[entity.getComponent<Actor>().id] + ": Run away!!", xy::Logger::Type::Info);
+    //        bot.pushState();
+    //        bot.resetState();
+    //
+    //        //look for the furthest exit (to give best chance to run)
+    //        bot.fleeing = true;
+    //        bot.fleeTimer = 0.f;
+    //
+    //        auto pos = position;
+    //        if (pos.x > (Global::IslandSize.x / 2.f))
+    //        {
+    //            pos.x = 0.f;
+    //        }
+    //        else
+    //        {
+    //            pos.x = Global::IslandSize.x;
+    //        }
+    //        bot.targetPoint = pos;
+    //        requestPath(entity);
+    //
+    //        return;
+    //    }
+    //}
 }
 
 void BotSystem::updateCapturing(xy::Entity entity)
@@ -998,7 +1031,7 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
     auto dir = bot.targetPoint//Entity.getComponent<xy::Transform>().getPosition() 
         - entity.getComponent<xy::Transform>().getPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dir);
-    if (len2 < /*1024.f*/768.f) //arbitrary distance somewhere close to target
+    if (len2 < /*1024.f*/512.f) //arbitrary distance somewhere close to target
     {
         if (bot.targetType == Bot::Target::Enemy)
         {
@@ -1148,7 +1181,6 @@ void BotSystem::wideSweep(xy::Entity entity)
             case Actor::PlayerThree:
             case Actor::PlayerFour:
             {
-                auto position = entity.getComponent<xy::Transform>().getPosition();
                 auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
                 auto direction = targetPosition - position;
                 auto len2 = xy::Util::Vector::lengthSquared(direction);
@@ -1190,7 +1222,6 @@ void BotSystem::wideSweep(xy::Entity entity)
                 if (bot.state == Bot::State::Digging)
                 {
                     //only change state if enemy is near
-                    auto position = entity.getComponent<xy::Transform>().getPosition();
                     auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
                     auto direction = targetPosition - position;
                     auto len2 = xy::Util::Vector::lengthSquared(direction);
@@ -1224,24 +1255,7 @@ void BotSystem::wideSweep(xy::Entity entity)
             else if (result == SweepResult::Target
                 && bot.state != Bot::State::Digging)
             {
-                //TODO barrels / food should increase in priority when health is low
-
-                //if we're aleady targeting only chose new target if it's closer
-                //and more valuable (based on actor id)
-                if (bot.state == Bot::State::Targeting)
-                {
-                    auto pos = entity.getComponent<xy::Transform>().getPosition();
-                    auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
-
-                    auto newDist = xy::Util::Vector::lengthSquared(targetPosition - position);
-                    auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - position);
-
-                    if (newDist > currDist
-                        || (bot.targetEntity.hasComponent<Actor>() && actor.id > bot.targetEntity.getComponent<Actor>().id))
-                    {
-                        continue;
-                    }
-                }
+                //TODO barrels / food should increase in priority when health is low                
 
                 if (ent == bot.targetEntity)
                 {
@@ -1266,9 +1280,11 @@ void BotSystem::wideSweep(xy::Entity entity)
 
                 //ignore health
                 if (actor.id == Actor::ID::Food
-                    && entity.getComponent<Inventory>().health == Inventory::MaxHealth)
+                    && entity.getComponent<Inventory>().health > Inventory::MaxHealth - 5)
                 {
-                    continue;
+                    bot.sweepTimer = -4.f; //give us enough chance to move away and not keep finding the health item
+                    std::cout << "skipped health\n";
+                    return;
                 }
 
                 //drop lantern if carrying 
@@ -1290,6 +1306,23 @@ void BotSystem::wideSweep(xy::Entity entity)
                     && (entity.getComponent<Carrier>().carryFlags != 0 || ent.getComponent<Carriable>().carried))
                 {
                     continue;
+                }
+
+                //if we're aleady targeting only chose new target if it's closer
+                //and more valuable (based on actor id) and already passed get clauses
+                if (bot.state == Bot::State::Targeting)
+                {
+                    auto pos = entity.getComponent<xy::Transform>().getPosition();
+                    auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+
+                    auto newDist = xy::Util::Vector::lengthSquared(targetPosition - position);
+                    auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - position);
+
+                    if (newDist > currDist
+                        || (bot.targetEntity.hasComponent<Actor>() && actor.id > bot.targetEntity.getComponent<Actor>().id))
+                    {
+                        continue;
+                    }
                 }
 
                 //plot path to collectable

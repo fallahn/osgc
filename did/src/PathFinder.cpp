@@ -132,7 +132,7 @@ std::vector<sf::Vector2f> PathFinder::plotPath(const sf::Vector2i& start, const 
                 continue;
             }
 
-            auto cost = currentNode->G + (i < 4u) ? 10u : 14u;
+            auto cost = currentNode->G + ((i < 4u) ? 10u : 14u);
             auto nextNode = nodeOnList(openSet, coords);
             if (!nextNode)
             {
@@ -221,7 +221,7 @@ bool PathFinder::collides(const sf::Vector2i& position) const
 {
     return (position.x < 0 || position.x >= m_gridSize.x
         || position.y < 0 || position.y >= m_gridSize.y
-        || (std::find(std::begin(m_soldTiles), std::end(m_soldTiles), position) != m_soldTiles.end()));
+        || (std::find(m_soldTiles.begin(), m_soldTiles.end(), position) != m_soldTiles.end()));
 }
 
 PathFinder::Node::Ptr PathFinder::nodeOnList(const std::set<Node::Ptr>& list, const sf::Vector2i& position) const

@@ -722,8 +722,11 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         }
         else
         {
-            //incase mine is planted on top of existing treasure
+            //in case mine is planted on top of existing treasure
             entity.getComponent<xy::Drawable>().setDepth(Global::MaxSortingDepth - 1);
+            //this is a fudge to stop client bots digging their own traps - doesn't
+            //affect when playing with human players
+            entity.getComponent<WetPatch>().owner = 0;
         }
         {
             //raise a message because we return from here

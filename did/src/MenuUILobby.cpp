@@ -228,7 +228,7 @@ void MenuState::buildLobby(sf::Font& font)
         auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
         entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
-        avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         
         //player name
         entity = m_uiScene.createEntity();

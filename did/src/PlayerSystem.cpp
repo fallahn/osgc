@@ -546,7 +546,7 @@ void PlayerSystem::updateCollision(xy::Entity entity, float dt)
             auto len2 = xy::Util::Vector::lengthSquared(tx.getPosition() - collision.manifolds[i].otherEntity.getComponent<xy::Transform>().getPosition());
             float amount = xy::Util::Math::clamp(1.f - (len2 / HurtRadius), 0.f, 1.f);
             int count = static_cast<int>(amount * 3.f) + 1;
-            for (auto i = 0; i < count; ++i)
+            for (auto j = 0; j < count; ++j)
             {
                 auto* newMsg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
                 newMsg->action = PlayerEvent::ExplosionHit;

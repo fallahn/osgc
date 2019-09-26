@@ -27,7 +27,7 @@ Copyright 2019 Matt Marchant
 class TreeSegment final
 {
 public:
-    TreeSegment(float length);
+    explicit TreeSegment(float length);
 
     sf::Vector2f getEnd() const;
 

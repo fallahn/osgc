@@ -56,7 +56,7 @@ struct Carriable final
     xy::Entity parentEntity; //REMEMBER nullify this when dropped
     std::uint16_t type = 0; //player flag to set or unset when carrying this
     
-    std::function<void(xy::Entity)> action; //performed if this is a consumable item like a decoy
+    std::function<void(xy::Entity, std::uint8_t)> action; //performed if this is a consumable item like a decoy, with ID of performer
 };
 
 namespace Server

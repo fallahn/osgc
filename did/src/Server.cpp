@@ -49,6 +49,7 @@ namespace
 GameServer::GameServer()
     : m_thread  (&GameServer::run, this),
     m_running   (false),
+    m_maxPlayers(4),
     m_nextFreeID(0)
 {
     m_sharedStateData.gameServer = this;
@@ -108,7 +109,7 @@ void GameServer::stop()
 //private
 bool GameServer::pollNetwork(xy::NetEvent& evt)
 {
-    std::uint32_t incomingSize = 0;
+    //std::uint32_t incomingSize = 0;
     if (m_host.pollEvent(evt))
     {
         //handle connect and disconnect

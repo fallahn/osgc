@@ -406,7 +406,7 @@ void GameState::loadRoundEnd()
     parentEntity.addComponent<xy::Transform>();
     parentEntity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/summary_window.png"));
     parentEntity.addComponent<xy::Drawable>();
-    auto bounds = parentEntity.getComponent<xy::Sprite>().getTextureBounds();
+    //auto bounds = parentEntity.getComponent<xy::Sprite>().getTextureBounds();
     parentEntity.getComponent<xy::Transform>().setPosition(UI::RoundScreenOffPosition);
     parentEntity.addComponent<xy::CommandTarget>().ID = UI::CommandID::RoundEndMenu;
     parentEntity.addComponent<sf::Vector2f>() = UI::RoundScreenOnPosition;

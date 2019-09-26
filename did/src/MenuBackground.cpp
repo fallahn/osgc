@@ -168,7 +168,7 @@ void MenuState::createBackground()
 
     for (auto i = 0u; i < 8u; ++i)
     {
-        auto entity = m_gameScene.createEntity();
+        entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(barrelPos[i]);
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("barrel01");
@@ -207,7 +207,7 @@ void MenuState::createBackground()
     spriteSheet.loadFromFile("assets/sprites/boat.spt", m_textureResource);
     for (auto i = 0; i < 4; ++i)
     {
-        auto entity = m_gameScene.createEntity();
+        entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(boatPos[i]);
         entity.addComponent<xy::Drawable>();
         entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("boat");
@@ -265,7 +265,7 @@ void MenuState::createBackground()
 
         auto head = xy::Util::Random::value(0, 10);
 
-        auto entity = m_gameScene.createEntity();
+        entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(pos);
         entity.addComponent<xy::Drawable>();
         if (head == 0)
@@ -290,8 +290,8 @@ void MenuState::createBackground()
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
         
         float scaleMod = xy::Util::Random::value(0.05f, 0.28f);
-        float scale = 0.3f + scaleMod;
-        entity.getComponent<xy::Transform>().setScale(scale, -scale);
+        float treeScale = 0.3f + scaleMod;
+        entity.getComponent<xy::Transform>().setScale(treeScale, -treeScale);
         if ((xy::Util::Random::value(0, 10) % 3) == 0)
         {
             entity.getComponent<xy::Transform>().scale(-1.f, 1.f);

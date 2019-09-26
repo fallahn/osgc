@@ -1220,7 +1220,6 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
                         if (m_sharedData.netClient->connect(m_sharedData.remoteIP.toAnsiString(), Global::GamePort))
                         {
                             //goto lobby
-                            xy::Command cmd;
                             cmd.targetFlags = Menu::CommandID::LobbyNode;
                             cmd.action = [](xy::Entity e, float)
                             {

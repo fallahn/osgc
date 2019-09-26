@@ -168,7 +168,7 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
             {
                 auto xPos = static_cast<float>(xy::Util::Random::value(0, static_cast<int>((f.width * 2.f) - 128.f))); //magic number just to stop sprite going off end
                 auto count = (f.width > (Global::TileSize * 2.5f)) ? xy::Util::Random::value(1, 2) : 1;
-                for (auto i = 0; i < count; ++i)
+                for (auto j = 0; j < count; ++j)
                 {
                     auto& sprite = m_midSprites[xy::Util::Random::value(0, m_midSprites.size() - 1)];
                     sf::FloatRect spriteRect = sprite.getLocalBounds();

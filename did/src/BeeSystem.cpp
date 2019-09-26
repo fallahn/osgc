@@ -93,9 +93,7 @@ void BeeSystem::process(float dt)
         {
             if (bee.target.isValid() && !bee.target.destroyed())
             {
-                //we must be chasing a player or decoy
-                auto& bee = entity.getComponent<Bee>();
-
+                //we must be chasing a player or decoy so
                 //move to target
                 move(entity, bee.target.getComponent<xy::Transform>().getPosition(), dt);
 

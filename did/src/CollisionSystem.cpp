@@ -199,7 +199,7 @@ void CollisionSystem::actorCollision(xy::Entity entity)
 
     const auto& tx = entity.getComponent<xy::Transform>();
     auto position = tx.getWorldPosition();
-    auto origin = tx.getOrigin();
+    //auto origin = tx.getOrigin();
     auto bounds = entity.getComponent<CollisionComponent>().bounds;
     auto queryBounds = bounds * 2.f;
 

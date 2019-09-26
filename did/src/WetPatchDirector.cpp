@@ -76,10 +76,10 @@ void DigDirector::handleMessage(const xy::Message& msg)
                 }
 
                 //fetch nearby holes from quad tree
-                auto area = Global::PlayerBounds;
-                area.left += position.x;
-                area.top += position.y;
-                auto holes = getScene().getSystem<xy::DynamicTreeSystem>().query(area, QuadTreeFilter::WetPatch);
+                auto queryArea = Global::PlayerBounds;
+                queryArea.left += position.x;
+                queryArea.top += position.y;
+                auto holes = getScene().getSystem<xy::DynamicTreeSystem>().query(queryArea, QuadTreeFilter::WetPatch);
 
                 //check if dig point is inside hole bounds
                 for (auto e : holes)
@@ -111,9 +111,9 @@ void DigDirector::handleMessage(const xy::Message& msg)
                                 //raise spawn message if hole fully dug
                                 if (wetPatch.state == WetPatch::OneHundred)
                                 {
-                                    auto position = e.getComponent<xy::Transform>().getPosition();
-                                    position.x += (Global::TileSize / 2.f);
-                                    position.y += (Global::TileSize / 2.f);
+                                    auto pos = e.getComponent<xy::Transform>().getPosition();
+                                    pos.x += (Global::TileSize / 2.f);
+                                    pos.y += (Global::TileSize / 2.f);
 
                                     /*if (e.getComponent<Actor>().id != Actor::ID::SkellySpawn)
                                     {
@@ -133,7 +133,7 @@ void DigDirector::handleMessage(const xy::Message& msg)
 
                                     //spawn an item
                                     auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
-                                    msg->position = position;
+                                    msg->position = pos;
                                     msg->type = ActorEvent::RequestSpawn;
 
                                     switch (e.getComponent<Actor>().id)
@@ -155,7 +155,7 @@ void DigDirector::handleMessage(const xy::Message& msg)
 
                                     //raise message to say there's a new hole
                                     auto* msg2 = postMessage<MapEvent>(MessageID::MapMessage);
-                                    msg2->position = position;
+                                    msg2->position = pos;
                                     msg2->type = MapEvent::HoleAdded;
                                 }
 

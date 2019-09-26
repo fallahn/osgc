@@ -279,7 +279,7 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
         else
         {
             //was an activated item (presumably) so activate and destroy it
-            carriable.action(ent);
+            carriable.action(ent, entity.getComponent<Player>().playerNumber);
             getScene()->destroyEntity(ent);
         }
     }
@@ -321,7 +321,6 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
     if (collision.water > 0 && !carriable.stashed)
     {
         //raise message so client can render sfx
-        CarriableState cs;
         cs.action = CarriableState::InWater;
         cs.carriableID = ent.getIndex();
         cs.parentID = 0;

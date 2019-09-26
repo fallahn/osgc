@@ -32,6 +32,7 @@ struct WetPatch final
         Zero, ThirtyThree, SixtySix, OneHundred
     }state = State::Zero;
     sf::Uint32 digCount = 0;
+    std::int32_t owner = -1; //this might be a booby trap
     static constexpr sf::Uint32 DigsPerStage = 3;
 };
 
