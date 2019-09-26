@@ -272,10 +272,15 @@ void MenuState::updateTextInput(const sf::Event& evt)
 {
     if (m_activeString != nullptr)
     {
-        std::size_t maxChar = (m_activeString == &m_sharedData.clientName)
+        /*std::size_t maxChar = (m_activeString == &m_sharedData.clientName)
             ? Global::MaxNameSize / sizeof(sf::Uint32) :
             (m_activeString == &m_chatInDisplayString)
-            ? Menu::MaxChatChar : Menu::MaxSeedChar;
+            ? Menu::MaxChatChar : Menu::MaxSeedChar;*/
+
+        std::size_t maxChar = (m_activeString == &m_sharedData.remoteIP)
+            ? 30 :
+            (m_activeString == &m_seedDisplayString)
+            ? Menu::MaxSeedChar : Menu::MaxChatChar;
 
         std::uint32_t targetFlags = 0;
         if (m_activeString == &m_sharedData.clientName) 

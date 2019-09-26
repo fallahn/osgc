@@ -316,6 +316,7 @@ void GameState::handleMessage(const xy::Message& msg)
                 if (data.data >= Actor::ID::PlayerOne && data.data <= Actor::PlayerFour)
                 {
                     m_playerSlots[data.data - Actor::ID::PlayerOne].stats.roundXP += XP::SkellyScore;
+                    m_playerSlots[data.data - Actor::ID::PlayerOne].stats.foesSlain++;
                 }
             }
         }
@@ -519,8 +520,8 @@ void GameState::handleMessage(const xy::Message& msg)
         case PlayerEvent::StoleTreasure:
             m_remainingTreasure++;
 
-            //TODO send message packet
-            //based on player ID
+            //update client
+            m_playerSlots[data.entity.getComponent<Player>().playerNumber].sendStatsUpdate = true;
 
             //update client scoreboards
             m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable, Global::ReliableChannel);

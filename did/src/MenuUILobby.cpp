@@ -38,6 +38,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/graphics/SpriteSheet.hpp>
+#include <xyginext/util/Random.hpp>
 
 #include <SFML/Window/Mouse.hpp>
 
@@ -168,6 +169,11 @@ void MenuState::buildLobby(sf::Font& font)
         "weapon_rodney", "weapon_rodney"
     };
 
+    std::array<std::string, 3u> animationNames =
+    {
+        "pistol_idle_front", "sword_idle_front", "shovel_idle_front"
+    };
+
     //root node for avatars to move easily arrange them
     auto avatarEnt = m_uiScene.createEntity();
     avatarEnt.addComponent<xy::Transform>().setPosition(0.f, -100.f);
@@ -224,7 +230,7 @@ void MenuState::buildLobby(sf::Font& font)
         entity.addComponent<xy::Transform>();
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
         entity.addComponent<xy::Sprite>() = weaponSprites.getSprite(weaponNames[i]);
-        entity.addComponent<xy::SpriteAnimation>().play(weaponSprites.getAnimationIndex("sword_idle_front", weaponNames[i]));
+        entity.addComponent<xy::SpriteAnimation>().play(weaponSprites.getAnimationIndex(animationNames[xy::Util::Random::value(0,2)], weaponNames[i]));
         auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
         entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);

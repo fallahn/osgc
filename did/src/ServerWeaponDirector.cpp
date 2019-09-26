@@ -115,6 +115,8 @@ void ServerWeaponDirector::handleMessage(const xy::Message& msg)
 
                         if (entity.getComponent<Actor>().id == Actor::ID::Skeleton)
                         {
+                            entity.getComponent<Inventory>().lastDamager = data.entity.getComponent<Actor>().id;
+                            
                             auto& skeleton = entity.getComponent<Skeleton>();
                             float strength = (weapon == Inventory::Pistol) ? 20.f : 60.f;
 

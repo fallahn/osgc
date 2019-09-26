@@ -307,7 +307,7 @@ void SkeletonSystem::updateNormal(xy::Entity entity, float dt)
                     msg->entity = entity;
                     msg->action = PlayerEvent::WantsToCarry;
 
-                    std::cout << "skelly grab treasure\n";
+                    //std::cout << "skelly grab treasure\n";
                 }
             }
             else
@@ -387,7 +387,8 @@ void SkeletonSystem::updateNormal(xy::Entity entity, float dt)
         if (skeleton.timer < 0)
         {
             skeleton.timer = 1.f;
-            
+            entity.getComponent<Inventory>().lastDamager = -1;
+
             auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
             msg->entity = entity;
             msg->action = PlayerEvent::PistolHit;
@@ -497,6 +498,8 @@ void SkeletonSystem::updateCollision(xy::Entity entity)
         {
         default: break;
         case ManifoldID::Player:
+            entity.getComponent<Inventory>().lastDamager = manifold.otherEntity.getComponent<Actor>().id;
+            
             skeleton.velocity += manifold.normal * 140.f;
             {
                 auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
@@ -507,6 +510,7 @@ void SkeletonSystem::updateCollision(xy::Entity entity)
         case ManifoldID::Explosion:
             skeleton.state = Skeleton::Dying;
             skeleton.timer = 1.2f;
+            entity.getComponent<Inventory>().lastDamager = -1;
 
             entity.getComponent<Inventory>().health = 0;
             entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(0);
@@ -521,6 +525,7 @@ void SkeletonSystem::updateCollision(xy::Entity entity)
             skeleton.pathPoints.push_back(entity.getComponent<xy::Transform>().getPosition() + (manifold.normal * (Global::TileSize * 2.5f)));
             skeleton.target = Skeleton::None;
             skeleton.targetEntity = {};
+            entity.getComponent<Inventory>().lastDamager = -1;
             break;
         }
     }

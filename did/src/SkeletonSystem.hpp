@@ -39,8 +39,9 @@ struct Skeleton final
     bool onFire = false;
     bool inLight = false;
     bool fleeingLight = false;
-    std::vector<sf::Vector2f> pathPoints;
+
     bool pathRequested = false;
+    std::vector<sf::Vector2f> pathPoints;
 
     enum Target
     {
