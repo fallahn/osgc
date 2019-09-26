@@ -483,7 +483,7 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
                         //skip any patches already dug, or have our own booby trap
                         const auto& patch = found.getComponent<WetPatch>();
                         if (patch.state != WetPatch::OneHundred
-                            && patch.owner != entity.getComponent<Player>().playerNumber)
+                            && patch.owner != entity.getComponent<Actor>().id)
                         {
                             const auto& patchTx = found.getComponent<xy::Transform>();
 
@@ -1168,6 +1168,13 @@ void BotSystem::wideSweep(xy::Entity entity)
                 continue;
             }
 
+            auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+            if (m_pathFinder.rayTest(position, targetPosition))
+            {
+                //ignore if no LOS
+                continue;
+            }
+
             const auto& actor = ent.getComponent<Actor>();
             
             SweepResult result = SweepResult::None;
@@ -1181,11 +1188,11 @@ void BotSystem::wideSweep(xy::Entity entity)
             case Actor::PlayerThree:
             case Actor::PlayerFour:
             {
-                auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+                //auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
                 auto direction = targetPosition - position;
                 auto len2 = xy::Util::Vector::lengthSquared(direction);
 
-                if (len2 < MaxFightDistance && !m_pathFinder.rayTest(position, targetPosition))
+                if (len2 < MaxFightDistance/* && !m_pathFinder.rayTest(position, targetPosition)*/)
                 {
                     //only target if close enough and not obstructed
                     result = SweepResult::Fight;
@@ -1222,7 +1229,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                 if (bot.state == Bot::State::Digging)
                 {
                     //only change state if enemy is near
-                    auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
+                    //auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
                     auto direction = targetPosition - position;
                     auto len2 = xy::Util::Vector::lengthSquared(direction);
                     if (len2 > 4096) //approx 2 tile radius
@@ -1363,7 +1370,7 @@ void BotSystem::wideSweep(xy::Entity entity)
 
                 //if we're already close skip path finding
                 if ((xy::Util::Vector::lengthSquared(bot.targetPoint - position) < MinTargetArea)
-                    && !m_pathFinder.rayTest(position, bot.targetPoint))
+                    /*&& !m_pathFinder.rayTest(position, bot.targetPoint)*/)
                 {
                     bot.path.push_back(bot.targetPoint);
                 }

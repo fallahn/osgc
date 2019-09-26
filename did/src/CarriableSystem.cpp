@@ -277,7 +277,7 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
         else
         {
             //was an activated item (presumably) so activate and destroy it
-            carriable.action(ent, entity.getComponent<Player>().playerNumber);
+            carriable.action(ent, entity.getComponent<Actor>().id);
             getScene()->destroyEntity(ent);
         }
     }

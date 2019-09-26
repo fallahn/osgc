@@ -306,7 +306,13 @@ void GameState::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<ActorEvent>();
         if (data.type == ActorEvent::RequestSpawn)
         {
-            spawnActor(data.position, data.id);
+            auto ent = spawnActor(data.position, data.id);
+            if (data.id == Actor::Explosion)
+            {
+                //tag player who caused explosion, either by booby trap
+                //or by barrage
+                ent.getComponent<std::int32_t>() = data.data;
+            }
         }
         else if (data.type == ActorEvent::Died)
         {
@@ -315,8 +321,11 @@ void GameState::handleMessage(const xy::Message& msg)
             {
                 if (data.data >= Actor::ID::PlayerOne && data.data <= Actor::PlayerFour)
                 {
-                    m_playerSlots[data.data - Actor::ID::PlayerOne].stats.roundXP += XP::SkellyScore;
-                    m_playerSlots[data.data - Actor::ID::PlayerOne].stats.foesSlain++;
+                    auto id = data.data - Actor::ID::PlayerOne;
+                    m_playerSlots[id].stats.roundXP += XP::SkellyScore;
+                    m_playerSlots[id].stats.foesSlain++;
+                    m_playerSlots[id].sendStatsUpdate = true;
+                    std::cout << (int)id << " killed skelly\n";
                 }
             }
         }
@@ -875,6 +884,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.getComponent<Actor>().nonStatic = false;
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().function = ExplosionCallback(m_scene);
+        entity.addComponent<std::int32_t>() = -1; //'owner' if this was caused by a booby trap or barrage
         break;
     case Actor::ID::DirtSpray:
         entity.getComponent<Actor>().nonStatic = false;

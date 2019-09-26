@@ -135,6 +135,7 @@ void DigDirector::handleMessage(const xy::Message& msg)
                                     auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                                     msg->position = pos;
                                     msg->type = ActorEvent::RequestSpawn;
+                                    msg->data = data.entity.getComponent<Actor>().id;
 
                                     switch (e.getComponent<Actor>().id)
                                     {

@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "AnimationSystem.hpp"
 #include "QuadTreeFilter.hpp"
 #include "PlayerSystem.hpp"
+#include "Actor.hpp"
 
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -91,7 +92,7 @@ void SkullShieldSystem::doCollision(xy::Entity entity)
     {
         if (collision.manifolds[i].ID == ManifoldID::Player)
         {
-            if (collision.manifolds[i].otherEntity.getComponent<Player>().playerNumber
+            if (collision.manifolds[i].otherEntity.getComponent<Actor>().id
                 != entity.getComponent<SkullShield>().owner)
             {
                 entity.getComponent<SkullShield>().state = SkullShield::Despawn;
