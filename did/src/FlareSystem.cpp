@@ -81,7 +81,7 @@ void FlareSystem::process(float dt)
                     auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                     msg->id = Actor::Explosion;
                     msg->position = spawnPos;
-                    //TODO set data to actor id of whoever sent up the flare
+                    msg->data = flare.owner;
                 }
             }
 

@@ -112,7 +112,8 @@ void BeeSystem::process(float dt)
                 bee.nextStingTime += dt;
                 if (bee.target.getComponent<Actor>().id != Actor::ID::Decoy)
                 {
-                    if (bee.target.getComponent<CollisionComponent>().water > 0.f)
+                    if (bee.target.getComponent<CollisionComponent>().water > 0.f
+                        || bee.target.getComponent<Player>().sync.state == Player::State::Dead)
                     {
                         bee.target = {};
                         bee.nextScanTime = -5.f;

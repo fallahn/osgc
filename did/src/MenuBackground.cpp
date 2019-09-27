@@ -69,7 +69,7 @@ void MenuState::createBackground()
     m_shaderResource.get(ShaderID::SpriteShader).setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
 
     //camera
-    camEnt = m_gameScene.createEntity();
+    camEnt = m_gameScene.getDefaultCamera();//using the default cam means scene automagically updates the letterbox
     camEnt.addComponent<xy::Transform>();
     const float fov = 0.6f; //0.55f FOV
     const float aspect = 16.f / 9.f;
@@ -79,7 +79,7 @@ void MenuState::createBackground()
     camEnt.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y - 140.f);
 
     auto view = getContext().defaultView;
-    auto& camera = camEnt.addComponent<xy::Camera>();
+    auto& camera = camEnt.getComponent<xy::Camera>();
     camera.setView(view.getSize());
     camera.setViewport(view.getViewport());
 

@@ -176,15 +176,16 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
                     sprite.setPosition(position);
 
                     //flip occasionally
-                    if (xy::Util::Random::value(0, 4) == 0)
+                    if (xy::Util::Random::value(0, 3) == 0)
                     {
-                        sprite.setScale(-1.f, 1.f);
+                        sprite.scale(-1.f, 1.f);
                         sprite.setOrigin(spriteRect.width, 0.f);
                     }
 
                     m_textures[m_textureIndex]->draw(sprite);
 
                     //add some minimum distance to reduce likelyhood of items overlapping
+                    xPos += sprite.getLocalBounds().width;
                     xPos += (f.width - xPos) / 2.f;
                     auto maxPos = (f.width * 2.f) - 128.f;
 

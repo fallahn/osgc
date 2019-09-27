@@ -1050,7 +1050,11 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.addComponent<Carriable>().type = Carrier::Flags::Flare;
         entity.getComponent<Carriable>().spawnPosition = position;
         entity.getComponent<Carriable>().offsetMultiplier = Carriable::FlareOffset;
-        entity.getComponent<Carriable>().action = [&](xy::Entity e, std::uint8_t) { spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Flare); };
+        entity.getComponent<Carriable>().action = [&](xy::Entity e, std::uint8_t actorID) 
+        { 
+            auto ent = spawnActor(e.getComponent<xy::Transform>().getPosition(), Actor::Flare);
+            ent.getComponent<Flare>().owner = actorID;
+        };
         entity.addComponent<TimedCarriable>();
         break;
     case Actor::SkullItem:

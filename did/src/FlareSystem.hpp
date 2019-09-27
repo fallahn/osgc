@@ -33,6 +33,8 @@ struct Flare final
 
     float fireTime = 0.f;
     static constexpr float NextFireTime = 0.5f;
+
+    std::int8_t owner = -1;
 };
 
 class FlareSystem final : public xy::System
