@@ -56,21 +56,26 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
     std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
     std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(playerID) + sizeof(peerID), size);
 
-    m_sharedData.clientInformation.getClient(playerID).name = sf::String::fromUtf32(buffer.begin(), buffer.end());
-    m_sharedData.clientInformation.getClient(playerID).peerID = peerID;
+    auto& client = m_sharedData.clientInformation.getClient(playerID);
+    bool newPlayer = client.peerID != peerID; //this client is not yet known to us!
+    client.name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+    client.peerID = peerID;
 
     //print a message
-    m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + " joined the game");
-
-    if (m_chatBuffer.size() > MaxChatSize)
+    if (newPlayer)
     {
-        m_chatBuffer.pop_front();
-    }
+        m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + " joined the game");
 
-    xy::Command cmd;
-    cmd.targetFlags = Menu::CommandID::ChatOutText;
-    cmd.action = std::bind(&MenuState::updateChatOutput, this, std::placeholders::_1, std::placeholders::_2);
-    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        if (m_chatBuffer.size() > MaxChatSize)
+        {
+            m_chatBuffer.pop_front();
+        }
+
+        xy::Command cmd;
+        cmd.targetFlags = Menu::CommandID::ChatOutText;
+        cmd.action = std::bind(&MenuState::updateChatOutput, this, std::placeholders::_1, std::placeholders::_2);
+        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
 }
 
 void MenuState::updateHostInfo(std::uint64_t hostID)

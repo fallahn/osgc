@@ -325,8 +325,16 @@ void GameState::handleMessage(const xy::Message& msg)
                     m_playerSlots[id].stats.roundXP += XP::SkellyScore;
                     m_playerSlots[id].stats.foesSlain++;
                     m_playerSlots[id].sendStatsUpdate = true;
-                    std::cout << (int)id << " killed skelly\n";
+                    //std::cout << (int)id << " killed skelly\n";
                 }
+            }
+        }
+        else if (data.type == ActorEvent::CollectedItem)
+        {
+            if (data.id >= Actor::ID::PlayerOne && data.data <= Actor::PlayerFour)
+            {
+                auto id = data.id - Actor::ID::PlayerOne;
+                m_playerSlots[id].sendStatsUpdate = true;
             }
         }
     }
@@ -367,29 +375,29 @@ void GameState::handleMessage(const xy::Message& msg)
                     //find last actor who damaged this player
                     //and award XP if it was another player
                     auto damager = data.data;
-                    if (damager >= Actor::ID::PlayerOne && damager <= Actor::ID::PlayerFour)
+                    if (damager >= Actor::ID::PlayerOne && damager <= Actor::ID::PlayerFour
+                        && damager != data.entity.getComponent<Actor>().id) //don't give points for killing ourselves
                     {
+                        damager -= Actor::PlayerOne;
+
                         //also check if this is a bot and make sure to award correct points
                         if (slot.gameEntity.getComponent<Bot>().enabled)
                         {
-                            m_playerSlots[damager - Actor::PlayerOne].stats.roundXP += XP::BotScore;
+                            m_playerSlots[damager].stats.roundXP += XP::BotScore;
                         }
                         else
                         {
                             //find the difference in levels and calc
-                            std::int64_t difference = m_playerSlots[damager - Actor::PlayerOne].stats.currentLevel -
+                            std::int64_t difference = m_playerSlots[damager].stats.currentLevel -
                                 slot.stats.currentLevel;
                             auto score = XP::calcPlayerScore(difference);
-                            m_playerSlots[damager - Actor::PlayerOne].stats.roundXP += score;
+                                                        
+                            m_playerSlots[damager].stats.roundXP += score;
+                            m_playerSlots[damager].stats.foesSlain++;
+                            m_playerSlots[damager].sendStatsUpdate = true;
                             //std::cout << "Player Score XP: " << score << "\n";
                         }
                     }
-                }
-                else if (data.data == slot.gameEntity.getComponent<Actor>().id)
-                {
-                    //data.data is who damaged player last
-                    slot.stats.foesSlain++;
-                    slot.sendStatsUpdate = true;
                 }
             }
 

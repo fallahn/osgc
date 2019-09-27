@@ -86,8 +86,8 @@ void CollectibleSystem::process(float dt)
                         if (inventory.health < Inventory::MaxHealth)
                         {
                             inventory.health = std::min(Inventory::MaxHealth, static_cast<sf::Int8>(inventory.health + collectible.value));
-                            collected = true;
                         }
+                        collected = true;
                         break;
                     }
                     //TODO other types
@@ -101,6 +101,11 @@ void CollectibleSystem::process(float dt)
                             state.inventory = inventory;
                             state.parentID = otherEnt.getIndex();
                             m_sharedData.gameServer->sendData(PacketID::InventoryUpdate, state, otherEnt.getComponent<std::uint64_t>(), xy::NetFlag::Reliable, Global::ReliableChannel);
+
+                            //make sure the servers knows to send a stats update
+                            auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
+                            msg->id = otherEnt.getComponent<Actor>().id;
+                            msg->type = ActorEvent::CollectedItem;
                         }
 
                         getScene()->destroyEntity(entity);

@@ -919,12 +919,12 @@ void BotSystem::updateCapturing(xy::Entity entity)
 {
     auto& bot = entity.getComponent<Bot>();
 
-    if(!bot.path.empty())
+    if (!bot.path.empty())
     {
         bot.pathRequested = false;
         followPath(entity);
     }
-    else
+    else if (!bot.pathRequested)
     {
         //we must be near the boat by now
         //walk to target point
@@ -1290,7 +1290,6 @@ void BotSystem::wideSweep(xy::Entity entity)
                     && entity.getComponent<Inventory>().health > Inventory::MaxHealth - 5)
                 {
                     bot.sweepTimer = -4.f; //give us enough chance to move away and not keep finding the health item
-                    std::cout << "skipped health\n";
                     return;
                 }
 
@@ -1369,8 +1368,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                 }
 
                 //if we're already close skip path finding
-                if ((xy::Util::Vector::lengthSquared(bot.targetPoint - position) < MinTargetArea)
-                    /*&& !m_pathFinder.rayTest(position, bot.targetPoint)*/)
+                if ((xy::Util::Vector::lengthSquared(bot.targetPoint - position) < MinTargetArea))
                 {
                     bot.path.push_back(bot.targetPoint);
                 }
@@ -1415,13 +1413,15 @@ void BotSystem::followPath(xy::Entity entity)
     const auto& collision = entity.getComponent<CollisionComponent>();
     for (auto i = 0u; i < collision.manifoldCount; ++i)
     {
-        if (collision.manifolds[i].ID == ManifoldID::Terrain)
+        auto manID = collision.manifolds[i].ID;
+        if (manID == ManifoldID::Terrain
+            || manID == ManifoldID::Boat)
         {
             bot.path.clear();
             bot.path.push_back((collision.manifolds[i].normal * Global::TileSize) + position);
             break;
         }
-        else if (collision.manifolds[i].ID == ManifoldID::SpawnArea)
+        else if (manID == ManifoldID::SpawnArea)
         {
             if (collision.manifolds[i].otherEntity.getComponent<SpawnArea>().parent.getComponent<Boat>().playerNumber
                 != entity.getComponent<Player>().playerNumber)
@@ -1497,7 +1497,7 @@ void BotSystem::requestPath(xy::Entity entity)
 
 void BotSystem::moveToPoint(sf::Vector2f dir, Bot& bot)
 {
-    static const float minMove = 2.f;
+    static const float minMove = 0.5f;
 
     if (dir.x > minMove)
     {

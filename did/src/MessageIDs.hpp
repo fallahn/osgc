@@ -87,7 +87,8 @@ struct ActorEvent final
         RequestSpawn,
         Spawned,
         Died,
-        SwitchedWeapon
+        SwitchedWeapon,
+        CollectedItem
     }type;
     sf::Vector2f position;
     std::uint32_t id = 0;
