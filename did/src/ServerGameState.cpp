@@ -736,7 +736,7 @@ void GameState::spawnPlayer(std::uint64_t clientID)
 void GameState::createPlayerEntity(std::size_t idx)
 {
     auto entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Global::BoatPositions[idx] + sf::Vector2f(0.f, Global::PlayerSpawnOffset));
+    entity.addComponent<xy::Transform>().setPosition(Global::BoatPositions[idx] + /*sf::Vector2f(0.f, Global::PlayerSpawnOffset)*/Global::SpawnOffsets[idx]);
     entity.addComponent<Actor>();
     switch (idx)
     {

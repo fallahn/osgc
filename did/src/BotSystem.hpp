@@ -73,7 +73,7 @@ struct Bot final
     std::uint16_t inputMask;
     bool enabled = false;// true;
     bool pathRequested = false; //don't want to request another path while waiting
-    bool fleeing = false; //won't fight when we're fleeing
+    bool fleeing = false; //run from bees!
     bool wantsGrab = false; //if we're trying to grab something but didn't get close enough
     std::int8_t previousHealth = 10;//for testing if health changed
 

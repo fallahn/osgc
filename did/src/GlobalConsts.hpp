@@ -88,6 +88,15 @@ namespace Global
         sf::Vector2f(Global::IslandSize.x - Global::BoatXOffset, Global::IslandSize.y - Global::BoatYOffset - Global::PlayerSpawnOffset),
         sf::Vector2f(Global::BoatXOffset, Global::IslandSize.y - Global::BoatYOffset - Global::PlayerSpawnOffset)
     };
+
+    static const std::array<sf::Vector2f, 4u> SpawnOffsets =
+    {
+        sf::Vector2f(Global::BoatXOffset / 4.f, Global::PlayerSpawnOffset),
+        sf::Vector2f(-Global::BoatXOffset / 4.f, Global::PlayerSpawnOffset),
+        sf::Vector2f(-Global::BoatXOffset / 4.f, -Global::PlayerSpawnOffset),
+        sf::Vector2f(Global::BoatXOffset / 4.f, -Global::PlayerSpawnOffset)
+    };
+
     static const float BoatRadius = 36.f;
 
     static const int TileExclusionX = 8;

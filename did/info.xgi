@@ -1,6 +1,6 @@
 game_info
 {
-    thumb = "assets/images/thumb.png"
+    thumb = "assets/images/thumbnail.png"
     title = "Desert Island Duel"
     version = "0.1.0"
     author = "fallahn"

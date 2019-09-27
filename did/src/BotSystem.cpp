@@ -421,9 +421,9 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
     }
 
     //request new path if needed
-    if ((bot.path.empty() && !bot.pathRequested))
+    if ((bot.path.empty() && !bot.pathRequested && !bot.fleeing))
     {
-        bot.fleeing = false;
+        //bot.fleeing = false;
         if (bot.stateStack.empty())
         {
             bot.targetPoint = m_destinationPoints[bot.pointIndex];
@@ -935,7 +935,8 @@ void BotSystem::updateCapturing(xy::Entity entity)
         {
             //something went wrong and we need a new path to spawn
             bot.targetPoint = entity.getComponent<Player>().spawnPosition;
-            bot.targetPoint.y -= Global::PlayerSpawnOffset;
+            //bot.targetPoint.y -= Global::PlayerSpawnOffset;
+            bot.targetPoint -= Global::SpawnOffsets[entity.getComponent<Player>().playerNumber];
             requestPath(entity);
             LOG("looking for home!", xy::Logger::Type::Info);
         }
@@ -997,7 +998,8 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
 
             LOG(ActorNames[entity.getComponent<Actor>().id] + ": picked up treasure!", xy::Logger::Type::Info);
             bot.targetPoint = entity.getComponent<Player>().spawnPosition;
-            bot.targetPoint.y -= Global::PlayerSpawnOffset;
+            //bot.targetPoint.y -= Global::PlayerSpawnOffset;
+            bot.targetPoint -= Global::SpawnOffsets[entity.getComponent<Player>().playerNumber];
             requestPath(entity);       
         }
         else
@@ -1497,7 +1499,7 @@ void BotSystem::requestPath(xy::Entity entity)
 
 void BotSystem::moveToPoint(sf::Vector2f dir, Bot& bot)
 {
-    static const float minMove = 0.5f;
+    static const float minMove = 1.5f;
 
     if (dir.x > minMove)
     {
