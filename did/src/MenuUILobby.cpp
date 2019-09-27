@@ -136,7 +136,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
@@ -402,7 +402,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse
                     && m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID())
@@ -532,7 +532,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {

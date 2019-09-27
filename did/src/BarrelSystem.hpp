@@ -44,21 +44,15 @@ struct Barrel final
     };
 };
 
-namespace Server
-{
-    struct SharedStateData;
-}
-
 class BarrelSystem final : public xy::System
 {
 public:
-    BarrelSystem(xy::MessageBus&, Server::SharedStateData&);
+    explicit BarrelSystem(xy::MessageBus&);
 
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
 private:
-    Server::SharedStateData& m_sharedData;
 
     std::size_t m_spawnIndex;
     float m_spawnTimer;

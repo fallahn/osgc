@@ -39,12 +39,10 @@ namespace
     const float WaveLifetime = 2.f;
 
     const float ReflectionOffset = 60.f;
-    float timeAccumulator = 0.f;
 }
 
 IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::ShaderResource& sr)
     : xy::System    (mb, typeid(IslandSystem)),
-    m_shaderResource(sr),
     m_seaShader     (nullptr),
     m_planeShader   (nullptr),
     m_landShader    (nullptr),

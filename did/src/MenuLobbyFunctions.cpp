@@ -24,7 +24,6 @@
 namespace
 {
     const sf::Vector2f ItemStartPosition(202.f, 188.f);
-    const float ItemVerticalSpacing = 76.f;
 
     std::array<sf::Vector2f, 4u> HostPositions =
     {

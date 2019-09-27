@@ -94,7 +94,7 @@ void FlareSystem::process(float dt)
     }
 }
 
-void FlareSystem::onEntityAdded(xy::Entity entity)
+void FlareSystem::onEntityAdded(xy::Entity)
 {
 
 }

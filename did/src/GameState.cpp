@@ -122,12 +122,12 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_summaryTexture    (m_fontResource),
     m_miniMap           (m_textureResource),
     m_foliageGenerator  (m_textureResource, m_shaderResource, m_modelMatrices),
-    m_sceneLoaded       (false),
     m_audioScape        (m_audioResource),
     m_canShowMessage    (true),
     m_roundTime         (3 * 60),
     m_roundOver         (false),
-    m_updateSummary     (false)
+    m_updateSummary     (false),
+    m_sceneLoaded       (false)
 {
     xy::App::setMouseCursorVisible(false);
 

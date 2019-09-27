@@ -582,7 +582,7 @@ void BotSystem::updateDigging(xy::Entity entity, float dt)
 
             //we might have collided with something so move away and await new path
             const auto & collision = entity.getComponent<CollisionComponent>();
-            for (auto i = 0; i < collision.manifoldCount; ++i)
+            for (auto i = 0u; i < collision.manifoldCount; ++i)
             {
                 if (collision.manifolds[i].ID == ManifoldID::Terrain)
                 {
@@ -854,7 +854,7 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
 
     //bail if collision
     const auto& collision = entity.getComponent<CollisionComponent>();
-    for (auto i = 0; i < collision.manifoldCount; ++i)
+    for (auto i = 0u; i < collision.manifoldCount; ++i)
     {
         if (collision.manifolds[i].ID == ManifoldID::Terrain)
         {
@@ -966,7 +966,7 @@ void BotSystem::updateCapturing(xy::Entity entity)
 
     //we might have collided with something so move away and await new path
     const auto & collision = entity.getComponent<CollisionComponent>();
-    for (auto i = 0; i < collision.manifoldCount; ++i)
+    for (auto i = 0u; i < collision.manifoldCount; ++i)
     {
         if (collision.manifolds[i].ID == ManifoldID::Terrain)
         {
@@ -1322,8 +1322,8 @@ void BotSystem::wideSweep(xy::Entity entity)
                     auto pos = entity.getComponent<xy::Transform>().getPosition();
                     auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
 
-                    auto newDist = xy::Util::Vector::lengthSquared(targetPosition - position);
-                    auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - position);
+                    auto newDist = xy::Util::Vector::lengthSquared(targetPosition - pos);
+                    auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - pos);
 
                     if (newDist > currDist
                         || (bot.targetEntity.hasComponent<Actor>() && actor.id > bot.targetEntity.getComponent<Actor>().id))
@@ -1413,7 +1413,7 @@ void BotSystem::followPath(xy::Entity entity)
     //check conditions such as being too near another player's boat
     //or walked into something
     const auto& collision = entity.getComponent<CollisionComponent>();
-    for (auto i = 0; i < collision.manifoldCount; ++i)
+    for (auto i = 0u; i < collision.manifoldCount; ++i)
     {
         if (collision.manifolds[i].ID == ManifoldID::Terrain)
         {

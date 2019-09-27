@@ -601,7 +601,7 @@ void GameState::showEndButton()
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity entity, std::uint64_t flags)
+            [&](xy::Entity, std::uint64_t flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {

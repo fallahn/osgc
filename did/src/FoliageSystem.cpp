@@ -165,7 +165,7 @@ FoliageSystem::FoliageSystem(xy::MessageBus& mb)
     fn::FreeNoiseSet(windNoise);
 }
 
-void FoliageSystem::process(float dt)
+void FoliageSystem::process(float)
 {
     m_windIndex = (m_windIndex + 1) % NoiseTableSize;
     

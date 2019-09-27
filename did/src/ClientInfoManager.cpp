@@ -24,11 +24,6 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/util/String.hpp>
 
-namespace
-{
-    const sf::Uint32 avatarSize = 64u;
-}
-
 ClientInfoManager::ClientInfoManager()
     : m_host(0)
 {

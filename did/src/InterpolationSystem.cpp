@@ -51,7 +51,7 @@ InterpolationSystem::InterpolationSystem(xy::MessageBus& mb)
 }
 
 //public
-void InterpolationSystem::process(float dt)
+void InterpolationSystem::process(float)
 {
     auto& entities = getEntities();
     for (auto& entity : entities)
@@ -96,7 +96,7 @@ void InterpolationSystem::process(float dt)
 }
 
 //private
-void InterpolationSystem::onEntityAdded(xy::Entity entity)
+void InterpolationSystem::onEntityAdded(xy::Entity)
 {
 
 }

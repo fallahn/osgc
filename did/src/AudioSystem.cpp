@@ -32,7 +32,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float CameraDepth = 300.f; //pushes the lister backwards slightly
+    //const float CameraDepth = 300.f; //pushes the listener backwards slightly
 }
 
 AudioSystem::AudioSystem(xy::MessageBus& mb)
@@ -43,7 +43,7 @@ AudioSystem::AudioSystem(xy::MessageBus& mb)
 }
 
 //public
-void AudioSystem::process(float dt)
+void AudioSystem::process(float)
 {
     //set listener position to active camera
     auto listenerEnt = getScene()->getActiveListener();

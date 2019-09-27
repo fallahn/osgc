@@ -134,7 +134,7 @@ void IslandGenerator::generate(int seed)
 
     static const int beeChance = 140;
     static const int birdChance = 60;
-    for (auto i = 0; i < Global::TileCount; ++i)
+    for (auto i = 0u; i < Global::TileCount; ++i)
     {
         //spawn bees
         if (m_mapData.tileData[i] >= TileType::Grass)

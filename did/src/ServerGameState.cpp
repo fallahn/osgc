@@ -635,7 +635,7 @@ void GameState::createScene()
     m_scene.addSystem<CollectibleSystem>(mb, m_sharedData);
     m_scene.addSystem<InventorySystem>(mb, m_sharedData);
     m_scene.addSystem<ParrotLauncherSystem>(mb, m_sharedData);
-    m_scene.addSystem<BarrelSystem>(mb, m_sharedData);
+    m_scene.addSystem<BarrelSystem>(mb);
     m_scene.addSystem<DecoySystem>(mb);
     m_scene.addSystem<TimedCarriableSystem>(mb);
     m_scene.addSystem<FlareSystem>(mb);

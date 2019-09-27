@@ -59,9 +59,8 @@ namespace
     };
 }
 
-BarrelSystem::BarrelSystem(xy::MessageBus& mb, Server::SharedStateData& sd)
+BarrelSystem::BarrelSystem(xy::MessageBus& mb)
     : xy::System(mb, typeid(BarrelSystem)),
-    m_sharedData(sd),
     m_spawnIndex(0),
     m_spawnTimer(0.f),
     m_itemIndex (0),

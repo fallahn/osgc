@@ -31,8 +31,6 @@ Copyright 2019 Matt Marchant
 
 void MenuState::buildOptions(sf::Font& font)
 {
-    auto& fineFont = m_fontResource.get(Global::FineFont);
-
     auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
     auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
 
@@ -109,7 +107,7 @@ void MenuState::buildOptions(sf::Font& font)
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {

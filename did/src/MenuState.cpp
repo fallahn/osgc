@@ -72,7 +72,6 @@ namespace
 
     const sf::Vector2f MenuStart = { 120.f, 600.f };
     const float MenuSpacing = 80.f;
-    const float PingTime = 1.f;
 
     const std::string NameFile("name.set");
     const std::string AddressFile("address.set");
@@ -594,7 +593,7 @@ void MenuState::createScene()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
@@ -644,7 +643,7 @@ void MenuState::createScene()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
@@ -700,7 +699,7 @@ void MenuState::createScene()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity ent, sf::Uint64 flags) mutable
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
@@ -733,7 +732,7 @@ void MenuState::createScene()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
-        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity ent, sf::Uint64 flags)
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {

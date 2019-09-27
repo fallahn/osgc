@@ -40,12 +40,12 @@ namespace
 {
     constexpr float WindStrength = 5.f;
 
-    sf::Vector2f& operator *= (sf::Vector2f& l, const sf::Vector2f& r)
+    /*sf::Vector2f& operator *= (sf::Vector2f& l, const sf::Vector2f& r)
     {
         l.x *= r.x;
         l.y *= r.y;
         return l;
-    }
+    }*/
 }
 
 SpringFlowerSystem::SpringFlowerSystem(xy::MessageBus& mb)
@@ -74,7 +74,7 @@ void SpringFlowerSystem::process(float dt)
     {
         auto& flower = entity.getComponent<SpringFlower>();
 
-        const auto& tx = entity.getComponent<xy::Transform>();
+        //const auto& tx = entity.getComponent<xy::Transform>();
 
         
         //add wind (would look nicer with noise but hey)

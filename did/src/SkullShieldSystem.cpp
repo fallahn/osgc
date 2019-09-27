@@ -88,7 +88,7 @@ void SkullShieldSystem::process(float dt)
 void SkullShieldSystem::doCollision(xy::Entity entity)
 {
     const auto& collision = entity.getComponent<CollisionComponent>();
-    for (auto i = 0; i < collision.manifoldCount; ++i)
+    for (auto i = 0u; i < collision.manifoldCount; ++i)
     {
         if (collision.manifolds[i].ID == ManifoldID::Player)
         {

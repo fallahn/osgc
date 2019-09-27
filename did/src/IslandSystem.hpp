@@ -55,8 +55,6 @@ public:
 
 private:
 
-    xy::ShaderResource& m_shaderResource;
-
     std::array<sf::Vertex, 4u> m_vertices;
     std::array<sf::Vertex, 16u> m_waveVertices;
     struct WaveQuad final

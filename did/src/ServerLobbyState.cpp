@@ -59,12 +59,12 @@ LobbyState::~LobbyState()
 }
 
 //public
-void LobbyState::networkUpdate(float dt)
+void LobbyState::networkUpdate(float)
 {
 
 }
 
-void LobbyState::logicUpdate(float dt)
+void LobbyState::logicUpdate(float)
 {
 
 }
