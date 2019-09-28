@@ -1,0 +1,28 @@
+spritesheet splash
+{
+    src="assets/images/splash.png"
+
+    sprite splash
+    {
+        bounds = 0,0,46,16
+
+        animation idle
+        {
+            frame = 0,0,46,16
+            frame = 0,16,46,16
+            frame = 0,32,46,16
+            frame = 0,48,46,16
+            frame = 0,64,46,16
+            frame = 0,80,46,16
+            frame = 0,96,46,16
+            frame = 0,112,46,16
+            frame = 0,128,46,16
+            frame = 0,144,46,16
+            frame = 0,160,46,16
+            frame = 0,176,46,16
+
+            framerate=18
+            loop=false
+        }
+    }
+}

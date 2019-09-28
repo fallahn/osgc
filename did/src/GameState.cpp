@@ -1496,6 +1496,13 @@ void GameState::updateCarriable(const CarriableState& state)
 void GameState::updateInventory(InventoryState state)
 {
     auto localPlayer = m_inputParser.getPlayerEntity();
+
+    //these might arrive before we finished joining
+    if (!localPlayer.isValid())
+    {
+        return;
+    }
+
     if (state.parentID == localPlayer.getComponent<Actor>().serverID)
     {
         //this is us, update hud

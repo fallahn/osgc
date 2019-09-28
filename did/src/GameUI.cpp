@@ -350,7 +350,7 @@ void GameState::loadUI()
     entity.getComponent<xy::Transform>().setScale(0.5f, 0.5f);
     auto tBounds = entity.addComponent<xy::Sprite>(m_miniMap.getTexture()).getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(0.f, tBounds.height / 2.f);
-    entity.addComponent<xy::Drawable>().setDepth(-1);
+    entity.addComponent<xy::Drawable>().setDepth(-201); //gotta be behind summary texture
     entity.addComponent<xy::CommandTarget>().ID = UI::CommandID::MiniMap;
     entity.addComponent<MiniMapData>().targetPosition = entity.getComponent<xy::Transform>().getPosition();
     entity.addComponent<xy::Callback>().function = 
@@ -405,7 +405,7 @@ void GameState::loadRoundEnd()
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>();
     parentEntity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/summary_window.png"));
-    parentEntity.addComponent<xy::Drawable>();
+    parentEntity.addComponent<xy::Drawable>().setDepth(-200);
     //auto bounds = parentEntity.getComponent<xy::Sprite>().getTextureBounds();
     parentEntity.getComponent<xy::Transform>().setPosition(UI::RoundScreenOffPosition);
     parentEntity.addComponent<xy::CommandTarget>().ID = UI::CommandID::RoundEndMenu;

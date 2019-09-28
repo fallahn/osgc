@@ -18,6 +18,16 @@ sprite_sheet foliage
         bounds=128,64,213,64
     }
 
+    sprite far_four
+    {
+        bounds=352,64,213,64
+    }
+
+    sprite far_five
+    {
+        bounds=160,128,213,64
+    }    
+
 	sprite rock_one
 	{
 		bounds = 0,160,64,32

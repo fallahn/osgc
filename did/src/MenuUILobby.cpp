@@ -566,6 +566,7 @@ void MenuState::buildLobby(sf::Font& font)
     //bounds.height -= 24.f;
     entity.getComponent<xy::Drawable>().setCroppingArea(bounds);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::ChatOutText;
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //host icon
     entity = m_uiScene.createEntity();
