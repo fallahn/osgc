@@ -1154,6 +1154,14 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     default: 
         //std::cout << (int)packet.id() << "\n";
         break;
+    case PacketID::ServerQuit:
+        if (!m_sharedData.gameServer->running())
+        {
+            m_sharedData.error = "Host has quit the game";
+            requestStackPush(StateID::Error);
+            m_sharedData.netClient->disconnect();
+        }
+        break;
     case PacketID::MapData:
     {
         TileArray mapData;
@@ -1732,7 +1740,8 @@ void GameState::updateConnection(ConnectionState state)
     }
     else
     {
-        //someone joined... do we actually need to handle this?
+        //someone joined... this should never actually happen
+        printMessage("Herobrine has joined the game");
     }
 }
 

@@ -274,5 +274,16 @@ void GameServer::run()
         }
     }
 
+    //broadcast a disconnect request and wait
+    m_host.broadcastPacket(PacketID::ServerQuit, std::uint8_t(0), xy::NetFlag::Reliable);
+    
+    sf::Clock timeoutClock;
+    while (timeoutClock.getElapsedTime() < sf::seconds(10.f)
+        && !m_sharedStateData.connectedClients.empty())
+    {
+        xy::NetEvent evt;
+        pollNetwork(evt); //this handles the incoming disconnects
+    }
+
     m_host.stop();
 }

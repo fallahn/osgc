@@ -77,5 +77,6 @@ namespace PacketID
         PlayerLeft, //player ID (not peer) so clients can default the avatar
         HostID, //peerID of lobby host
         ChatMessage, //sender ID (0-3, uint8) string length (Max 160 bytes, uint8), string data
+        ServerQuit, //request clients disconnect
     };
 }

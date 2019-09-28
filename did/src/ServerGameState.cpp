@@ -592,24 +592,18 @@ void GameState::handleMessage(const xy::Message& msg)
         if (data.type == ServerEvent::ClientDisconnected)
         {
             Actor::ID id = Actor::None;
-            
+
             //remove from active list
-            for (auto& slot : m_playerSlots)
-            {
-                if (slot.clientID == data.id)
-                {
-                    slot.available = true;
-                    slot.clientID = {};
-                    slot.gameEntity.getComponent<std::uint64_t>() = 0;
-                    slot.gameEntity.getComponent<Inventory>().reset();
-                    slot.stats.reset();
-                    id = slot.gameEntity.getComponent<Actor>().id;
-                    slot.gameEntity.getComponent<Bot>().enabled = true;
-                    slot.sendStatsUpdate = true; //update the remaining clients
-                    //slot.gameEntity.getComponent<CollisionComponent>().collidesTerrain = false;
-                    break;
-                }
-            }
+            auto& slot = m_playerSlots[data.id];
+            slot.available = true;
+            slot.clientID = {};
+            slot.gameEntity.getComponent<std::uint64_t>() = 0;
+            slot.gameEntity.getComponent<Inventory>().reset();
+            slot.stats.reset();
+            id = slot.gameEntity.getComponent<Actor>().id;
+            slot.gameEntity.getComponent<Bot>().enabled = true;
+            slot.sendStatsUpdate = true; //update the remaining clients
+            //slot.gameEntity.getComponent<CollisionComponent>().collidesTerrain = false;
 
             //tell clients which actor just lost its player
             ConnectionState state;

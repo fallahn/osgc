@@ -781,6 +781,14 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
     case PacketID::HostID:
         updateHostInfo(evt.packet.as<std::uint64_t>());
         break;
+    case PacketID::ServerQuit:
+        if (!m_sharedData.gameServer->running())
+        {
+            m_sharedData.error = "Host has closed the lobby";
+            requestStackPush(StateID::Error);
+            m_sharedData.netClient->disconnect();
+        }
+        break;
     case PacketID::RejectClient:
     {
         auto reason = evt.packet.as<std::uint8_t>();
