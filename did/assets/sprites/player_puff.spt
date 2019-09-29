@@ -1,0 +1,28 @@
+spriteesheet puff
+{
+    src="assets/images/player_puff.png"
+
+    sprite player_puff
+    {
+        bounds = 0,0,48,50
+
+        animation idle
+        {
+            frame=0,0,48,50
+            frame=48,0,48,50
+            frame=96,0,48,50
+            frame=0,50,48,50
+            frame=48,50,48,50
+            frame=96,50,48,50
+            frame=0,100,48,50
+            frame=48,100,48,50
+            frame=96,100,48,50
+            frame=0,150,48,50
+            frame=48,150,48,50
+            frame=96,150,48,50
+
+            loop=false
+            framerate=18
+        }
+    }
+}

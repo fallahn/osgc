@@ -73,7 +73,7 @@ void GameServer::start()
 {
     if (!m_host.start("", Global::GamePort, 4, Global::NetworkChannels))
     {
-        xy::Logger::log("Failed to start netowrk host :(", xy::Logger::Type::Error);
+        xy::Logger::log("Failed to start network host :(", xy::Logger::Type::Error);
     }
     else
     {

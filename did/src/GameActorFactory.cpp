@@ -931,12 +931,13 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
             };
 
             std::string strState = stateStrings[(int)bot.state];
-            if (bot.state == Bot::State::Targeting)
+            //if (bot.state == Bot::State::Targeting)
             {
                 strState += targetStrings[(int)bot.targetType] + " at " + std::to_string(bot.targetPoint.x) + ", " + std::to_string(bot.targetPoint.y);
             }
 
             xy::App::printStat("Bot State", strState);
+            xy::App::printStat("Fleeing", bot.fleeing ? "true" : "false");
 
             auto position = entity.getComponent<xy::Transform>().getPosition();
             xy::App::printStat("Position", std::to_string(position.x) + ", " + std::to_string(position.y));

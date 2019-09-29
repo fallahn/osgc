@@ -174,6 +174,8 @@ private:
     void updateCapturing(xy::Entity);
     void updateTargeting(xy::Entity, float);
 
+    bool inSea(xy::Entity);
+    bool tooFar(xy::Entity); //check we popped a state and that it's not too far away
     void wideSweep(xy::Entity);
 
     void followPath(xy::Entity);

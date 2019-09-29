@@ -71,7 +71,7 @@ Behaviour:
 
 namespace
 {
-    const float MinDistance = 16.f * 16.f;// (Global::TileSize/* * 4.f*/) * (Global::TileSize/* * 4.f*/);
+    const float MinDistance = 10.f * 10.f;// (Global::TileSize/* * 4.f*/) * (Global::TileSize/* * 4.f*/);
     const float DeadZone = 2.f;
     const float TestOffset = 6.f; //distance from bot to dig
 
@@ -245,11 +245,17 @@ void BotSystem::handleMessage(const xy::Message& msg)
                     {
                         LOG(ActorNames[ent.getComponent<Actor>().id] + ": flee bees!", xy::Logger::Type::Info);
                         //run away
-                        bot.pushState();
+                        
+                        if (ent.getComponent<Carrier>().carryFlags)
+                        {
+                            bot.inputMask |= InputFlag::CarryDrop;
+                        }
+
                         bot.resetState();
 
                         bot.fleeing = true;
-                        bot.fleeTimer = 0.f;
+                        bot.fleeTimer = -8.f;
+                        bot.sweepTimer = -14.f;
 
                         auto pos = ent.getComponent<xy::Transform>().getPosition();
                         if (pos.x < (Global::IslandSize.x / 2.f))
@@ -261,7 +267,10 @@ void BotSystem::handleMessage(const xy::Message& msg)
                             pos.x = Global::IslandSize.x;
                         }
                         bot.targetPoint = pos;
-                        requestPath(ent);
+                        bot.path.clear();
+                        bot.path.push_back(bot.targetPoint);
+                        bot.state = Bot::State::Searching;
+                        //requestPath(ent);
                     }
                 }
             }
@@ -314,7 +323,7 @@ void BotSystem::process(float dt)
                 || entity.getComponent<CollisionComponent>().water > 0))
             {
                 bot.fleeing = false;
-                bot.popState();
+                bot.resetState();
             }
 
             const auto inventory = entity.getComponent<Inventory>();
@@ -402,8 +411,28 @@ bool BotSystem::isDay() const
 void BotSystem::updateSearching(xy::Entity entity, float dt)
 {
     auto& bot = entity.getComponent<Bot>();
-    auto position = entity.getComponent<xy::Transform>().getPosition();
-   
+       
+    if (bot.fleeing)
+    {
+        //path fetching is async, so we might
+        //end up being supplied with a previous request
+        if (bot.path.size() > 1)
+        {
+            bot.path.clear();
+            bot.path.push_back(bot.targetPoint);
+        }
+
+        bot.pathRequested = false;
+        followPath(entity);
+
+        if (bot.path.empty())
+        {
+            bot.fleeing = false;
+            bot.resetState();
+        }
+        return;
+    }
+
     if (entity.getComponent<Carrier>().carryFlags & Carrier::Treasure)
     {
         //we got confused about whether or not we dropped treasure
@@ -421,9 +450,8 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
     }
 
     //request new path if needed
-    if ((bot.path.empty() && !bot.pathRequested && !bot.fleeing))
+    if ((bot.path.empty() && !bot.pathRequested))
     {
-        //bot.fleeing = false;
         if (bot.stateStack.empty())
         {
             bot.targetPoint = m_destinationPoints[bot.pointIndex];
@@ -451,6 +479,7 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
         {
             bot.searchTimer = 0.f;
 
+            auto position = entity.getComponent<xy::Transform>().getPosition();
             auto bounds = isDay() ? DaySearchArea : NightSearchArea;
             bounds.left += position.x;
             bounds.top += position.y;
@@ -523,39 +552,20 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
 
 void BotSystem::updateDigging(xy::Entity entity, float dt)
 {
-    auto& bot = entity.getComponent<Bot>();
-
-    //if we're in the water for some reason, path to land
-    if (entity.getComponent<CollisionComponent>().water > 0)
+    if (inSea(entity))
     {
-        const auto position = entity.getComponent<xy::Transform>().getPosition();
-        sf::Vector2f target = position;
-        const float minBounds = 20.f;
-        if (position.x < minBounds)
-        {
-            target.x = 200.f;
-        }
-        else if (position.x > (Global::IslandSize.x - minBounds))
-        {
-            target.x = Global::IslandSize.x - 200.f;
-        }
-
-        if (position.y < minBounds)
-        {
-            target.y = 200.f;
-        }
-        else if (position.y > (Global::IslandSize.y - minBounds))
-        {
-            target.y = Global::IslandSize.y - 200.f;
-        }
-
-        bot.resetState();
-        bot.targetPoint = target;
-        bot.path.push_back(target);
-        bot.sweepTimer = -4.f;
         return;
     }
- 
+
+    auto& bot = entity.getComponent<Bot>();
+
+    if (tooFar(entity))
+    {
+        bot.resetState();
+        bot.sweepTimer = SweepTime;
+        return;
+    }
+
     //follow path to patch if path exists
     if (!bot.path.empty())
     {
@@ -679,7 +689,19 @@ void BotSystem::updateDigging(xy::Entity entity, float dt)
 
 void BotSystem::updateFighting(xy::Entity entity, float dt)
 {
+    if (inSea(entity))
+    {
+        return;
+    }
+
     auto& bot = entity.getComponent<Bot>();
+
+    /*if (tooFar(entity))
+    {
+        bot.resetState();
+        bot.sweepTimer = SweepTime;
+        return;
+    }*/
 
     bot.fightTimer += dt;
     if (bot.fightTimer > MaxMoveTime)
@@ -928,10 +950,10 @@ void BotSystem::updateCapturing(xy::Entity entity)
     {
         //we must be near the boat by now
         //walk to target point
-        auto dir = bot.targetPoint - entity.getComponent<xy::Transform>().getPosition();
+        auto dir = /*bot.targetPoint*/Global::BoatPositions[entity.getComponent<Player>().playerNumber] - entity.getComponent<xy::Transform>().getPosition();
         auto len2 = xy::Util::Vector::lengthSquared(dir);
         
-        if ((len2 > 4096.f) && !bot.pathRequested)//approx 2 tile radius
+        if ((len2 > /*4096.f*/9120.f) && !bot.pathRequested)//approx 3 tile radius
         {
             //something went wrong and we need a new path to spawn
             bot.targetPoint = entity.getComponent<Player>().spawnPosition;
@@ -980,7 +1002,19 @@ void BotSystem::updateCapturing(xy::Entity entity)
 
 void BotSystem::updateTargeting(xy::Entity entity, float dt)
 {
+    if (inSea(entity))
+    {
+        return;
+    }
+
     auto& bot = entity.getComponent<Bot>();
+
+    /*if (tooFar(entity))
+    {
+        bot.resetState();
+        bot.sweepTimer = SweepTime;
+        return;
+    }*/
 
     //if we managed to pick something up see what it is
     //then switch to the appropriate state
@@ -1046,7 +1080,7 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
         if (bot.targetType == Bot::Target::Collectable)
         {
             moveToPoint(dir, bot);
-            if (len2 < 64.f)
+            if (len2 < 32.f)
             {
                 //assume we picked it up and go seeking again
                 bot.popState();
@@ -1059,7 +1093,7 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
             if (bot.wantsGrab)
             {
                 //we missed last time so move a bit closer
-                moveToPoint(dir, bot);
+                moveToPoint(dir * 2.f, bot);
                 bot.wantsGrab = false;
             }
             else
@@ -1068,31 +1102,35 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
                 dir = bot.targetEntity.getComponent<xy::Transform>().getPosition()
                     - entity.getComponent<xy::Transform>().getPosition();
 
-                auto playerDir = entity.getComponent<Player>().sync.direction;
-                if (std::abs(dir.y) > std::abs(dir.x))
-                {
-                    //face up or down
-                    if (dir.y < 0 && playerDir != Player::Up)
-                    {
-                        bot.inputMask |= InputFlag::Up;
-                    }
-                    else if (dir.y > 0 && playerDir != Player::Down)
-                    {
-                        bot.inputMask |= InputFlag::Down;
-                    }
-                }
-                else
-                {
-                    //face left or right
-                    if (dir.x < 0 && playerDir != Player::Left)
-                    {
-                        bot.inputMask |= InputFlag::Left;
-                    }
-                    else if (dir.x > 0 && playerDir != Player::Right)
-                    {
-                        bot.inputMask |= InputFlag::Right;
-                    }
-                }
+                //TODO if we walked towards the target we should already be facing
+                //the correct way - so if the grab fails we can try reorientating
+                //next loop (above ^^)
+
+                //auto playerDir = entity.getComponent<Player>().sync.direction;
+                //if (std::abs(dir.y) > std::abs(dir.x))
+                //{
+                //    //face up or down
+                //    if (dir.y < 0 && playerDir != Player::Up)
+                //    {
+                //        bot.inputMask |= InputFlag::Up;
+                //    }
+                //    else if (dir.y > 0 && playerDir != Player::Down)
+                //    {
+                //        bot.inputMask |= InputFlag::Down;
+                //    }
+                //}
+                //else
+                //{
+                //    //face left or right
+                //    if (dir.x < 0 && playerDir != Player::Left)
+                //    {
+                //        bot.inputMask |= InputFlag::Left;
+                //    }
+                //    else if (dir.x > 0 && playerDir != Player::Right)
+                //    {
+                //        bot.inputMask |= InputFlag::Right;
+                //    }
+                //}
 
                 //try pick up. The next loop we check if
                 //we're carrying anything (above^^) and switch state
@@ -1122,6 +1160,60 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
             followPath(entity);
         }
     }
+}
+
+bool BotSystem::inSea(xy::Entity entity)
+{
+    auto& bot = entity.getComponent<Bot>();
+
+    //if we're in the water for some reason, path to land
+    if (entity.getComponent<CollisionComponent>().water > 0.24f
+        && bot.path.empty())
+    {
+        const auto position = entity.getComponent<xy::Transform>().getPosition();
+        sf::Vector2f target = position;
+        const float minBounds = Global::TileSize * 2.f;// 20.f;
+        if (position.x < minBounds)
+        {
+            target.x = 64.f;
+        }
+        else if (position.x > (Global::IslandSize.x - minBounds))
+        {
+            target.x = Global::IslandSize.x - 64.f;
+        }
+
+        if (position.y < minBounds)
+        {
+            target.y = 64.f;
+        }
+        else if (position.y > (Global::IslandSize.y - minBounds))
+        {
+            target.y = Global::IslandSize.y - 64.f;
+        }
+
+        bot.resetState();
+        bot.targetPoint = target;
+        bot.path.push_back(target);
+        bot.sweepTimer = -14.f;
+        bot.fleeing = true;
+        std::cout << "escaping water\n";
+        return true;
+    }
+
+    return false;
+}
+
+bool BotSystem::tooFar(xy::Entity entity)
+{
+    //this is called to check that, for example, popping a state
+    //after fleeing or fighting hasn't left us with a previous
+    //target which is now miles away
+
+    auto pos = entity.getComponent<xy::Transform>().getPosition();
+    auto target = entity.getComponent<Bot>().targetPoint;
+
+    static const float MaxDist = (Global::IslandSize.x / 4.f) * (Global::IslandSize.x / 4.f);
+    return (xy::Util::Vector::lengthSquared(target - pos) > MaxDist);
 }
 
 void BotSystem::wideSweep(xy::Entity entity)
@@ -1269,7 +1361,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                 if (ent == bot.targetEntity)
                 {
                     //already targeted, skip
-                    continue;
+                    return;
                 }
 
                 //ignore ammo if inventory full
@@ -1483,7 +1575,11 @@ void BotSystem::requestPath(xy::Entity entity)
     sf::Vector2i start(position / Global::TileSize);
     sf::Vector2i end(bot.targetPoint / Global::TileSize);
 
-    if (start == end)
+    static const float minDist = (Global::TileSize * 2.f) * (Global::TileSize * 2.f);
+
+    //if (start == end)
+    if(xy::Util::Vector::lengthSquared(position - bot.targetPoint) < minDist
+        && !m_pathFinder.rayTest(position, bot.targetPoint))
     {
         //head straight to target
         bot.path.push_back(bot.targetPoint);

@@ -1,0 +1,43 @@
+spritesheet water_details
+{
+    src="assets/images/water_details.png"
+
+    sprite posts
+    {
+        bounds = 0,0,54,50
+
+        animation idle
+        {
+            frame = 0,0,54,50
+            loop=true
+            framerate=30
+        }
+
+        animation skwarp
+        {
+            frame = 54,0,54,50
+            loop=true
+            framerate=30
+        }
+    }
+
+    sprite rope_posts
+    {
+        bounds = 0,50,128,64
+    }
+
+    sprite large_rock
+    {
+        bounds = 108,0,48,64
+    }
+
+    sprite small_rock01
+    {
+        bounds = 128,64,32,16
+    }
+
+    sprite small_rock02
+    {
+        bounds=128,80,32,16
+    }
+}
