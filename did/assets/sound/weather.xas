@@ -8,6 +8,7 @@ audio_scape weather
         attenuation = 0.1
         looped = true
         volume = 10
+        mixer_channel = 1
     }
 
     emitter wind
@@ -18,6 +19,7 @@ audio_scape weather
         attenuation = 0.1
         looped = true
         volume = 22
+        mixer_channel = 1
     }
 
     emitter thunder01
@@ -27,6 +29,7 @@ audio_scape weather
     	min_distance = 5
     	volume = 20
     	attenuation = 1
+        mixer_channel = 1
     }
 
     emitter thunder02
@@ -36,6 +39,7 @@ audio_scape weather
     	min_distance = 5
     	volume = 20
     	attenuation = 1
+        mixer_channel = 1
     }
 
     emitter thunder03
@@ -45,5 +49,6 @@ audio_scape weather
     	min_distance = 5
     	volume = 20
     	attenuation = 1
+        mixer_channel = 1
     }
 }

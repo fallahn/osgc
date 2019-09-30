@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "SoundEffectsDirector.hpp"
+#include "MixerChannels.hpp"
 #include "MessageIDs.hpp"
 #include "Actor.hpp"
 #include "ResourceIDs.hpp"
@@ -408,7 +409,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             auto& emitter = playSound(xy::Util::Random::value(AudioID::Splash01, AudioID::Splash04), data.position);
             emitter.setAttenuation(2.f);
             emitter.setMinDistance(4.f);
-            emitter.setVolume(25.f);
+            emitter.setVolume(28.f);
         }
         else if (data.type == MapEvent::Explosion)
         {
@@ -607,7 +608,7 @@ void SFXDirector::resizeEntities(std::size_t size)
     {
         m_entities[i] = getScene().createEntity();
         m_entities[i].addComponent<xy::Transform>();
-        m_entities[i].addComponent<xy::AudioEmitter>();
+        m_entities[i].addComponent<xy::AudioEmitter>().setChannel(MixerChannel::FX);
     }
 }
 

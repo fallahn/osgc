@@ -77,6 +77,8 @@ namespace SpriteID
         MineItem,
         SmokePuff,
         Impact,
+        WaterSplash,
+        PlayerPuff,
         Count
     };
 }

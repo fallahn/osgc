@@ -6,7 +6,7 @@ audioscape
         streaming = true
         looped = true
         volume = 1.2
-        mixer_channel = 1
+        mixer_channel = 0
     }
 
     emitter music_night
@@ -15,6 +15,6 @@ audioscape
         streaming = true
         looped = true
         volume = 1.9
-        mixer_channel = 1
+        mixer_channel = 0
     }    
 }

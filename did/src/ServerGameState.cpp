@@ -317,6 +317,7 @@ void GameState::handleMessage(const xy::Message& msg)
         else if (data.type == ActorEvent::Died)
         {
             //TODO use this to raise client messages / sound effects
+            //eg if a collectible was picked up or despawned
             if (data.id == Actor::ID::Skeleton)
             {
                 if (data.data >= Actor::ID::PlayerOne && data.data <= Actor::PlayerFour)

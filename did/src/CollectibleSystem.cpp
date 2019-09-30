@@ -112,6 +112,7 @@ void CollectibleSystem::process(float dt)
 
                         auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                         msg->type = ActorEvent::Died;
+                        msg->data = 0; //collected. Needs to be an enum
 
                         switch (collectible.type)
                         {
@@ -143,6 +144,7 @@ void CollectibleSystem::process(float dt)
 
                 auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                 msg->type = ActorEvent::Died;
+                msg->data = 1; //despawned. Needs to be enum as above ^^
 
                 switch (collectible.type)
                 {

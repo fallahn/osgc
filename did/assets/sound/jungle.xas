@@ -8,6 +8,7 @@ audio_scape
 		min_distance = 18
 		attenuation = 0.5
 		volume = 1.5
+		mixer_channel = 1
 	}
 
 	emitter jungle_night
@@ -18,6 +19,7 @@ audio_scape
 		min_distance = 18
 		attenuation = 0.5
 		volume = 2
+		mixer_channel = 1
 	}
 
 	emitter parrots01
@@ -28,6 +30,7 @@ audio_scape
 		attenuation = 2
 		looped = false
 		volume = 9
+		mixer_channel = 1
 	}
 
 	emitter parrots02
@@ -38,6 +41,7 @@ audio_scape
 		attenuation = 2
 		looped = false
 		volume = 9
+		mixer_channel = 1
 	}
 
 	emitter parrots03
@@ -48,5 +52,6 @@ audio_scape
 		attenuation = 2
 		looped = false
 		volume = 9
+		mixer_channel = 1
 	}
 }

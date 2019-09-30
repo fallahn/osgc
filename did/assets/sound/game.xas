@@ -8,6 +8,7 @@ audio_scape player
         attenuation = 1
         looped = true
         volume = 10
+        mixer_channel = 1
     }
 
     emitter barrel
@@ -17,6 +18,7 @@ audio_scape player
     	min_distance = 5
     	volume = 12
     	attenuation = 1
+        mixer_channel = 1
     }
 
     emitter bees
@@ -27,6 +29,7 @@ audio_scape player
         attenuation = 2
         looped = true
         volume = 22
+        mixer_channel = 1
     }
 
     emitter crab
@@ -37,6 +40,7 @@ audio_scape player
     	attenuation = 1.5
     	looped = false
     	volume = 40
+        mixer_channel = 1
     }
 
     emitter decoy
@@ -47,6 +51,7 @@ audio_scape player
         attenuation = 1.5
         looped = false
         volume = 30
+        mixer_channel = 1
     }
 
     emitter flare
@@ -57,6 +62,7 @@ audio_scape player
         attenuation = 1
         looped = false
         volume = 24
+        mixer_channel = 1
     }
 
     emitter splash
@@ -67,5 +73,6 @@ audio_scape player
         attenuation = 1
         looped = false
         volume = 20
+        mixer_channel = 1
     }    
 }

@@ -439,25 +439,7 @@ void GameState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == MapEvent::ItemInWater)
         {
-            auto entity = m_gameScene.createEntity();
-            entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::PlaneShader));
-            entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Rings];
-            entity.addComponent<xy::SpriteAnimation>().play(0);
-            entity.addComponent<float>() = 0.4f;
-            entity.addComponent<xy::Callback>().active = true;
-            entity.getComponent<xy::Callback>().function = 
-                [&](xy::Entity e, float dt)
-            {
-                e.getComponent<float>() -= dt;
-                if (e.getComponent<float>() < 0)
-                {
-                    m_gameScene.destroyEntity(e);
-                }
-            };
-            auto& ringTx = entity.addComponent<xy::Transform>();
-            auto bounds = m_sprites[SpriteID::Rings].getTextureBounds();
-            ringTx.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
-            ringTx.setPosition(data.position);
+            createSplash(data.position);
         }
     }
     else if (msg.id == MessageID::SceneMessage)
@@ -593,11 +575,15 @@ void GameState::handleMessage(const xy::Message& msg)
             }
             else
             {
-                LOG("Client player respawned", xy::Logger::Type::Info);
+                //LOG("Client player respawned", xy::Logger::Type::Info);
                 cmd.action = [](xy::Entity entity, float)
                 {
                     entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
                 };
+                createPlayerPuff(data.position);
+
+                auto entity = data.entity;
+                entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
             }
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -983,6 +969,12 @@ void GameState::loadResources()
     m_animationMaps[SpriteID::SkullShield][AnimationID::Spawn] = spriteSheet.getAnimationIndex("spawn", "shield");
     m_animationMaps[SpriteID::SkullShield][AnimationID::IdleDown] = spriteSheet.getAnimationIndex("idle", "shield");
     m_animationMaps[SpriteID::SkullShield][AnimationID::Die] = spriteSheet.getAnimationIndex("despawn", "shield");
+
+    spriteSheet.loadFromFile("assets/sprites/splash.spt", m_textureResource);
+    m_sprites[SpriteID::WaterSplash] = spriteSheet.getSprite("splash");
+
+    spriteSheet.loadFromFile("assets/sprites/player_puff.spt", m_textureResource);
+    m_sprites[SpriteID::PlayerPuff] = spriteSheet.getSprite("player_puff");
 
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
@@ -1674,6 +1666,7 @@ void GameState::updateScene(SceneState state)
                 auto* msg = getContext().appInstance.getMessageBus().post<PlayerEvent>(MessageID::PlayerMessage);
                 msg->action = PlayerEvent::Respawned;
                 msg->entity = entity;
+                msg->position = entity.getComponent<xy::Transform>().getPosition();
             }
         };
     }
@@ -1768,6 +1761,86 @@ void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)
 
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function = GhostFloatCallback(m_gameScene);
+
+    //createPlayerPuff(position);
+}
+
+void GameState::createSplash(sf::Vector2f position)
+{
+    //rings
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::PlaneShader));
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Rings];
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.addComponent<float>() = 0.4f;
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        e.getComponent<float>() -= dt;
+        if (e.getComponent<float>() < 0)
+        {
+            m_gameScene.destroyEntity(e);
+        }
+    };
+    auto& ringTx = entity.addComponent<xy::Transform>();
+    auto bounds = m_sprites[SpriteID::Rings].getTextureBounds();
+    ringTx.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    ringTx.setPosition(position);
+
+    //drops
+    auto cameraEntity = m_gameScene.getActiveCamera();
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::WaterSplash];
+    entity.addComponent<Sprite3D>(m_modelMatrices);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float)
+    {
+        if (e.getComponent<xy::SpriteAnimation>().stopped())
+        {
+            m_gameScene.destroyEntity(e);
+        }
+    };
+}
+
+void GameState::createPlayerPuff(sf::Vector2f position)
+{
+    position.y += 1.f; //jest to moev in front of player sprite
+
+    auto cameraEntity = m_gameScene.getActiveCamera();
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.addComponent<xy::Transform>().setPosition(position);
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerPuff];
+    entity.addComponent<Sprite3D>(m_modelMatrices);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float)
+    {
+        if (e.getComponent<xy::SpriteAnimation>().stopped())
+        {
+            m_gameScene.destroyEntity(e);
+        }
+    };
 }
 
 void GameState::handleDisconnect()

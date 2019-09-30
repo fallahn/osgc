@@ -7,6 +7,7 @@ audio_scape weapons
         min_distance = 20
         attenuation = 1
         volume = 10
+        mixer_channel = 1
     }
 
     emitter pistol02
@@ -16,6 +17,7 @@ audio_scape weapons
         min_distance = 20
         attenuation = 1
         volume = 10
+        mixer_channel = 1
     }
 
     emitter pistol03
@@ -25,6 +27,7 @@ audio_scape weapons
         min_distance = 20
         attenuation = 1
         volume = 10
+        mixer_channel = 1
     }
 
     emitter pistol04
@@ -34,6 +37,7 @@ audio_scape weapons
         min_distance = 20
         attenuation = 1
         volume = 10
+        mixer_channel = 1
     }
 
     emitter pistol05
@@ -43,6 +47,7 @@ audio_scape weapons
         min_distance = 20
         attenuation = 1
         volume = 10
+        mixer_channel = 1
     }
 
     emitter pistol06
@@ -52,5 +57,6 @@ audio_scape weapons
         min_distance = 20
         attenuation = 1
         volume = 10
+        mixer_channel = 1
     }
 }

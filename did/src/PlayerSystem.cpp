@@ -126,6 +126,7 @@ void PlayerSystem::process(float dt)
                 auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
                 msg->entity = entity;
                 msg->action = PlayerEvent::Respawned;
+                msg->position = player.spawnPosition;
             }
         }
         

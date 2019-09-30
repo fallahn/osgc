@@ -22,7 +22,7 @@ namespace MixerChannel
 {
     enum
     {
-        FX,
-        Music
+        Music,
+        FX
     };
 }
