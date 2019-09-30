@@ -147,7 +147,8 @@ void MenuState::applySeed()
 void MenuState::randomiseSeed()
 {
     m_activeString = &m_seedDisplayString;
-    auto string = std::to_string(xy::Util::Random::value(5423412, 47235525));
+    auto length = xy::Util::Random::value(4, 8);
+    auto string = std::to_string(xy::Util::Random::value(static_cast<int>(std::pow(10, length - 1)), std::pow(10, length)));
 
     auto passes = xy::Util::Random::value(0, 10);
     for (auto i = 0; i < passes; ++i)

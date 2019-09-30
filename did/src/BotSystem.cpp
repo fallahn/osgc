@@ -58,15 +58,14 @@ Behaviour:
     Searching - 
     Points are picked one at a time from a list of randomly distributed targets.
     While traversing points searches are made for diggable areas, treasure chests
-    and other player. Encountering any of these switches the mode
+    and other players. Encountering any of these switches the mode
 
     Fighting - 
     Engaged in combat with an identified target. This state remains until one or
     other parties have died, or moved out of range
 
     Capturing - currently in posession of a treasure chest and trying to return
-    it to the boat. 50/50 chance of fight or flight when encountering an enemy,
-    possibly higher chance of flight if near to home base already.
+    it to the boat.
 */
 
 namespace
@@ -953,16 +952,16 @@ void BotSystem::updateCapturing(xy::Entity entity)
         auto dir = /*bot.targetPoint*/Global::BoatPositions[entity.getComponent<Player>().playerNumber] - entity.getComponent<xy::Transform>().getPosition();
         auto len2 = xy::Util::Vector::lengthSquared(dir);
         
-        if ((len2 > /*4096.f*/9120.f) && !bot.pathRequested)//approx 3 tile radius
+        if ((len2 > 9120.f) && !bot.pathRequested)//approx 3 tile radius
         {
             //something went wrong and we need a new path to spawn
-            bot.targetPoint = entity.getComponent<Player>().spawnPosition;
+            bot.targetPoint = Global::BoatPositions[entity.getComponent<Player>().playerNumber];// entity.getComponent<Player>().spawnPosition;
             //bot.targetPoint.y -= Global::PlayerSpawnOffset;
-            bot.targetPoint -= Global::SpawnOffsets[entity.getComponent<Player>().playerNumber];
+            //bot.targetPoint -= Global::SpawnOffsets[entity.getComponent<Player>().playerNumber];
             requestPath(entity);
             LOG("looking for home!", xy::Logger::Type::Info);
         }
-        else if (len2 > 100.f)
+        else if (len2 > 16.f)
         {
             moveToPoint(dir, bot);
         }

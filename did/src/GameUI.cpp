@@ -733,10 +733,10 @@ void GameState::showServerMessage(std::int32_t messageID)
         break;
     }
 
-    auto makeBigText = [&]()
+    auto makeBigText = [&](float offset = 0.f)
     {
         auto entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x, 310.f);
+        entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x, 310.f + offset);
         entity.addComponent<xy::Text>(m_fontResource.get(Global::TitleFont));
         entity.getComponent<xy::Text>().setString(msgString);
         entity.getComponent<xy::Text>().setCharacterSize(80);
@@ -779,7 +779,7 @@ void GameState::showServerMessage(std::int32_t messageID)
     }
     else if (messageID == Server::Message::FinalTreasureFound)
     {
-        makeBigText();
+        makeBigText(60.f);
     }
     else
     {

@@ -505,7 +505,7 @@ void PlayerSystem::updateCollision(xy::Entity entity, float dt)
                 auto& player = entity.getComponent<Player>();
                 auto& boat = collision.manifolds[i].otherEntity.getComponent<Boat>();
                 if (boat.playerNumber == player.playerNumber
-                    && entity.getComponent<Carrier>().carryFlags & Carrier::Treasure)
+                    && (entity.getComponent<Carrier>().carryFlags & Carrier::Treasure))
                 {
                     //raise message to say we got treasure to the boat
                     auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
