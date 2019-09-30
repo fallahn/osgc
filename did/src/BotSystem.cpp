@@ -804,12 +804,12 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         if (std::abs(direction.y) > std::abs(direction.x))
         {
             //face up or down
-            if (direction.y < 0 && playerDir != Player::Up)
+            if (direction.y <= 0 && playerDir != Player::Up)
             {
                 bot.inputMask |= InputFlag::Up;
                 canStrafe = false;
             }
-            else if(direction.y > 0 && playerDir != Player::Down)
+            else if(direction.y >= 0 && playerDir != Player::Down)
             {
                 bot.inputMask |= InputFlag::Down;
                 canStrafe = false;
@@ -818,12 +818,12 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
         else
         {
             //face left or right
-            if (direction.x < 0 && playerDir != Player::Left)
+            if (direction.x <= 0 && playerDir != Player::Left)
             {
                 bot.inputMask |= InputFlag::Left;
                 canStrafe = false;
             }
-            else if(direction.x > 0 && playerDir != Player::Right)
+            else if(direction.x >= 0 && playerDir != Player::Right)
             {
                 bot.inputMask |= InputFlag::Right;
                 canStrafe = false;
@@ -1064,6 +1064,19 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
         return;
     }
 
+    //stop targetting if target dies
+    auto targetID = bot.targetEntity.getComponent<Actor>().id;
+    if (bot.targetType == Bot::Target::Enemy
+        && targetID >= Actor::PlayerOne && targetID <= Actor::PlayerFour)
+    {
+        if (bot.targetEntity.hasComponent<Player>() && //this is only needed when running client side - remove from release builds
+            bot.targetEntity.getComponent<Player>().sync.state == Player::State::Dead)
+        {
+            bot.popState();
+            return;
+        }
+    }
+
     auto dir = bot.targetPoint//Entity.getComponent<xy::Transform>().getPosition() 
         - entity.getComponent<xy::Transform>().getPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dir);
@@ -1275,14 +1288,19 @@ void BotSystem::wideSweep(xy::Entity entity)
             switch (actor.id)
             {
             default: break;
-            case Actor::Skeleton:
-            case Actor::Barrel:
             case Actor::PlayerOne:
             case Actor::PlayerTwo:
             case Actor::PlayerThree:
             case Actor::PlayerFour:
+                //skip dead players
+                if (ent.hasComponent<Player>() && //client side actors won't have this component.. ideally skip this in release builds (with no client bots)
+                    ent.getComponent<Player>().sync.state == Player::State::Dead)
+                {
+                    continue;
+                }
+            case Actor::Skeleton:
+            case Actor::Barrel:
             {
-                //auto targetPosition = ent.getComponent<xy::Transform>().getPosition();
                 auto direction = targetPosition - position;
                 auto len2 = xy::Util::Vector::lengthSquared(direction);
 

@@ -140,6 +140,23 @@ void InventorySystem::handleMessage(const xy::Message& msg)
             }
         }
             break;
+        case PlayerEvent::Died:
+        {
+            //drop a coin if we have one
+            auto entity = data.entity;
+            auto& inventory = entity.getComponent<Inventory>();
+            if (inventory.treasure % Global::TreasureValue != 0)
+            {
+                inventory.treasure -= 1;
+                inventory.sendUpdate = true;
+
+                auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
+                msg->id = Actor::ID::Coin;
+                msg->position = data.position;
+                msg->type = ActorEvent::RequestSpawn;
+            }
+        }
+            break;
         }
     }
 }

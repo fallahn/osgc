@@ -365,10 +365,11 @@ void GameState::handleMessage(const xy::Message& msg)
             state.position = data.entity.getComponent<Player>().deathPosition;
             m_sharedData.gameServer->broadcastData(PacketID::SceneUpdate, state, xy::NetFlag::Reliable, Global::ReliableChannel);
 
-            for (auto& slot : m_playerSlots)
+            //for (auto& slot : m_playerSlots)
             {
-                if (slot.gameEntity == data.entity)
+                //if (slot.gameEntity == data.entity)
                 {
+                    auto& slot = m_playerSlots[data.entity.getComponent<Player>().playerNumber];
                     slot.stats.livesLost++;
                     slot.sendStatsUpdate = true;
 
@@ -393,10 +394,10 @@ void GameState::handleMessage(const xy::Message& msg)
                             auto score = XP::calcPlayerScore(difference);
                                                         
                             m_playerSlots[damager].stats.roundXP += score;
-                            m_playerSlots[damager].stats.foesSlain++;
-                            m_playerSlots[damager].sendStatsUpdate = true;
-                            //std::cout << "Player Score XP: " << score << "\n";
                         }
+                        m_playerSlots[damager].stats.foesSlain++;
+                        m_playerSlots[damager].sendStatsUpdate = true;
+                        //std::cout << "Player Score XP: " << score << "\n";
                     }
                 }
             }

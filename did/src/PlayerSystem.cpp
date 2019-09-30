@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "BoatSystem.hpp"
 #include "CarriableSystem.hpp"
+#include "SkullShieldSystem.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -107,6 +108,7 @@ void PlayerSystem::process(float dt)
             deadMsg->entity = entity;
             deadMsg->action = PlayerEvent::Died;
             deadMsg->data = inventory.lastDamager;
+            deadMsg->position = tx.getPosition();
 
             //std::cout << entity.getIndex() << " player died\n";
         }
@@ -557,9 +559,9 @@ void PlayerSystem::updateCollision(xy::Entity entity, float dt)
             break;
         case ManifoldID::SkullShield:
         {
-            //TODO check not being cursed by own shield
             auto& player = entity.getComponent<Player>();
-            if ((player.sync.flags & Player::Cursed) == 0)
+            if ((player.sync.flags & Player::Cursed) == 0
+                && collision.manifolds[i].otherEntity.getComponent<SkullShield>().owner != entity.getComponent<Actor>().id)
             {
                 player.sync.flags |= Player::Cursed;
                 player.curseTimer = CurseTime;

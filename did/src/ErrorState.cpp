@@ -41,20 +41,19 @@ ErrorState::ErrorState(xy::StateStack& stack, xy::State::Context ctx, SharedData
         XY_ASSERT(xy::App::getRenderWindow(), "no valid window");
 
         auto windowSize = sf::Vector2f(xy::App::getRenderWindow()->getSize());
-        auto boxSize = sf::Vector2f(400.f, 100.f);
+        auto boxSize = sf::Vector2f(300.f, 100.f);
         windowSize = (windowSize - boxSize) / 2.f;
 
-        xy::ui::setNextWindowPosition(windowSize.x, windowSize.y);
-        xy::ui::setNextWindowSize(boxSize.x, boxSize.y);
-        xy::ui::begin("Error");      
-        xy::ui::text(m_sharedData.error);
-        if (xy::ui::button("OK", 40.f, 16.f))
+        ImGui::SetNextWindowSize({ boxSize.x, boxSize.y }, ImGuiCond_Always);
+        ImGui::SetNextWindowPos({ windowSize.x, windowSize.y });
+        ImGui::Begin("Error");
+        ImGui::Text("%s", m_sharedData.error.c_str());
+        if (ImGui::Button("OK", { 40.f, 24.f }))
         {
             requestStackClear();
             requestStackPush(StateID::Menu);
-            //getContext().appInstance.getMessageBus().post<MenuEvent>(MessageID::MenuMessage)->action = MenuEvent::QuitGameClicked;
         }
-        xy::ui::end();
+        ImGui::End();
     });
 
     xy::App::setMouseCursorVisible(true);
