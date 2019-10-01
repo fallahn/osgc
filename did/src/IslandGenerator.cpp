@@ -190,7 +190,7 @@ void IslandGenerator::generate(int seed)
     for (auto i = 0; i < rockCount; ++i)
     {
         auto rockY = Server::getRandomInt(startTile, Global::TileCountY - 10);
-        startTile = std::min(rockY, static_cast<int>(Global::TileCountY - 11));
+        startTile = std::min(rockY + 1, static_cast<int>(Global::TileCountY - 11));
         if (rockY != y) //don't overlap with seagull
         {
             m_actorSpawns.emplace_back(-48.f + Server::getRandomFloat(-12.f, 12.f), rockY * Global::TileSize, Actor::WaterDetail);
@@ -201,7 +201,7 @@ void IslandGenerator::generate(int seed)
     for (auto i = 0; i < rockCount; ++i)
     {
         auto rockY = Server::getRandomInt(startTile, Global::TileCountY - 10);
-        startTile = std::min(rockY, static_cast<int>(Global::TileCountY - 11));
+        startTile = std::min(rockY + 1, static_cast<int>(Global::TileCountY - 11));
         if (rockY != y) //don't overlap with seagull
         {
             m_actorSpawns.emplace_back(Global::IslandSize.y + 48.f + Server::getRandomFloat(-12.f, 12.f), rockY * Global::TileSize, Actor::WaterDetail);
@@ -212,7 +212,7 @@ void IslandGenerator::generate(int seed)
     for (auto i = 0; i < rockCount; ++i)
     {
         auto rockX = Server::getRandomInt(startTile, Global::TileCountX);
-        startTile = std::min(rockX, static_cast<int>(Global::TileCountX - 1));
+        startTile = std::min(rockX + 1, static_cast<int>(Global::TileCountX - 1));
         if (rockX != x) //don't overlap with seagull
         {
             m_actorSpawns.emplace_back(rockX * Global::TileSize, -48.f + Server::getRandomFloat(-12.f, 12.f), Actor::WaterDetail);

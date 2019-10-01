@@ -572,8 +572,8 @@ void GameState::handleMessage(const xy::Message& msg)
         case PlayerEvent::StoleTreasure:
             m_remainingTreasure++;
 
-            //update client
-            m_playerSlots[data.entity.getComponent<Player>().playerNumber].sendStatsUpdate = true;
+            //update client - who lost treasure! can't assume the thief scored yet :)
+            m_playerSlots[data.data].sendStatsUpdate = true;
 
             //update client scoreboards
             m_sharedData.gameServer->broadcastData(PacketID::TreasureUpdate, std::uint8_t(m_remainingTreasure), xy::NetFlag::Reliable, Global::ReliableChannel);
@@ -581,10 +581,6 @@ void GameState::handleMessage(const xy::Message& msg)
             break;
         case PlayerEvent::StashedTreasure:
             m_remainingTreasure--;
-            /*if (m_remainingTreasure == 1)
-            {
-                m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::OneTreasureRemaining, EP2PSend::k_EP2PSendReliable);
-            }*/
 
             auto playerID = data.entity.getComponent<Player>().playerNumber;
             switch (playerID)
@@ -829,6 +825,9 @@ void GameState::spawnMapActors()
     const auto& actors = m_islandGenerator.getActorSpawns();
     for (const auto& spawn : actors)
     {
+        //TODO not really any need to create water details server
+        //side so we could just skip them
+
         auto entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(spawn.position);
         entity.addComponent<Actor>().id = static_cast<Actor::ID>(spawn.id);
@@ -867,7 +866,6 @@ void GameState::spawnMapActors()
             break;
         }
     }
-
 
     for (auto i = 0u; i < Global::BoatPositions.size(); ++i)
     {
@@ -937,22 +935,26 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         if (velocity.x > 0)
         {
             position.x = -(Global::TileSize * 10.f);
-            position.y = Server::getRandomInt(10, Global::TileCountY - 10) * Global::TileSize;
+            position.y = Server::getRandomInt(11, Global::TileCountY - 11) * Global::TileSize;
+            position.y += Server::getRandomFloat(-Global::TileSize, Global::TileSize);
         }
         else if (velocity.x < 0)
         {
             position.x = Global::IslandSize.x + (Global::TileSize * 10.f);
-            position.y = Server::getRandomInt(10, Global::TileCountY - 10) * Global::TileSize;
+            position.y = Server::getRandomInt(11, Global::TileCountY - 11) * Global::TileSize;
+            position.y += Server::getRandomFloat(-Global::TileSize, Global::TileSize);
         }
         else if (velocity.y > 0)
         {
             position.y = -(Global::TileSize * 10.f);
-            position.x = Server::getRandomInt(10, Global::TileCountX - 10) * Global::TileSize;
+            position.x = Server::getRandomInt(11, Global::TileCountX - 11) * Global::TileSize;
+            position.x += Server::getRandomFloat(-Global::TileSize, Global::TileSize);
         }
         else
         {
             position.y = Global::IslandSize.y + (Global::TileSize * 10.f);
-            position.x = Server::getRandomInt(10, Global::TileCountX - 10) * Global::TileSize;
+            position.x = Server::getRandomInt(11, Global::TileCountX - 11) * Global::TileSize;
+            position.x += Server::getRandomFloat(-Global::TileSize, Global::TileSize);
         }
 
         entity.addComponent<CollisionComponent>().bounds = Global::PlayerBounds;

@@ -474,7 +474,8 @@ void BotSystem::updateSearching(xy::Entity entity, float dt)
         //check for diggable holes
         bot.searchTimer += dt;
         if (bot.searchTimer > SearchTime
-            && !bot.fleeing)
+            && !bot.fleeing
+            && entity.getComponent<Carrier>().carryFlags == 0) //ignore when carrying else item tends to get applied to treasure patch
         {
             bot.searchTimer = 0.f;
 

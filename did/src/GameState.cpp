@@ -1520,6 +1520,9 @@ void GameState::updateCarriable(const CarriableState& state)
                 ent.getComponent<InterpolationComponent>().setEnabled(false);
                 ent.getComponent<xy::Transform>().setPosition(position);
 
+                auto puff = createPlayerPuff(position, false);
+                puff.getComponent<xy::Transform>().scale(0.5f, 0.5f);
+
                 //we have to reapply the position a frame later client-side
                 xy::Command cmd2;
                 cmd2.targetFlags = CommandID::NetInterpolator;

@@ -599,7 +599,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
     case Actor::WaterDetail:
     {
         static int lastSprite = 0;
-        int spr = 0;
+        int spr = lastSprite;
         do
         {
             //TODO make sure no inf loop here!
