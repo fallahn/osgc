@@ -1167,8 +1167,8 @@ void GameState::handlePacket(const xy::NetEvent& evt)
         auto* msg = getContext().appInstance.getMessageBus().post<CollectibleEvent>(MessageID::CollectibleMessage);
         msg->position = { despawn.x, despawn.y };
 
-        std::uint8_t id = msg->id & 0x7F;
-        std::uint8_t type = msg->id & 0x80;
+        std::uint8_t id = despawn.despawnType & 0x7F;
+        std::uint8_t type = despawn.despawnType & 0x80;
 
         if (type != 0)
         {
@@ -1519,6 +1519,10 @@ void GameState::updateCarriable(const CarriableState& state)
                 ent.getComponent<InterpolationComponent>().resetPosition(position);
                 ent.getComponent<InterpolationComponent>().setEnabled(false);
                 ent.getComponent<xy::Transform>().setPosition(position);
+
+                auto* msg2 = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
+                msg2->type = MapEvent::ItemRespawn;
+                msg2->position = position;
 
                 auto puff = createPlayerPuff(position, false);
                 puff.getComponent<xy::Transform>().scale(0.5f, 0.5f);

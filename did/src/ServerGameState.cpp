@@ -337,7 +337,7 @@ void GameState::handleMessage(const xy::Message& msg)
                 is.x = data.position.x;
                 is.y = data.position.y;
 
-                switch (data.type)
+                switch (data.id)
                 {
                 default: break;
                 case Actor::Ammo:

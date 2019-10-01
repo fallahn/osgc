@@ -120,6 +120,7 @@ namespace
         Splash04,
 
         DecoyDie,
+        Respawn,
 
         Count
     };
@@ -206,7 +207,8 @@ namespace
         "assets/sound/effects/splash03.wav",
         "assets/sound/effects/splash04.wav",
 
-        "assets/sound/effects/decoy_die.wav"
+        "assets/sound/effects/decoy_die.wav",
+        "assets/sound/effects/respawn.wav"
     };
 
     //std::array<float, AudioID::Count> triggerTimes = {};
@@ -418,6 +420,13 @@ void SFXDirector::handleMessage(const xy::Message& msg)
         else if (data.type == MapEvent::ItemInWater)
         {
             auto& emitter = playSound(xy::Util::Random::value(AudioID::Splash01, AudioID::Splash04), data.position);
+            emitter.setAttenuation(2.f);
+            emitter.setMinDistance(4.f);
+            emitter.setVolume(28.f);
+        }
+        else if (data.type == MapEvent::ItemRespawn)
+        {
+            auto& emitter = playSound(AudioID::Respawn, data.position);
             emitter.setAttenuation(2.f);
             emitter.setMinDistance(4.f);
             emitter.setVolume(28.f);

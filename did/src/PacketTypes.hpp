@@ -133,7 +133,7 @@ struct DebugState final
 
 struct ItemState final
 {
-    std::uint8_t despawnType = -1;
+    std::uint8_t despawnType = 255;
     float x = 0.f;
     float y = 0.f;
 

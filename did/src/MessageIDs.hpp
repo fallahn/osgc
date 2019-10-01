@@ -74,6 +74,7 @@ struct MapEvent final
         LightningStrike,
         LightningFlash,
         ItemInWater,
+        ItemRespawn,
         FlareLaunched,
         Explosion
     }type;

@@ -298,13 +298,13 @@ void MenuState::createBackground()
 
     //finally.... some trees!
     const auto& treeTex = m_textureResource.get("assets/images/menu_trees.png");
-    auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 440.f, 430.f }, 60.f, 12);
+    auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 440.f, 400.f }, 60.f, 12);
 
     spriteSheet.loadFromFile("assets/sprites/foliage.spt", m_textureResource);
 
     for (auto pos : positions)
     {
-        pos.x += 526.f;
+        pos.x += 556.f;
         pos.y += 526.f;
 
         auto head = xy::Util::Random::value(0, 10);
