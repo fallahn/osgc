@@ -193,7 +193,14 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         ent.addComponent<xy::Drawable>();
         ent.addComponent<ShadowCaster>().parent = entity;
     };
-    
+    auto addSpawnPuff = [&](xy::Entity entity)
+    {
+        auto puffEnt = createPlayerPuff({}, true);
+        puffEnt.getComponent<xy::Transform>().move(0.f, -4.f);
+        entity.getComponent<xy::Transform>().addChild(puffEnt.getComponent<xy::Transform>());
+        entity.addComponent<std::any>() = std::make_any<xy::Entity>(puffEnt);
+    };
+
     auto addDebugLabel = [&](xy::Entity parent)
     {
 #ifdef XY_DEBUG
@@ -259,6 +266,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         hasWeapon = true;
         addNameTag(entity);
         addShadow(entity);
+        addSpawnPuff(entity);
         break;
 
     case Actor::PlayerTwo:
@@ -278,6 +286,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         hasWeapon = true;
         addNameTag(entity);
         addShadow(entity);
+        addSpawnPuff(entity);
         break;
     case Actor::PlayerThree:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerThree];
@@ -296,6 +305,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         hasWeapon = true;
         addNameTag(entity);
         addShadow(entity);
+        addSpawnPuff(entity);
         break;
     case Actor::PlayerFour:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerFour];
@@ -313,6 +323,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<BroadcastComponent>();
         hasWeapon = true;
         addShadow(entity);
+        addSpawnPuff(entity);
         break;
     case Actor::ID::Bees:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Bees];
@@ -906,7 +917,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         cameraEntity.getComponent<Camera3D>().target = entity;
 
         m_inputParser.setPlayerEntity(entity, entity.getComponent<Player>().playerNumber);
-        entity.addComponent<Bot>().enabled = true; //this component is required by the input parser
+        entity.addComponent<Bot>();// .enabled = true; //this component is required by the input parser
 
         auto compassEntity = m_gameScene.createEntity();
         compassEntity.addComponent<xy::Drawable>();

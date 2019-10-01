@@ -128,7 +128,7 @@ private:
     void processMessageQueue();
 
     void createSplash(sf::Vector2f);
-    void createPlayerPuff(sf::Vector2f);
+    xy::Entity createPlayerPuff(sf::Vector2f, bool);
 
     void plotPath(const std::vector<sf::Vector2f>&);
     void loadAudio();

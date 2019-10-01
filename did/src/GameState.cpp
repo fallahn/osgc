@@ -575,15 +575,15 @@ void GameState::handleMessage(const xy::Message& msg)
             }
             else
             {
-                //LOG("Client player respawned", xy::Logger::Type::Info);
                 cmd.action = [](xy::Entity entity, float)
                 {
                     entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
                 };
-                createPlayerPuff(data.position);
 
                 auto entity = data.entity;
                 entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
+                //this plays the 'puff' sprite
+                std::any_cast<xy::Entity>(entity.getComponent<std::any>()).getComponent<xy::SpriteAnimation>().play(0);
             }
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -1814,10 +1814,8 @@ void GameState::createSplash(sf::Vector2f position)
     };
 }
 
-void GameState::createPlayerPuff(sf::Vector2f position)
+xy::Entity GameState::createPlayerPuff(sf::Vector2f position, bool playerAttachment)
 {
-    position.y += 1.f; //jest to moev in front of player sprite
-
     auto cameraEntity = m_gameScene.getActiveCamera();
 
     auto entity = m_gameScene.createEntity();
@@ -1829,8 +1827,16 @@ void GameState::createPlayerPuff(sf::Vector2f position)
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-    entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+    
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    
+    if (playerAttachment)
+    {
+        entity.getComponent<Sprite3D>().verticalOffset = bounds.height / 2.f;
+        entity.getComponent<xy::Transform>().move(8.f, 0.f);
+        return entity;
+    }
+    entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =
@@ -1841,6 +1847,8 @@ void GameState::createPlayerPuff(sf::Vector2f position)
             m_gameScene.destroyEntity(e);
         }
     };
+
+    return entity;
 }
 
 void GameState::handleDisconnect()
