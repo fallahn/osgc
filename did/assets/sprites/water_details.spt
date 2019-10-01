@@ -2,7 +2,7 @@ spritesheet water_details
 {
     src="assets/images/water_details.png"
 
-    sprite posts
+    sprite seagull
     {
         bounds = 0,0,54,50
 

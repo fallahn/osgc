@@ -157,6 +157,69 @@ void IslandGenerator::generate(int seed)
         }
     }
 
+    //chose one of 3 edges for a seagull
+    auto edge = Server::getRandomInt(0, 2);
+    int x = 0;
+    int y = 0;
+    switch (edge)
+    {
+    default:
+    case 0:
+    {
+        y = Server::getRandomInt(0, Global::TileCountY-6);
+        m_actorSpawns.emplace_back(-64.f, y * Global::TileSize, Actor::Seagull);
+    }
+        break;
+    case 1:
+    {
+        x = Server::getRandomInt(0, Global::TileCountX);
+        m_actorSpawns.emplace_back(x * Global::TileSize, -64.f, Actor::Seagull);
+    }
+        break;
+    case 2:
+    {
+        y = Server::getRandomInt(0, Global::TileCountY-6);
+        m_actorSpawns.emplace_back(Global::IslandSize.y + 64.f, y * Global::TileSize, Actor::Seagull);
+    }
+        break;
+    }
+
+    //throw in some rocks etc
+    auto rockCount = Server::getRandomInt(1, 4);
+    int startTile = 0;
+    for (auto i = 0; i < rockCount; ++i)
+    {
+        auto rockY = Server::getRandomInt(startTile, Global::TileCountY - 10);
+        startTile = std::min(rockY, static_cast<int>(Global::TileCountY - 11));
+        if (rockY != y) //don't overlap with seagull
+        {
+            m_actorSpawns.emplace_back(-48.f + Server::getRandomFloat(-12.f, 12.f), rockY * Global::TileSize, Actor::WaterDetail);
+        }
+    }
+    rockCount = Server::getRandomInt(1, 4);
+    startTile = 2;
+    for (auto i = 0; i < rockCount; ++i)
+    {
+        auto rockY = Server::getRandomInt(startTile, Global::TileCountY - 10);
+        startTile = std::min(rockY, static_cast<int>(Global::TileCountY - 11));
+        if (rockY != y) //don't overlap with seagull
+        {
+            m_actorSpawns.emplace_back(Global::IslandSize.y + 48.f + Server::getRandomFloat(-12.f, 12.f), rockY * Global::TileSize, Actor::WaterDetail);
+        }
+    }
+    rockCount = Server::getRandomInt(1, 4);
+    startTile = 4;
+    for (auto i = 0; i < rockCount; ++i)
+    {
+        auto rockX = Server::getRandomInt(startTile, Global::TileCountX);
+        startTile = std::min(rockX, static_cast<int>(Global::TileCountX - 1));
+        if (rockX != x) //don't overlap with seagull
+        {
+            m_actorSpawns.emplace_back(rockX * Global::TileSize, -48.f + Server::getRandomFloat(-12.f, 12.f), Actor::WaterDetail);
+        }
+    }
+
+
     //makes sure any spawn coordinates are on a valid tile
     auto validateSpawn = [&](int& x, int& y)
     {
@@ -212,8 +275,8 @@ void IslandGenerator::generate(int seed)
 
     //spawn chest
     //pick a point at random within 4 tiles from the edge
-    int x = Server::getRandomInt(4, Global::TileCountX - 8);
-    int y = Server::getRandomInt(4, Global::TileCountY - 8);
+    x = Server::getRandomInt(4, Global::TileCountX - 8);
+    y = Server::getRandomInt(4, Global::TileCountY - 8);
 
     validateSpawn(x, y);
 

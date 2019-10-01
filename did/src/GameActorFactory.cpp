@@ -114,47 +114,47 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
             };
         }
     };
-    auto spawnDog = [&](std::size_t playerNumber)
-    {
-        static const std::array<sf::Vector2f, 4u> dogPos =
-        {
-            sf::Vector2f(Global::TileSize, Global::TileSize / 2.f),
-            sf::Vector2f(-Global::TileSize, Global::TileSize / 2.f),
-            sf::Vector2f(-Global::TileSize, -Global::TileSize / 2.f),
-            sf::Vector2f(Global::TileSize, -Global::TileSize / 2.f)
-        };
-
-        auto entity = m_gameScene.createEntity();
-        //entity.addComponent<Dog>().owner = playerNumber;
-        auto& spriteTx = entity.addComponent<xy::Transform>();
-        entity.addComponent<xy::Drawable>();
-        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Dog];
-        entity.addComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::Dog][AnimationID::IdleDown]);
-        entity.addComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::Dog];
-        entity.getComponent<AnimationModifier>().nextAnimation = m_animationMaps[SpriteID::Dog][AnimationID::IdleDown];
-        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::Dog].getTexture());
-        entity.addComponent<Sprite3D>(m_modelMatrices);
-        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
-        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-        entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("dog");
-
-        auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-        spriteTx.setOrigin(bounds.width / 2.f, 0.f);
-        spriteTx.setPosition(position + dogPos[playerNumber - Actor::ID::PlayerOne]); //THIS WILL BREAK IF THE ENUM CHANGES!!!!!
-        spriteTx.setScale(0.5f, -0.5f);
-
-        if (playerNumber == Actor::PlayerOne || playerNumber == Actor::PlayerFour) spriteTx.scale(-1.f, 1.f);
-
-        //shadow
-        entity = m_gameScene.createEntity();
-        auto& shadowTx = entity.addComponent<xy::Transform>();
-        shadowTx.setOrigin(8.f, 8.f);
-        shadowTx.setPosition(bounds.width / 2.f, 0.f);
-        entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::PlaneShader));
-        entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/player_shadow.png"));
-        spriteTx.addChild(shadowTx);
-    };
+    //auto spawnDog = [&](std::size_t playerNumber)
+    //{
+    //    static const std::array<sf::Vector2f, 4u> dogPos =
+    //    {
+    //        sf::Vector2f(Global::TileSize, Global::TileSize / 2.f),
+    //        sf::Vector2f(-Global::TileSize, Global::TileSize / 2.f),
+    //        sf::Vector2f(-Global::TileSize, -Global::TileSize / 2.f),
+    //        sf::Vector2f(Global::TileSize, -Global::TileSize / 2.f)
+    //    };
+    //
+    //    auto entity = m_gameScene.createEntity();
+    //    //entity.addComponent<Dog>().owner = playerNumber;
+    //    auto& spriteTx = entity.addComponent<xy::Transform>();
+    //    entity.addComponent<xy::Drawable>();
+    //    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Dog];
+    //    entity.addComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::Dog][AnimationID::IdleDown]);
+    //    entity.addComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::Dog];
+    //    entity.getComponent<AnimationModifier>().nextAnimation = m_animationMaps[SpriteID::Dog][AnimationID::IdleDown];
+    //    entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+    //    entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::Dog].getTexture());
+    //    entity.addComponent<Sprite3D>(m_modelMatrices);
+    //    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    //    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    //    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("dog");
+    //
+    //    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    //    spriteTx.setOrigin(bounds.width / 2.f, 0.f);
+    //    spriteTx.setPosition(position + dogPos[playerNumber - Actor::ID::PlayerOne]); //THIS WILL BREAK IF THE ENUM CHANGES!!!!!
+    //    spriteTx.setScale(0.5f, -0.5f);
+    //
+    //    if (playerNumber == Actor::PlayerOne || playerNumber == Actor::PlayerFour) spriteTx.scale(-1.f, 1.f);
+    //
+    //    //shadow
+    //    entity = m_gameScene.createEntity();
+    //    auto& shadowTx = entity.addComponent<xy::Transform>();
+    //    shadowTx.setOrigin(8.f, 8.f);
+    //    shadowTx.setPosition(bounds.width / 2.f, 0.f);
+    //    entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::PlaneShader));
+    //    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/player_shadow.png"));
+    //    spriteTx.addChild(shadowTx);
+    //};
     auto addNameTag = [&](xy::Entity parent)
     {
         auto idx = parent.getComponent<Actor>().id - Actor::ID::PlayerOne;
@@ -578,7 +578,49 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.getComponent<xy::AudioEmitter>().play();
         addShadow(entity);
         return; //skip shadows
+    case Actor::Seagull:
+        entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Seagull];
+        entity.getComponent<xy::SpriteAnimation>().play(0);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
 
+        entity.addComponent<Sprite3D>(m_modelMatrices);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+        {
+            auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+            entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+        }
+        //TODO add bird sound + controller
+        //entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("crab");
+        //entity.getComponent<xy::AudioEmitter>().play();
+        return; //skip shadows
+    case Actor::WaterDetail:
+    {
+        static int lastSprite = 0;
+        int spr = 0;
+        do
+        {
+            //TODO make sure no inf loop here!
+            spr = xy::Util::Random::value(SpriteID::Posts, SpriteID::SmallRock02);
+        } while (spr == lastSprite);
+        
+        lastSprite = spr;
+        entity.addComponent<xy::Sprite>() = m_sprites[spr];
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+
+        entity.addComponent<Sprite3D>(m_modelMatrices);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        float xScale = (xy::Util::Random::value(0, 1) == 0) ? 0.5f : -0.5f;
+        entity.getComponent<xy::Transform>().setScale(xScale, -0.5f);
+        
+        auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+    }
+        return; //skip shadows
     case Actor::Lantern:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Lantern];
         entity.getComponent<xy::SpriteAnimation>().play(0);

@@ -79,6 +79,11 @@ namespace SpriteID
         Impact,
         WaterSplash,
         PlayerPuff,
+        Seagull,
+        Posts,
+        LargeRock,
+        SmallRock01,
+        SmallRock02,
         Count
     };
 }

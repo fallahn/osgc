@@ -984,6 +984,13 @@ void GameState::loadResources()
     spriteSheet.loadFromFile("assets/sprites/player_puff.spt", m_textureResource);
     m_sprites[SpriteID::PlayerPuff] = spriteSheet.getSprite("player_puff");
 
+    spriteSheet.loadFromFile("assets/sprites/water_details.spt", m_textureResource);
+    m_sprites[SpriteID::Seagull] = spriteSheet.getSprite("seagull");
+    m_sprites[SpriteID::Posts] = spriteSheet.getSprite("rope_posts");
+    m_sprites[SpriteID::LargeRock] = spriteSheet.getSprite("large_rock");
+    m_sprites[SpriteID::SmallRock01] = spriteSheet.getSprite("small_rock01");
+    m_sprites[SpriteID::SmallRock02] = spriteSheet.getSprite("small_rock02");
+
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
     loadUI();

@@ -62,7 +62,10 @@ struct Actor final
         Flare,
         Decoy,
         Magnet,
-        Impact
+        Impact,
+
+        Seagull,
+        WaterDetail
     }id = None;
 
     std::uint32_t entityID = 0;
