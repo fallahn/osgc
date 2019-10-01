@@ -112,7 +112,8 @@ void CollectibleSystem::process(float dt)
 
                         auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                         msg->type = ActorEvent::Died;
-                        msg->data = 0; //collected. Needs to be an enum
+                        msg->data = Collectible::Collected;
+                        msg->position = entity.getComponent<xy::Transform>().getPosition();
 
                         switch (collectible.type)
                         {
@@ -144,7 +145,8 @@ void CollectibleSystem::process(float dt)
 
                 auto* msg = postMessage<ActorEvent>(MessageID::ActorMessage);
                 msg->type = ActorEvent::Died;
-                msg->data = 1; //despawned. Needs to be enum as above ^^
+                msg->data = Collectible::TimeOut;
+                msg->position = entity.getComponent<xy::Transform>().getPosition();
 
                 switch (collectible.type)
                 {

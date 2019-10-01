@@ -130,3 +130,19 @@ struct DebugState final
     std::uint8_t pathSize = 0;
     std::int8_t target = -1;
 };
+
+struct ItemState final
+{
+    std::uint8_t despawnType = -1;
+    float x = 0.f;
+    float y = 0.f;
+
+    //this is kind of reproducing actor IDs here
+    //but we're using this to pack the item type
+    //in the first 7 bits of despawn type with
+    //the final bit representing timeout or collection
+    enum
+    {
+        Ammo, Coin, Food
+    };
+};

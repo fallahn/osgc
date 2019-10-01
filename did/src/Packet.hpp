@@ -53,6 +53,7 @@ namespace PacketID
         WeatherUpdate, //uint8 containing current weather mode
         TreasureUpdate, //uint8 number of treasure remaining
         DebugUpdate, //contains state and entity ID
+        ItemDespawn, //if item timed out or wa collected, and position
         //PhysicsUpdate, //data for client side physics interp
         //PhysicsSync, //data to sync physics state on the client
 

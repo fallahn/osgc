@@ -36,6 +36,7 @@ namespace MessageID
         ServerMessage,
         CarryMessage,
         MiniMapUpdate,
+        CollectibleMessage,
         UIMessage
     };
 }
@@ -161,6 +162,16 @@ struct MiniMapEvent final
 {
     sf::Vector2f position;
     std::int32_t actorID = 0;
+};
+
+struct CollectibleEvent final
+{
+    std::int32_t id = 0;
+    enum
+    {
+        TimeOut, Collected
+    }type = TimeOut;
+    sf::Vector2f position;
 };
 
 struct UIEvent final

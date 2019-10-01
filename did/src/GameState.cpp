@@ -442,6 +442,14 @@ void GameState::handleMessage(const xy::Message& msg)
             createSplash(data.position);
         }
     }
+    else if (msg.id == MessageID::CollectibleMessage)
+    {
+        const auto& data = msg.getData<CollectibleEvent>();
+        if (data.type == CollectibleEvent::TimeOut)
+        {
+            createPlayerPuff(data.position, false).getComponent<xy::Transform>().scale(0.5f, 0.5f);
+        }
+    }
     else if (msg.id == MessageID::SceneMessage)
     {
         const auto& data = msg.getData<SceneEvent>();
@@ -1145,6 +1153,35 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     {
     default: 
         //std::cout << (int)packet.id() << "\n";
+        break;
+    case PacketID::ItemDespawn:
+    {
+        const auto& despawn = evt.packet.as<ItemState>();
+        auto* msg = getContext().appInstance.getMessageBus().post<CollectibleEvent>(MessageID::CollectibleMessage);
+        msg->position = { despawn.x, despawn.y };
+
+        std::uint8_t id = msg->id & 0x7F;
+        std::uint8_t type = msg->id & 0x80;
+
+        if (type != 0)
+        {
+            msg->type = CollectibleEvent::Collected;
+        }
+
+        switch (id)
+        {
+        default: break;
+        case ItemState::Ammo:
+            msg->id = Actor::Ammo;
+            break;
+        case ItemState::Coin:
+            msg->id = Actor::Coin;
+            break;
+        case ItemState::Food:
+            msg->id = Actor::Food;
+            break;
+        }
+    }
         break;
     case PacketID::ServerQuit:
         if (!m_sharedData.gameServer->running())

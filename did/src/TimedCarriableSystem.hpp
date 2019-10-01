@@ -19,9 +19,12 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include "CarriableSystem.hpp"
+#include "ServerSharedStateData.hpp"
+#include "PacketTypes.hpp"
 
 #include <xyginext/ecs/System.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/components/Transform.hpp>
 
 struct TimedCarriable final
 {
@@ -32,11 +35,13 @@ struct TimedCarriable final
 class TimedCarriableSystem final : public xy::System
 {
 public:
-    explicit TimedCarriableSystem(xy::MessageBus& mb)
-        : xy::System(mb, typeid(TimedCarriableSystem))
+    TimedCarriableSystem(xy::MessageBus& mb, Server::SharedStateData& sd)
+        : xy::System(mb, typeid(TimedCarriableSystem)),
+        m_sharedData(sd)
     {
         requireComponent<TimedCarriable>();
         requireComponent<Carriable>();
+        requireComponent<xy::Transform>();
     }
 
     void process(float dt) override
@@ -58,6 +63,14 @@ public:
                     timedCarriable.currentTime += dt;
                     if (timedCarriable.currentTime > TimedCarriable::Timeout)
                     {
+                        auto position = entity.getComponent<xy::Transform>().getPosition();
+
+                        ItemState is;
+                        is.despawnType = 0; //we don't care what it is, just that it despawned
+                        is.x = position.x;
+                        is.y = position.y;
+                        m_sharedData.gameServer->broadcastData(PacketID::ItemDespawn, is);
+
                         getScene()->destroyEntity(entity);
                     }
                 }
@@ -66,4 +79,5 @@ public:
     }
 
 private:
+    Server::SharedStateData& m_sharedData;
 };

@@ -24,7 +24,7 @@ spriteesheet puff
             frame=0,0,1,1
 
             loop=false
-            framerate=18
+            framerate=22
         }
     }
 }

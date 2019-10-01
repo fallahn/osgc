@@ -308,10 +308,10 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             }
         }
     }
-    else if (msg.id == MessageID::ActorMessage)
+    else if (msg.id == MessageID::CollectibleMessage)
     {
-        const auto& data = msg.getData<ActorEvent>();
-        if (data.type == ActorEvent::Died)
+        const auto& data = msg.getData<CollectibleEvent>();
+        if (data.type == CollectibleEvent::Collected)
         {
             switch (data.id)
             {
@@ -328,7 +328,18 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 emitter.setVolume(30.f);
                 emitter.setPitch(1.3f);
             }
-                break;
+            break;
+            }
+        }
+    }    
+    else if (msg.id == MessageID::ActorMessage)
+    {
+        const auto& data = msg.getData<ActorEvent>();
+        if (data.type == ActorEvent::Died)
+        {
+            switch (data.id)
+            {
+            default: break;
             case Actor::ID::Treasure:
                 //if(triggerTimes[AudioID::Scored] < 0)
             {

@@ -38,6 +38,11 @@ struct Collectible final
     float collectionTime = 1.f; //not collectible until 0
     float lifeTime = DespawnTime; //despawn after a while
     sf::Vector2f velocity;
+
+    enum Despawn
+    {
+        TimeOut, Collected
+    };
 };
 
 class CollectibleSystem final : public xy::System

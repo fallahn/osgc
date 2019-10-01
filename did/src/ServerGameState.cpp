@@ -316,10 +316,9 @@ void GameState::handleMessage(const xy::Message& msg)
         }
         else if (data.type == ActorEvent::Died)
         {
-            //TODO use this to raise client messages / sound effects
-            //eg if a collectible was picked up or despawned
-            if (data.id == Actor::ID::Skeleton)
+            switch(data.id)
             {
+            case Actor::Skeleton:
                 if (data.data >= Actor::ID::PlayerOne && data.data <= Actor::PlayerFour)
                 {
                     auto id = data.data - Actor::ID::PlayerOne;
@@ -328,6 +327,40 @@ void GameState::handleMessage(const xy::Message& msg)
                     m_playerSlots[id].sendStatsUpdate = true;
                     //std::cout << (int)id << " killed skelly\n";
                 }
+                break;
+            case Actor::Coin:
+            case Actor::Food:
+            case Actor::Ammo:
+            {
+                //tell clients so they can render effects
+                ItemState is;
+                is.x = data.position.x;
+                is.y = data.position.y;
+
+                switch (data.type)
+                {
+                default: break;
+                case Actor::Ammo:
+                    is.despawnType = ItemState::Ammo;
+                    break;
+                case Actor::Coin:
+                    is.despawnType = ItemState::Coin;
+                    break;
+                case Actor::Food:
+                    is.despawnType = ItemState::Food;
+                    break;
+                }
+
+                if (data.data)
+                {
+                    //item was collected
+                    is.despawnType |= (1 << 7);
+                }
+
+                //as this is only for effect (items are actually erased elsewhere) don't worry about reliability
+                m_sharedData.gameServer->broadcastData(PacketID::ItemDespawn, is);
+            }
+                break;
             }
         }
         else if (data.type == ActorEvent::CollectedItem)
@@ -641,7 +674,7 @@ void GameState::createScene()
     m_scene.addSystem<ParrotLauncherSystem>(mb, m_sharedData);
     m_scene.addSystem<BarrelSystem>(mb);
     m_scene.addSystem<DecoySystem>(mb);
-    m_scene.addSystem<TimedCarriableSystem>(mb);
+    m_scene.addSystem<TimedCarriableSystem>(mb, m_sharedData);
     m_scene.addSystem<FlareSystem>(mb);
     m_scene.addSystem<SkullShieldSystem>(mb);
 
