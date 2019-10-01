@@ -195,6 +195,50 @@ void MenuState::createBackground()
         };
     }
 
+    //water details
+    spriteSheet.loadFromFile("assets/sprites/water_details.spt", m_textureResource);
+    std::array<std::string, 5u> spriteNames =
+    {
+        "seagull", "rope_posts", "large_rock", "small_rock01", "small_rock02"
+    };
+    std::array<sf::Vector2f, 5u> waterPos =
+    {
+        sf::Vector2f(576.f, 395.f),
+        {1130.f, 588.f},
+        {1014.f, 1068.f},
+        {1066.f, 1026.f},
+        {294.f, 1052.f}
+    };
+    for (auto i = 0u; i < 5u; ++i)
+    {
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(waterPos[i]);
+        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(spriteNames[i]);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShader));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.addComponent<Sprite3D>(m_matrixPool);
+        entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &camEnt.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Transform>().setScale(0.5f, -0.5f);
+
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
+
+        auto rootPos = waterPos[i] - (Global::IslandSize / 2.f);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function =
+            [rootPos, &islandTx](xy::Entity e, float)
+        {
+            sf::Transform tx;
+            tx.translate(islandTx.getPosition());
+            tx.rotate(islandTx.getRotation());
+
+            e.getComponent<xy::Transform>().setPosition(tx.transformPoint(rootPos));
+        };
+    }
+
+
     //boats
     std::array<sf::Vector2f, 4u> boatPos =
     {
