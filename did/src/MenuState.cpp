@@ -76,6 +76,8 @@ namespace
 
     const std::string NameFile("name.set");
     const std::string AddressFile("address.set");
+    const std::string KeysFile("keys.set");
+    const std::string ButtonsFile("buttons.set");
     const std::vector<std::string> names =
     {
         "Cleftwisp", "Old Sam", "Lou Baker",
@@ -1363,6 +1365,39 @@ void MenuState::loadSettings()
     {
         readFile(settingsPath + AddressFile, m_sharedData.remoteIP);
     }
+
+    auto readControls = [](const std::string& src, void* dst, std::size_t size)
+    {
+        std::ifstream file(src, std::ios::binary);
+        if (file.is_open() && file.good())
+        {
+            file.seekg(0, file.end);
+            auto fileSize = file.tellg();
+            file.seekg(file.beg);
+
+            if (fileSize != size)
+            {
+                xy::Logger::log(src + " unexpected file size", xy::Logger::Type::Error);
+                return;
+            }
+
+            std::vector<char> buffer(fileSize);
+            file.read(buffer.data(), fileSize);
+            file.close();
+
+            std::memcpy(dst, buffer.data(), size);
+        }
+    };
+
+    if (xy::FileSystem::fileExists(settingsPath + KeysFile))
+    {
+        readControls(settingsPath + KeysFile, m_sharedData.inputBinding.keys.data(), sizeof(sf::Keyboard::Key) * m_sharedData.inputBinding.keys.size());
+    }
+
+    if (xy::FileSystem::fileExists(settingsPath + ButtonsFile))
+    {
+        readControls(settingsPath + ButtonsFile, m_sharedData.inputBinding.buttons.data(), sizeof(std::uint32_t) * m_sharedData.inputBinding.buttons.size());
+    }
 }
 
 void MenuState::saveSettings()
@@ -1382,6 +1417,22 @@ void MenuState::saveSettings()
     {
         auto codePoints = m_sharedData.remoteIP.toUtf32();
         file.write(reinterpret_cast<char*>(codePoints.data()), codePoints.size() * sizeof(sf::Uint32));
+        file.close();
+    }
+
+    file.open(settingsPath + KeysFile);
+    if (file.is_open() && file.good())
+    {
+        const auto& data = m_sharedData.inputBinding.keys;
+        file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(sf::Keyboard::Key));
+        file.close();
+    }
+
+    file.open(settingsPath + ButtonsFile);
+    if (file.is_open() && file.good())
+    {
+        const auto& data = m_sharedData.inputBinding.buttons;
+        file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(std::uint32_t));
         file.close();
     }
 }
