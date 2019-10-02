@@ -19,6 +19,8 @@ Copyright 2019 Matt Marchant
 #include "MenuState.hpp"
 #include "GlobalConsts.hpp"
 #include "SliderSystem.hpp"
+#include "SharedStateData.hpp"
+#include "KeyMapping.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -28,6 +30,23 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/systems/UISystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+
+#include <SFML/Window/Event.hpp>
+
+namespace
+{
+    std::array<sf::Keyboard::Key, 4u> ReservedKeys =
+    {
+        sf::Keyboard::Escape, sf::Keyboard::Tab,
+        sf::Keyboard::P, sf::Keyboard::Pause
+    };
+
+    //yeah I know - but we might reserve more in the future...
+    std::array<std::uint32_t, 1u> ReservedButtons =
+    {
+        7
+    };
+}
 
 void MenuState::buildOptions(sf::Font& font)
 {
@@ -42,23 +61,37 @@ void MenuState::buildOptions(sf::Font& font)
     //background
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/browser_window.png"));
+    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/controls_bg.png"));
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 120.f);
+    entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 300.f);
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    auto bgEntity = entity;
+
+    //plank
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //title
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 30.f);
+    entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
+    entity.getComponent<xy::Transform>().move(0.f, -46.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(font).setString("Controls");
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    bounds = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
 
     //back button
     entity = m_uiScene.createEntity();
@@ -116,33 +149,265 @@ void MenuState::buildOptions(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-
-    auto helpString =
-R"(W - Up
-S - Down
-A - Left
-D - Right
-
-LCtrl/Controller B - Pick up/drop
-Space/Controller A - Use Item
-LShift/Controller LB - Strafe
-
-Q/Controller RB - Previous Item
-E/Controller Y - Next Item
-Z/Controller X - Show/Zoom Map
-M/Controller Back - Show Map
-Tab - Show Scoreboard
-
-Esc/P/Pause/Controller Start - Show options Menu)";
-
+    //info string
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(120.f, 180.f);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 800.f);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont));
-    entity.getComponent<xy::Text>().setString(helpString);
+    entity.getComponent<xy::Text>().setString("Click on an item to change it");
     entity.getComponent<xy::Text>().setCharacterSize(40);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::OptionsInfoText;
     /*entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);*/
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //keybinds
+    sf::Vector2f currPos(636.f, 29.f);
+    const float verticalOffset = 40.5f;
+    const sf::FloatRect buttonArea(-86.f, 0.f, 172.f, 36.f);
+    
+    auto addKeyWindow = [&, buttonArea](std::int32_t binding, sf::Vector2f position)
+    {
+        auto ent = m_uiScene.createEntity();
+        ent.addComponent<xy::Transform>().setPosition(position);
+        ent.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        ent.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.inputBinding.keys[binding]));
+        ent.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+        ent.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+
+        ent.addComponent<xy::UIHitBox>().area = buttonArea;
+        ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+            m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+                [&, ent, binding](xy::Entity, sf::Uint64 flags) mutable
+                {
+                    if (flags & xy::UISystem::LeftMouse)
+                    {
+                        m_activeMapping.keybindActive = true;
+                        m_activeMapping.keyDest = &m_sharedData.inputBinding.keys[binding];
+                        m_activeMapping.displayEntity = ent;
+
+                        ent.getComponent<xy::Text>().setString("?");
+
+                        xy::Command cmd;
+                        cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+                        cmd.action = [](xy::Entity e, float)
+                        {
+                            e.getComponent<xy::Text>().setString("Press a key");
+                        };
+                        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                    }
+                });
+
+
+        bgEntity.getComponent<xy::Transform>().addChild(ent.getComponent<xy::Transform>());
+    };
+
+    addKeyWindow(InputBinding::Up, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::Down, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::Left, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::Right, currPos);
+    currPos.y += verticalOffset * 1.3f;
+
+    addKeyWindow(InputBinding::CarryDrop, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::Action, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::Strafe, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::WeaponPrev, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::WeaponNext, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::ZoomMap, currPos);
+    currPos.y += verticalOffset;
+    addKeyWindow(InputBinding::ShowMap, currPos);
+
+    //joybuttons
+    currPos = { 1126.f, 29.f };
+    auto addJoyWindow = [&, buttonArea](std::int32_t binding, sf::Vector2f position)
+    {
+        auto ent = m_uiScene.createEntity();
+        ent.addComponent<xy::Transform>().setPosition(position);
+        ent.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        ent.addComponent<xy::Text>(font).setAlignment(xy::Text::Alignment::Centre);
+        ent.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+
+        if (binding == -1)
+        {
+            ent.getComponent<xy::Text>().setString("DPad");
+        }
+        else
+        {
+            ent.getComponent<xy::Text>().setString(JoyMapping[m_sharedData.inputBinding.buttons[binding]]);
+            ent.addComponent<xy::UIHitBox>().area = buttonArea;
+            ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+                m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+                    [&, ent, binding](xy::Entity, sf::Uint64 flags) mutable
+                    {
+                        if (flags & xy::UISystem::LeftMouse)
+                        {
+                            m_activeMapping.joybindActive = true;
+                            m_activeMapping.joyButtonDest = &m_sharedData.inputBinding.buttons[binding];
+                            m_activeMapping.displayEntity = ent;
+
+                            ent.getComponent<xy::Text>().setString("?");
+
+                            xy::Command cmd;
+                            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+                            cmd.action = [](xy::Entity e, float)
+                            {
+                                e.getComponent<xy::Text>().setString("Press a button");
+                            };
+                            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                        }
+                    });
+        }
+
+        bgEntity.getComponent<xy::Transform>().addChild(ent.getComponent<xy::Transform>());
+    };
+
+    addJoyWindow(-1, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(-1, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(-1, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(-1, currPos);
+    currPos.y += verticalOffset * 1.3f;
+
+    addJoyWindow(InputBinding::CarryDrop, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(InputBinding::Action, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(InputBinding::Strafe, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(InputBinding::WeaponPrev, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(InputBinding::WeaponNext, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(InputBinding::ZoomMap, currPos);
+    currPos.y += verticalOffset;
+    addJoyWindow(InputBinding::ShowMap, currPos);
+
+}
+
+void MenuState::handleKeyMapping(const sf::Event& evt)
+{
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        //check existing bindings (but not the requested one)
+        //to see if key code already bound
+        bool keyFree = true;
+        for (auto i = 0u; i < m_sharedData.inputBinding.keys.size(); ++i)
+        {
+            if ((m_sharedData.inputBinding.keys[i] != *m_activeMapping.keyDest
+                && m_sharedData.inputBinding.keys[i] == evt.key.code)
+                || std::find(ReservedKeys.begin(), ReservedKeys.end(), evt.key.code) != ReservedKeys.end())
+            {
+                //already bound!
+                xy::Command cmd;
+                cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+                cmd.action = [evt](xy::Entity e, float)
+                {
+                    e.getComponent<xy::Text>().setString(KeyMapping.at(evt.key.code) + " is already bound!");
+                };
+                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                keyFree = false;
+                break;
+            }
+        }
+
+        if (keyFree)
+        {
+            *m_activeMapping.keyDest = evt.key.code;
+            m_activeMapping.keyDest = nullptr;
+            m_activeMapping.keybindActive = false;
+
+            auto ent = m_activeMapping.displayEntity;
+            m_activeMapping.displayEntity = {};
+
+            ent.getComponent<xy::Text>().setString(KeyMapping.at(evt.key.code));
+
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<xy::Text>().setString("Click on an item to change it");
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+    }
+}
+
+void MenuState::handleJoyMapping(const sf::Event& evt)
+{
+    //check we didn't hit this by mistake and enable escape to cancel
+        //otherwise a user will be buggered if they have no controller!
+    if (evt.type == sf::Event::KeyReleased
+        && evt.key.code == sf::Keyboard::Escape)
+    {
+        m_activeMapping.displayEntity.getComponent<xy::Text>().setString(JoyMapping[*m_activeMapping.joyButtonDest]);
+        m_activeMapping.joyButtonDest = nullptr;
+        m_activeMapping.displayEntity = { };
+        m_activeMapping.joybindActive = false;
+
+        xy::Command cmd;
+        cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<xy::Text>().setString("Click on an item to change it");
+        };
+        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    }
+    else if (evt.type == sf::Event::JoystickButtonReleased
+        && evt.joystickButton.joystickId == 0)
+    {
+        //check not existing binding
+        bool buttonFree = true;
+        for (auto i = 0u; i < m_sharedData.inputBinding.keys.size(); ++i)
+        {
+            if ((m_sharedData.inputBinding.buttons[i] != *m_activeMapping.joyButtonDest
+                && m_sharedData.inputBinding.buttons[i] == evt.joystickButton.button)
+                || std::find(ReservedButtons.begin(), ReservedButtons.end(), evt.joystickButton.button) != ReservedButtons.end())
+            {
+                //already bound!
+                xy::Command cmd;
+                cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+                cmd.action = [evt](xy::Entity e, float)
+                {
+                    e.getComponent<xy::Text>().setString(JoyMapping[evt.joystickButton.button] + " is already bound!");
+                };
+                m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+                buttonFree = false;
+                break;
+            }
+        }
+
+        if (buttonFree)
+        {
+            *m_activeMapping.joyButtonDest = evt.joystickButton.button;
+            m_activeMapping.joyButtonDest = nullptr;
+            m_activeMapping.joybindActive = false;
+
+            auto ent = m_activeMapping.displayEntity;
+            m_activeMapping.displayEntity = {};
+
+            ent.getComponent<xy::Text>().setString(JoyMapping[evt.joystickButton.button]);
+
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<xy::Text>().setString("Click on an item to change it");
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+    }
 }

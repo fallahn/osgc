@@ -44,7 +44,7 @@ Every pirate has a trusty sword as well as a pistol. Pistols are powerful, have 
 
     Esc/P/Pause/Controller Start - Show options Menu  
 
-This assumes the default xinput style controller layout on Windows. Custom keybinds and controller input is coming Soon™
+This assumes the default xinput style controller layout on Windows. Keys and joystick buttons can be customised from the options menu.
 
 ###### Hosting a Game
 Click host on the main menu to host a new game. The host can choose to update the 'seed' a random word or phrase which is used to change how the island is generated, it can be almost anything you like! Remember the seeds for your favourite islands as using the same seed will regenerate the same one each time (although not necessarily with the same treasure...). Hosting requires port 20715 to be open on the host computer, and any relevant NAT/port forwarding done to allow other players to join across the internet.

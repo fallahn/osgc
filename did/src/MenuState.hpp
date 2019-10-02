@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "MatrixPool.hpp"
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/gui/GuiClient.hpp>
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
@@ -50,7 +51,7 @@ struct Checkbox final
     std::uint8_t playerID = 0;
 };
 
-class MenuState final : public xy::State
+class MenuState final : public xy::State, public xy::GuiClient
 {
 public:
     MenuState(xy::StateStack&, xy::State::Context, SharedData&);
@@ -73,6 +74,22 @@ private:
 
     std::array<xy::Sprite, Menu::SpriteID::Count> m_sprites = {};
     std::array<sf::Uint32, Menu::CallbackID::Count> m_callbackIDs = {};
+
+    struct ActiveMapping final
+    {
+        bool keybindActive = false;
+        bool joybindActive = false;
+
+        union
+        {
+            sf::Keyboard::Key* keyDest;
+            std::uint32_t* joyButtonDest;
+        };
+
+        xy::Entity displayEntity;
+    }m_activeMapping;
+    void handleKeyMapping(const sf::Event&);
+    void handleJoyMapping(const sf::Event&);
 
     bool m_gameLaunched;
 
@@ -100,6 +117,9 @@ private:
     void createScene();
     void createBackground();
     void setLobbyView();
+
+    std::vector<std::string> m_readmeStrings;
+    void loadReadme();
 
     void buildLobby(sf::Font&);
     void buildOptions(sf::Font&);

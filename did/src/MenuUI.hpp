@@ -46,7 +46,8 @@ namespace Menu
             HostIcon = 0x1000,
 
             ChatInText = 0x2000,
-            ChatOutText = 0x4000
+            ChatOutText = 0x4000,
+            OptionsInfoText = 0x8000
         };
     }
 

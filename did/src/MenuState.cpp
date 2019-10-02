@@ -32,6 +32,7 @@ Copyright 2019 Matt Marchant
 #include "Sprite3D.hpp"
 #include "WaveSystem.hpp"
 #include "FlappySailSystem.hpp"
+#include "KeyMapping.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -94,11 +95,16 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 {
     launchLoadingScreen();
 
+    //this member is a union so there's no
+    //default value
+    m_activeMapping.keyDest = nullptr;
+
     loadSettings();
     loadAssets();
     createScene();
 
     setLobbyView();
+    loadReadme();
 
     xy::App::setMouseCursorVisible(true);
 
@@ -133,7 +139,19 @@ bool MenuState::handleEvent(const sf::Event& evt)
 
     updateTextInput(evt);
 
-    m_uiScene.getSystem<xy::UISystem>().handleEvent(evt);
+    //don't update UI input if waiting a keybind
+    if(m_activeMapping.keybindActive)
+    {
+        handleKeyMapping(evt);
+    }
+    else if (m_activeMapping.joybindActive)
+    {
+        handleJoyMapping(evt);
+    }
+    else
+    {
+        m_uiScene.getSystem<xy::UISystem>().handleEvent(evt);
+    }
     m_uiScene.forwardEvent(evt);
     m_gameScene.forwardEvent(evt);
     return true;
@@ -770,6 +788,48 @@ void MenuState::setLobbyView()
 
         //request a seed update (also sends all client data)
         m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
+    }
+}
+
+void MenuState::loadReadme()
+{
+    auto path = xy::FileSystem::getResourcePath() + "assets/readme.md";
+    if (xy::FileSystem::fileExists(path))
+    {
+        std::ifstream file(path);
+        if (file.is_open() && file.good())
+        {
+            std::string line;
+            std::size_t lineCount = 0;
+            const std::size_t MaxLines = 16;
+            m_readmeStrings.emplace_back();
+            std::size_t strIndx = 0;
+
+            while (std::getline(file, line))
+            {
+                //ImGui has a limit on string length so
+                //the file needs to be split across multiple strings
+                m_readmeStrings[strIndx] += line + "\n";
+                lineCount++;
+                if (lineCount == MaxLines)
+                {
+                    lineCount = 0;
+                    m_readmeStrings.emplace_back();
+                    strIndx++;
+                }
+            }
+
+            registerConsoleTab("Readme", [&]()
+                {
+                    ImGui::BeginChild("ReadmeRegion", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false, ImGuiWindowFlags_HorizontalScrollbar);
+                    
+                    for (const auto& str : m_readmeStrings)
+                    {
+                        ImGui::TextWrapped("%s", str.c_str());
+                    }
+                    ImGui::EndChild();
+                });
+        }
     }
 }
 
