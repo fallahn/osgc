@@ -83,7 +83,7 @@ namespace
     struct TimeStruct final
     {
         sf::Clock clock;
-        sf::Time nextTime = sf::seconds(8.f);
+        sf::Time nextTime = sf::seconds(18.f);
     };
 }
 
@@ -607,7 +607,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
             auto& timer = std::any_cast<TimeStruct&>(e.getComponent<xy::Callback>().userData);
             if (timer.clock.getElapsedTime() > timer.nextTime)
             {
-                timer.nextTime = sf::seconds(xy::Util::Random::value(8.f, 15.f));
+                timer.nextTime = sf::seconds(xy::Util::Random::value(18, 35));
                 timer.clock.restart();
                 e.getComponent<xy::AudioEmitter>().play();
                 e.getComponent<xy::SpriteAnimation>().play(1);

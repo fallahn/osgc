@@ -56,12 +56,12 @@ audio_scape player
 
     emitter seagull
     {
-        path = "assets/sound/effects/dog.wav"
+        path = "assets/sound/effects/gull.wav"
         streaming = false
         min_distance = 6
-        attenuation = 1.5
+        attenuation = 2
         looped = false
-        volume = 30
+        volume = 20
         mixer_channel = 1
     }
 

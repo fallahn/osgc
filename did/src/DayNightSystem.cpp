@@ -318,21 +318,23 @@ void DayNightSystem::process(float dt)
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
 
+    if (m_fadeInVolume < m_targetVolume)
+    {
+        m_fadeInVolume = std::min(m_targetVolume, m_fadeInVolume + (dt / AudioFadeTime));
+
+        //TODO target a bus or a prefader through which effects are routed
+    }
+
     //update day/night sounds
     if (!m_isDayTime)
     {
         float volume = xy::Util::Math::clamp((lightAmount - 0.5f) * 8.f, 0.f, 1.f);
 
-        if (m_fadeInVolume < m_targetVolume)
-        {
-            m_fadeInVolume = std::min(m_targetVolume, m_fadeInVolume + (dt / AudioFadeTime));
-        }
-
         xy::Command cmd;
         cmd.targetFlags = CommandID::DaySound;
-        cmd.action = [&, volume](xy::Entity ent, float)
+        cmd.action = [volume](xy::Entity ent, float)
         {
-            ent.getComponent<xy::AudioEmitter>().setVolume(ent.getComponent<float>() * (1.f - volume) * m_fadeInVolume);
+            ent.getComponent<xy::AudioEmitter>().setVolume(ent.getComponent<float>() * (1.f - volume));
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 
