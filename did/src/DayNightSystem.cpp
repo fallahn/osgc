@@ -150,10 +150,13 @@ namespace
 
     const float FlareTransitionTime = 3.f;
     const sf::Glsl::Vec4 FlareColour(255.f / 255.f, 143.f / 255.f, 246.f / 255.f, 1.f);
+    const float AudioFadeTime = 2.f;
 }
 
 DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::TextureResource& tr)
     : xy::System            (mb, typeid(DayNightSystem)),
+    m_fadeInVolume          (0.f),
+    m_targetVolume          (0.f),
     m_groundShader          (nullptr),
     m_sunDirection          (-2.f, -1.f, 2.4f),
     m_currentIndex          (0),
@@ -254,6 +257,10 @@ void DayNightSystem::handleMessage(const xy::Message& msg)
         {
             m_targetFlareAmount = 1.f;
         }
+        else if (data.type == MapEvent::CurtainRaised)
+        {
+            m_targetVolume = 1.f;
+        }
     }
         break;
     }
@@ -316,11 +323,16 @@ void DayNightSystem::process(float dt)
     {
         float volume = xy::Util::Math::clamp((lightAmount - 0.5f) * 8.f, 0.f, 1.f);
 
+        if (m_fadeInVolume < m_targetVolume)
+        {
+            m_fadeInVolume = std::min(m_targetVolume, m_fadeInVolume + (dt / AudioFadeTime));
+        }
+
         xy::Command cmd;
         cmd.targetFlags = CommandID::DaySound;
-        cmd.action = [volume](xy::Entity ent, float)
+        cmd.action = [&, volume](xy::Entity ent, float)
         {
-            ent.getComponent<xy::AudioEmitter>().setVolume(ent.getComponent<float>() * (1.f - volume));
+            ent.getComponent<xy::AudioEmitter>().setVolume(ent.getComponent<float>() * (1.f - volume) * m_fadeInVolume);
         };
         getScene()->getSystem<xy::CommandSystem>().sendCommand(cmd);
 

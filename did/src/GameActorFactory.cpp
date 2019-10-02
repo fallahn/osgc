@@ -79,6 +79,12 @@ namespace
         { 182.f, 216.f, 49.f, 60.f },
         { 80.f, 278.f, 49.f, 60.f }
     };
+
+    struct TimeStruct final
+    {
+        sf::Clock clock;
+        sf::Time nextTime = sf::seconds(8.f);
+    };
 }
 
 void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t timestamp, bool localPlayer)
@@ -592,9 +598,27 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
             auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
             entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
         }
-        //TODO add bird sound + controller
-        //entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("crab");
-        //entity.getComponent<xy::AudioEmitter>().play();
+        entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("seagull");
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().userData = std::make_any<TimeStruct>();
+        entity.getComponent<xy::Callback>().function =
+            [](xy::Entity e, float)
+        {
+            auto& timer = std::any_cast<TimeStruct&>(e.getComponent<xy::Callback>().userData);
+            if (timer.clock.getElapsedTime() > timer.nextTime)
+            {
+                timer.nextTime = sf::seconds(xy::Util::Random::value(8.f, 15.f));
+                timer.clock.restart();
+                e.getComponent<xy::AudioEmitter>().play();
+                e.getComponent<xy::SpriteAnimation>().play(1);
+            }
+
+            if (e.getComponent<xy::AudioEmitter>().getStatus() == xy::AudioEmitter::Stopped)
+            {
+                e.getComponent<xy::SpriteAnimation>().play(0);
+            }
+        };
+        
         return; //skip shadows
     case Actor::WaterDetail:
     {

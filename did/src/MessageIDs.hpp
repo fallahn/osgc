@@ -76,7 +76,8 @@ struct MapEvent final
         ItemInWater,
         ItemRespawn,
         FlareLaunched,
-        Explosion
+        Explosion,
+        CurtainRaised
     }type;
     float value = 0.f;
     sf::Vector2f position;

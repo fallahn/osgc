@@ -57,6 +57,9 @@ public:
 
 private:
 
+    float m_fadeInVolume; //used to fade in the looped sounds once the curtain is raised
+    float m_targetVolume;
+
     std::vector<sf::Shader*> m_shaders;
     sf::Shader* m_groundShader;
     sf::Glsl::Vec3 m_sunDirection;

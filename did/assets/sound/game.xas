@@ -54,6 +54,17 @@ audio_scape player
         mixer_channel = 1
     }
 
+    emitter seagull
+    {
+        path = "assets/sound/effects/dog.wav"
+        streaming = false
+        min_distance = 6
+        attenuation = 1.5
+        looped = false
+        volume = 30
+        mixer_channel = 1
+    }
+
     emitter flare
     {
         path = "assets/sound/effects/flare.wav"

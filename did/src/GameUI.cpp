@@ -330,8 +330,9 @@ void GameState::loadUI()
         ent.getComponent<xy::Transform>().move(0.f, -420.f * dt);
 
         auto yPos = ent.getComponent<xy::Transform>().getPosition().y;
+        const float MaxDistance = -xy::DefaultSceneSize.y * 1.05f;
 
-        if (yPos < -xy::DefaultSceneSize.y * 1.05f)
+        if (yPos < MaxDistance)
         {
             m_uiScene.destroyEntity(ent);
             //toggleUI();
@@ -341,6 +342,9 @@ void GameState::loadUI()
             cmd.targetFlags = CommandID::LoopedSound;
             cmd.action = [](xy::Entity ent, float) {ent.getComponent<xy::AudioEmitter>().play(); };
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            auto* msg = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
+            msg->type = MapEvent::CurtainRaised;
         }
     };
 

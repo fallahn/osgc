@@ -211,7 +211,6 @@ bool MenuState::handleEvent(const sf::Event& evt)
         {
             //TODO check existing bindings (but not the requested one)
             //to see if key code already bound
-
             *m_activeMapping.keyDest = evt.key.code;
             m_activeMapping.keyDest = nullptr;
             m_activeMapping.keybindActive = false;
