@@ -149,12 +149,13 @@ void MenuState::buildOptions(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    auto& finefont = m_fontResource.get(Global::FineFont);
+
     //info string
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 800.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont));
-    entity.getComponent<xy::Text>().setString("Click on an item to change it");
+    entity.addComponent<xy::Text>(finefont).setString("Click on an input to change it");
     entity.getComponent<xy::Text>().setCharacterSize(40);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -164,7 +165,7 @@ void MenuState::buildOptions(sf::Font& font)
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //keybinds
-    sf::Vector2f currPos(636.f, 29.f);
+    sf::Vector2f currPos(664.f, 29.f);
     const float verticalOffset = 40.5f;
     const sf::FloatRect buttonArea(-86.f, 0.f, 172.f, 36.f);
     
@@ -173,9 +174,10 @@ void MenuState::buildOptions(sf::Font& font)
         auto ent = m_uiScene.createEntity();
         ent.addComponent<xy::Transform>().setPosition(position);
         ent.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-        ent.addComponent<xy::Text>(font).setString(KeyMapping.at(m_sharedData.inputBinding.keys[binding]));
+        ent.addComponent<xy::Text>(finefont).setString(KeyMapping.at(m_sharedData.inputBinding.keys[binding]));
         ent.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
         ent.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+        ent.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
 
         ent.addComponent<xy::UIHitBox>().area = buttonArea;
         ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -211,7 +213,7 @@ void MenuState::buildOptions(sf::Font& font)
     addKeyWindow(InputBinding::Left, currPos);
     currPos.y += verticalOffset;
     addKeyWindow(InputBinding::Right, currPos);
-    currPos.y += verticalOffset * 1.3f;
+    currPos.y += verticalOffset * 1.35f;
 
     addKeyWindow(InputBinding::CarryDrop, currPos);
     currPos.y += verticalOffset;
@@ -228,13 +230,13 @@ void MenuState::buildOptions(sf::Font& font)
     addKeyWindow(InputBinding::ShowMap, currPos);
 
     //joybuttons
-    currPos = { 1126.f, 29.f };
+    currPos = { 1154.f, 29.f };
     auto addJoyWindow = [&, buttonArea](std::int32_t binding, sf::Vector2f position)
     {
         auto ent = m_uiScene.createEntity();
         ent.addComponent<xy::Transform>().setPosition(position);
         ent.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-        ent.addComponent<xy::Text>(font).setAlignment(xy::Text::Alignment::Centre);
+        ent.addComponent<xy::Text>(finefont).setAlignment(xy::Text::Alignment::Centre);
         ent.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
 
         if (binding == -1)
@@ -278,7 +280,7 @@ void MenuState::buildOptions(sf::Font& font)
     addJoyWindow(-1, currPos);
     currPos.y += verticalOffset;
     addJoyWindow(-1, currPos);
-    currPos.y += verticalOffset * 1.3f;
+    currPos.y += verticalOffset * 1.35f;
 
     addJoyWindow(InputBinding::CarryDrop, currPos);
     currPos.y += verticalOffset;
@@ -338,7 +340,7 @@ void MenuState::handleKeyMapping(const sf::Event& evt)
             cmd.targetFlags = Menu::CommandID::OptionsInfoText;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Text>().setString("Click on an item to change it");
+                e.getComponent<xy::Text>().setString("Click on an input to change it");
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -361,7 +363,7 @@ void MenuState::handleJoyMapping(const sf::Event& evt)
         cmd.targetFlags = Menu::CommandID::OptionsInfoText;
         cmd.action = [](xy::Entity e, float)
         {
-            e.getComponent<xy::Text>().setString("Click on an item to change it");
+            e.getComponent<xy::Text>().setString("Click on an input to change it");
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
@@ -405,7 +407,7 @@ void MenuState::handleJoyMapping(const sf::Event& evt)
             cmd.targetFlags = Menu::CommandID::OptionsInfoText;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Text>().setString("Click on an item to change it");
+                e.getComponent<xy::Text>().setString("Click on an input to change it");
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
