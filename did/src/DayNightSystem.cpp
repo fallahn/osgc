@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "SeagullSystem.hpp"
 #include "FoliageSystem.hpp"
 #include "FlappySailSystem.hpp"
+#include "MixerChannels.hpp"
 
 #include <xyginext/resources/ShaderResource.hpp>
 #include <xyginext/resources/Resource.hpp>
@@ -36,6 +37,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Wavetable.hpp>
 #include <xyginext/util/Random.hpp>
 #include <xyginext/util/Math.hpp>
+
+#include <xyginext/audio/Mixer.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -174,6 +177,9 @@ DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::T
     m_targetStormAmount     (0.f),
     m_doLightning           (false)
 {
+    xy::AudioMixer::setPrefadeVolume(m_fadeInVolume, MixerChannel::FX);
+    xy::AudioMixer::setPrefadeVolume(m_fadeInVolume, MixerChannel::Music);
+
     m_shaders.push_back(&sr.get(ShaderID::LandShader));
     m_shaders.push_back(&sr.get(ShaderID::PlaneShader));
     m_shaders.push_back(&sr.get(ShaderID::SkyShader));
@@ -322,7 +328,8 @@ void DayNightSystem::process(float dt)
     {
         m_fadeInVolume = std::min(m_targetVolume, m_fadeInVolume + (dt / AudioFadeTime));
 
-        //TODO target a bus or a prefader through which effects are routed
+        xy::AudioMixer::setPrefadeVolume(m_fadeInVolume, MixerChannel::FX);
+        xy::AudioMixer::setPrefadeVolume(m_fadeInVolume, MixerChannel::Music);
     }
 
     //update day/night sounds

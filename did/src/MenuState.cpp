@@ -101,6 +101,10 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     //default value
     m_activeMapping.keyDest = nullptr;
 
+    //incase quit early from game state
+    xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::FX);
+    xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::Music);
+
     loadSettings();
     loadAssets();
     createScene();
