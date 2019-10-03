@@ -68,6 +68,6 @@ While the game is running there are a few console commands available. Open the c
         skull_item
         skull_shield
         mine_item
-    seed - shows the current map seed
+        seed - shows the current map seed
 
 Note some of the above commands are only available to the current game host. For a list of available commands at run time type `help`.
