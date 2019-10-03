@@ -218,7 +218,7 @@ void MenuState::buildOptions(sf::Font& font)
     addKeyWindow(InputBinding::Left, currPos);
     currPos.y += verticalOffset;
     addKeyWindow(InputBinding::Right, currPos);
-    currPos.y += verticalOffset * 1.35f;
+    currPos.y += verticalOffset * 1.4f;
 
     addKeyWindow(InputBinding::CarryDrop, currPos);
     currPos.y += verticalOffset;
@@ -288,7 +288,7 @@ void MenuState::buildOptions(sf::Font& font)
     addJoyWindow(-1, currPos);
     currPos.y += verticalOffset;
     addJoyWindow(-1, currPos);
-    currPos.y += verticalOffset * 1.35f;
+    currPos.y += verticalOffset * 1.4f;
 
     addJoyWindow(InputBinding::CarryDrop, currPos);
     currPos.y += verticalOffset;
@@ -360,7 +360,7 @@ void MenuState::buildOptions(sf::Font& font)
     bgEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(1126.f, 448.f);
+    entity.addComponent<xy::Transform>().setPosition(1536.f, 448.f);
     entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 64.f, 64.f };
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
@@ -379,7 +379,7 @@ void MenuState::buildOptions(sf::Font& font)
                     cmd.targetFlags = Menu::CommandID::JoybindButton;
                     cmd.action = [&](xy::Entity e, float)
                     {
-                        e.getComponent<xy::Text>().setString(JoyMapping[m_sharedData.inputBinding.keys[e.getComponent<std::int32_t>()]]);
+                        e.getComponent<xy::Text>().setString(JoyMapping[m_sharedData.inputBinding.buttons[e.getComponent<std::int32_t>()]]);
                     };
                     m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
@@ -461,7 +461,7 @@ void MenuState::handleJoyMapping(const sf::Event& evt)
     {
         //check not existing binding
         bool buttonFree = true;
-        for (auto i = 0u; i < m_sharedData.inputBinding.keys.size(); ++i)
+        for (auto i = 0u; i < m_sharedData.inputBinding.buttons.size(); ++i)
         {
             if ((m_sharedData.inputBinding.buttons[i] != *m_activeMapping.joyButtonDest
                 && m_sharedData.inputBinding.buttons[i] == evt.joystickButton.button)

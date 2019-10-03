@@ -338,11 +338,6 @@ void GameState::loadUI()
             //toggleUI();
             m_gameScene.getSystem<Camera3DSystem>().setActive(true);
             
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::LoopedSound;
-            cmd.action = [](xy::Entity ent, float) {ent.getComponent<xy::AudioEmitter>().play(); };
-            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
             auto* msg = getContext().appInstance.getMessageBus().post<MapEvent>(MessageID::MapMessage);
             msg->type = MapEvent::CurtainRaised;
         }

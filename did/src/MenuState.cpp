@@ -179,7 +179,7 @@ void MenuState::handleMessage(const xy::Message& msg)
 
             if (!m_sharedData.netClient->connected())
             {
-                if (m_sharedData.netClient->connect(/*"127.0.0.1""255.255.255.255"*/"", Global::GamePort))
+                if (m_sharedData.netClient->connect(/*"127.0.0.1"*/"255.255.255.255", Global::GamePort))
                 {
 
                     xy::Command cmd;

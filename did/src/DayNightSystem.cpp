@@ -153,13 +153,13 @@ namespace
 
     const float FlareTransitionTime = 3.f;
     const sf::Glsl::Vec4 FlareColour(255.f / 255.f, 143.f / 255.f, 246.f / 255.f, 1.f);
-    const float AudioFadeTime = 2.f;
+    const float AudioFadeTime = 12.f;
 }
 
 DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::TextureResource& tr)
     : xy::System            (mb, typeid(DayNightSystem)),
     m_fadeInVolume          (0.f),
-    m_targetVolume          (0.f),
+    m_targetVolume          (1.f),
     m_groundShader          (nullptr),
     m_sunDirection          (-2.f, -1.f, 2.4f),
     m_currentIndex          (0),
@@ -262,10 +262,6 @@ void DayNightSystem::handleMessage(const xy::Message& msg)
         else if (data.type == MapEvent::FlareLaunched)
         {
             m_targetFlareAmount = 1.f;
-        }
-        else if (data.type == MapEvent::CurtainRaised)
-        {
-            m_targetVolume = 1.f;
         }
     }
         break;

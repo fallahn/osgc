@@ -448,6 +448,11 @@ void GameState::handleMessage(const xy::Message& msg)
             cmd.targetFlags = UI::CommandID::Curtain;
             cmd.action = [](xy::Entity ent, float) {ent.getComponent<xy::Callback>().active = true; };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            cmd;
+            cmd.targetFlags = CommandID::LoopedSound;
+            cmd.action = [](xy::Entity ent, float) {ent.getComponent<xy::AudioEmitter>().play(); };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
         else if (data.type == MapEvent::ItemInWater)
         {
