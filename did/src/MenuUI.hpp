@@ -47,7 +47,9 @@ namespace Menu
 
             ChatInText = 0x2000,
             ChatOutText = 0x4000,
-            OptionsInfoText = 0x8000
+            OptionsInfoText = 0x8000,
+            KeybindButton = 0x10000,
+            JoybindButton = 0x20000
         };
     }
 

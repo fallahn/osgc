@@ -46,12 +46,15 @@ namespace
     {
         7
     };
+
+    const std::string defaultMessage("Click on an input to change it");
 }
 
 void MenuState::buildOptions(sf::Font& font)
 {
     auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
     auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
+
 
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
@@ -155,7 +158,7 @@ void MenuState::buildOptions(sf::Font& font)
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 800.f);
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Text>(finefont).setString("Click on an input to change it");
+    entity.addComponent<xy::Text>(finefont).setString(defaultMessage);
     entity.getComponent<xy::Text>().setCharacterSize(40);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -178,6 +181,8 @@ void MenuState::buildOptions(sf::Font& font)
         ent.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
         ent.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
         ent.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
+        ent.addComponent<xy::CommandTarget>().ID = Menu::CommandID::KeybindButton;
+        ent.addComponent<std::int32_t>() = binding;
 
         ent.addComponent<xy::UIHitBox>().area = buttonArea;
         ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
@@ -268,6 +273,9 @@ void MenuState::buildOptions(sf::Font& font)
                             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                         }
                     });
+
+            ent.addComponent<xy::CommandTarget>().ID = Menu::CommandID::JoybindButton;
+            ent.addComponent<std::int32_t>() = binding;
         }
 
         bgEntity.getComponent<xy::Transform>().addChild(ent.getComponent<xy::Transform>());
@@ -296,6 +304,87 @@ void MenuState::buildOptions(sf::Font& font)
     currPos.y += verticalOffset;
     addJoyWindow(InputBinding::ShowMap, currPos);
 
+    //reset buttons
+    auto mouseEnter = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity, sf::Vector2f)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+            cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setString("Reset Controls"); };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        });
+    auto mouseExit = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity, sf::Vector2f)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+            cmd.action = [](xy::Entity e, float) {e.getComponent<xy::Text>().setString(defaultMessage); };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        });
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(210.f, 448.f);
+    entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 64.f, 64.f };
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags) 
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.inputBinding.keys =
+                    {
+                        sf::Keyboard::M,
+                        sf::Keyboard::Z,
+                        sf::Keyboard::Space,
+                        sf::Keyboard::LControl,
+                        sf::Keyboard::E,
+                        sf::Keyboard::Q,
+                        sf::Keyboard::LShift,
+                        sf::Keyboard::A,
+                        sf::Keyboard::D,
+                        sf::Keyboard::W,
+                        sf::Keyboard::S
+                    };
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::KeybindButton;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Text>().setString(KeyMapping.at(m_sharedData.inputBinding.keys[e.getComponent<std::int32_t>()]));
+                    };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    bgEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(1126.f, 448.f);
+    entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 64.f, 64.f };
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.inputBinding.buttons =
+                    {
+                        {6, 2, 0, 1, 5, 3, 4} //Back, X, A, B , LB, RB, Y
+                    };
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::JoybindButton;
+                    cmd.action = [&](xy::Entity e, float)
+                    {
+                        e.getComponent<xy::Text>().setString(JoyMapping[m_sharedData.inputBinding.keys[e.getComponent<std::int32_t>()]]);
+                    };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    bgEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 void MenuState::handleKeyMapping(const sf::Event& evt)
@@ -340,7 +429,7 @@ void MenuState::handleKeyMapping(const sf::Event& evt)
             cmd.targetFlags = Menu::CommandID::OptionsInfoText;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Text>().setString("Click on an input to change it");
+                e.getComponent<xy::Text>().setString(defaultMessage);
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
@@ -363,7 +452,7 @@ void MenuState::handleJoyMapping(const sf::Event& evt)
         cmd.targetFlags = Menu::CommandID::OptionsInfoText;
         cmd.action = [](xy::Entity e, float)
         {
-            e.getComponent<xy::Text>().setString("Click on an input to change it");
+            e.getComponent<xy::Text>().setString(defaultMessage);
         };
         m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
     }
@@ -407,7 +496,7 @@ void MenuState::handleJoyMapping(const sf::Event& evt)
             cmd.targetFlags = Menu::CommandID::OptionsInfoText;
             cmd.action = [](xy::Entity e, float)
             {
-                e.getComponent<xy::Text>().setString("Click on an input to change it");
+                e.getComponent<xy::Text>().setString(defaultMessage);
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
