@@ -78,7 +78,7 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
     }
 }
 
-void MenuState::updateHostInfo(std::uint64_t hostID)
+void MenuState::updateHostInfo(std::uint64_t hostID, std::string remoteAddress)
 {
     m_sharedData.clientInformation.setHostID(hostID);
 
@@ -108,6 +108,35 @@ void MenuState::updateHostInfo(std::uint64_t hostID)
 
                 break;
             }
+        }
+
+        //display our local IP just for info's sake        
+        if (hostID == m_sharedData.netClient->getPeer().getID())
+        {
+            auto& chatFont = m_fontResource.get("assets/fonts/ProggyClean.ttf");
+            
+            auto entity = m_uiScene.createEntity();
+            entity.addComponent<xy::Transform>().setPosition(12.f, 4.f);
+            entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+            entity.addComponent<xy::Text>(chatFont).setFillColour(sf::Color::White);
+            entity.getComponent<xy::Text>().setCharacterSize(32);
+            entity.getComponent<xy::Text>().setString("Hosting on " + remoteAddress + ":" + std::to_string(Global::GamePort));
+            entity.addComponent<xy::Callback>().active = true;
+            entity.getComponent<xy::Callback>().function =
+                [&](xy::Entity e, float)
+            {
+                if (!m_sharedData.gameServer->running())
+                {
+                    m_uiScene.destroyEntity(e);
+                }
+            };
+
+            cmd.targetFlags = Menu::CommandID::LobbyNode;
+            cmd.action = [entity](xy::Entity parentEntity, float) mutable
+            {
+                parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
     }
 }

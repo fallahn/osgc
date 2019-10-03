@@ -599,6 +599,8 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
             entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
         }
         entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("seagull");
+        entity.addComponent<float>() = entity.getComponent<xy::AudioEmitter>().getVolume(); //store the default volume to be restored during day time
+        entity.addComponent<xy::CommandTarget>().ID = CommandID::DaySound;
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().userData = std::make_any<TimeStruct>();
         entity.getComponent<xy::Callback>().function =

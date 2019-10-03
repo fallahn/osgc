@@ -179,7 +179,7 @@ void MenuState::handleMessage(const xy::Message& msg)
 
             if (!m_sharedData.netClient->connected())
             {
-                if (m_sharedData.netClient->connect("127.0.0.1", Global::GamePort))
+                if (m_sharedData.netClient->connect(/*"127.0.0.1""255.255.255.255"*/"", Global::GamePort))
                 {
 
                     xy::Command cmd;
@@ -295,11 +295,6 @@ void MenuState::updateTextInput(const sf::Event& evt)
 {
     if (m_activeString != nullptr)
     {
-        /*std::size_t maxChar = (m_activeString == &m_sharedData.clientName)
-            ? Global::MaxNameSize / sizeof(sf::Uint32) :
-            (m_activeString == &m_chatInDisplayString)
-            ? Menu::MaxChatChar : Menu::MaxSeedChar;*/
-
         std::size_t maxChar = (m_activeString == &m_sharedData.remoteIP)
             ? 30 :
             (m_activeString == &m_seedDisplayString)
@@ -845,7 +840,7 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
     {
     default: break;
     case PacketID::HostID:
-        updateHostInfo(evt.packet.as<std::uint64_t>());
+        updateHostInfo(evt.packet.as<std::uint64_t>(), evt.peer.getAddress());
         break;
     case PacketID::ServerQuit:
         if (!m_sharedData.gameServer->running())

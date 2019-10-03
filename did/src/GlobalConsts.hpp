@@ -69,7 +69,7 @@ namespace Global
     //collision properties
     static const sf::FloatRect PlayerBounds(-7.f, -7.f, 14.f, 14.f); //the sprite scale ends up doubling this
     static const sf::FloatRect LanternBounds(-16.f, -16.f, 32.f, 32.f);
-    static const sf::FloatRect BoatBounds(-(TileSize * 1.1f), -(TileSize / 2.5f), TileSize * 2.2f, TileSize * 0.8f);
+    static const sf::FloatRect BoatBounds(-(TileSize * 1.1f), -(TileSize / 2.5f), TileSize * 2.2f, TileSize * 0.7f);
     static const sf::FloatRect CollectibleBounds((-Global::TileSize / 3.f), (-Global::TileSize / 3.f), (Global::TileSize / 3.f) * 2.f, (Global::TileSize / 3.f) * 2.f);
     static const sf::FloatRect SkullShieldBounds(-Global::TileSize, -(Global::TileSize / 2.f), Global::TileSize * 2.f, Global::TileSize);
 

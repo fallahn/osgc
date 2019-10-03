@@ -69,6 +69,7 @@ public:
     std::int32_t getServerTime() const { return m_serverTime.getElapsedTime().asMilliseconds(); }
 
 private:
+
     sf::Thread m_thread;
     std::atomic<bool> m_running;
     std::unique_ptr<Server::State> m_currentState;

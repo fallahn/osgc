@@ -47,10 +47,10 @@ namespace
 }
 
 GameServer::GameServer()
-    : m_thread  (&GameServer::run, this),
-    m_running   (false),
-    m_maxPlayers(4),
-    m_nextFreeID(0)
+    : m_thread          (&GameServer::run, this),
+    m_running           (false),
+    m_maxPlayers        (4),
+    m_nextFreeID        (0)
 {
     m_sharedStateData.gameServer = this;
 
@@ -209,12 +209,12 @@ void GameServer::run()
 
     while (m_running)
     {
-        if (pingClock.getElapsedTime().asMilliseconds() > 5000)
-        {
-            //sends a ping to clients
-            broadcastData(PacketID::Ping, std::uint8_t(0));
-            pingClock.restart();
-        }
+        //if (pingClock.getElapsedTime().asMilliseconds() > 5000)
+        //{
+        //    //sends a ping to clients
+        //    broadcastData(PacketID::Ping, std::uint8_t(0));
+        //    pingClock.restart();
+        //}
         
         //do network pump
         xy::NetEvent evt;

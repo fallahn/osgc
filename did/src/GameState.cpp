@@ -215,6 +215,18 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                     {
                         id = Actor::MineItem;
                     }
+                    else if (param == "food")
+                    {
+                        id = Actor::Food;
+                    }
+                    else if (param == "ammo")
+                    {
+                        id = Actor::Ammo;
+                    }
+                    else if (param == "skeleton")
+                    {
+                        id = Actor::Skeleton;
+                    }
 
                     if (id != Actor::None)
                     {
