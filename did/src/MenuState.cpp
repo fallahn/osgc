@@ -33,6 +33,7 @@ Copyright 2019 Matt Marchant
 #include "WaveSystem.hpp"
 #include "FlappySailSystem.hpp"
 #include "KeyMapping.hpp"
+#include "ButtonHighlightSystem.hpp"
 
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -92,6 +93,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_uiScene       (ctx.appInstance.getMessageBus()),
     m_gameScene     (ctx.appInstance.getMessageBus()),
     m_sharedData    (sd),
+    m_audioScape    (m_audioResource),
     m_gameLaunched  (false),
     m_activeString  (nullptr)
 {
@@ -396,10 +398,13 @@ void MenuState::loadAssets()
     m_uiScene.addSystem<xy::CommandSystem>(mb);
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
     m_uiScene.addSystem<SliderSystem>(mb);
+    m_uiScene.addSystem<ButtonHighlightSystem>(mb);
     m_uiScene.addSystem<xy::TextSystem>(mb);
     m_uiScene.addSystem<xy::SpriteSystem>(mb);
     m_uiScene.addSystem<xy::SpriteAnimator>(mb);
     m_uiScene.addSystem<xy::RenderSystem>(mb);
+
+    m_uiScene.setSystemActive<ButtonHighlightSystem>(false); //only active when options are visible
 
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
@@ -534,6 +539,8 @@ void MenuState::loadAssets()
             entity.getComponent<xy::Sprite>().setTextureRect(bounds);
         }
     });
+
+    m_audioScape.loadFromFile("assets/sound/menu.xas");
 }
 
 void MenuState::createScene()
@@ -724,6 +731,8 @@ void MenuState::createScene()
         {
             parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
             parentEntity.getComponent<Slider>().active = true;
+
+            m_uiScene.setSystemActive<ButtonHighlightSystem>(true);
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::OptionsNode;

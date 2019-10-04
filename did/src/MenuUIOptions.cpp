@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "SliderSystem.hpp"
 #include "SharedStateData.hpp"
 #include "KeyMapping.hpp"
+#include "ButtonHighlightSystem.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -115,6 +116,8 @@ void MenuState::buildOptions(sf::Font& font)
         {
             parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
             parentEntity.getComponent<Slider>().active = true;
+
+            m_uiScene.setSystemActive<ButtonHighlightSystem>(false);
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::MainNode;
@@ -385,6 +388,38 @@ void MenuState::buildOptions(sf::Font& font)
                 }
             });
     bgEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //highlighters for joypad
+    auto& buttonTex = m_textureResource.get("assets/images/button_highlight.png");
+    std::array<sf::Vector2f, 10u> buttonPositions =
+    {
+        //these are in button ID order
+        sf::Vector2f(1666.f,314.f),
+        sf::Vector2f(1690.f,290.f),
+        sf::Vector2f(1642.f,290.f),
+        sf::Vector2f(1666.f,266.f),
+        sf::Vector2f(1488.f,214.f),
+        sf::Vector2f(1640.f,214.f),
+        sf::Vector2f(1536.f,290.f),
+        sf::Vector2f(1592.f,290.f),
+        sf::Vector2f(1468.f,288.f),
+        sf::Vector2f(1616.f,348.f)
+    };
+
+    for (auto i = 0u; i < buttonPositions.size(); ++i)
+    {
+        entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(buttonPositions[i]);
+        entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter(std::to_string(i));
+        entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+        entity.getComponent<xy::Drawable>().setBlendMode(sf::BlendAdd);
+        entity.addComponent<ButtonHighlight>().id = i;
+        entity.addComponent<xy::Sprite>(buttonTex);
+        entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+        bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        bgEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+    }
 }
 
 void MenuState::handleKeyMapping(const sf::Event& evt)

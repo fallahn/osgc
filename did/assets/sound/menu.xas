@@ -1,0 +1,112 @@
+audio_scape menu
+{
+    emitter 0
+    {
+        path = "assets/sound/voice/helena/score01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 1
+    {
+        path = "assets/sound/voice/lars/spawn01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 2
+    {
+        path = "assets/sound/voice/rodney/win01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }        
+
+    emitter 3
+    {
+        path = "assets/sound/voice/helena/die01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 4
+    {
+        path = "assets/sound/voice/jean/spawn02.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 5
+    {
+        path = "assets/sound/voice/rodney/win02.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 6
+    {
+        path = "assets/sound/voice/helena/win03.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 7
+    {
+        path = "assets/sound/voice/lars/die01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 8
+    {
+        path = "assets/sound/voice/rodney/grab_treasure01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }
+
+    emitter 9
+    {
+        path = "assets/sound/voice/jean/win01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 1
+    }    
+}

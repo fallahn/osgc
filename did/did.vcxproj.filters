@@ -360,6 +360,9 @@
     <ClInclude Include="src\PauseState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="src\ButtonHighlightSystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FoliageGenerator.cpp">
@@ -613,6 +616,9 @@
     </ClCompile>
     <ClCompile Include="src\PauseState.cpp">
       <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ButtonHighlightSystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

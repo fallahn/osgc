@@ -8,6 +8,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/BeeSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BoatSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BotSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ButtonHighlightSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CarriableSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ClientInfoManager.cpp

@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/audio/AudioScape.hpp>
 
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -71,6 +72,8 @@ private:
     xy::TextureResource m_textureResource;
     xy::FontResource m_fontResource;
     xy::AudioResource m_audioResource;
+
+    xy::AudioScape m_audioScape;
 
     std::array<xy::Sprite, Menu::SpriteID::Count> m_sprites = {};
     std::array<sf::Uint32, Menu::CallbackID::Count> m_callbackIDs = {};

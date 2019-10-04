@@ -234,6 +234,7 @@
     <ClInclude Include="src\BoatSystem.hpp" />
     <ClInclude Include="src\BotSystem.hpp" />
     <ClInclude Include="src\BroadcastSystem.hpp" />
+    <ClInclude Include="src\ButtonHighlightSystem.hpp" />
     <ClInclude Include="src\Camera3D.hpp" />
     <ClInclude Include="src\CarriableSystem.hpp" />
     <ClInclude Include="src\CircularBuffer.hpp" />
@@ -333,6 +334,7 @@
     <ClCompile Include="src\BeeSystem.cpp" />
     <ClCompile Include="src\BoatSystem.cpp" />
     <ClCompile Include="src\BotSystem.cpp" />
+    <ClCompile Include="src\ButtonHighlightSystem.cpp" />
     <ClCompile Include="src\Camera3D.cpp" />
     <ClCompile Include="src\CarriableSystem.cpp" />
     <ClCompile Include="src\ClientBeeSystem.cpp" />
