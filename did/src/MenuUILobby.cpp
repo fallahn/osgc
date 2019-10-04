@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "Packet.hpp"
 #include "SliderSystem.hpp"
 #include "MenuUI.hpp"
+#include "MixerChannels.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Text.hpp>
@@ -83,6 +84,8 @@ void MenuState::buildLobby(sf::Font& font)
         {
             parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
             parentEntity.getComponent<Slider>().active = true;
+
+            xy::AudioMixer::setPrefadeVolume(0.f, MixerChannel::Menu);
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::MainNode;
@@ -561,6 +564,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(chatFont).setFillColour(sf::Color::White);
     entity.getComponent<xy::Text>().setCharacterSize(32);
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("chat_message");
     bounds = m_sprites[Menu::SpriteID::ChatBox].getTextureBounds();
     bounds.width -= 24.f;
     //bounds.height -= 24.f;
@@ -581,11 +585,17 @@ void MenuState::buildLobby(sf::Font& font)
 
 xy::Entity MenuState::addCheckbox(std::uint8_t playerID)
 {
+    std::array<std::string, 4u> emitterNames =
+    {
+        "ready_rodney", "ready_jean", "ready_helena", "ready_lars"
+    };
+
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Checkbox];
     entity.addComponent<Checkbox>().playerID = playerID;
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter(emitterNames[playerID]);
 
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
@@ -600,6 +610,11 @@ xy::Entity MenuState::addCheckbox(std::uint8_t playerID)
         auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
         if (checked)
         {
+            if (bounds.top != bounds.height)
+            {
+                //freshly checked
+                e.getComponent<xy::AudioEmitter>().play();
+            }
             bounds.top = bounds.height;
         }
         else

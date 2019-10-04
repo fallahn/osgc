@@ -106,6 +106,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     //incase quit early from game state
     xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::FX);
     xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::Music);
+    xy::AudioMixer::setPrefadeVolume(0.f, MixerChannel::Menu);
 
     loadSettings();
     loadAssets();
@@ -122,6 +123,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 MenuState::~MenuState()
 {
     saveSettings();
+    xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::Menu);
 }
 
 //public
@@ -1088,6 +1090,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
                         msg->action = SystemEvent::RequestStartServer;
 
                         m_activeString = nullptr;
+                        xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::Menu);
 
                         xy::Command cmd;
                         cmd.targetFlags = Menu::CommandID::NameText;
@@ -1293,6 +1296,8 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
                         && !m_sharedData.remoteIP.isEmpty())
                     {
                         m_activeString = nullptr;
+
+                        xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::Menu);
 
                         xy::Command cmd;
                         cmd.targetFlags = Menu::CommandID::NameText | Menu::CommandID::IPText;

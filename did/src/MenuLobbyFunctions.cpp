@@ -264,4 +264,5 @@ void MenuState::updateChatOutput(xy::Entity e, float)
         outStr += str + "\n";
     }
     e.getComponent<xy::Text>().setString(outStr);
+    e.getComponent<xy::AudioEmitter>().play();
 }

@@ -24,7 +24,7 @@ audio_scape menu
 
     emitter 2
     {
-        path = "assets/sound/voice/rodney/win01.wav"
+        path = "assets/sound/voice/rodney/die04.wav"
         streaming = false
         min_distance = 12
         attenuation = 0
@@ -57,7 +57,7 @@ audio_scape menu
 
     emitter 5
     {
-        path = "assets/sound/voice/rodney/win02.wav"
+        path = "assets/sound/voice/rodney/die03.wav"
         streaming = false
         min_distance = 12
         attenuation = 0
@@ -68,7 +68,7 @@ audio_scape menu
 
     emitter 6
     {
-        path = "assets/sound/voice/helena/win03.wav"
+        path = "assets/sound/voice/helena/grab_treasure01.wav"
         streaming = false
         min_distance = 12
         attenuation = 0
@@ -101,12 +101,67 @@ audio_scape menu
 
     emitter 9
     {
-        path = "assets/sound/voice/jean/win01.wav"
+        path = "assets/sound/voice/jean/spawn01.wav"
         streaming = false
         min_distance = 12
         attenuation = 0
         volume = 10
         looped = false
         mixer_channel = 1
+    }
+
+    emitter ready_rodney
+    {
+        path = "assets/sound/voice/rodney/spawn01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 2
+    } 
+
+    emitter ready_jean
+    {
+        path = "assets/sound/voice/jean/score01.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 2
+    } 
+
+    emitter ready_helena
+    {
+        path = "assets/sound/voice/helena/spawn0.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 2
+    } 
+
+    emitter ready_lars
+    {
+        path = "assets/sound/voice/lars/spawn02.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 2
+    }  
+
+    emitter chat_message
+    {
+        path = "assets/sound/effects/respawn.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 2
     }    
 }
