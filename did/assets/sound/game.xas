@@ -54,6 +54,17 @@ audio_scape player
         mixer_channel = 1
     }
 
+    emitter shield
+    {
+        path = "assets/sound/effects/shield.wav"
+        streaming = false
+        min_distance = 6
+        attenuation = 1.5
+        looped = false
+        volume = 30
+        mixer_channel = 1
+    }
+
     emitter seagull
     {
         path = "assets/sound/effects/gull.wav"
@@ -96,5 +107,23 @@ audio_scape player
         looped = false
         volume = 20
         mixer_channel = 1
-    }    
+    }
+
+    emitter round_end
+    {
+        path="assets/sound/music/round_end.wav";
+        streaming = false
+        looped = false
+        volume = 30
+        mixer_channel = 0
+    }
+
+    emitter final_treasure
+    {
+        path="assets/sound/music/final_treasure.wav";
+        streaming = false
+        looped = false
+        volume = 16
+        mixer_channel = 0
+    }
 }

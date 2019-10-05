@@ -79,7 +79,7 @@ void ClientDecoySystem::process(float dt)
             auto offset = sprite.verticalOffset * (dt * InflateSpeed);
             sprite.verticalOffset -= offset;
 
-            if (sprite.verticalOffset < 0.5)
+            if (sprite.verticalOffset < 0.45f)
             {
                 sprite.verticalOffset = 0.f;
                 decoy.state = ClientDecoy::Idle;

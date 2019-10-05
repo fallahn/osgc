@@ -38,9 +38,10 @@ namespace CommandID
         RainSound       = 0x2000,
         InventoryHolder = 0x4000,
         DebugLabel      = 0x8000,
-        ShipLight       = 0x100000,
+        ShipLight       = 0x10000,
         BasicShadow     = 0x20000,
         Removable       = 0x400000,
-        WindSound       = 0x800000
+        WindSound       = 0x800000,
+        Music           = 0x1000000
     };
 }

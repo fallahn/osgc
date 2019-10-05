@@ -582,6 +582,16 @@ void GameState::showRoundEnd(const RoundSummary& summary)
     };
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+    //stop the music and play round end ditty
+    cmd.targetFlags = CommandID::Music;
+    cmd.action = [](xy::Entity ent, float) {ent.getComponent<xy::AudioEmitter>().stop(); };
+    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("round_end");
+    entity.getComponent<xy::AudioEmitter>().play();
+
     //disable unnecessary systems - why is this unnecessary?
     //disabling it breaks the weapon animations
     //m_gameScene.setSystemActive<ClientWeaponSystem>(false);
@@ -752,6 +762,11 @@ void GameState::showServerMessage(std::int32_t messageID)
             }
         };
         entity.getComponent<xy::Callback>().active = true;
+
+        entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("final_treasure");
+        entity.getComponent<xy::AudioEmitter>().play();
     };
 
     if (messageID == Server::Message::OneTreasureRemaining)

@@ -399,9 +399,10 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
         entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::SkullShield].getTexture());
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::SkullShield];
-        entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::Spawn;
-        /*entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("shield");
-        entity.getComponent<xy::AudioEmitter>().play();*/
+        entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::Idle;
+        entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::SkullShield][AnimationID::Idle]);
+        entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("shield");
+        entity.getComponent<xy::AudioEmitter>().play();
         addShadow(entity);
         break;
     case Actor::Flare:

@@ -193,7 +193,7 @@ void GameState::loadAudio()
     entity.addComponent<xy::AudioEmitter>() = as.getEmitter("music_day");
     //default volume for fading back in again
     entity.addComponent<float>() = entity.getComponent<xy::AudioEmitter>().getVolume();
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::DaySound | CommandID::LoopedSound;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::DaySound | CommandID::LoopedSound | CommandID::Music;
 
     entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
@@ -201,5 +201,5 @@ void GameState::loadAudio()
     //default volume for fading back in again
     entity.addComponent<float>() = entity.getComponent<xy::AudioEmitter>().getVolume();
     entity.getComponent<xy::AudioEmitter>().setVolume(0.f);
-    entity.addComponent<xy::CommandTarget>().ID = CommandID::NightSound | CommandID::LoopedSound;
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::NightSound | CommandID::LoopedSound | CommandID::Music;
 }

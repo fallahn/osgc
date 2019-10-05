@@ -5,32 +5,46 @@ sprite_sheet skull
 
 	sprite skull
 	{
-		bounds = 0,32,32,32
+		bounds = 0,256,32,32
 	}
 
 	sprite shield
 	{
-		bounds = 32, 0, 128, 64
+		bounds = 0, 0, 128, 64
 
         animation idle
         {
-            frame = 32, 0, 128, 64
-            frame_rate = 10
+            frame = 0, 0, 128, 64
+            frame = 0, 64, 128, 64
+            frame = 0, 128, 128, 64
+            frame = 0, 192, 128, 64
+            frame = 128, 0, 128, 64
+            frame = 128, 64, 128, 64
+            frame = 128, 128, 128, 64
+            frame = 128, 192, 128, 64
+            frame_rate = 20
             loop = true
         }
 
         animation spawn
         {
-            frame = 32, 0, 128, 64
+            frame = 0, 0, 128, 64
             frame_rate = 10
             loop = false
         }
 
         animation despawn
         {
-            frame = 32, 0, 128, 64
-            frame_rate = 10
-            loop = false
+            frame = 0, 0, 128, 64
+            frame = 0, 64, 128, 64
+            frame = 0, 128, 128, 64
+            frame = 0, 192, 128, 64
+            frame = 128, 0, 128, 64
+            frame = 128, 64, 128, 64
+            frame = 128, 128, 128, 64
+            frame = 128, 192, 128, 64
+            frame_rate = 20
+            loop = true
         }
 	}
 }

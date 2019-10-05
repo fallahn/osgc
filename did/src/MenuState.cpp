@@ -800,6 +800,8 @@ void MenuState::setLobbyView()
 
         //request a seed update (also sends all client data)
         m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
+
+        xy::AudioMixer::setPrefadeVolume(1.f, MixerChannel::Menu);
     }
 }
 

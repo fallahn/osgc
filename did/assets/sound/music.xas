@@ -16,5 +16,5 @@ audioscape
         looped = true
         volume = 1.9
         mixer_channel = 0
-    }    
+    } 
 }
