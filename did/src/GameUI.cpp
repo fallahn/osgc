@@ -772,7 +772,7 @@ void GameState::showServerMessage(std::int32_t messageID)
     if (messageID == Server::Message::OneTreasureRemaining)
     {
         //BIG
-        makeBigText();
+        makeBigText(-20.f);
 
         //tell the treasure icon to flash
         xy::Command cmd;

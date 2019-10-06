@@ -106,6 +106,8 @@ namespace Menu
             TextInput,
             ChatBox,
             ChatButton,
+            TreasureMap,
+            ButtonBackground,
             Count
         };
     }
@@ -136,9 +138,9 @@ namespace Menu
 
     static const sf::Vector2f OffscreenPosition(0.f, -1080.f);
     static const sf::FloatRect ButtonArea({ 0.f, 0.f, 300.f, 70.f });
-    static const sf::Vector2f StartButtonPosition(1890.f, 960.f);
+    static const sf::Vector2f StartButtonPosition(1364.f, 940.f);
     static const sf::Vector2f StartButtonPositionHidden(2890.f, 960.f);
-    static const sf::Vector2f BackButtonPosition(30.f, 960.f);
+    static const sf::Vector2f BackButtonPosition(20.f, 940.f);
     static const sf::Vector2f SeedPosition(210.f, 768.f);
     static const sf::Vector2f ChatInputPosition(210.f, 860.f);
     static const sf::Vector2f ChatBoxPosition(940.f, 768.f);

@@ -96,19 +96,32 @@ void MenuState::buildOptions(sf::Font& font)
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //back background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ButtonBackground];
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    auto textPos = Menu::BackButtonPosition;
+    textPos.x += bounds.width / 2.f;
+    textPos.y += 8.f;
+    bounds.left -= bounds.width / 2.f;
 
     //back button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+    entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(font).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+    entity.getComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEntity](xy::Entity, sf::Uint64 flags) mutable
     {
@@ -131,20 +144,33 @@ void MenuState::buildOptions(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //advanced button
+    //advanced background
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ButtonBackground];
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    textPos = Menu::StartButtonPosition;
+    textPos.x += bounds.width / 2.f;
+    textPos.y += 8.f;
+    bounds.left -= bounds.width / 2.f;
+
+    //advanced button
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(font).setString("Advanced");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
+    entity.getComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
     {

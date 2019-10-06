@@ -31,4 +31,14 @@ spritesheet menu_ui
     {
         bounds = 1088,256,64,64
     }
+
+    sprite treasure_map
+    {
+        bounds = 1184,256,128,128
+    }
+
+    sprite button_background
+    {
+        bounds = 384,576,536,128
+    }
 }

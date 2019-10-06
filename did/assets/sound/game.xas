@@ -115,7 +115,7 @@ audio_scape player
         streaming = false
         looped = false
         volume = 30
-        mixer_channel = 0
+        mixer_channel = 1
     }
 
     emitter final_treasure
@@ -124,6 +124,6 @@ audio_scape player
         streaming = false
         looped = false
         volume = 16
-        mixer_channel = 0
+        mixer_channel = 1
     }
 }

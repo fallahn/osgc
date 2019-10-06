@@ -434,16 +434,20 @@ void MenuState::loadAssets()
     m_sprites[Menu::SpriteID::RandomButton] = spriteSheet.getSprite("random_button");
     m_sprites[Menu::SpriteID::ChatBox] = spriteSheet.getSprite("chatbox");
     m_sprites[Menu::SpriteID::ChatButton] = spriteSheet.getSprite("chat_button");
+    m_sprites[Menu::SpriteID::TreasureMap] = spriteSheet.getSprite("treasure_map");
+    m_sprites[Menu::SpriteID::ButtonBackground] = spriteSheet.getSprite("button_background");
 
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
     {
-        entity.getComponent<xy::Text>().setFillColour(Global::OuterTextColour);
+        entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+        //entity.getComponent<xy::Text>().setFillColour(Global::OuterTextColour);
     });
     m_callbackIDs[Menu::CallbackID::TextUnselected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
     {
-        entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+        entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+        //entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     });
 
     m_callbackIDs[Menu::CallbackID::CheckboxClicked] = m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
@@ -616,7 +620,7 @@ void MenuState::createScene()
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
@@ -666,7 +670,7 @@ void MenuState::createScene()
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
@@ -722,7 +726,7 @@ void MenuState::createScene()
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
@@ -757,7 +761,7 @@ void MenuState::createScene()
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
     entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
@@ -772,12 +776,21 @@ void MenuState::createScene()
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //map background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(MenuStart);
+    entity.getComponent<xy::Transform>().move(-60.f, -40.f);
+    entity.getComponent<xy::Transform>().setScale(3.5f, 3.5f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TreasureMap];
+    parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
     //version
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(20.f, 1020.f);
     entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont)).setString(REVISION_STRING);
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     buildLobby(font);

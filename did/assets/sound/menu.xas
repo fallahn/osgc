@@ -134,7 +134,7 @@ audio_scape menu
 
     emitter ready_helena
     {
-        path = "assets/sound/voice/helena/spawn0.wav"
+        path = "assets/sound/voice/helena/spawn02.wav"
         streaming = false
         min_distance = 12
         attenuation = 0
