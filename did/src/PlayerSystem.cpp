@@ -398,6 +398,19 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
 
         player.previousInputFlags = input.mask;
 
+        //check if shovel button is held and continue to dig on cooldown time
+        if (input.mask & InputFlag::Action
+            && entity.getComponent<Inventory>().weapon == Inventory::Shovel
+            && player.sync.flags & Player::CanDoAction)
+        {
+            auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+            msg->entity = entity;
+            msg->action = PlayerEvent::DidAction; //activates selected weapon
+
+            player.sync.flags &= ~Player::CanDoAction;
+            player.coolDown = Inventory::ShovelCoolDown;
+        }
+
         //when strafing direction isn't updated
         if (input.mask & InputFlag::Strafe)
         {

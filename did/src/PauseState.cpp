@@ -27,11 +27,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/UIHitBox.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/UISystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 
@@ -79,6 +81,13 @@ PauseState::PauseState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    xy::App::setMouseCursorVisible(true);
+}
+
+PauseState::~PauseState()
+{
+    xy::App::setMouseCursorVisible(false);
 }
 
 //public
@@ -89,6 +98,8 @@ bool PauseState::handleEvent(const sf::Event& evt)
     {
         return false;
     }
+
+    m_scene.getSystem<xy::UISystem>().handleEvent(evt);
 
     auto execSelection = [&]()
     {
@@ -203,13 +214,14 @@ bool PauseState::handleEvent(const sf::Event& evt)
                 break;
             }
         }
-        /*else if (evt.type == sf::Event::MouseMoved)
+        else if (evt.type == sf::Event::MouseButtonReleased)
         {
-            if (std::abs(evt.mouseMove.x) > 10)
+            if (evt.mouseButton.button == sf::Mouse::Left)
             {
-                selectNext(evt.mouseMove.x > 0);
+                //TODO also check mouse is in bounds of current item
+                execSelection();
             }
-        }*/
+        }
     }
 
     m_scene.forwardEvent(evt);
@@ -238,6 +250,7 @@ void PauseState::draw()
 void PauseState::build()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
@@ -258,6 +271,27 @@ void PauseState::build()
     auto fontID = m_resources.load<sf::Font>(Global::FineFont);
     auto& font = m_resources.get<sf::Font>(fontID);
 
+    auto mouseCallback = m_scene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity en, sf::Vector2f)
+        {
+            m_selectedIndex = en.getComponent<std::size_t>();
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Cursor;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<xy::Transform>().setPosition(selection[m_selectedIndex]);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            cmd.targetFlags = CommandID::Message;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<xy::Text>().setString(messages[m_selectedIndex]);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        });
+
     auto createText = [&](const std::string& str)->xy::Entity
     {
         entity = m_scene.createEntity();
@@ -275,18 +309,28 @@ void PauseState::build()
     entity.getComponent<xy::Transform>().move(0.f, -340.f);
     entity.getComponent<xy::Text>().setCharacterSize(Global::LargeTextSize);
     entity.getComponent<xy::Text>().setOutlineThickness(4.f);
+    
 
     //continue
     entity = createText("Continue");
     entity.getComponent<xy::Transform>().move(0.f, -100.f);
+    entity.addComponent<std::size_t>() = 0;
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseCallback;
 
     //options
     entity = createText("Options");
     entity.getComponent<xy::Transform>().move(0.f, 0.f);
+    entity.addComponent<std::size_t>() = 1;
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseCallback;
 
     //quit
     entity = createText("Quit");
     entity.getComponent<xy::Transform>().move(0.f, 100.f);
+    entity.addComponent<std::size_t>() = 2;
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseCallback;
 
     //selection message
     entity = createText("Continue Playing");

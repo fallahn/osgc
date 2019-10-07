@@ -31,6 +31,7 @@ class PauseState final : public xy::State
 {
 public:
     PauseState(xy::StateStack&, xy::State::Context, SharedData&);
+    ~PauseState();
 
     bool handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
