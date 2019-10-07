@@ -27,10 +27,10 @@ namespace
 
     std::array<sf::Vector2f, 4u> HostPositions =
     {
-        sf::Vector2f(255.f, 560.f),
-        {725.f, 560.f},
-        {1195.f, 560.f},
-        {1665.f, 560.f}
+        sf::Vector2f(255.f, 530.f),
+        {725.f, 530.f},
+        {1195.f, 530.f},
+        {1665.f, 530.f}
     };
 }
 
@@ -116,7 +116,7 @@ void MenuState::updateHostInfo(std::uint64_t hostID, std::string remoteAddress)
             auto& chatFont = m_fontResource.get("assets/fonts/ProggyClean.ttf");
             
             auto entity = m_uiScene.createEntity();
-            entity.addComponent<xy::Transform>().setPosition(12.f, 4.f);
+            entity.addComponent<xy::Transform>().setPosition(12.f, -6.f);
             entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
             entity.addComponent<xy::Text>(chatFont).setFillColour(sf::Color::White);
             entity.getComponent<xy::Text>().setCharacterSize(32);

@@ -64,8 +64,8 @@ namespace Global
     static const std::uint32_t LobbyTextSize = 50;
     
     static const sf::Color InnerTextColour(236, 178, 19);
-    static const sf::Color OuterTextColour(84,63,42);// (65, 33, 31);
-    static const sf::Color ButtonTextColour(113, 89, 63);
+    static const sf::Color OuterTextColour = InnerTextColour;// (244, 106, 3);// (65, 33, 31);
+    static const sf::Color ButtonTextColour(13,11,12,160);// (113, 89, 63);
 
     //collision properties
     static const sf::FloatRect PlayerBounds(-7.f, -7.f, 14.f, 14.f); //the sprite scale ends up doubling this

@@ -141,9 +141,9 @@ namespace Menu
     static const sf::Vector2f StartButtonPosition(1364.f, 940.f);
     static const sf::Vector2f StartButtonPositionHidden(2890.f, 960.f);
     static const sf::Vector2f BackButtonPosition(20.f, 940.f);
-    static const sf::Vector2f SeedPosition(210.f, 768.f);
-    static const sf::Vector2f ChatInputPosition(210.f, 860.f);
-    static const sf::Vector2f ChatBoxPosition(940.f, 768.f);
+    static const sf::Vector2f SeedPosition(210.f, 738.f);
+    static const sf::Vector2f ChatInputPosition(210.f, 830.f);
+    static const sf::Vector2f ChatBoxPosition(940.f, 738.f);
     static const sf::Vector2f FriendsPosition(120.f, 830.f);
     static const sf::Vector2f TitlePosition(xy::DefaultSceneSize.x / 2.f, 168.f);
 

@@ -85,7 +85,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setFillColour(Global::ButtonTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
-    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    //entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -163,7 +163,7 @@ void MenuState::buildLobby(sf::Font& font)
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setFillColour(Global::ButtonTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
-    entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    //entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = mouseOver;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = mouseOut;
@@ -209,7 +209,7 @@ void MenuState::buildLobby(sf::Font& font)
 
     //root node for avatars to move easily arrange them
     auto avatarEnt = m_uiScene.createEntity();
-    avatarEnt.addComponent<xy::Transform>().setPosition(0.f, -100.f);
+    avatarEnt.addComponent<xy::Transform>().setPosition(0.f, -130.f); //100
     parentEntity.getComponent<xy::Transform>().addChild(avatarEnt.getComponent<xy::Transform>());
 
     //player avatars
@@ -347,7 +347,7 @@ void MenuState::buildLobby(sf::Font& font)
     //plank background
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, (xy::DefaultSceneSize.y / 4.f) + 40.f);
+    entity.getComponent<xy::Transform>().move(0.f, (xy::DefaultSceneSize.y / 4.f) + 10.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far - 10);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -428,7 +428,7 @@ void MenuState::buildLobby(sf::Font& font)
 
     //randomise button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(/*Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y*/xy::DefaultSceneSize.x / 2.f, 1020.f);
+    entity.addComponent<xy::Transform>().setPosition(/*Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y*/xy::DefaultSceneSize.x / 2.f, 1000.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::RandomButton];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -604,7 +604,7 @@ void MenuState::buildLobby(sf::Font& font)
 
     //host icon
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(-100.f, -100.f);
+    entity.addComponent<xy::Transform>().setPosition(-100.f, -150.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Host];
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
