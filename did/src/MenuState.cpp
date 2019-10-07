@@ -1035,20 +1035,33 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::NameText;
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //back background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ButtonBackground];
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    auto textPos = Menu::BackButtonPosition;
+    textPos.x += bounds.width / 2.f;
+    textPos.y += 8.f;
+    bounds.left -= bounds.width / 2.f;
 
     //back button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+    entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(largeFont).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+    entity.getComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEnt](xy::Entity, sf::Uint64 flags) mutable
             {
@@ -1080,20 +1093,32 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //next button
+    //next background
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ButtonBackground];
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    textPos = Menu::StartButtonPosition;
+    textPos.x += bounds.width / 2.f;
+    textPos.y += 8.f;
+    bounds.left -= bounds.width / 2.f;
+
+    //next button
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(largeFont).setString("Next");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
+    entity.getComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags) mutable
             {
@@ -1238,20 +1263,32 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::IPText;
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //back background
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ButtonBackground];
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    auto textPos = Menu::BackButtonPosition;
+    textPos.x += bounds.width / 2.f;
+    textPos.y += 8.f;
+    bounds.left -= bounds.width / 2.f;
 
     //back button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::BackButtonPosition);
+    entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(largeFont).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Left);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
+    entity.getComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&, parentEnt](xy::Entity, sf::Uint64 flags) mutable
             {
@@ -1288,20 +1325,32 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    //next button
+    //next background
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::StartButtonPosition);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ButtonBackground];
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    textPos = Menu::StartButtonPosition;
+    textPos.x += bounds.width / 2.f;
+    textPos.y += 8.f;
+    bounds.left -= bounds.width / 2.f;
+
+    //next button
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(largeFont).setString("Join");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Right);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseEnter] = m_callbackIDs[Menu::CallbackID::TextSelected];
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseExit] = m_callbackIDs[Menu::CallbackID::TextUnselected];
-    entity.getComponent<xy::UIHitBox>().area = Menu::ButtonArea;
-    entity.getComponent<xy::UIHitBox>().area.left = -entity.getComponent<xy::UIHitBox>().area.width;
+    entity.getComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags) mutable
             {
