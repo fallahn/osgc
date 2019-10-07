@@ -221,68 +221,72 @@ void IslandGenerator::generate(int seed)
 
 
     //makes sure any spawn coordinates are on a valid tile
-    auto validateSpawn = [&](int& x, int& y)
+    auto validateSpawn = [&](int& x0, int& y0) //x0,y0 to prevent accidentally capturing x,y above
     {
         //check if it's on solid then move in a random direction until it isn't
         int up = Server::getRandomInt(0, 1) == 0 ? -2 : 2;
-        while (m_mapData.tileData[y * Global::TileCountX + x] >= TileType::Grass)
+        while (m_mapData.tileData[y0 * Global::TileCountX + x0] >= TileType::Grass)
         {
             y += up;
         }
 
-        if (m_mapData.tileData[(y + 1) * Global::TileCountX + x] >= TileType::Grass)
+        if (m_mapData.tileData[(y0 + 1) * Global::TileCountX + x0] >= TileType::Grass)
         {
             y--;
         }
-        else if (m_mapData.tileData[(y - 1) * Global::TileCountX + x] >= TileType::Grass)
+        else if (m_mapData.tileData[(y0 - 1) * Global::TileCountX + x0] >= TileType::Grass)
         {
             y++;
         }
 
         //we don't want to dig in the gaps between hedges - so move if grass either side
-        if (m_mapData.tileData[y * Global::TileCountX + (x - 2)] >= TileType::Grass &&
-            m_mapData.tileData[y * Global::TileCountX + (x + 2)] >= TileType::Grass)
+        if (m_mapData.tileData[y0 * Global::TileCountX + (x0 - 2)] >= TileType::Grass &&
+            m_mapData.tileData[y0 * Global::TileCountX + (x0 + 2)] >= TileType::Grass)
         {
-            y += up;
+            y0 += up;
         }
 
         //check we haven't landed on a patch of dark sand
-        if (m_mapData.tileData[y * Global::TileCountX + x] < TileType::LightSand)
+        if (m_mapData.tileData[y0 * Global::TileCountX + x0] < TileType::LightSand)
         {
-            if (auto tile = m_mapData.tileData[y * Global::TileCountX + (x + 2)];
+            if (auto tile = m_mapData.tileData[y0 * Global::TileCountX + (x0 + 2)];
                 tile >= TileType::LightSand && tile < TileType::Grass/*tile < TileType::DarkSand*/)
             {
-                x += 2;
+                x0 += 2;
                 
             }
-            else if (auto tile = m_mapData.tileData[y * Global::TileCountX + (x - 2)];
+            else if (auto tile = m_mapData.tileData[y0 * Global::TileCountX + (x0 - 2)];
                 tile >= TileType::LightSand && tile < TileType::Grass/*tile < TileType::DarkSand*/)
             {
-                x -= 2;
+                x0 -= 2;
             }
-            else if (auto tile = m_mapData.tileData[(y + 2) * Global::TileCountX + x];
+            else if (auto tile = m_mapData.tileData[(y0 + 2) * Global::TileCountX + x0];
                 tile >= TileType::LightSand && tile < TileType::Grass)
             {
-                y += 2;
+                y0 += 2;
             }
-            else if (auto tile = m_mapData.tileData[(y - 2) * Global::TileCountX + x];
+            else if (auto tile = m_mapData.tileData[(y0 - 2) * Global::TileCountX + x0];
                 tile >= TileType::LightSand && tile < TileType::Grass)
             {
-                y -= 2;
+                y0 -= 2;
             }
         }
     };
 
-    //spawn chest
-    //pick a point at random within 4 tiles from the edge
-    x = Server::getRandomInt(4, Global::TileCountX - 8);
-    y = Server::getRandomInt(4, Global::TileCountY - 8);
+    //spawn min chest count
+    sf::Vector2f treasurePos;
+    //for (auto i = 0; i < 2; ++i)
+    {
+        //pick a point at random within 4 tiles from the edge
+        x = Server::getRandomInt(4, Global::TileCountX - 8);
+        y = Server::getRandomInt(4, Global::TileCountY - 8);
 
-    validateSpawn(x, y);
+        validateSpawn(x, y);
 
-    sf::Vector2f treasurePos(x * Global::TileSize, y * Global::TileSize);
-    m_actorSpawns.emplace_back(treasurePos.x, treasurePos.y, Actor::TreasureSpawn);
-    m_treasureCount++;
+        treasurePos = { x * Global::TileSize, y * Global::TileSize };
+        m_actorSpawns.emplace_back(treasurePos.x, treasurePos.y, Actor::TreasureSpawn);
+        m_treasureCount++;
+    }
 
     //use poisson disc to spawn ammo and skeletons
     //there's a bug in the generator which means we can't offset the destination area...
@@ -327,7 +331,7 @@ void IslandGenerator::generate(int seed)
     std::shuffle(m_actorSpawns.begin(), m_actorSpawns.end(), Server::rndEngine);
 
     //convert a few more to treasure
-    auto stride = m_actorSpawns.size() / 6; //max extra treasures - we want 5 in total so there should always be at least one winner
+    auto stride = m_actorSpawns.size() / 7; //max extra treasures - we want 5 in total so there should always be at least one winner
     for (auto i = stride; i < m_actorSpawns.size(); i += stride)
     {
         if ((m_actorSpawns[i].id == Actor::AmmoSpawn
