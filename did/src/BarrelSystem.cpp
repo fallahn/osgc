@@ -41,18 +41,18 @@ They maybe be explosive or contain food or coins. Or poop snails
 
 namespace
 {
-    const std::size_t MaxBarrels = 8;
+    const std::size_t MaxBarrels = 12;
     const std::array<float, 10u> SpawnTimes =
     {
-        20.f, 11.f, 20.f, 23.f, 19.f,
-        21.f, 24.f, 19.f, 23.f, 20.f
+        15.f, 8.f, 15.f, 16.f, 14.f,
+        15.5f, 18.f, 14.f, 16.f, 15.f
     };
 
     //we shuffle this each time a new system is created
     std::array<Actor::ID, 14u> Items = 
     {
-        Actor::Food, Actor::Food ,Actor::Food, Actor::MineItem,
-        Actor::Ammo, Actor::Ammo, Actor::Ammo, Actor::MineItem,
+        Actor::Food, Actor::Food ,Actor::MineItem, Actor::MineItem,
+        Actor::Ammo, Actor::Ammo, Actor::FlareItem, Actor::MineItem,
         Actor::DecoyItem, Actor::DecoyItem,
         Actor::FlareItem, Actor::FlareItem,
         Actor::SkullItem, Actor::SkullItem

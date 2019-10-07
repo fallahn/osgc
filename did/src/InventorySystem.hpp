@@ -40,7 +40,7 @@ struct Inventory final
 
     static constexpr float PistolCoolDown = 1.5f;
     static constexpr float SwordCoolDown = 0.375f;
-    static constexpr float ShovelCoolDown = 0.3f;
+    static constexpr float ShovelCoolDown = 0.5f;
 
     bool sendUpdate = false;
     void reset()

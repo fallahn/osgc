@@ -26,10 +26,12 @@ Copyright 2019 Matt Marchant
 #include "BoatSystem.hpp"
 #include "CarriableSystem.hpp"
 #include "SkullShieldSystem.hpp"
+#include "QuadTreeFilter.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/util/Vector.hpp>
 #include <xyginext/util/Math.hpp>
@@ -165,7 +167,11 @@ void PlayerSystem::process(float dt)
 void PlayerSystem::reconcile(const ClientState& state, xy::Entity entity)
 {
     auto& player = entity.getComponent<Player>();
+    //urg this is a horrible kludge to prevent the server overriding the
+    //animation state when the client is digging.
+    auto flags = state.sync.flags | (player.sync.flags & Player::CanDoAction);
     player.sync = state.sync;
+    player.sync.flags = flags;
 
     entity.getComponent<Carrier>().carryFlags = (player.sync.flags & ~0x7);
 
@@ -401,7 +407,7 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
         //check if shovel button is held and continue to dig on cooldown time
         if (input.mask & InputFlag::Action
             && entity.getComponent<Inventory>().weapon == Inventory::Shovel
-            && player.sync.flags & Player::CanDoAction)
+            && (player.sync.flags & Player::CanDoAction))
         {
             auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
             msg->entity = entity;
@@ -415,6 +421,20 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
         if (input.mask & InputFlag::Strafe)
         {
             player.sync.flags |= Player::Strafing;
+
+            //auto pos = tx.getPosition();
+            //const sf::FloatRect searchArea(pos.x - 128.f, pos.y - 128.f, 256.f, 256.f);
+            //auto results = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, QuadTreeFilter::Player);
+            //for (auto other : results)
+            //{
+            //    if (other != entity)
+            //    {
+            //        //we can safely overwrite 'motion' now as we've already
+            //        //moved and it will be returned as a value to update the player direction
+            //        motion = other.getComponent<xy::Transform>().getPosition() - pos;
+            //        break;
+            //    }
+            //}
         }
         else
         {

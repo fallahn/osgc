@@ -377,18 +377,22 @@ void ClientWeaponSystem::process(float)
                                 break;
                             case Player::Up:
                                 tx.setScale(1.f, 1.f);
+                                //entity.getComponent<xy::SpriteAnimation>().stop();
                                 entity.getComponent<xy::SpriteAnimation>().play(m_animationIDs[WeaponAnimationID::ShovelBack]);
                                 break;
                             case Player::Down:
                                 tx.setScale(1.f, 1.f);
+                                //entity.getComponent<xy::SpriteAnimation>().stop();
                                 entity.getComponent<xy::SpriteAnimation>().play(m_animationIDs[WeaponAnimationID::ShovelFront]);
                                 break;
                             case Player::Left:
                                 tx.setScale(1.f, 1.f);
+                                //entity.getComponent<xy::SpriteAnimation>().stop();
                                 entity.getComponent<xy::SpriteAnimation>().play(m_animationIDs[WeaponAnimationID::ShovelSide]);
                                 break;
                             case Player::Right:
                                 tx.setScale(-1.f, 1.f);
+                                //entity.getComponent<xy::SpriteAnimation>().stop();
                                 entity.getComponent<xy::SpriteAnimation>().play(m_animationIDs[WeaponAnimationID::ShovelSide]);
                                 break;
                             }
