@@ -1051,27 +1051,29 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
 
     auto parent = entity;
 
+    if (actor.id != Actor::Boat)
+    {
+        entity = m_gameScene.createEntity();
+        auto& shadowTx = entity.addComponent<xy::Transform>();
+        shadowTx.setOrigin(8.f, 8.f);
+        shadowTx.setPosition(bounds.width / 2.f, 0.f);
+        entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::PlaneShader));
+        entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/player_shadow.png"));
+        entity.addComponent<SimpleShadow>().parent = parent;
+        //entity.addComponent<xy::CommandTarget>().ID = CommandID::BasicShadow;
 
-    entity = m_gameScene.createEntity();
-    auto& shadowTx = entity.addComponent<xy::Transform>();
-    shadowTx.setOrigin(8.f, 8.f);
-    shadowTx.setPosition(bounds.width / 2.f, 0.f);
-    entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::PlaneShader));
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/player_shadow.png"));
-    entity.addComponent<SimpleShadow>().parent = parent;
-    //entity.addComponent<xy::CommandTarget>().ID = CommandID::BasicShadow;
+        //TODO we can move this to a system if we're also going to fade on light proximity
+        //entity.addComponent<xy::Callback>().active = true; //destroy shadow if parent removed
+        //entity.getComponent<xy::Callback>().function = [&](xy::Entity ent, float)
+        //{
+        //    if (ent.getComponent<xy::Transform>().getDepth() == 0)
+        //    {
+        //        m_gameScene.destroyEntity(ent);
+        //    }
+        //};
 
-    //TODO we can move this to a system if we're also going to fade on light proximity
-    //entity.addComponent<xy::Callback>().active = true; //destroy shadow if parent removed
-    //entity.getComponent<xy::Callback>().function = [&](xy::Entity ent, float)
-    //{
-    //    if (ent.getComponent<xy::Transform>().getDepth() == 0)
-    //    {
-    //        m_gameScene.destroyEntity(ent);
-    //    }
-    //};
-
-    spriteTx.addChild(shadowTx);
+        spriteTx.addChild(shadowTx);
+    }
 
     //add a weapon sprite to players
     if (hasWeapon)

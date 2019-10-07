@@ -114,7 +114,7 @@ void MenuState::buildOptions(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.addComponent<xy::Text>(font).setString("Back");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
-    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setFillColour(Global::ButtonTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
@@ -163,7 +163,7 @@ void MenuState::buildOptions(sf::Font& font)
     entity.addComponent<xy::Text>(font).setString("Advanced");
     entity.getComponent<xy::Text>().setCharacterSize(Global::MediumTextSize);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
+    entity.getComponent<xy::Text>().setFillColour(Global::ButtonTextColour);
     entity.getComponent<xy::Text>().setOutlineColour(Global::OuterTextColour);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
