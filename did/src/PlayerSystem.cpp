@@ -282,7 +282,8 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
     if (player.sync.state == Player::State::Alive)
     {
         auto motion = parseInput(input.mask, (player.sync.flags & Player::Cursed));
-        if (xy::Util::Vector::lengthSquared(motion) > 0)
+        auto motionLen = xy::Util::Vector::lengthSquared(motion);
+        if (motionLen > 0)
         {
             player.sync.accel = std::min(1.f, player.sync.accel + (delta * 4.f));
             tx.move((player.sync.accel * PlayerSpeed * input.acceleration) * motion * delta);
@@ -401,6 +402,33 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
                 //button released
             }
         }
+        //else if (changes & InputFlag::Strafe)
+        //{
+        //    auto pos = tx.getPosition();
+        //    const sf::FloatRect searchArea(pos.x - 96.f, pos.y - 96.f, 192.f, 192.f);
+        //    auto results = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, QuadTreeFilter::Player | QuadTreeFilter::Skeleton);
+        //    for (auto other : results)
+        //    {
+        //        if (other != entity)
+        //        {
+        //            //we can safely overwrite 'motion' now as we've already
+        //            //moved and it will be returned as a value to update the player direction
+        //            motion = other.getComponent<xy::Transform>().getPosition() - pos;
+
+        //            //find the axis with greatest magnitude
+        //            if (std::abs(motion.x) > std::abs(motion.y))
+        //            {
+        //                motion.y = 0.f;
+        //            }
+        //            else
+        //            {
+        //                motion.x = 0.f;
+        //            }
+
+        //            break;
+        //        }
+        //    }
+        //}
 
         player.previousInputFlags = input.mask;
 
@@ -422,19 +450,33 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
         {
             player.sync.flags |= Player::Strafing;
 
-            //auto pos = tx.getPosition();
-            //const sf::FloatRect searchArea(pos.x - 128.f, pos.y - 128.f, 256.f, 256.f);
-            //auto results = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, QuadTreeFilter::Player);
-            //for (auto other : results)
-            //{
-            //    if (other != entity)
-            //    {
-            //        //we can safely overwrite 'motion' now as we've already
-            //        //moved and it will be returned as a value to update the player direction
-            //        motion = other.getComponent<xy::Transform>().getPosition() - pos;
-            //        break;
-            //    }
-            //}
+            if (motionLen > 0)
+            {
+                auto pos = tx.getPosition();
+                const sf::FloatRect searchArea(pos.x - 96.f, pos.y - 96.f, 192.f, 192.f);
+                auto results = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, QuadTreeFilter::Player | QuadTreeFilter::Skeleton);
+                for (auto other : results)
+                {
+                    if (other != entity)
+                    {
+                        //we can safely overwrite 'motion' now as we've already
+                        //moved and it will be returned as a value to update the player direction
+                        motion = other.getComponent<xy::Transform>().getPosition() - pos;
+
+                        //find the axis with greatest magnitude
+                        if (std::abs(motion.x) > std::abs(motion.y))
+                        {
+                            motion.y = 0.f;
+                        }
+                        else
+                        {
+                            motion.x = 0.f;
+                        }
+
+                        break;
+                    }
+                }
+            }
         }
         else
         {
@@ -454,8 +496,8 @@ void PlayerSystem::updateAnimation(sf::Vector2f direction, xy::Entity entity)
 
     if (xy::Util::Vector::lengthSquared(direction) > 0)
     {
-        //player must be moving
-        if ((player.sync.flags & Player::Strafing) == 0)
+        //player must be moving - CHANGED strafe button now always points player to nearest enemy
+        //if ((player.sync.flags & Player::Strafing) == 0)
         {
             //set animation direction if not strafing
             if (direction.y > 0)
@@ -480,26 +522,26 @@ void PlayerSystem::updateAnimation(sf::Vector2f direction, xy::Entity entity)
                 player.sync.direction = Player::Direction::Left;
             }
         }
-        else //TODO fix this repeating animation
-        {
-            //carry on facing the way we were when started to strafe
-            switch (player.sync.direction)
-            {
-            default: break;
-            case Player::Up:
-                anim.nextAnimation = AnimationID::WalkUp;
-                break;
-            case Player::Down:
-                anim.nextAnimation = AnimationID::WalkDown;
-                break;
-            case Player::Left:
-                anim.nextAnimation = AnimationID::WalkLeft;
-                break;
-            case Player::Right:
-                anim.nextAnimation = AnimationID::WalkRight;
-                break;
-            }
-        }
+        //else //TODO fix this repeating animation
+        //{
+        //    //carry on facing the way we were when started to strafe
+        //    switch (player.sync.direction)
+        //    {
+        //    default: break;
+        //    case Player::Up:
+        //        anim.nextAnimation = AnimationID::WalkUp;
+        //        break;
+        //    case Player::Down:
+        //        anim.nextAnimation = AnimationID::WalkDown;
+        //        break;
+        //    case Player::Left:
+        //        anim.nextAnimation = AnimationID::WalkLeft;
+        //        break;
+        //    case Player::Right:
+        //        anim.nextAnimation = AnimationID::WalkRight;
+        //        break;
+        //    }
+        //}
     }
     else
     {

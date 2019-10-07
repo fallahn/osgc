@@ -158,6 +158,8 @@ public:
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
+    void addDiggableSpot(sf::Vector2f);
+
 private:
     PathFinder& m_pathFinder;
     std::int32_t m_timeAccumulator;

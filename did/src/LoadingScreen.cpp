@@ -36,9 +36,9 @@ namespace
 
     const std::array<std::string, 3> randomMessages =
     {
-        "Strafe when fighting!",
+        "Use the strafe button to face enemies",
         "Use a decoy to distract the bees",
-        "Zombies are scared of light!"
+        "Zombies are hurt by light!"
     };
 }
 

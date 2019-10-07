@@ -850,7 +850,8 @@ void GameState::spawnMapActors()
             entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, Global::TileSize, Global::TileSize });
             entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::WetPatch);
             entity.addComponent<WetPatch>();
-            entity.getComponent<Actor>().nonStatic = false;           
+            entity.getComponent<Actor>().nonStatic = false;
+            m_scene.getSystem<BotSystem>().addDiggableSpot(spawn.position);
             break;
         case Actor::Parrot:
             entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, Global::TileSize, Global::TileSize });

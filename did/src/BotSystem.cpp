@@ -181,10 +181,11 @@ BotSystem::BotSystem(xy::MessageBus& mb, PathFinder& pf, std::size_t seed)
 
     //make the points an odd number so any bots with a +2 stride will
     //get the intermediate points the second loop around
-    if (m_destinationPoints.size() % 2 == 0)
+    //MOVED to adding dig spots, below
+    /*if (m_destinationPoints.size() % 2 == 0)
     {
         m_destinationPoints.pop_back();
-    }
+    }*/
 }
 
 //public
@@ -398,6 +399,18 @@ void BotSystem::process(float dt)
             playerIp.history[playerIp.currentInput].input.acceleration = bot.acceleration;
             playerIp.currentInput = (playerIp.currentInput + 1) % playerIp.history.size();
         }
+    }
+}
+
+void BotSystem::addDiggableSpot(sf::Vector2f pos)
+{
+    m_destinationPoints.push_back(pos);
+    std::shuffle(m_destinationPoints.begin(), m_destinationPoints.end(), m_rndEngine);
+
+    //make sure still odd number
+    if (m_destinationPoints.size() % 2 == 0)
+    {
+        m_destinationPoints.pop_back();
     }
 }
 
