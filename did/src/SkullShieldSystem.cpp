@@ -97,6 +97,8 @@ void SkullShieldSystem::doCollision(xy::Entity entity)
             {
                 entity.getComponent<SkullShield>().state = SkullShield::Despawn;
                 entity.getComponent<SkullShield>().stateTime = DespawnTime;
+                entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::Die;
+                entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(0); //turn off collision
             }
         }
     }

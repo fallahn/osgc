@@ -454,7 +454,7 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
             {
                 auto pos = tx.getPosition();
                 const sf::FloatRect searchArea(pos.x - 96.f, pos.y - 96.f, 192.f, 192.f);
-                auto results = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, QuadTreeFilter::Player | QuadTreeFilter::Skeleton);
+                auto results = getScene()->getSystem<xy::DynamicTreeSystem>().query(searchArea, QuadTreeFilter::Player | QuadTreeFilter::Skeleton | QuadTreeFilter::Barrel);
                 for (auto other : results)
                 {
                     if (other != entity)

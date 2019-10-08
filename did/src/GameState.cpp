@@ -1172,10 +1172,12 @@ void GameState::handlePacket(const xy::NetEvent& evt)
         return;
     }
 
+    //std::cout << (int)evt.packet.getID() << "\n";
+
     switch (evt.packet.getID())
     {
     default: 
-        //std::cout << (int)packet.id() << "\n";
+        //std::cout << (int)evt.packet.getID() << "\n";
         break;
     case PacketID::ItemDespawn:
     {

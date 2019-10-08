@@ -185,7 +185,7 @@ void MenuState::buildOptions(sf::Font& font)
     //info string
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 800.f);
-    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(finefont).setString(defaultMessage);
     entity.getComponent<xy::Text>().setCharacterSize(40);
     entity.getComponent<xy::Text>().setFillColour(Global::InnerTextColour);
@@ -200,7 +200,19 @@ void MenuState::buildOptions(sf::Font& font)
     const float verticalOffset = 40.5f;
     const sf::FloatRect buttonArea(-86.f, 0.f, 172.f, 36.f);
     
-    auto addKeyWindow = [&, buttonArea](std::int32_t binding, sf::Vector2f position)
+    auto mouseOff = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity, sf::Vector2f)
+        {
+            xy::Command cmd;
+            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<xy::Text>().setString(defaultMessage);
+            };
+            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        });
+
+    auto addKeyWindow = [&, buttonArea, mouseOff](std::int32_t binding, sf::Vector2f position, const std::string& msg = "")
     {
         auto ent = m_uiScene.createEntity();
         ent.addComponent<xy::Transform>().setPosition(position);
@@ -235,6 +247,22 @@ void MenuState::buildOptions(sf::Font& font)
                     }
                 });
 
+        if (!msg.empty())
+        {
+            ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] =
+                m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
+                    [&, msg](xy::Entity, sf::Vector2f)
+                    {
+                        xy::Command cmd;
+                        cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+                        cmd.action = [msg](xy::Entity e, float)
+                        {
+                            e.getComponent<xy::Text>().setString(msg);
+                        };
+                        m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                    });
+            ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseOff;
+        }
 
         bgEntity.getComponent<xy::Transform>().addChild(ent.getComponent<xy::Transform>());
     };
@@ -248,23 +276,23 @@ void MenuState::buildOptions(sf::Font& font)
     addKeyWindow(InputBinding::Right, currPos);
     currPos.y += verticalOffset * 1.4f;
 
-    addKeyWindow(InputBinding::CarryDrop, currPos);
+    addKeyWindow(InputBinding::CarryDrop, currPos, "Pick up or drop an item");
     currPos.y += verticalOffset;
-    addKeyWindow(InputBinding::Action, currPos);
+    addKeyWindow(InputBinding::Action, currPos, "Swing ya cutlass!");
     currPos.y += verticalOffset;
-    addKeyWindow(InputBinding::Strafe, currPos);
+    addKeyWindow(InputBinding::Strafe, currPos, "Hold to face your enemy");
     currPos.y += verticalOffset;
-    addKeyWindow(InputBinding::WeaponPrev, currPos);
+    addKeyWindow(InputBinding::WeaponPrev, currPos, "Select previous weapon");
     currPos.y += verticalOffset;
-    addKeyWindow(InputBinding::WeaponNext, currPos);
+    addKeyWindow(InputBinding::WeaponNext, currPos, "Select next weapon");
     currPos.y += verticalOffset;
-    addKeyWindow(InputBinding::ZoomMap, currPos);
+    addKeyWindow(InputBinding::ZoomMap, currPos, "X marks the spot!");
     currPos.y += verticalOffset;
     addKeyWindow(InputBinding::ShowMap, currPos);
 
     //joybuttons
     currPos = { 1154.f, 29.f };
-    auto addJoyWindow = [&, buttonArea](std::int32_t binding, sf::Vector2f position)
+    auto addJoyWindow = [&, buttonArea, mouseOff](std::int32_t binding, sf::Vector2f position, const std::string& msg = "")
     {
         auto ent = m_uiScene.createEntity();
         ent.addComponent<xy::Transform>().setPosition(position);
@@ -304,6 +332,23 @@ void MenuState::buildOptions(sf::Font& font)
 
             ent.addComponent<xy::CommandTarget>().ID = Menu::CommandID::JoybindButton;
             ent.addComponent<std::int32_t>() = binding;
+
+            if (!msg.empty())
+            {
+                ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] =
+                    m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
+                        [&, msg](xy::Entity, sf::Vector2f)
+                        {
+                            xy::Command cmd;
+                            cmd.targetFlags = Menu::CommandID::OptionsInfoText;
+                            cmd.action = [msg](xy::Entity e, float)
+                            {
+                                e.getComponent<xy::Text>().setString(msg);
+                            };
+                            m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                        });
+                ent.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseOff;
+            }
         }
 
         bgEntity.getComponent<xy::Transform>().addChild(ent.getComponent<xy::Transform>());
@@ -318,17 +363,17 @@ void MenuState::buildOptions(sf::Font& font)
     addJoyWindow(-1, currPos);
     currPos.y += verticalOffset * 1.4f;
 
-    addJoyWindow(InputBinding::CarryDrop, currPos);
+    addJoyWindow(InputBinding::CarryDrop, currPos, "Pick up or drop an item");
     currPos.y += verticalOffset;
-    addJoyWindow(InputBinding::Action, currPos);
+    addJoyWindow(InputBinding::Action, currPos, "Swing ya cutlass!");
     currPos.y += verticalOffset;
-    addJoyWindow(InputBinding::Strafe, currPos);
+    addJoyWindow(InputBinding::Strafe, currPos, "Hold to face your opponent");
     currPos.y += verticalOffset;
-    addJoyWindow(InputBinding::WeaponPrev, currPos);
+    addJoyWindow(InputBinding::WeaponPrev, currPos, "Select previous weapon");
     currPos.y += verticalOffset;
-    addJoyWindow(InputBinding::WeaponNext, currPos);
+    addJoyWindow(InputBinding::WeaponNext, currPos, "Select next weapon");
     currPos.y += verticalOffset;
-    addJoyWindow(InputBinding::ZoomMap, currPos);
+    addJoyWindow(InputBinding::ZoomMap, currPos, "X marks the spot!");
     currPos.y += verticalOffset;
     addJoyWindow(InputBinding::ShowMap, currPos);
 

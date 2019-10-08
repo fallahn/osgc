@@ -812,7 +812,7 @@ void BotSystem::updateFighting(xy::Entity entity, float dt)
     {
         //face enemy
         auto playerDir = entity.getComponent<Player>().sync.direction;
-        bool canStrafe = true;
+        bool canStrafe = true;// actorID != Actor::Barrel;
         bool moveX = true;
         if (std::abs(direction.y) > std::abs(direction.x))
         {
@@ -1093,7 +1093,11 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
     auto dir = bot.targetPoint//Entity.getComponent<xy::Transform>().getPosition() 
         - entity.getComponent<xy::Transform>().getPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dir);
-    if (len2 < /*1024.f*/512.f) //arbitrary distance somewhere close to target
+
+    //arbitrary distance somewhere close to target (approx one tile)
+    //not too close however as bots may collide with a boat before grabbing
+    //the target
+    if (len2 < 1024.f) 
     {
         if (bot.targetType == Bot::Target::Enemy)
         {
@@ -1125,8 +1129,8 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
             else
             {
                 //face target
-                dir = bot.targetEntity.getComponent<xy::Transform>().getPosition()
-                    - entity.getComponent<xy::Transform>().getPosition();
+                /*dir = bot.targetEntity.getComponent<xy::Transform>().getPosition()
+                    - entity.getComponent<xy::Transform>().getPosition();*/
 
                 //TODO if we walked towards the target we should already be facing
                 //the correct way - so if the grab fails we can try reorientating

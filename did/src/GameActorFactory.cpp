@@ -370,7 +370,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
         entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds * 2.f);
-        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(/*QuadTreeFilter::Barrel |*/ QuadTreeFilter::BotQuery);
+        entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Barrel | QuadTreeFilter::BotQuery);
         entity.addComponent<CollisionComponent>().bounds = Global::PlayerBounds;
         entity.getComponent<CollisionComponent>().ID = ManifoldID::Barrel;
         entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("barrel");
