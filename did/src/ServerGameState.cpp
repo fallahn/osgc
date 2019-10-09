@@ -1001,7 +1001,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(0);
         entity.addComponent<CollisionComponent>().bounds = Global::SkullShieldBounds;
         entity.getComponent<CollisionComponent>().ID = ManifoldID::SkullShield;
-        entity.addComponent<SkullShield>(); //TODO how do we set the owner?
+        entity.addComponent<SkullShield>();
         break;
     case Actor::AmmoSpawn:
     case Actor::TreasureSpawn:

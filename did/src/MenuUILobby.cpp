@@ -431,11 +431,12 @@ void MenuState::buildLobby(sf::Font& font)
     entity.addComponent<xy::Transform>().setPosition(/*Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y*/xy::DefaultSceneSize.x / 2.f, 1000.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::RandomButton];
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("randomise");
     bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse
                     && m_sharedData.clientInformation.getHostID() == m_sharedData.netClient->getPeer().getID())
@@ -444,6 +445,8 @@ void MenuState::buildLobby(sf::Font& font)
                     m_activeString->clear();
                     applySeed();
                     m_activeString = nullptr;
+
+                    e.getComponent<xy::AudioEmitter>().play();
                 }
             });
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] =

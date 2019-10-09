@@ -163,5 +163,16 @@ audio_scape menu
         volume = 10
         looped = false
         mixer_channel = 2
-    }    
+    }
+
+    emitter randomise
+    {
+        path = "assets/sound/effects/respawn.wav"
+        streaming = false
+        min_distance = 12
+        attenuation = 0
+        volume = 10
+        looped = false
+        mixer_channel = 2
+    }
 }
