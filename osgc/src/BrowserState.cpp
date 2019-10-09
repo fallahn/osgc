@@ -66,6 +66,21 @@ source distribution.
 #include <fstream>
 #include <cstring>
 
+namespace SpriteID
+{
+    std::array<xy::Sprite, SpriteID::Count> sprites = {};
+}
+
+namespace TextureID
+{
+    std::array<std::size_t, TextureID::Count> handles = {};
+}
+
+namespace FontID
+{
+    std::array<std::size_t, Count> handles = {};
+}
+
 namespace
 {
 #if defined(__APPLE__)
@@ -808,8 +823,7 @@ void BrowserState::buildMenu()
 
     //title text at the bottom
     entity = m_textScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(/*xy::DefaultSceneSize / 2.f*/TitlePosition);
-    //entity.getComponent<xy::Transform>().move(0.f, 320.f);
+    entity.addComponent<xy::Transform>().setPosition(TitlePosition);
     entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(TitleCharSize);
     entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);

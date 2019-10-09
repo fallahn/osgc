@@ -44,7 +44,7 @@ namespace TextureID
         Count
     };
 
-    static std::array<std::size_t, TextureID::Count> handles = {};
+    extern std::array<std::size_t, TextureID::Count> handles;
 }
 
 namespace SpriteID
@@ -61,7 +61,7 @@ namespace SpriteID
         Count
     };
 
-    static std::array<xy::Sprite, SpriteID::Count> sprites = {};
+    extern std::array<xy::Sprite, SpriteID::Count> sprites;
 }
 
 namespace FontID
@@ -73,7 +73,7 @@ namespace FontID
         Count
     };
 
-    static std::array<std::size_t, Count> handles = {};
+    extern std::array<std::size_t, Count> handles;
 }
 
 namespace AudioChannel

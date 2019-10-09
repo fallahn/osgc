@@ -59,6 +59,16 @@ Copyright 2019 Matt Marchant
 
 #include <fstream>
 
+namespace FontID
+{
+    std::array<std::size_t, FontID::Count> handles = {};
+}
+
+namespace TextureID
+{
+    std::array<std::size_t, TextureID::Count> handles = {};
+}
+
 namespace
 {
     const std::string TextFrag =

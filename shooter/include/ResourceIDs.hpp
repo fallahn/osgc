@@ -28,7 +28,7 @@ namespace FontID
         Count
     };
 
-    static std::array<std::size_t, FontID::Count> handles;
+    extern std::array<std::size_t, FontID::Count> handles;
 }
 
 namespace TextureID
@@ -46,7 +46,7 @@ namespace TextureID
         Count
     };
 
-    static std::array<std::size_t, TextureID::Count> handles;
+    extern std::array<std::size_t, TextureID::Count> handles;
 }
 
 namespace ShaderID
