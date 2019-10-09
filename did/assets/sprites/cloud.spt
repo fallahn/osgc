@@ -1,0 +1,78 @@
+spritesheet cloud
+{
+    src="assets/images/cloud.png"
+
+    sprite cloud
+    {
+        bounds=0,0,32,32
+
+        animation idle
+        {
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=0,96,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,96,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32
+
+            frame=0,0,32,32
+            frame=32,0,32,32
+            frame=0,32,32,32
+            frame=32,32,32,32
+            frame=0,64,32,32
+            frame=32,64,32,32            
+
+            loop=true
+            framerate=30
+        }
+    }
+}

@@ -1017,6 +1017,9 @@ void GameState::loadResources()
     m_sprites[SpriteID::SmallRock01] = spriteSheet.getSprite("small_rock01");
     m_sprites[SpriteID::SmallRock02] = spriteSheet.getSprite("small_rock02");
 
+    spriteSheet.loadFromFile("assets/sprites/cloud.spt", m_textureResource);
+    m_sprites[SpriteID::Cloud] = spriteSheet.getSprite("cloud");
+
     m_audioScape.loadFromFile("assets/sound/game.xas");
 
     loadUI();
@@ -1866,10 +1869,10 @@ void GameState::spawnCurseIcon(xy::Entity parent, std::uint16_t id)
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>();
-    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::SkullItem];
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Cloud];
     entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
-    //entity.addComponent<xy::SpriteAnimation>().play(0);
-    entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderUnlitTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<Sprite3D>(m_modelMatrices).verticalOffset = -16.f;
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);

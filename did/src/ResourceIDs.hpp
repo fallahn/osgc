@@ -84,6 +84,7 @@ namespace SpriteID
         LargeRock,
         SmallRock01,
         SmallRock02,
+        Cloud,
         Count
     };
 }
