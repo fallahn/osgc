@@ -36,6 +36,7 @@ namespace CommandID
         RootNode = 0x4,
         Slideshow = 0x8,
         UINode = 0x10,
-        ConfirmationEntity = 0x20
+        ConfirmationEntity = 0x20,
+        ScaledText = 0x40
     };
 }

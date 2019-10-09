@@ -85,6 +85,8 @@ namespace
     const std::uint32_t TitleCharSize = 128;
     const sf::Vector2f TitlePosition(960.f, 860.f);
 
+    const std::uint32_t InfoTextSize = 24;
+
     const std::string settingsFile("browser.cfg");
     const auto ThumbnailSize = xy::DefaultSceneSize / 2.f; //make sure to scale all sprites to correct size
 
@@ -726,17 +728,16 @@ void BrowserState::buildMenu()
 
         auto& parentTx = entity.getComponent<xy::Transform>();
 
-        std::uint32_t textSize = 24;
-
         if (!info.version.empty())
         {
             entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Version: " + info.version);
-            entity.getComponent<xy::Text>().setCharacterSize(textSize);
+            entity.getComponent<xy::Text>().setCharacterSize(InfoTextSize);
             entity.getComponent<xy::Text>().setOutlineThickness(1.f);
             //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+            entity.addComponent<xy::CommandTarget>().ID = CommandID::ScaledText;
 
             auto bounds = xy::Text::getLocalBounds(entity);
             entity.getComponent<xy::Transform>().setPosition(ThumbnailSize.x - (bounds.width + (ItemPadding * 4.f)), ThumbnailSize.y - (bounds.height + ItemPadding));
@@ -749,10 +750,11 @@ void BrowserState::buildMenu()
             entity = m_scene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Text>(menuFont).setString("Author: " + info.author);
-            entity.getComponent<xy::Text>().setCharacterSize(textSize);
+            entity.getComponent<xy::Text>().setCharacterSize(InfoTextSize);
             entity.getComponent<xy::Text>().setOutlineThickness(1.f);
             //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
             entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+            entity.addComponent<xy::CommandTarget>().ID = CommandID::ScaledText;
 
             auto bounds = xy::Text::getLocalBounds(entity);
             entity.getComponent<xy::Transform>().setPosition(ItemPadding * 4.f, ThumbnailSize.y - (bounds.height + ItemPadding));
@@ -1351,6 +1353,17 @@ void BrowserState::updateTextScene()
         e.getComponent<xy::Text>().setCharacterSize(charSize);
     };
     m_textScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+    cmd.targetFlags = CommandID::ScaledText;
+    cmd.action = [](xy::Entity e, float)
+    {
+        auto charSize = static_cast<std::uint32_t>(static_cast<float>(InfoTextSize) * windowScale);
+        e.getComponent<xy::Text>().setCharacterSize(charSize);
+
+        auto scale = 1.f / windowScale;
+        e.getComponent<xy::Transform>().setScale(scale, scale);
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
 void BrowserState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
