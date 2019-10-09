@@ -52,6 +52,7 @@ source distribution.
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
+#include <xyginext/ecs/systems/CameraSystem.hpp>
 
 #include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/core/Console.hpp>
@@ -80,6 +81,9 @@ namespace
     const std::string pluginFolder("plugins/");
     const std::string infoFile("/info.xgi");
 #endif
+
+    const std::uint32_t TitleCharSize = 128;
+    const sf::Vector2f TitlePosition(960.f, 860.f);
 
     const std::string settingsFile("browser.cfg");
     const auto ThumbnailSize = xy::DefaultSceneSize / 2.f; //make sure to scale all sprites to correct size
@@ -142,6 +146,7 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_gameInstance      (game),
     m_loadingScreen     (ls),
     m_scene             (ctx.appInstance.getMessageBus()),
+    m_textScene         (ctx.appInstance.getMessageBus()),
     m_browserTargetIndex(0),
     m_slideshowIndex    (0),
     m_audioScape        (m_audioResource),
@@ -197,6 +202,13 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
 
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
+
+    //title text rendered in its own scene to maintan a 1:1 scale with the window when it resizes
+    xy::Entity e = m_textScene.createEntity();
+    e.addComponent<xy::Transform>();
+    e.addComponent<xy::Camera>();
+    m_textScene.setActiveCamera(e);
+    updateTextScene();
 
     ctx.appInstance.setMouseCursorVisible(true);
 
@@ -307,6 +319,7 @@ bool BrowserState::handleEvent(const sf::Event& evt)
 
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
+    m_textScene.forwardEvent(evt);
     return true;
 }
 
@@ -321,12 +334,23 @@ void BrowserState::handleMessage(const xy::Message& msg)
         }
     }
 
+    else if (msg.id == xy::Message::WindowMessage)
+    {
+        const auto& data = msg.getData<xy::Message::WindowEvent>();
+        if (data.type == xy::Message::WindowEvent::Resized)
+        {
+            updateTextScene();
+        }
+    }
+
     m_scene.forwardMessage(msg);
+    m_textScene.forwardMessage(msg);
 }
 
 bool BrowserState::update(float dt)
 {
     m_scene.update(dt);
+    m_textScene.update(dt);
     return true;
 }
 
@@ -334,6 +358,10 @@ void BrowserState::draw()
 {
     auto rw = getContext().appInstance.getRenderWindow();
     rw->draw(m_scene);
+    rw->draw(m_textScene);
+
+    //restore the default view before updating UI
+    getContext().appInstance.getRenderWindow()->setView(getContext().defaultView);
 }
 
 xy::StateID BrowserState::stateID() const
@@ -400,8 +428,15 @@ void BrowserState::initScene()
     m_scene.addSystem<xy::TextSystem>(messageBus);
     m_scene.addSystem<xy::UISystem>(messageBus).setJoypadCursorActive(false);
     m_scene.addSystem<xy::SpriteSystem>(messageBus);
+
+    m_scene.addSystem<xy::CameraSystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
     m_scene.addSystem<xy::AudioSystem>(messageBus);
+
+    m_textScene.addSystem<xy::CommandSystem>(messageBus);
+    m_textScene.addSystem<xy::TextSystem>(messageBus);
+    m_textScene.addSystem<xy::CameraSystem>(messageBus);
+    m_textScene.addSystem<xy::RenderSystem>(messageBus);
 
     //set up the mixer channels - these may have been altered by plugins
     xy::AudioMixer::setLabel("Music", AudioChannel::Music);
@@ -770,11 +805,11 @@ void BrowserState::buildMenu()
     rootNode.addChild(parentTx);
 
     //title text at the bottom
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.getComponent<xy::Transform>().move(0.f, 320.f);
+    entity = m_textScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(/*xy::DefaultSceneSize / 2.f*/TitlePosition);
+    //entity.getComponent<xy::Transform>().move(0.f, 320.f);
     entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
-    entity.getComponent<xy::Text>().setCharacterSize(128);
+    entity.getComponent<xy::Text>().setCharacterSize(TitleCharSize);
     entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
@@ -1069,7 +1104,7 @@ void BrowserState::enableItem()
             {
                 ee.getComponent<xy::Text>().setString(node.title);
             };
-            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
+            m_textScene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
         }
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -1293,6 +1328,29 @@ void BrowserState::sortNodes(bool asc)
         m_nodeList[i].first.getComponent<BrowserNode>().index = i;
         nodePos.x += stride;
     }
+}
+
+void BrowserState::updateTextScene()
+{
+    static float windowScale = 1.f;
+
+    auto currView = xy::App::getRenderWindow()->getDefaultView();
+    windowScale = currView.getSize().x / xy::DefaultSceneSize.x;
+
+    m_textScene.getActiveCamera().getComponent<xy::Camera>().setView(currView.getSize());
+    m_textScene.getActiveCamera().getComponent<xy::Camera>().setViewport(currView.getViewport());
+    m_textScene.getActiveCamera().getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize / 2.f) * windowScale);
+
+    xy::Command cmd;
+    cmd.targetFlags = CommandID::TitleText;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<xy::Transform>().setPosition(TitlePosition * windowScale);
+
+        auto charSize = static_cast<std::uint32_t>(static_cast<float>(TitleCharSize) * windowScale);
+        e.getComponent<xy::Text>().setCharacterSize(charSize);
+    };
+    m_textScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 }
 
 void BrowserState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
