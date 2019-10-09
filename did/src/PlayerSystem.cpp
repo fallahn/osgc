@@ -285,8 +285,15 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
         auto motionLen = xy::Util::Vector::lengthSquared(motion);
         if (motionLen > 0)
         {
+            auto speed = PlayerSpeed;
+            //move slower when carrying treasure (it's heavy!)
+            if (entity.getComponent<Carrier>().carryFlags & Carrier::Treasure)
+            {
+                speed *= 0.68f;
+            }
+
             player.sync.accel = std::min(1.f, player.sync.accel + (delta * 4.f));
-            tx.move((player.sync.accel * PlayerSpeed * input.acceleration) * motion * delta);
+            tx.move((player.sync.accel * speed * input.acceleration) * motion * delta);
             player.previousMovement = motion;
         }
         else

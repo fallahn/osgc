@@ -64,7 +64,7 @@ namespace Global
     static const std::uint32_t LobbyTextSize = 50;
     
     static const sf::Color InnerTextColour(236, 178, 19);
-    static const sf::Color OuterTextColour = InnerTextColour;// (244, 106, 3);// (65, 33, 31);
+    static const sf::Color OuterTextColour = InnerTextColour;// (244, 106, 3);// (65, 33, 31);// (236,126,19)
     static const sf::Color ButtonTextColour(13,11,12,160);// (113, 89, 63);
 
     //collision properties
