@@ -110,6 +110,16 @@ namespace
 #include "ParticleShader.inl"
 #include "SunsetShader.inl"
 #include "GroundShaders.inl"
+
+    struct CurseIconData final
+    {
+        std::uint16_t id = 0;
+        enum
+        {
+            Spawn, Active, Despawn
+        }state = Spawn;
+        float alpha = 0.f;
+    };
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -1769,13 +1779,28 @@ void GameState::updateScene(SceneState state)
     }
     else if (state.action == SceneState::GotCursed)
     {
-        LOG("got curse", xy::Logger::Type::Info);
-        return;
+        //LOG("got curse", xy::Logger::Type::Info);
+        cmd.targetFlags = CommandID::PlayerAvatar;
+        cmd.action = [&, id](xy::Entity entity, float)
+        {
+            if (entity.getComponent<Actor>().serverID == id)
+            {
+                spawnCurseIcon(entity, id);
+            }
+        };
     }
     else if (state.action == SceneState::LostCurse)
     {
-        LOG("lost curse", xy::Logger::Type::Info);
-        return;
+        //LOG("lost curse", xy::Logger::Type::Info);
+        cmd.targetFlags = CommandID::CurseIcon;
+        cmd.action = [id](xy::Entity entity, float)
+        {
+            auto& data = std::any_cast<CurseIconData&>(entity.getComponent<xy::Callback>().userData);
+            if (data.id == id)
+            {
+                data.state = CurseIconData::Despawn;
+            }
+        };
     }
     else if (state.action == SceneState::Stung)
     {
@@ -1832,6 +1857,67 @@ void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)
     entity.getComponent<xy::Callback>().function = GhostFloatCallback(m_gameScene);
 
     //createPlayerPuff(position);
+}
+
+void GameState::spawnCurseIcon(xy::Entity parent, std::uint16_t id)
+{
+    auto cameraEntity = m_gameScene.getActiveCamera();
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::SkullItem];
+    entity.getComponent<xy::Sprite>().setColour(sf::Color::Transparent);
+    //entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_modelMatrices).verticalOffset = -16.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(-bounds.width / 2.f, 2.f);
+
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::CurseIcon;
+    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("shield");
+    entity.getComponent<xy::AudioEmitter>().play();
+
+    CurseIconData cd;
+    cd.id = id;
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<CurseIconData>(cd);
+    entity.getComponent<xy::Callback>().function =
+        [&](xy::Entity e, float dt)
+    {
+        auto& data = std::any_cast<CurseIconData&>(e.getComponent<xy::Callback>().userData);
+
+        switch (data.state)
+        {
+        case CurseIconData::Spawn:
+            data.alpha = std::min(1.f, data.alpha + dt);
+            e.getComponent<xy::Sprite>().setColour({ 255,255,255,static_cast<sf::Uint8>(255.f * data.alpha) });
+
+            if (data.alpha == 1)
+            {
+                data.state = CurseIconData::Active;
+            }
+            break;
+        case CurseIconData::Active:
+
+            break;
+        case CurseIconData::Despawn:
+            data.alpha = std::max(0.f, data.alpha - dt);
+            e.getComponent<xy::Sprite>().setColour({ 255,255,255,static_cast<sf::Uint8>(255.f * data.alpha) });
+
+            if (data.alpha == 0)
+            {
+                m_gameScene.destroyEntity(e);
+            }
+            break;
+        }
+    };
+
+    parent.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 }
 
 void GameState::createSplash(sf::Vector2f position)

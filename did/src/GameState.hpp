@@ -120,6 +120,7 @@ private:
     void updateConnection(ConnectionState);
 
     void spawnGhost(xy::Entity, sf::Vector2f);
+    void spawnCurseIcon(xy::Entity, std::uint16_t);
     void toggleUI();
     void showRoundEnd(const RoundSummary&);
     void showEndButton();

@@ -23,7 +23,7 @@ namespace CommandID
     enum
     {
         PlayerAvatar    = 0x01,
-        PlayerTwo       = 0x02,
+        CurseIcon       = 0x02,
         NetInterpolator = 0x04,
         Weapon          = 0x08,
         LocalPlayer     = 0x10,

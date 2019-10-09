@@ -32,8 +32,8 @@ struct PlayerInfo final
 
 struct NetworkState
 {
-    std::uint32_t serverID = 0;
-    std::int32_t actorID = 0;
+    std::uint16_t serverID = 0;
+    std::int16_t actorID = 0;
     sf::Vector2f position;
 };
 
@@ -51,25 +51,26 @@ struct ClientState final : public NetworkState
 
 struct AnimationState final
 {
-    std::uint32_t serverID = 0;    
+    std::uint16_t serverID = 0;    
     std::int8_t animation = 0;
 };
 
 struct CarriableState final
 {
+    sf::Vector2f position;
     enum
     {
         PickedUp, Dropped, InWater
     }action;
-    std::uint32_t parentID = 0;
-    std::uint32_t carriableID = 0;
-    sf::Vector2f position;
+    std::uint16_t parentID = 0;
+    std::uint16_t carriableID = 0;
+
 };
 
 struct InventoryState final
 {
-    std::uint32_t parentID = 0;    
     Inventory inventory;
+    std::uint16_t parentID = 0;    
 };
 
 struct SceneState final
@@ -86,8 +87,8 @@ struct SceneState final
         LostCurse,
         Stung
     }action = EntityRemoved;
-    std::int32_t serverID = 0;
     sf::Vector2f position;
+    std::int16_t serverID = 0;
 };
 
 struct ConnectionState final
@@ -119,13 +120,13 @@ struct PathData final
 
 struct HoleState final
 {
-    std::uint32_t serverID = 0;
+    std::uint16_t serverID = 0;
     std::uint8_t state = 0;
 };
 
 struct DebugState final
 {
-    std::uint32_t serverID = 0;
+    std::uint16_t serverID = 0;
     std::uint8_t state = 0;
     std::uint8_t pathSize = 0;
     std::int8_t target = -1;
@@ -133,9 +134,9 @@ struct DebugState final
 
 struct ItemState final
 {
-    std::uint8_t despawnType = 255;
     float x = 0.f;
     float y = 0.f;
+    std::uint8_t despawnType = 255;
 
     //this is kind of reproducing actor IDs here
     //but we're using this to pack the item type
