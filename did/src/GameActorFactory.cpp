@@ -994,7 +994,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         compassEntity.addComponent<xy::Transform>();
         compassEntity.addComponent<Compass>().parent = entity;
 
-        spawnCurseIcon(entity, 0);
+        //spawnCurseIcon(entity, 0);
 
 #ifdef XY_DEBUG
         auto debugEnt = m_gameScene.createEntity();

@@ -43,7 +43,7 @@ namespace
 
     const float HurtRadius = 48.f * 48.f;
 
-    const float CurseTime = 10.f;
+    const float CurseTime = 14.f;
 }
 
 PlayerSystem::PlayerSystem(xy::MessageBus& mb)
@@ -653,6 +653,27 @@ void PlayerSystem::updateCollision(xy::Entity entity, float dt)
                 msg->entity = entity;
                 msg->action = PlayerEvent::Cursed;
                 msg->data = 1;
+            }
+        }
+            break;
+        case ManifoldID::Player:
+        {
+            auto& player = entity.getComponent<Player>();
+            if ((player.sync.flags & Player::Cursed) == 0
+                && collision.manifolds[i].otherEntity.hasComponent<Player>())
+            {
+                const auto& otherPlayer = collision.manifolds[i].otherEntity.getComponent<Player>();
+                if (otherPlayer.sync.flags & Player::Cursed)
+                {
+                    //catch the curse! :(
+                    player.sync.flags |= Player::Cursed;
+                    player.curseTimer = CurseTime;
+
+                    auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
+                    msg->entity = entity;
+                    msg->action = PlayerEvent::Cursed;
+                    msg->data = 1;
+                }
             }
         }
             break;
