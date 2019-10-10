@@ -126,4 +126,13 @@ audio_scape player
         volume = 16
         mixer_channel = 1
     }
+
+    emitter countdown
+    {
+        path="assets/sound/music/count_down.wav";
+        streaming = false
+        looped = false
+        volume = 16
+        mixer_channel = 1
+    }    
 }

@@ -250,7 +250,7 @@ void PauseState::draw()
 void PauseState::build()
 {
     auto& mb = getContext().appInstance.getMessageBus();
-    m_scene.addSystem<xy::UISystem>(mb);
+    m_scene.addSystem<xy::UISystem>(mb).setJoypadCursorActive(false);
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);

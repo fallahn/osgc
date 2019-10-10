@@ -103,8 +103,8 @@ namespace
     class TimerUpdate final
     {
     public:
-        explicit TimerUpdate(std::int32_t& timeSource)
-            : m_timeSource(timeSource) {}
+        TimerUpdate(std::int32_t& timeSource, xy::Scene& scene, const xy::AudioScape& as)
+            : m_timeSource(timeSource), m_scene(scene), m_audioScape(as) {}
         void operator()(xy::Entity e, float dt)
         {
             m_currSec -= dt;
@@ -112,6 +112,16 @@ namespace
             {
                 m_currSec = 1.f;
                 m_timeSource--;
+
+                if (m_timeSource == 10)
+                {
+                    //start count down sound
+                    auto entity = m_scene.createEntity();
+                    entity.addComponent<xy::Transform>();
+                    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("countdown");
+                    entity.getComponent<xy::AudioEmitter>().play();
+                    entity.addComponent<xy::CommandTarget>().ID = CommandID::Music;
+                }
 
                 if (m_timeSource == 0)
                 {
@@ -136,6 +146,8 @@ namespace
 
     private:
         std::int32_t& m_timeSource;
+        xy::Scene& m_scene;
+        const xy::AudioScape& m_audioScape;
         float m_currSec = 1.f;
         float m_alpha = 0.f;
     };
@@ -391,7 +403,7 @@ void GameState::loadUI()
     entity.getComponent<xy::Text>().setCharacterSize(80);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
 
-    entity.addComponent<xy::Callback>().function = TimerUpdate(m_roundTime);
+    entity.addComponent<xy::Callback>().function = TimerUpdate(m_roundTime, m_gameScene, m_audioScape);
     entity.addComponent<xy::CommandTarget>().ID = UI::CommandID::RoundTimer;
 
     loadRoundEnd();

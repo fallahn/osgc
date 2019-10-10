@@ -167,11 +167,11 @@ audio_scape menu
 
     emitter randomise
     {
-        path = "assets/sound/effects/respawn.wav"
+        path = "assets/sound/effects/randomise.wav"
         streaming = false
         min_distance = 12
         attenuation = 0
-        volume = 10
+        volume = 20
         looped = false
         mixer_channel = 2
     }
