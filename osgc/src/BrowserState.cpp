@@ -163,7 +163,6 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_gameInstance      (game),
     m_loadingScreen     (ls),
     m_scene             (ctx.appInstance.getMessageBus()),
-    m_textScene         (ctx.appInstance.getMessageBus()),
     m_browserTargetIndex(0),
     m_slideshowIndex    (0),
     m_audioScape        (m_audioResource),
@@ -220,11 +219,6 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
 
-    //title text rendered in its own scene to maintan a 1:1 scale with the window when it resizes
-    xy::Entity e = m_textScene.createEntity();
-    e.addComponent<xy::Transform>();
-    e.addComponent<xy::Camera>();
-    m_textScene.setActiveCamera(e);
     updateTextScene();
 
     ctx.appInstance.setMouseCursorVisible(true);
@@ -336,7 +330,6 @@ bool BrowserState::handleEvent(const sf::Event& evt)
 
     m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
-    m_textScene.forwardEvent(evt);
     return true;
 }
 
@@ -361,13 +354,11 @@ void BrowserState::handleMessage(const xy::Message& msg)
     }
 
     m_scene.forwardMessage(msg);
-    m_textScene.forwardMessage(msg);
 }
 
 bool BrowserState::update(float dt)
 {
     m_scene.update(dt);
-    m_textScene.update(dt);
     return true;
 }
 
@@ -375,10 +366,6 @@ void BrowserState::draw()
 {
     auto rw = getContext().appInstance.getRenderWindow();
     rw->draw(m_scene);
-    rw->draw(m_textScene);
-
-    //restore the default view before updating UI
-    getContext().appInstance.getRenderWindow()->setView(getContext().defaultView);
 }
 
 xy::StateID BrowserState::stateID() const
@@ -449,11 +436,6 @@ void BrowserState::initScene()
     m_scene.addSystem<xy::CameraSystem>(messageBus);
     m_scene.addSystem<xy::RenderSystem>(messageBus);
     m_scene.addSystem<xy::AudioSystem>(messageBus);
-
-    m_textScene.addSystem<xy::CommandSystem>(messageBus);
-    m_textScene.addSystem<xy::TextSystem>(messageBus);
-    m_textScene.addSystem<xy::CameraSystem>(messageBus);
-    m_textScene.addSystem<xy::RenderSystem>(messageBus);
 
     //set up the mixer channels - these may have been altered by plugins
     xy::AudioMixer::setLabel("Music", AudioChannel::Music);
@@ -822,7 +804,7 @@ void BrowserState::buildMenu()
     rootNode.addChild(parentTx);
 
     //title text at the bottom
-    entity = m_textScene.createEntity();
+    entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(TitlePosition);
     entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(TitleCharSize);
@@ -1120,7 +1102,7 @@ void BrowserState::enableItem()
             {
                 ee.getComponent<xy::Text>().setString(node.title);
             };
-            m_textScene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd2);
         }
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -1353,20 +1335,19 @@ void BrowserState::updateTextScene()
     auto currView = xy::App::getRenderWindow()->getDefaultView();
     windowScale = currView.getSize().x / xy::DefaultSceneSize.x;
 
-    m_textScene.getActiveCamera().getComponent<xy::Camera>().setView(currView.getSize());
-    m_textScene.getActiveCamera().getComponent<xy::Camera>().setViewport(currView.getViewport());
-    m_textScene.getActiveCamera().getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize / 2.f) * windowScale);
-
     xy::Command cmd;
     cmd.targetFlags = CommandID::TitleText;
     cmd.action = [](xy::Entity e, float)
     {
-        e.getComponent<xy::Transform>().setPosition(TitlePosition * windowScale);
+        //e.getComponent<xy::Transform>().setPosition(TitlePosition * windowScale);
 
         auto charSize = static_cast<std::uint32_t>(static_cast<float>(TitleCharSize) * windowScale);
         e.getComponent<xy::Text>().setCharacterSize(charSize);
+
+        auto scale = 1.f / windowScale;
+        e.getComponent<xy::Transform>().setScale(scale, scale);
     };
-    m_textScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
     cmd.targetFlags = CommandID::ScaledText;
     cmd.action = [](xy::Entity e, float)

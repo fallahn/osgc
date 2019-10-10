@@ -63,7 +63,6 @@ private:
     fe::LoadingScreen& m_loadingScreen;
 
     xy::Scene m_scene;
-    xy::Scene m_textScene;
     xy::ResourceHandler m_resources;
 
     std::size_t m_browserTargetIndex;
