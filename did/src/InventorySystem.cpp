@@ -28,9 +28,9 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const std::int32_t SwordDamage = 1;
-    const std::int32_t PistolDamage = 4;
-    const std::int32_t BeeDamage = 3;
+    const std::int32_t SwordDamage = 4;
+    const std::int32_t PistolDamage = 13;
+    const std::int32_t BeeDamage = 2;
     const std::int32_t SkellyDamage = 4;
     const std::int32_t ExplosionDamage = 8;
     const std::int32_t DrownDamage = 8;

@@ -33,7 +33,7 @@ namespace
 }
 
 SkullShieldSystem::SkullShieldSystem(xy::MessageBus& mb)
-    :xy::System(mb, typeid(SkullShieldSystem))
+    : xy::System(mb, typeid(SkullShieldSystem))
 {
     requireComponent<SkullShield>();
     requireComponent<CollisionComponent>();

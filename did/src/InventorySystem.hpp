@@ -25,7 +25,7 @@ Copyright 2019 Matt Marchant
 struct Inventory final
 {
     static constexpr sf::Int8 MaxHealth = 25;
-    static constexpr sf::Uint8 MaxAmmo = 5;
+    static constexpr sf::Uint8 MaxAmmo = 3;
 
     sf::Uint16 treasure = 0;
     sf::Uint8 ammo = MaxAmmo;

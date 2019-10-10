@@ -58,3 +58,8 @@ License
 -------
 
 The frontend project and OSGC plugin template source files are licensed under the zlib license. Further OSGC plugin source, such as the top down shooter game, may be licensed differently. See individual project directories for more information.
+
+
+Many Thanks
+-----------
+OSGC is a collaborative project, which couldn't exist without the contribution of others either directly or indirectly via sites like [Open Game Art](https://opengameart.org), [Freesound](https://freesound.org) or [Looperman](https://looperman.com), or through the awesome gamedev communities on the internet. I try to credit every resource I can, usually through the use of `credits.txt` files in a particular project's directory, though some may slip through the net! If you feel I have a missed a credit somewhere then please leave an issue on the Github tracker or even submit a pull request. A particular mention should go to (@sadface_RL)[https://twitter.com/Sadface_RL] for his excellent pixel art tutorials, [@ryanmusicco](https://twitter.com/RyanMusicCo) for his wonderful compositions and the lovely chaps and chapesses over at #sfml for their feedback and support. Do go check them out!

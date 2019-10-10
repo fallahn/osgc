@@ -119,6 +119,7 @@ namespace
             Spawn, Active, Despawn
         }state = Spawn;
         float alpha = 0.f;
+        xy::Entity parent;
     };
 }
 
@@ -1874,12 +1875,12 @@ void GameState::spawnCurseIcon(xy::Entity parent, std::uint16_t id)
     entity.addComponent<xy::SpriteAnimation>().play(0);
     entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderUnlitTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.addComponent<Sprite3D>(m_modelMatrices).verticalOffset = -16.f;
+    entity.addComponent<Sprite3D>(m_modelMatrices).verticalOffset = -12.f;
     entity.getComponent<xy::Drawable>().bindUniform("u_viewProjMat", &cameraEntity.getComponent<Camera3D>().viewProjectionMatrix[0][0]);
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
-    entity.getComponent<xy::Transform>().setOrigin(-bounds.width / 2.f, 2.f);
+    entity.getComponent<xy::Transform>().setOrigin(-bounds.width / 2.f, -2.f);
 
     entity.addComponent<xy::CommandTarget>().ID = CommandID::CurseIcon;
     entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("shield");
@@ -1887,6 +1888,7 @@ void GameState::spawnCurseIcon(xy::Entity parent, std::uint16_t id)
 
     CurseIconData cd;
     cd.id = id;
+    cd.parent = parent;
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().userData = std::make_any<CurseIconData>(cd);
     entity.getComponent<xy::Callback>().function =
@@ -1906,7 +1908,10 @@ void GameState::spawnCurseIcon(xy::Entity parent, std::uint16_t id)
             }
             break;
         case CurseIconData::Active:
-
+            if (data.parent.getComponent<Player>().sync.state == Player::Dead)
+            {
+                m_gameScene.destroyEntity(e);
+            }
             break;
         case CurseIconData::Despawn:
             data.alpha = std::max(0.f, data.alpha - dt);

@@ -342,6 +342,19 @@ void IslandGenerator::generate(int seed)
             m_treasureCount++;
         }
     }
+
+    //make sure we have a min count of 3
+    if (m_treasureCount < 3)
+    {
+        auto result = std::find_if(m_actorSpawns.begin(), m_actorSpawns.end(),
+            [](const ActorSpawn& s) {return s.id == Actor::AmmoSpawn || s.id == Actor::CoinSpawn; });
+
+        if (result != m_actorSpawns.end())
+        {
+            result->id = Actor::TreasureSpawn;
+            m_treasureCount++;
+        }
+    }
 }
 
 void IslandGenerator::render(const TileArray& tileData, xy::TextureResource& tr)

@@ -742,6 +742,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
     case Actor::AmmoSpawn:
     case Actor::CoinSpawn:
         m_miniMap.addCross(position);
+        m_gameScene.getSystem<BotSystem>().addDiggableSpot(position);
     case Actor::MineSpawn: //don't draw these on the minimap
         entity.getComponent<AnimationModifier>().animationMap = { 0, 1, 2, 3 };
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::WetPatch];
@@ -986,7 +987,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         cameraEntity.getComponent<Camera3D>().target = entity;
 
         m_inputParser.setPlayerEntity(entity, entity.getComponent<Player>().playerNumber);
-        entity.addComponent<Bot>();// .enabled = true; //this component is required by the input parser
+        entity.addComponent<Bot>().enabled = true; //this component is required by the input parser
 
         auto compassEntity = m_gameScene.createEntity();
         compassEntity.addComponent<xy::Drawable>();
