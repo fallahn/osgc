@@ -57,6 +57,7 @@ namespace SpriteID
         Yes,
         No,
         Sort,
+        Tiled,
 
         Count
     };

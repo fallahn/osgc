@@ -97,6 +97,12 @@ namespace
     const std::string infoFile("/info.xgi");
 #endif
 
+    std::array<sf::Vector2f, 2u> camTargets =
+    {
+        xy::DefaultSceneSize / 2.f,
+        sf::Vector2f(xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y + (xy::DefaultSceneSize.y / 2.f))
+    };
+
     const std::uint32_t TitleCharSize = 128;
     const sf::Vector2f TitlePosition(960.f, 860.f);
 
@@ -178,7 +184,16 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
 
     initScene();
     loadResources();
+
+    //set up the camera to switch between views
+    m_scene.getActiveCamera().getComponent<xy::Transform>().setPosition(camTargets[m_settings.camTargetIndex]);
+    auto& cam = m_scene.getActiveCamera().getComponent<xy::Camera>();
+    cam.setView(ctx.defaultView.getSize());
+    cam.setViewport(ctx.defaultView.getViewport());
+
     buildMenu();
+    buildTileView();
+    updateTextScene();
 
     registerConsoleTab("Options",
         [&]() 
@@ -215,11 +230,6 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
             xy::ui::text("OSGC - Open Source Game Collection. Copyright 2019 Matt Marchant and contributors");
             xy::ui::text("For more information visit https://github.com/fallah/osgc");
         });
-
-    m_scene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
-    m_scene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
-
-    updateTextScene();
 
     ctx.appInstance.setMouseCursorVisible(true);
 
@@ -467,6 +477,7 @@ void BrowserState::loadResources()
     SpriteID::sprites[SpriteID::Yes] = spriteSheet.getSprite("yes");
     SpriteID::sprites[SpriteID::No] = spriteSheet.getSprite("no");
     SpriteID::sprites[SpriteID::Sort] = spriteSheet.getSprite("sort");
+    SpriteID::sprites[SpriteID::Tiled] = spriteSheet.getSprite("tile");
 
     m_audioScape.loadFromFile("assets/sound/ui.xas");
 }
@@ -521,10 +532,16 @@ void BrowserState::buildMenu()
     //background
     buildSlideshow();
 
+    auto& camTx = m_scene.getActiveCamera().getComponent<xy::Transform>();
+    
+    //background image is independent of slideshow and visible when
+    //slideshow mode is disabled.
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(BackgroundDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::Background]));
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y * 0.6f);
@@ -539,11 +556,42 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::Transform>().setPosition(ItemPadding, ItemPadding);
     entity.addComponent<xy::Text>(m_resources.get<sf::Font>(FontID::handles[FontID::TitleFont])).setString("OSGC");
     entity.getComponent<xy::Text>().setCharacterSize(48);
-    //entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
-    //entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
-    //entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
+    //tile mode toggle
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = SpriteID::sprites[SpriteID::Tiled];
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureRect();
+    bounds.top = bounds.height * m_settings.camTargetIndex;
+    entity.getComponent<xy::Sprite>().setTextureRect(bounds);
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - ((bounds.width + ItemPadding) * 4.f), ItemPadding);
+    entity.addComponent<UINode>();
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::UINode;
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse
+                    && e.getComponent<UINode>().enabled)
+                {
+                    m_settings.camTargetIndex = (m_settings.camTargetIndex + 1) % camTargets.size();
+                    m_scene.getActiveCamera().getComponent<xy::Transform>().setPosition(camTargets[m_settings.camTargetIndex]);
+
+                    auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
+                    bounds.top = bounds.height * m_settings.camTargetIndex;
+                    e.getComponent<xy::Sprite>().setTextureRect(bounds);
+                }
+            });
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
+
+    //sort icon
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>();
@@ -564,7 +612,10 @@ void BrowserState::buildMenu()
                     enableItem();
                 }
             });
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
+    //options icon
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>();
@@ -584,7 +635,10 @@ void BrowserState::buildMenu()
                     xy::Console::show();
                 }
             });
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
+    //quit icon
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>();
@@ -604,6 +658,8 @@ void BrowserState::buildMenu()
                     showQuit();
                 }
             });
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
     //navigation arrows
     entity = m_scene.createEntity();    
@@ -766,7 +822,7 @@ void BrowserState::buildMenu()
         m_browserTargets.back().x = -m_browserTargets.back().x;
     }
 
-    //sort nodes alphabetically. Quit node (below) is ignore so it is always last
+    //sort nodes alphabetically. Quit node (below) is ignored so it is always last
     sortNodes(m_settings.lastSort);
 
     //add one extra item to quit the browser
@@ -823,8 +879,8 @@ void BrowserState::buildMenu()
     verts.resize(4);
     verts[0].color = sf::Color::Black;
     verts[1] = { sf::Vector2f(xy::DefaultSceneSize.x, 0.f), sf::Color::Black };
-    verts[2] = { xy::DefaultSceneSize, sf::Color::Black };
-    verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y), sf::Color::Black };
+    verts[2] = { sf::Vector2f(xy::DefaultSceneSize. x, xy::DefaultSceneSize.y * 2.f), sf::Color::Black };
+    verts[3] = { sf::Vector2f(0.f, xy::DefaultSceneSize.y * 2.f), sf::Color::Black };
     entity.getComponent<xy::Drawable>().updateLocalBounds();
     entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Quads);
 
@@ -987,11 +1043,20 @@ void BrowserState::buildSlideshow()
                 break;
             }
         };
+
+        entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+        auto& camTx = m_scene.getActiveCamera().getComponent<xy::Transform>();
+        camTx.addChild(entity.getComponent<xy::Transform>());
     }
     else
     {
         m_slideshowTextures.clear();
     }
+}
+
+void BrowserState::buildTileView()
+{
+
 }
 
 void BrowserState::nextItem()
@@ -1140,6 +1205,7 @@ void BrowserState::showQuit()
 
     //show confirmation
     int renderDepth = 1000;
+    auto& camTx = m_scene.getActiveCamera().getComponent<xy::Transform>();
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>();
@@ -1175,6 +1241,8 @@ void BrowserState::showQuit()
             e.getComponent<xy::Callback>().active = false;
         }
     };
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
@@ -1188,6 +1256,8 @@ void BrowserState::showQuit()
     entity.getComponent<xy::Text>().setOutlineThickness(2.f);
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(120);
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
@@ -1208,6 +1278,8 @@ void BrowserState::showQuit()
                     xy::App::quit();
                 }
             });
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
     entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
@@ -1228,6 +1300,8 @@ void BrowserState::showQuit()
                     hideQuit();
                 }
             });
+    entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
+    camTx.addChild(entity.getComponent<xy::Transform>());
 
     m_quitShown = true;
 }

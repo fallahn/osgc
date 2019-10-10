@@ -83,6 +83,7 @@ private:
     
     struct Settings final
     {
+        std::size_t camTargetIndex = 0;
         bool useSlideshow = false;
         bool lastSort = true;
     }m_settings;
@@ -93,6 +94,7 @@ private:
     void loadResources();
     void buildMenu();
     void buildSlideshow();
+    void buildTileView();
 
     void nextItem();
     void prevItem();

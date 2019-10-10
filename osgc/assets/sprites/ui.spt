@@ -33,4 +33,14 @@ spritesheet ui
 	{
 		bounds=128,128,64,64
 	}
+
+    sprite tile
+    {
+        bounds = 192,0,64,64
+    }
+
+    sprite slide
+    {
+        bounds = 192,64,64,64
+    }    
 }
