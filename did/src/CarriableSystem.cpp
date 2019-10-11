@@ -204,7 +204,7 @@ void CarriableSystem::tryGrab(xy::Entity entity)
 
                     carriable.carried = true;
                     carriable.parentEntity = entity;
-                    carriable.spawnPosition = carriablePosition;
+                    //carriable.spawnPosition = carriablePosition;
                     carriable.stashed = false;
 
                     boat.treasureCount--;

@@ -38,12 +38,13 @@ struct Player final
     {
         CanDoAction = 0x1,
         Strafing = 0x2,
-        Cursed = 0x4 //reverses controls
+        Cursed = 0x4, //reverses controls
+        CanDig = 0x8
         //bit kludgy here as we also include
         //carriable flags from the 'Carrier' component
         //so remember if we add more here make sure
         //the carriable flags match up
-        //also make sure to sync correctly in the PlayerSystem update
+        //also make sure to sync correctly in the PlayerSystem update/reconcile
     };
 
     enum Direction
@@ -59,7 +60,7 @@ struct Player final
     struct Sync final
     {
         float accel = 0.f;        
-        std::uint16_t flags = CanDoAction;
+        std::uint16_t flags = CanDoAction | CanDig;
         std::uint8_t direction = Direction::Down;
         std::uint8_t state = State::Alive;
     }sync;

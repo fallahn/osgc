@@ -68,7 +68,7 @@ void PlayerSystem::process(float dt)
 
         //kludgy... update the player's sync flags with the carrier's
         //remember to update this if adding new player sync values
-        player.sync.flags = ((player.sync.flags & 0x7) | entity.getComponent<Carrier>().carryFlags);
+        player.sync.flags = ((player.sync.flags & 0xf) | entity.getComponent<Carrier>().carryFlags);
 
         //count down any curse on the player...
         if (player.sync.flags & Player::Cursed)
@@ -173,7 +173,8 @@ void PlayerSystem::reconcile(const ClientState& state, xy::Entity entity)
     player.sync = state.sync;
     player.sync.flags = flags;
 
-    entity.getComponent<Carrier>().carryFlags = (player.sync.flags & ~0x7);
+    //see Player::Flags
+    entity.getComponent<Carrier>().carryFlags = (player.sync.flags & ~0xf);
 
     //we don't actually sync the player curse time
     //but we do sync the state - so set the curse time locally
@@ -341,16 +342,18 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
                     auto* msg = postMessage<PlayerEvent>(MessageID::PlayerMessage);
                     msg->entity = entity;
 
-                    if (carryFlags & (Carrier::Torch | Carrier::Treasure))
+                    if ((carryFlags & (Carrier::Torch | Carrier::Treasure))
+                        || entity.getComponent<CollisionComponent>().water != 0)
                     {
                         //raise message to drop what we're carrying
                         msg->action = PlayerEvent::DroppedCarrying;
                     }
-                    else if(entity.getComponent<CollisionComponent>().water == 0)
+                    else// if(entity.getComponent<CollisionComponent>().water == 0)
                     {
                         //perform that items action
                         msg->action = PlayerEvent::ActivatedItem;
                     }
+                    player.sync.flags &= ~Player::CanDig;
                 }
                 else
                 {
@@ -379,6 +382,11 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
                         }
                     }
                 }
+            }
+            else if ((input.mask & InputFlag::Action) == 0)
+            {
+                //must have just let go so re-enable digging
+                player.sync.flags |= Player::CanDig;
             }
         }
         else if (changes & InputFlag::WeaponNext)
@@ -440,7 +448,7 @@ sf::Vector2f PlayerSystem::processInput(Input input, float delta, xy::Entity ent
         player.previousInputFlags = input.mask;
 
         //check if shovel button is held and continue to dig on cooldown time
-        if (input.mask & InputFlag::Action
+        if (input.mask & InputFlag::Action && (player.sync.flags & Player::CanDig)
             && entity.getComponent<Inventory>().weapon == Inventory::Shovel
             && (player.sync.flags & Player::CanDoAction))
         {
@@ -637,6 +645,8 @@ void PlayerSystem::updateCollision(xy::Entity entity, float dt)
                 newMsg->action = PlayerEvent::ExplosionHit;
                 newMsg->entity = entity;
                 newMsg->data = collision.manifolds[i].otherEntity.getComponent<std::int32_t>();
+
+                std::cout << "explosion owner " << newMsg->data << "\n";
             }
         }
             break;

@@ -1808,7 +1808,7 @@ void GameState::updateScene(SceneState state)
     }
     else if (state.action == SceneState::Stung)
     {
-        LOG("Stung by bees", xy::Logger::Type::Info);
+        //LOG("Stung by bees", xy::Logger::Type::Info);
     }
 
     m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);

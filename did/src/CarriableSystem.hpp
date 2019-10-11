@@ -28,17 +28,17 @@ struct Carrier final
     enum Flags
     {
         //as these have to be sync'd as part of the player
-        //component the flags start at 0x4. Be wary of updating
+        //component the flags start at 0x10. Be wary of updating
         //values in the player flags enum, and make sure that
-        //if we go beyond 14 values here that we increase the
+        //if we go beyond 12 values here that we increase the
         //player flags word to accomodate.
-        Torch = 0x8,
         Treasure = 0x10,
         Decoy = 0x20,
         Flare = 0x40,
         Magnet = 0x80,
         SpookySkull = 0x100,
-        Mine = 0x200
+        Mine = 0x200,
+        Torch = 0x400,
     };
 
     std::int32_t carryFlags = 0;

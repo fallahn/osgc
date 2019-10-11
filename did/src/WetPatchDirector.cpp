@@ -151,6 +151,7 @@ void DigDirector::handleMessage(const xy::Message& msg)
                                         break;
                                     case Actor::ID::MineSpawn:
                                         msg->id = Actor::ID::Explosion;
+                                        msg->data = wetPatch.owner;
                                         break;
                                     }
 
