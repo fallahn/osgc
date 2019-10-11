@@ -37,6 +37,8 @@ namespace CommandID
         Slideshow = 0x8,
         UINode = 0x10,
         ConfirmationEntity = 0x20,
-        ScaledText = 0x40
+        ScaledText = 0x40,
+        TileTitleText = 0x80,
+        TileNode = 0x100
     };
 }

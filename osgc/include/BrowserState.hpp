@@ -81,6 +81,9 @@ private:
     std::vector<std::pair<xy::Entity, std::string>> m_nodeList;
     sf::Vector2f m_basePosition; //initial node position
     
+    std::vector<std::pair<xy::Entity, std::string>> m_tileList;
+    std::vector<sf::Vector2f> m_tilePositions;
+
     struct Settings final
     {
         std::size_t camTargetIndex = 0;
@@ -94,7 +97,15 @@ private:
     void loadResources();
     void buildMenu();
     void buildSlideshow();
-    void buildTileView();
+
+    struct PluginInfo final
+    {
+        std::string name;
+        std::string thumbnail;
+        std::string author;
+        std::string version;
+    };
+    xy::Entity addTileNode(std::size_t, std::size_t, const std::string&, const PluginInfo&);
 
     void nextItem();
     void prevItem();

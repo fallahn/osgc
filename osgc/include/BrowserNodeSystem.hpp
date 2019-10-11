@@ -32,6 +32,16 @@ source distribution.
 #include <string>
 #include <functional>
 
+struct TileNode final
+{
+    //std::size_t index = 0;
+    std::string title;
+    std::string author;
+    std::string version;
+    bool enabled = false;
+    std::function<void()> action;
+};
+
 struct BrowserNode final
 {
     std::size_t index = 0;

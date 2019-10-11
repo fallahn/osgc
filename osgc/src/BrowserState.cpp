@@ -111,14 +111,6 @@ namespace
     const std::string settingsFile("browser.cfg");
     const auto ThumbnailSize = xy::DefaultSceneSize / 2.f; //make sure to scale all sprites to correct size
 
-    struct PluginInfo final
-    {
-        std::string name;
-        std::string thumbnail;
-        std::string author;
-        std::string version;
-    };
-
     template <typename T>
     sf::Vector2<T> operator / (sf::Vector2<T> a, sf::Vector2<T> b)
     {
@@ -192,7 +184,6 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
     cam.setViewport(ctx.defaultView.getViewport());
 
     buildMenu();
-    buildTileView();
     updateTextScene();
 
     registerConsoleTab("Options",
@@ -259,6 +250,10 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
 
 BrowserState::~BrowserState()
 {
+    //set the default view again
+    //so any loading plugin is as it expects
+    xy::App::getRenderWindow()->setView(getContext().defaultView);
+
     saveSettings();
 }
 
@@ -725,8 +720,49 @@ void BrowserState::buildMenu()
             }
         });
 
+    auto tileButtonCallback = m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+        [](xy::Entity e, sf::Uint64 flags)
+        {
+            if (flags & xy::UISystem::LeftMouse
+                && e.getComponent<TileNode>().enabled)
+            {
+                e.getComponent<TileNode>().action();
+            }
+        });
+
+    auto tileMouseInCallback = m_scene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity e, sf::Vector2f)
+        {
+            if (e.getComponent<TileNode>().enabled)
+            {
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::TileTitleText;
+                cmd.action = [e](xy::Entity titleEnt, float)
+                {
+                    titleEnt.getComponent<xy::Text>().setString(e.getComponent<TileNode>().title);
+                };
+                m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
+        });
+
+    auto tileMouseOutCallback = m_scene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity e, sf::Vector2f)
+        {
+            if (e.getComponent<TileNode>().enabled)
+            {
+                xy::Command cmd;
+                cmd.targetFlags = CommandID::TileTitleText;
+                cmd.action = [](xy::Entity titleEnt, float)
+                {
+                    titleEnt.getComponent<xy::Text>().setString("OSGC");
+                };
+                m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+            }
+        });
 
     std::size_t i = 0;
+    auto tileNodeParent = m_scene.createEntity();
+    tileNodeParent.addComponent<xy::Transform>().setPosition(0.f, xy::DefaultSceneSize.y);
 
     auto pluginList = xy::FileSystem::listDirectories(xy::FileSystem::getResourcePath() + pluginFolder);
     for (const auto& dir : pluginList)
@@ -768,16 +804,24 @@ void BrowserState::buildMenu()
         entity.getComponent<xy::Transform>().setOrigin(ThumbnailSize.x / 2.f, ThumbnailSize.y * 0.8f);
         entity.addComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(thumbID));
         applyVertices(entity.getComponent<xy::Drawable>());
-        entity.addComponent<BrowserNode>().index = i++;
+        entity.addComponent<BrowserNode>().index = i;
         entity.getComponent<BrowserNode>().title = info.name;
         entity.getComponent<BrowserNode>().action = [&, loadPath]() {m_gameInstance.loadPlugin(loadPath); };
         entity.addComponent<xy::CommandTarget>().ID = CommandID::BrowserNode;
 
         entity.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
-        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] = nodeCallback;            
+        entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] = nodeCallback;
 
         //store node entity so we can sort by name
         m_nodeList.emplace_back(std::make_pair(entity, info.name));
+
+        //create a smaller version for tile view
+        auto tileEnt = addTileNode(i, thumbID, loadPath, info);
+        tileNodeParent.getComponent<xy::Transform>().addChild(tileEnt.getComponent<xy::Transform>());
+        tileEnt.addComponent<xy::UIHitBox>().area = { sf::Vector2f(), ThumbnailSize };
+        tileEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] = tileButtonCallback;
+        //tileEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = tileMouseOutCallback;
+        tileEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = tileMouseInCallback;
 
         auto& parentTx = entity.getComponent<xy::Transform>();
 
@@ -820,6 +864,8 @@ void BrowserState::buildMenu()
         rootNode.addChild(parentTx);
         m_browserTargets.push_back(nodePosition - m_basePosition);
         m_browserTargets.back().x = -m_browserTargets.back().x;
+
+        i++;
     }
 
     //sort nodes alphabetically. Quit node (below) is ignored so it is always last
@@ -870,6 +916,18 @@ void BrowserState::buildMenu()
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TitleText;
     entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
+    //tile version
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(TitlePosition);
+    entity.getComponent<xy::Transform>().move(0.f, xy::DefaultSceneSize.y);
+    entity.addComponent<xy::Text>(menuFont).setAlignment(xy::Text::Alignment::Centre);
+    entity.getComponent<xy::Text>().setCharacterSize(TitleCharSize);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::White);
+    entity.getComponent<xy::Text>().setOutlineThickness(2.f);
+    entity.getComponent<xy::Text>().setString("OSGC");
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::TileTitleText;
+    entity.addComponent<xy::Drawable>().setDepth(TextDepth);
 
     //create a fade in which also plays the intro sound
     entity = m_scene.createEntity();
@@ -1054,9 +1112,34 @@ void BrowserState::buildSlideshow()
     }
 }
 
-void BrowserState::buildTileView()
+xy::Entity BrowserState::addTileNode(std::size_t index, std::size_t textureID, const std::string& loadPath, const PluginInfo& info)
 {
+    //TODO we need to paginate these when there are more plugins than can fit on screen.
 
+    const std::size_t TilesPerRow = 7;
+    const float ThumbWidth = xy::DefaultSceneSize.x / 8.f;
+    const float Padding = (xy::DefaultSceneSize.x - (TilesPerRow * ThumbWidth)) / 8.f;
+    const float RowHeight = (xy::DefaultSceneSize.y / 8.f);
+
+    sf::Vector2f nodePosition((ThumbWidth + Padding) * (index % TilesPerRow), (RowHeight + Padding) * (index / TilesPerRow));
+    nodePosition += sf::Vector2f(Padding, Padding + 96.f);
+
+    auto entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(nodePosition);
+    entity.getComponent<xy::Transform>().setScale(0.25f, 0.25f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(textureID));
+    entity.addComponent<TileNode>().title = info.name;
+    entity.getComponent<TileNode>().author = info.author;
+    entity.getComponent<TileNode>().version = info.version;
+    entity.getComponent<TileNode>().enabled = true;
+    entity.getComponent<TileNode>().action = [&, loadPath]() {m_gameInstance.loadPlugin(loadPath); };
+    entity.addComponent<xy::CommandTarget>().ID = CommandID::TileNode;
+
+    m_tileList.emplace_back(std::make_pair(entity, info.name));
+    m_tilePositions.emplace_back(nodePosition);
+
+    return entity;
 }
 
 void BrowserState::nextItem()
@@ -1203,6 +1286,13 @@ void BrowserState::showQuit()
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+    cmd.targetFlags = CommandID::TileNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<TileNode>().enabled = false;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
     //show confirmation
     int renderDepth = 1000;
     auto& camTx = m_scene.getActiveCamera().getComponent<xy::Transform>();
@@ -1259,6 +1349,7 @@ void BrowserState::showQuit()
     entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
     camTx.addChild(entity.getComponent<xy::Transform>());
 
+    //yes button
     entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>();
@@ -1281,6 +1372,7 @@ void BrowserState::showQuit()
     entity.getComponent<xy::Transform>().move(-xy::DefaultSceneSize / 2.f);
     camTx.addChild(entity.getComponent<xy::Transform>());
 
+    //no button
     entity = m_scene.createEntity();
     entity.addComponent<xy::CommandTarget>().ID = CommandID::ConfirmationEntity;
     entity.addComponent<xy::Transform>();
@@ -1334,6 +1426,13 @@ void BrowserState::hideQuit()
     };
     m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+    cmd.targetFlags = CommandID::TileNode;
+    cmd.action = [](xy::Entity e, float)
+    {
+        e.getComponent<TileNode>().enabled = true;
+    };
+    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
     //destroy the confirmation entities
     cmd.targetFlags = CommandID::ConfirmationEntity;
     cmd.action = [&](xy::Entity e, float)
@@ -1380,11 +1479,23 @@ void BrowserState::sortNodes(bool asc)
             {
                 return a.second < b.second;
             });
+
+        std::sort(m_tileList.begin(), m_tileList.end(),
+            [](const std::pair<xy::Entity, std::string>& a, const std::pair<xy::Entity, std::string>& b)
+            {
+                return a.second < b.second;
+            });
     }
     else
     {
         std::sort(m_nodeList.begin(), m_nodeList.end(),
             [](const std::pair<xy::Entity, std::string> & a, const std::pair<xy::Entity, std::string> & b)
+            {
+                return a.second > b.second;
+            });
+
+        std::sort(m_tileList.begin(), m_tileList.end(),
+            [](const std::pair<xy::Entity, std::string>& a, const std::pair<xy::Entity, std::string>& b)
             {
                 return a.second > b.second;
             });
@@ -1399,6 +1510,8 @@ void BrowserState::sortNodes(bool asc)
         m_nodeList[i].first.getComponent<xy::Transform>().setPosition(nodePos);
         m_nodeList[i].first.getComponent<BrowserNode>().index = i;
         nodePos.x += stride;
+
+        m_tileList[i].first.getComponent<xy::Transform>().setPosition(m_tilePositions[i]);
     }
 }
 
@@ -1410,7 +1523,7 @@ void BrowserState::updateTextScene()
     windowScale = currView.getSize().x / xy::DefaultSceneSize.x;
 
     xy::Command cmd;
-    cmd.targetFlags = CommandID::TitleText;
+    cmd.targetFlags = CommandID::TitleText | CommandID::TileTitleText;
     cmd.action = [](xy::Entity e, float)
     {
         //e.getComponent<xy::Transform>().setPosition(TitlePosition * windowScale);
