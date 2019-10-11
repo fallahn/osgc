@@ -45,7 +45,7 @@ Copyright 2019 Matt Marchant
 
 #include <array>
 
-#ifdef XY_DEBUG
+#ifdef BUNS//XY_DEBUG
 #define SEND_DEBUG DebugState state; \
 state.serverID = entity.getIndex(); \
 state.state = skeleton.state; \

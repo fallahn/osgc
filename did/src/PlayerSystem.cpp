@@ -645,8 +645,6 @@ void PlayerSystem::updateCollision(xy::Entity entity, float dt)
                 newMsg->action = PlayerEvent::ExplosionHit;
                 newMsg->entity = entity;
                 newMsg->data = collision.manifolds[i].otherEntity.getComponent<std::int32_t>();
-
-                std::cout << "explosion owner " << newMsg->data << "\n";
             }
         }
             break;

@@ -796,6 +796,8 @@ void BrowserState::buildMenu()
             }
         }
 
+        m_resources.get<sf::Texture>(thumbID).setSmooth(true);
+
         //create entity
         auto loadPath = pluginFolder + dir;
 
