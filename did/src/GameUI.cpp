@@ -121,6 +121,17 @@ namespace
                     entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("countdown");
                     entity.getComponent<xy::AudioEmitter>().play();
                     entity.addComponent<xy::CommandTarget>().ID = CommandID::Music;
+
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Music;
+                    cmd.action = [entity](xy::Entity e, float)
+                    {
+                        if (e != entity)
+                        {
+                            e.getComponent<xy::AudioEmitter>().stop();
+                        }
+                    };
+                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
                 }
 
                 if (m_timeSource == 0)

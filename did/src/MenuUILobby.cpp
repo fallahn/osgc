@@ -326,22 +326,16 @@ void MenuState::buildLobby(sf::Font& font)
 
     //tip text
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::SeedPosition);
-    entity.getComponent<xy::Transform>().setOrigin(-30.f, 20.f);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 1020.f);
     entity.getComponent<xy::Transform>().setScale(0.f, 0.f);
-    entity.addComponent<xy::Text>(fineFont).setString("Change this phrase to change how the island is generated");
+    entity.addComponent<xy::Text>(fineFont);// .setString("Change this phrase to change how the island is generated");
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
-    entity.getComponent<xy::Text>().setFillColour(/*Global::InnerTextColour*/sf::Color::White);
-    entity.getComponent<xy::Text>().setOutlineColour(/*Global::OuterTextColour*/sf::Color::Black);
+    entity.getComponent<xy::Text>().setFillColour(sf::Color::White);
+    entity.getComponent<xy::Text>().setOutlineColour(sf::Color::Black);
     entity.getComponent<xy::Text>().setOutlineThickness(1.f);
+    entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Drawable>().setDepth(100);
-    entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function =
-        [](xy::Entity e, float)
-    {
-        auto mousePos = xy::App::getRenderWindow()->mapPixelToCoords(sf::Mouse::getPosition(*xy::App::getRenderWindow()));
-        e.getComponent<xy::Transform>().setPosition(mousePos);
-    };
+
     auto toolTip = entity;
 
     //plank background
@@ -428,7 +422,7 @@ void MenuState::buildLobby(sf::Font& font)
 
     //randomise button
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(/*Menu::SeedPosition.x + 700.f, Menu::SeedPosition.y*/xy::DefaultSceneSize.x / 2.f, 1000.f);
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, 980.f);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::RandomButton];
     entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("randomise");
