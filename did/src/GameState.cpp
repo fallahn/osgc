@@ -67,6 +67,7 @@ Copyright 2019 Matt Marchant
 #include "Packet.hpp"
 
 #include <xyginext/core/App.hpp>
+#include <xyginext/core/SysTime.hpp>
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -905,7 +906,14 @@ void GameState::loadResources()
         spriteSheet.getAnimationIndex("dig", "poopsnail")
     };
 
-    spriteSheet.loadFromFile("assets/sprites/lantern.spt", m_textureResource);
+    if (xy::SysTime::now().months() == 10)
+    {
+        spriteSheet.loadFromFile("assets/sprites/pumpkin.spt", m_textureResource);
+    }
+    else
+    {
+        spriteSheet.loadFromFile("assets/sprites/lantern.spt", m_textureResource);
+    }
     m_sprites[SpriteID::Lantern] = spriteSheet.getSprite("lantern");
     auto id = spriteSheet.getAnimationIndex("flicker", "lantern");
     m_animationMaps[SpriteID::Lantern] = { id };
@@ -1908,7 +1916,7 @@ void GameState::spawnCurseIcon(xy::Entity parent, std::uint16_t id)
             }
             break;
         case CurseIconData::Active:
-            if (data.parent.getComponent<Player>().sync.state == Player::Dead)
+            if (data.parent.getComponent<xy::Transform>().getScale().x < 0.5f)
             {
                 m_gameScene.destroyEntity(e);
             }

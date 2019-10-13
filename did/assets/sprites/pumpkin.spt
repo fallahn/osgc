@@ -1,0 +1,23 @@
+sprite_sheet pumpkin
+{
+	src = "assets/images/pumpkin.png"
+	blendmode = alpha	
+
+	sprite lantern
+	{
+		bounds = 0,0,32,32
+
+		animation flicker
+		{
+			frame = 0,0,32,32
+			frame = 32,0,32,32
+			frame = 64,0,32,32
+			frame = 0,32,32,32
+			frame = 32,32,32,32
+			frame = 64,32,32,32
+			
+			loop = true
+			framerate = 24
+		}
+	}
+}

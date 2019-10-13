@@ -328,6 +328,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("walk");
         entity.addComponent<BroadcastComponent>();
         hasWeapon = true;
+        addNameTag(entity);
         addShadow(entity);
         addSpawnPuff(entity);
         break;

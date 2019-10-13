@@ -57,8 +57,9 @@ When in a lobby as either a host or a guest, make sure to check the 'Ready' butt
 ###### Console Commands
 While the game is running there are a few console commands available. Open the console by pressing F1 and enter the following:
 
-    set_storm 0,1,2 - sets weather to nice, rain or storm (host only)
-    bots_enabled 0, 1 - enable server side bots (host only)
+    set_storm <0,1,2> - sets weather to nice, rain or storm (host only)
+    bots_enabled <0,1> - enable server side bots (host only)
+    seed - shows the current map seed
     spawn <item> - spawns the given item at the player’s position (host only)
         decoy_item
         decoy
@@ -68,6 +69,5 @@ While the game is running there are a few console commands available. Open the c
         skull_item
         skull_shield
         mine_item
-        seed - shows the current map seed
-
+    
 Note some of the above commands are only available to the current game host. For a list of available commands at run time type `help`.
