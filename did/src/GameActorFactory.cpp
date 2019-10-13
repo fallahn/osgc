@@ -653,7 +653,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Lantern];
         entity.getComponent<xy::SpriteAnimation>().play(0);
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::Lantern].getTexture());
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<Torchlight>();
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::LanternBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::BotQuery);
@@ -1055,7 +1055,8 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
 
     auto parent = entity;
 
-    if (actor.id != Actor::Boat)
+    if (actor.id != Actor::Boat
+        && actor.id != Actor::Lantern)
     {
         entity = m_gameScene.createEntity();
         auto& shadowTx = entity.addComponent<xy::Transform>();
@@ -1065,16 +1066,6 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/player_shadow.png"));
         entity.addComponent<SimpleShadow>().parent = parent;
         //entity.addComponent<xy::CommandTarget>().ID = CommandID::BasicShadow;
-
-        //TODO we can move this to a system if we're also going to fade on light proximity
-        //entity.addComponent<xy::Callback>().active = true; //destroy shadow if parent removed
-        //entity.getComponent<xy::Callback>().function = [&](xy::Entity ent, float)
-        //{
-        //    if (ent.getComponent<xy::Transform>().getDepth() == 0)
-        //    {
-        //        m_gameScene.destroyEntity(ent);
-        //    }
-        //};
 
         spriteTx.addChild(shadowTx);
     }

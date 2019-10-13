@@ -121,6 +121,7 @@ namespace
 
         DecoyDie,
         Respawn,
+        PlayerSpawn,
 
         Count
     };
@@ -208,7 +209,8 @@ namespace
         "assets/sound/effects/splash04.wav",
 
         "assets/sound/effects/decoy_die.wav",
-        "assets/sound/effects/respawn.wav"
+        "assets/sound/effects/respawn.wav",
+        "assets/sound/effects/player_spawn.wav"
     };
 
     //std::array<float, AudioID::Count> triggerTimes = {};
@@ -484,6 +486,7 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
             }
+            playSound(AudioID::PlayerSpawn, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(30.f);
             break;
 
         case PlayerEvent::Died:

@@ -87,6 +87,8 @@ public:
     //returns if the given position is in water - depends on map data already being processed
     bool isWater(sf::Vector2f) const;
 
+    bool isEdgeTile(sf::Vector2f) const;
+
 private:
 
     std::size_t m_treasureCount;

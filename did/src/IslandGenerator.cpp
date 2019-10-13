@@ -533,9 +533,22 @@ const TileArray& IslandGenerator::getPathData()
 
 bool IslandGenerator::isWater(sf::Vector2f position) const
 {
+    position.x += Global::TileSize / 2.f;
+    position.y += Global::TileSize / 2.f;
+
     sf::Vector2i tileIndex(position / Global::TileSize);
     auto idx = tileIndex.y * Global::TileCountX + tileIndex.x;
     return (m_mapData.tileData[idx] == 0 || m_mapData.tileData[idx] == 15);
+}
+
+bool IslandGenerator::isEdgeTile(sf::Vector2f position) const
+{
+    position.x += Global::TileSize / 2.f;
+    position.y += Global::TileSize / 2.f;
+
+    sf::Vector2i tileIndex(position / Global::TileSize);
+    auto idx = tileIndex.y * Global::TileCountX + tileIndex.x;
+    return (m_mapData.tileData[idx] < 30);
 }
 
 //private

@@ -37,27 +37,29 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float WeaponWidth = 1.f;
-    const float WeaponHalfWidth = WeaponWidth / 2.f;
-    const float SwordLength = 22.f;
+    const float SwordLength = 22.f;  
+    const float SwordWidth = 16.f;
+    const float SwordHalfWidth = SwordWidth / 2.f;
+    const float PistolWidth = 1.f;
+    const float PistolHalfWidth = PistolWidth / 2.f;
     const float PistolLength = 256.f;
 
     //indexed by Player::Direction enum
     //up, down, left, right
     const std::array<sf::FloatRect,4u> swords = 
     {
-        sf::FloatRect(-WeaponHalfWidth, 0.f, WeaponWidth, -SwordLength),
-        sf::FloatRect(-WeaponHalfWidth, 0.f, WeaponWidth, SwordLength),
-        sf::FloatRect(0.f, -WeaponHalfWidth, -SwordLength, WeaponWidth),
-        sf::FloatRect(0.f, -WeaponHalfWidth, SwordLength, WeaponWidth)
+        sf::FloatRect(-SwordHalfWidth, 0.f, SwordWidth, -SwordLength),
+        sf::FloatRect(-SwordHalfWidth, 0.f, SwordWidth, SwordLength),
+        sf::FloatRect(0.f, -SwordHalfWidth, -SwordLength, SwordWidth),
+        sf::FloatRect(0.f, -SwordHalfWidth, SwordLength, SwordWidth)
     };
 
     const std::array<sf::FloatRect, 4u> pistols = 
     {
-        sf::FloatRect(-WeaponHalfWidth, 0.f, WeaponWidth, -PistolLength),
-        sf::FloatRect(-WeaponHalfWidth, 0.f, WeaponWidth, PistolLength),
-        sf::FloatRect(0.f, -WeaponHalfWidth, -PistolLength, WeaponWidth),
-        sf::FloatRect(0.f, -WeaponHalfWidth, PistolLength, WeaponWidth)
+        sf::FloatRect(-PistolHalfWidth, 0.f, PistolWidth, -PistolLength),
+        sf::FloatRect(-PistolHalfWidth, 0.f, PistolWidth, PistolLength),
+        sf::FloatRect(0.f, -PistolHalfWidth, -PistolLength, PistolWidth),
+        sf::FloatRect(0.f, -PistolHalfWidth, PistolLength, PistolWidth)
     };
 
 }

@@ -902,6 +902,32 @@ void GameState::spawnMapActors()
 
 xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
 {
+    auto correctPosition = [&](sf::Vector2f p)->sf::Vector2f
+    {
+        if (m_islandGenerator.isEdgeTile(p))
+        {
+            const auto centre = Global::IslandSize / 2.f;
+            if (p.x < centre.x)
+            {
+                p.x += Global::TileSize / 2.f;
+            }
+            else
+            {
+                p.x -= Global::TileSize / 2.f;
+            }
+
+            if (p.y < centre.y)
+            {
+                p.y += Global::TileSize / 2.f;
+            }
+            else
+            {
+                p.y -= Global::TileSize / 2.f;
+            }
+        }
+        return p;
+    };
+
     auto entity = m_scene.createEntity();
     entity.addComponent<Actor>().id = static_cast<Actor::ID>(id);
     entity.getComponent<Actor>().entityID = entity.getIndex();
@@ -992,11 +1018,13 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         entity.getComponent<Crab>().maxTravel += Server::getRandomFloat(-10.f, 10.f);
         break;
     case Actor::Decoy:
+        position = correctPosition(position);
         entity.addComponent<Decoy>();
         entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, Global::TileSize, Global::TileSize });
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Decoy);
         break;
     case Actor::SkullShield:
+        position = correctPosition(position);
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::SkullShieldBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(0);
         entity.addComponent<CollisionComponent>().bounds = Global::SkullShieldBounds;
@@ -1007,6 +1035,8 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
     case Actor::TreasureSpawn:
     case Actor::CoinSpawn:
     case Actor::MineSpawn:
+        //check if we're on a dark sand tile and move away from water if needed
+        position = correctPosition(position);
         entity.addComponent<xy::BroadphaseComponent>().setArea({ 0.f, 0.f, Global::TileSize, Global::TileSize });
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::WetPatch);
         entity.addComponent<WetPatch>();
@@ -1117,7 +1147,7 @@ xy::Entity GameState::spawnActor(sf::Vector2f position, std::int32_t id)
         break;
     }
 
-    //adding this last because barrels mutate position
+    //add this last because some conditions mutate position
     entity.addComponent<xy::Transform>().setPosition(position);
 
     ActorState state;

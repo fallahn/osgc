@@ -263,6 +263,7 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
     auto ent = carrier.carriedEntity;
 
     auto& carriable = ent.getComponent<Carriable>();
+    const auto& collision = ent.getComponent<CollisionComponent>();
     //do this first so any action callbacks can read carriable data before it's reset
     if (destroyItem)
     {
@@ -274,7 +275,7 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
             ent.getComponent<xy::Transform>().setPosition(-5000.f, -5000.f); //just hide somewhere
             m_stashedTreasures[m_stashedIndex++] = ent;
         }
-        else
+        else if(collision.water == 0)
         {
             //was an activated item (presumably) so activate and destroy it
             carriable.action(ent, entity.getComponent<Actor>().id);
@@ -315,7 +316,6 @@ void CarriableSystem::tryDrop(xy::Entity entity, bool destroyItem)
     m_sharedData.gameServer->broadcastData(PacketID::CarriableUpdate, cs, xy::NetFlag::Reliable, Global::ReliableChannel);
 
     //check if was dropped in water
-    const auto& collision = ent.getComponent<CollisionComponent>();
     if (collision.water > 0 && !carriable.stashed)
     {
         //raise message so client can render sfx
