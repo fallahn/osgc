@@ -253,7 +253,7 @@ void MenuState::buildLobby(sf::Font& font)
         //large avatar
         sf::Texture* texture = &m_textureResource.get(textureNames[i]);
         entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xPos - 12.f, 340.f);
+        entity.addComponent<xy::Transform>().setPosition(xPos - 12.f, 392.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
         entity.addComponent<xy::Sprite>() = m_avatarSprites[i];
         entity.getComponent<xy::Sprite>().setTexture(*texture, false);

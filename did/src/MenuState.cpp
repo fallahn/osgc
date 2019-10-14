@@ -676,6 +676,8 @@ void MenuState::createScene()
                 e.getComponent<xy::Text>().setString(m_sharedData.clientName);
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            m_spriteSounds[m_spriteIndex].getComponent<xy::AudioEmitter>().play();
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -734,6 +736,8 @@ void MenuState::createScene()
                 e.getComponent<xy::Text>().setString(m_sharedData.remoteIP);
             };
             m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            m_spriteSounds[m_spriteIndex].getComponent<xy::AudioEmitter>().play();
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

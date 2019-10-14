@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/System/Vector2.hpp>
 
 #include <vector>
+#include <array>
 
 namespace xy
 {
@@ -47,11 +48,15 @@ public:
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
+    void mapSpriteIndex(std::int32_t, std::uint8_t);
+
 private:
     xy::ResourceHandler m_audioResource;
 
     std::vector<xy::Entity> m_entities;
     std::size_t m_nextFreeEntity;
+
+    std::array<std::uint8_t, 5u> m_spriteIndices = {};
 
     xy::Entity getNextFreeEntity();
     void resizeEntities(std::size_t);

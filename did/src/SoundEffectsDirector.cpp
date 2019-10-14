@@ -466,22 +466,22 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             break;
 
         case PlayerEvent::Respawned:
-            switch (data.entity.getComponent<Actor>().id)
+            switch (m_spriteIndices[data.entity.getComponent<Actor>().id])
             {
             default:break;
-            case Actor::ID::PlayerOne:
+            case 0:
                 playSound(xy::Util::Random::value(AudioID::RodneySpawn01, AudioID::RodneySpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerTwo:
+            case 1:
                 playSound(xy::Util::Random::value(AudioID::JeanSpawn01, AudioID::JeanSpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerThree:
+            case 2:
                 playSound(xy::Util::Random::value(AudioID::HelenaSpawn01, AudioID::HelenaSpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerFour:
+            case 3:
                 playSound(xy::Util::Random::value(AudioID::LarsSpawn01, AudioID::LarsSpawn02),
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
@@ -502,22 +502,22 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 position = data.position;
             }
 
-            switch (data.entity.getComponent<Actor>().id)
+            switch (m_spriteIndices[data.entity.getComponent<Actor>().id])
             {
             default:break;
-            case Actor::ID::PlayerOne:
+            case 0:
                 playSound(xy::Util::Random::value(AudioID::RodneyDie01, AudioID::RodneyDie04),
                     position).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerTwo:
+            case 1:
                 playSound(xy::Util::Random::value(AudioID::JeanDie01, AudioID::JeanDie04),
                     position).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerThree:
+            case 2:
                 playSound(xy::Util::Random::value(AudioID::HelenaDie01, AudioID::HelenaDie03),
                     position).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerFour:
+            case 3:
                 playSound(xy::Util::Random::value(AudioID::LarsDie01, AudioID::LarsDie04),
                     position).setVolume(45.f);
                 break;
@@ -530,22 +530,22 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             if (data.data != actor.entityID) //client messages will be the same
             {
                 auto position = data.entity.getComponent<xy::Transform>().getPosition();
-                switch (data.entity.getComponent<Actor>().id)
+                switch (m_spriteIndices[data.entity.getComponent<Actor>().id])
                 {
                 default:break;
-                case Actor::ID::PlayerOne:
+                case 0:
                     playSound(AudioID::RodneyScore01,
                         position).setVolume(45.f);
                     break;
-                case Actor::ID::PlayerTwo:
+                case 1:
                     playSound(AudioID::JeanScore01,
                         position).setVolume(45.f);
                     break;
-                case Actor::ID::PlayerThree:
+                case 2:
                     playSound(AudioID::HelenaScore01,
                         position).setVolume(45.f);
                     break;
-                case Actor::ID::PlayerFour:
+                case 3:
                     playSound(AudioID::LarsScore01,
                         position).setVolume(45.f);
                     break;
@@ -566,22 +566,22 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             data.type == Carrier::Treasure)
         {
             auto playerID = data.entity.getComponent<Actor>().id;
-            switch (playerID)
+            switch (m_spriteIndices[playerID])
             {
             default:break;
-            case Actor::ID::PlayerOne:
+            case 0:
                 playSound(AudioID::RodneyPickup01, 
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerTwo:
+            case 1:
                 playSound(AudioID::JeanPickup01,
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerThree:
+            case 2:
                 playSound(AudioID::HelenaPickup01,
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
-            case Actor::ID::PlayerFour:
+            case 3:
                 playSound(AudioID::LarsPickup01,
                     data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
                 break;
@@ -610,6 +610,12 @@ void SFXDirector::process(float)
     {
         t -= dt;
     }*/
+}
+
+void SFXDirector::mapSpriteIndex(std::int32_t actor, std::uint8_t index)
+{
+    XY_ASSERT(actor < m_spriteIndices.size(), "");
+    m_spriteIndices[actor] = index;
 }
 
 //private

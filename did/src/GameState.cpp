@@ -782,7 +782,11 @@ void GameState::loadResources()
     m_gameScene.getSystem<Camera3DSystem>().enableChase(true);
     m_gameScene.getSystem<Camera3DSystem>().setActive(false);
 
-    m_gameScene.addDirector<SFXDirector>();
+    auto& sfxDir = m_gameScene.addDirector<SFXDirector>();
+    sfxDir.mapSpriteIndex(Actor::ID::PlayerOne, m_sharedData.clientInformation.getClient(0).spriteIndex);
+    sfxDir.mapSpriteIndex(Actor::ID::PlayerTwo, m_sharedData.clientInformation.getClient(1).spriteIndex);
+    sfxDir.mapSpriteIndex(Actor::ID::PlayerThree, m_sharedData.clientInformation.getClient(2).spriteIndex);
+    sfxDir.mapSpriteIndex(Actor::ID::PlayerFour, m_sharedData.clientInformation.getClient(3).spriteIndex);
 
     //set up camera
     auto view = getContext().defaultView;
