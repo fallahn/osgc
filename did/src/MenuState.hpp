@@ -124,6 +124,7 @@ private:
     std::vector<std::string> m_readmeStrings;
     void loadReadme();
 
+    std::uint8_t m_spriteIndex;
     std::array<xy::Sprite, 4u> m_avatarSprites;
     std::array<xy::Sprite, 4u> m_weaponSprites;
     void buildLobby(sf::Font&);

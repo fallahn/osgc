@@ -95,7 +95,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_sharedData    (sd),
     m_audioScape    (m_audioResource),
     m_gameLaunched  (false),
-    m_activeString  (nullptr)
+    m_activeString  (nullptr),
+    m_spriteIndex   (0)
 {
     launchLoadingScreen();
 

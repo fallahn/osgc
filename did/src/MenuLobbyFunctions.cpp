@@ -39,35 +39,34 @@ void MenuState::sendPlayerData()
     auto nameBytes = m_sharedData.clientName.toUtf32();
     auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), Global::MaxNameSize);
 
-    m_sharedData.netClient->sendPacket(PacketID::SupPlayerInfo, nameBytes.data(), size, xy::NetFlag::Reliable, Global::ReliableChannel);
+    std::vector<std::uint8_t>  buffer(size + 1);
+    buffer[0] = m_spriteIndex;
+    std::memcpy(&buffer[1], nameBytes.data(), size);
+
+    m_sharedData.netClient->sendPacket(PacketID::SupPlayerInfo, buffer.data(), buffer.size(), xy::NetFlag::Reliable, Global::ReliableChannel);
 }
 
 void MenuState::updateClientInfo(const xy::NetEvent& evt)
 {
     auto size = evt.packet.getSize();
-    size = std::min(Global::MaxNameSize, size - (sizeof(std::uint8_t) + sizeof(std::uint64_t)));
+    size = std::min(Global::MaxNameSize, size - sizeof(ClientInfoHeader));
 
-    std::uint8_t playerID = 0;
-    std::memcpy(&playerID, evt.packet.getData(), sizeof(playerID));
-
-    std::uint64_t peerID = 0;
-    std::memcpy(&peerID, (char*)evt.packet.getData() + sizeof(playerID), sizeof(peerID));
+    ClientInfoHeader ch;
+    std::memcpy(&ch, evt.packet.getData(), sizeof(ch));
 
     std::vector<sf::Uint32> buffer(size / sizeof(sf::Uint32));
-    std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(playerID) + sizeof(peerID), size);
+    std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(ch), size);
 
-    auto& client = m_sharedData.clientInformation.getClient(playerID);
-    bool newPlayer = client.peerID != peerID; //this client is not yet known to us!
+    auto& client = m_sharedData.clientInformation.getClient(ch.playerID);
+    bool newPlayer = client.peerID != ch.peerID; //this client is not yet known to us!
     client.name = sf::String::fromUtf32(buffer.begin(), buffer.end());
-    client.peerID = peerID;
-    client.spriteIndex = 3 - playerID;
-    //TODO get index of player's chosen sprite and update lobby view
-
+    client.peerID = ch.peerID;
+    client.spriteIndex = ch.spriteIndex;
 
     //print a message
     if (newPlayer)
     {
-        m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + " joined the game");
+        m_chatBuffer.push_back(client.name + " joined the game");
 
         if (m_chatBuffer.size() > MaxChatSize)
         {

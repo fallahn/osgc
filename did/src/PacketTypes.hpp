@@ -147,3 +147,11 @@ struct ItemState final
         Ammo, Coin, Food
     };
 };
+
+//used to send / receive client info in lobby state
+struct ClientInfoHeader final
+{
+    std::uint64_t peerID = 0;
+    std::uint8_t playerID = 0;
+    std::uint8_t spriteIndex = 0;
+};

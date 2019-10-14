@@ -108,13 +108,14 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         break;
     case PacketID::SupPlayerInfo:
     {
+        //grab sprite index
+        std::memcpy(&m_sharedData.connectedClients[evt.peer.getID()].spriteIndex, (char*)evt.packet.getData(), 1);
+
         //read out name string
-        std::vector<sf::Uint32> buffer(evt.packet.getSize() / sizeof(sf::Uint32));
-        std::memcpy(buffer.data(), (char*)evt.packet.getData(), evt.packet.getSize());
+        std::vector<sf::Uint32> buffer((evt.packet.getSize() - 1) / sizeof(sf::Uint32));
+        std::memcpy(buffer.data(), (char*)evt.packet.getData() + 1, evt.packet.getSize() - 1);
 
         m_sharedData.connectedClients[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
-
-        //TODO set which sprite the playre cose here
 
         //update all clients
         broadcastClientInfo();
@@ -167,13 +168,17 @@ void LobbyState::broadcastClientInfo()
 {
     for (const auto& [id, client] : m_sharedData.connectedClients)
     {
-        //send the player number (0 - 3), peer ID and name of client
-        auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
-        std::vector<char> buffer(sizeof(client.playerID) + sizeof(id) + size);
+        //send the player number (0 - 3), peer ID, sprite index and name of client
+        ClientInfoHeader ch;
+        ch.playerID = client.playerID;
+        ch.peerID = id;
+        ch.spriteIndex = client.spriteIndex;
 
-        std::memcpy(buffer.data(), &client.playerID, sizeof(client.playerID));
-        std::memcpy(buffer.data() + sizeof(client.playerID), &id, sizeof(id));
-        std::memcpy(buffer.data() + sizeof(client.playerID) + sizeof(id), client.name.getData(), size);
+        auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
+        std::vector<char> buffer(sizeof(ch) + size);
+
+        std::memcpy(buffer.data(), &ch, sizeof(ch));
+        std::memcpy(buffer.data() + sizeof(ch), client.name.getData(), size);
 
         m_sharedData.gameServer->broadcastData(PacketID::DeliverPlayerInfo, buffer.data(), buffer.size(), xy::NetFlag::Reliable);
 
