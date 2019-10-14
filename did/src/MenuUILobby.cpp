@@ -185,22 +185,18 @@ void MenuState::buildLobby(sf::Font& font)
 
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);
-    std::array<std::string, 4u> spriteNames =
+    for (auto i = 0u; i < 4u; ++i)
     {
-        "player_one",
-        "player_two",
-        "player_three",
-        "player_four"
-    };
+        m_avatarSprites[i] = spriteSheet.getSprite(std::to_string(i));
+    }
 
     xy::SpriteSheet weaponSprites;
     weaponSprites.loadFromFile("assets/sprites/weapons.spt", m_textureResource);
-    std::array<std::string, 4u> weaponNames =
-    {
-        "weapon_rodney",
-        "weapon_jean",
-        "weapon_rodney", "weapon_rodney"
-    };
+    m_weaponSprites[0] = weaponSprites.getSprite("weapon_rodney");
+    m_weaponSprites[1] = weaponSprites.getSprite("weapon_jean");
+    m_weaponSprites[2] = weaponSprites.getSprite("weapon_rodney");
+    m_weaponSprites[3] = weaponSprites.getSprite("weapon_rodney");
+
 
     std::array<std::string, 3u> animationNames =
     {
@@ -248,11 +244,12 @@ void MenuState::buildLobby(sf::Font& font)
         avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //large avatar
+        //TODO select the correct colour texture for player ID
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos - 12.f, 340.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
-        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(spriteNames[i]);
-        entity.addComponent<xy::SpriteAnimation>().play(spriteSheet.getAnimationIndex("idle_down", spriteNames[i]));
+        entity.addComponent<xy::Sprite>() = m_avatarSprites[i];
+        entity.addComponent<xy::SpriteAnimation>().play(spriteSheet.getAnimationIndex("idle_down", std::to_string(i)));
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
         entity.getComponent<xy::Transform>().setScale(5.f, 5.f);
@@ -262,11 +259,25 @@ void MenuState::buildLobby(sf::Font& font)
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>();
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
-        entity.addComponent<xy::Sprite>() = weaponSprites.getSprite(weaponNames[i]);
-        entity.addComponent<xy::SpriteAnimation>().play(weaponSprites.getAnimationIndex(animationNames[xy::Util::Random::value(0,2)], weaponNames[i]));
+        entity.addComponent<xy::Sprite>() = m_weaponSprites[i];
+        entity.addComponent<xy::SpriteAnimation>().play(weaponSprites.getAnimationIndex(animationNames[xy::Util::Random::value(0,2)], "weapon_rodney"));
         auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
         entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().userData = std::make_any<std::uint8_t>(i);
+        entity.getComponent<xy::Callback>().function =
+            [&, playerEnt, i](xy::Entity e, float) mutable
+        {
+            auto& spriteIdx = std::any_cast<std::uint8_t&>(e.getComponent<xy::Callback>().userData);
+            const auto& client = m_sharedData.clientInformation.getClient(i);
+            if (spriteIdx != client.spriteIndex)
+            {
+                spriteIdx = client.spriteIndex;
+                playerEnt.getComponent<xy::Sprite>() = m_avatarSprites[spriteIdx];
+                e.getComponent<xy::Sprite>() = m_weaponSprites[spriteIdx];
+            }
+        };
         playerEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
         
         //player name

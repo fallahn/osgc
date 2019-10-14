@@ -60,12 +60,14 @@ std::uint8_t ClientInfoManager::getClientFromPeer(std::uint64_t peer) const
 
 void ClientInfoManager::resetClient(std::int32_t idx)
 {
+    XY_ASSERT(idx < m_clientInfo.size(), "Index out of range");
     auto& client = m_clientInfo[idx];
     client.name = Global::PlayerNames[idx];
     client.peerID = 0;
     client.ready = true; //makes no actual odds, but looks like CPU players are ready
     client.gamesPlayed = 0;
     client.score = 0;
+    client.spriteIndex = idx;
 }
 
 //private

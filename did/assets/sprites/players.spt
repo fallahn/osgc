@@ -3,7 +3,7 @@ sprite_sheet players
 	src = "assets/images/player.png"
 	blendmode = alpha
 
-	sprite player_one
+	sprite 0
 	{
 		bounds = 0,0,64,64
 
@@ -332,7 +332,7 @@ sprite_sheet players
 		}
 	}
 
-	sprite player_two
+	sprite 1
 	{
 		bounds = 256,0,64,64
 
@@ -627,7 +627,7 @@ sprite_sheet players
 		}
 	}
 
-	sprite player_three
+	sprite 2
 	{
 		bounds = 0,256,64,64
 
@@ -908,7 +908,7 @@ sprite_sheet players
 		}
 	}
 
-	sprite player_four
+	sprite 3
 	{
 		bounds = 256,256,64,64
 

@@ -803,56 +803,61 @@ void GameState::loadResources()
     //actor sprites
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);
-    m_sprites[SpriteID::PlayerOne] = spriteSheet.getSprite("player_one");
+    auto spriteIndex = std::to_string(m_sharedData.clientInformation.getClient(0).spriteIndex);
+
+    m_sprites[SpriteID::PlayerOne] = spriteSheet.getSprite(spriteIndex);
     m_animationMaps[SpriteID::PlayerOne] = 
     {
-        spriteSheet.getAnimationIndex("idle_up", "player_one"),
-        spriteSheet.getAnimationIndex("idle_down", "player_one"),
-        spriteSheet.getAnimationIndex("idle_left", "player_one"),
-        spriteSheet.getAnimationIndex("idle_right", "player_one"),
-        spriteSheet.getAnimationIndex("walk_left", "player_one"),
-        spriteSheet.getAnimationIndex("walk_right", "player_one"),
-        spriteSheet.getAnimationIndex("walk_up", "player_one"),
-        spriteSheet.getAnimationIndex("walk_down", "player_one"),
+        spriteSheet.getAnimationIndex("idle_up", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_down", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_left", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_left", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_up", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_down", spriteIndex),
         0,0
     };
-    m_sprites[SpriteID::PlayerTwo] = spriteSheet.getSprite("player_two");
+    spriteIndex = std::to_string(m_sharedData.clientInformation.getClient(1).spriteIndex);
+    m_sprites[SpriteID::PlayerTwo] = spriteSheet.getSprite(spriteIndex);
     m_animationMaps[SpriteID::PlayerTwo] =
     {
-        spriteSheet.getAnimationIndex("idle_up", "player_two"),
-        spriteSheet.getAnimationIndex("idle_down", "player_two"),
-        spriteSheet.getAnimationIndex("idle_left", "player_two"),
-        spriteSheet.getAnimationIndex("idle_right", "player_two"),
-        spriteSheet.getAnimationIndex("walk_left", "player_two"),
-        spriteSheet.getAnimationIndex("walk_right", "player_two"),
-        spriteSheet.getAnimationIndex("walk_up", "player_two"),
-        spriteSheet.getAnimationIndex("walk_down", "player_two"),
+        spriteSheet.getAnimationIndex("idle_up", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_down", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_left", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_left", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_up", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_down", spriteIndex),
         0,0
     };
-    m_sprites[SpriteID::PlayerThree] = spriteSheet.getSprite("player_three");
+    spriteIndex = std::to_string(m_sharedData.clientInformation.getClient(2).spriteIndex);
+    m_sprites[SpriteID::PlayerThree] = spriteSheet.getSprite(spriteIndex);
     m_animationMaps[SpriteID::PlayerThree] =
     {
-        spriteSheet.getAnimationIndex("idle_up", "player_three"),
-        spriteSheet.getAnimationIndex("idle_down", "player_three"),
-        spriteSheet.getAnimationIndex("idle_left", "player_three"),
-        spriteSheet.getAnimationIndex("idle_right", "player_three"),
-        spriteSheet.getAnimationIndex("walk_left", "player_three"),
-        spriteSheet.getAnimationIndex("walk_right", "player_three"),
-        spriteSheet.getAnimationIndex("walk_up", "player_three"),
-        spriteSheet.getAnimationIndex("walk_down", "player_three"),
+        spriteSheet.getAnimationIndex("idle_up", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_down", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_left", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_left", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_up", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_down", spriteIndex),
         0,0
     };
-    m_sprites[SpriteID::PlayerFour] = spriteSheet.getSprite("player_four");
+    spriteIndex = std::to_string(m_sharedData.clientInformation.getClient(3).spriteIndex);
+    m_sprites[SpriteID::PlayerFour] = spriteSheet.getSprite(spriteIndex);
     m_animationMaps[SpriteID::PlayerFour] =
     {
-        spriteSheet.getAnimationIndex("idle_up", "player_four"),
-        spriteSheet.getAnimationIndex("idle_down", "player_four"),
-        spriteSheet.getAnimationIndex("idle_left", "player_four"),
-        spriteSheet.getAnimationIndex("idle_right", "player_four"),
-        spriteSheet.getAnimationIndex("walk_left", "player_four"),
-        spriteSheet.getAnimationIndex("walk_right", "player_four"),
-        spriteSheet.getAnimationIndex("walk_up", "player_four"),
-        spriteSheet.getAnimationIndex("walk_down", "player_four"),
+        spriteSheet.getAnimationIndex("idle_up", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_down", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_left", spriteIndex),
+        spriteSheet.getAnimationIndex("idle_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_left", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_right", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_up", spriteIndex),
+        spriteSheet.getAnimationIndex("walk_down", spriteIndex),
         0,0
     };
 

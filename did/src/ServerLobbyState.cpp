@@ -114,6 +114,8 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
 
         m_sharedData.connectedClients[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
 
+        //TODO set which sprite the playre cose here
+
         //update all clients
         broadcastClientInfo();
     }

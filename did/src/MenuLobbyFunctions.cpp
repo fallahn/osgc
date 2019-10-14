@@ -60,6 +60,9 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
     bool newPlayer = client.peerID != peerID; //this client is not yet known to us!
     client.name = sf::String::fromUtf32(buffer.begin(), buffer.end());
     client.peerID = peerID;
+    client.spriteIndex = 3 - playerID;
+    //TODO get index of player's chosen sprite and update lobby view
+
 
     //print a message
     if (newPlayer)

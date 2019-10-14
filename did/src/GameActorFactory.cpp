@@ -46,6 +46,7 @@ Copyright 2019 Matt Marchant
 #include "ClientFlareSystem.hpp"
 #include "InterpolationSystem.hpp"
 #include "InputParser.hpp"
+#include "SharedStateData.hpp"
 
 #include "Operators.hpp"
 #include "QuadTreeFilter.hpp"
@@ -1080,13 +1081,15 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         parent.getComponent<xy::CommandTarget>().ID |= CommandID::PlayerAvatar | CommandID::InventoryHolder;
         parent.addComponent<Inventory>();
 
-        addHealthBar(parent, Global::PlayerColours[actor.id - Actor::ID::PlayerOne]);
+        auto playerIndex = actor.id - Actor::ID::PlayerOne;
+        addHealthBar(parent, Global::PlayerColours[playerIndex]);
 
         //weapon
+        auto spriteIdx = m_sharedData.clientInformation.getClient(playerIndex).spriteIndex;
         auto weaponBounds = m_sprites[SpriteID::WeaponJean].getTextureBounds();
         entity = m_gameScene.createEntity();
         entity.addComponent<Sprite3D>(m_modelMatrices).verticalOffset = weaponBounds.height / 2.f; //cos scale 0.5f
-        entity.addComponent<xy::Sprite>() = (actor.id == Actor::ID::PlayerTwo) ? m_sprites[SpriteID::WeaponJean] : m_sprites[SpriteID::WeaponRodney];
+        entity.addComponent<xy::Sprite>() = (spriteIdx == 1) ? m_sprites[SpriteID::WeaponJean] : m_sprites[SpriteID::WeaponRodney];
         entity.addComponent<xy::SpriteAnimation>();
         entity.addComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
         entity.getComponent<xy::Drawable>().bindUniform("u_texture", *entity.getComponent<xy::Sprite>().getTexture());

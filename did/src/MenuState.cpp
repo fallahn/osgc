@@ -820,7 +820,7 @@ void MenuState::setLobbyView()
 
 void MenuState::loadReadme()
 {
-    auto path = xy::FileSystem::getResourcePath() + "assets/readme.md";
+    auto path = xy::FileSystem::getResourcePath() + "readme.md";
     if (xy::FileSystem::fileExists(path))
     {
         std::ifstream file(path);
