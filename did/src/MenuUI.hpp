@@ -108,6 +108,8 @@ namespace Menu
             ChatButton,
             TreasureMap,
             ButtonBackground,
+            ArrowLeft,
+            ArrowRight,
             Count
         };
     }

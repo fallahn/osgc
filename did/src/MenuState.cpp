@@ -44,6 +44,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/UISystem.hpp>
@@ -437,6 +438,8 @@ void MenuState::loadAssets()
     m_sprites[Menu::SpriteID::ChatButton] = spriteSheet.getSprite("chat_button");
     m_sprites[Menu::SpriteID::TreasureMap] = spriteSheet.getSprite("treasure_map");
     m_sprites[Menu::SpriteID::ButtonBackground] = spriteSheet.getSprite("button_background");
+    m_sprites[Menu::SpriteID::ArrowLeft] = spriteSheet.getSprite("arrow_left");
+    m_sprites[Menu::SpriteID::ArrowRight] = spriteSheet.getSprite("arrow_right");
 
     m_callbackIDs[Menu::CallbackID::TextSelected] = m_uiScene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [](xy::Entity entity, sf::Vector2f)
@@ -966,6 +969,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     parentEnt.addComponent<xy::CommandTarget>().ID = Menu::CommandID::HostNameNode;
     parentEnt.addComponent<Slider>().speed = Menu::SliderSpeed;
 
+    //title
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
@@ -987,6 +991,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //name input
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 320.f);
@@ -1034,6 +1039,83 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::NameText;
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //selected avatar
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().setScale(5.f, 5.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
+    entity.addComponent<xy::Sprite>() = m_avatarSprites[m_spriteIndex];
+    entity.addComponent<xy::SpriteAnimation>().play(1);
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    auto avatarEnt = entity;
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Sprite>() = m_weaponSprites[m_spriteIndex];
+    entity.addComponent<xy::SpriteAnimation>().play(22);
+    auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
+    entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<std::uint8_t>(m_spriteIndex);
+    entity.getComponent<xy::Callback>().function =
+        [&, avatarEnt](xy::Entity e, float) mutable
+    {
+        auto& spriteIdx = std::any_cast<std::uint8_t&>(e.getComponent<xy::Callback>().userData);
+        if (spriteIdx != m_spriteIndex)
+        {
+            spriteIdx = m_spriteIndex;
+            avatarEnt.getComponent<xy::Sprite>() = m_avatarSprites[spriteIdx];
+            auto frame = e.getComponent<xy::Sprite>().getTextureRect();
+            e.getComponent<xy::Sprite>() = m_weaponSprites[spriteIdx];
+            e.getComponent<xy::Sprite>().setTextureRect(frame);
+        }
+    };
+    avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //left arrow
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(-224.f, 60.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ArrowLeft];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_spriteIndex = (m_spriteIndex + 3) % 4;
+                }
+            });
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //right arrow
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(224.f, 60.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ArrowRight];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_spriteIndex = (m_spriteIndex + 1) % 4;
+                }
+            });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //back background
@@ -1145,11 +1227,13 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
 
 void MenuState::buildJoinEntry(sf::Font& largeFont)
 {
+    //TODO refactor so we're not repeating the code from the host menu
     auto parentEnt = m_uiScene.createEntity();
     parentEnt.addComponent<xy::Transform>().setPosition(Menu::OffscreenPosition);
     parentEnt.addComponent<xy::CommandTarget>().ID = Menu::CommandID::JoinNameNode;
     parentEnt.addComponent<Slider>().speed = Menu::SliderSpeed;
 
+    //title bar
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::TitleBar];
@@ -1171,6 +1255,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    //name input
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, 320.f);
@@ -1263,6 +1348,84 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::IPText;
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //selected avatar
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().setScale(5.f, 5.f);
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
+    entity.addComponent<xy::Sprite>() = m_avatarSprites[m_spriteIndex];
+    entity.addComponent<xy::SpriteAnimation>().play(1);
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    auto avatarEnt = entity;
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
+    entity.addComponent<xy::Sprite>() = m_weaponSprites[m_spriteIndex];
+    entity.addComponent<xy::SpriteAnimation>().play(22);
+    auto weaponBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(weaponBounds.width / 2.f, 0.f);
+    entity.getComponent<xy::Transform>().setPosition(bounds.width * 0.56f, 14.f);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().userData = std::make_any<std::uint8_t>(m_spriteIndex);
+    entity.getComponent<xy::Callback>().function =
+        [&, avatarEnt](xy::Entity e, float) mutable
+    {
+        auto& spriteIdx = std::any_cast<std::uint8_t&>(e.getComponent<xy::Callback>().userData);
+        if (spriteIdx != m_spriteIndex)
+        {
+            spriteIdx = m_spriteIndex;
+            avatarEnt.getComponent<xy::Sprite>() = m_avatarSprites[spriteIdx];
+            auto frame = e.getComponent<xy::Sprite>().getTextureRect();
+            e.getComponent<xy::Sprite>() = m_weaponSprites[spriteIdx];
+            e.getComponent<xy::Sprite>().setTextureRect(frame);
+        }
+    };
+    avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //left arrow
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(-224.f, 60.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ArrowLeft];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_spriteIndex = (m_spriteIndex + 3) % 4;
+                }
+            });
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //right arrow
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(224.f, 60.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ArrowRight];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_spriteIndex = (m_spriteIndex + 1) % 4;
+                }
+            });
+    parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
 
     //back background
     entity = m_uiScene.createEntity();

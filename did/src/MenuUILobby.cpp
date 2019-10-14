@@ -197,6 +197,13 @@ void MenuState::buildLobby(sf::Font& font)
     m_weaponSprites[2] = weaponSprites.getSprite("weapon_rodney");
     m_weaponSprites[3] = weaponSprites.getSprite("weapon_rodney");
 
+    std::array<std::string, 4u> textureNames =
+    {
+        "assets/images/player_one.png",
+        "assets/images/player_two.png",
+        "assets/images/player_three.png",
+        "assets/images/player_four.png"
+    };
 
     std::array<std::string, 3u> animationNames =
     {
@@ -244,11 +251,12 @@ void MenuState::buildLobby(sf::Font& font)
         avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //large avatar
-        //TODO select the correct colour texture for player ID
+        sf::Texture* texture = &m_textureResource.get(textureNames[i]);
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos - 12.f, 340.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
         entity.addComponent<xy::Sprite>() = m_avatarSprites[i];
+        entity.getComponent<xy::Sprite>().setTexture(*texture, false);
         entity.addComponent<xy::SpriteAnimation>().play(spriteSheet.getAnimationIndex("idle_down", std::to_string(i)));
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, 0.f);
@@ -267,7 +275,7 @@ void MenuState::buildLobby(sf::Font& font)
         entity.addComponent<xy::Callback>().active = true;
         entity.getComponent<xy::Callback>().userData = std::make_any<std::uint8_t>(i);
         entity.getComponent<xy::Callback>().function =
-            [&, playerEnt, i](xy::Entity e, float) mutable
+            [&, playerEnt, i, texture](xy::Entity e, float) mutable
         {
             auto& spriteIdx = std::any_cast<std::uint8_t&>(e.getComponent<xy::Callback>().userData);
             const auto& client = m_sharedData.clientInformation.getClient(i);
@@ -275,6 +283,7 @@ void MenuState::buildLobby(sf::Font& font)
             {
                 spriteIdx = client.spriteIndex;
                 playerEnt.getComponent<xy::Sprite>() = m_avatarSprites[spriteIdx];
+                playerEnt.getComponent<xy::Sprite>().setTexture(*texture, false);
                 e.getComponent<xy::Sprite>() = m_weaponSprites[spriteIdx];
             }
         };

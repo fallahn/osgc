@@ -258,11 +258,12 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
     case Actor::PlayerOne:
         //sprite for player
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerOne];
+        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_one.png"), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerOne];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerOne][AnimationID::IdleDown]);
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::PlayerOne].getTexture());
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::PlayerBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Player | QuadTreeFilter::BotQuery);
         entity.addComponent<CollisionComponent>().bounds = Global::PlayerBounds;
@@ -278,11 +279,12 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
 
     case Actor::PlayerTwo:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerTwo];
+        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_two.png"), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerTwo];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerTwo][AnimationID::IdleDown]);
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::PlayerTwo].getTexture());
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::PlayerBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Player | QuadTreeFilter::BotQuery);
         entity.addComponent<CollisionComponent>().bounds = Global::PlayerBounds;
@@ -297,11 +299,12 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         break;
     case Actor::PlayerThree:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerThree];
+        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_three.png"), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerThree];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerThree][AnimationID::IdleDown]);
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::PlayerThree].getTexture());
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::PlayerBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Player | QuadTreeFilter::BotQuery);
         entity.addComponent<CollisionComponent>().bounds = Global::PlayerBounds;
@@ -316,11 +319,12 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         break;
     case Actor::PlayerFour:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerFour];
+        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_four.png"), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerFour];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerFour][AnimationID::IdleDown]);
         entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
-        entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::PlayerFour].getTexture());
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.addComponent<xy::BroadphaseComponent>().setArea(Global::PlayerBounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(QuadTreeFilter::Player | QuadTreeFilter::BotQuery);
         entity.addComponent<CollisionComponent>().bounds = Global::PlayerBounds;
