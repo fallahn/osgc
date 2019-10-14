@@ -118,7 +118,7 @@ audio_scape menu
         attenuation = 0
         volume = 10
         looped = false
-        mixer_channel = 2
+        mixer_channel = 1
     } 
 
     emitter ready_jean
@@ -129,7 +129,7 @@ audio_scape menu
         attenuation = 0
         volume = 10
         looped = false
-        mixer_channel = 2
+        mixer_channel = 1
     } 
 
     emitter ready_helena
@@ -140,7 +140,7 @@ audio_scape menu
         attenuation = 0
         volume = 10
         looped = false
-        mixer_channel = 2
+        mixer_channel = 1
     } 
 
     emitter ready_lars
@@ -151,7 +151,7 @@ audio_scape menu
         attenuation = 0
         volume = 10
         looped = false
-        mixer_channel = 2
+        mixer_channel = 1
     }  
 
     emitter chat_message
@@ -162,7 +162,7 @@ audio_scape menu
         attenuation = 0
         volume = 10
         looped = false
-        mixer_channel = 2
+        mixer_channel = 1
     }
 
     emitter randomise
@@ -173,6 +173,6 @@ audio_scape menu
         attenuation = 0
         volume = 20
         looped = false
-        mixer_channel = 2
+        mixer_channel = 1
     }
 }

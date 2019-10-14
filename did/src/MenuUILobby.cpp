@@ -632,17 +632,11 @@ void MenuState::buildLobby(sf::Font& font)
 
 xy::Entity MenuState::addCheckbox(std::uint8_t playerID)
 {
-    std::array<std::string, 4u> emitterNames =
-    {
-        "ready_rodney", "ready_jean", "ready_helena", "ready_lars"
-    };
-
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);
     entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::Checkbox];
     entity.addComponent<Checkbox>().playerID = playerID;
-    entity.addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter(emitterNames[playerID]);
 
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.addComponent<xy::UIHitBox>().area = bounds;
@@ -660,7 +654,7 @@ xy::Entity MenuState::addCheckbox(std::uint8_t playerID)
             if (bounds.top != bounds.height)
             {
                 //freshly checked
-                e.getComponent<xy::AudioEmitter>().play();
+                //e.getComponent<xy::AudioEmitter>().play();
             }
             bounds.top = bounds.height;
         }

@@ -80,6 +80,7 @@ namespace
     const std::string AddressFile("address.set");
     const std::string KeysFile("keys.set");
     const std::string ButtonsFile("buttons.set");
+    const std::string SpriteFile("sprite.set");
     const std::vector<std::string> names =
     {
         "Cleftwisp", "Old Sam", "Lou Baker",
@@ -551,6 +552,22 @@ void MenuState::loadAssets()
     });
 
     m_audioScape.loadFromFile("assets/sound/menu.xas");
+
+    m_spriteSounds[0] = m_uiScene.createEntity();
+    m_spriteSounds[0].addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    m_spriteSounds[0].addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("ready_rodney");
+
+    m_spriteSounds[1] = m_uiScene.createEntity();
+    m_spriteSounds[1].addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    m_spriteSounds[1].addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("ready_jean");
+
+    m_spriteSounds[2] = m_uiScene.createEntity();
+    m_spriteSounds[2].addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    m_spriteSounds[2].addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("ready_helena");
+
+    m_spriteSounds[3] = m_uiScene.createEntity();
+    m_spriteSounds[3].addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    m_spriteSounds[3].addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("ready_lars");
 }
 
 void MenuState::createScene()
@@ -1094,6 +1111,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_spriteIndex = (m_spriteIndex + 3) % 4;
+                    m_spriteSounds[m_spriteIndex].getComponent<xy::AudioEmitter>().play();
                 }
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -1114,6 +1132,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_spriteIndex = (m_spriteIndex + 1) % 4;
+                    m_spriteSounds[m_spriteIndex].getComponent<xy::AudioEmitter>().play();
                 }
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -1402,6 +1421,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_spriteIndex = (m_spriteIndex + 3) % 4;
+                    m_spriteSounds[m_spriteIndex].getComponent<xy::AudioEmitter>().play();
                 }
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -1422,6 +1442,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     m_spriteIndex = (m_spriteIndex + 1) % 4;
+                    m_spriteSounds[m_spriteIndex].getComponent<xy::AudioEmitter>().play();
                 }
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -1639,6 +1660,11 @@ void MenuState::loadSettings()
     {
         readControls(settingsPath + ButtonsFile, m_sharedData.inputBinding.buttons.data(), sizeof(std::uint32_t) * m_sharedData.inputBinding.buttons.size());
     }
+
+    if (xy::FileSystem::fileExists(settingsPath + SpriteFile))
+    {
+        readControls(settingsPath + SpriteFile, &m_spriteIndex, sizeof(m_spriteIndex));
+    }
 }
 
 void MenuState::saveSettings()
@@ -1674,6 +1700,13 @@ void MenuState::saveSettings()
     {
         const auto& data = m_sharedData.inputBinding.buttons;
         file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(std::uint32_t));
+        file.close();
+    }
+
+    file.open(settingsPath + SpriteFile);
+    if (file.is_open() && file.good())
+    {
+        file.write(reinterpret_cast<const char*>(&m_spriteIndex), sizeof(m_spriteIndex));
         file.close();
     }
 }

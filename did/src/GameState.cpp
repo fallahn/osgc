@@ -1859,7 +1859,7 @@ void GameState::spawnGhost(xy::Entity playerEnt, sf::Vector2f position)
     entity.addComponent<xy::Transform>().setPosition(position);
     entity.addComponent<xy::Drawable>();
     entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::Ghost];
-    entity.addComponent<xy::SpriteAnimation>().play(id);
+    entity.addComponent<xy::SpriteAnimation>().play(m_sharedData.clientInformation.getClient(id).spriteIndex);
     entity.getComponent<xy::Drawable>().setShader(&m_shaderResource.get(ShaderID::SpriteShaderCulled));
     entity.getComponent<xy::Drawable>().bindUniform("u_texture", *m_sprites[SpriteID::Ghost].getTexture());
     entity.addComponent<Sprite3D>(m_modelMatrices);

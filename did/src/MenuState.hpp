@@ -133,6 +133,7 @@ private:
     void buildNameEntry(sf::Font&);
     void buildJoinEntry(sf::Font&);
 
+    std::array<xy::Entity, 4u> m_spriteSounds = {};
     xy::Entity addCheckbox(std::uint8_t);
 
     void sendPlayerData();
