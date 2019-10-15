@@ -65,7 +65,8 @@ void MenuState::buildOptions(sf::Font& font)
     //background
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/controls_bg.png"));
+    auto bgID = m_resources.load<sf::Texture>("assets/images/controls_bg.png");
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(bgID));
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Far);
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition((xy::DefaultSceneSize.x - bounds.width) / 2.f, 300.f);
@@ -180,7 +181,7 @@ void MenuState::buildOptions(sf::Font& font)
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    auto& finefont = m_fontResource.get(Global::FineFont);
+    auto& finefont = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Fine]);
 
     //info string
     entity = m_uiScene.createEntity();
@@ -460,7 +461,8 @@ void MenuState::buildOptions(sf::Font& font)
     bgEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //highlighters for joypad
-    auto& buttonTex = m_textureResource.get("assets/images/button_highlight.png");
+    auto buttonID = m_resources.load<sf::Texture>("assets/images/button_highlight.png");
+    auto& buttonTex = m_resources.get<sf::Texture>(buttonID);
     std::array<sf::Vector2f, 10u> buttonPositions =
     {
         //these are in button ID order

@@ -166,7 +166,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
             });
     sharedEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    auto& font = m_fontResource.get(Global::FineFont);
+    auto& font = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Fine]);
 
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
@@ -487,7 +487,7 @@ void MenuState::buildJoinEntry(sf::Font& largeFont)
             });
     parentEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
-    auto& font = m_fontResource.get(Global::FineFont);
+    auto& font = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Fine]);
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
     entity.getComponent<xy::Transform>().move(0.f, (bounds.height * 0.9f) + 320.f);

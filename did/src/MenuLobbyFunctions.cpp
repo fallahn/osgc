@@ -125,7 +125,7 @@ void MenuState::updateHostInfo(std::uint64_t hostID, std::string remoteAddress)
         //display our local IP just for info's sake        
         if (hostID == m_sharedData.netClient->getPeer().getID())
         {
-            auto& chatFont = m_fontResource.get("assets/fonts/ProggyClean.ttf");
+            auto& chatFont = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Chat]);
             
             auto entity = m_uiScene.createEntity();
             entity.addComponent<xy::Transform>().setPosition(12.f, -6.f);

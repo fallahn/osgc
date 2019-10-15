@@ -383,7 +383,8 @@ void MenuState::updateTextInput(const sf::Event& evt)
 void MenuState::loadAssets()
 {
     m_seaBuffer.create(static_cast<unsigned>(Global::IslandSize.x), static_cast<unsigned>(Global::IslandSize.y));
-    auto& seaTex = m_textureResource.get("assets/images/sea.png");
+    auto seaID = m_resources.load<sf::Texture>("assets/images/sea.png");
+    auto& seaTex = m_resources.get<sf::Texture>(seaID);
     seaTex.setRepeated(true);
     m_seaSprite.setTexture(seaTex);
     m_seaSprite.setTextureRect({ 0, 0, static_cast<int>(m_seaBuffer.getSize().x), static_cast<int>(m_seaBuffer.getSize().y) });
@@ -423,7 +424,7 @@ void MenuState::loadAssets()
     m_gameScene.addSystem<xy::RenderSystem>(mb);
 
     xy::SpriteSheet spriteSheet;
-    spriteSheet.loadFromFile("assets/sprites/lobby.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/lobby.spt", m_resources);
     m_sprites[Menu::SpriteID::Checkbox] = spriteSheet.getSprite("checkbox");
     m_sprites[Menu::SpriteID::Host] = spriteSheet.getSprite("host");
     m_sprites[Menu::SpriteID::Bot] = spriteSheet.getSprite("bot_icon");
@@ -432,7 +433,7 @@ void MenuState::loadAssets()
     m_sprites[Menu::SpriteID::PlayerThree] = spriteSheet.getSprite("player_three");
     m_sprites[Menu::SpriteID::PlayerFour] = spriteSheet.getSprite("player_four");
 
-    spriteSheet.loadFromFile("assets/sprites/menu_ui.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/menu_ui.spt", m_resources);
     m_sprites[Menu::SpriteID::TitleBar] = spriteSheet.getSprite("title_bar");
     m_sprites[Menu::SpriteID::TextInput] = spriteSheet.getSprite("text_input");
     m_sprites[Menu::SpriteID::PlayerFrame] = spriteSheet.getSprite("player_frame");
@@ -572,6 +573,10 @@ void MenuState::loadAssets()
     m_spriteSounds[3].addComponent<xy::AudioEmitter>() = m_audioScape.getEmitter("ready_lars");
 
     initHats();
+
+    m_fontIDs[Menu::FontID::Title] = m_resources.load<sf::Font>(Global::TitleFont);
+    m_fontIDs[Menu::FontID::Fine] = m_resources.load<sf::Font>(Global::FineFont);
+    m_fontIDs[Menu::FontID::Chat] = m_resources.load<sf::Font>("assets/fonts/ProggyClean.ttf");
 }
 
 void MenuState::createScene()
@@ -585,7 +590,7 @@ void MenuState::createScene()
 
     createBackground();
 
-    auto& font = m_fontResource.get(Global::TitleFont);
+    auto& font = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Title]);
     auto parentEntity = m_uiScene.createEntity();
     parentEntity.addComponent<xy::Transform>();
 
@@ -817,7 +822,7 @@ void MenuState::createScene()
     //version
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(20.f, 1020.f);
-    entity.addComponent<xy::Text>(m_fontResource.get(Global::FineFont)).setString(REVISION_STRING);
+    entity.addComponent<xy::Text>(m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Fine])).setString(REVISION_STRING);
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize);
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

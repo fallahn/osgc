@@ -50,7 +50,7 @@ namespace
 
 void MenuState::buildLobby(sf::Font& font)
 {
-    auto& fineFont = m_fontResource.get(Global::FineFont);
+    auto& fineFont = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Fine]);
     
     auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
     auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
@@ -184,14 +184,14 @@ void MenuState::buildLobby(sf::Font& font)
 
 
     xy::SpriteSheet spriteSheet;
-    spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/players.spt", m_resources);
     for (auto i = 0u; i < 4u; ++i)
     {
         m_avatarSprites[i] = spriteSheet.getSprite(std::to_string(i));
     }
 
     xy::SpriteSheet weaponSprites;
-    weaponSprites.loadFromFile("assets/sprites/weapons.spt", m_textureResource);
+    weaponSprites.loadFromFile("assets/sprites/weapons.spt", m_resources);
     m_weaponSprites[0] = weaponSprites.getSprite("weapon_rodney");
     m_weaponSprites[1] = weaponSprites.getSprite("weapon_jean");
     m_weaponSprites[2] = weaponSprites.getSprite("weapon_rodney");
@@ -525,8 +525,8 @@ void MenuState::buildLobby(sf::Font& font)
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //blinkenlights
-    m_textureResource.setFallbackColour(sf::Color::Red);
-    auto& cursorTex = m_textureResource.get();
+    auto redID = m_resources.load<sf::Texture>("assets/images/blinken.png");
+    auto& cursorTex = m_resources.get<sf::Texture>(redID);
     sf::Vector2f texSize(cursorTex.getSize());
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(position);
@@ -597,7 +597,7 @@ void MenuState::buildLobby(sf::Font& font)
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
     //chat output text
-    auto& chatFont = m_fontResource.get("assets/fonts/ProggyClean.ttf");
+    auto& chatFont = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Chat]);
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition + sf::Vector2f(12.f, -6.f));
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);

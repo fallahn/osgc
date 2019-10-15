@@ -69,8 +69,7 @@ private:
     xy::Scene m_gameScene; //used for drawing background
     SharedData& m_sharedData;
 
-    xy::TextureResource m_textureResource;
-    xy::FontResource m_fontResource;
+    std::array<std::size_t, Menu::FontID::Count> m_fontIDs = {};
     xy::AudioResource m_audioResource;
     xy::ResourceHandler m_resources;
 

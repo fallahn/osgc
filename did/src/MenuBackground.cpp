@@ -63,7 +63,9 @@ void MenuState::createBackground()
     landShader = &m_shaderResource.get(ShaderID::LandShader);
     landShader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
     landShader->setUniform("u_sunDirection", sf::Glsl::Vec3(1.f, 1.f, 1.f));
-    landShader->setUniform("u_normalTexture", m_textureResource.get("assets/images/menu_island_normal.png"));
+
+    auto normalID = m_resources.load<sf::Texture>("assets/images/menu_island_normal.png");
+    landShader->setUniform("u_normalTexture", m_resources.get<sf::Texture>(normalID));
 
     m_shaderResource.get(ShaderID::SpriteShader).setUniform("u_lightAmount", 1.f);
     m_shaderResource.get(ShaderID::SpriteShader).setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
@@ -91,8 +93,11 @@ void MenuState::createBackground()
     entity.addComponent<xy::Drawable>().setDepth(-100000);
     entity.getComponent<xy::Drawable>().setShader(skyShader);
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    m_textureResource.get("assets/images/background.png").setRepeated(true);
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/background.png"));
+
+    auto bgID = m_resources.load<sf::Texture>("assets/images/background.png");
+    auto& bgTex = m_resources.get<sf::Texture>(bgID);
+    bgTex.setRepeated(true);
+    entity.addComponent<xy::Sprite>(bgTex);
     float scale = xy::DefaultSceneSize.x / entity.getComponent<xy::Sprite>().getTextureBounds().width;
     entity.getComponent<xy::Transform>().setScale(scale, scale);
 
@@ -110,7 +115,8 @@ void MenuState::createBackground()
     entity.addComponent<xy::Drawable>().setDepth(-9998);
     entity.getComponent<xy::Drawable>().setShader(landShader);
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_diffuseTexture");
-    entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/menu_island.png"));
+    auto islandID = m_resources.load<sf::Texture>("assets/images/menu_island.png");
+    entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(islandID));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 0.4f);
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
@@ -130,6 +136,8 @@ void MenuState::createBackground()
         0.f, ((Wave::MaxScale - Wave::MaxScale) * 0.4f),
         ((Wave::MaxScale - Wave::MinScale) * 0.7f)
     };
+    auto waveID = m_resources.load<sf::Texture>("assets/images/menu_island_waves.png");
+
     for (auto i = 0; i < 3; ++i)
     {
         entity = m_gameScene.createEntity();
@@ -137,7 +145,7 @@ void MenuState::createBackground()
         entity.addComponent<xy::Drawable>().setDepth(-9999);
         entity.getComponent<xy::Drawable>().setShader(planeShader);
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-        entity.addComponent<xy::Sprite>(m_textureResource.get("assets/images/menu_island_waves.png"));
+        entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(waveID));
         bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 0.4f);
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
@@ -151,7 +159,7 @@ void MenuState::createBackground()
     }
 
     xy::SpriteSheet spriteSheet;
-    spriteSheet.loadFromFile("assets/sprites/barrel.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/barrel.spt", m_resources);
 
     //barrels
     std::array<sf::Vector2f, 8u> barrelPos =
@@ -196,7 +204,7 @@ void MenuState::createBackground()
     }
 
     //water details
-    spriteSheet.loadFromFile("assets/sprites/water_details.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/water_details.spt", m_resources);
     std::array<std::string, 5u> spriteNames =
     {
         "seagull", "rope_posts", "large_rock", "small_rock01", "small_rock02"
@@ -248,7 +256,7 @@ void MenuState::createBackground()
         {459.f, 1044.f}
     };
 
-    spriteSheet.loadFromFile("assets/sprites/boat.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/boat.spt", m_resources);
     for (auto i = 0; i < 4; ++i)
     {
         entity = m_gameScene.createEntity();
@@ -297,10 +305,11 @@ void MenuState::createBackground()
     }
 
     //finally.... some trees!
-    const auto& treeTex = m_textureResource.get("assets/images/menu_trees.png");
+    auto treeID = m_resources.load<sf::Texture>("assets/images/menu_trees.png");
+    const auto& treeTex = m_resources.get<sf::Texture>(treeID);
     auto positions = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 440.f, 400.f }, 60.f, 12);
 
-    spriteSheet.loadFromFile("assets/sprites/foliage.spt", m_textureResource);
+    spriteSheet.loadFromFile("assets/sprites/foliage.spt", m_resources);
 
     for (auto pos : positions)
     {

@@ -71,14 +71,6 @@ namespace Menu
         sf::Uint32 id = 0;
     };
 
-    //namespace ControlID
-    //{
-    //    enum
-    //    {
-
-    //    };
-    //}
-
     namespace SpriteDepth
     {
         enum
@@ -135,6 +127,18 @@ namespace Menu
         {
             StartGame,
             ChatText
+        };
+    }
+
+    namespace FontID
+    {
+        enum
+        {
+            Title,
+            Fine,
+            Chat,
+
+            Count
         };
     }
 
