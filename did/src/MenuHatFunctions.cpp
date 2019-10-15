@@ -241,7 +241,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -262,7 +262,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.addComponent<xy::UIHitBox>().area = bounds;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -286,7 +286,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
         entity.addComponent<xy::UIHitBox>().area = bounds;
         entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
             m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-                [&](xy::Entity e, sf::Uint64 flags)
+                [&](xy::Entity, sf::Uint64 flags)
                 {
                     if (flags & xy::UISystem::LeftMouse)
                     {
@@ -307,7 +307,7 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
         entity.addComponent<xy::UIHitBox>().area = bounds;
         entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
             m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
-                [&](xy::Entity e, sf::Uint64 flags)
+                [&](xy::Entity, sf::Uint64 flags)
                 {
                     if (flags & xy::UISystem::LeftMouse)
                     {
