@@ -66,7 +66,9 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
     client.name = sf::String::fromUtf32(buffer.begin(), buffer.end());
     client.peerID = ch.peerID;
     client.spriteIndex = ch.spriteIndex;
-    client.hatIndex = ch.hatIndex;
+    client.hatIndex = (ch.hatIndex < m_hatTextureIDs.size()) ? ch.hatIndex : 0;
+
+    //TODO if we're updating the character sprite immediately, do we need to store the hat index in the client data?
 
     //print a message
     if (newPlayer)
@@ -77,6 +79,9 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
         {
             m_chatBuffer.pop_front();
         }
+
+        //update the sprite texture
+        updateHatTexture(m_resources.get<sf::Texture>(m_playerTextureIDs[ch.playerID]), m_resources.get<sf::Texture>(m_hatTextureIDs[client.hatIndex]), *m_sharedData.playerSprites[ch.playerID]);
 
         xy::Command cmd;
         cmd.targetFlags = Menu::CommandID::ChatOutText;

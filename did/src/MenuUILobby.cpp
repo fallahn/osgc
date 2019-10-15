@@ -197,14 +197,6 @@ void MenuState::buildLobby(sf::Font& font)
     m_weaponSprites[2] = weaponSprites.getSprite("weapon_rodney");
     m_weaponSprites[3] = weaponSprites.getSprite("weapon_rodney");
 
-    std::array<std::string, 4u> textureNames =
-    {
-        "assets/images/player_one.png",
-        "assets/images/player_two.png",
-        "assets/images/player_three.png",
-        "assets/images/player_four.png"
-    };
-
     std::array<std::string, 3u> animationNames =
     {
         "pistol_idle_front", "sword_idle_front", "shovel_idle_front"
@@ -251,7 +243,7 @@ void MenuState::buildLobby(sf::Font& font)
         avatarEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //large avatar
-        sf::Texture* texture = &m_textureResource.get(textureNames[i]);
+        const sf::Texture* texture = &m_sharedData.playerSprites[i]->getTexture();
         entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xPos - 12.f, 392.f);
         entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Mid);

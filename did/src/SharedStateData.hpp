@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/network/NetClient.hpp>
 
 #include <SFML/System/Thread.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 
 #include <memory>
 
@@ -37,6 +38,8 @@ struct SharedData final
     sf::String remoteIP;
 
     ClientInfoManager clientInformation;
+    std::array<std::shared_ptr<sf::RenderTexture>, 4u> playerSprites;
+
     std::string error;
     Server::SeedData seedData;
 

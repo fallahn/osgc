@@ -258,7 +258,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
     case Actor::PlayerOne:
         //sprite for player
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerOne];
-        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_one.png"), false);
+        entity.getComponent<xy::Sprite>().setTexture(m_sharedData.playerSprites[0]->getTexture(), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerOne];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerOne][AnimationID::IdleDown]);
@@ -279,7 +279,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
 
     case Actor::PlayerTwo:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerTwo];
-        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_two.png"), false);
+        entity.getComponent<xy::Sprite>().setTexture(m_sharedData.playerSprites[1]->getTexture(), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerTwo];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerTwo][AnimationID::IdleDown]);
@@ -299,7 +299,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         break;
     case Actor::PlayerThree:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerThree];
-        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_three.png"), false);
+        entity.getComponent<xy::Sprite>().setTexture(m_sharedData.playerSprites[2]->getTexture(), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerThree];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerThree][AnimationID::IdleDown]);
@@ -319,7 +319,7 @@ void GameState::spawnActor(Actor actor, sf::Vector2f position, std::int32_t time
         break;
     case Actor::PlayerFour:
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::PlayerFour];
-        entity.getComponent<xy::Sprite>().setTexture(m_textureResource.get("assets/images/player_four.png"), false);
+        entity.getComponent<xy::Sprite>().setTexture(m_sharedData.playerSprites[3]->getTexture(), false);
         entity.getComponent<AnimationModifier>().animationMap = m_animationMaps[SpriteID::PlayerFour];
         entity.getComponent<AnimationModifier>().nextAnimation = AnimationID::IdleDown;
         entity.getComponent<xy::SpriteAnimation>().play(m_animationMaps[SpriteID::PlayerFour][AnimationID::IdleDown]);

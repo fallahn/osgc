@@ -124,6 +124,7 @@ private:
 
     std::uint8_t m_hatIndex;
     std::vector<std::size_t> m_hatTextureIDs;
+    std::array<std::size_t, 4u> m_playerTextureIDs = {};
     sf::RenderTexture m_playerPreviewTexture;
     void initHats();
     void updateHatTexture(const sf::Texture&, const sf::Texture&, sf::RenderTexture&);

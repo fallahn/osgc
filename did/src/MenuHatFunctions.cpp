@@ -43,6 +43,14 @@ namespace
         "Harriet Cobbler", "Queasy Jo", "E. Claire",
         "Pro Moist", "Hannah Theresa", "Shrinkwrap"
     };
+
+    const std::array<std::string, 4u> playerTextureNames =
+    {
+        "assets/images/player_one.png",
+        "assets/images/player_two.png",
+        "assets/images/player_three.png",
+        "assets/images/player_four.png"
+    };
 }
 
 void MenuState::initHats()
@@ -65,10 +73,22 @@ void MenuState::initHats()
         m_hatTextureIDs.push_back(m_resources.load<sf::Texture>("assets/images/hats/" + t));
     }
 
-    //init the target render texure
+    for (auto i = 0u; i < playerTextureNames.size(); ++i)
+    {
+        m_playerTextureIDs[i] = m_resources.load<sf::Texture>(playerTextureNames[i]);
+    }
+
+    //init the target render texures
     auto defaultTexture = m_resources.get<sf::Texture>(m_hatTextureIDs[0]);
     auto size = defaultTexture.getSize();
     m_playerPreviewTexture.create(size.x, size.y);
+
+    for (auto& t : m_sharedData.playerSprites)
+    {
+        t = std::make_shared<sf::RenderTexture>();
+        t->create(size.x, size.y);
+        updateHatTexture(defaultTexture, defaultTexture, *t);
+    }
 
     //check the loaded index is in range
     if (m_hatIndex >= m_hatTextureIDs.size())
