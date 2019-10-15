@@ -620,6 +620,9 @@
     <ClCompile Include="src\ButtonHighlightSystem.cpp">
       <Filter>Source Files\systems\Client</Filter>
     </ClCompile>
+    <ClCompile Include="src\MenuHatFunctions.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\IslandShaders.inl">

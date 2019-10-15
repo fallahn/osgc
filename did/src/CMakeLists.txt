@@ -45,6 +45,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuBackground.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuLobbyFunctions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MenuHatFunctions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuUILobby.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuUIOptions.cpp

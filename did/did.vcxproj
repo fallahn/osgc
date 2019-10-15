@@ -390,6 +390,7 @@
     <ClCompile Include="src\LoadingScreen.cpp" />
     <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuBackground.cpp" />
+    <ClCompile Include="src\MenuHatFunctions.cpp" />
     <ClCompile Include="src\MenuLobbyFunctions.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\MenuUILobby.cpp" />

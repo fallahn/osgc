@@ -98,7 +98,7 @@ void MenuState::buildLobby(sf::Font& font)
             parentEntity.getComponent<Slider>().target = Menu::OffscreenPosition;
             parentEntity.getComponent<Slider>().active = true;
 
-            xy::AudioMixer::setPrefadeVolume(0.f, MixerChannel::Menu);
+            //xy::AudioMixer::setPrefadeVolume(0.f, MixerChannel::Menu);
 
             xy::Command cmd;
             cmd.targetFlags = Menu::CommandID::MainNode;

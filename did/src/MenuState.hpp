@@ -72,6 +72,7 @@ private:
     xy::TextureResource m_textureResource;
     xy::FontResource m_fontResource;
     xy::AudioResource m_audioResource;
+    xy::ResourceHandler m_resources;
 
     xy::AudioScape m_audioScape;
 
@@ -120,6 +121,12 @@ private:
     void createScene();
     void createBackground();
     void setLobbyView();
+
+    std::size_t m_hatIndex;
+    std::vector<std::size_t> m_hatTextureIDs;
+    sf::RenderTexture m_playerPreviewTexture;
+    void initHats();
+    void updateHatTexture(const sf::Texture&, const sf::Texture&, sf::RenderTexture&);
 
     std::vector<std::string> m_readmeStrings;
     void loadReadme();
