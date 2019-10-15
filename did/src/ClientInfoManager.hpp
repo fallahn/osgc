@@ -33,6 +33,7 @@ struct ClientInfo final
     std::uint32_t score = 0; //this is updated by the round summary
     std::uint32_t gamesPlayed = 0; //as is this
     std::uint8_t spriteIndex = 0; //which sprite the player has chosen
+    std::uint8_t hatIndex = 0; //which hat the player has chosen
 };
 
 class ClientInfoManager final

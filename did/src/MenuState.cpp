@@ -1066,7 +1066,11 @@ void MenuState::loadSettings()
 
     if (xy::FileSystem::fileExists(settingsPath + SpriteFile))
     {
-        readControls(settingsPath + SpriteFile, &m_spriteIndex, sizeof(m_spriteIndex));
+        PlayerInfoHeader ph;
+
+        readControls(settingsPath + SpriteFile, &ph, sizeof(ph));
+        m_spriteIndex = ph.spriteIndex;
+        m_hatIndex = ph.hatIndex;
     }
 }
 
@@ -1109,7 +1113,11 @@ void MenuState::saveSettings()
     file.open(settingsPath + SpriteFile);
     if (file.is_open() && file.good())
     {
-        file.write(reinterpret_cast<const char*>(&m_spriteIndex), sizeof(m_spriteIndex));
+        PlayerInfoHeader ph;
+        ph.spriteIndex = m_spriteIndex;
+        ph.hatIndex = m_hatIndex;
+
+        file.write(reinterpret_cast<const char*>(&ph), sizeof(ph));
         file.close();
     }
 }

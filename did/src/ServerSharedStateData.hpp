@@ -42,6 +42,7 @@ namespace Server
         bool ready = false;
         std::uint8_t playerID = 0;
         std::uint8_t spriteIndex = 0;
+        std::uint8_t hatIndex = 0;
     };
 
     struct SharedStateData final

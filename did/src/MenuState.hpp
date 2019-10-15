@@ -122,7 +122,7 @@ private:
     void createBackground();
     void setLobbyView();
 
-    std::size_t m_hatIndex;
+    std::uint8_t m_hatIndex;
     std::vector<std::size_t> m_hatTextureIDs;
     sf::RenderTexture m_playerPreviewTexture;
     void initHats();

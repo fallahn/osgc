@@ -108,12 +108,14 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         break;
     case PacketID::SupPlayerInfo:
     {
-        //grab sprite index
-        std::memcpy(&m_sharedData.connectedClients[evt.peer.getID()].spriteIndex, (char*)evt.packet.getData(), 1);
+        PlayerInfoHeader ph;
+        std::memcpy(&ph, (char*)evt.packet.getData(), sizeof(PlayerInfoHeader));
+        m_sharedData.connectedClients[evt.peer.getID()].spriteIndex = ph.spriteIndex;
+        m_sharedData.connectedClients[evt.peer.getID()].hatIndex = ph.hatIndex;
 
         //read out name string
-        std::vector<sf::Uint32> buffer((evt.packet.getSize() - 1) / sizeof(sf::Uint32));
-        std::memcpy(buffer.data(), (char*)evt.packet.getData() + 1, evt.packet.getSize() - 1);
+        std::vector<sf::Uint32> buffer((evt.packet.getSize() - sizeof(ph)) / sizeof(sf::Uint32));
+        std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(ph), evt.packet.getSize() - sizeof(ph));
 
         m_sharedData.connectedClients[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
 
@@ -173,6 +175,7 @@ void LobbyState::broadcastClientInfo()
         ch.playerID = client.playerID;
         ch.peerID = id;
         ch.spriteIndex = client.spriteIndex;
+        ch.hatIndex = client.hatIndex;
 
         auto size = std::min(Global::MaxNameSize, client.name.getSize() * sizeof(sf::Uint32));
         std::vector<char> buffer(sizeof(ch) + size);

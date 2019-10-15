@@ -154,4 +154,11 @@ struct ClientInfoHeader final
     std::uint64_t peerID = 0;
     std::uint8_t playerID = 0;
     std::uint8_t spriteIndex = 0;
+    std::uint8_t hatIndex = 0;
+};
+
+struct PlayerInfoHeader final
+{
+    std::uint8_t spriteIndex = 0;
+    std::uint8_t hatIndex = 0;
 };

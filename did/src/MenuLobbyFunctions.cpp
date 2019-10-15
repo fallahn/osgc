@@ -39,9 +39,13 @@ void MenuState::sendPlayerData()
     auto nameBytes = m_sharedData.clientName.toUtf32();
     auto size = std::min(nameBytes.size() * sizeof(sf::Uint32), Global::MaxNameSize);
 
-    std::vector<std::uint8_t>  buffer(size + 1);
-    buffer[0] = m_spriteIndex;
-    std::memcpy(&buffer[1], nameBytes.data(), size);
+    std::vector<std::uint8_t>  buffer(size + sizeof(PlayerInfoHeader));
+    PlayerInfoHeader ph;
+    ph.spriteIndex = m_spriteIndex;
+    ph.hatIndex = m_hatIndex;
+    
+    std::memcpy(buffer.data(), &ph, sizeof(ph));
+    std::memcpy(buffer.data() + sizeof(ph), nameBytes.data(), size);
 
     m_sharedData.netClient->sendPacket(PacketID::SupPlayerInfo, buffer.data(), buffer.size(), xy::NetFlag::Reliable, Global::ReliableChannel);
 }
@@ -62,6 +66,7 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
     client.name = sf::String::fromUtf32(buffer.begin(), buffer.end());
     client.peerID = ch.peerID;
     client.spriteIndex = ch.spriteIndex;
+    client.hatIndex = ch.hatIndex;
 
     //print a message
     if (newPlayer)

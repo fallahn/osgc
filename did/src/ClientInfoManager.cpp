@@ -68,6 +68,7 @@ void ClientInfoManager::resetClient(std::int32_t idx)
     client.gamesPlayed = 0;
     client.score = 0;
     client.spriteIndex = idx;
+    client.hatIndex = 0;
 }
 
 //private
