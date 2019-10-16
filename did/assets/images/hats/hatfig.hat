@@ -1,0 +1,14 @@
+hats
+{
+    hat capn
+    {
+        id = 0
+        file="capn.png"
+    }
+
+    hat fez
+    {
+        id = 1
+        file = "fez.png"
+    }
+}

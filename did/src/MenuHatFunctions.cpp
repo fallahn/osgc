@@ -60,15 +60,40 @@ void MenuState::initHats()
     m_hatTextureIDs.push_back(m_resources.load<sf::Texture>("assets/images/player.png"));
 
     //check hat directory for textures
-    auto textures = xy::FileSystem::listFiles(xy::FileSystem::getResourcePath() + "assets/images/hats");
+    std::map<std::int32_t, std::string> textures;
 
-    //sort by name - this will still be incorrect
-    //if textures are missing on a specific client
-    //but hey, stop messing with your assets
-    std::sort(textures.begin(), textures.end());
+    xy::ConfigFile cfg;
+    if (cfg.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/hats/hatfig.hat"))
+    {
+        const auto& objs = cfg.getObjects();
+        for (const auto& obj : objs)
+        {
+            const auto& properties = obj.getProperties();
+            std::string file;
+            std::int32_t id = -1;
+            for (const auto& prop : properties)
+            {
+                if (prop.getName() == "file")
+                {
+                    file = prop.getValue<std::string>();
+                }
+                else if (prop.getName() == "id")
+                {
+                    id = prop.getValue<std::int32_t>();
+                }
+            }
+            //if valid and ID doesn't exist...
+            if (!file.empty() && id > -1
+                && textures.count(id) == 0)
+            {
+                textures.insert(std::make_pair(id, file));
+            }
+        }
+    }
 
-    //load each texture into the resource manager and store the handle
-    for (const auto& t : textures)
+    //std::sort(textures.begin(), textures.end(),
+    //    [](const std::pair<std::int32_t, std::string&> a, const std::pair<std::int32_t, std::string>& b) {return a.first < b.first; });
+    for(const auto& [i, t] : textures)
     {
         m_hatTextureIDs.push_back(m_resources.load<sf::Texture>("assets/images/hats/" + t));
     }
