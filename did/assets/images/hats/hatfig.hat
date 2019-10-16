@@ -11,4 +11,22 @@ hats
         id = 1
         file = "fez.png"
     }
+
+    hat bngr
+    {
+        id = 2
+        file = "band_gr.png"
+    }
+
+    hat bnrd
+    {
+        id = 3
+        file = "band_rd.png"
+    }
+
+    hat bnbl
+    {
+        id = 4
+        file = "band_bl.png"
+    }
 }
