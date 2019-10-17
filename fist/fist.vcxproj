@@ -142,12 +142,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\PhysicsSystem.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
+    <ClInclude Include="include\ShapeUtils.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\PhysicsObject.cpp" />
+    <ClCompile Include="src\PhysicsSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

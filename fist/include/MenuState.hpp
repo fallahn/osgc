@@ -28,6 +28,7 @@ source distribution.
 #pragma once
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
 
 class MenuState final : public xy::State
 {
@@ -45,5 +46,9 @@ public:
     xy::StateID stateID() const override;
 
 private:
+    xy::Scene m_gameScene;
 
+    void initScene();
+    void buildArena();
+    void addHand();
 };
