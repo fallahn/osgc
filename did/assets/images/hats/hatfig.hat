@@ -18,15 +18,27 @@ hats
         file = "band_gr.png"
     }
 
-    hat bnrd
+    hat bnbl
     {
         id = 3
+        file = "crown.png"
+    }
+
+    hat bnrd
+    {
+        id = 4
         file = "band_rd.png"
+    }
+
+    hat capn2
+    {
+        id = 5
+        file = "capn2.png"
     }
 
     hat bnbl
     {
-        id = 4
+        id = 6
         file = "band_bl.png"
-    }
+    }    
 }
