@@ -46,7 +46,7 @@
 	#endif
 	
 	#if defined(__LP64__) && __LP64__
-		#define CP_USE_DOUBLES 0//1
+		#define CP_USE_DOUBLES 1
 	#else
 		#define CP_USE_DOUBLES 0
 	#endif
@@ -54,7 +54,7 @@
 
 #ifndef CP_USE_DOUBLES
 	// Use doubles by default for higher precision.
-	#define CP_USE_DOUBLES 0//1
+	#define CP_USE_DOUBLES 1
 #endif
 
 /// @defgroup basicTypes Basic Types

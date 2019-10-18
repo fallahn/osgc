@@ -52,7 +52,7 @@ cpTransformNewTranspose(cpFloat a, cpFloat c, cpFloat tx, cpFloat b, cpFloat d, 
 static inline cpTransform
 cpTransformInverse(cpTransform t)
 {
-  cpFloat inv_det = (cpFloat)1.0/(t.a*t.d - t.c*t.b);
+  cpFloat inv_det = 1.0/(t.a*t.d - t.c*t.b);
   return cpTransformNewTranspose(
      t.d*inv_det, -t.c*inv_det, (t.c*t.ty - t.tx*t.d)*inv_det,
     -t.b*inv_det,  t.a*inv_det, (t.tx*t.b - t.a*t.ty)*inv_det
@@ -88,8 +88,8 @@ static inline cpBB
 cpTransformbBB(cpTransform t, cpBB bb)
 {
 	cpVect center = cpBBCenter(bb);
-	cpFloat hw = (bb.r - bb.l)*(cpFloat)0.5;
-	cpFloat hh = (bb.t - bb.b)*(cpFloat)0.5;
+	cpFloat hw = (bb.r - bb.l)*0.5;
+	cpFloat hh = (bb.t - bb.b)*0.5;
 	
 	cpFloat a = t.a*hw, b = t.c*hh, d = t.b*hw, e = t.d*hh;
 	cpFloat hw_max = cpfmax(cpfabs(a + b), cpfabs(a - b));
@@ -168,8 +168,8 @@ static inline cpTransform
 cpTransformOrtho(cpBB bb)
 {
   return cpTransformNewTranspose(
-      (cpFloat)2.0/(bb.r - bb.l), (cpFloat)0.0, -(bb.r + bb.l)/(bb.r - bb.l),
-      (cpFloat)0.0, (cpFloat)2.0/(bb.t - bb.b), -(bb.t + bb.b)/(bb.t - bb.b)
+    2.0/(bb.r - bb.l), 0.0, -(bb.r + bb.l)/(bb.r - bb.l),
+    0.0, 2.0/(bb.t - bb.b), -(bb.t + bb.b)/(bb.t - bb.b)
   );
 }
 
@@ -186,8 +186,8 @@ cpTransformBoneScale(cpVect v0, cpVect v1)
 static inline cpTransform
 cpTransformAxialScale(cpVect axis, cpVect pivot, cpFloat scale)
 {
-  cpFloat A = axis.x*axis.y*(scale - (cpFloat)1.0);
-  cpFloat B = cpvdot(axis, pivot)*((cpFloat)1.0 - scale);
+  cpFloat A = axis.x*axis.y*(scale - 1.0);
+  cpFloat B = cpvdot(axis, pivot)*(1.0 - scale);
   
   return cpTransformNewTranspose(
     scale*axis.x*axis.x + axis.y*axis.y, A, axis.x*B,

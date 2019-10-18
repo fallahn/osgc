@@ -804,6 +804,15 @@ void GameState::loadResources()
     //actually requires fov in X not Y
     m_gameScene.getSystem<Render3DSystem>().setFOV(fov * aspect);
 
+    //zero out all the animation maps first
+    for (auto& map : m_animationMaps)
+    {
+        for (auto& m : map)
+        {
+            m = 0;
+        }
+    }
+
     //actor sprites
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/players.spt", m_textureResource);

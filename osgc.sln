@@ -114,7 +114,6 @@ Global
 		{B2A5D0E5-B25B-485E-B4CD-8E14799BB064}.Release|x86.ActiveCfg = Release|Win32
 		{B2A5D0E5-B25B-485E-B4CD-8E14799BB064}.Release|x86.Build.0 = Release|Win32
 		{B2A5D0E5-B25B-485E-B4CD-8E14799BB064}.ReleaseWithDebug|x64.ActiveCfg = Release|x64
-		{B2A5D0E5-B25B-485E-B4CD-8E14799BB064}.ReleaseWithDebug|x64.Build.0 = Release|x64
 		{B2A5D0E5-B25B-485E-B4CD-8E14799BB064}.ReleaseWithDebug|x86.ActiveCfg = Release|Win32
 		{B2A5D0E5-B25B-485E-B4CD-8E14799BB064}.ReleaseWithDebug|x86.Build.0 = Release|Win32
 	EndGlobalSection
