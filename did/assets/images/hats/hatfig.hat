@@ -2,26 +2,20 @@ hats
 {
     hat capn
     {
-        id = 0
+        id = 1
         file="capn.png"
     }
 
     hat fez
     {
-        id = 1
+        id = 2
         file = "fez.png"
     }
 
     hat bngr
     {
-        id = 2
-        file = "band_gr.png"
-    }
-
-    hat bnbl
-    {
         id = 3
-        file = "crown.png"
+        file = "band_gr.png"
     }
 
     hat bnrd
@@ -30,15 +24,51 @@ hats
         file = "band_rd.png"
     }
 
-    hat capn2
+    hat bnbl
     {
         id = 5
+        file = "band_bl.png"
+    }
+
+    hat crown
+    {
+        id = 6
+        file = "crown.png"
+    }
+
+    hat capn2
+    {
+        id = 7
         file = "capn2.png"
     }
 
-    hat bnbl
+    hat beard
     {
-        id = 6
-        file = "band_bl.png"
-    }    
+        id = 8
+        file = "baard.png"
+    }
+
+    hat capn3
+    {
+        id = 9
+        file = "capn3.png"
+    }
+
+    hat magician
+    {
+        id = 10
+        file = "magician.png"
+    }
+
+    hat king
+    {
+        id = 11
+        file = "king.png"
+    }
+
+    hat bird
+    {
+        id = 12
+        file = "bird.png"
+    }
 }
