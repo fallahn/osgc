@@ -9,6 +9,7 @@ project(${PROJECT_NAME})
 
 # Some default variables which the user may change
 SET(CMAKE_BUILD_TYPE        Debug CACHE STRING  "Choose the type of build (Debug or Release)")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # We're using c++17
 set(CMAKE_CXX_STANDARD 17)
@@ -27,6 +28,7 @@ find_package(SFML ${SFML_MIN_VERSION} REQUIRED graphics window audio system netw
 
 # Find xyginext
 find_package(XYGINEXT REQUIRED)
+find_package(CHIPMUNK REQUIRED)
 
 # X11 is required on unices
 if(UNIX AND NOT APPLE)
@@ -52,9 +54,10 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
 
 # Linker settings
 target_link_libraries(${PROJECT_NAME} xyginext)
+target_link_libraries(${PROJECT_NAME} ${CHIPMUNK_LIBRARY})
 
 # Additional include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include ${CHIPUNK_INCLUDE_DIR})
 
 if(X11_FOUND)
   target_link_libraries(${PROJECT_NAME}
