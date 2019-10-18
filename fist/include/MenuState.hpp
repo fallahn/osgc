@@ -27,6 +27,8 @@ source distribution.
 
 #pragma once
 
+#include "InputParser.hpp"
+
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 
@@ -47,6 +49,8 @@ public:
 
 private:
     xy::Scene m_gameScene;
+
+    InputParser m_inputParser;
 
     void initScene();
     void buildArena();

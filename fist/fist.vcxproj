@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\PhysicsSystem.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
@@ -149,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\PhysicsObject.cpp" />
     <ClCompile Include="src\PhysicsSystem.cpp" />

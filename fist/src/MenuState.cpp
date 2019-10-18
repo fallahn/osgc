@@ -42,20 +42,9 @@ source distribution.
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 
-#include <xyginext/util/Vector.hpp>
-
 #include <chipmunk/chipmunk.h>
 
 #include <SFML/Window/Event.hpp>
-
-namespace
-{
-    //temp until we get a proper controller going
-    xy::Entity player;
-    const float PlayerStrength = 320.f;
-    const float MaxVelocity = 800.f;
-    const float MaxVelSqr = MaxVelocity * MaxVelocity;
-}
 
 MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State(ss, ctx),
@@ -91,41 +80,7 @@ void MenuState::handleMessage(const xy::Message& msg)
 
 bool MenuState::update(float dt)
 {
-    //temp until we move this to a controller
-    if (player.isValid())
-    {
-        sf::Vector2f movement;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            movement.x -= 1.f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            movement.x += 1.f;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-        {
-            movement.y -= 1.f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        {
-            movement.y += 1.f;
-        }
-        if (xy::Util::Vector::lengthSquared(movement) > 1)
-        {
-            movement = xy::Util::Vector::normalise(movement);
-        }
-
-        movement *= PlayerStrength;
-        
-        auto& vel = player.getComponent<sf::Vector2f>();
-        if (xy::Util::Vector::lengthSquared(vel) < MaxVelSqr)
-        {
-            vel += movement;
-        }
-    }
-
+    m_inputParser.update();
     m_gameScene.update(dt);
     return true;
 }
@@ -219,11 +174,14 @@ void MenuState::addHand()
     properties.elasticity = 0.4f;
     properties.mass = 2.5f;
 
+    auto& physWorld = m_gameScene.getSystem<PhysicsSystem>();
+    sf::Vector2f basePos(40.f, xy::DefaultSceneSize.y / 2.f);
+
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>();
-    entity.addComponent<PhysicsObject>() = m_gameScene.getSystem<PhysicsSystem>().createObject({ 400.f, xy::DefaultSceneSize.y / 2.f }, PhysicsObject::Type::Kinematic);
-    entity.getComponent<PhysicsObject>().addCircleShape(properties, 120.f);
-    Shape::setCircle(entity.addComponent<xy::Drawable>(), 120.f, sf::Color::Red);
+    entity.addComponent<PhysicsObject>() = physWorld.createObject(basePos, PhysicsObject::Type::Kinematic);
+    entity.getComponent<PhysicsObject>().addCircleShape(properties, 80.f);
+    Shape::setCircle(entity.addComponent<xy::Drawable>(), 80.f, sf::Color::Red);
     entity.addComponent<sf::Vector2f>();
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function =
@@ -234,5 +192,14 @@ void MenuState::addHand()
         e.getComponent<PhysicsObject>().setVelocity(vel);
     };
 
-    player = entity;
+    m_inputParser.setPlayerEntity(entity);
+    auto handEnt = entity;
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<PhysicsObject>() = physWorld.createObject(basePos + sf::Vector2f(80.f, 80.f));
+    entity.getComponent<PhysicsObject>().addBoxShape(properties, { 40.f, 100.f });
+    Shape::setRectangle(entity.addComponent<xy::Drawable>(), { 40.f, 100.f });
+
+    physWorld.pinBodies(handEnt, entity, basePos, {10.f, 10.f});
 }

@@ -243,6 +243,10 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
 
             m_gameInstance.setArgsString("");
         }
+        else
+        {
+            xy::Logger::log(m_gameInstance.getArgsString() + ": directory not found.", xy::Logger::Type::Error);
+        }
     }
 
     quitLoadingScreen();

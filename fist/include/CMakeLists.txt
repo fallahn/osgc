@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PhysicsSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp

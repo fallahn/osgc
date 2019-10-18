@@ -100,6 +100,18 @@ PhysicsObject PhysicsSystem::createObject(sf::Vector2f position, PhysicsObject::
     return obj;
 }
 
+void PhysicsSystem::pinBodies(xy::Entity a, xy::Entity b, sf::Vector2f aa, sf::Vector2f ab)
+{
+    auto ct = cpSimpleMotorNew(a.getComponent<PhysicsObject>().m_body, b.getComponent<PhysicsObject>().m_body, 10.0);
+    cpSpaceAddConstraint(m_space, ct);
+    
+    Constraint constraint;
+    constraint.a = a;
+    constraint.b = b;
+    constraint.constraint = ct;
+    m_constraintList.push_back(constraint);
+}
+
 void PhysicsSystem::removeObject(PhysicsObject& obj)
 {
     //remove obj shapes
@@ -120,5 +132,18 @@ void PhysicsSystem::removeObject(PhysicsObject& obj)
 
 void PhysicsSystem::onEntityRemoved(xy::Entity entity)
 {
+    //check if this is in the constraint list and remove the constraint
+    auto result = std::find_if(m_constraintList.begin(), m_constraintList.end(),
+        [entity](const Constraint& c)
+        {
+            return entity == c.a || entity == c.b;
+        });
+
+    if (result != m_constraintList.end())
+    {
+        cpSpaceRemoveConstraint(m_space, result->constraint);
+        m_constraintList.erase(result);
+    }
+
     removeObject(entity.getComponent<PhysicsObject>());
 }

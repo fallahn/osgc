@@ -281,8 +281,18 @@ public:
 
     void onEntityRemoved(xy::Entity) override;
 
+    void pinBodies(xy::Entity, xy::Entity, sf::Vector2f, sf::Vector2f);
+
 private:
     cpSpace* m_space;
 
     friend class PhysicsObject;
+
+    struct Constraint final
+    {
+        cpConstraint* constraint = nullptr;
+        xy::Entity a;
+        xy::Entity b;
+    };
+    std::vector<Constraint> m_constraintList;
 };
