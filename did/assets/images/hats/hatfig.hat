@@ -71,4 +71,76 @@ hats
         id = 12
         file = "bird.png"
     }
+
+    hat glasses
+    {
+        id = 13
+        file = "glasses.png"
+    }
+
+    hat gc1
+    {
+        id = 14
+        file = "gc1.png"
+    }
+
+    hat bns
+    {
+        id = 15
+        file = "ban_spec.png"
+    }
+
+    hat bs
+    {
+        id = 16
+        file = "bad_spy.png"
+    }
+
+    hat gc
+    {
+        id = 17
+        file = "gc2.png"
+    }
+
+    hat party
+    {
+        id = 18
+        file = "party_time.png"
+    }
+
+    hat h1
+    {
+        id = 19
+        file = "h1.png"
+    }
+
+    hat h2
+    {
+        id = 20
+        file = "h2.png"
+    }
+
+    hat h3
+    {
+        id = 21
+        file = "h3.png"
+    }
+
+    hat h4
+    {
+        id = 22
+        file = "h4.png"
+    }
+
+    hat h5
+    {
+        id = 23
+        file = "h5.png"
+    }
+
+    hat h6
+    {
+        id = 24
+        file = "h6.png"
+    }    
 }
