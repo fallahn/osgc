@@ -843,6 +843,10 @@ void MenuState::setLobbyView()
         {
             auto& client = m_sharedData.clientInformation.getClient(i);
             client.ready = (client.peerID == 0) ? true : false;
+
+            updateHatTexture(m_resources.get<sf::Texture>(m_playerTextureIDs[i]),
+                m_resources.get<sf::Texture>(m_hatTextureIDs[client.hatIndex]), 
+                *m_sharedData.playerSprites[i]);
         }
 
         //request a seed update (also sends all client data)
