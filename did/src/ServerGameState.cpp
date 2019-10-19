@@ -800,8 +800,8 @@ void GameState::createPlayerEntity(std::size_t idx)
     //spawn a lantern nearby
     static const std::array<sf::Vector2f, 4u> lampPositions = 
     {
-        sf::Vector2f(Global::TileSize / 2.f, Global::TileSize / 2.f),
-        sf::Vector2f(-Global::TileSize / 2.f, Global::TileSize / 2.f),
+        sf::Vector2f(-Global::TileSize, Global::TileSize / 2.f),
+        sf::Vector2f(Global::TileSize, Global::TileSize / 2.f),
         sf::Vector2f(-Global::TileSize, -Global::TileSize * 1.5f),
         sf::Vector2f(Global::TileSize, -Global::TileSize * 1.5f),
     };
