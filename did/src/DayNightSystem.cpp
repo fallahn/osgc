@@ -585,8 +585,7 @@ void DayNightSystem::prepShaders()
             //glUseProgram(handle);
             sf::Shader::bind(s);
             auto loc = glGetUniformLocation(handle, "u_lightAmount");
-
-            if (loc > 64) //some invalid number
+            if (loc > 64 || loc < 1) //some invalid number
             {
                 LOG("Failed retreiving uniforms - retrying...", xy::Logger::Type::Warning);
                 m_lampUniforms.clear();
@@ -599,7 +598,7 @@ void DayNightSystem::prepShaders()
         auto handle = m_shadowShader->getNativeHandle();
         glUseProgram(handle);
         auto loc = glGetUniformLocation(handle, "u_amount");
-        if (loc > 64)
+        if (loc > 64 || loc < 1)
         {
             m_lampUniforms.clear();
             return;
@@ -610,7 +609,7 @@ void DayNightSystem::prepShaders()
         handle = m_sunsetShader->getNativeHandle();
         glUseProgram(handle);
         loc = glGetUniformLocation(handle, "u_lightness");
-        if (loc > 64)
+        if (loc > 64 || loc < 1)
         {
             m_lampUniforms.clear();
             return;
@@ -621,7 +620,7 @@ void DayNightSystem::prepShaders()
         handle = m_groundShader->getNativeHandle();
         glUseProgram(handle);
         loc = glGetUniformLocation(handle, "u_sunDirection");
-        if (loc > 64)
+        if (loc > 64 || loc < 1)
         {
             m_lampUniforms.clear();
             return;
@@ -632,7 +631,7 @@ void DayNightSystem::prepShaders()
         handle = m_skyShader->getNativeHandle();
         glUseProgram(handle);
         loc = glGetUniformLocation(handle, "u_time");
-        if (loc > 64)
+        if (loc > 64 || loc < 1)
         {
             m_lampUniforms.clear();
             return;
@@ -643,7 +642,7 @@ void DayNightSystem::prepShaders()
         handle = m_moonShader->getNativeHandle();
         glUseProgram(handle);
         loc = glGetUniformLocation(handle, "u_dayNumber");
-        if (loc > 64)
+        if (loc > 64 || loc < 1)
         {
             m_lampUniforms.clear();
             return;
@@ -657,7 +656,7 @@ void DayNightSystem::prepShaders()
             glUseProgram(handle);
             auto loc = glGetUniformLocation(handle, "u_skyColour");
 
-            if (loc > 64) //some invalid number
+            if (loc > 64 || loc < 1) //some invalid number
             {
                 LOG("Failed retreiving uniforms - retrying...", xy::Logger::Type::Warning);
                 m_lampUniforms.clear();
