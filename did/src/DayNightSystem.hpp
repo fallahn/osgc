@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 
 #include <vector>
 #include <array>
+#include <map>
 
 namespace sf
 {
@@ -54,6 +55,8 @@ public:
     const sf::Texture& getBufferTexture() const { return m_bufferTexture.getTexture(); }
 
     void setStormLevel(std::int32_t);
+
+    void prepShaders();
 
 private:
 
@@ -85,7 +88,9 @@ private:
     sf::Clock m_dayTimer;
 
     std::vector<sf::Shader*> m_lampShaders;
+    std::map<std::uint32_t, std::int32_t> m_lampUniforms;
     sf::Shader* m_sunsetShader;
+    std::pair<std::uint32_t, std::int32_t> m_sunsetUniform;
 
     sf::Sprite m_bufferSprite;
     mutable sf::RenderTexture m_bufferTexture;

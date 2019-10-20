@@ -262,6 +262,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     );
 
     update(0.f); //gets scene ready to draw before first frame
+    m_gameScene.getSystem<DayNightSystem>().prepShaders();
     quitLoadingScreen();   
 }
 

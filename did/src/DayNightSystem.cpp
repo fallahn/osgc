@@ -26,6 +26,8 @@ Copyright 2019 Matt Marchant
 #include "FlappySailSystem.hpp"
 #include "MixerChannels.hpp"
 
+#include "glad/glad.h"
+
 #include <xyginext/resources/ShaderResource.hpp>
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
@@ -277,12 +279,30 @@ void DayNightSystem::process(float dt)
     //sets the amount of light lamps should cast
     float lightAmount = ((m_waveTable[m_currentIndexTwoFold] + interpOffset) + 1.f) / 2.f;
     //xy::Console::printStat("light amount", std::to_string(lightAmount));
-    for (auto shader : m_lampShaders)
+    /*for (auto shader : m_lampShaders)
     {
         shader->setUniform("u_lightAmount", lightAmount);
     }
+ 
     m_sunsetShader->setUniform("u_lightness", lightAmount * 0.5f);
-    m_shadowShader->setUniform("u_amount", lightAmount);
+    m_shadowShader->setUniform("u_amount", lightAmount);   
+    
+    */
+
+
+    for (auto [program, uniform] : m_lampUniforms)
+    {
+        glUseProgram(program);
+        glUniform1f(uniform, lightAmount);
+    }
+
+    glUseProgram(m_sunsetUniform.first);
+    glUniform1f(m_sunsetUniform.second, lightAmount * 0.5f);
+    //glUseProgram(m_shadowUniform.first);
+    //glUniform1f(m_shadowUniform.second, lightAmount);
+
+    glUseProgram(0);
+
 
     //update the lights of ships at sea
     xy::Command shipCommand;
@@ -527,6 +547,40 @@ void DayNightSystem::setStormLevel(std::int32_t level)
         getScene()->getSystem<FoliageSystem>().setWindStrength(0.4f);
         getScene()->getSystem<FlappySailSystem>().setWindStrength(20.f);
         break;
+    }
+}
+
+void DayNightSystem::prepShaders()
+{
+    //this is done here as shaders return incorrect values
+    //when this system is constructed
+    if (m_lampUniforms.empty())
+    {
+        for (const auto* s : m_lampShaders)
+        {
+            auto handle = s->getNativeHandle();
+            //glUseProgram(handle);
+            sf::Shader::bind(s);
+            auto loc = glGetUniformLocation(handle, "u_lightAmount");
+            m_lampUniforms.insert(std::make_pair(handle, loc));
+            //std::cout << "loc " << loc << "\n";
+        }
+        //this has the same value as lamps applied so add it to the map
+        auto handle = m_shadowShader->getNativeHandle();
+        glUseProgram(handle);
+        m_lampUniforms.insert(std::make_pair(handle, glGetUniformLocation(handle, "u_amount")));
+
+        //sunset shader
+        handle = m_sunsetShader->getNativeHandle();
+        glUseProgram(handle);
+        m_sunsetUniform = std::make_pair(handle, glGetUniformLocation(handle, "u_lightness"));
+
+        //ground shader
+        //sky shader
+        //moon shader
+        //shader array
+
+        glUseProgram(0);
     }
 }
 
