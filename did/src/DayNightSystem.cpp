@@ -206,6 +206,7 @@ DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::T
     }
 
     m_groundShader = &sr.get(ShaderID::LandShader);
+    m_groundShader->setUniform("u_sunDirection", sf::Glsl::Vec3(0.f, -1.f, 0.f));
     m_skyShader = &sr.get(ShaderID::SkyShader);
     m_moonShader = &sr.get(ShaderID::MoonShader);
     m_shadowShader = &sr.get(ShaderID::ShadowShader);
@@ -300,7 +301,7 @@ void DayNightSystem::process(float dt)
     
     */
 
-    prepShaders(); //only does anythign is uniforms are empty
+    prepShaders(); //only does anything if uniforms are empty
     for (auto [program, uniform] : m_lampUniforms)
     {
         glUseProgram(program);
@@ -309,8 +310,6 @@ void DayNightSystem::process(float dt)
 
     glUseProgram(m_sunsetUniform.first);
     glUniform1f(m_sunsetUniform.second, lightAmount * 0.5f);
-    //glUseProgram(m_shadowUniform.first);
-    //glUniform1f(m_shadowUniform.second, lightAmount);
 
     glUseProgram(0);
 
@@ -392,7 +391,10 @@ void DayNightSystem::process(float dt)
     m_sunDirection.x = -4.f * m_waveTable[m_currentIndex];
     m_sunDirection.y = ((m_waveTable[m_currentIndexTwoFold] + interpOffset) + 1.f);
 
-    m_groundShader->setUniform("u_sunDirection", m_sunDirection);
+    //m_groundShader->setUniform("u_sunDirection", m_sunDirection);
+    glUseProgram(m_groundUniform.first);
+    glUniform3f(m_groundUniform.second, m_sunDirection.x, m_sunDirection.y, m_sunDirection.z);
+    glUseProgram(0);
 
     //interp storm amount
     if (m_stormAmount < m_targetStormAmount)
@@ -469,11 +471,16 @@ void DayNightSystem::process(float dt)
         currColour = { 2.f, 2.f, 2.f, 1.f };
     }
 
-    for (auto s : m_shaders)
+    /*for (auto s : m_shaders)
     {
         s->setUniform("u_skyColour", currColour);
+    }*/
+    for (auto [program, uniform] : m_shaderUniforms)
+    {
+        glUseProgram(program);
+        glUniform4f(uniform, currColour.x, currColour.y, currColour.z, currColour.w);
     }
-
+    glUseProgram(0);
 
     //update sky sprite
     static float timeAccumulator = 0.f;
@@ -482,7 +489,10 @@ void DayNightSystem::process(float dt)
     auto c = static_cast<sf::Uint8>((1.f - (m_sunDirection.y / 2.f)) * 255.f);
 
     m_bufferSprite.setPosition(getScene()->getActiveCamera().getComponent<xy::Transform>().getPosition());
-    m_skyShader->setUniform("u_time", timeAccumulator * 0.005f);
+    //m_skyShader->setUniform("u_time", timeAccumulator * 0.005f);
+    glUseProgram(m_skyUniform.first);
+    glUniform1f(m_skyUniform.second, timeAccumulator * 0.005f);
+    glUseProgram(0); //TODO prob don't need to keep resetting this until the end of this function
 
     auto starColour = sf::Color::White;
     starColour.a = 255 - c;
@@ -508,8 +518,10 @@ void DayNightSystem::process(float dt)
 
     m_moonSprite.move(-movement * dt, 0.f);
     m_moonSprite.setPosition(m_moonSprite.getPosition().x, (verticalTravel - m_sunSprite.getPosition().y) + verticalTravel);
-    m_moonShader->setUniform("u_dayNumber", m_dayNumber + (static_cast<float>(m_currentIndexTwoFold) / static_cast<float>(m_waveTable.size())));
-
+    //m_moonShader->setUniform("u_dayNumber", m_dayNumber + (static_cast<float>(m_currentIndexTwoFold) / static_cast<float>(m_waveTable.size())));
+    glUseProgram(m_moonUniform.first);
+    glUniform1f(m_moonUniform.second, m_dayNumber + (static_cast<float>(m_currentIndexTwoFold) / static_cast<float>(m_waveTable.size())));
+    glUseProgram(0);
 
     //update these more slowly for a longer cycle
     if (m_dayTimer.getElapsedTime().asMilliseconds() > 1000)
@@ -582,22 +594,79 @@ void DayNightSystem::prepShaders()
             }
 
             m_lampUniforms.insert(std::make_pair(handle, loc));
-            //std::cout << "loc " << loc << "\n";
         }
         //this has the same value as lamps applied so add it to the map
         auto handle = m_shadowShader->getNativeHandle();
         glUseProgram(handle);
-        m_lampUniforms.insert(std::make_pair(handle, glGetUniformLocation(handle, "u_amount")));
+        auto loc = glGetUniformLocation(handle, "u_amount");
+        if (loc > 64)
+        {
+            m_lampUniforms.clear();
+            return;
+        }
+        m_lampUniforms.insert(std::make_pair(handle, loc));
 
         //sunset shader
         handle = m_sunsetShader->getNativeHandle();
         glUseProgram(handle);
-        m_sunsetUniform = std::make_pair(handle, glGetUniformLocation(handle, "u_lightness"));
+        loc = glGetUniformLocation(handle, "u_lightness");
+        if (loc > 64)
+        {
+            m_lampUniforms.clear();
+            return;
+        }
+        m_sunsetUniform = std::make_pair(handle, loc);
 
         //ground shader
+        handle = m_groundShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_sunDirection");
+        if (loc > 64)
+        {
+            m_lampUniforms.clear();
+            return;
+        }
+        m_groundUniform = std::make_pair(handle, loc);
+
         //sky shader
+        handle = m_skyShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_time");
+        if (loc > 64)
+        {
+            m_lampUniforms.clear();
+            return;
+        }
+        m_skyUniform = std::make_pair(handle, loc);
+
         //moon shader
+        handle = m_moonShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_dayNumber");
+        if (loc > 64)
+        {
+            m_lampUniforms.clear();
+            return;
+        }
+        m_moonUniform = std::make_pair(handle, loc);
+
         //shader array
+        for (const auto* s : m_shaders)
+        {
+            auto handle = s->getNativeHandle();
+            glUseProgram(handle);
+            auto loc = glGetUniformLocation(handle, "u_skyColour");
+
+            if (loc > 64) //some invalid number
+            {
+                LOG("Failed retreiving uniforms - retrying...", xy::Logger::Type::Warning);
+                m_lampUniforms.clear();
+                m_shaderUniforms.clear();
+                return;
+            }
+
+            m_shaderUniforms.insert(std::make_pair(handle, loc));
+        }
 
         glUseProgram(0);
     }

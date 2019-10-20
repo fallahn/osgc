@@ -64,7 +64,9 @@ private:
     float m_targetVolume;
 
     std::vector<sf::Shader*> m_shaders;
+    std::map<std::uint32_t, std::int32_t> m_shaderUniforms;
     sf::Shader* m_groundShader;
+    std::pair<std::uint32_t, std::int32_t> m_groundUniform;
     sf::Glsl::Vec3 m_sunDirection;
 
     std::vector<float> m_waveTable;
@@ -74,10 +76,12 @@ private:
     sf::Transform m_cameraTransform;
     sf::Sprite m_skySprite;
     mutable sf::Shader* m_skyShader;
+    std::pair<std::uint32_t, std::int32_t> m_skyUniform;
 
     sf::Sprite m_sunSprite;
     sf::Sprite m_moonSprite;
     sf::Shader* m_moonShader;
+    std::pair<std::uint32_t, std::int32_t> m_moonUniform;
     float m_dayNumber;
 
     sf::Shader* m_shadowShader;
