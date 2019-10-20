@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "ClientWeaponSystem.hpp"
 #include "PlayerSystem.hpp"
 #include "CarriableSystem.hpp"
+#include "GlobalConsts.hpp"
 
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -32,6 +33,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/util/Random.hpp>
+#include <xyginext/util/Vector.hpp>
 
 #include <array>
 
@@ -218,6 +220,7 @@ namespace
     std::array<std::size_t, AudioID::Count> audioHandles = {};
 
     const std::size_t MinEntities = 32;
+    const float VoiceVol = 45.f;
 }
 
 SFXDirector::SFXDirector()
@@ -466,29 +469,43 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             break;
 
         case PlayerEvent::Respawned:
+        {
+            auto position = data.entity.getComponent<xy::Transform>().getPosition();
             switch (m_spriteIndices[data.entity.getComponent<Actor>().id])
             {
             default:break;
             case 0:
-                playSound(xy::Util::Random::value(AudioID::RodneySpawn01, AudioID::RodneySpawn02),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::RodneySpawn01, AudioID::RodneySpawn02);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             case 1:
-                playSound(xy::Util::Random::value(AudioID::JeanSpawn01, AudioID::JeanSpawn02),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::JeanSpawn01, AudioID::JeanSpawn02);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             case 2:
-                playSound(xy::Util::Random::value(AudioID::HelenaSpawn01, AudioID::HelenaSpawn02),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::HelenaSpawn01, AudioID::HelenaSpawn02);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             case 3:
-                playSound(xy::Util::Random::value(AudioID::LarsSpawn01, AudioID::LarsSpawn02),
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::LarsSpawn01, AudioID::LarsSpawn02);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             }
             playSound(AudioID::PlayerSpawn, data.entity.getComponent<xy::Transform>().getPosition()).setVolume(30.f);
             break;
-
+        }
         case PlayerEvent::Died:
         {
             sf::Vector2f position;
@@ -506,20 +523,32 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             {
             default:break;
             case 0:
-                playSound(xy::Util::Random::value(AudioID::RodneyDie01, AudioID::RodneyDie04),
-                    position).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::RodneyDie01, AudioID::RodneyDie04);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             case 1:
-                playSound(xy::Util::Random::value(AudioID::JeanDie01, AudioID::JeanDie04),
-                    position).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::JeanDie01, AudioID::JeanDie04);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             case 2:
-                playSound(xy::Util::Random::value(AudioID::HelenaDie01, AudioID::HelenaDie03),
-                    position).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::HelenaDie01, AudioID::HelenaDie03);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             case 3:
-                playSound(xy::Util::Random::value(AudioID::LarsDie01, AudioID::LarsDie04),
-                    position).setVolume(45.f);
+            {
+                auto id = xy::Util::Random::value(AudioID::LarsDie01, AudioID::LarsDie04);
+                playSound(id, position).setVolume(VoiceVol);
+                addDelay(id, position);
+            }
                 break;
             }
             break;
@@ -534,20 +563,20 @@ void SFXDirector::handleMessage(const xy::Message& msg)
                 {
                 default:break;
                 case 0:
-                    playSound(AudioID::RodneyScore01,
-                        position).setVolume(45.f);
+                    playSound(AudioID::RodneyScore01, position).setVolume(VoiceVol);
+                    addDelay(AudioID::RodneyScore01, position);
                     break;
                 case 1:
-                    playSound(AudioID::JeanScore01,
-                        position).setVolume(45.f);
+                    playSound(AudioID::JeanScore01, position).setVolume(VoiceVol);
+                    addDelay(AudioID::JeanScore01, position);
                     break;
                 case 2:
-                    playSound(AudioID::HelenaScore01,
-                        position).setVolume(45.f);
+                    playSound(AudioID::HelenaScore01, position).setVolume(VoiceVol);
+                    addDelay(AudioID::HelenaScore01, position);
                     break;
                 case 3:
-                    playSound(AudioID::LarsScore01,
-                        position).setVolume(45.f);
+                    playSound(AudioID::LarsScore01, position).setVolume(VoiceVol);
+                    addDelay(AudioID::LarsScore01, position);
                     break;
                 }
 
@@ -566,24 +595,33 @@ void SFXDirector::handleMessage(const xy::Message& msg)
             data.type == Carrier::Treasure)
         {
             auto playerID = data.entity.getComponent<Actor>().id;
+            auto position = data.entity.getComponent<xy::Transform>().getPosition();
             switch (m_spriteIndices[playerID])
             {
             default:break;
             case 0:
-                playSound(AudioID::RodneyPickup01, 
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                playSound(AudioID::RodneyPickup01, position).setVolume(45.f);
+                addDelay(AudioID::RodneyPickup01, position);
+            }
                 break;
             case 1:
-                playSound(AudioID::JeanPickup01,
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                playSound(AudioID::JeanPickup01, position).setVolume(45.f);
+                addDelay(AudioID::JeanPickup01, position);
+            }
                 break;
             case 2:
-                playSound(AudioID::HelenaPickup01,
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                playSound(AudioID::HelenaPickup01, position).setVolume(45.f);
+                addDelay(AudioID::HelenaPickup01, position);
+            }
                 break;
             case 3:
-                playSound(AudioID::LarsPickup01,
-                    data.entity.getComponent<xy::Transform>().getPosition()).setVolume(45.f);
+            {
+                playSound(AudioID::LarsPickup01, position).setVolume(45.f);
+                addDelay(AudioID::LarsPickup01, position);
+            }
                 break;
             }
         }
@@ -604,6 +642,19 @@ void SFXDirector::process(float)
             i--;
         }
     }
+
+    //play any delayed sounds
+    m_delays.erase(std::remove_if(m_delays.begin(), m_delays.end(), 
+        [&](const AudioDelay& d)
+        {
+            if (d.timer.getElapsedTime() > d.timeout)
+            {
+                playSound(d.id, d.position).setVolume(d.volume);
+                return true;
+            }
+
+            return false;
+        }), m_delays.end());
 
     //update the trigger times
     /*for (auto& t : triggerTimes)
@@ -654,4 +705,27 @@ xy::AudioEmitter& SFXDirector::playSound(std::int32_t audioID, sf::Vector2f posi
     emitter.setPitch(1.f);
     emitter.play();
     return emitter;
+}
+
+void SFXDirector::addDelay(std::int32_t id, sf::Vector2f position)
+{
+    const float MaxDelay = 400.f;
+    const float MaxDist = xy::Util::Vector::lengthSquared(Global::IslandSize);
+    const float MinDist = xy::Util::Vector::lengthSquared(Global::IslandSize / 4.f);
+
+    auto dist = position - getScene().getActiveListener().getComponent<xy::Transform>().getPosition();
+    auto len2 = xy::Util::Vector::lengthSquared(dist);
+
+    if (len2 > MinDist)
+    {
+        auto ratio = std::sqrt(len2) / std::sqrt(MaxDist);
+
+        AudioDelay ad;
+        ad.position = position;
+        ad.id = id;
+        ad.timeout = sf::milliseconds(static_cast<sf::Int32>(MaxDelay * ratio));
+        ad.volume = 34.f * ratio;
+
+        m_delays.push_back(ad);
+    }
 }

@@ -189,6 +189,7 @@ DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::T
     m_shaders.push_back(&sr.get(ShaderID::SpriteShaderCulled));
     m_shaders.push_back(&sr.get(ShaderID::MoonShader));
 
+    //seems we need to set some inital values for the uniform caching to work on mac etc
     for(auto* shader : m_shaders)
     {
     	shader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
@@ -299,7 +300,7 @@ void DayNightSystem::process(float dt)
     
     */
 
-
+    prepShaders(); //only does anythign is uniforms are empty
     for (auto [program, uniform] : m_lampUniforms)
     {
         glUseProgram(program);
@@ -572,6 +573,14 @@ void DayNightSystem::prepShaders()
             //glUseProgram(handle);
             sf::Shader::bind(s);
             auto loc = glGetUniformLocation(handle, "u_lightAmount");
+
+            if (loc > 64) //some invalid number
+            {
+                LOG("Failed retreiving uniforms - retrying...", xy::Logger::Type::Warning);
+                m_lampUniforms.clear();
+                return;
+            }
+
             m_lampUniforms.insert(std::make_pair(handle, loc));
             //std::cout << "loc " << loc << "\n";
         }
