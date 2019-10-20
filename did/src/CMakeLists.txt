@@ -88,4 +88,6 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/fastnoise/FastNoiseSIMD_sse2.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/fastnoise/FastNoiseSIMD_sse41.cpp
 
+  ${CMAKE_CURRENT_SOURCE_DIR}/glad/glad.c
+
   PARENT_SCOPE)

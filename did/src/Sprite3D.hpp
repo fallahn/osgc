@@ -27,6 +27,7 @@ Responsible for creating the 3D matrix used for drawing sprites
 #include <xyginext/ecs/System.hpp>
 
 #include <vector>
+#include <map>
 
 namespace sf
 {
@@ -119,4 +120,8 @@ public:
 
 private:
     const std::vector<sf::Shader*> m_spriteShaders;
+
+    std::map<std::uint32_t, std::int32_t> m_uniformMap;
+
+    void onEntityAdded(xy::Entity) override;
 };

@@ -36,6 +36,8 @@ source distribution.
 #include "SharedStateData.hpp"
 #include "PauseState.hpp"
 
+#include "glad/glad.h"
+
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
 
@@ -61,6 +63,12 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     signal(SIGABRT, onAbort);
 #endif
     
+    if (!gladLoadGL())
+    {
+        xy::Logger::log("Failed to load OpenGL");
+        return StateID::ParentState;
+    }
+
     *sharedData = std::make_any<SharedData>();
     auto& sd = std::any_cast<SharedData&>(*sharedData);
 

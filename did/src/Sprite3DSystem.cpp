@@ -21,6 +21,8 @@ Copyright 2019 Matt Marchant
 #include "Camera3D.hpp"
 #include "HealthBarSystem.hpp"
 
+#include "glad/glad.h"
+
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
@@ -82,11 +84,34 @@ void Sprite3DSystem::process(float)
     const auto& camera = camEnt.getComponent<Camera3D>();
     auto camPos = camera.worldPosition.z - (Global::PlayerCameraOffset - 30.f);
 
-    for (auto shader : m_spriteShaders)
-    {
-        //compensate for the offset value in the shader - see Global::PlayerCameraOffset
-        shader->setUniform("u_cameraWorldPosition", camPos);
+    //for (auto shader : m_spriteShaders)
+    //{
+    //    //compensate for the offset value in the shader - see Global::PlayerCameraOffset
+    //    shader->setUniform("u_cameraWorldPosition", camPos);
 
-        //DPRINT("Cam pos", std::to_string(tx.y));
+    //    //DPRINT("Cam pos", std::to_string(tx.y));
+    //}
+
+    for (auto [program, uniform] : m_uniformMap)
+    {
+        glUseProgram(program);
+        glUniform1f(uniform, camPos);        
+    }
+    glUseProgram(0);
+}
+
+void Sprite3DSystem::onEntityAdded(xy::Entity)
+{
+    //we do this here as a delayed operation
+    //because apparently at the time of this system's
+    //construction the shaders return incorrect uniform locations
+    if (m_uniformMap.empty())
+    {
+        for (const auto* s : m_spriteShaders)
+        {
+            glUseProgram(s->getNativeHandle());
+            auto loc = glGetUniformLocation(s->getNativeHandle(), "u_cameraWorldPosition");
+            m_uniformMap.insert(std::make_pair(s->getNativeHandle(), loc));
+        }
     }
 }
