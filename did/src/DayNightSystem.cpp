@@ -189,10 +189,20 @@ DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::T
     m_shaders.push_back(&sr.get(ShaderID::SpriteShaderCulled));
     m_shaders.push_back(&sr.get(ShaderID::MoonShader));
 
+    for(auto* shader : m_shaders)
+    {
+    	shader->setUniform("u_skyColour", sf::Glsl::Vec4(1.f, 1.f, 1.f, 1.f));
+    }
+
     m_lampShaders.push_back(&sr.get(ShaderID::LandShader));
     m_lampShaders.push_back(&sr.get(ShaderID::PlaneShader));
     m_lampShaders.push_back(&sr.get(ShaderID::SpriteShader));
     m_lampShaders.push_back(&sr.get(ShaderID::SpriteShaderCulled));
+
+    for(auto* shader : m_lampShaders)
+    {
+    	shader->setUniform("u_lightAmount", 1.f);
+    }
 
     m_groundShader = &sr.get(ShaderID::LandShader);
     m_skyShader = &sr.get(ShaderID::SkyShader);
