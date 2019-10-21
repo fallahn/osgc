@@ -83,6 +83,12 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
         m_waveVertices[j + 3].texCoords = { 0.f, Global::IslandSize.y /*/ 4.f*/ };
     }
 
+    //one extra quad for shore/sand wave
+    m_waveVertices[16].texCoords = {};
+    m_waveVertices[17].texCoords = { Global::IslandSize.x, 0.f };
+    m_waveVertices[18].texCoords = { Global::IslandSize  };
+    m_waveVertices[29].texCoords = { 0.f, Global::IslandSize.y };
+
     m_sunsetShader = &sr.get(ShaderID::SunsetShader);
 
     requireComponent<Island>();
@@ -149,6 +155,7 @@ void IslandSystem::updateWaves(float dt)
 
     auto timeInc = dt * 0.05f;
 
+    //growing waves
     for (auto i = 0u; i < m_waves.size(); ++i)
     {
         transformable.setScale(m_waves[i].scale, m_waves[i].scale);
@@ -179,6 +186,34 @@ void IslandSystem::updateWaves(float dt)
             m_waves[i].lifetime = WaveLifetime;
         }
     }
+
+    static const float MinWaveSize = 0.03f;
+    //shrinking shore wave
+    transformable.setScale(m_inWave.scale, m_inWave.scale);
+    const auto& tx = transformable.getTransform();
+
+    float alpha = 1.f - ((1.f - m_inWave.scale) / MinWaveSize);
+    alpha = std::min(std::max(0.f, alpha), 1.f);
+    m_inWave.scale -= timeInc *(alpha + 0.01f);
+
+    m_waveVertices[16].position = tx.transformPoint({});
+    m_waveVertices[17].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
+    m_waveVertices[18].position = tx.transformPoint(Global::IslandSize);
+    m_waveVertices[19].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
+
+    alpha *= 63.f;
+    sf::Color colour(255, 255, 255, static_cast<sf::Uint8>(alpha));
+    m_waveVertices[16].color = colour;
+    m_waveVertices[17].color = colour;
+    m_waveVertices[18].color = colour;
+    m_waveVertices[19].color = colour;
+
+    m_inWave.lifetime -= dt;
+    if (m_inWave.lifetime < 0)
+    {
+        m_inWave.lifetime = WaveLifetime / 2.f;
+        m_inWave.scale = 1.f;
+    }
 }
 
 void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
@@ -204,20 +239,22 @@ void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     refStates.blendMode = sf::BlendAdd;
     rt.draw(m_reflectionSprite, refStates);
 
-    //waves
-    states.transform = {};
-    states.texture = m_waveMap;
-    states.blendMode = sf::BlendAdd;
-    rt.draw(m_waveVertices.data(), m_waveVertices.size(), sf::Quads, states);
-
     //ground
     m_landShader->setUniform("u_diffuseTexture", *m_currentTexture);
     m_landShader->setUniform("u_normalTexture", *m_normalMap);
     m_landShader->setUniform("u_normalUVOffset", 0.f);
+    states.transform = {};
     states.texture = m_currentTexture;
     states.shader = m_landShader;
     states.blendMode = sf::BlendAlpha;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
+
+    //waves
+    states.shader = m_planeShader;
+    states.texture = m_waveMap;
+    states.blendMode = sf::BlendAdd;
+    rt.draw(m_waveVertices.data(), m_waveVertices.size(), sf::Quads, states);
+
 }
 
 void IslandSystem::onEntityAdded(xy::Entity entity)

@@ -56,13 +56,14 @@ public:
 private:
 
     std::array<sf::Vertex, 4u> m_vertices;
-    std::array<sf::Vertex, 16u> m_waveVertices;
+    std::array<sf::Vertex, 20u> m_waveVertices;
     struct WaveQuad final
     {
         float scale = 1.f;
         float lifetime = 0.f;
     };
     std::array<WaveQuad, 3u> m_waves;
+    WaveQuad m_inWave;
 
     sf::Shader* m_seaShader;
     sf::Shader* m_planeShader;

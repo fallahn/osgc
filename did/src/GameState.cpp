@@ -798,7 +798,7 @@ void GameState::loadResources()
     const float fov = 0.6f; //0.55f FOV
     const float aspect = 16.f / 9.f;
     cameraEntity.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, aspect, 0.1f, 1536.f); 
-    cameraEntity.getComponent<xy::Transform>().setPosition(Global::IslandSize / 2.f);
+    cameraEntity.getComponent<xy::Transform>().setPosition(Global::IslandSize.x / 2.f, Global::IslandSize.y * 1.35f);
     cameraEntity.getComponent<xy::AudioListener>().setDepth(Camera3D::DefaultHeight);
 
     //actually requires fov in X not Y
