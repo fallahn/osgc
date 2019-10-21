@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/Glsl.hpp>
 
 #include <vector>
+#include <array>
 
 namespace sf
 {
@@ -52,7 +53,17 @@ public:
 private:
     float m_dayTime; //updated by server but interpolated to know how bright to make lights
 
+    struct UniformLocations final
+    {
+        std::array<std::pair<std::uint32_t, std::int32_t>, 4u> colours;
+        std::array<std::pair<std::uint32_t, std::int32_t>, 4u> positions;
+    };
+
     std::vector<sf::Shader*> m_shaders;
+    std::vector<UniformLocations> m_uniforms;
     std::vector<float> m_noiseTable;
     std::size_t m_noiseIndex;
+
+    std::size_t m_prepCount;
+    void prepShaders();
 };

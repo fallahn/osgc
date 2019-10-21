@@ -56,8 +56,6 @@ public:
 
     void setStormLevel(std::int32_t);
 
-    void prepShaders();
-
 private:
 
     float m_fadeInVolume; //used to fade in the looped sounds once the curtain is raised
@@ -158,4 +156,7 @@ private:
     void setTimeOfDay(float);
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+    std::size_t m_prepCount;
+    void prepShaders();
 };

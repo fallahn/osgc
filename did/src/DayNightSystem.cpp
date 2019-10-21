@@ -177,7 +177,8 @@ DayNightSystem::DayNightSystem(xy::MessageBus& mb, xy::ShaderResource& sr, xy::T
     m_flickerIndex          (0),
     m_stormAmount           (0.f),
     m_targetStormAmount     (0.f),
-    m_doLightning           (false)
+    m_doLightning           (false),
+    m_prepCount             (3)
 {
     xy::AudioMixer::setPrefadeVolume(m_fadeInVolume, MixerChannel::FX);
     xy::AudioMixer::setPrefadeVolume(m_fadeInVolume, MixerChannel::Music);
@@ -573,104 +574,6 @@ void DayNightSystem::setStormLevel(std::int32_t level)
     }
 }
 
-void DayNightSystem::prepShaders()
-{
-    //this is done here as shaders return incorrect values
-    //when this system is constructed
-    if (m_lampUniforms.empty())
-    {
-        for (const auto* s : m_lampShaders)
-        {
-            auto handle = s->getNativeHandle();
-            //glUseProgram(handle);
-            sf::Shader::bind(s);
-            auto loc = glGetUniformLocation(handle, "u_lightAmount");
-            if (loc > 64 || loc < 1) //some invalid number
-            {
-                LOG("Failed retreiving uniforms - retrying...", xy::Logger::Type::Warning);
-                m_lampUniforms.clear();
-                return;
-            }
-
-            m_lampUniforms.insert(std::make_pair(handle, loc));
-        }
-        //this has the same value as lamps applied so add it to the map
-        auto handle = m_shadowShader->getNativeHandle();
-        glUseProgram(handle);
-        auto loc = glGetUniformLocation(handle, "u_amount");
-        if (loc > 64)
-        {
-            m_lampUniforms.clear();
-            return;
-        }
-        m_lampUniforms.insert(std::make_pair(handle, loc));
-
-        //sunset shader
-        handle = m_sunsetShader->getNativeHandle();
-        glUseProgram(handle);
-        loc = glGetUniformLocation(handle, "u_lightness");
-        if (loc > 64)
-        {
-            m_lampUniforms.clear();
-            return;
-        }
-        m_sunsetUniform = std::make_pair(handle, loc);
-
-        //ground shader
-        handle = m_groundShader->getNativeHandle();
-        glUseProgram(handle);
-        loc = glGetUniformLocation(handle, "u_sunDirection");
-        if (loc > 64)
-        {
-            m_lampUniforms.clear();
-            return;
-        }
-        m_groundUniform = std::make_pair(handle, loc);
-
-        //sky shader
-        handle = m_skyShader->getNativeHandle();
-        glUseProgram(handle);
-        loc = glGetUniformLocation(handle, "u_time");
-        if (loc > 64)
-        {
-            m_lampUniforms.clear();
-            return;
-        }
-        m_skyUniform = std::make_pair(handle, loc);
-
-        //moon shader
-        handle = m_moonShader->getNativeHandle();
-        glUseProgram(handle);
-        loc = glGetUniformLocation(handle, "u_dayNumber");
-        if (loc > 64)
-        {
-            m_lampUniforms.clear();
-            return;
-        }
-        m_moonUniform = std::make_pair(handle, loc);
-
-        //shader array
-        for (const auto* s : m_shaders)
-        {
-            auto handle = s->getNativeHandle();
-            glUseProgram(handle);
-            auto loc = glGetUniformLocation(handle, "u_skyColour");
-
-            if (loc > 64) //some invalid number
-            {
-                LOG("Failed retreiving uniforms - retrying...", xy::Logger::Type::Warning);
-                m_lampUniforms.clear();
-                m_shaderUniforms.clear();
-                return;
-            }
-
-            m_shaderUniforms.insert(std::make_pair(handle, loc));
-        }
-
-        glUseProgram(0);
-    }
-}
-
 //private
 bool DayNightSystem::updateLightning()
 {
@@ -727,4 +630,65 @@ void DayNightSystem::draw(sf::RenderTarget& rt, sf::RenderStates) const
 
     states.transform = m_cameraTransform;
     rt.draw(m_bufferSprite/*, states*/);
+}
+
+void DayNightSystem::prepShaders()
+{
+    //this is a horrible hack to keep retrying until we
+    //get valid uniform IDs - worth it though for the optimisation gains.
+    if (m_prepCount > 0)
+    {
+        m_lampUniforms.clear();
+        m_shaderUniforms.clear();
+        m_prepCount--;
+
+        for (const auto* s : m_lampShaders)
+        {
+            auto handle = s->getNativeHandle();
+            glUseProgram(handle);
+            //sf::Shader::bind(s);
+            auto loc = glGetUniformLocation(handle, "u_lightAmount");
+            m_lampUniforms.insert(std::make_pair(handle, loc));
+        }
+        //this has the same value as lamps applied so add it to the map
+        auto handle = m_shadowShader->getNativeHandle();
+        glUseProgram(handle);
+        auto loc = glGetUniformLocation(handle, "u_amount");
+        m_lampUniforms.insert(std::make_pair(handle, loc));
+
+        //sunset shader
+        handle = m_sunsetShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_lightness");
+        m_sunsetUniform = std::make_pair(handle, loc);
+
+        //ground shader
+        handle = m_groundShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_sunDirection");
+        m_groundUniform = std::make_pair(handle, loc);
+
+        //sky shader
+        handle = m_skyShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_time");
+        m_skyUniform = std::make_pair(handle, loc);
+
+        //moon shader
+        handle = m_moonShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_dayNumber");
+        m_moonUniform = std::make_pair(handle, loc);
+
+        //shader array
+        for (const auto* s : m_shaders)
+        {
+            auto handle = s->getNativeHandle();
+            glUseProgram(handle);
+            auto loc = glGetUniformLocation(handle, "u_skyColour");
+            m_shaderUniforms.insert(std::make_pair(handle, loc));
+        }
+
+        glUseProgram(0);
+    }
 }

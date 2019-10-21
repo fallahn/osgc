@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "GlobalConsts.hpp"
 #include "MessageIDs.hpp"
 #include "ResourceIDs.hpp"
+#include "glad/glad.h"
 #include "fastnoise/FastNoiseSIMD.h"
 using fn = FastNoiseSIMD;
 
@@ -52,7 +53,8 @@ namespace
 TorchlightSystem::TorchlightSystem(xy::MessageBus& mb, xy::ShaderResource& shaders)
     : xy::System    (mb, typeid(TorchlightSystem)),
     m_dayTime       (Global::DayCycleOffset),
-    m_noiseIndex    (0)
+    m_noiseIndex    (0),
+    m_prepCount     (2)
 {
     //add shaders to internal list
     m_shaders.push_back(&shaders.get(ShaderID::SpriteShader));
@@ -98,6 +100,8 @@ void TorchlightSystem::handleMessage(const xy::Message& msg)
 
 void TorchlightSystem::process(float dt)
 {
+    prepShaders();
+
     //interpolate day time
     m_dayTime += dt / Global::DayNightSeconds;
 
@@ -113,15 +117,55 @@ void TorchlightSystem::process(float dt)
         auto pos = entities[i].getComponent<xy::Transform>().getWorldPosition();
         sf::Glsl::Vec3 worldPosition = { pos.x, Torchlight::height, pos.y + 10.f };
 
-        for (auto shader : m_shaders)
+        //for (auto shader : m_shaders)
+        //{
+            //shader->setUniform(ColourUniforms[i], torch.colour);
+            //shader->setUniform(PositionUniforms[i], worldPosition);
+        //}
+
+        for (const auto& uniform : m_uniforms)
         {
-            shader->setUniform(ColourUniforms[i], torch.colour);
-            shader->setUniform(PositionUniforms[i], worldPosition);
+            glUseProgram(uniform.colours[i].first);
+            glUniform3f(uniform.colours[i].second, torch.colour.x, torch.colour.y, torch.colour.z);
+
+            glUseProgram(uniform.positions[i].first);
+            glUniform3f(uniform.positions[i].second, worldPosition.x, worldPosition.y, worldPosition.z);
         }
+        glUseProgram(0);
 
         /*sf::Uint8 c = static_cast<sf::Uint8>(255.f * m_noiseTable[idx]);
         entities[i].getComponent<xy::Sprite>().setColour({ c,c,c });*/
     }
 
     m_noiseIndex = (m_noiseIndex + 1) % NoiseTableSize;
+}
+
+//private
+void TorchlightSystem::prepShaders()
+{
+    if (m_prepCount > 0)
+    {
+        m_uniforms;
+        m_prepCount--;
+
+        for (auto s : m_shaders)
+        {
+            auto handle = s->getNativeHandle();
+            glUseProgram(handle);
+
+            UniformLocations locations;
+
+            for (auto i = 0; i < ColourUniforms.size(); ++i)
+            {
+                auto loc = glGetUniformLocation(handle, ColourUniforms[i].c_str());
+                locations.colours[i] = std::make_pair(handle, loc);
+
+                loc = glGetUniformLocation(handle, PositionUniforms[i].c_str());
+                locations.positions[i] = std::make_pair(handle, loc);
+            }
+            m_uniforms.push_back(locations);
+        }
+
+        glUseProgram(0);
+    }
 }
