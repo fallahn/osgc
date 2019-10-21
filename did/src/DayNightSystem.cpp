@@ -312,8 +312,6 @@ void DayNightSystem::process(float dt)
     glUseProgram(m_sunsetUniform.first);
     glUniform1f(m_sunsetUniform.second, lightAmount * 0.5f);
 
-    glUseProgram(0);
-
 
     //update the lights of ships at sea
     xy::Command shipCommand;
@@ -395,7 +393,6 @@ void DayNightSystem::process(float dt)
     //m_groundShader->setUniform("u_sunDirection", m_sunDirection);
     glUseProgram(m_groundUniform.first);
     glUniform3f(m_groundUniform.second, m_sunDirection.x, m_sunDirection.y, m_sunDirection.z);
-    glUseProgram(0);
 
     //interp storm amount
     if (m_stormAmount < m_targetStormAmount)
@@ -481,7 +478,7 @@ void DayNightSystem::process(float dt)
         glUseProgram(program);
         glUniform4f(uniform, currColour.x, currColour.y, currColour.z, currColour.w);
     }
-    glUseProgram(0);
+
 
     //update sky sprite
     static float timeAccumulator = 0.f;
@@ -493,7 +490,6 @@ void DayNightSystem::process(float dt)
     //m_skyShader->setUniform("u_time", timeAccumulator * 0.005f);
     glUseProgram(m_skyUniform.first);
     glUniform1f(m_skyUniform.second, timeAccumulator * 0.005f);
-    glUseProgram(0); //TODO prob don't need to keep resetting this until the end of this function
 
     auto starColour = sf::Color::White;
     starColour.a = 255 - c;

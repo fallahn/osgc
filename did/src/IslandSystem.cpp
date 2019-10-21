@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "GlobalConsts.hpp"
 #include "ResourceIDs.hpp"
 #include "MessageIDs.hpp"
+#include "glad/glad.h"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -50,7 +51,8 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
     m_normalMap     (nullptr),
     m_waveMap       (nullptr),
     m_seaTexture    (nullptr),
-    m_sunsetShader  (nullptr)
+    m_sunsetShader  (nullptr),
+    m_prepCount     (2)
 {
     m_vertices[1].position = { Global::IslandSize.x, 0.f };
     m_vertices[1].texCoords = m_vertices[1].position;
@@ -84,10 +86,10 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
     }
 
     //one extra quad for shore/sand wave
-    m_waveVertices[16].texCoords = {};
+    /*m_waveVertices[16].texCoords = {};
     m_waveVertices[17].texCoords = { Global::IslandSize.x, 0.f };
     m_waveVertices[18].texCoords = { Global::IslandSize  };
-    m_waveVertices[29].texCoords = { 0.f, Global::IslandSize.y };
+    m_waveVertices[29].texCoords = { 0.f, Global::IslandSize.y };*/
 
     m_sunsetShader = &sr.get(ShaderID::SunsetShader);
 
@@ -97,25 +99,34 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
 //public
 void IslandSystem::process(float dt)
 {
+    prepShaders();
+
     //update sea shader
     static float timeAccumulator = 0.f;
     timeAccumulator += dt;
-    m_seaShader->setUniform("u_time", timeAccumulator);
+    //m_seaShader->setUniform("u_time", timeAccumulator);
+    glUseProgram(m_uniforms[UniformID::SeaTime].first);
+    glUniform1f(m_uniforms[UniformID::SeaTime].second, timeAccumulator);
 
     //update from camera settings
     const auto camEnt = getScene()->getActiveCamera();
     const auto& camera = camEnt.getComponent<Camera3D>();
 
-    //auto view = sf::Glsl::Mat4(&camera.viewMatrix[0][0]);
+    ////auto view = sf::Glsl::Mat4(&camera.viewMatrix[0][0]);
     auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
     auto worldCam = sf::Glsl::Vec3(camera.worldPosition.x, camera.worldPosition.y, camera.worldPosition.z);
-    m_planeShader->setUniform("u_viewProjection", viewProj);
-    m_planeShader->setUniform("u_cameraWorldPosition", worldCam);
+    //m_planeShader->setUniform("u_viewProjection", viewProj);
+    //m_planeShader->setUniform("u_cameraWorldPosition", worldCam);
+    glUseProgram(m_uniforms[PlaneViewProj].first);
+    glUniformMatrix4fv(m_uniforms[PlaneViewProj].second, 1, 0, &camera.viewProjectionMatrix[0][0]);
+    glUniform3f(m_uniforms[PlaneCamWorld].second, camera.worldPosition.x, camera.worldPosition.y, camera.worldPosition.z);
     
-    //m_landShader->setUniform("u_view", view);
-    m_landShader->setUniform("u_viewProjection", viewProj);
-    m_landShader->setUniform("u_cameraWorldPosition", worldCam);
-    
+    ////m_landShader->setUniform("u_view", view);
+    //m_landShader->setUniform("u_viewProjection", viewProj);
+    //m_landShader->setUniform("u_cameraWorldPosition", worldCam);
+    glUseProgram(m_uniforms[LandViewProj].first);
+    glUniformMatrix4fv(m_uniforms[LandViewProj].second, 1, 0, &camera.viewProjectionMatrix[0][0]);
+    glUniform3f(m_uniforms[LandCamWorld].second, camera.worldPosition.x, camera.worldPosition.y, camera.worldPosition.z);
 
     //make the sea follow so it seems infinite :D
     auto camPos = camEnt.getComponent<xy::Transform>().getWorldPosition();
@@ -124,13 +135,18 @@ void IslandSystem::process(float dt)
     m_seaTransform.translate(-((Global::IslandSize.x / 2.f) + 100.f), -Global::IslandSize.y); //this is just stretched a bit up to the screen edge
     m_seaTransform.scale(1.2f, 1.f);
     auto textureOffset = sf::Vector2f(camPos.x / Global::IslandSize.x, camPos.y / Global::IslandSize.y);
-    m_seaShader->setUniform("u_textureOffset", textureOffset);
+    //m_seaShader->setUniform("u_textureOffset", textureOffset);
+    glUseProgram(m_uniforms[UniformID::SeaTextureOffset].first);
+    glUniform2f(m_uniforms[UniformID::SeaTextureOffset].second, textureOffset.x, textureOffset.y);
 
     camPos.y -= ReflectionOffset;
     m_reflectionSprite.setPosition(camPos);
 
-    timeAccumulator += dt;
-    m_sunsetShader->setUniform("u_time", timeAccumulator);
+    //timeAccumulator += dt; //should this be added twice??
+    //m_sunsetShader->setUniform("u_time", timeAccumulator);
+    glUseProgram(m_uniforms[UniformID::SunTime].first);
+    glUniform1f(m_uniforms[UniformID::SunTime].second, timeAccumulator);
+    glUseProgram(0);
 
     updateWaves(dt);
 }
@@ -147,6 +163,47 @@ void IslandSystem::setReflectionTexture(const sf::Texture& texture)
 }
 
 //private
+void IslandSystem::prepShaders()
+{
+    if (m_prepCount > 0)
+    {
+        m_prepCount--;
+
+        auto handle = m_seaShader->getNativeHandle();
+        glUseProgram(handle);
+        auto loc = glGetUniformLocation(handle, "u_time");
+        m_uniforms[UniformID::SeaTime] = std::make_pair(handle, loc);
+
+        handle = m_planeShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_viewProjection");
+        m_uniforms[UniformID::PlaneViewProj] = std::make_pair(handle, loc);
+        loc = glGetUniformLocation(handle, "u_cameraWorldPosition");
+        m_uniforms[UniformID::PlaneCamWorld] = std::make_pair(handle, loc);
+
+        handle = m_landShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_viewProjection");
+        m_uniforms[UniformID::LandViewProj] = std::make_pair(handle, loc);
+        loc = glGetUniformLocation(handle, "u_cameraWorldPosition");
+        m_uniforms[UniformID::LandCamWorld] = std::make_pair(handle, loc);
+        loc = glGetUniformLocation(handle, "u_normalUVOffset");
+        m_uniforms[UniformID::LandUV] = std::make_pair(handle, loc);
+
+        handle = m_seaShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_textureOffset");
+        m_uniforms[UniformID::SeaTextureOffset] = std::make_pair(handle, loc);
+
+        handle = m_sunsetShader->getNativeHandle();
+        glUseProgram(handle);
+        loc = glGetUniformLocation(handle, "u_time");
+        m_uniforms[UniformID::SunTime] = std::make_pair(handle, loc);
+
+        glUseProgram(0);
+    }
+}
+
 void IslandSystem::updateWaves(float dt)
 {
     sf::Transformable transformable;
@@ -187,33 +244,33 @@ void IslandSystem::updateWaves(float dt)
         }
     }
 
-    static const float MinWaveSize = 0.03f;
-    //shrinking shore wave
-    transformable.setScale(m_inWave.scale, m_inWave.scale);
-    const auto& tx = transformable.getTransform();
+    //static const float MinWaveSize = 0.03f;
+    ////shrinking shore wave
+    //transformable.setScale(m_inWave.scale, m_inWave.scale);
+    //const auto& tx = transformable.getTransform();
 
-    float alpha = 1.f - ((1.f - m_inWave.scale) / MinWaveSize);
-    alpha = std::min(std::max(0.f, alpha), 1.f);
-    m_inWave.scale -= timeInc *(alpha + 0.01f);
+    //float alpha = 1.f - ((1.f - m_inWave.scale) / MinWaveSize);
+    //alpha = std::min(std::max(0.f, alpha), 1.f);
+    //m_inWave.scale -= timeInc *(alpha + 0.01f);
 
-    m_waveVertices[16].position = tx.transformPoint({});
-    m_waveVertices[17].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
-    m_waveVertices[18].position = tx.transformPoint(Global::IslandSize);
-    m_waveVertices[19].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
+    //m_waveVertices[16].position = tx.transformPoint({});
+    //m_waveVertices[17].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
+    //m_waveVertices[18].position = tx.transformPoint(Global::IslandSize);
+    //m_waveVertices[19].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
 
-    alpha *= 63.f;
-    sf::Color colour(255, 255, 255, static_cast<sf::Uint8>(alpha));
-    m_waveVertices[16].color = colour;
-    m_waveVertices[17].color = colour;
-    m_waveVertices[18].color = colour;
-    m_waveVertices[19].color = colour;
+    //alpha *= 63.f;
+    //sf::Color colour(255, 255, 255, static_cast<sf::Uint8>(alpha));
+    //m_waveVertices[16].color = colour;
+    //m_waveVertices[17].color = colour;
+    //m_waveVertices[18].color = colour;
+    //m_waveVertices[19].color = colour;
 
-    m_inWave.lifetime -= dt;
-    if (m_inWave.lifetime < 0)
-    {
-        m_inWave.lifetime = WaveLifetime / 2.f;
-        m_inWave.scale = 1.f;
-    }
+    //m_inWave.lifetime -= dt;
+    //if (m_inWave.lifetime < 0)
+    //{
+    //    m_inWave.lifetime = WaveLifetime / 2.f;
+    //    m_inWave.scale = 1.f;
+    //}
 }
 
 void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
@@ -242,7 +299,11 @@ void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     //ground
     m_landShader->setUniform("u_diffuseTexture", *m_currentTexture);
     m_landShader->setUniform("u_normalTexture", *m_normalMap);
-    m_landShader->setUniform("u_normalUVOffset", 0.f);
+    //m_landShader->setUniform("u_normalUVOffset", 0.f); //this gets set elsewhere by drawables bound to it so needs to be reset right before drawing
+    glUseProgram(m_uniforms[LandUV].first);
+    glUniform1f(m_uniforms[LandUV].second, 0.f);
+    glUseProgram(0);
+
     states.transform = {};
     states.texture = m_currentTexture;
     states.shader = m_landShader;

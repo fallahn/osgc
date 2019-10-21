@@ -80,6 +80,19 @@ private:
     sf::Sprite m_reflectionSprite;
     sf::Shader* m_sunsetShader;
 
+    enum UniformID
+    {
+        SeaTime, SeaTextureOffset,
+        PlaneViewProj, PlaneCamWorld,
+        LandViewProj, LandCamWorld,
+        LandUV, SunTime,
+
+        Count
+    };
+    std::array<std::pair<std::uint32_t, std::int32_t>, UniformID::Count> m_uniforms;
+    std::size_t m_prepCount;
+    void prepShaders();
+
     void updateWaves(float);
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 

@@ -117,11 +117,11 @@ void TorchlightSystem::process(float dt)
         auto pos = entities[i].getComponent<xy::Transform>().getWorldPosition();
         sf::Glsl::Vec3 worldPosition = { pos.x, Torchlight::height, pos.y + 10.f };
 
-        //for (auto shader : m_shaders)
-        //{
-            //shader->setUniform(ColourUniforms[i], torch.colour);
-            //shader->setUniform(PositionUniforms[i], worldPosition);
-        //}
+        /*for (auto shader : m_shaders)
+        {
+            shader->setUniform(ColourUniforms[i], torch.colour);
+            shader->setUniform(PositionUniforms[i], worldPosition);
+        }*/
 
         for (const auto& uniform : m_uniforms)
         {
@@ -145,7 +145,7 @@ void TorchlightSystem::prepShaders()
 {
     if (m_prepCount > 0)
     {
-        m_uniforms;
+        m_uniforms.clear();
         m_prepCount--;
 
         for (auto s : m_shaders)
