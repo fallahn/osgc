@@ -77,6 +77,9 @@ private:
     sf::Transform m_seaTransform;
     mutable sf::RenderTexture m_seaBuffer;
 
+    std::vector<float> m_edgeTable;
+    std::size_t m_edgeIndex;
+
     sf::Sprite m_reflectionSprite;
     sf::Shader* m_sunsetShader;
 

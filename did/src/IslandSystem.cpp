@@ -27,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/resources/Resource.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
+#include <xyginext/util/Wavetable.hpp>
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -51,6 +52,7 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
     m_normalMap     (nullptr),
     m_waveMap       (nullptr),
     m_seaTexture    (nullptr),
+    m_edgeIndex     (0),
     m_sunsetShader  (nullptr),
     m_prepCount     (2)
 {
@@ -86,10 +88,17 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
     }
 
     //one extra quad for shore/sand wave
-    /*m_waveVertices[16].texCoords = {};
+    m_waveVertices[16].texCoords = {};
     m_waveVertices[17].texCoords = { Global::IslandSize.x, 0.f };
     m_waveVertices[18].texCoords = { Global::IslandSize  };
-    m_waveVertices[29].texCoords = { 0.f, Global::IslandSize.y };*/
+    m_waveVertices[19].texCoords = { 0.f, Global::IslandSize.y };
+
+    m_waveVertices[16].color = { 255,255,255,64 };
+    m_waveVertices[17].color = { 255,255,255,64 };
+    m_waveVertices[18].color = { 255,255,255,64 };
+    m_waveVertices[19].color = { 255,255,255,64 };
+
+    m_edgeTable = xy::Util::Wavetable::sine(0.5f, 0.01f);
 
     m_sunsetShader = &sr.get(ShaderID::SunsetShader);
 
@@ -245,32 +254,17 @@ void IslandSystem::updateWaves(float dt)
     }
 
     //static const float MinWaveSize = 0.03f;
-    ////shrinking shore wave
-    //transformable.setScale(m_inWave.scale, m_inWave.scale);
-    //const auto& tx = transformable.getTransform();
+    //shrinking shore wave
+    transformable.setScale(m_inWave.scale, m_inWave.scale);
+    const auto& tx = transformable.getTransform();
 
-    //float alpha = 1.f - ((1.f - m_inWave.scale) / MinWaveSize);
-    //alpha = std::min(std::max(0.f, alpha), 1.f);
-    //m_inWave.scale -= timeInc *(alpha + 0.01f);
+    m_inWave.scale = 1.f + m_edgeTable[m_edgeIndex];
+    m_edgeIndex = (m_edgeIndex + 1) % m_edgeTable.size();
 
-    //m_waveVertices[16].position = tx.transformPoint({});
-    //m_waveVertices[17].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
-    //m_waveVertices[18].position = tx.transformPoint(Global::IslandSize);
-    //m_waveVertices[19].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
-
-    //alpha *= 63.f;
-    //sf::Color colour(255, 255, 255, static_cast<sf::Uint8>(alpha));
-    //m_waveVertices[16].color = colour;
-    //m_waveVertices[17].color = colour;
-    //m_waveVertices[18].color = colour;
-    //m_waveVertices[19].color = colour;
-
-    //m_inWave.lifetime -= dt;
-    //if (m_inWave.lifetime < 0)
-    //{
-    //    m_inWave.lifetime = WaveLifetime / 2.f;
-    //    m_inWave.scale = 1.f;
-    //}
+    m_waveVertices[16].position = tx.transformPoint({});
+    m_waveVertices[17].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
+    m_waveVertices[18].position = tx.transformPoint(Global::IslandSize);
+    m_waveVertices[19].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
 }
 
 void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
@@ -313,7 +307,7 @@ void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     //waves
     states.shader = m_planeShader;
     states.texture = m_waveMap;
-    states.blendMode = sf::BlendAdd;
+    //states.blendMode = sf::BlendAdd;
     rt.draw(m_waveVertices.data(), m_waveVertices.size(), sf::Quads, states);
 
 }

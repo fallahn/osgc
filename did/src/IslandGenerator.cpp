@@ -97,26 +97,29 @@ R"(
 uniform sampler2D u_texture;
 uniform float u_pixelOffset;
 
-const float Thickness = 2.0;
+const float Thickness = 4.0;
 
 void main()
 {
     vec2 uv = gl_TexCoord[0].xy;
-    float alpha = Thickness * 4.0 * texture2D(u_texture, uv).a;
+    float baseAlpha = texture2D(u_texture, uv).a;
+    float alpha = Thickness * 4.0 * baseAlpha;
 
     for(float i = 1.0; i <= Thickness; ++i)
     {
-        alpha -= texture2D(u_texture, uv + vec2(u_pixelOffset * i, 0.0f)).a;
-        alpha -= texture2D(u_texture, uv + vec2(-u_pixelOffset * i, 0.0f)).a;
-        alpha -= texture2D(u_texture, uv + vec2(0.0f, u_pixelOffset * i)).a;
-        alpha -= texture2D(u_texture, uv + vec2(0.0f, -u_pixelOffset * i)).a;
+        alpha -= texture2D(u_texture, uv - vec2(u_pixelOffset * i, 0.0f)).a;
+        alpha -= texture2D(u_texture, uv - vec2(-u_pixelOffset * i, 0.0f)).a;
+        alpha -= texture2D(u_texture, uv - vec2(0.0f, u_pixelOffset * i)).a;
+        alpha -= texture2D(u_texture, uv - vec2(0.0f, -u_pixelOffset * i)).a;
     }
 
     float wave = (sin(uv.x * 100.0) + 1.0 / 2.0);
     wave *= (cos(uv.y * 100.0) + 1.0 / 2.0);
     wave = clamp(wave + 0.8, 0.0, 1.0);
 
-    gl_FragColor = vec4(vec3(1.0), clamp(alpha, 0.0, 1.0) * 0.9 * wave);
+    vec3 waveColour = vec3(1.0) * clamp(alpha, 0.0, 1.0) * 0.9 * wave;
+
+    gl_FragColor = vec4(waveColour, waveColour.r);// clamp((1.0 - baseAlpha) + (waveColour.b * 0.9999), 0.0, 1.0));
 })";
 }
 

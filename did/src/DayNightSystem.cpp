@@ -39,6 +39,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Wavetable.hpp>
 #include <xyginext/util/Random.hpp>
 #include <xyginext/util/Math.hpp>
+#include <xyginext/util/Vector.hpp>
 
 #include <xyginext/audio/Mixer.hpp>
 
@@ -390,9 +391,11 @@ void DayNightSystem::process(float dt)
     m_sunDirection.x = -4.f * m_waveTable[m_currentIndex];
     m_sunDirection.y = ((m_waveTable[m_currentIndexTwoFold] + interpOffset) + 1.f);
 
+    //juat looks nicer this way
+    auto sunDir = xy::Util::Vector::normalise((xy::DefaultSceneSize / 2.f) - m_sunSprite.getPosition());
     //m_groundShader->setUniform("u_sunDirection", m_sunDirection);
     glUseProgram(m_groundUniform.first);
-    glUniform3f(m_groundUniform.second, m_sunDirection.x, m_sunDirection.y, m_sunDirection.z);
+    glUniform3f(m_groundUniform.second, -sunDir.x, sunDir.y, /*-m_sunDirection.z*/0.5f);
 
     //interp storm amount
     if (m_stormAmount < m_targetStormAmount)
