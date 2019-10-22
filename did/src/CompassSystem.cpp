@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "Actor.hpp"
 #include "Camera3D.hpp"
 #include "PlayerSystem.hpp"
+#include "glad/glad.h"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -50,7 +51,8 @@ namespace
 }
 
 CompassSystem::CompassSystem(xy::MessageBus& mb)
-    : xy::System(mb, typeid(CompassSystem))
+    : xy::System(mb, typeid(CompassSystem)),
+    m_prepCount(2)
 {
     requireComponent<Compass>();
     requireComponent<xy::Transform>();
@@ -71,6 +73,8 @@ void CompassSystem::handleMessage(const xy::Message& msg)
 
 void CompassSystem::process(float)
 {
+    prepShader();
+
     auto& entities = getEntities();
     for (auto entity : entities)
     {
@@ -170,8 +174,11 @@ void CompassSystem::process(float)
     const auto camEnt = getScene()->getActiveCamera();
     const auto& camera = camEnt.getComponent<Camera3D>();
 
-    auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
-    m_shader.setUniform("u_viewProjectionMatrix", viewProj);
+    //auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
+    //m_shader.setUniform("u_viewProjectionMatrix", viewProj);
+    glUseProgram(m_uniform.first);
+    glUniformMatrix4fv(m_uniform.second, 1, 0, &camera.viewProjectionMatrix[0][0]);
+    glUseProgram(0);
 }
 
 void CompassSystem::onEntityAdded(xy::Entity entity)
@@ -179,4 +186,20 @@ void CompassSystem::onEntityAdded(xy::Entity entity)
     entity.getComponent<xy::Drawable>().getVertices().resize(4 * 4); //background and 3 pointers
     entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Quads);
     entity.getComponent<xy::Drawable>().setShader(&m_shader);
+}
+
+//private
+void CompassSystem::prepShader()
+{
+    if (m_prepCount > 0)
+    {
+        m_prepCount--;
+
+        auto handle = m_shader.getNativeHandle();
+        glUseProgram(handle);
+        auto loc = glGetUniformLocation(handle, "u_viewProjectionMatrix");
+        m_uniform = std::make_pair(handle, loc);
+
+        glUseProgram(0);
+    }
 }

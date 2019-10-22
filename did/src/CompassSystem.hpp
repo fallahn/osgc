@@ -44,4 +44,8 @@ public:
 private:
     std::array<sf::Vector2f, 4u> m_playerPoints;
     sf::Shader m_shader;
+    std::pair<std::uint32_t, std::int32_t> m_uniform;
+
+    std::size_t m_prepCount;
+    void prepShader();
 };
