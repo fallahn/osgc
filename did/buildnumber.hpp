@@ -1,3 +1,3 @@
 #pragma once
-#define BUILDNUMBER 4973
-#define BUILDNUMBER_STR "4973"
+#define BUILDNUMBER 4974
+#define BUILDNUMBER_STR "4974"

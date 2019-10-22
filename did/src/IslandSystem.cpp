@@ -293,22 +293,23 @@ void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     //ground
     m_landShader->setUniform("u_diffuseTexture", *m_currentTexture);
     m_landShader->setUniform("u_normalTexture", *m_normalMap);
-    //m_landShader->setUniform("u_normalUVOffset", 0.f); //this gets set elsewhere by drawables bound to it so needs to be reset right before drawing
+    //m_landShader->setUniform("u_normalUVOffset", 0.f); 
+    //this gets set elsewhere by drawables bound to it so needs to be reset right before drawing
     glUseProgram(m_uniforms[LandUV].first);
     glUniform1f(m_uniforms[LandUV].second, 0.f);
     glUseProgram(0);
 
     states.transform = {};
+    //waves
+    //states.shader = m_planeShader;
+    states.texture = m_waveMap;
+    states.blendMode = sf::BlendAdd;
+    rt.draw(m_waveVertices.data(), m_waveVertices.size(), sf::Quads, states);
+
     states.texture = m_currentTexture;
     states.shader = m_landShader;
     states.blendMode = sf::BlendAlpha;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
-
-    //waves
-    states.shader = m_planeShader;
-    states.texture = m_waveMap;
-    //states.blendMode = sf::BlendAdd;
-    rt.draw(m_waveVertices.data(), m_waveVertices.size(), sf::Quads, states);
 
 }
 

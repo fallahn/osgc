@@ -52,6 +52,9 @@ private:
 
     std::vector<xy::Entity> m_lights;
     sf::Shader* m_shader;
+    std::pair<std::uint32_t, std::int32_t> m_uniform;
+    std::size_t m_prepCount;
+    void prepShader();
 
     std::pair<sf::Vector2f, float> getRay(sf::Vector2f, sf::Vector2f);
 };

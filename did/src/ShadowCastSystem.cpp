@@ -22,6 +22,7 @@ Copyright 2019 Matt Marchant
 #include "Camera3D.hpp"
 #include "ResourceIDs.hpp"
 #include "Sprite3D.hpp"
+#include "glad/glad.h"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -38,7 +39,8 @@ namespace
 }
 
 ShadowCastSystem::ShadowCastSystem(xy::MessageBus& mb, xy::ShaderResource& sr)
-    : xy::System(mb, typeid(ShadowCastSystem))
+    : xy::System(mb, typeid(ShadowCastSystem)),
+    m_prepCount (2)
 {
     requireComponent<ShadowCaster>();
     requireComponent<xy::Transform>();
@@ -50,6 +52,7 @@ ShadowCastSystem::ShadowCastSystem(xy::MessageBus& mb, xy::ShaderResource& sr)
 //public
 void ShadowCastSystem::process(float)
 {
+    prepShader();
     auto& entities = getEntities();
     for (auto entity : entities)
     {
@@ -124,8 +127,11 @@ void ShadowCastSystem::process(float)
     const auto camEnt = getScene()->getActiveCamera();
     const auto& camera = camEnt.getComponent<Camera3D>();
 
-    auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
-    m_shader->setUniform("u_viewProjectionMatrix", viewProj);
+    //auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
+    //m_shader->setUniform("u_viewProjectionMatrix", viewProj);
+    glUseProgram(m_uniform.first);
+    glUniformMatrix4fv(m_uniform.second, 1, 0, &camera.viewProjectionMatrix[0][0]);
+    glUseProgram(0);
 }
 
 void ShadowCastSystem::addLight(xy::Entity entity)
@@ -144,6 +150,21 @@ void ShadowCastSystem::onEntityAdded(xy::Entity entity)
 }
 
 //private
+void ShadowCastSystem::prepShader()
+{
+    if (m_prepCount > 0)
+    {
+        m_prepCount--;
+
+        auto handle = m_shader->getNativeHandle();
+        glUseProgram(handle);
+        auto loc = glGetUniformLocation(handle, "u_viewProjectionMatrix");
+        m_uniform = std::make_pair(handle, loc);
+
+        glUseProgram(0);
+    }
+}
+
 std::pair<sf::Vector2f, float> ShadowCastSystem::getRay(sf::Vector2f lightPos, sf::Vector2f basePos)
 {
     auto ray = basePos - lightPos;

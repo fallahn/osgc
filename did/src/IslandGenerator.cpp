@@ -97,7 +97,7 @@ R"(
 uniform sampler2D u_texture;
 uniform float u_pixelOffset;
 
-const float Thickness = 4.0;
+const float Thickness = 2.0;
 
 void main()
 {
