@@ -64,6 +64,8 @@ private:
 
     struct AudioDelayTrigger final
     {
+    	//clang wants a ctor, clang gets a ctor
+    	AudioDelayTrigger() : id(-1), volume(45.f){}
         sf::Clock timer;
         sf::Time timeout;
         std::int32_t id = -1;
