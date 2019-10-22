@@ -65,6 +65,7 @@ Copyright 2019 Matt Marchant
 #include "ClientFlareSystem.hpp"
 #include "InterpolationSystem.hpp"
 #include "Packet.hpp"
+#include "AudioDelaySystem.hpp"
 
 #include <xyginext/core/App.hpp>
 #include <xyginext/core/SysTime.hpp>
@@ -776,6 +777,7 @@ void GameState::loadResources()
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::TextSystem>(mb);
     m_gameScene.addSystem<AudioSystem>(mb);
+    m_gameScene.addSystem<AudioDelaySystem>(mb);
     
     m_gameScene.addSystem<Render3DSystem>(mb);
   

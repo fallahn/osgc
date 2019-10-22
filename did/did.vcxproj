@@ -228,6 +228,7 @@
     <ClInclude Include="src\ActorSystem.hpp" />
     <ClInclude Include="src\AnimationCallbacks.hpp" />
     <ClInclude Include="src\AnimationSystem.hpp" />
+    <ClInclude Include="src\AudioDelaySystem.hpp" />
     <ClInclude Include="src\AudioSystem.hpp" />
     <ClInclude Include="src\BarrelSystem.hpp" />
     <ClInclude Include="src\BeeSystem.hpp" />
@@ -329,6 +330,7 @@
   <ItemGroup>
     <ClCompile Include="src\ActorSystem.cpp" />
     <ClCompile Include="src\AnimationSystem.cpp" />
+    <ClCompile Include="src\AudioDelaySystem.cpp" />
     <ClCompile Include="src\AudioSystem.cpp" />
     <ClCompile Include="src\BarrelSystem.cpp" />
     <ClCompile Include="src\BeeSystem.cpp" />

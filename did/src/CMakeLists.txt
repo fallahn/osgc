@@ -3,6 +3,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ActorSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AnimationSystem.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/AudioSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/AudioDelaySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/AudioSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BarrelSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/BeeSystem.cpp

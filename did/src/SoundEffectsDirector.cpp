@@ -16,6 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
+
 #include "SoundEffectsDirector.hpp"
 #include "MixerChannels.hpp"
 #include "MessageIDs.hpp"
@@ -26,6 +27,7 @@ Copyright 2019 Matt Marchant
 #include "PlayerSystem.hpp"
 #include "CarriableSystem.hpp"
 #include "GlobalConsts.hpp"
+#include "AudioDelaySystem.hpp"
 
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -645,11 +647,11 @@ void SFXDirector::process(float)
 
     //play any delayed sounds
     m_delays.erase(std::remove_if(m_delays.begin(), m_delays.end(), 
-        [&](const AudioDelay& d)
+        [&](const AudioDelayTrigger& d)
         {
             if (d.timer.getElapsedTime() > d.timeout)
             {
-                playSound(d.id, d.position).setVolume(d.volume);
+                playSound(d.id, d.position, d).setVolume(d.volume);
                 return true;
             }
 
@@ -689,12 +691,22 @@ void SFXDirector::resizeEntities(std::size_t size)
         m_entities[i] = getScene().createEntity();
         m_entities[i].addComponent<xy::Transform>();
         m_entities[i].addComponent<xy::AudioEmitter>().setChannel(MixerChannel::FX);
+        m_entities[i].addComponent<AudioDelay>();
     }
 }
 
-xy::AudioEmitter& SFXDirector::playSound(std::int32_t audioID, sf::Vector2f position)
+xy::AudioEmitter& SFXDirector::playSound(std::int32_t audioID, sf::Vector2f position, AudioDelayTrigger ad)
 {
     auto entity = getNextFreeEntity();
+
+    if (ad.id > 0)
+    {
+        auto delay = entity.getComponent<AudioDelay>();
+        delay.active = true;
+        delay.startDistance = xy::Util::Vector::lengthSquared(position - getScene().getActiveListener().getComponent<xy::Transform>().getPosition());
+        delay.startVolume = ad.volume;
+    }
+
     entity.getComponent<xy::Transform>().setPosition(position);
     auto& emitter = entity.getComponent<xy::AudioEmitter>();
     emitter.setSource(m_audioResource.get<sf::SoundBuffer>(audioHandles[audioID]));
@@ -713,14 +725,14 @@ void SFXDirector::addDelay(std::int32_t id, sf::Vector2f position)
     const float MaxDist = xy::Util::Vector::lengthSquared(Global::IslandSize);
     const float MinDist = xy::Util::Vector::lengthSquared(Global::IslandSize / 4.f);
 
-    auto dist = position - getScene().getActiveListener().getComponent<xy::Transform>().getPosition();
+    auto dist = position - getScene().getActiveListener().getComponent<xy::Transform>().getWorldPosition();
     auto len2 = xy::Util::Vector::lengthSquared(dist);
 
     if (len2 > MinDist)
     {
         auto ratio = std::sqrt(len2) / std::sqrt(MaxDist);
 
-        AudioDelay ad;
+        AudioDelayTrigger ad;
         ad.position = position;
         ad.id = id;
         ad.timeout = sf::milliseconds(static_cast<sf::Int32>(MaxDelay * ratio));

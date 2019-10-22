@@ -363,6 +363,9 @@
     <ClInclude Include="src\ButtonHighlightSystem.hpp">
       <Filter>Header Files\systems\client</Filter>
     </ClInclude>
+    <ClInclude Include="src\AudioDelaySystem.hpp">
+      <Filter>Header Files\systems\client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FoliageGenerator.cpp">
@@ -625,6 +628,9 @@
     </ClCompile>
     <ClCompile Include="src\glad\glad.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioDelaySystem.cpp">
+      <Filter>Source Files\systems\Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

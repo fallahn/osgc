@@ -60,10 +60,9 @@ private:
 
     xy::Entity getNextFreeEntity();
     void resizeEntities(std::size_t);
-    xy::AudioEmitter& playSound(std::int32_t, sf::Vector2f = {});
     void addDelay(std::int32_t, sf::Vector2f = {});
 
-    struct AudioDelay final
+    struct AudioDelayTrigger final
     {
         sf::Clock timer;
         sf::Time timeout;
@@ -71,5 +70,7 @@ private:
         sf::Vector2f position;
         float volume = 45.f;
     };
-    std::vector<AudioDelay> m_delays;
+    std::vector<AudioDelayTrigger> m_delays;
+
+    xy::AudioEmitter& playSound(std::int32_t, sf::Vector2f = {}, AudioDelayTrigger = {});
 };
