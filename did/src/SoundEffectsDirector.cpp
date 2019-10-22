@@ -701,7 +701,7 @@ xy::AudioEmitter& SFXDirector::playSound(std::int32_t audioID, sf::Vector2f posi
 
     if (ad.id > 0)
     {
-        auto delay = entity.getComponent<AudioDelay>();
+        auto& delay = entity.getComponent<AudioDelay>();
         delay.active = true;
         delay.startDistance = xy::Util::Vector::lengthSquared(position - getScene().getActiveListener().getComponent<xy::Transform>().getPosition());
         delay.startVolume = ad.volume;

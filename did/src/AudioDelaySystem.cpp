@@ -17,12 +17,18 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "AudioDelaySystem.hpp"
+#include "GlobalConsts.hpp"
 
 #include <xyginext/ecs/components/AudioEmitter.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/Scene.hpp>
 
 #include <xyginext/util/Vector.hpp>
+
+namespace
+{
+    const float MinDistance = xy::Util::Vector::lengthSquared(Global::IslandSize / 4.f);
+}
 
 AudioDelaySystem::AudioDelaySystem(xy::MessageBus& mb)
     : xy::System(mb, typeid(AudioDelaySystem))
@@ -38,7 +44,7 @@ void AudioDelaySystem::process(float)
     auto& entities = getEntities();
     for (auto entity : entities)
     {
-        auto delay = entity.getComponent<AudioDelay>();
+        auto& delay = entity.getComponent<AudioDelay>();
 
         if (delay.active)
         {
@@ -51,11 +57,12 @@ void AudioDelaySystem::process(float)
             {
                 auto currPos = getScene()->getActiveListener().getComponent<xy::Transform>().getWorldPosition();
                 auto currDist = xy::Util::Vector::lengthSquared(currPos - entity.getComponent<xy::Transform>().getPosition());
+                currDist = std::max(0.f, currDist - MinDistance);
                 
-                float ratio = std::min(1.f, currDist / delay.startDistance);
+                //TODO use min distance to set the ratio to 0
+                float ratio = std::min(1.f, std::sqrt(currDist) / std::sqrt(delay.startDistance));
                 emitter.setVolume(delay.startVolume * ratio);
             }
-
         }
     }
 }

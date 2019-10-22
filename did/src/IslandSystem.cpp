@@ -88,15 +88,15 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
     }
 
     //one extra quad for shore/sand wave
-    m_waveVertices[16].texCoords = {};
-    m_waveVertices[17].texCoords = { Global::IslandSize.x, 0.f };
-    m_waveVertices[18].texCoords = { Global::IslandSize  };
-    m_waveVertices[19].texCoords = { 0.f, Global::IslandSize.y };
+    m_shoreWaveVertices[0].texCoords = {};
+    m_shoreWaveVertices[1].texCoords = { Global::IslandSize.x, 0.f };
+    m_shoreWaveVertices[2].texCoords = { Global::IslandSize  };
+    m_shoreWaveVertices[3].texCoords = { 0.f, Global::IslandSize.y };
 
-    m_waveVertices[16].color = { 255,255,255,64 };
-    m_waveVertices[17].color = { 255,255,255,64 };
-    m_waveVertices[18].color = { 255,255,255,64 };
-    m_waveVertices[19].color = { 255,255,255,64 };
+    m_shoreWaveVertices[0].color = { 255,255,255,64 };
+    m_shoreWaveVertices[1].color = { 255,255,255,64 };
+    m_shoreWaveVertices[2].color = { 255,255,255,64 };
+    m_shoreWaveVertices[3].color = { 255,255,255,64 };
 
     m_edgeTable = xy::Util::Wavetable::sine(0.5f, 0.01f);
 
@@ -255,16 +255,16 @@ void IslandSystem::updateWaves(float dt)
 
     //static const float MinWaveSize = 0.03f;
     //shrinking shore wave
-    transformable.setScale(m_inWave.scale, m_inWave.scale);
+    transformable.setScale(m_shoreWave.scale, m_shoreWave.scale);
     const auto& tx = transformable.getTransform();
 
-    m_inWave.scale = 1.f + m_edgeTable[m_edgeIndex];
+    m_shoreWave.scale = 1.f + m_edgeTable[m_edgeIndex];
     m_edgeIndex = (m_edgeIndex + 1) % m_edgeTable.size();
 
-    m_waveVertices[16].position = tx.transformPoint({});
-    m_waveVertices[17].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
-    m_waveVertices[18].position = tx.transformPoint(Global::IslandSize);
-    m_waveVertices[19].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
+    m_shoreWaveVertices[0].position = tx.transformPoint({});
+    m_shoreWaveVertices[1].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
+    m_shoreWaveVertices[2].position = tx.transformPoint(Global::IslandSize);
+    m_shoreWaveVertices[3].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
 }
 
 void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
@@ -299,9 +299,9 @@ void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     glUniform1f(m_uniforms[LandUV].second, 0.f);
     glUseProgram(0);
 
-    states.transform = {};
+
     //waves
-    //states.shader = m_planeShader;
+    states.transform = {};
     states.texture = m_waveMap;
     states.blendMode = sf::BlendAdd;
     rt.draw(m_waveVertices.data(), m_waveVertices.size(), sf::Quads, states);
@@ -311,6 +311,10 @@ void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     states.blendMode = sf::BlendAlpha;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 
+    states.shader = m_planeShader;
+    states.texture = m_waveMap;
+    states.blendMode = sf::BlendAdd;
+    rt.draw(m_shoreWaveVertices.data(), m_shoreWaveVertices.size(), sf::Quads, states);
 }
 
 void IslandSystem::onEntityAdded(xy::Entity entity)
