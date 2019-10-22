@@ -200,11 +200,10 @@ void CarriableSystem::tryGrab(xy::Entity entity)
 
                     carriablePosition *= carriable.offsetMultiplier;
                     carriablePosition += tx.getPosition();
-                    entTx.setPosition(carriablePosition);
+                    //entTx.setPosition(carriablePosition); //don't do this it moves the boat you wally.
 
                     carriable.carried = true;
                     carriable.parentEntity = entity;
-                    //carriable.spawnPosition = carriablePosition;
                     carriable.stashed = false;
 
                     boat.treasureCount--;
