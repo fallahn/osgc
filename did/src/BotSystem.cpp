@@ -1097,7 +1097,7 @@ void BotSystem::updateTargeting(xy::Entity entity, float dt)
     //arbitrary distance somewhere close to target (approx one tile)
     //not too close however as bots may collide with a boat before grabbing
     //the target
-    if (len2 < 2304.f) 
+    if (len2 < 4096.f) 
     {
         if (bot.targetType == Bot::Target::Enemy)
         {
