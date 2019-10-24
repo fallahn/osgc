@@ -982,6 +982,13 @@ void BrowserState::buildMenu()
             };
             m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
+            cmd.targetFlags = CommandID::TileNode;
+            cmd.action = [](xy::Entity f, float)
+            {
+                f.getComponent<TileNode>().enabled = true;
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
             m_locked = false;
         }
     };
@@ -1138,7 +1145,7 @@ xy::Entity BrowserState::addTileNode(std::size_t index, std::size_t textureID, c
     entity.addComponent<TileNode>().title = info.name;
     entity.getComponent<TileNode>().author = info.author;
     entity.getComponent<TileNode>().version = info.version;
-    entity.getComponent<TileNode>().enabled = true;
+    entity.getComponent<TileNode>().enabled = false;
     entity.getComponent<TileNode>().action = [&, loadPath]() {m_gameInstance.loadPlugin(loadPath); };
     entity.addComponent<xy::CommandTarget>().ID = CommandID::TileNode;
 
