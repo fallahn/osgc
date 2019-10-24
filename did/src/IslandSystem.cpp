@@ -87,16 +87,26 @@ IslandSystem::IslandSystem(xy::MessageBus& mb, xy::TextureResource& tr, xy::Shad
         m_waveVertices[j + 3].texCoords = { 0.f, Global::IslandSize.y /*/ 4.f*/ };
     }
 
-    //one extra quad for shore/sand wave
+    //quads for shore/sand wave
     m_shoreWaveVertices[0].texCoords = {};
     m_shoreWaveVertices[1].texCoords = { Global::IslandSize.x, 0.f };
     m_shoreWaveVertices[2].texCoords = { Global::IslandSize  };
     m_shoreWaveVertices[3].texCoords = { 0.f, Global::IslandSize.y };
 
-    m_shoreWaveVertices[0].color = { 255,255,255,64 };
-    m_shoreWaveVertices[1].color = { 255,255,255,64 };
-    m_shoreWaveVertices[2].color = { 255,255,255,64 };
-    m_shoreWaveVertices[3].color = { 255,255,255,64 };
+    m_shoreWaveVertices[4].texCoords = {};
+    m_shoreWaveVertices[5].texCoords = { Global::IslandSize.x, 0.f };
+    m_shoreWaveVertices[6].texCoords = { Global::IslandSize };
+    m_shoreWaveVertices[7].texCoords = { 0.f, Global::IslandSize.y };
+
+    m_shoreWaveVertices[0].color = { 255,255,255,44 };
+    m_shoreWaveVertices[1].color = { 255,255,255,44 };
+    m_shoreWaveVertices[2].color = { 255,255,255,44 };
+    m_shoreWaveVertices[3].color = { 255,255,255,44 };
+
+    m_shoreWaveVertices[4].color = { 255,255,255,44 };
+    m_shoreWaveVertices[5].color = { 255,255,255,44 };
+    m_shoreWaveVertices[6].color = { 255,255,255,44 };
+    m_shoreWaveVertices[7].color = { 255,255,255,44 };
 
     m_edgeTable = xy::Util::Wavetable::sine(0.5f, 0.01f);
 
@@ -253,18 +263,29 @@ void IslandSystem::updateWaves(float dt)
         }
     }
 
-    //static const float MinWaveSize = 0.03f;
-    //shrinking shore wave
-    transformable.setScale(m_shoreWave.scale, m_shoreWave.scale);
-    const auto& tx = transformable.getTransform();
 
-    m_shoreWave.scale = 1.f + m_edgeTable[m_edgeIndex];
-    m_edgeIndex = (m_edgeIndex + 1) % m_edgeTable.size();
+    //oscillating shore waves
+    float scale = 1.f + m_edgeTable[m_edgeIndex];
+    transformable.setScale(scale, scale);
+    auto tx = transformable.getTransform();
 
     m_shoreWaveVertices[0].position = tx.transformPoint({});
     m_shoreWaveVertices[1].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
     m_shoreWaveVertices[2].position = tx.transformPoint(Global::IslandSize);
     m_shoreWaveVertices[3].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
+
+    auto idx = (m_edgeIndex + (m_edgeTable.size() / 3)) % m_edgeTable.size();
+    scale = 1.f + m_edgeTable[idx];
+    transformable.setScale(scale, scale);
+    tx = transformable.getTransform();
+
+    m_shoreWaveVertices[4].position = tx.transformPoint({});
+    m_shoreWaveVertices[5].position = tx.transformPoint({ Global::IslandSize.x, 0.f });
+    m_shoreWaveVertices[6].position = tx.transformPoint(Global::IslandSize);
+    m_shoreWaveVertices[7].position = tx.transformPoint({ 0.f, Global::IslandSize.y });
+
+    m_edgeIndex = (m_edgeIndex + 1) % m_edgeTable.size();
+
 }
 
 void IslandSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const

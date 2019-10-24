@@ -63,8 +63,7 @@ private:
         float lifetime = 0.f;
     };
     std::array<WaveQuad, 3u> m_waves;
-    WaveQuad m_shoreWave;
-    std::array<sf::Vertex, 4u> m_shoreWaveVertices;
+    std::array<sf::Vertex, 8u> m_shoreWaveVertices;
 
     sf::Shader* m_seaShader;
     sf::Shader* m_planeShader;
