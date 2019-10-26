@@ -930,6 +930,10 @@ void GameState::loadResources()
     {
         spriteSheet.loadFromFile("assets/sprites/pumpkin.spt", m_textureResource);
     }
+    else if (xy::SysTime::now().months() == 12)
+    {
+        spriteSheet.loadFromFile("assets/sprites/xtree.spt", m_textureResource);
+    }
     else
     {
         spriteSheet.loadFromFile("assets/sprites/lantern.spt", m_textureResource);

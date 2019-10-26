@@ -1,0 +1,18 @@
+sprite_sheet tree
+{
+	src = "assets/images/xtree.png"
+	blendmode = alpha	
+
+	sprite lantern
+	{
+		bounds = 0,0,32,32
+
+		animation flicker
+		{
+			frame = 0,0,32,32
+			
+			loop = true
+			framerate = 24
+		}
+	}
+}

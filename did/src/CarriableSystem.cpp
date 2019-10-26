@@ -184,7 +184,7 @@ void CarriableSystem::tryGrab(xy::Entity entity)
                 const auto& player = entity.getComponent<Player>();
                 auto& carrier = entity.getComponent<Carrier>();
 
-                auto boatArea = entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 1.05f);
+                auto boatArea = entTx.getTransform().transformRect(ent.getComponent<CollisionComponent>().bounds * 1.15f);
 
                 if (player.playerNumber != boat.playerNumber &&
                     boat.treasureCount > 0 &&

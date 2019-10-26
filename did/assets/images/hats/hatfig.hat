@@ -142,5 +142,71 @@ hats
     {
         id = 24
         file = "h6.png"
-    }    
+    }
+
+    hat v1
+    {
+        id = 25
+        file = "v1.png"
+    }
+
+    hat v2
+    {
+        id = 26
+        file = "v2.png"
+    }
+
+    hat v3
+    {
+        id = 27
+        file = "v3.png"
+    }
+
+    hat v4
+    {
+        id = 28
+        file = "v4.png"
+    }
+
+    hat v5
+    {
+        id = 29
+        file = "v5.png"
+    }
+
+    hat v6
+    {
+        id = 30
+        file = "v6.png"
+    }
+
+    hat v7
+    {
+        id = 31
+        file = "v7.png"
+    }
+
+    hat v8
+    {
+        id = 32
+        file = "v8.png"
+    }
+
+    hat v9
+    {
+        id = 33
+        file = "v9.png"
+    }
+
+    hat v10
+    {
+        id = 34
+        file = "v10.png"
+    }
+
+    hat v11
+    {
+        id = 35
+        file = "v11.png"
+    }        
 }
