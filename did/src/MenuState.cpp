@@ -129,6 +129,16 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
     });
 
+
+    /*sf::Image img;
+    img.create(1, 1, sf::Color::Black);
+    auto idx = m_resources.load<sf::Texture>("unf");
+    m_resources.get<sf::Texture>(idx).loadFromImage(img);
+    auto ent = m_uiScene.createEntity();
+    ent.addComponent<xy::Drawable>().setDepth(-100);
+    ent.addComponent<xy::Transform>().setScale(xy::DefaultSceneSize);
+    ent.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(idx));*/
+
     quitLoadingScreen();
 }
 
