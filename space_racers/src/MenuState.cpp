@@ -125,6 +125,12 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
             requestStackPush(StateID::Debug);
         });
 
+    registerConsoleTab("About",
+        []()
+        {
+            xy::ui::text("Space Racers (c)2013-2019 Matt Marchant and Contributors");
+            xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
+        });
 
     //m_sharedData.useBloom = false;
     quitLoadingScreen();
@@ -232,7 +238,7 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     m_sharedData.fontID = m_sharedData.resources.load<sf::Font>("assets/fonts/" + FontID::DefaultFont);
-    
+
     m_textureIDs[TextureID::Menu::MainMenu] = m_resources.load<sf::Texture>("assets/images/menu_title.png");
     m_textureIDs[TextureID::Menu::Stars] = m_resources.load<sf::Texture>("assets/images/stars.png");
     m_textureIDs[TextureID::Menu::VehicleSelect] = m_resources.load<sf::Texture>("assets/images/vehicle_select_large.png");
@@ -439,7 +445,7 @@ void MenuState::buildMenu()
             bounds.left = bounds.width;
             e.getComponent<xy::Sprite>().setTextureRect(bounds);
         });
-    auto mouseExit = uiSystem.addMouseMoveCallback([](xy::Entity e, sf::Vector2f) 
+    auto mouseExit = uiSystem.addMouseMoveCallback([](xy::Entity e, sf::Vector2f)
         {
             auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
             bounds.left = 0.f;
@@ -474,7 +480,7 @@ void MenuState::buildMenu()
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
     parentTx.addChild(entity.getComponent<xy::Transform>());
-    
+
     itemPosition.y += bounds.height;
 
     //local

@@ -133,7 +133,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
         });
 
     registerConsoleTab("Key Binds",
-        [&]() 
+        [&]()
         {
             xy::Nim::text("Move Left");
             if (!m_sharedData.waitingBind)
@@ -190,7 +190,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                 xy::Nim::sameLine();
                 xy::Nim::text("Press a key");
             }
-            
+
             //------------------------
             xy::Nim::text("Action");
             if (!m_sharedData.waitingBind)
@@ -209,6 +209,13 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
                 xy::Nim::sameLine();
                 xy::Nim::text("Press a key");
             }
+        });
+
+     registerConsoleTab("About",
+        []()
+        {
+            xy::ui::text("Back to Computer (c)2019 Matt Marchant and Contributors");
+            xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
         });
 
     quitLoadingScreen();
@@ -275,7 +282,7 @@ void MenuState::handleMessage(const xy::Message& msg)
         {
             auto entity = data.entityHit;
             auto& item = entity.getComponent<MenuItem>();
-            
+
             switch (item.ID)
             {
             default:break;
@@ -356,7 +363,7 @@ void MenuState::initScene()
 void MenuState::loadResources()
 {
     m_textureIDs[TextureID::Menu::Background] = m_resources.load<sf::Texture>("assets/images/gearboy/background.png");
-    
+
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/gearboy/player.spt", m_resources);
     m_sprites[SpriteID::GearBoy::Player] = spriteSheet.getSprite("player");
@@ -455,7 +462,7 @@ void MenuState::buildBackground()
         entity.addComponent<xy::SpriteAnimation>().play(0);
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
-        
+
         auto& collision = entity.addComponent<CollisionBody>();
         collision.shapes[0].aabb = GameConst::Gearboy::PlayerBounds;
         collision.shapes[0].type = CollisionShape::Player;
@@ -735,7 +742,7 @@ void MenuState::spawnCrate(sf::Vector2f position)
 
     bounds.left -= bounds.width / 2.f;
     bounds.top -= bounds.height / 2.f;
-    
+
     entity.addComponent<CollisionBody>().shapeCount = 2;
     entity.getComponent<CollisionBody>().shapes[0].aabb = bounds;
     entity.getComponent<CollisionBody>().shapes[0].type = CollisionShape::Crate;

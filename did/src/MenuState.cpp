@@ -122,6 +122,13 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     xy::App::setMouseCursorVisible(true);
 
+    registerConsoleTab("About",
+    []()
+    {
+        xy::ui::text("Desert Island Duel (c)2019 Matt Marchant and Contributors");
+        xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
+    });
+
     quitLoadingScreen();
 }
 
@@ -310,7 +317,7 @@ void MenuState::updateTextInput(const sf::Event& evt)
             ? Menu::MaxSeedChar : Menu::MaxChatChar;
 
         std::uint32_t targetFlags = 0;
-        if (m_activeString == &m_sharedData.clientName) 
+        if (m_activeString == &m_sharedData.clientName)
         {
             targetFlags = Menu::CommandID::NameText;
         }
@@ -622,7 +629,7 @@ void MenuState::createScene()
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-            
+
     entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(Menu::TitlePosition);
     entity.getComponent<xy::Transform>().move(0.f, -46.f);
@@ -635,7 +642,7 @@ void MenuState::createScene()
     bounds = xy::Text::getLocalBounds(entity);
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
-    
+
     auto mouseOver = m_callbackIDs[Menu::CallbackID::TextSelected];
     auto mouseOut = m_callbackIDs[Menu::CallbackID::TextUnselected];
 
@@ -845,7 +852,7 @@ void MenuState::setLobbyView()
             client.ready = (client.peerID == 0) ? true : false;
 
             updateHatTexture(m_resources.get<sf::Texture>(m_playerTextureIDs[i]),
-                m_resources.get<sf::Texture>(m_hatTextureIDs[client.hatIndex]), 
+                m_resources.get<sf::Texture>(m_hatTextureIDs[client.hatIndex]),
                 *m_sharedData.playerSprites[i]);
         }
 
@@ -887,7 +894,7 @@ void MenuState::loadReadme()
             registerConsoleTab("Readme", [&]()
                 {
                     ImGui::BeginChild("ReadmeRegion", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false, ImGuiWindowFlags_HorizontalScrollbar);
-                    
+
                     for (const auto& str : m_readmeStrings)
                     {
                         ImGui::TextWrapped("%s", str.c_str());
@@ -999,7 +1006,7 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
 void MenuState::loadSettings()
 {
     auto settingsPath = xy::FileSystem::getConfigDirectory(getContext().appInstance.getApplicationName());
-    
+
     auto readFile = [](const std::string& src, sf::String& dst)
     {
         std::ifstream file(src, std::ios::binary);

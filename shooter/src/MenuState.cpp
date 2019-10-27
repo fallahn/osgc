@@ -136,11 +136,11 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     xy::App::setMouseCursorVisible(true);
 
-    registerConsoleTab("About", 
+    registerConsoleTab("About",
         []()
         {
-            xy::Nim::text("Drone Drop (c)2019 Matt Marchant and Contributors");
-            xy::Nim::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
+            xy::ui::text("Drone Drop (c)2019 Matt Marchant and Contributors");
+            xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
         });
 
     quitLoadingScreen();
@@ -369,6 +369,8 @@ void MenuState::loadAssets()
     TextureID::handles[TextureID::DifficultySelect] = m_resources.load<sf::Texture>("assets/images/difficulty_select.png");
     TextureID::handles[TextureID::HighScores] = m_resources.load<sf::Texture>("assets/images/high_scores.png");
 
+    FontID::handles[FontID::CGA] = m_sharedData.resources.load<sf::Font>("assets/fonts/IBM_CGA.ttf");
+
     m_audioscape.loadFromFile("assets/sound/menu.xas");
 
     m_sharedData.mapNames.clear();
@@ -410,7 +412,7 @@ void MenuState::buildMenu()
     rootNode.addComponent<xy::Transform>().setPosition(0.f, Menu::PlanetHiddenPosition);
     rootNode.addComponent<Slider>().speed = 1.f;
     rootNode.addComponent<xy::CommandTarget>().ID = CommandID::Menu::RootNode;
-    
+
     //title
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
     auto entity = m_scene.createEntity();
@@ -821,7 +823,7 @@ void MenuState::buildHelp()
     entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 45.f, 25.f };
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags) 
+            [&](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -876,7 +878,7 @@ void MenuState::buildHelp()
     const sf::Vector2f textScale(0.25f, 0.25f);
     const float verticalSpacing = 24.f;
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
-    
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
@@ -1144,7 +1146,7 @@ void MenuState::buildDifficultySelect()
     entity.addComponent<xy::UIHitBox>().area = { 68.f, 85.f, 68.f, 17.f };
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, bounds](xy::Entity e, sf::Uint64 flags) 
+            [&, bounds](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
@@ -1300,7 +1302,7 @@ void MenuState::buildHighScores()
             }
         }
     };
-    
+
     if (!m_sharedData.highScores.easy.loadFromFile(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreEasyName))
     {
         m_sharedData.highScores.easy.save(xy::FileSystem::getConfigDirectory(Menu::AppName) + Menu::ScoreEasyName);
