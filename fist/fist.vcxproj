@@ -89,8 +89,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/chipmunk;../extlibs/bin/msvc_x64/xygine/Debug;../extlibs/bin/msvc_x64/sfml/Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;xyginext-d.lib;chipmunk-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/xygine/Debug;../extlibs/bin/msvc_x64/sfml/Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;xyginext-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>4194304</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
@@ -135,25 +135,23 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/chipmunk;../extlibs/bin/msvc_x64/xygine/Release;../extlibs/bin/msvc_x64/sfml/Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;xyginext.lib;chipmunk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../extlibs/bin/msvc_x64/xygine/Release;../extlibs/bin/msvc_x64/sfml/Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;xyginext.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>4194304</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\GameState.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
-    <ClInclude Include="include\PhysicsSystem.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
-    <ClInclude Include="include\ShapeUtils.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
-    <ClCompile Include="src\PhysicsObject.cpp" />
-    <ClCompile Include="src\PhysicsSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

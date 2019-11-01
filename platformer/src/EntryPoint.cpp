@@ -62,6 +62,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     sd.loadInputBinding();
     sd.loadProgress();
 
+    xy::App::getActiveInstance()->setWindowTitle("Back to Computer!");
+
 #ifdef XY_DEBUG
     //return StateID::Ending;
     return StateID::Game;

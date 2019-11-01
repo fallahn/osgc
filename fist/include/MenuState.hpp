@@ -27,8 +27,6 @@ source distribution.
 
 #pragma once
 
-#include "InputParser.hpp"
-
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
 
@@ -48,11 +46,7 @@ public:
     xy::StateID stateID() const override;
 
 private:
-    xy::Scene m_gameScene;
-
-    InputParser m_inputParser;
+    xy::Scene m_uiScene;
 
     void initScene();
-    void buildArena();
-    void addHand();
 };

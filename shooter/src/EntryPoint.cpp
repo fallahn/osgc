@@ -63,6 +63,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<PauseState>(StateID::Pause, data);
     ss->registerState<GameOverState>(StateID::GameOver, data);
 
+    xy::App::getActiveInstance()->setWindowTitle("Drone Drop");
+
 #ifdef XY_DEBUG
     //return StateID::Game;
     return StateID::MainMenu;

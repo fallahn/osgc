@@ -249,6 +249,13 @@ BrowserState::BrowserState(xy::StateStack& ss, xy::State::Context ctx, Game& gam
         }
     }
 
+
+#ifdef XY_DEBUG
+    m_gameInstance.setWindowTitle("OSGC - The Open Source Game Collection (Debug build) - Press F1 for Console");
+#else
+    m_gameInstance.setWindowTitle("OSGC - The Open Source Game Collection - Press F1 for Console");
+#endif
+
     quitLoadingScreen();
 }
 

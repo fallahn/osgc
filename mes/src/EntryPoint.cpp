@@ -39,6 +39,9 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<MainState>(StateID::Main);
     ss->registerState<VCSState>(StateID::VCS2600);
     //return StateID::VCS2600;
+
+    xy::App::getActiveInstance()->setWindowTitle("Mutant Egg Spawn");
+
     return StateID::Main;
 }
 

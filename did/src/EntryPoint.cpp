@@ -40,6 +40,7 @@ source distribution.
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
+#include <xyginext/core/App.hpp>
 
 #ifdef DD_DEBUG
 #include <csignal>
@@ -88,6 +89,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<PauseState>(StateID::Pause, sd);
 
     gameServer->setMaxPlayers(4);
+
+    xy::App::getActiveInstance()->setWindowTitle("Desert Island Duel");
 
     return StateID::Menu;
 }

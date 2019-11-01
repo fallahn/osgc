@@ -87,6 +87,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
             });
     }
 
+    xy::App::getActiveInstance()->setWindowTitle("Bubble Puzzle 2097");
+
     return StateID::Main;
 }
 

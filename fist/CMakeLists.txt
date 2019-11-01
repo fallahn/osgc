@@ -28,7 +28,7 @@ find_package(SFML ${SFML_MIN_VERSION} REQUIRED graphics window audio system netw
 
 # Find xyginext
 find_package(XYGINEXT REQUIRED)
-find_package(CHIPMUNK REQUIRED)
+#find_package(CHIPMUNK REQUIRED)
 
 # X11 is required on unices
 if(UNIX AND NOT APPLE)

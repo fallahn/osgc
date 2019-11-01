@@ -27,11 +27,30 @@ source distribution.
 
 #pragma once
 
-namespace StateID
+#include "InputParser.hpp"
+
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
+
+class GameState final : public xy::State
 {
-    enum
-    {
-        MainMenu,
-        Game
-    };
-}
+public:
+    GameState(xy::StateStack&, xy::State::Context);
+
+    bool handleEvent(const sf::Event&) override;
+
+    void handleMessage(const xy::Message&) override;
+
+    bool update(float) override;
+
+    void draw() override;
+
+    xy::StateID stateID() const override;
+
+private:
+    xy::Scene m_gameScene;
+
+    InputParser m_inputParser;
+
+    void initScene();
+};

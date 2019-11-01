@@ -28,6 +28,7 @@ source distribution.
 #include "PluginExport.hpp"
 #include "StateIDs.hpp"
 #include "MenuState.hpp"
+#include "GameState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -36,10 +37,15 @@ source distribution.
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
     ss->registerState<MenuState>(StateID::MainMenu);
-    return StateID::MainMenu;
+    ss->registerState<GameState>(StateID::Game);
+
+    xy::App::getActiveInstance()->setWindowTitle("The FIST");
+
+    return StateID::Game;
 }
 
 void end(xy::StateStack* ss)
 {
+    ss->unregisterState(StateID::Game);
     ss->unregisterState(StateID::MainMenu);
 }

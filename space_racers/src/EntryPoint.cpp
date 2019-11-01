@@ -61,6 +61,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<TimeTrialState>(StateID::TimeTrial, data);
     ss->registerState<TimeTrialSummaryState>(StateID::TimeTrialSummary, data);
 
+    xy::App::getActiveInstance()->setWindowTitle("Space Racers");
+
 #ifdef XY_DEBUG
 
     //return StateID::Debug;

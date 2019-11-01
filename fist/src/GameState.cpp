@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include "MenuState.hpp"
+#include "GameState.hpp"
 #include "StateIDs.hpp"
 
 #include <xyginext/core/Log.hpp>
@@ -42,15 +42,15 @@ source distribution.
 
 #include <SFML/Window/Event.hpp>
 
-MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx)
-    : xy::State (ss, ctx),
-    m_uiScene   (ctx.appInstance.getMessageBus())
+GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
+    : xy::State(ss, ctx),
+    m_gameScene(ctx.appInstance.getMessageBus())
 {
     initScene();
 }
 
 //public
-bool MenuState::handleEvent(const sf::Event& evt)
+bool GameState::handleEvent(const sf::Event& evt)
 {
 	//prevents events being forwarded if the console wishes to consume them
 	if (xy::ui::wantsKeyboard() || xy::ui::wantsMouse())
@@ -64,41 +64,42 @@ bool MenuState::handleEvent(const sf::Event& evt)
         xy::App::quit();
     }
 
-    m_uiScene.forwardEvent(evt);
+    m_gameScene.forwardEvent(evt);
     return true;
 }
 
-void MenuState::handleMessage(const xy::Message& msg)
+void GameState::handleMessage(const xy::Message& msg)
 {
-    m_uiScene.forwardMessage(msg);
+    m_gameScene.forwardMessage(msg);
 }
 
-bool MenuState::update(float dt)
+bool GameState::update(float dt)
 {
-    m_uiScene.update(dt);
+    m_inputParser.update();
+    m_gameScene.update(dt);
     return true;
 }
 
-void MenuState::draw()
+void GameState::draw()
 {
     auto& rw = getContext().renderWindow;
-    rw.draw(m_uiScene);
+    rw.draw(m_gameScene);
 }
 
-xy::StateID MenuState::stateID() const
+xy::StateID GameState::stateID() const
 {
-    return StateID::MainMenu;
+    return StateID::Game;
 }
 
 //private
-void MenuState::initScene()
+void GameState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
-    m_uiScene.addSystem<xy::CallbackSystem>(mb);
-    m_uiScene.addSystem<xy::CameraSystem>(mb);
-    m_uiScene.addSystem<xy::RenderSystem>(mb);
+    m_gameScene.addSystem<xy::CallbackSystem>(mb);
+    m_gameScene.addSystem<xy::CameraSystem>(mb);
+    m_gameScene.addSystem<xy::RenderSystem>(mb);
 
-    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
-    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
+    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
+    m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
 }
