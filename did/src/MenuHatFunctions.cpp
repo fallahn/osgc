@@ -41,8 +41,11 @@ namespace
         "Cleftwisp", "Old Sam", "Lou Baker",
         "Geoff Strongman", "Issy Soux", "Grumbles",
         "Harriet Cobbler", "Queasy Jo", "E. Claire",
-        "Pro Moist", "Hannah Theresa", "Shrinkwrap"
+        "Pro Moist", "Hannah Theresa", "Shrinkwrap",
+        "Fat Tony", "Player Five", "Mr Pump",
+        "Tenacious Kaye", "The Hammer", "Doris Baardgezicht"
     };
+    std::size_t randNameIndex = 0;
 
     const std::array<std::string, 4u> playerTextureNames =
     {
@@ -215,6 +218,60 @@ void MenuState::buildNameEntry(sf::Font& largeFont)
     entity.getComponent<xy::Text>().setCharacterSize(Global::SmallTextSize + 14);
     entity.addComponent<xy::CommandTarget>().ID = Menu::CommandID::NameText;
     sharedEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //buttons to scroll through random names
+     //left arrow
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(-284.f, 320.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ArrowLeft];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    randNameIndex = (randNameIndex + (names.size() - 1)) % names.size();
+                    m_sharedData.clientName = names[randNameIndex];
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::NameText;
+                    cmd.action = [&](xy::Entity e, float) {e.getComponent<xy::Text>().setString(names[randNameIndex]); };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    sharedEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //right arrow
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    entity.getComponent<xy::Transform>().move(284.f, 320.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = m_sprites[Menu::SpriteID::ArrowRight];
+    bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_uiScene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    randNameIndex = (randNameIndex + 1) % names.size();
+                    m_sharedData.clientName = names[randNameIndex];
+
+                    xy::Command cmd;
+                    cmd.targetFlags = Menu::CommandID::NameText;
+                    cmd.action = [&](xy::Entity e, float) {e.getComponent<xy::Text>().setString(names[randNameIndex]); };
+                    m_uiScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    sharedEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
 
     //selected avatar
     entity = m_uiScene.createEntity();
