@@ -54,6 +54,7 @@ source distribution.
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
+#include <xyginext/ecs/components/UIHitbox.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
@@ -65,6 +66,7 @@ source distribution.
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/AudioSystem.hpp>
 #include <xyginext/ecs/systems/ParticleSystem.hpp>
+#include <xyginext/ecs/systems/UISystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 #include <xyginext/detail/Operators.hpp>
@@ -225,7 +227,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 bool MenuState::handleEvent(const sf::Event& evt)
 {
 	//prevents events being forwarded if the console wishes to consume them
-	if ((xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse()) &&
+	if ((xy::ui::wantsKeyboard() || xy::ui::wantsMouse()) &&
         !m_sharedData.waitingBind)
     {
         return true;
@@ -265,6 +267,8 @@ bool MenuState::handleEvent(const sf::Event& evt)
             m_sharedData.saveInputBinding();
         }
     }
+
+    m_backgroundScene.getSystem<xy::UISystem>().handleEvent(evt);
 
     m_playerInput.handleEvent(evt);
     m_backgroundScene.forwardEvent(evt);
@@ -345,6 +349,7 @@ void MenuState::initScene()
     m_backgroundScene.addSystem<ShakerSystem>(mb);
     m_backgroundScene.addSystem<FluidAnimationSystem>(mb);
     m_backgroundScene.addSystem<xy::TextSystem>(mb);
+    m_backgroundScene.addSystem<xy::UISystem>(mb);
     m_backgroundScene.addSystem<xy::SpriteAnimator>(mb);
     m_backgroundScene.addSystem<xy::SpriteSystem>(mb);
     m_backgroundScene.addSystem<xy::CameraSystem>(mb);
@@ -683,6 +688,16 @@ void MenuState::buildMenu()
     entity.addComponent<MenuItem>().ID = MenuID::NewGame;
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function = MenuCallback();
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_backgroundScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags) 
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.menuID = MenuID::NewGame;
+                    requestStackPush(StateID::MenuConfirm);
+                }
+            });
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(1200.f, 390.f);
@@ -698,6 +713,16 @@ void MenuState::buildMenu()
     entity.addComponent<MenuItem>().ID = MenuID::Continue;
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function = MenuCallback();
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_backgroundScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    m_sharedData.menuID = MenuID::Continue;
+                    requestStackPush(StateID::MenuConfirm);
+                }
+            });
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(800.f, 700.f);
@@ -713,6 +738,15 @@ void MenuState::buildMenu()
     entity.addComponent<MenuItem>().ID = MenuID::Options;
     entity.addComponent<xy::Callback>().active = true;
     entity.getComponent<xy::Callback>().function = MenuCallback();
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_backgroundScene.getSystem<xy::UISystem>().addMouseButtonCallback([](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Console::show();
+                }
+            });
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(220.f, 770.f);
@@ -726,6 +760,16 @@ void MenuState::buildMenu()
     entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(CollisionShape::Text);
     entity.addComponent<Shaker>();
     entity.addComponent<MenuItem>().ID = MenuID::Quit;
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_backgroundScene.getSystem<xy::UISystem>().addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    requestStackClear();
+                    requestStackPush(StateID::ParentState);
+                }
+            });
 }
 
 void MenuState::spawnCrate(sf::Vector2f position)

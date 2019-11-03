@@ -28,11 +28,13 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/UIHitbox.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/UISystem.hpp>
 
 #include <xyginext/gui/Gui.hpp>
 
@@ -68,7 +70,7 @@ MenuConfirmState::MenuConfirmState(xy::StateStack& ss, xy::State::Context ctx, S
 bool MenuConfirmState::handleEvent(const sf::Event& evt)
 {
     //prevents events being forwarded if the console wishes to consume them
-    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    if (xy::ui::wantsKeyboard() || xy::ui::wantsMouse())
     {
         return false;
     }
@@ -175,8 +177,17 @@ bool MenuConfirmState::handleEvent(const sf::Event& evt)
                 break;
             }
         }
+        else if (evt.type == sf::Event::MouseButtonReleased)
+        {
+            if (evt.mouseButton.button == sf::Mouse::Left)
+            {
+                //TODO also check mouse is in bounds of current item
+                execSelection();
+            }
+        }
     }
 
+    m_scene.getSystem<xy::UISystem>().handleEvent(evt);
     m_scene.forwardEvent(evt);
 
     return false;
@@ -203,6 +214,7 @@ void MenuConfirmState::draw()
 void MenuConfirmState::build()
 {
     auto& mb = getContext().appInstance.getMessageBus();
+    m_scene.addSystem<xy::UISystem>(mb);
     m_scene.addSystem<xy::CommandSystem>(mb);
     m_scene.addSystem<xy::SpriteSystem>(mb);
     m_scene.addSystem<xy::TextSystem>(mb);
@@ -229,6 +241,27 @@ void MenuConfirmState::build()
 
     auto fontID = m_resources.load<sf::Font>(FontID::GearBoyFont);
     auto& font = m_resources.get<sf::Font>(fontID);
+
+    auto mouseCallback = m_scene.getSystem<xy::UISystem>().addMouseMoveCallback(
+        [&](xy::Entity en, sf::Vector2f)
+        {
+            m_selectedIndex = en.getComponent<std::size_t>();
+
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Menu::Cursor;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<xy::Transform>().setPosition(selection[m_selectedIndex]);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+            /*cmd.targetFlags = CommandID::Menu::Message;
+            cmd.action = [&](xy::Entity e, float)
+            {
+                e.getComponent<xy::Text>().setString(messages[m_selectedIndex]);
+            };
+            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);*/
+        });
 
     const sf::Color* colours = GameConst::Gearboy::colours.data();
     if (m_sharedData.theme == "mes")
@@ -276,10 +309,16 @@ void MenuConfirmState::build()
     //yes
     entity = createText("Yes");
     entity.getComponent<xy::Transform>().move(0.f, -40.f);
+    entity.addComponent<std::size_t>() = 0;
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseCallback;
 
     //no
     entity = createText("No");
     entity.getComponent<xy::Transform>().move(0.f, 60.f);
+    entity.addComponent<std::size_t>() = 1;
+    entity.addComponent<xy::UIHitBox>().area = xy::Text::getLocalBounds(entity);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseCallback;
 
     auto arrow = m_resources.load<sf::Texture>("assets/images/"+m_sharedData.theme+"/menu_cursor.png");
     entity = m_scene.createEntity();
