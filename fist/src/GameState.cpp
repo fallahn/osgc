@@ -30,6 +30,7 @@ source distribution.
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
 #include "ResourceIDs.hpp"
+#include "GameConst.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -45,11 +46,15 @@ source distribution.
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 
+#include <xyginext/util/Const.hpp>
+
 #include <SFML/Window/Event.hpp>
 
 namespace
 {
 #include "Sprite3DShader.inl"
+
+    xy::Entity debugCam;
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
@@ -70,10 +75,20 @@ bool GameState::handleEvent(const sf::Event& evt)
         return true;
     }
 
-    if (evt.type == sf::Event::KeyReleased
-        && evt.key.code == sf::Keyboard::Escape)
+    if (evt.type == sf::Event::KeyReleased)
     {
-        xy::App::quit();
+#ifdef XY_DEBUG
+        if (evt.key.code == sf::Keyboard::Escape)
+        {
+            xy::App::quit();
+        }
+        else if (evt.key.code == sf::Keyboard::F8)
+        {
+            auto newCam = debugCam;
+            debugCam = m_gameScene.setActiveCamera(newCam);
+        }
+
+#endif //XY_DEBUG
     }
 
     m_gameScene.forwardEvent(evt);
@@ -125,19 +140,35 @@ void GameState::initScene()
     //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
     //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
 
-    //add a 3d camera   
-    auto camEnt = m_gameScene.getActiveCamera();
-    camEnt.getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
-    camEnt.getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
-
+    //add a 3d camera  
     auto view = getContext().defaultView;
-    float fov = Camera3D::calcFOV(view.getSize().y);
+    auto camEnt = m_gameScene.getActiveCamera();
+    camEnt.getComponent<xy::Camera>().setView(view.getSize());
+    camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
+
+    auto& camera = camEnt.addComponent<Camera3D>();
+    float fov = camera.calcFOV(view.getSize().y, GameConst::RoomWidth / 2.f);
     float ratio = view.getSize().x / view.getSize().y;
-    camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, ratio, 0.1f, Camera3D::depth + 960.f);
+    camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth + GameConst::RoomHeight);
+    camera.depth = GameConst::RoomHeight / 2.f;
+    camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
+
+
+#ifdef XY_DEBUG
+    //set up a camera for deugging view
+    debugCam = m_gameScene.createEntity();
+    debugCam.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    debugCam.addComponent<xy::Camera>().setView(view.getSize());
+    debugCam.getComponent<xy::Camera>().setViewport(view.getViewport());
+
+    auto& dCamera = debugCam.addComponent<Camera3D>();
+    fov = dCamera.calcFOV(view.getSize().y);
+    dCamera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, dCamera.depth + GameConst::RoomHeight);
 
     //temp just to move the camera about
-    camEnt.addComponent<sf::Vector2f>();
-    m_inputParser.setPlayerEntity(camEnt);
+    debugCam.addComponent<sf::Vector2f>();
+    m_inputParser.setPlayerEntity(debugCam);
+#endif
 }
 
 void GameState::loadResources()

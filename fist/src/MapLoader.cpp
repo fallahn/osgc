@@ -268,7 +268,8 @@ bool GameState::loadMap()
         auto yCoord = roomCount / GameConst::RoomsPerRow;
 
         auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xCoord * GameConst::RoomWidth, yCoord * GameConst::RoomWidth);
+        entity.addComponent<xy::Transform>().setPosition(xCoord * (GameConst::RoomWidth + GameConst::RoomPadding), 
+                                                        yCoord * (GameConst::RoomWidth + GameConst::RoomPadding));
         entity.addComponent<xy::Drawable>().setDepth(0);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);

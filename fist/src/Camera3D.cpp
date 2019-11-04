@@ -47,7 +47,8 @@ void Camera3DSystem::process(float)
         //we can save a matrix inv op here because we only want the translation, and
         //just use the inverse positions EXCEPT for the y position, as SFML inverts
         //it when drawing top to bottom Y coords - hence the scale op underneath!!
-        camera.viewMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-tx.getPosition().x, tx.getPosition().y, -camera.depth));
+        camera.viewMatrix = camera.rotationMatrix;
+        camera.viewMatrix = glm::translate(camera.viewMatrix, glm::vec3(-tx.getPosition().x, tx.getPosition().y, -camera.depth));
         camera.viewMatrix = glm::scale(camera.viewMatrix, glm::vec3(1.f, -1.f, 1.f));
 
         camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;

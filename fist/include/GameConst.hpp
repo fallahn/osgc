@@ -22,5 +22,6 @@ namespace GameConst
 {
     static const float RoomWidth = 960.f;
     static const float RoomHeight = 540.f;
+    static const float RoomPadding = 0.f;// 12.f;
     const std::int32_t RoomsPerRow = 8;
 }
