@@ -28,7 +28,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
-#include <xyginext/ecs/components/UIHitbox.hpp>
+#include <xyginext/ecs/components/UIHitBox.hpp>
 
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
 #include <xyginext/ecs/systems/TextSystem.hpp>

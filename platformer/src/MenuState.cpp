@@ -54,7 +54,7 @@ source distribution.
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/AudioListener.hpp>
-#include <xyginext/ecs/components/UIHitbox.hpp>
+#include <xyginext/ecs/components/UIHitBox.hpp>
 
 #include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
