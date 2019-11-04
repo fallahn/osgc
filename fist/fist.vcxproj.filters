@@ -13,11 +13,23 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\systems">
+      <UniqueIdentifier>{f8f51f99-b1a0-4136-a65f-c382a8a4451c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\states">
+      <UniqueIdentifier>{64f64cd6-d835-4977-ba62-9fb0af4ec3a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shaders">
+      <UniqueIdentifier>{f2968dbf-62e6-4a01-9031-9318e01b7b8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\states">
+      <UniqueIdentifier>{27babe62-a219-46f9-ab8b-e296e28464f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems">
+      <UniqueIdentifier>{c1d972e4-16e7-4a61-aac9-f46fc15b2c2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\MenuState.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\PluginExport.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -27,7 +39,25 @@
     <ClInclude Include="include\InputParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\MenuState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
     <ClInclude Include="include\GameState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Camera3D.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Sprite3D.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MatrixPool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ResourceIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameConst.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,14 +65,31 @@
     <ClCompile Include="src\EntryPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MenuState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\InputParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MenuState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
     <ClCompile Include="src\GameState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Camera3D.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sprite3DSystem.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MatrixPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MapLoader.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Sprite3DShader.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

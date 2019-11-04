@@ -25,7 +25,7 @@ class InputParser final
 public:
     InputParser();
 
-    void update();
+    void update(float);
     void setPlayerEntity(xy::Entity entity) { m_playerEntity = entity; }
 
 private:

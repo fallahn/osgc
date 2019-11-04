@@ -21,7 +21,8 @@ Copyright 2019 Matt Marchant
 #include <string>
 
 //because we don't have direct access to vertex attribs
-//we've fudged depth information into the red channel of the colour attrib
+//we've fudged depth information into the alpha channel of the colour attrib
+//as a multiplier of the z-depth set in the model matrix.
 
 static const std::string SpriteVertex =
 R"(

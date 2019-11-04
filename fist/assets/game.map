@@ -1,0 +1,317 @@
+map game_map
+{
+    room 0
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 1
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 2
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 3
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 4
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 5
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 6
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 7
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+
+    room 8
+    {
+        src = "assets/images/rooms/template.png"
+        ceiling = 1
+        item_id = -1
+
+        wall
+        {
+            direction = 0
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 1
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 2
+            door = 0
+            locked = 0
+        }
+
+        wall
+        {
+            direction = 3
+            door = 0
+            locked = 0
+        }
+    }
+}

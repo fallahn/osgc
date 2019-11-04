@@ -1,0 +1,42 @@
+spritesheet bella
+{
+    src="assets/images/bella.png"
+
+    sprite bella
+    {
+        bounds = 0, 256,128,128
+
+        animation right
+        {
+            frame = 0,256,128,128
+            frame = 128,256,128,128
+            frame = 256,256,128,128
+            frame = 384,256,128,128
+
+            loop = true
+            framerate = 12
+        }
+
+        animation left
+        {
+            frame = 0,384,128,128
+            frame = 128,384,128,128
+            frame = 256,384,128,128
+            frame = 384,384,128,128
+
+            loop = true
+            framerate = 12
+        }
+
+        animation sleep
+        {
+            frame = 0,512,128,128
+            frame = 128,512,128,128
+            frame = 256,512,128,128
+            frame = 384,512,128,128
+
+            loop = true
+            framerate = 12
+        }
+    }
+}

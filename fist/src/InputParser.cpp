@@ -18,13 +18,14 @@ Copyright 2019 Matt Marchant
 
 #include "InputParser.hpp"
 
+#include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/util/Vector.hpp>
 
 #include <SFML/Window/Keyboard.hpp>
 
 namespace
 {
-    const float PlayerStrength = 320.f;
+    const float PlayerStrength = 120.f;
     const float MaxVelocity = 1800.f;
     const float MaxVelSqr = MaxVelocity * MaxVelocity;
 }
@@ -35,7 +36,7 @@ InputParser::InputParser()
 }
 
 //public
-void InputParser::update()
+void InputParser::update(float dt)
 {
     if (m_playerEntity.isValid())
     {
@@ -69,5 +70,8 @@ void InputParser::update()
         {
             vel += movement;
         }
+
+        m_playerEntity.getComponent<xy::Transform>().move(vel * dt);
+        vel *= 0.79f;
     }
 }

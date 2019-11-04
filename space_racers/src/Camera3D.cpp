@@ -17,7 +17,6 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "Camera3D.hpp"
-#include "MessageIDs.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 

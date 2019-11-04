@@ -1,0 +1,39 @@
+spritesheet bob
+{
+    src="assets/images/bob.png"
+
+    sprite bob
+    {
+        bounds = 0,256,128,256
+
+        animation right
+        {
+            frame = 0,256,128,256
+            frame = 128,256,128,256
+            frame = 256,256,128,256
+            frame = 384,256,128,256
+            frame = 512,256,128,256
+            frame = 640,256,128,256
+            frame = 768,256,128,256
+            frame = 896,256,128,256
+
+            framerate = 12
+            loop = true
+        }
+
+        animation left
+        {
+            frame = 1024,256,128,256
+            frame = 1152,256,128,256
+            frame = 1280,256,128,256
+            frame = 1408,256,128,256
+            frame = 1536,256,128,256
+            frame = 1664,256,128,256
+            frame = 1792,256,128,256
+            frame = 1920,256,128,256
+
+            framerate = 12
+            loop = true
+        }
+    }
+}

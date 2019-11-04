@@ -124,7 +124,7 @@ TimeTrialState::TimeTrialState(xy::StateStack& ss, xy::State::Context ctx, Share
 //public
 bool TimeTrialState::handleEvent(const sf::Event& evt)
 {
-    if (xy::Nim::wantsKeyboard() || xy::Nim::wantsMouse())
+    if (xy::ui::wantsKeyboard() || xy::ui::wantsMouse())
     {
         return true;
     }

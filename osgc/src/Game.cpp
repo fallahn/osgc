@@ -34,7 +34,7 @@ source distribution.
 #include <SFML/Window/Event.hpp>
 
 Game::Game()
-    : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
+    : xy::App   (sf::ContextSettings(8u)),
     m_stateStack({ *getRenderWindow(), *this })
 {
     setApplicationName("osgc");

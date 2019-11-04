@@ -28,9 +28,12 @@ source distribution.
 #pragma once
 
 #include "InputParser.hpp"
+#include "MatrixPool.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 class GameState final : public xy::State
 {
@@ -49,8 +52,14 @@ public:
 
 private:
     xy::Scene m_gameScene;
+    MatrixPool m_matrixPool;
+
+    xy::ResourceHandler m_resources;
+    xy::ShaderResource m_shaders;
 
     InputParser m_inputParser;
 
     void initScene();
+    void loadResources();
+    bool loadMap();
 };
