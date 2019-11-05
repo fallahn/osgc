@@ -69,6 +69,9 @@
     <ClInclude Include="include\CameraTransportSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render3DSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -96,6 +99,9 @@
       <Filter>Source Files\states</Filter>
     </ClCompile>
     <ClCompile Include="src\CameraTransportSystem.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render3DSystem.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>

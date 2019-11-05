@@ -31,6 +31,8 @@ public:
 
     void setFOV(float);
 
+    void setCamera(xy::Entity cam) { m_camera = cam; }
+
 private:
 
     struct Frustum final
@@ -41,6 +43,8 @@ private:
     }m_frustum;
 
     std::vector<xy::Entity> m_drawList;
+
+    xy::Entity m_camera;
 
     float lineSide(sf::Vector2f, sf::Vector2f);
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

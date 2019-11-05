@@ -33,6 +33,7 @@ source distribution.
 #include "GameConst.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTransportSystem.hpp"
+#include "Render3DSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -200,7 +201,7 @@ void GameState::initScene()
     m_gameScene.addSystem<Sprite3DSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
-    m_gameScene.addSystem<xy::RenderSystem>(mb);
+    m_gameScene.addSystem<Render3DSystem>(mb);
 
     //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
     //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
@@ -220,7 +221,7 @@ void GameState::initScene()
     camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth + GameConst::RoomHeight);
     camera.depth = GameConst::RoomHeight / 2.f;
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
-
+    m_gameScene.getSystem<Render3DSystem>().setCamera(camEnt);
 
 #ifdef XY_DEBUG
     //set up a camera for deugging view
