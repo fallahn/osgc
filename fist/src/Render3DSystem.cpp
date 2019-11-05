@@ -29,6 +29,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Shader.hpp>
 
+#include <SFML/OpenGL.hpp>
+
 #include <algorithm>
 #include <cmath>
 
@@ -53,6 +55,9 @@ void Render3DSystem::process(float)
     auto& entities = getEntities();
     for (auto entity : entities)
     {
+        m_drawList.push_back(entity);
+        continue;
+
         const auto& tx = entity.getComponent<xy::Transform>();
         auto pos = tx.getPosition();
 
@@ -124,6 +129,8 @@ float Render3DSystem::lineSide(sf::Vector2f line, sf::Vector2f point)
 
 void Render3DSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     for (auto entity : m_drawList)
     {
         const auto& drawable = entity.getComponent<xy::Drawable>();
@@ -139,4 +146,6 @@ void Render3DSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 
         rt.draw(drawable, states);
     }
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
 }

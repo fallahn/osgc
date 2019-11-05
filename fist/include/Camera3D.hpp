@@ -32,11 +32,14 @@ struct Camera3D final
     glm::mat4 viewProjectionMatrix;
     glm::mat4 rotationMatrix = glm::mat4(1.f);
 
+    //used by the transport system
     glm::mat4 postRotationMatrix = glm::mat4(1.f);
     glm::mat4 postTranslationMatrix = glm::mat4(1.f);
 
     static constexpr float defaultDepth = 4320.f;
     float depth = defaultDepth;
+
+    glm::vec3 worldPosition;
 
     float calcFOV(float viewYHeight, float targetDistance = defaultDepth)
     {

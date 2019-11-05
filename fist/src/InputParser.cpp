@@ -25,8 +25,8 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float PlayerStrength = 120.f;
-    const float MaxVelocity = 1800.f;
+    const float PlayerStrength = 420.f;
+    const float MaxVelocity = 7200.f;
     const float MaxVelSqr = MaxVelocity * MaxVelocity;
 }
 
@@ -41,20 +41,20 @@ void InputParser::update(float dt)
     if (m_playerEntity.isValid())
     {
         sf::Vector2f movement;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
             movement.x -= 1.f;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
         {
             movement.x += 1.f;
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
         {
             movement.y -= 1.f;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
         {
             movement.y += 1.f;
         }

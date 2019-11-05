@@ -54,6 +54,9 @@ void Camera3DSystem::process(float)
 
         //these are updated by the camera transport system
         camera.viewMatrix *= camera.postRotationMatrix * camera.postTranslationMatrix;
+        camera.worldPosition = glm::inverse(camera.viewMatrix) * glm::vec4(0.f, 0.f, 0.f, 1.f);
+
+        //xy::Console::printStat("cam pos", std::to_string(camera.worldPosition.x) + ", " + std::to_string(camera.worldPosition.y));
 
         camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;
     }

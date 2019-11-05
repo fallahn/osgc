@@ -271,8 +271,7 @@ bool GameState::loadMap()
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xCoord * (GameConst::RoomWidth + GameConst::RoomPadding), 
                                                         yCoord * (GameConst::RoomWidth + GameConst::RoomPadding));
-        entity.addComponent<xy::Drawable>().setDepth(0);
-        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
         entity.getComponent<xy::Drawable>().setTexture(&tex);
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));

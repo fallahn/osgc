@@ -67,8 +67,9 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State(ss, ctx),
     m_gameScene(ctx.appInstance.getMessageBus())
 {
+    loadResources();//TODO swap this back!
     initScene();
-    loadResources();
+    
     loadMap(); //TODO store result then push error state on map fail
 }
 
@@ -231,12 +232,50 @@ void GameState::initScene()
     debugCam.getComponent<xy::Camera>().setViewport(view.getViewport());
 
     auto& dCamera = debugCam.addComponent<Camera3D>();
-    fov = dCamera.calcFOV(view.getSize().y);
+    fov = dCamera.calcFOV(view.getSize().y * 3.f);
     dCamera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, dCamera.depth + GameConst::RoomHeight);
 
     //temp just to move the camera about
     debugCam.addComponent<sf::Vector2f>();
     m_inputParser.setPlayerEntity(debugCam);
+
+    //and a debug icon
+    auto texID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+    auto& tex = m_resources.get<sf::Texture>(texID);
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setTexture(&tex);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight / 2.f;
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+    sf::Vertex vert;
+    vert.color.a = 255;
+    vert.position = { -32.f, -64.f };
+    verts.push_back(vert);
+    vert.position = { 32.f, -64.f };
+    vert.texCoords = { 64.f, 0.f };
+    verts.push_back(vert);
+    vert.position = { 32.f, 0.f };
+    vert.texCoords = { 64.f, 64.f };
+    verts.push_back(vert);
+    vert.position = { -32.f, 0.f };
+    vert.texCoords = { 0.f, 64.f };
+    verts.push_back(vert);
+
+    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = 
+        [camEnt](xy::Entity e, float)
+    {
+        auto& tx = e.getComponent<xy::Transform>();
+        const auto& cam = camEnt.getComponent<Camera3D>();
+        tx.setPosition(cam.worldPosition.x, cam.worldPosition.y);
+        tx.setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
+    };
+
 #endif
 }
 
