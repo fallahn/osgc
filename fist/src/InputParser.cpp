@@ -72,6 +72,6 @@ void InputParser::update(float dt)
         }
 
         m_playerEntity.getComponent<xy::Transform>().move(vel * dt);
-        vel *= 0.79f;
+        vel *= 0.89f;
     }
 }

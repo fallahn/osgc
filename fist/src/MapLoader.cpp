@@ -20,9 +20,11 @@ Copyright 2019 Matt Marchant
 #include "Sprite3D.hpp"
 #include "GameConst.hpp"
 #include "ResourceIDs.hpp"
+#include "CommandIDs.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
 #include <xyginext/core/ConfigFile.hpp>
 
@@ -201,16 +203,15 @@ namespace
     }
 }
 
-
 bool GameState::loadMap()
 {
     std::int32_t roomCount = 0;
-    auto processRoom = [&](const xy::ConfigObject& room)->std::int32_t
+    auto processRoom = [&](const xy::ConfigObject& room)
     {
         const auto& properties = room.getProperties();
         if (properties.empty())
         {
-            return 0;
+            return;
         }
 
         //get room properties
@@ -234,7 +235,7 @@ bool GameState::loadMap()
 
         if (textureName.empty())
         {
-            return 0;
+            return;
         }
 
         //check if this room has walls
@@ -294,7 +295,7 @@ bool GameState::loadMap()
         }
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
-        return 1;
+        roomCount++;
     };
 
     xy::ConfigFile map;
@@ -305,7 +306,7 @@ bool GameState::loadMap()
         {
             if (obj.getName() == "room")
             {
-                roomCount += processRoom(obj);
+                processRoom(obj);
             }
         }
         glFrontFace(GL_CW); //simpler for my tiny brain to comprehend when wound in the same direction as UVs

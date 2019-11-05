@@ -142,11 +142,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Camera3D.hpp" />
+    <ClInclude Include="include\CameraTransportSystem.hpp" />
+    <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\GameConst.hpp" />
     <ClInclude Include="include\GameState.hpp" />
     <ClInclude Include="include\InputParser.hpp" />
     <ClInclude Include="include\MatrixPool.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
+    <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\Sprite3D.hpp" />
@@ -154,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera3D.cpp" />
+    <ClCompile Include="src\CameraTransportSystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\InputParser.cpp" />

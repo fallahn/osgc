@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "Camera3D.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -50,6 +51,9 @@ void Camera3DSystem::process(float)
         camera.viewMatrix = camera.rotationMatrix;
         camera.viewMatrix = glm::translate(camera.viewMatrix, glm::vec3(-tx.getPosition().x, tx.getPosition().y, -camera.depth));
         camera.viewMatrix = glm::scale(camera.viewMatrix, glm::vec3(1.f, -1.f, 1.f));
+
+        //these are updated by the camera transport system
+        camera.viewMatrix *= camera.postRotationMatrix * camera.postTranslationMatrix;
 
         camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;
     }

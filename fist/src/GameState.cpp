@@ -31,6 +31,8 @@ source distribution.
 #include "Sprite3D.hpp"
 #include "ResourceIDs.hpp"
 #include "GameConst.hpp"
+#include "CommandIDs.hpp"
+#include "CameraTransportSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -41,14 +43,17 @@ source distribution.
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/CommandTarget.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
+#include <xyginext/ecs/systems/CommandSystem.hpp>
 
 #include <xyginext/util/Const.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/OpenGL.hpp>
 
 namespace
 {
@@ -77,18 +82,66 @@ bool GameState::handleEvent(const sf::Event& evt)
 
     if (evt.type == sf::Event::KeyReleased)
     {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::Q:
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Camera;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<CameraTransport>().rotate(true);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+            break;
+        case sf::Keyboard::E:
+        {
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Camera;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<CameraTransport>().rotate(false);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+        }
+        break;
 #ifdef XY_DEBUG
-        if (evt.key.code == sf::Keyboard::Escape)
+        case sf::Keyboard::Escape:
+            {
+                xy::App::quit();
+            }
+            break;
+        case sf::Keyboard::F8:
+            {
+                auto newCam = debugCam;
+                debugCam = m_gameScene.setActiveCamera(newCam);
+            }
+            break;
+        case sf::Keyboard::A:
         {
-            xy::App::quit();
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Camera;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<CameraTransport>().move(true);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
-        else if (evt.key.code == sf::Keyboard::F8)
+            break;
+        case sf::Keyboard::D:
         {
-            auto newCam = debugCam;
-            debugCam = m_gameScene.setActiveCamera(newCam);
+            xy::Command cmd;
+            cmd.targetFlags = CommandID::Camera;
+            cmd.action = [](xy::Entity e, float)
+            {
+                e.getComponent<CameraTransport>().move(false);
+            };
+            m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
-
 #endif //XY_DEBUG
+        }
     }
 
     m_gameScene.forwardEvent(evt);
@@ -97,6 +150,16 @@ bool GameState::handleEvent(const sf::Event& evt)
 
 void GameState::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == xy::Message::WindowMessage)
+    {
+        const auto& data = msg.getData<xy::Message::WindowEvent>();
+        if (data.type == xy::Message::WindowEvent::Resized)
+        {
+            //reapply this as the context will have been recreated
+            glFrontFace(GL_CW); 
+        }
+    }
+
     m_gameScene.forwardMessage(msg);
 }
 
@@ -132,6 +195,8 @@ void GameState::initScene()
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
+    m_gameScene.addSystem<xy::CommandSystem>(mb);
+    m_gameScene.addSystem<CameraTransportSystem>(mb);
     m_gameScene.addSystem<Sprite3DSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
@@ -143,6 +208,9 @@ void GameState::initScene()
     //add a 3d camera  
     auto view = getContext().defaultView;
     auto camEnt = m_gameScene.getActiveCamera();
+    camEnt.addComponent<xy::CommandTarget>().ID = CommandID::Camera;
+    camEnt.getComponent<xy::Transform>().setPosition(0.f, GameConst::RoomWidth / 2.f); //TODO move cam further out and cull nearer rooms
+    camEnt.addComponent<CameraTransport>();
     camEnt.getComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 

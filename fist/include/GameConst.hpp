@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <cstdint>
+
 namespace GameConst
 {
     static const float RoomWidth = 960.f;
