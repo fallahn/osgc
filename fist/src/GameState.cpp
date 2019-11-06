@@ -238,7 +238,7 @@ void GameState::initScene()
     auto& camera = camEnt.addComponent<Camera3D>();
     float fov = camera.calcFOV(view.getSize().y, GameConst::RoomWidth / 2.f);
     float ratio = view.getSize().x / view.getSize().y;
-    camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 3.f);
+    camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.depth = GameConst::RoomHeight / 2.f;
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
     m_gameScene.getSystem<Render3DSystem>().setCamera(camEnt);
