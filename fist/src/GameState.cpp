@@ -177,6 +177,9 @@ bool GameState::update(float dt)
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
     shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
 
+    //auto& shader2 = m_shaders.get(ShaderID::Sprite3DColoured);
+    //shader2.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+
     return true;
 }
 
@@ -184,6 +187,16 @@ void GameState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
+
+//#ifdef XY_DEBUG
+//    auto oldCam = m_gameScene.setActiveCamera(debugCam);
+//    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+//    shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&debugCam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+//    rw.draw(m_gameScene);
+//
+//    shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&oldCam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+//    m_gameScene.setActiveCamera(oldCam);
+//#endif
 }
 
 xy::StateID GameState::stateID() const
@@ -211,8 +224,8 @@ void GameState::initScene()
     auto view = getContext().defaultView;
     auto camEnt = m_gameScene.getActiveCamera();
     camEnt.addComponent<xy::CommandTarget>().ID = CommandID::Camera;
-    camEnt.getComponent<xy::Transform>().setPosition(0.f, GameConst::RoomWidth / 2.f); //TODO move cam further out and cull nearer rooms
-    camEnt.addComponent<CameraTransport>();
+    camEnt.getComponent<xy::Transform>().setPosition(0.f, GameConst::RoomWidth * 0.49f); //TODO move cam further out and cull nearer rooms?
+    camEnt.addComponent<CameraTransport>(1);
     camEnt.getComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 
@@ -223,21 +236,23 @@ void GameState::initScene()
     camera.depth = GameConst::RoomHeight / 2.f;
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
     m_gameScene.getSystem<Render3DSystem>().setCamera(camEnt);
+    //m_gameScene.getSystem<Render3DSystem>().setFOV(fov * ratio); //frustum width is in X plane
 
 #ifdef XY_DEBUG
     //set up a camera for deugging view
     debugCam = m_gameScene.createEntity();
-    debugCam.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
+    debugCam.addComponent<xy::Transform>().setPosition(GameConst::RoomWidth, GameConst::RoomWidth / 2.f);
     debugCam.addComponent<xy::Camera>().setView(view.getSize());
     debugCam.getComponent<xy::Camera>().setViewport(view.getViewport());
 
     auto& dCamera = debugCam.addComponent<Camera3D>();
-    fov = dCamera.calcFOV(view.getSize().y * 3.f);
+    fov = dCamera.calcFOV(view.getSize().y * 8.f);
     dCamera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, dCamera.depth + GameConst::RoomHeight);
 
     //temp just to move the camera about
     debugCam.addComponent<sf::Vector2f>();
     m_inputParser.setPlayerEntity(debugCam);
+    debugCam = m_gameScene.setActiveCamera(debugCam);
 
     //and a debug icon
     auto texID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
@@ -275,11 +290,11 @@ void GameState::initScene()
         tx.setPosition(cam.worldPosition.x, cam.worldPosition.y);
         tx.setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
     };
-
 #endif
 }
 
 void GameState::loadResources()
 {
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertex, SpriteFragmentTextured);
+    m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertex, SpriteFragmentColoured);
 }

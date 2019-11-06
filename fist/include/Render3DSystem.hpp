@@ -22,6 +22,8 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Graphics/Drawable.hpp>
 
+#include <array>
+
 class Render3DSystem final : public xy::System, public sf::Drawable
 {
 public:
@@ -40,7 +42,7 @@ private:
         //points are 2 directions indicating frustum sides
         sf::Vector2f left;
         sf::Vector2f right;
-    }m_frustum;
+    } m_frustum;
 
     std::vector<xy::Entity> m_drawList;
 

@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #include "Render3DSystem.hpp"
 #include "GameConst.hpp"
+#include "Camera3D.hpp"
+#include "CameraTransportSystem.hpp"
 
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -36,7 +38,8 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float ViewDistance = GameConst::RoomWidth * 3.f;
+    const float ViewDistance = GameConst::RoomWidth * 2.8f;
+    const sf::FloatRect CullBounds(-ViewDistance / 2.f, -ViewDistance * 0.9f, ViewDistance, ViewDistance);
 }
 
 Render3DSystem::Render3DSystem(xy::MessageBus& mb)
@@ -50,66 +53,29 @@ Render3DSystem::Render3DSystem(xy::MessageBus& mb)
 void Render3DSystem::process(float)
 {
     m_drawList.clear();
-    auto camPos = m_camera.getComponent<xy::Transform>().getPosition();
+    auto camWorldPos = m_camera.getComponent<Camera3D>().worldPosition;
+    sf::Vector2f camPos(camWorldPos.x, camWorldPos.y);
+
+    const auto& transport = m_camera.getComponent<CameraTransport>();
+    auto rotation = transport.getCurrentRotation();
+
+    sf::Transform cullTx;
+    cullTx.translate(camPos);
+    cullTx.rotate(rotation);
+    auto cullBounds = cullTx.transformRect(CullBounds);
 
     auto& entities = getEntities();
     for (auto entity : entities)
     {
-        m_drawList.push_back(entity);
-        continue;
-
         const auto& tx = entity.getComponent<xy::Transform>();
-        auto pos = tx.getPosition();
-
-        //TODO take into account camera rotation....
-
-        //if we're behind the camera cull immediately
-        if (pos.y > camPos.y || pos.y < (camPos.y - ViewDistance))
-        {
-            continue;
-        }
-
-        //point line test. if either of the top corners of the drawable
-        //bounds lie between the frustum lines it must be visible
         const auto& drawable = entity.getComponent<xy::Drawable>();
-        auto worldBounds = tx.getWorldTransform().transformRect(drawable.getLocalBounds());
+        auto worldBounds = tx.getTransform().transformRect(drawable.getLocalBounds());
 
-        sf::Vector2f posA(worldBounds.left, worldBounds.top + worldBounds.height);
-        posA -= camPos;
-
-        float resultALeft = lineSide(m_frustum.left, posA);
-        float resultARight = lineSide(m_frustum.right, posA);
-        if (resultALeft < 0 && resultARight > 0)
+        if (worldBounds.intersects(cullBounds))
         {
             m_drawList.push_back(entity);
-            continue;
-        }
-
-        sf::Vector2f posB(worldBounds.left + worldBounds.width, worldBounds.top + worldBounds.height);
-        posB -= camPos;
-
-        float resultBLeft = lineSide(m_frustum.left, posB);
-        float resultBRight = lineSide(m_frustum.right, posB);
-        if (resultBLeft < 0 && resultBRight > 0)
-        {
-            m_drawList.push_back(entity);
-            continue;
-        }
-
-        //else if both the points straddle the frustum then the drawable passes right across it
-        if (resultALeft > 0 && resultBRight < 0)
-        {
-            m_drawList.push_back(entity);
-            continue;
         }
     }
-
-    //depth sort drawlist
-    std::sort(m_drawList.begin(), m_drawList.end(),
-        [](const xy::Entity& entA, const xy::Entity& entB)
-    {
-        return entA.getComponent<xy::Drawable>().getDepth() < entB.getComponent<xy::Drawable>().getDepth();
-    });
 }
 
 void Render3DSystem::setFOV(float fov)

@@ -24,6 +24,8 @@ Copyright 2019 Matt Marchant
 
 struct CameraTransport final
 {
+    CameraTransport(std::int32_t = 0);
+
     void move(bool left);
 
     void rotate(bool left);
