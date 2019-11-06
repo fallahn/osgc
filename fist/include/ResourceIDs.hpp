@@ -24,6 +24,7 @@ namespace ShaderID
     {
         Sprite3DTextured,
         Sprite3DColoured,
+        Sprite3DWalls,
 
         Count
     };

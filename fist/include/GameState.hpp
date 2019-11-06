@@ -62,4 +62,8 @@ private:
     void initScene();
     void loadResources();
     bool loadMap();
+
+#ifdef XY_DEBUG
+    void debugSetup();
+#endif
 };

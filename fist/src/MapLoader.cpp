@@ -48,7 +48,10 @@ namespace
     {
         sf::Vertex vert;
         vert.color.a = 0;
-        //TODO put normal data in colour rgb
+        //put normal data in colour rgb
+        vert.color.r = 127;
+        vert.color.g = 127;
+        vert.color.b = 255;
 
         vert.position = { -GameConst::RoomWidth, -GameConst::RoomWidth };
         vert.position /= 2.f;
@@ -73,7 +76,10 @@ namespace
     {
         sf::Vertex vert;
         vert.color.a = 255;
-        //TODO put normal data in colour rgb
+        //put normal data in colour rgb
+        vert.color.r = 127;
+        vert.color.g = 127;
+        vert.color.b = 0;
 
         vert.position = { GameConst::RoomWidth, -GameConst::RoomWidth };
         vert.position /= 2.f;
@@ -103,7 +109,10 @@ namespace
         {
             sf::Vertex vert;
             vert.color.a = 255;
-            //TODO put normal data into colour property
+            //put normal data into colour property
+            vert.color.r = 127;
+            vert.color.g = 255;
+            vert.color.b = 127;
 
             vert.position = { -GameConst::RoomWidth, -GameConst::RoomWidth };
             vert.position /= 2.f;
@@ -128,7 +137,10 @@ namespace
         {
             sf::Vertex vert;
             vert.color.a = 255;
-            //TODO put normal data into colour property
+            //put normal data into colour property
+            vert.color.r = 127;
+            vert.color.g = 0;
+            vert.color.b = 127;
 
             vert.position = { GameConst::RoomWidth, GameConst::RoomWidth };
             vert.position /= 2.f;
@@ -153,7 +165,10 @@ namespace
         {
             sf::Vertex vert;
             vert.color.a = 255;
-            //TODO put normal data into colour property
+            //put normal data into colour property
+            vert.color.r = 0;
+            vert.color.g = 127;
+            vert.color.b = 127;
 
             vert.position = { GameConst::RoomWidth, -GameConst::RoomWidth };
             vert.position /= 2.f;
@@ -178,7 +193,10 @@ namespace
         {
             sf::Vertex vert;
             vert.color.a = 255;
-            //TODO put normal data into colour property
+            //put normal data into colour property
+            vert.color.r = 255;
+            vert.color.g = 127;
+            vert.color.b = 127;
 
             vert.position = { -GameConst::RoomWidth, GameConst::RoomWidth };
             vert.position /= 2.f;
@@ -205,6 +223,10 @@ namespace
 
 bool GameState::loadMap()
 {
+    auto normalID = m_resources.load<sf::Texture>("assets/images/rooms/paper_normal.png");
+    auto& normalTex = m_resources.get<sf::Texture>(normalID);
+    normalTex.setRepeated(true);
+
     std::int32_t roomCount = 0;
     auto processRoom = [&](const xy::ConfigObject& room)
     {
@@ -274,8 +296,9 @@ bool GameState::loadMap()
         entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
         entity.getComponent<xy::Drawable>().setTexture(&tex);
-        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DWalls));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", normalTex);
         entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight;
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 

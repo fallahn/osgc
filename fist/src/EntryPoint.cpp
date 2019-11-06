@@ -33,13 +33,15 @@ source distribution.
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
 
+#include <SFML/OpenGL.hpp>
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
     ss->registerState<MenuState>(StateID::MainMenu);
     ss->registerState<GameState>(StateID::Game);
 
-    xy::App::getActiveInstance()->setWindowTitle("The FIST");
+    xy::App::getActiveInstance()->setWindowTitle("The Bob's Big Adventure");
+    glFrontFace(GL_CW);
 
     return StateID::Game;
 }
