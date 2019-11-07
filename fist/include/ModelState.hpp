@@ -67,4 +67,6 @@ private:
     void initScene();
     void parseVerts();
     void exportModel(const std::string&);
+
+    void setCamera(std::int32_t);
 };

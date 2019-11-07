@@ -166,6 +166,18 @@ bool ModelState::handleEvent(const sf::Event& evt)
             requestStackPop();
             requestStackPush(StateID::Game);
             break;
+        case sf::Keyboard::Num1:
+            setCamera(0);
+            break;
+        case sf::Keyboard::Num2:
+            setCamera(1);
+            break;
+        case sf::Keyboard::Num3:
+            setCamera(2);
+            break;
+        case sf::Keyboard::Num4:
+            setCamera(3);
+            break;
         }
     }
 
@@ -290,6 +302,7 @@ void ModelState::initScene()
     addCeiling(verts);
     addWall(verts, 0);
     addWall(verts, 1);
+    addWall(verts, 2);
     addWall(verts, 3);
 
     entity.getComponent<xy::Drawable>().updateLocalBounds();
@@ -384,4 +397,31 @@ void ModelState::exportModel(const std::string& path)
 
     //TODO write metadata file containing bin name,
     //texture name and pos/rot/scale
+}
+
+void ModelState::setCamera(std::int32_t direction)
+{
+    XY_ASSERT(direction < 4 && direction > -1, "out of range");
+
+    static const std::array<float, 4u> rotations =
+    {
+        0.f,
+        90.f * xy::Util::Const::degToRad,
+        xy::Util::Const::PI,
+        -90.f * xy::Util::Const::degToRad
+    };
+
+    static const std::array<sf::Vector2f, 4u> positions =
+    {
+        sf::Vector2f(0.f, GameConst::RoomWidth),
+        {-GameConst::RoomWidth, 0.f},
+        {0.f, -GameConst::RoomWidth},
+        {GameConst::RoomWidth, 0.f}
+    };
+
+    auto& cam = m_uiScene.getActiveCamera().getComponent<Camera3D>();
+    cam.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
+    cam.rotationMatrix = glm::rotate(cam.rotationMatrix, rotations[direction], glm::vec3(0.f, 0.f, 1.f));
+
+    m_uiScene.getActiveCamera().getComponent<xy::Transform>().setPosition(positions[direction]);
 }
