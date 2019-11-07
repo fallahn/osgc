@@ -116,6 +116,24 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx)
                 ImGui::Text("%s", "No Model Loaded.");
             }
 
+            if (ImGui::Button("Reset Position")
+                && m_fileLoaded)
+            {
+                modelEntity.getComponent<xy::Transform>().setPosition(0.f, 0.f);
+            }
+
+            if (ImGui::Button("Reset Rotation")
+                && m_fileLoaded)
+            {
+                modelEntity.getComponent<xy::Transform>().setRotation(0.f);
+            }
+
+            if (ImGui::Button("Reset Scale")
+                && m_fileLoaded)
+            {
+                modelEntity.getComponent<xy::Transform>().setScale(1.f, 1.f);
+            }
+
             ImGui::End();
         });
 }
@@ -129,10 +147,26 @@ bool ModelState::handleEvent(const sf::Event& evt)
         return true;
     }
 
-    if (evt.type == sf::Event::KeyReleased
-        && evt.key.code == sf::Keyboard::Escape)
+    if (evt.type == sf::Event::KeyReleased)
     {
-        xy::App::quit();
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::Escape:
+#ifdef XY_DEBUG
+            xy::App::quit();
+#else
+            //TODO display quit without saving dialogue
+
+            requestStackClear();
+            requestStackPush(StateID::MainMenu);
+#endif
+            break;
+        case sf::Keyboard::F3:
+            requestStackPop();
+            requestStackPush(StateID::Game);
+            break;
+        }
     }
 
     m_uiScene.forwardEvent(evt);
@@ -146,6 +180,51 @@ void ModelState::handleMessage(const xy::Message& msg)
 
 bool ModelState::update(float dt)
 {
+    if (m_fileLoaded)
+    {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        {
+            modelEntity.getComponent<xy::Transform>().scale(sf::Vector2f(1.1f, 1.1f));
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        {
+            modelEntity.getComponent<xy::Transform>().scale(sf::Vector2f(0.9f, 0.9f));
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        {
+            modelEntity.getComponent<xy::Transform>().rotate(120.f * dt);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            modelEntity.getComponent<xy::Transform>().rotate(-120.f * dt);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            modelEntity.getComponent<xy::Transform>().move(0.f, -120.f * dt);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            modelEntity.getComponent<xy::Transform>().move(0.f, 120.f * dt);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            modelEntity.getComponent<xy::Transform>().move(-120.f * dt, 0.f);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            modelEntity.getComponent<xy::Transform>().move(120.f * dt, 0.f);
+        }
+
+        //TODO clamp the object within the room using AABB
+    }
+
     auto cam = m_uiScene.getActiveCamera();
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
     shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
@@ -263,7 +342,7 @@ void ModelState::parseVerts()
             sf::Vertex vert;
             //positions
             vert.position.x = meshVerts[i].Position.X;
-            vert.position.y = meshVerts[i].Position.Y;
+            vert.position.y = -meshVerts[i].Position.Y;
 
             float z = meshVerts[i].Position.Z - zExtremes.first->Position.Z;
             z = z / range;
@@ -278,7 +357,7 @@ void ModelState::parseVerts()
                 return static_cast<sf::Uint8>(c);
             };
             vert.color.r = convertComponent(meshVerts[i].Normal.X);
-            vert.color.g = convertComponent(meshVerts[i].Normal.Y);
+            vert.color.g = convertComponent(-meshVerts[i].Normal.Y);
             vert.color.b = convertComponent(meshVerts[i].Normal.Z);
 
             //texcoords - for now we'll leave them normalised
@@ -301,5 +380,8 @@ void ModelState::parseVerts()
 
 void ModelState::exportModel(const std::string& path)
 {
+    //TODO serialise verts and write binary mesh file
 
+    //TODO write metadata file containing bin name,
+    //texture name and pos/rot/scale
 }

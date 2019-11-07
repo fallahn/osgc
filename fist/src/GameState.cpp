@@ -71,6 +71,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
     initScene();
     loadResources();
     loadMap(); //TODO store result then push error state on map fail
+    //TODO load current game state
 
 #ifdef XY_DEBUG
     debugSetup();
@@ -120,6 +121,10 @@ bool GameState::handleEvent(const sf::Event& evt)
             {
                 xy::App::quit();
             }
+            break;
+        case sf::Keyboard::F3:
+            requestStackPop();
+            requestStackPush(StateID::Model);
             break;
         case sf::Keyboard::F8:
             {

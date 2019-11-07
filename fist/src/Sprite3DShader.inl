@@ -62,7 +62,8 @@ void main()
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
-    v_normal = normalize(gl_Color.rgb * 2.0 - 1.0);
+    vec4 normal = vec4(gl_Color.rgb * 2.0 - 1.0, 0.0);
+    v_normal = normalize((u_modelMat * normal).xyz);
 })";
 
 //the tangent calc makes some assumptions about the normals
