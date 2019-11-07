@@ -37,7 +37,7 @@ CameraTransport::CameraTransport(std::int32_t startingRoom)
     auto x = startingRoom % GameConst::RoomsPerRow;
     auto y = startingRoom / GameConst::RoomsPerRow;
 
-    targetPosition = { x * GameConst::RoomWidth, y * GameConst::RoomWidth };
+    targetPosition = { x * GameConst::RoomWidth, y * -GameConst::RoomWidth };
     currentPosition = targetPosition - sf::Vector2f(2.f, 2.f);
     active = true; //this just makes the camera snap to initial position
 }

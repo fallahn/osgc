@@ -3,11 +3,13 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTransportSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ModelState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Render3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp
   PARENT_SCOPE)

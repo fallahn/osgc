@@ -27,13 +27,26 @@ source distribution.
 
 #pragma once
 
-namespace StateID
+#include <xyginext/core/State.hpp>
+#include <xyginext/ecs/Scene.hpp>
+
+class ErrorState final : public xy::State
 {
-    enum
-    {
-        MainMenu,
-        Game,
-        Error,
-        Model
-    };
-}
+public:
+    ErrorState(xy::StateStack&, xy::State::Context);
+
+    bool handleEvent(const sf::Event&) override;
+
+    void handleMessage(const xy::Message&) override;
+
+    bool update(float) override;
+
+    void draw() override;
+
+    xy::StateID stateID() const override;
+
+private:
+    xy::Scene m_uiScene;
+
+    void initScene();
+};

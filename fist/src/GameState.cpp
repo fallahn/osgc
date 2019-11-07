@@ -231,7 +231,7 @@ void GameState::initScene()
     auto camEnt = m_gameScene.getActiveCamera();
     camEnt.addComponent<xy::CommandTarget>().ID = CommandID::Camera;
     camEnt.getComponent<xy::Transform>().setPosition(0.f, GameConst::RoomWidth * 0.49f);
-    camEnt.addComponent<CameraTransport>(1);
+    camEnt.addComponent<CameraTransport>(57); //57
     camEnt.getComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 
@@ -260,7 +260,7 @@ void GameState::debugSetup()
 
     //set up a camera for deugging view
     debugCam = m_gameScene.createEntity();
-    debugCam.addComponent<xy::Transform>().setPosition(GameConst::RoomWidth, GameConst::RoomWidth / 2.f);
+    debugCam.addComponent<xy::Transform>().setPosition(GameConst::RoomWidth, (GameConst::RoomWidth / 2.f) + GameConst::RoomWidth * 7);
     debugCam.addComponent<xy::Camera>().setView(view.getSize());
     debugCam.getComponent<xy::Camera>().setViewport(view.getViewport());
 

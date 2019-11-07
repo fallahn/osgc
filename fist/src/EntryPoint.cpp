@@ -29,6 +29,8 @@ source distribution.
 #include "StateIDs.hpp"
 #include "MenuState.hpp"
 #include "GameState.hpp"
+#include "ErrorState.hpp"
+#include "ModelState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -39,6 +41,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
     ss->registerState<MenuState>(StateID::MainMenu);
     ss->registerState<GameState>(StateID::Game);
+    ss->registerState<ErrorState>(StateID::Error);
+    ss->registerState<ModelState>(StateID::Model);
 
     xy::App::getActiveInstance()->setWindowTitle("The Bob's Big Adventure");
     glFrontFace(GL_CW);
@@ -48,6 +52,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
 void end(xy::StateStack* ss)
 {
+    ss->unregisterState(StateID::Model);
+    ss->unregisterState(StateID::Error);
     ss->unregisterState(StateID::Game);
     ss->unregisterState(StateID::MainMenu);
 }

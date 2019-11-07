@@ -72,6 +72,12 @@
     <ClInclude Include="include\Render3DSystem.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="include\ErrorState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ModelState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -103,6 +109,12 @@
     </ClCompile>
     <ClCompile Include="src\Render3DSystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ErrorState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModelState.cpp">
+      <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
