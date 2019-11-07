@@ -38,7 +38,7 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float ViewDistance = GameConst::RoomWidth * 2.8f;
+    const float ViewDistance = GameConst::RoomWidth * 3.8f;
     const sf::FloatRect CullBounds(-ViewDistance / 2.f, -ViewDistance * 0.9f, ViewDistance, ViewDistance);
 }
 
@@ -76,6 +76,13 @@ void Render3DSystem::process(float)
             m_drawList.push_back(entity);
         }
     }
+
+    //yes, drawing back to front causes overdraw, but we need this for transparency
+    std::sort(m_drawList.begin(), m_drawList.end(),
+        [](const xy::Entity& a, const xy::Entity& b)
+        {
+            return a.getComponent<xy::Transform>().getPosition().y < b.getComponent<xy::Transform>().getPosition().y;
+        });
 }
 
 void Render3DSystem::setFOV(float fov)

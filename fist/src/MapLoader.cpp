@@ -46,6 +46,7 @@ namespace
 
     void addFloor(std::vector<sf::Vertex>& verts)
     {
+        const float Width = GameConst::RoomWidth + GameConst::RoomPadding;
         std::vector<sf::Vertex> temp;
 
         sf::Vertex vert;
@@ -55,7 +56,7 @@ namespace
         vert.color.g = 127;
         vert.color.b = 255;
 
-        vert.position = { -GameConst::RoomWidth, -GameConst::RoomWidth };
+        vert.position = { -Width, -Width };
         vert.position /= 2.f;
 
         vert.texCoords = { FloorUV.left, FloorUV.top };
@@ -65,11 +66,11 @@ namespace
         vert.texCoords.x += FloorUV.width;
         temp.push_back(vert);
 
-        vert.position.y += GameConst::RoomWidth;
+        vert.position.y += Width;
         vert.texCoords.y += FloorUV.height;
         temp.push_back(vert);
 
-        vert.position.x -= GameConst::RoomWidth;
+        vert.position.x -= Width;
         vert.texCoords.x -= FloorUV.width;
         temp.push_back(vert);
 
@@ -79,6 +80,8 @@ namespace
 
     void addCeiling(std::vector<sf::Vertex>& verts)
     {
+        const float Width = GameConst::RoomWidth + GameConst::RoomPadding;
+
         //using this to reverse the winding because I cba to manually rearrange the code
         std::vector<sf::Vertex> temp;
 
@@ -89,21 +92,21 @@ namespace
         vert.color.g = 127;
         vert.color.b = 0;
 
-        vert.position = { GameConst::RoomWidth, -GameConst::RoomWidth };
+        vert.position = { Width, -Width };
         vert.position /= 2.f;
 
         vert.texCoords = { CeilingUV.left, CeilingUV.top };
         temp.push_back(vert);
 
-        vert.position.x -= GameConst::RoomWidth;
+        vert.position.x -= Width;
         vert.texCoords.x += CeilingUV.width;
         temp.push_back(vert);
 
-        vert.position.y += GameConst::RoomWidth;
+        vert.position.y += Width;
         vert.texCoords.y += CeilingUV.height;
         temp.push_back(vert);
 
-        vert.position.x += GameConst::RoomWidth;
+        vert.position.x += Width;
         vert.texCoords.x -= CeilingUV.width;
         temp.push_back(vert);
 
@@ -113,6 +116,8 @@ namespace
 
     void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
     {
+        const float Width = GameConst::RoomWidth + GameConst::RoomPadding;
+
         std::vector<sf::Vertex> temp;
         switch (dir)
         {
@@ -126,13 +131,13 @@ namespace
             vert.color.g = 255;
             vert.color.b = 127;
 
-            vert.position = { -GameConst::RoomWidth, -GameConst::RoomWidth };
+            vert.position = { -Width, -Width };
             vert.position /= 2.f;
 
             vert.texCoords = { NorthUV.left, NorthUV.top };
             temp.push_back(vert);
 
-            vert.position.x += GameConst::RoomWidth;
+            vert.position.x += Width;
             vert.texCoords.x += NorthUV.width;
             temp.push_back(vert);
 
@@ -140,7 +145,7 @@ namespace
             vert.texCoords.y += NorthUV.height;
             temp.push_back(vert);
 
-            vert.position.x -= GameConst::RoomWidth;
+            vert.position.x -= Width;
             vert.texCoords.x -= NorthUV.width;
             temp.push_back(vert);
         }
@@ -154,13 +159,13 @@ namespace
             vert.color.g = 0;
             vert.color.b = 127;
 
-            vert.position = { GameConst::RoomWidth, GameConst::RoomWidth };
+            vert.position = { Width, Width };
             vert.position /= 2.f;
 
             vert.texCoords = { SouthUV.left, SouthUV.top };
             temp.push_back(vert);
 
-            vert.position.x -= GameConst::RoomWidth;
+            vert.position.x -= Width;
             vert.texCoords.x += SouthUV.width;
             temp.push_back(vert);
 
@@ -168,7 +173,7 @@ namespace
             vert.texCoords.y += SouthUV.height;
             temp.push_back(vert);
 
-            vert.position.x += GameConst::RoomWidth;
+            vert.position.x += Width;
             vert.texCoords.x -= SouthUV.width;
             temp.push_back(vert);
         }
@@ -182,13 +187,13 @@ namespace
             vert.color.g = 127;
             vert.color.b = 127;
 
-            vert.position = { GameConst::RoomWidth, -GameConst::RoomWidth };
+            vert.position = { Width, -Width };
             vert.position /= 2.f;
 
             vert.texCoords = { EastUV.left, EastUV.top };
             temp.push_back(vert);
 
-            vert.position.y += GameConst::RoomWidth;
+            vert.position.y += Width;
             vert.texCoords.y += EastUV.height;
             temp.push_back(vert);
 
@@ -196,7 +201,7 @@ namespace
             vert.texCoords.x += EastUV.width;
             temp.push_back(vert);
 
-            vert.position.y -= GameConst::RoomWidth;
+            vert.position.y -= Width;
             vert.texCoords.y -= EastUV.height;
             temp.push_back(vert);
         }
@@ -210,13 +215,13 @@ namespace
             vert.color.g = 127;
             vert.color.b = 127;
 
-            vert.position = { -GameConst::RoomWidth, GameConst::RoomWidth };
+            vert.position = { -Width, Width };
             vert.position /= 2.f;
 
             vert.texCoords = { WestUV.left, WestUV.top };
             temp.push_back(vert);
 
-            vert.position.y -= GameConst::RoomWidth;
+            vert.position.y -= Width;
             vert.texCoords.y += WestUV.height;
             temp.push_back(vert);
 
@@ -224,7 +229,7 @@ namespace
             vert.texCoords.x += WestUV.width;
             temp.push_back(vert);
 
-            vert.position.y += GameConst::RoomWidth;
+            vert.position.y += Width;
             vert.texCoords.y -= WestUV.height;
             temp.push_back(vert);
         }
