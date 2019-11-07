@@ -46,6 +46,8 @@ namespace
 
     void addFloor(std::vector<sf::Vertex>& verts)
     {
+        std::vector<sf::Vertex> temp;
+
         sf::Vertex vert;
         vert.color.a = 0;
         //put normal data in colour rgb
@@ -57,23 +59,29 @@ namespace
         vert.position /= 2.f;
 
         vert.texCoords = { FloorUV.left, FloorUV.top };
-        verts.push_back(vert);
+        temp.push_back(vert);
 
         vert.position.x += GameConst::RoomWidth;
         vert.texCoords.x += FloorUV.width;
-        verts.push_back(vert);
+        temp.push_back(vert);
 
         vert.position.y += GameConst::RoomWidth;
         vert.texCoords.y += FloorUV.height;
-        verts.push_back(vert);
+        temp.push_back(vert);
 
         vert.position.x -= GameConst::RoomWidth;
         vert.texCoords.x -= FloorUV.width;
-        verts.push_back(vert);
+        temp.push_back(vert);
+
+        std::reverse(temp.begin(), temp.end());
+        verts.insert(verts.end(), temp.begin(), temp.end());
     }
 
     void addCeiling(std::vector<sf::Vertex>& verts)
     {
+        //using this to reverse the winding because I cba to manually rearrange the code
+        std::vector<sf::Vertex> temp;
+
         sf::Vertex vert;
         vert.color.a = 255;
         //put normal data in colour rgb
@@ -85,23 +93,27 @@ namespace
         vert.position /= 2.f;
 
         vert.texCoords = { CeilingUV.left, CeilingUV.top };
-        verts.push_back(vert);
+        temp.push_back(vert);
 
         vert.position.x -= GameConst::RoomWidth;
         vert.texCoords.x += CeilingUV.width;
-        verts.push_back(vert);
+        temp.push_back(vert);
 
         vert.position.y += GameConst::RoomWidth;
         vert.texCoords.y += CeilingUV.height;
-        verts.push_back(vert);
+        temp.push_back(vert);
 
         vert.position.x += GameConst::RoomWidth;
         vert.texCoords.x -= CeilingUV.width;
-        verts.push_back(vert);
+        temp.push_back(vert);
+
+        std::reverse(temp.begin(), temp.end());
+        verts.insert(verts.end(), temp.begin(), temp.end());
     }
 
     void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
     {
+        std::vector<sf::Vertex> temp;
         switch (dir)
         {
         default: return;
@@ -118,19 +130,19 @@ namespace
             vert.position /= 2.f;
 
             vert.texCoords = { NorthUV.left, NorthUV.top };
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.x += GameConst::RoomWidth;
             vert.texCoords.x += NorthUV.width;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.color.a = 0;
             vert.texCoords.y += NorthUV.height;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.x -= GameConst::RoomWidth;
             vert.texCoords.x -= NorthUV.width;
-            verts.push_back(vert);
+            temp.push_back(vert);
         }
             break;
         case Sout:
@@ -146,19 +158,19 @@ namespace
             vert.position /= 2.f;
 
             vert.texCoords = { SouthUV.left, SouthUV.top };
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.x -= GameConst::RoomWidth;
             vert.texCoords.x += SouthUV.width;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.color.a = 0;
             vert.texCoords.y += SouthUV.height;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.x += GameConst::RoomWidth;
             vert.texCoords.x -= SouthUV.width;
-            verts.push_back(vert);
+            temp.push_back(vert);
         }
             break;
         case Eas:
@@ -174,19 +186,19 @@ namespace
             vert.position /= 2.f;
 
             vert.texCoords = { EastUV.left, EastUV.top };
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.y += GameConst::RoomWidth;
             vert.texCoords.y += EastUV.height;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.color.a = 0;
             vert.texCoords.x += EastUV.width;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.y -= GameConst::RoomWidth;
             vert.texCoords.y -= EastUV.height;
-            verts.push_back(vert);
+            temp.push_back(vert);
         }
             break;
         case Wes:
@@ -202,22 +214,25 @@ namespace
             vert.position /= 2.f;
 
             vert.texCoords = { WestUV.left, WestUV.top };
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.y -= GameConst::RoomWidth;
             vert.texCoords.y += WestUV.height;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.color.a = 0;
             vert.texCoords.x += WestUV.width;
-            verts.push_back(vert);
+            temp.push_back(vert);
 
             vert.position.y += GameConst::RoomWidth;
             vert.texCoords.y -= WestUV.height;
-            verts.push_back(vert);
+            temp.push_back(vert);
         }
             break;
         }
+
+        std::reverse(temp.begin(), temp.end());
+        verts.insert(verts.end(), temp.begin(), temp.end());
     }
 }
 
@@ -331,7 +346,7 @@ bool GameState::loadMap()
                 processRoom(obj);
             }
         }
-        glFrontFace(GL_CW); //simpler for my tiny brain to comprehend when wound in the same direction as UVs
+
         return roomCount == 64;
     }
     return false;

@@ -158,15 +158,14 @@ bool GameState::handleEvent(const sf::Event& evt)
 
 void GameState::handleMessage(const xy::Message& msg)
 {
-    if (msg.id == xy::Message::WindowMessage)
+    /*if (msg.id == xy::Message::WindowMessage)
     {
         const auto& data = msg.getData<xy::Message::WindowEvent>();
         if (data.type == xy::Message::WindowEvent::Resized)
         {
-            //reapply this as the context will have been recreated
-            glFrontFace(GL_CW); 
+             
         }
-    }
+    }*/
 
     m_gameScene.forwardMessage(msg);
 }
@@ -236,7 +235,7 @@ void GameState::initScene()
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 
     auto& camera = camEnt.addComponent<Camera3D>();
-    float fov = camera.calcFOV(view.getSize().y, GameConst::RoomWidth / 2.f);
+    float fov = camera.calcFOV(view.getSize().y * 1.4f, GameConst::RoomWidth / 2.f);
     float ratio = view.getSize().x / view.getSize().y;
     camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.depth = GameConst::RoomHeight / 2.f;

@@ -45,7 +45,6 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<ModelState>(StateID::Model);
 
     xy::App::getActiveInstance()->setWindowTitle("The Bob's Big Adventure");
-    glFrontFace(GL_CW);
 
     return StateID::Game;
 }
