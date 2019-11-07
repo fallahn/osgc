@@ -155,6 +155,7 @@
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\Render3DSystem.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\RoomBuilder.hpp" />
     <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
   </ItemGroup>

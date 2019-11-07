@@ -78,6 +78,9 @@
     <ClInclude Include="include\ModelState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\RoomBuilder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">

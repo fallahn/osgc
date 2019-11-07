@@ -27,10 +27,18 @@ source distribution.
 
 #pragma once
 
+#include "OBJ_Loader.h"
+#include "MatrixPool.hpp"
+
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
+#include <xyginext/gui/GuiClient.hpp>
+#include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
-class ModelState final : public xy::State
+#include <string>
+
+class ModelState final : public xy::State, public xy::GuiClient
 {
 public:
     ModelState(xy::StateStack&, xy::State::Context);
@@ -48,5 +56,15 @@ public:
 private:
     xy::Scene m_uiScene;
 
+    objl::Loader m_objLoader;
+    bool m_fileLoaded;
+    std::string m_fileData;
+
+    xy::ResourceHandler m_resources;
+    xy::ShaderResource m_shaders;
+    MatrixPool m_matrixPool;
+
     void initScene();
+    void parseVerts();
+    void exportModel(const std::string&);
 };
