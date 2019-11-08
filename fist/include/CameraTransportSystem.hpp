@@ -32,6 +32,8 @@ struct CameraTransport final
 
     float getCurrentRotation() const { return -currentRotation; }
 
+    sf::Vector2f getCurrentDirection() const { return currentDirection; }
+
 private:
     sf::Vector2f targetPosition;
     sf::Vector2f currentPosition;

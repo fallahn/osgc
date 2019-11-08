@@ -78,11 +78,51 @@ void Render3DSystem::process(float)
     }
 
     //yes, drawing back to front causes overdraw, but we need this for transparency
-    std::sort(m_drawList.begin(), m_drawList.end(),
-        [](const xy::Entity& a, const xy::Entity& b)
+    //also have to remember the direction we sort depends on which way the camera is facing
+    auto dir = transport.getCurrentDirection();
+    if (dir.x != 0)
+    {
+        //left/right
+        if (dir.x > 0)
         {
-            return a.getComponent<xy::Transform>().getPosition().y < b.getComponent<xy::Transform>().getPosition().y;
-        });
+            std::sort(m_drawList.begin(), m_drawList.end(),
+                [](const xy::Entity& a, const xy::Entity& b)
+                {
+                    return a.getComponent<xy::Transform>().getPosition().x + a.getComponent<xy::Drawable>().getDepth()
+                        < b.getComponent<xy::Transform>().getPosition().x + b.getComponent<xy::Drawable>().getDepth();
+                });
+        }
+        else
+        {
+            std::sort(m_drawList.begin(), m_drawList.end(),
+                [](const xy::Entity& a, const xy::Entity& b)
+                {
+                    return a.getComponent<xy::Transform>().getPosition().x - a.getComponent<xy::Drawable>().getDepth()
+                        > b.getComponent<xy::Transform>().getPosition().x - b.getComponent<xy::Drawable>().getDepth();
+                });
+        }
+    }
+    else
+    {
+        if (dir.y < 0)
+        {
+            std::sort(m_drawList.begin(), m_drawList.end(),
+                [](const xy::Entity& a, const xy::Entity& b)
+                {
+                    return a.getComponent<xy::Transform>().getPosition().y + a.getComponent<xy::Drawable>().getDepth()
+                        < b.getComponent<xy::Transform>().getPosition().y + b.getComponent<xy::Drawable>().getDepth();
+                });
+        }
+        else
+        {
+            std::sort(m_drawList.begin(), m_drawList.end(),
+                [](const xy::Entity& a, const xy::Entity& b)
+                {
+                    return a.getComponent<xy::Transform>().getPosition().y - a.getComponent<xy::Drawable>().getDepth()
+                        > b.getComponent<xy::Transform>().getPosition().y - b.getComponent<xy::Drawable>().getDepth();
+                });
+        }
+    }
 }
 
 void Render3DSystem::setFOV(float fov)
