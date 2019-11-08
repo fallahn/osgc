@@ -62,6 +62,7 @@ private:
     void initScene();
     void loadResources();
     bool loadMap();
+    void addPlayer();
 
 #ifdef XY_DEBUG
     void debugSetup();

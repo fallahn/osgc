@@ -91,7 +91,7 @@ public:
     }
 
     float depth = 0.f;
-
+    float xRot = 0.f;
 private:
     MatrixPool* m_pool;
     std::size_t m_matrixIdx;

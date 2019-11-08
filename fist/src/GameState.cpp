@@ -34,6 +34,7 @@ source distribution.
 #include "CommandIDs.hpp"
 #include "CameraTransportSystem.hpp"
 #include "Render3DSystem.hpp"
+#include "RoomBuilder.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -45,13 +46,17 @@ source distribution.
 #include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
 #include <xyginext/ecs/systems/CallbackSystem.hpp>
 #include <xyginext/ecs/systems/CommandSystem.hpp>
+#include <xyginext/ecs/systems/SpriteAnimator.hpp>
+#include <xyginext/ecs/systems/SpriteSystem.hpp>
 
 #include <xyginext/util/Const.hpp>
+#include <xyginext/graphics/SpriteSheet.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
@@ -61,6 +66,8 @@ namespace
 #include "Sprite3DShader.inl"
 
     xy::Entity debugCam;
+
+    std::int32_t startingRoom = 57;
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
@@ -68,10 +75,12 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
     m_gameScene(ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
+    //TODO load current game state
     initScene();
     loadResources();
     loadMap(); //TODO store result then push error state on map fail
-    //TODO load current game state
+    
+    addPlayer();
 
 #ifdef XY_DEBUG
     debugSetup();
@@ -132,7 +141,7 @@ bool GameState::handleEvent(const sf::Event& evt)
                 debugCam = m_gameScene.setActiveCamera(newCam);
             }
             break;
-        case sf::Keyboard::A:
+        case sf::Keyboard::O:
         {
             xy::Command cmd;
             cmd.targetFlags = CommandID::Camera;
@@ -143,7 +152,7 @@ bool GameState::handleEvent(const sf::Event& evt)
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
             break;
-        case sf::Keyboard::D:
+        case sf::Keyboard::P:
         {
             xy::Command cmd;
             cmd.targetFlags = CommandID::Camera;
@@ -219,9 +228,13 @@ void GameState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
-    m_gameScene.addSystem<xy::CallbackSystem>(mb);
+
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<CameraTransportSystem>(mb);
+    m_gameScene.addSystem<xy::SpriteAnimator>(mb);
+    m_gameScene.addSystem<xy::SpriteSystem>(mb);
+    m_gameScene.addSystem<xy::CallbackSystem>(mb);
+
     m_gameScene.addSystem<Sprite3DSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
@@ -235,12 +248,12 @@ void GameState::initScene()
     auto camEnt = m_gameScene.getActiveCamera();
     camEnt.addComponent<xy::CommandTarget>().ID = CommandID::Camera;
     camEnt.getComponent<xy::Transform>().setPosition(0.f, GameConst::RoomWidth * 0.49f);
-    camEnt.addComponent<CameraTransport>(57); //57
+    camEnt.addComponent<CameraTransport>(startingRoom); //57
     camEnt.getComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 
     auto& camera = camEnt.addComponent<Camera3D>();
-    float fov = camera.calcFOV(view.getSize().y * 1.4f, GameConst::RoomWidth / 2.f);
+    float fov = camera.calcFOV(view.getSize().y * 1.8f, GameConst::RoomWidth / 2.f);
     float ratio = view.getSize().x / view.getSize().y;
     camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.depth = GameConst::RoomHeight / 2.f;
@@ -255,6 +268,43 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertexColoured, SpriteFragmentColoured);
     m_shaders.preload(ShaderID::Sprite3DWalls, SpriteVertexWalls, SpriteFragmentWalls);
+}
+
+void GameState::addPlayer()
+{
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/bob.spt", m_resources);
+    auto bounds = spriteSheet.getSprite("bob").getTextureBounds();
+
+    auto x = startingRoom % GameConst::RoomsPerRow;
+    auto y = startingRoom / GameConst::RoomsPerRow;
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(x * GameConst::RoomWidth, y * GameConst::RoomWidth + 1.f);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bob");
+    entity.addComponent<xy::SpriteAnimation>().play(0);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    //hack to correct vert direction. Might move this to a system, only if we end up
+    //using a bunch of animated sprites though...
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = [](xy::Entity e, float)
+    {
+        auto& verts = e.getComponent<xy::Drawable>().getVertices();
+        verts[0].position = verts[1].position;
+        verts[3].position = verts[2].position;
+        verts[1].color.a = 0;
+        verts[2].color.a = 0;
+
+        //also want to read the camera's current rotation here and modify as necessary
+    };
+
+
+    //TODO load bella
 }
 
 #ifdef XY_DEBUG
