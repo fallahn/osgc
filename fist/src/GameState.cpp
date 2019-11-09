@@ -283,6 +283,7 @@ void GameState::addPlayer()
     entity.addComponent<xy::Transform>().setPosition(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bob");
+    entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
     entity.addComponent<xy::SpriteAnimation>().play(0);
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -307,7 +308,34 @@ void GameState::addPlayer()
     };
 
 
-    //TODO load bella
+    //load bella
+    spriteSheet.loadFromFile("assets/sprites/bella.spt", m_resources);
+    bounds = spriteSheet.getSprite("bella").getTextureBounds();
+
+    entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition((x * GameConst::RoomWidth) - 100.f, y * GameConst::RoomWidth);
+    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bella");
+    entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
+    entity.addComponent<xy::SpriteAnimation>().play(2);
+    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().setDepth(9); //used by 3D render to depth sort
+    entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function = [camEnt](xy::Entity e, float)
+    {
+        auto& verts = e.getComponent<xy::Drawable>().getVertices();
+        verts[0].position = verts[1].position;
+        verts[3].position = verts[2].position;
+        verts[1].color.a = 0;
+        verts[2].color.a = 0;
+
+        //also want to read the camera's current rotation
+        e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
+    };
 }
 
 #ifdef XY_DEBUG

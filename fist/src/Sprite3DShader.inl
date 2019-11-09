@@ -56,7 +56,7 @@ varying vec3 v_normal;
 void main()
 {
     vec4 worldPos = u_modelMat * gl_Vertex;
-    worldPos.z *= gl_Color.a;
+    worldPos.z *= gl_Color.a * length(vec3(u_modelMat[2][0], u_modelMat[2][1], u_modelMat[2][2]));
 
     gl_Position = u_viewProjMat * worldPos;
 
@@ -86,9 +86,9 @@ void main()
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
-    vec3 normal = normalize(gl_Color.rgb * 2.0 - 1.0);
-    vec3 tan = vec3(0.0);
-    vec3 bit = vec3(0.0);
+    vec4 normal = normalize(vec4(gl_Color.rgb * 2.0 - 1.0, 1.0));
+    vec4 tan = vec4(0.0);
+    vec4 bit = vec4(0.0);
 
     if(abs(normal.x) > 0.3)
     {
@@ -106,7 +106,11 @@ void main()
         bit.y = -1.0;
     }
 
-    mat3 TBN = transpose(mat3(tan, bit, normal));
+    normal = u_modelMat * normal;
+    tan = u_modelMat * tan;
+    bit = u_modelMat * bit;
+
+    mat3 TBN = transpose(mat3(tan.xyz, bit.xyz, normal.xyz));
 
     v_lightDir = TBN * normalize(vec3(0.2, 0.2, 1.0));
 
@@ -123,12 +127,17 @@ varying vec3 v_lightDir;
 
 void main()
 {
+    vec4 baseColour = texture2D(u_texture, gl_TexCoord[0].xy);
+    if(baseColour.a < 0.1)
+    {
+        discard;
+    }
+    vec3 ambientColour = baseColour.rgb * 0.3;    
+
     vec3 normal = texture2D(u_normalMap, gl_TexCoord[0].xy).rgb * 2.0 - 1.0;
     //normal.xy *= 0.5; normalize(normal);
     vec3 lightDir = normalize(v_lightDir);
 
-    vec4 baseColour = texture2D(u_texture, gl_TexCoord[0].xy);
-    vec3 ambientColour = baseColour.rgb * 0.3;
     float diffuseAmount = max(dot(lightDir, normal), 0.3);
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
@@ -145,11 +154,16 @@ varying vec3 v_normal;
 
 void main()
 {
+    vec4 baseColour = texture2D(u_texture, gl_TexCoord[0].xy);
+    if(baseColour.a < 0.1)
+    {
+        discard;
+    }
+    vec3 ambientColour = baseColour.rgb * 0.1;
+
     vec3 normal = normalize(v_normal);
     vec3 lightDir = normalize(vec3(0.2, 0.2, 1.0));
 
-    vec4 baseColour = texture2D(u_texture, gl_TexCoord[0].xy);
-    vec3 ambientColour = baseColour.rgb * 0.1;
     float diffuseAmount = max(dot(lightDir, normal), 0.5);
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 

@@ -31,12 +31,28 @@ spritesheet bella
         animation sleep
         {
             frame = 0,512,128,128
-            frame = 128,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+            frame = 0,512,128,128
+
+            loop = true
+            framerate = 10
+        }
+
+        animation sleep_flick
+        {
+			frame = 128,512,128,128
             frame = 256,512,128,128
             frame = 384,512,128,128
 
-            loop = true
-            framerate = 12
+            loop = false
+            framerate = 12        
         }
     }
 }
