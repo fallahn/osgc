@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/core/App.hpp>
+#include <xyginext/util/Vector.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -73,56 +74,16 @@ void Render3DSystem::process(float)
 
         if (worldBounds.intersects(cullBounds))
         {
-            m_drawList.push_back(entity);
+            m_drawList.push_back(std::make_pair(entity, xy::Util::Vector::lengthSquared(tx.getPosition() - camPos) - drawable.getDepth()));
         }
     }
 
     //yes, drawing back to front causes overdraw, but we need this for transparency
-    //also have to remember the direction we sort depends on which way the camera is facing
-    auto dir = transport.getCurrentDirection();
-    if (dir.x != 0)
-    {
-        //left/right
-        if (dir.x > 0)
+    std::sort(m_drawList.begin(), m_drawList.end(),
+        [](const std::pair<xy::Entity, float>& a, const std::pair<xy::Entity, float>& b)
         {
-            std::sort(m_drawList.begin(), m_drawList.end(),
-                [](const xy::Entity& a, const xy::Entity& b)
-                {
-                    return a.getComponent<xy::Transform>().getPosition().x + a.getComponent<xy::Drawable>().getDepth()
-                        < b.getComponent<xy::Transform>().getPosition().x + b.getComponent<xy::Drawable>().getDepth();
-                });
-        }
-        else
-        {
-            std::sort(m_drawList.begin(), m_drawList.end(),
-                [](const xy::Entity& a, const xy::Entity& b)
-                {
-                    return a.getComponent<xy::Transform>().getPosition().x - a.getComponent<xy::Drawable>().getDepth()
-                        > b.getComponent<xy::Transform>().getPosition().x - b.getComponent<xy::Drawable>().getDepth();
-                });
-        }
-    }
-    else
-    {
-        if (dir.y < 0)
-        {
-            std::sort(m_drawList.begin(), m_drawList.end(),
-                [](const xy::Entity& a, const xy::Entity& b)
-                {
-                    return a.getComponent<xy::Transform>().getPosition().y + a.getComponent<xy::Drawable>().getDepth()
-                        < b.getComponent<xy::Transform>().getPosition().y + b.getComponent<xy::Drawable>().getDepth();
-                });
-        }
-        else
-        {
-            std::sort(m_drawList.begin(), m_drawList.end(),
-                [](const xy::Entity& a, const xy::Entity& b)
-                {
-                    return a.getComponent<xy::Transform>().getPosition().y - a.getComponent<xy::Drawable>().getDepth()
-                        > b.getComponent<xy::Transform>().getPosition().y - b.getComponent<xy::Drawable>().getDepth();
-                });
-        }
-    }
+            return a.second > b.second;
+        });
 }
 
 void Render3DSystem::setFOV(float fov)
@@ -144,7 +105,7 @@ void Render3DSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    for (auto entity : m_drawList)
+    for (auto [entity, dist] : m_drawList)
     {
         const auto& drawable = entity.getComponent<xy::Drawable>();
         const auto& tx = entity.getComponent<xy::Transform>().getWorldTransform();

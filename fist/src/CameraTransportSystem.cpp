@@ -26,10 +26,17 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Math.hpp>
 #include <xyginext/util/Vector.hpp>
 
+#include <array>
+
 namespace
 {
     const float TranslateSpeed = 10.f;
-    const float RotateSpeed = 10.f;
+    const float RotateSpeed = 20.f;
+
+    const std::array<float, 4u> rotationTargets =
+    {
+        0.f, 90.f, 180.f, -90.f
+    };
 }
 
 CameraTransport::CameraTransport(std::int32_t startingRoom)
@@ -69,18 +76,22 @@ void CameraTransport::rotate(bool left)
     {
         if (left)
         {
-            targetRotation += 90.f;
+            m_currentRotationTarget = (m_currentRotationTarget + 1) % rotationTargets.size();
+
             float temp = currentDirection.x;
             currentDirection.x = -currentDirection.y;
             currentDirection.y = temp;
         }
         else
         {
-            targetRotation -= 90.f;
+            m_currentRotationTarget = (m_currentRotationTarget + 3) % rotationTargets.size();
+
             float temp = currentDirection.y;
             currentDirection.y = -currentDirection.x;
             currentDirection.x = temp;
         }
+
+        targetRotation = rotationTargets[m_currentRotationTarget];
         active = true;
     }
 }
@@ -128,7 +139,7 @@ void CameraTransportSystem::process(float dt)
             float rotation = xy::Util::Math::shortestRotation(transport.currentRotation, transport.targetRotation);
             if (rotation != 0)
             {
-                if (std::abs(rotation) > 2)
+                if (std::abs(rotation) > 1)
                 {
                     float amount = rotation * RotateSpeed * dt;
                     auto& cam = entity.getComponent<Camera3D>();
@@ -139,7 +150,7 @@ void CameraTransportSystem::process(float dt)
                 else
                 {
                     auto& cam = entity.getComponent<Camera3D>();
-                    cam.postRotationMatrix = glm::rotate(cam.postRotationMatrix, rotation * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
+                    cam.postRotationMatrix = glm::rotate(/*cam.postRotationMatrix*/glm::mat4(1.f), transport.targetRotation * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
                     transport.currentRotation = transport.targetRotation;
                     transport.active = false;
 

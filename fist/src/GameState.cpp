@@ -284,10 +284,11 @@ void GameState::addPlayer()
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bob");
     entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
+    const_cast<sf::Texture*>(entity.getComponent<xy::Sprite>().getTexture())->setSmooth(true);
     entity.addComponent<xy::SpriteAnimation>().play(0);
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().setDepth(10); //used by 3D render to depth sort
+    entity.getComponent<xy::Drawable>().setDepth(100); //used by 3D render to depth sort
     entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
@@ -317,6 +318,7 @@ void GameState::addPlayer()
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
     entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bella");
     entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
+    const_cast<sf::Texture*>(entity.getComponent<xy::Sprite>().getTexture())->setSmooth(true);
     entity.addComponent<xy::SpriteAnimation>().play(2);
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");

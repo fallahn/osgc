@@ -106,9 +106,9 @@ void main()
         bit.y = -1.0;
     }
 
-    normal = u_modelMat * normal;
-    tan = u_modelMat * tan;
-    bit = u_modelMat * bit;
+    //normal = u_modelMat * normal;
+    //tan = u_modelMat * tan;
+    //bit = u_modelMat * bit;
 
     mat3 TBN = transpose(mat3(tan.xyz, bit.xyz, normal.xyz));
 

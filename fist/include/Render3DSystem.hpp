@@ -44,7 +44,7 @@ private:
         sf::Vector2f right;
     } m_frustum;
 
-    std::vector<xy::Entity> m_drawList;
+    std::vector<std::pair<xy::Entity, float>> m_drawList;
 
     xy::Entity m_camera;
 

@@ -42,6 +42,7 @@ private:
 
     float targetRotation = 0.f;
     float currentRotation = 0.f;
+    std::size_t m_currentRotationTarget = 0;
 
     bool active = false;
 
