@@ -20,6 +20,7 @@ Copyright 2019 Matt Marchant
 #include "GameConst.hpp"
 #include "Camera3D.hpp"
 #include "CameraTransportSystem.hpp"
+#include "Sprite3D.hpp"
 
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
@@ -48,15 +49,18 @@ Render3DSystem::Render3DSystem(xy::MessageBus& mb)
 {
     requireComponent<xy::Drawable>();
     requireComponent<xy::Transform>();
+    requireComponent<Sprite3D>();
 }
 
 //public
 void Render3DSystem::process(float)
 {
-    m_drawList.clear();
+    m_renderPasses[0].clear();
+    m_renderPasses[1].clear();
+
     auto camWorldPos = m_camera.getComponent<Camera3D>().worldPosition;
     sf::Vector2f camPos(camWorldPos.x, camWorldPos.y);
-
+    xy::App::printStat("pos", std::to_string(camWorldPos.x) + ", " + std::to_string(camWorldPos.y));
     const auto& transport = m_camera.getComponent<CameraTransport>();
     auto rotation = transport.getCurrentRotation();
 
@@ -74,16 +78,20 @@ void Render3DSystem::process(float)
 
         if (worldBounds.intersects(cullBounds))
         {
-            m_drawList.push_back(std::make_pair(entity, xy::Util::Vector::lengthSquared(tx.getPosition() - camPos) - drawable.getDepth()));
+            auto pass = entity.getComponent<Sprite3D>().renderPass;
+            m_renderPasses[pass].push_back(std::make_pair(entity, xy::Util::Vector::lengthSquared(tx.getPosition() - camPos)));
         }
     }
 
     //yes, drawing back to front causes overdraw, but we need this for transparency
-    std::sort(m_drawList.begin(), m_drawList.end(),
-        [](const std::pair<xy::Entity, float>& a, const std::pair<xy::Entity, float>& b)
-        {
-            return a.second > b.second;
-        });
+    for (auto& drawList : m_renderPasses)
+    {
+        std::sort(drawList.begin(), drawList.end(),
+            [](const std::pair<xy::Entity, float>& a, const std::pair<xy::Entity, float>& b)
+            {
+                return a.second > b.second;
+            });
+    }
 }
 
 void Render3DSystem::setFOV(float fov)
@@ -105,20 +113,24 @@ void Render3DSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    for (auto [entity, dist] : m_drawList)
+
+    for (const auto& drawList : m_renderPasses)
     {
-        const auto& drawable = entity.getComponent<xy::Drawable>();
-        const auto& tx = entity.getComponent<xy::Transform>().getWorldTransform();
-
-        states = drawable.getStates();
-        states.transform = tx;
-
-        if (states.shader)
+        for (auto [entity, dist] : drawList)
         {
-            drawable.applyShader();
-        }
+            const auto& drawable = entity.getComponent<xy::Drawable>();
+            const auto& tx = entity.getComponent<xy::Transform>().getWorldTransform();
 
-        rt.draw(drawable, states);
+            states = drawable.getStates();
+            states.transform = tx;
+
+            if (states.shader)
+            {
+                drawable.applyShader();
+            }
+
+            rt.draw(drawable, states);
+        }
     }
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);

@@ -279,6 +279,8 @@ void GameState::addPlayer()
     auto x = startingRoom % GameConst::RoomsPerRow;
     auto y = startingRoom / GameConst::RoomsPerRow;
 
+    //TODO tidy this up and remove repeat code
+
     auto entity = m_gameScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
     entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
@@ -290,6 +292,7 @@ void GameState::addPlayer()
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.getComponent<xy::Drawable>().setDepth(100); //used by 3D render to depth sort
     entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
+    entity.getComponent<Sprite3D>().renderPass = 1;
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     //hack to correct vert direction. Might move this to a system, only if we end up
@@ -322,8 +325,9 @@ void GameState::addPlayer()
     entity.addComponent<xy::SpriteAnimation>().play(2);
     entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().setDepth(9); //used by 3D render to depth sort
+    entity.getComponent<xy::Drawable>().setDepth(90); //used by 3D render to depth sort
     entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
+    entity.getComponent<Sprite3D>().renderPass = 1;
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     entity.addComponent<xy::Callback>().active = true;
