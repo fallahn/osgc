@@ -18,28 +18,17 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
-#include <xyginext/ecs/Director.hpp>
-#include <xyginext/ecs/Entity.hpp>
+#include <array>
 
-class PlayerDirector final : public xy::Director
+namespace AnimationID
 {
-public:
-    PlayerDirector();
+    enum
+    {
+        Idle, Scratch,
+        InspectStart, InspectEnd,
+        Left, Right,
 
-    void handleEvent(const sf::Event&) override;
-    void handleMessage(const xy::Message&) override;
-    void process(float) override;
-
-    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
-
-private:
-    bool m_cameraLocked;
-    xy::Entity m_playerEntity;
-    std::int32_t m_cameraDirection;
-    std::uint16_t m_inputFlags;
-
-    sf::Vector2f m_previousVelocity;
-    sf::Clock m_animationTimer;
-    sf::Time m_nextAnimTime;
-    void playAnimation(std::size_t);
-};
+        Count
+    };
+}
+using AnimationMap = std::array<std::size_t, AnimationID::Count>;

@@ -18,8 +18,12 @@ Copyright 2019 Matt Marchant
 
 #include "PlayerDirector.hpp"
 #include "MessageIDs.hpp"
+#include "AnimationID.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
+#include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/util/Random.hpp>
+#include <xyginext/util/Vector.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -44,7 +48,8 @@ namespace
 PlayerDirector::PlayerDirector()
     : m_cameraLocked    (false),
     m_cameraDirection   (0),
-    m_inputFlags        (0)
+    m_inputFlags        (0),
+    m_nextAnimTime      (sf::seconds(xy::Util::Random::value(5, 12)))
 {
 
 }
@@ -105,27 +110,27 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
 
 void PlayerDirector::process(float dt)
 {
+    sf::Vector2f velocity; //used below for updating animation
     if (m_cameraLocked && m_playerEntity.isValid())
     {
         if (m_inputFlags != 0)
         {
-            sf::Vector2f velocity;
             if (m_inputFlags & InputFlags::Left)
             {
                 switch (m_cameraDirection)
                 {
                 default: break;
                 case CameraEvent::N:
-                    velocity.x = -1.f;
+                    velocity.x += -1.f;
                     break;
                 case CameraEvent::E:
-                    velocity.y = -1.f;
+                    velocity.y += -1.f;
                     break;
                 case CameraEvent::S:
-                    velocity.x = 1.f;
+                    velocity.x += 1.f;
                     break;
                 case CameraEvent::W:
-                    velocity.y = 1.f;
+                    velocity.y += 1.f;
                     break;
                 }
             }
@@ -136,16 +141,16 @@ void PlayerDirector::process(float dt)
                 {
                 default: break;
                 case CameraEvent::N:
-                    velocity.x = 1.f;
+                    velocity.x += 1.f;
                     break;
                 case CameraEvent::E:
-                    velocity.y = 1.f;
+                    velocity.y += 1.f;
                     break;
                 case CameraEvent::S:
-                    velocity.x = -1.f;
+                    velocity.x += -1.f;
                     break;
                 case CameraEvent::W:
-                    velocity.y = -1.f;
+                    velocity.y += -1.f;
                     break;
                 }
             }
@@ -155,4 +160,48 @@ void PlayerDirector::process(float dt)
             //TODO inspect stuff if UP is released
         }
     }
+
+    //update the player animations
+    const auto& animMap = m_playerEntity.getComponent<AnimationMap>();
+    auto& animation = m_playerEntity.getComponent<xy::SpriteAnimation>();
+    if (animation.getAnimationIndex() == animMap[AnimationID::Idle]
+        && m_animationTimer.getElapsedTime() > m_nextAnimTime)
+    {
+        m_nextAnimTime = sf::seconds(xy::Util::Random::value(6, 14));
+        m_animationTimer.restart();
+        animation.play(animMap[AnimationID::Scratch]);
+    }
+    else if (animation.getAnimationIndex() == animMap[AnimationID::Scratch]
+        && animation.stopped())
+    {
+        animation.play(animMap[AnimationID::Idle]);
+    }
+
+    if (xy::Util::Vector::lengthSquared(velocity) == 0
+        && xy::Util::Vector::lengthSquared(m_previousVelocity) != 0)
+    {
+        //we stop moving
+        animation.play(animMap[AnimationID::Idle]);
+        m_animationTimer.restart();
+    }
+    else if(xy::Util::Vector::lengthSquared(velocity) != 0
+            && xy::Util::Vector::lengthSquared(m_previousVelocity) == 0)
+    {
+        if (m_inputFlags & InputFlags::Left)
+        {
+            animation.play(animMap[AnimationID::Left]);
+        }
+        else
+        {
+            animation.play(animMap[AnimationID::Right]);
+        }
+    }
+
+    m_previousVelocity = velocity;
+}
+
+//private
+void PlayerDirector::playAnimation(std::size_t id)
+{
+
 }

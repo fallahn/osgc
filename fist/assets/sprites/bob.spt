@@ -6,6 +6,52 @@ spritesheet bob
     {
         bounds = 0,256,128,256
 
+        animation idle
+        {
+            frame = 1024, 1280, 128, 256
+            frame = 1536, 1280, 128, 256
+            frame = 896, 512, 128, 256
+
+            framerate = 12
+            loop = true
+        }
+
+        animation scratch
+        {
+            frame = 1024, 1280, 128, 256
+            frame = 1152, 1280, 128, 256
+            frame = 1280, 1280, 128, 256
+            frame = 1408, 1280, 128, 256
+            frame = 1536, 1280, 128, 256
+            frame = 1664, 1280, 128, 256
+            frame = 1792, 1280, 128, 256
+            frame = 1920, 1280, 128, 256
+
+
+            framerate = 12
+            loop = false
+        }
+
+        animation inspect_start
+        {
+            frame = 0,256,128,256
+            frame = 256,0,128,256
+
+            framerate = 12
+            loop = false
+        }
+
+        animation inspect_end
+        {
+            
+            frame = 256,0,128,256
+            frame = 0,256,128,256
+            frame = 1280,0,128,256
+
+            framerate = 12
+            loop = false
+        }
+
         animation right
         {
             frame = 0,256,128,256

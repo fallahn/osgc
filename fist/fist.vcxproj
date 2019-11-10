@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\AnimationID.hpp" />
     <ClInclude Include="include\Camera3D.hpp" />
     <ClInclude Include="include\CameraTransportSystem.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />

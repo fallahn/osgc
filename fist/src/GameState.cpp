@@ -36,6 +36,7 @@ source distribution.
 #include "Render3DSystem.hpp"
 #include "RoomBuilder.hpp"
 #include "PlayerDirector.hpp"
+#include "AnimationID.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -324,6 +325,16 @@ void GameState::addPlayer()
     sf::Vector2f position(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
     auto player = createSprite("bob", position);
     m_gameScene.getDirector<PlayerDirector>().setPlayerEntity(player);
+
+    auto& animMap = player.addComponent<AnimationMap>();
+    animMap[AnimationID::Idle] = spriteSheet.getAnimationIndex("idle", "bob");
+    animMap[AnimationID::Scratch] = spriteSheet.getAnimationIndex("scratch", "bob");
+    animMap[AnimationID::InspectStart] = spriteSheet.getAnimationIndex("inspect_start", "bob");
+    animMap[AnimationID::InspectEnd] = spriteSheet.getAnimationIndex("inspect_end", "bob");
+    animMap[AnimationID::Left] = spriteSheet.getAnimationIndex("left", "bob");
+    animMap[AnimationID::Right] = spriteSheet.getAnimationIndex("right", "bob");
+    player.getComponent<xy::SpriteAnimation>().play(animMap[AnimationID::Idle]);
+
 
     //load bella
     spriteSheet.loadFromFile("assets/sprites/bella.spt", m_resources);

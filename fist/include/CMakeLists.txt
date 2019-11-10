@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/AnimationID.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraInput.hpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTransportSystem.hpp
