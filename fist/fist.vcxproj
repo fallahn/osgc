@@ -152,6 +152,7 @@
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\ModelState.hpp" />
+    <ClInclude Include="include\PlayerDirector.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\Render3DSystem.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\ModelState.cpp" />
+    <ClCompile Include="src\PlayerDirector.cpp" />
     <ClCompile Include="src\Render3DSystem.cpp" />
     <ClCompile Include="src\Sprite3DSystem.cpp" />
   </ItemGroup>

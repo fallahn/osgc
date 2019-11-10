@@ -28,6 +28,12 @@
     <Filter Include="Source Files\systems">
       <UniqueIdentifier>{c1d972e4-16e7-4a61-aac9-f46fc15b2c2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\directors">
+      <UniqueIdentifier>{37d6325e-9046-487d-9032-d9f17e4d18c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\directors">
+      <UniqueIdentifier>{f4d89fec-4b00-40ef-b989-2fbdbe2d733e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\PluginExport.hpp">
@@ -81,6 +87,9 @@
     <ClInclude Include="include\CameraInput.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\PlayerDirector.hpp">
+      <Filter>Header Files\directors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -118,6 +127,9 @@
     </ClCompile>
     <ClCompile Include="src\CameraInput.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlayerDirector.cpp">
+      <Filter>Source Files\directors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

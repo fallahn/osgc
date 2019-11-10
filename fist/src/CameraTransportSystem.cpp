@@ -18,9 +18,11 @@ Copyright 2019 Matt Marchant
 
 #include "CameraTransportSystem.hpp"
 #include "Camera3D.hpp"
+#include "MessageIDs.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
+#include <xyginext/core/App.hpp>
 #include <xyginext/ecs/components/Transform.hpp>
 
 #include <xyginext/util/Math.hpp>
@@ -35,7 +37,7 @@ namespace
 
     const std::array<float, 4u> rotationTargets =
     {
-        0.f, 90.f, 180.f, -90.f
+        0.f, -90.f, 180.f, 90.f
     };
 }
 
@@ -67,6 +69,9 @@ void CameraTransport::move(bool left)
 
         targetPosition += dir * GameConst::RoomWidth;
         active = true;
+
+        auto* msg = xy::App::getActiveInstance()->getMessageBus().post<CameraEvent>(MessageID::CameraMessage);
+        msg->type = CameraEvent::Unlocked;
     }
 }
 
@@ -76,7 +81,7 @@ void CameraTransport::rotate(bool left)
     {
         if (left)
         {
-            m_currentRotationTarget = (m_currentRotationTarget + 1) % rotationTargets.size();
+            m_currentRotationTarget = (m_currentRotationTarget + 3) % rotationTargets.size();
 
             float temp = currentDirection.x;
             currentDirection.x = -currentDirection.y;
@@ -84,7 +89,7 @@ void CameraTransport::rotate(bool left)
         }
         else
         {
-            m_currentRotationTarget = (m_currentRotationTarget + 3) % rotationTargets.size();
+            m_currentRotationTarget = (m_currentRotationTarget + 1) % rotationTargets.size();
 
             float temp = currentDirection.y;
             currentDirection.y = -currentDirection.x;
@@ -93,6 +98,9 @@ void CameraTransport::rotate(bool left)
 
         targetRotation = rotationTargets[m_currentRotationTarget];
         active = true;
+
+        auto* msg = xy::App::getActiveInstance()->getMessageBus().post<CameraEvent>(MessageID::CameraMessage);
+        msg->type = CameraEvent::Unlocked;
     }
 }
 
@@ -129,7 +137,10 @@ void CameraTransportSystem::process(float dt)
                     transport.currentPosition = transport.targetPosition;
                     transport.active = false;
 
-                    //TODO raise a message
+                    //raise a message
+                    auto* msg = postMessage<CameraEvent>(MessageID::CameraMessage);
+                    msg->type = CameraEvent::Locked;
+                    msg->direction = static_cast<CameraEvent::Direction>(transport.m_currentRotationTarget);
                 }
                 entity.getComponent<Camera3D>().postTranslationMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-transport.currentPosition.x, transport.currentPosition.y, 0.f));
             }
@@ -150,11 +161,14 @@ void CameraTransportSystem::process(float dt)
                 else
                 {
                     auto& cam = entity.getComponent<Camera3D>();
-                    cam.postRotationMatrix = glm::rotate(/*cam.postRotationMatrix*/glm::mat4(1.f), transport.targetRotation * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
+                    cam.postRotationMatrix = glm::rotate(glm::mat4(1.f), transport.targetRotation * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
                     transport.currentRotation = transport.targetRotation;
                     transport.active = false;
 
-                    //TODO raise message
+                    //raise message
+                    auto* msg = postMessage<CameraEvent>(MessageID::CameraMessage);
+                    msg->type = CameraEvent::Locked;
+                    msg->direction = static_cast<CameraEvent::Direction>(transport.m_currentRotationTarget);
                 }
             }
         }

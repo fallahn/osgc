@@ -18,16 +18,23 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/ecs/Director.hpp>
 #include <xyginext/ecs/Entity.hpp>
 
-class CameraInput final
+class PlayerDirector final : public xy::Director
 {
 public:
-    CameraInput();
+    PlayerDirector();
 
-    void update(float);
-    void setCameraEntity(xy::Entity entity) { m_cameraEntity = entity; }
+    void handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    void process(float) override;
+
+    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
 
 private:
-    xy::Entity m_cameraEntity;
+    bool m_cameraLocked;
+    xy::Entity m_playerEntity;
+    std::int32_t m_cameraDirection;
+    std::uint16_t m_inputFlags;
 };

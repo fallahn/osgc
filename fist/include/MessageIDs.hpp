@@ -19,3 +19,25 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <xyginext/core/Message.hpp>
+
+namespace MessageID
+{
+    enum
+    {
+        CameraMessage = xy::Message::Count
+    };
+}
+
+struct CameraEvent final
+{
+    enum
+    {
+        Locked, Unlocked,
+        DirectionChanged
+    }type = Locked;
+
+    enum Direction
+    {
+        N,E,S,W
+    }direction = N;
+};

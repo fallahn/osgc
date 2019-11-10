@@ -35,6 +35,7 @@ source distribution.
 #include "CameraTransportSystem.hpp"
 #include "Render3DSystem.hpp"
 #include "RoomBuilder.hpp"
+#include "PlayerDirector.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -242,6 +243,8 @@ void GameState::initScene()
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<Render3DSystem>(mb);
 
+    m_gameScene.addDirector<PlayerDirector>();
+
     //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
     //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
 
@@ -277,7 +280,7 @@ void GameState::addPlayer()
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/bob.spt", m_resources);
 
-    auto createSprite = [&](const std::string sprite, sf::Vector2f position)
+    auto createSprite = [&](const std::string sprite, sf::Vector2f position)->xy::Entity 
     {
         auto bounds = spriteSheet.getSprite(sprite).getTextureBounds();
 
@@ -311,13 +314,16 @@ void GameState::addPlayer()
             //also want to read the camera's current rotation
             e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
         };
+
+        return entity;
     };
 
     auto x = startingRoom % GameConst::RoomsPerRow;
     auto y = startingRoom / GameConst::RoomsPerRow;
 
     sf::Vector2f position(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
-    createSprite("bob", position);
+    auto player = createSprite("bob", position);
+    m_gameScene.getDirector<PlayerDirector>().setPlayerEntity(player);
 
     //load bella
     spriteSheet.loadFromFile("assets/sprites/bella.spt", m_resources);
@@ -343,7 +349,7 @@ void GameState::debugSetup()
 
     //temp just to move the camera about
     debugCam.addComponent<sf::Vector2f>();
-    m_cameraInput.setPlayerEntity(debugCam);
+    m_cameraInput.setCameraEntity(debugCam);
     //debugCam = m_gameScene.setActiveCamera(debugCam);
 
     //and a debug icon

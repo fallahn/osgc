@@ -38,7 +38,7 @@ CameraInput::CameraInput()
 //public
 void CameraInput::update(float dt)
 {
-    if (m_playerEntity.isValid())
+    if (m_cameraEntity.isValid())
     {
         sf::Vector2f movement;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
@@ -65,13 +65,13 @@ void CameraInput::update(float dt)
 
         movement *= PlayerStrength;
 
-        auto& vel = m_playerEntity.getComponent<sf::Vector2f>();
+        auto& vel = m_cameraEntity.getComponent<sf::Vector2f>();
         if (xy::Util::Vector::lengthSquared(vel) < MaxVelSqr)
         {
             vel += movement;
         }
 
-        m_playerEntity.getComponent<xy::Transform>().move(vel * dt);
+        m_cameraEntity.getComponent<xy::Transform>().move(vel * dt);
         vel *= 0.89f;
     }
 }
