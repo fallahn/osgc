@@ -16,7 +16,7 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#include "InputParser.hpp"
+#include "CameraInput.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/util/Vector.hpp>
@@ -30,13 +30,13 @@ namespace
     const float MaxVelSqr = MaxVelocity * MaxVelocity;
 }
 
-InputParser::InputParser()
+CameraInput::CameraInput()
 {
 
 }
 
 //public
-void InputParser::update(float dt)
+void CameraInput::update(float dt)
 {
     if (m_playerEntity.isValid())
     {

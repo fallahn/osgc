@@ -27,7 +27,7 @@ source distribution.
 
 #pragma once
 
-#include "InputParser.hpp"
+#include "CameraInput.hpp"
 #include "MatrixPool.hpp"
 
 #include <xyginext/core/State.hpp>
@@ -57,14 +57,13 @@ private:
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
 
-    InputParser m_inputParser;
-
     void initScene();
     void loadResources();
     bool loadMap();
     void addPlayer();
 
 #ifdef XY_DEBUG
+    CameraInput m_cameraInput;
     void debugSetup();
 #endif
 };

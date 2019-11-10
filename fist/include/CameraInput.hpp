@@ -20,10 +20,10 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/Entity.hpp>
 
-class InputParser final
+class CameraInput final
 {
 public:
-    InputParser();
+    CameraInput();
 
     void update(float);
     void setPlayerEntity(xy::Entity entity) { m_playerEntity = entity; }

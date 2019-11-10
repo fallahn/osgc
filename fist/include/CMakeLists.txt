@@ -1,12 +1,12 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
   ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CameraInput.hpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTransportSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameConst.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp

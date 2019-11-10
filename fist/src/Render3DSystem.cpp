@@ -84,6 +84,7 @@ void Render3DSystem::process(float)
     }
 
     //yes, drawing back to front causes overdraw, but we need this for transparency
+    //TODO can we reverse this order for first pass to reduce the overdraw?
     for (auto& drawList : m_renderPasses)
     {
         std::sort(drawList.begin(), drawList.end(),

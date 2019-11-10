@@ -186,7 +186,9 @@ void GameState::handleMessage(const xy::Message& msg)
 
 bool GameState::update(float dt)
 {
-    m_inputParser.update(dt);
+#ifdef XY_DEBUG
+    m_cameraInput.update(dt);
+#endif
     m_gameScene.update(dt);
 
     //updates the relevant shaders with the camera viewProj
@@ -274,74 +276,53 @@ void GameState::addPlayer()
 {
     xy::SpriteSheet spriteSheet;
     spriteSheet.loadFromFile("assets/sprites/bob.spt", m_resources);
-    auto bounds = spriteSheet.getSprite("bob").getTextureBounds();
+
+    auto createSprite = [&](const std::string sprite, sf::Vector2f position)
+    {
+        auto bounds = spriteSheet.getSprite(sprite).getTextureBounds();
+
+        auto entity = m_gameScene.createEntity();
+        entity.setLabel(sprite);
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
+        entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(sprite);
+        entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
+        const_cast<sf::Texture*>(entity.getComponent<xy::Sprite>().getTexture())->setSmooth(true);
+        entity.addComponent<xy::SpriteAnimation>();
+        entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().setDepth(100); //used by 3D render to depth sort
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
+        entity.getComponent<Sprite3D>().renderPass = 1;
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+
+        //hack to correct vert direction. Might move this to a system, particularly if we end up
+        //using a bunch of animated sprites
+        auto camEnt = m_gameScene.getActiveCamera();
+        entity.addComponent<xy::Callback>().active = true;
+        entity.getComponent<xy::Callback>().function = [camEnt](xy::Entity e, float)
+        {
+            auto& verts = e.getComponent<xy::Drawable>().getVertices();
+            verts[0].position = verts[1].position;
+            verts[3].position = verts[2].position;
+            verts[1].color.a = 0;
+            verts[2].color.a = 0;
+
+            //also want to read the camera's current rotation
+            e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
+        };
+    };
 
     auto x = startingRoom % GameConst::RoomsPerRow;
     auto y = startingRoom / GameConst::RoomsPerRow;
 
-    //TODO tidy this up and remove repeat code
-
-    auto entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
-    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bob");
-    entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
-    const_cast<sf::Texture*>(entity.getComponent<xy::Sprite>().getTexture())->setSmooth(true);
-    entity.addComponent<xy::SpriteAnimation>().play(0);
-    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().setDepth(100); //used by 3D render to depth sort
-    entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
-    entity.getComponent<Sprite3D>().renderPass = 1;
-    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-
-    //hack to correct vert direction. Might move this to a system, only if we end up
-    //using a bunch of animated sprites though...
-    auto camEnt = m_gameScene.getActiveCamera();
-    entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function = [camEnt](xy::Entity e, float)
-    {
-        auto& verts = e.getComponent<xy::Drawable>().getVertices();
-        verts[0].position = verts[1].position;
-        verts[3].position = verts[2].position;
-        verts[1].color.a = 0;
-        verts[2].color.a = 0;
-
-        //also want to read the camera's current rotation
-        e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
-    };
-
+    sf::Vector2f position(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
+    createSprite("bob", position);
 
     //load bella
     spriteSheet.loadFromFile("assets/sprites/bella.spt", m_resources);
-    bounds = spriteSheet.getSprite("bella").getTextureBounds();
-
-    entity = m_gameScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition((x * GameConst::RoomWidth) - 100.f, y * GameConst::RoomWidth);
-    entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
-    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("bella");
-    entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
-    const_cast<sf::Texture*>(entity.getComponent<xy::Sprite>().getTexture())->setSmooth(true);
-    entity.addComponent<xy::SpriteAnimation>().play(2);
-    entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-    entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().setDepth(90); //used by 3D render to depth sort
-    entity.addComponent<Sprite3D>(m_matrixPool).depth = bounds.height;
-    entity.getComponent<Sprite3D>().renderPass = 1;
-    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-
-    entity.addComponent<xy::Callback>().active = true;
-    entity.getComponent<xy::Callback>().function = [camEnt](xy::Entity e, float)
-    {
-        auto& verts = e.getComponent<xy::Drawable>().getVertices();
-        verts[0].position = verts[1].position;
-        verts[3].position = verts[2].position;
-        verts[1].color.a = 0;
-        verts[2].color.a = 0;
-
-        //also want to read the camera's current rotation
-        e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
-    };
+    position = { (x * GameConst::RoomWidth) - 100.f, y * GameConst::RoomWidth };
+    createSprite("bella", position);
 }
 
 #ifdef XY_DEBUG
@@ -362,7 +343,7 @@ void GameState::debugSetup()
 
     //temp just to move the camera about
     debugCam.addComponent<sf::Vector2f>();
-    m_inputParser.setPlayerEntity(debugCam);
+    m_cameraInput.setPlayerEntity(debugCam);
     //debugCam = m_gameScene.setActiveCamera(debugCam);
 
     //and a debug icon
