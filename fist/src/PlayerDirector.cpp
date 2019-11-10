@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "PlayerDirector.hpp"
 #include "MessageIDs.hpp"
 #include "AnimationID.hpp"
+#include "GameConst.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -49,6 +50,7 @@ PlayerDirector::PlayerDirector()
     : m_cameraLocked    (false),
     m_cameraDirection   (0),
     m_inputFlags        (0),
+    m_currentRoom       (0),
     m_nextAnimTime      (sf::seconds(xy::Util::Random::value(5, 12)))
 {
 
@@ -99,105 +101,165 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
         if (data.type == CameraEvent::Locked)
         {
             m_cameraLocked = true;
-            m_cameraDirection = data.direction;
+
+            //snap player to target position
+            m_playerEntity.getComponent<xy::Transform>().setPosition(m_targetScreenPosition);
         }
         else if (data.type == CameraEvent::Unlocked)
         {
             m_cameraLocked = false;
+
+            if (data.direction != m_cameraDirection)
+            {
+                //we're rotating - set interp dest to centre of the room
+                //on the new depth axis, and restore to previous position on width axis
+                switch (data.direction)
+                {
+                default: break;
+                case CameraEvent::N:
+                case CameraEvent::S:
+                    m_targetScreenPosition.x = m_realWorldPosition.x;
+                    m_targetScreenPosition.y = (m_currentRoom / GameConst::RoomsPerRow) * GameConst::RoomWidth;
+                    break;
+                case CameraEvent::E:
+                case CameraEvent::W:
+                    m_targetScreenPosition.y = m_realWorldPosition.y;
+                    m_targetScreenPosition.x = (m_currentRoom % GameConst::RoomsPerRow) * GameConst::RoomWidth;
+                    break;
+                }
+            }
+            else
+            {
+                //moving - set interp dest to beginning of next room in current direction
+                //update the room number
+            }
+
+            m_cameraDirection = data.direction;
         }
     }
 }
 
 void PlayerDirector::process(float dt)
 {
-    sf::Vector2f velocity; //used below for updating animation
-    if (m_cameraLocked && m_playerEntity.isValid())
+    if (m_playerEntity.isValid())
     {
-        if (m_inputFlags != 0)
+        sf::Vector2f velocity; //used below for updating animation
+        if (m_cameraLocked)
         {
-            if (m_inputFlags & InputFlags::Left)
+            //check input
+            if (m_inputFlags != 0)
             {
+                if (m_inputFlags & InputFlags::Left)
+                {
+                    switch (m_cameraDirection)
+                    {
+                    default: break;
+                    case CameraEvent::N:
+                        velocity.x += -1.f;
+                        break;
+                    case CameraEvent::E:
+                        velocity.y += -1.f;
+                        break;
+                    case CameraEvent::S:
+                        velocity.x += 1.f;
+                        break;
+                    case CameraEvent::W:
+                        velocity.y += 1.f;
+                        break;
+                    }
+                }
+
+                if (m_inputFlags & InputFlags::Right)
+                {
+                    switch (m_cameraDirection)
+                    {
+                    default: break;
+                    case CameraEvent::N:
+                        velocity.x += 1.f;
+                        break;
+                    case CameraEvent::E:
+                        velocity.y += 1.f;
+                        break;
+                    case CameraEvent::S:
+                        velocity.x += -1.f;
+                        break;
+                    case CameraEvent::W:
+                        velocity.y += -1.f;
+                        break;
+                    }
+                }
+
+                auto& tx = m_playerEntity.getComponent<xy::Transform>();
+                tx.move(velocity * PlayerSpeed * dt);
                 switch (m_cameraDirection)
                 {
                 default: break;
                 case CameraEvent::N:
-                    velocity.x += -1.f;
+                case CameraEvent::S:
+                    m_realWorldPosition.x = tx.getPosition().x;
                     break;
                 case CameraEvent::E:
-                    velocity.y += -1.f;
-                    break;
-                case CameraEvent::S:
-                    velocity.x += 1.f;
-                    break;
                 case CameraEvent::W:
-                    velocity.y += 1.f;
+                    m_realWorldPosition.y = tx.getPosition().y;
                     break;
                 }
+
+                //TODO inspect stuff if UP is released
             }
-
-            if (m_inputFlags & InputFlags::Right)
-            {
-                switch (m_cameraDirection)
-                {
-                default: break;
-                case CameraEvent::N:
-                    velocity.x += 1.f;
-                    break;
-                case CameraEvent::E:
-                    velocity.y += 1.f;
-                    break;
-                case CameraEvent::S:
-                    velocity.x += -1.f;
-                    break;
-                case CameraEvent::W:
-                    velocity.y += -1.f;
-                    break;
-                }
-            }
-
-            m_playerEntity.getComponent<xy::Transform>().move(velocity * PlayerSpeed * dt);
-
-            //TODO inspect stuff if UP is released
-        }
-    }
-
-    //update the player animations
-    const auto& animMap = m_playerEntity.getComponent<AnimationMap>();
-    auto& animation = m_playerEntity.getComponent<xy::SpriteAnimation>();
-    if (animation.getAnimationIndex() == animMap[AnimationID::Idle]
-        && m_animationTimer.getElapsedTime() > m_nextAnimTime)
-    {
-        m_nextAnimTime = sf::seconds(xy::Util::Random::value(6, 14));
-        m_animationTimer.restart();
-        animation.play(animMap[AnimationID::Scratch]);
-    }
-    else if (animation.getAnimationIndex() == animMap[AnimationID::Scratch]
-        && animation.stopped())
-    {
-        animation.play(animMap[AnimationID::Idle]);
-    }
-
-    if (xy::Util::Vector::lengthSquared(velocity) == 0
-        && xy::Util::Vector::lengthSquared(m_previousVelocity) != 0)
-    {
-        //we stop moving
-        animation.play(animMap[AnimationID::Idle]);
-        m_animationTimer.restart();
-    }
-    else if(xy::Util::Vector::lengthSquared(velocity) != 0
-            && xy::Util::Vector::lengthSquared(m_previousVelocity) == 0)
-    {
-        if (m_inputFlags & InputFlags::Left)
-        {
-            animation.play(animMap[AnimationID::Left]);
         }
         else
         {
-            animation.play(animMap[AnimationID::Right]);
+            //camera is moving so interp to dest point
+            auto& tx = m_playerEntity.getComponent<xy::Transform>();
+            auto dist = m_targetScreenPosition - tx.getPosition();
+            tx.move(dist * dt * GameConst::CamRotateSpeed); //TODO decide if we should be using rot or trans speed
         }
-    }
 
-    m_previousVelocity = velocity;
+        //update the player animations
+        const auto& animMap = m_playerEntity.getComponent<AnimationMap>();
+        auto& animation = m_playerEntity.getComponent<xy::SpriteAnimation>();
+        if (animation.getAnimationIndex() == animMap[AnimationID::Idle]
+            && m_animationTimer.getElapsedTime() > m_nextAnimTime)
+        {
+            m_nextAnimTime = sf::seconds(xy::Util::Random::value(6, 14));
+            m_animationTimer.restart();
+            animation.play(animMap[AnimationID::Scratch]);
+        }
+        else if (animation.getAnimationIndex() == animMap[AnimationID::Scratch]
+            && animation.stopped())
+        {
+            animation.play(animMap[AnimationID::Idle]);
+        }
+
+        if (xy::Util::Vector::lengthSquared(velocity) == 0
+            && xy::Util::Vector::lengthSquared(m_previousVelocity) != 0)
+        {
+            //we stop moving
+            animation.play(animMap[AnimationID::Idle]);
+            m_animationTimer.restart();
+        }
+        else if (xy::Util::Vector::lengthSquared(velocity) != 0
+            && xy::Util::Vector::lengthSquared(m_previousVelocity) == 0)
+        {
+            if (m_inputFlags & InputFlags::Left)
+            {
+                animation.play(animMap[AnimationID::Left]);
+            }
+            else
+            {
+                animation.play(animMap[AnimationID::Right]);
+            }
+        }
+
+        m_previousVelocity = velocity;
+    }
+}
+
+void PlayerDirector::setPlayerEntity(xy::Entity entity)
+{
+    m_playerEntity = entity; 
+    m_realWorldPosition = entity.getComponent<xy::Transform>().getPosition();
+    m_targetScreenPosition = m_realWorldPosition;
 }
 
 //private

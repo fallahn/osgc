@@ -19,6 +19,7 @@ Copyright 2019 Matt Marchant
 #include "CameraTransportSystem.hpp"
 #include "Camera3D.hpp"
 #include "MessageIDs.hpp"
+#include "GameConst.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -32,9 +33,6 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float TranslateSpeed = 10.f;
-    const float RotateSpeed = 20.f;
-
     const std::array<float, 4u> rotationTargets =
     {
         0.f, -90.f, 180.f, 90.f
@@ -72,6 +70,7 @@ void CameraTransport::move(bool left)
 
         auto* msg = xy::App::getActiveInstance()->getMessageBus().post<CameraEvent>(MessageID::CameraMessage);
         msg->type = CameraEvent::Unlocked;
+        msg->direction = static_cast<CameraEvent::Direction>(m_currentRotationTarget);
     }
 }
 
@@ -101,6 +100,7 @@ void CameraTransport::rotate(bool left)
 
         auto* msg = xy::App::getActiveInstance()->getMessageBus().post<CameraEvent>(MessageID::CameraMessage);
         msg->type = CameraEvent::Unlocked;
+        msg->direction = static_cast<CameraEvent::Direction>(m_currentRotationTarget);
     }
 }
 
@@ -130,7 +130,7 @@ void CameraTransportSystem::process(float dt)
             {
                 if (len2 > 25)
                 {
-                    transport.currentPosition += (direction * TranslateSpeed * dt);
+                    transport.currentPosition += (direction * GameConst::CamTranslateSpeed * dt);
                 }
                 else
                 {
@@ -140,7 +140,6 @@ void CameraTransportSystem::process(float dt)
                     //raise a message
                     auto* msg = postMessage<CameraEvent>(MessageID::CameraMessage);
                     msg->type = CameraEvent::Locked;
-                    msg->direction = static_cast<CameraEvent::Direction>(transport.m_currentRotationTarget);
                 }
                 entity.getComponent<Camera3D>().postTranslationMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-transport.currentPosition.x, transport.currentPosition.y, 0.f));
             }
@@ -152,7 +151,7 @@ void CameraTransportSystem::process(float dt)
             {
                 if (std::abs(rotation) > 1)
                 {
-                    float amount = rotation * RotateSpeed * dt;
+                    float amount = rotation * GameConst::CamRotateSpeed * dt;
                     auto& cam = entity.getComponent<Camera3D>();
                     cam.postRotationMatrix = glm::rotate(cam.postRotationMatrix, amount * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
 
@@ -168,7 +167,7 @@ void CameraTransportSystem::process(float dt)
                     //raise message
                     auto* msg = postMessage<CameraEvent>(MessageID::CameraMessage);
                     msg->type = CameraEvent::Locked;
-                    msg->direction = static_cast<CameraEvent::Direction>(transport.m_currentRotationTarget);
+                    
                 }
             }
         }

@@ -30,13 +30,18 @@ public:
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
-    void setPlayerEntity(xy::Entity e) { m_playerEntity = e; }
+    void setPlayerEntity(xy::Entity);
+    void setCurrentRoom(std::int32_t room) { m_currentRoom = room; }
 
 private:
     bool m_cameraLocked;
     xy::Entity m_playerEntity;
     std::int32_t m_cameraDirection;
     std::uint16_t m_inputFlags;
+
+    std::int32_t m_currentRoom;
+    sf::Vector2f m_realWorldPosition; //used when interpolating view changes
+    sf::Vector2f m_targetScreenPosition;
 
     sf::Vector2f m_previousVelocity;
     sf::Clock m_animationTimer;

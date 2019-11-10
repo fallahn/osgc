@@ -261,6 +261,7 @@ void GameState::initScene()
     auto& camera = camEnt.addComponent<Camera3D>();
     float fov = camera.calcFOV(view.getSize().y * 1.8f, GameConst::RoomWidth / 2.f);
     float ratio = view.getSize().x / view.getSize().y;
+    //camera.projectionMatrix = glm::ortho(-480.f, 480.f, -270.f, 270.f, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.depth = GameConst::RoomHeight / 2.f;
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
@@ -325,6 +326,7 @@ void GameState::addPlayer()
     sf::Vector2f position(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
     auto player = createSprite("bob", position);
     m_gameScene.getDirector<PlayerDirector>().setPlayerEntity(player);
+    m_gameScene.getDirector<PlayerDirector>().setCurrentRoom(startingRoom);
 
     auto& animMap = player.addComponent<AnimationMap>();
     animMap[AnimationID::Idle] = spriteSheet.getAnimationIndex("idle", "bob");
