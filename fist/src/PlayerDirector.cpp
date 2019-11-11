@@ -52,6 +52,15 @@ namespace
     };
 
     const float PlayerSpeed = 180.f;
+
+    const std::array<sf::Vector2f, 4u> Offsets =
+    {
+        sf::Vector2f(0.f, -1.f),
+        sf::Vector2f(1.f, 0.f),
+        sf::Vector2f(0.f, 1.f),
+        sf::Vector2f(-1.f, 0.f)
+    };
+    const float OffsetDistance = 128.f;
 }
 
 PlayerDirector::PlayerDirector()
@@ -128,6 +137,7 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
                 case CameraEvent::S:
                     m_targetScreenPosition.x = m_realWorldPosition.x;
                     m_targetScreenPosition.y = (m_currentRoom / GameConst::RoomsPerRow) * GameConst::RoomWidth;
+                    
                     break;
                 case CameraEvent::E:
                 case CameraEvent::W:
@@ -135,12 +145,9 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
                     m_targetScreenPosition.x = (m_currentRoom % GameConst::RoomsPerRow) * GameConst::RoomWidth;
                     break;
                 }
+                //m_targetScreenPosition += Offsets[data.direction] * OffsetDistance;
             }
-            else
-            {
-                //moving - set interp dest to beginning of next room in current direction
-                //update the room number
-            }
+            //translating the camera is take care of by collision trigger, below
 
             m_cameraDirection = data.direction;
         }

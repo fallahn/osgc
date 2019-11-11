@@ -40,8 +40,10 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
-    const float ViewDistance = GameConst::RoomWidth * 3.8f;
-    const sf::FloatRect CullBounds(-ViewDistance / 2.f, -ViewDistance * 0.9f, ViewDistance, ViewDistance);
+    //TODO we need to get smarter with this and do some occlusion culling based on 
+    //any walls that maybe in front
+    const float ViewDistance = GameConst::RoomWidth * 4.8f;
+    const sf::FloatRect CullBounds(-ViewDistance / 2.f, -ViewDistance * 1.1f, ViewDistance, ViewDistance);
 }
 
 Render3DSystem::Render3DSystem(xy::MessageBus& mb)

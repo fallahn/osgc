@@ -41,7 +41,7 @@ namespace
         std::int32_t door = 0;
     };
 
-    const float TriggerWidth = 100.f;
+    const float TriggerWidth = 192.f;
     const float TriggerHeight = 20.f;
 
     const std::array<sf::FloatRect, 4u> Hitboxes =
