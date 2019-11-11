@@ -72,17 +72,20 @@ static const std::string SpriteVertexWalls =
 R"(
 #version 120
 
-uniform mat4 u_viewProjMat;
+uniform mat4 u_projMat;
+uniform mat4 u_viewMat;
 uniform mat4 u_modelMat;
 
 varying vec3 v_lightDir;
+varying vec4 v_viewPosition;
 
 void main()
 {
     vec4 worldPos = u_modelMat * gl_Vertex;
     worldPos.z *= gl_Color.a;
 
-    gl_Position = u_viewProjMat * worldPos;
+    v_viewPosition = u_viewMat * worldPos;
+    gl_Position = u_projMat * u_viewMat * worldPos;
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
@@ -124,6 +127,10 @@ uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
 
 varying vec3 v_lightDir;
+varying vec4 v_viewPosition;
+
+const float FogNear = 2880.0;
+const float FogFar = 4800.0;
 
 void main()
 {
@@ -135,13 +142,20 @@ void main()
     vec3 ambientColour = baseColour.rgb * 0.3;    
 
     vec3 normal = texture2D(u_normalMap, gl_TexCoord[0].xy).rgb * 2.0 - 1.0;
-    //normal.xy *= 0.5; normalize(normal);
+    //normal.xy *= 1.5; normalize(normal);
     vec3 lightDir = normalize(v_lightDir);
 
     float diffuseAmount = max(dot(lightDir, normal), 0.3);
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
     gl_FragColor = vec4(ambientColour + diffuse, baseColour.a);
+
+    float distance = length(v_viewPosition);
+    float fogAmount = (FogFar - distance) / (FogFar - FogNear);
+    fogAmount = clamp(fogAmount, 0.0, 1.0 );
+
+    gl_FragColor.rgb = mix(vec3(0.0), gl_FragColor.rgb, fogAmount);
+
 })";
 
 static const std::string SpriteFragmentTextured =
