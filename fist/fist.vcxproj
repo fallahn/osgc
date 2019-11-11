@@ -160,6 +160,7 @@
     <ClInclude Include="include\RoomBuilder.hpp" />
     <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\WallData.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera3D.cpp" />

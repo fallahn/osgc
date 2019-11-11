@@ -93,6 +93,9 @@
     <ClInclude Include="include\AnimationID.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\WallData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">

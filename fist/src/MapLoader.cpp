@@ -22,10 +22,12 @@ Copyright 2019 Matt Marchant
 #include "ResourceIDs.hpp"
 #include "CommandIDs.hpp"
 #include "RoomBuilder.hpp"
+#include "WallData.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
+#include "xyginext/ecs/components/BroadPhaseComponent.hpp"
 
 #include <xyginext/core/ConfigFile.hpp>
 
@@ -33,7 +35,31 @@ Copyright 2019 Matt Marchant
 
 namespace
 {
+    struct WallProperties final
+    {
+        std::int32_t direction = -1;
+        std::int32_t door = 0;
+    };
 
+    const float TriggerWidth = 100.f;
+    const float TriggerHeight = 20.f;
+
+    const std::array<sf::FloatRect, 4u> Hitboxes =
+    {
+        sf::FloatRect(-TriggerWidth / 2.f, -GameConst::RoomWidth / 2.f, TriggerWidth, TriggerHeight),
+        sf::FloatRect((GameConst::RoomWidth / 2.f) - TriggerHeight, -TriggerWidth / 2.f, TriggerHeight, TriggerWidth),
+        sf::FloatRect(-TriggerWidth / 2.f, (GameConst::RoomWidth / 2.f) - TriggerHeight, TriggerWidth, TriggerHeight),
+        sf::FloatRect(-GameConst::RoomWidth / 2.f, -TriggerWidth / 2.f, TriggerHeight, TriggerWidth)
+    };
+
+    const float TargetOffset = (GameConst::RoomWidth / 2.f) + TriggerHeight + 72.f;
+    const std::array<sf::Vector2f, 4u> Offsets =
+    {
+        sf::Vector2f(0.f, -TargetOffset),
+        sf::Vector2f(TargetOffset, 0.f),
+        sf::Vector2f(0.f, TargetOffset),
+        sf::Vector2f(-TargetOffset, 0.f)
+    };
 }
 
 bool GameState::loadMap()
@@ -77,7 +103,8 @@ bool GameState::loadMap()
 
         //check if this room has walls
         const auto& objects = room.getObjects();
-        std::array<bool, 4u> walls = { false,false,false,false };
+        std::array<WallProperties, 4u> walls = { };
+        std::size_t wallIdx = 0;
         for (const auto& obj : objects)
         {
             if (obj.getName() == "wall")
@@ -90,13 +117,27 @@ bool GameState::loadMap()
                         auto dir = wallProp.getValue<std::int32_t>();
                         if (dir >= 0 && dir < 4)
                         {
-                            walls[dir] = true;
+                            walls[wallIdx].direction = dir;
                         }
                     }
-                    //TODO look up door properties
+                    else if (wallProp.getName() == "door")
+                    {
+                        walls[wallIdx].door = wallProp.getValue<std::int32_t>();
+                    }
                 }
+
+                wallIdx++;
+            }
+            if (wallIdx == walls.size())
+            {
+                break;
             }
         }
+        std::sort(walls.begin(), walls.end(),
+            [](const WallProperties& a, const WallProperties& b)
+            {
+                return a.direction < b.direction;
+            });
 
         auto texID = m_resources.load<sf::Texture>(textureName);
         auto& tex = m_resources.get<sf::Texture>(texID);
@@ -117,6 +158,7 @@ bool GameState::loadMap()
         entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight;
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
+        std::array<WallData, 4u> wallData = {};
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         addFloor(verts);
         if (hasCeiling)
@@ -125,12 +167,29 @@ bool GameState::loadMap()
         }
         for (auto i = 0u; i < walls.size(); ++i)
         {
-            if (walls[i])
+            if (walls[i].direction > -1)
             {
-                addWall(verts, i);
+                addWall(verts, walls[i].direction);
+                if (walls[i].door != 1)
+                {
+                    wallData[walls[i].direction].passable = false;
+                }
             }
         }
         entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        //add triggers to each side of the room
+        auto position = entity.getComponent<xy::Transform>().getPosition();
+        for (auto i = 0u; i < wallData.size(); ++i)
+        {
+            wallData[i].targetPoint = position + Offsets[i];
+
+            auto triggerEnt = m_gameScene.createEntity();
+            triggerEnt.addComponent<xy::Transform>();
+            triggerEnt.addComponent<xy::BroadphaseComponent>().setArea(Hitboxes[i]);
+            triggerEnt.addComponent<WallData>() = wallData[i];
+            entity.getComponent<xy::Transform>().addChild(triggerEnt.getComponent<xy::Transform>());
+        }
 
         roomCount++;
     };

@@ -20,9 +20,17 @@ Copyright 2019 Matt Marchant
 #include "MessageIDs.hpp"
 #include "AnimationID.hpp"
 #include "GameConst.hpp"
+#include "WallData.hpp"
+#include "CommandIDs.hpp"
+#include "CameraTransportSystem.hpp"
+
+#include <xyginext/ecs/Scene.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/BroadPhaseComponent.hpp>
+
 #include <xyginext/util/Random.hpp>
 #include <xyginext/util/Vector.hpp>
 
@@ -191,6 +199,9 @@ void PlayerDirector::process(float dt)
 
                 auto& tx = m_playerEntity.getComponent<xy::Transform>();
                 tx.move(velocity * PlayerSpeed * dt);
+
+                doCollision(); //this might mutate our position
+
                 switch (m_cameraDirection)
                 {
                 default: break;
@@ -266,4 +277,149 @@ void PlayerDirector::setPlayerEntity(xy::Entity entity)
 void PlayerDirector::playAnimation(std::size_t id)
 {
 
+}
+
+void PlayerDirector::doCollision()
+{
+    //in theory we know which room we're in
+    //so we ought to be able to pick the 4 triggers
+    //belonging to it rather than query the dynamic tree
+
+    const auto pos = m_playerEntity.getComponent<xy::Transform>().getPosition();
+    const sf::FloatRect queryBounds(pos.x - 64.f, pos.y - 64.f, 128.f, 128.f);
+    auto nearby = getScene().getSystem<xy::DynamicTreeSystem>().query(queryBounds);
+    for (auto otherEnt : nearby)
+    {
+        auto otherPos = otherEnt.getComponent<xy::Transform>().getWorldPosition();
+        auto otherBounds = otherEnt.getComponent<xy::BroadphaseComponent>().getArea();
+        otherBounds.left += otherPos.x;
+        otherBounds.top += otherPos.y;
+
+        sf::FloatRect intersection;
+        if (queryBounds.intersects(otherBounds, intersection))
+        {
+            const auto& wallData = otherEnt.getComponent<WallData>();
+            if (wallData.passable)
+            {
+                m_targetScreenPosition = wallData.targetPoint;
+                m_realWorldPosition = wallData.targetPoint;
+
+                //trigger cam shift based on current direction
+                //and update new room number
+                auto shiftCam = [&](bool moveLeft)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Camera;
+                    cmd.action = [moveLeft](xy::Entity e, float)
+                    {
+                        e.getComponent<CameraTransport>().move(moveLeft);
+                    };
+                    getScene().getSystem<xy::CommandSystem>().sendCommand(cmd);
+                };
+
+                switch (m_cameraDirection)
+                {
+                default: break;
+                case CameraEvent::N:
+                    if (pos.x > otherPos.x)
+                    {
+                        m_currentRoom++;
+                        shiftCam(false);
+                    }
+                    else
+                    {
+                        m_currentRoom--;
+                        shiftCam(true);
+                    }
+                    break;
+                case CameraEvent::E:
+                    if (pos.y > otherPos.y)
+                    {
+                        m_currentRoom += GameConst::RoomsPerRow;
+                        shiftCam(false);
+                    }
+                    else
+                    {
+                        m_currentRoom -= GameConst::RoomsPerRow;
+                        shiftCam(true);
+                    }
+                    break;
+                case CameraEvent::S:
+                    if (pos.x < otherPos.x)
+                    {
+                        m_currentRoom--;
+                        shiftCam(false);
+                    }
+                    else
+                    {
+                        m_currentRoom++;
+                        shiftCam(true);
+                    }
+                    break;
+                case CameraEvent::W:
+                    if (pos.y < otherPos.y)
+                    {
+                        m_currentRoom -= GameConst::RoomsPerRow;
+                        shiftCam(false);
+                    }
+                    else
+                    {
+                        m_currentRoom += GameConst::RoomsPerRow;
+                        shiftCam(true);
+                    }
+                    break;
+                }
+                m_cameraLocked = false; //pre-empt this so we don't get double collisions.
+            }
+            else //solid collision
+            {
+                switch (m_cameraDirection)
+                {
+                default: break;
+                case CameraEvent::N:
+                    if (pos.x < otherPos.x)
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(intersection.width, 0.f);
+                    }
+                    else
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(-intersection.width, 0.f);
+                    }
+                    break;
+                case CameraEvent::E:
+                    if (pos.y < otherPos.y)
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(0.f, intersection.height);
+                    }
+                    else
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(0.f, -intersection.height);
+                    }
+                    break;
+                case CameraEvent::S:
+                    if (pos.x < otherPos.x)
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(intersection.width, 0.f);
+                    }
+                    else
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(-intersection.width, 0.f);
+                    }
+                    break;
+                case CameraEvent::W:
+                    if (pos.y < otherPos.y)
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(0.f, intersection.height);
+                    }
+                    else
+                    {
+                        m_playerEntity.getComponent<xy::Transform>().move(0.f, -intersection.height);
+                    }
+                    break;
+                }
+            }
+
+            break;
+        }
+    }
 }

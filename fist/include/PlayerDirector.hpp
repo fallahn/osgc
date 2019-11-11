@@ -47,4 +47,6 @@ private:
     sf::Clock m_animationTimer;
     sf::Time m_nextAnimTime;
     void playAnimation(std::size_t);
+
+    void doCollision();
 };

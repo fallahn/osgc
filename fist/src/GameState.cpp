@@ -56,6 +56,7 @@ source distribution.
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/util/Const.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
@@ -74,7 +75,7 @@ namespace
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State(ss, ctx),
-    m_gameScene(ctx.appInstance.getMessageBus())
+    m_gameScene(ctx.appInstance.getMessageBus(), 1024)
 {
     launchLoadingScreen();
     //TODO load current game state
@@ -232,13 +233,12 @@ void GameState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
-
     m_gameScene.addSystem<xy::CommandSystem>(mb);
     m_gameScene.addSystem<CameraTransportSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
     m_gameScene.addSystem<xy::CallbackSystem>(mb);
-
+    m_gameScene.addSystem<xy::DynamicTreeSystem>(mb);
     m_gameScene.addSystem<Sprite3DSystem>(mb);
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<Camera3DSystem>(mb);
@@ -340,7 +340,7 @@ void GameState::addPlayer()
 
     //load bella
     spriteSheet.loadFromFile("assets/sprites/bella.spt", m_resources);
-    position = { (x * GameConst::RoomWidth) - 100.f, y * GameConst::RoomWidth };
+    position = { (x * GameConst::RoomWidth) - 100.f, (y * GameConst::RoomWidth) + 32.f };
     createSprite("bella", position);
 }
 
