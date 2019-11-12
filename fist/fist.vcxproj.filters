@@ -96,6 +96,9 @@
     <ClInclude Include="include\WallData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SliderSystem.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -136,6 +139,9 @@
     </ClCompile>
     <ClCompile Include="src\PlayerDirector.cpp">
       <Filter>Source Files\directors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SliderSystem.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

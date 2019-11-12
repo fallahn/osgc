@@ -1,0 +1,14 @@
+spriteshee icons
+{
+    src="assets/images/ui/icons.png"
+
+    sprite rot_left
+    {
+        bounds = 0,0,54,36
+    }
+
+    sprite rot_right
+    {
+        bounds=54,0,54,36
+    }
+}

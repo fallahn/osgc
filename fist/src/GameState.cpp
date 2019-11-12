@@ -37,6 +37,7 @@ source distribution.
 #include "RoomBuilder.hpp"
 #include "PlayerDirector.hpp"
 #include "AnimationID.hpp"
+#include "SliderSystem.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -49,6 +50,7 @@ source distribution.
 #include <xyginext/ecs/components/Callback.hpp>
 #include <xyginext/ecs/components/CommandTarget.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/UIHitBox.hpp>
 
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 #include <xyginext/ecs/systems/CameraSystem.hpp>
@@ -56,6 +58,8 @@ source distribution.
 #include <xyginext/ecs/systems/CommandSystem.hpp>
 #include <xyginext/ecs/systems/SpriteAnimator.hpp>
 #include <xyginext/ecs/systems/SpriteSystem.hpp>
+#include <xyginext/ecs/systems/UISystem.hpp>
+#include <xyginext/ecs/systems/TextSystem.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/util/Const.hpp>
@@ -68,14 +72,19 @@ namespace
 {
 #include "Sprite3DShader.inl"
 
+    const sf::Vector2f InventoryOffPosition(0.f, -168.f);
+    const sf::Vector2f InventoryOnPosition(0.f, 0.f);
+    const sf::FloatRect InventoryButtonArea(855.f, 168.f, 210.f, 48.f);
+
     xy::Entity debugCam;
 
     std::int32_t startingRoom = 57;
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
-    : xy::State(ss, ctx),
-    m_gameScene(ctx.appInstance.getMessageBus(), 1024)
+    : xy::State (ss, ctx),
+    m_gameScene (ctx.appInstance.getMessageBus(), 1024),
+    m_uiScene   (ctx.appInstance.getMessageBus())
 {
     launchLoadingScreen();
     //TODO load current game state
@@ -88,7 +97,7 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
 #ifdef XY_DEBUG
     debugSetup();
 #endif
-
+    buildUI();
     quitLoadingScreen();
 }
 
@@ -106,6 +115,7 @@ bool GameState::handleEvent(const sf::Event& evt)
         switch (evt.key.code)
         {
         default: break;
+#ifdef XY_DEBUG
         case sf::Keyboard::Q:
         {
             xy::Command cmd;
@@ -128,7 +138,7 @@ bool GameState::handleEvent(const sf::Event& evt)
             m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
         }
         break;
-#ifdef XY_DEBUG
+
         case sf::Keyboard::Escape:
             {
                 xy::App::quit();
@@ -169,7 +179,15 @@ bool GameState::handleEvent(const sf::Event& evt)
         }
     }
 
+    /*if (evt.type == sf::Event::MouseMoved)
+    {
+        auto pos = getContext().renderWindow.mapPixelToCoords({ evt.mouseMove.x, evt.mouseMove.y }, getContext().defaultView);
+        std::cout << pos.x << ", " << pos.y << "\n";
+    }*/
+
     m_gameScene.forwardEvent(evt);
+    m_uiScene.getSystem<xy::UISystem>().handleEvent(evt);
+    m_uiScene.forwardEvent(evt);
     return true;
 }
 
@@ -185,6 +203,7 @@ void GameState::handleMessage(const xy::Message& msg)
     }*/
 
     m_gameScene.forwardMessage(msg);
+    m_uiScene.forwardMessage(msg);
 }
 
 bool GameState::update(float dt)
@@ -193,6 +212,7 @@ bool GameState::update(float dt)
     m_cameraInput.update(dt);
 #endif
     m_gameScene.update(dt);
+    m_uiScene.update(dt);
 
     //updates the relevant shaders with the camera viewProj
     //TODO if we end up with multiple cameras move this to draw func
@@ -212,6 +232,7 @@ void GameState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
+    rw.draw(m_uiScene);
 
 //#ifdef XY_DEBUG
 //    auto oldCam = m_gameScene.setActiveCamera(debugCam);
@@ -245,10 +266,17 @@ void GameState::initScene()
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<Render3DSystem>(mb);
 
-    m_gameScene.addDirector<PlayerDirector>();
+    m_gameScene.addDirector<PlayerDirector>(m_uiScene);
 
-    //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
-    //m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
+    m_uiScene.addSystem<xy::UISystem>(mb);
+    m_uiScene.addSystem<SliderSystem>(mb);
+    m_uiScene.addSystem<xy::SpriteSystem>(mb);
+    m_uiScene.addSystem<xy::TextSystem>(mb);
+    m_uiScene.addSystem<xy::CameraSystem>(mb);
+    m_uiScene.addSystem<xy::RenderSystem>(mb);
+
+    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(getContext().defaultView.getSize());
+    m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(getContext().defaultView.getViewport());
 
     //add a 3d camera  
     auto view = getContext().defaultView;
@@ -345,6 +373,112 @@ void GameState::addPlayer()
     createSprite("bella", position);
 }
 
+void GameState::buildUI()
+{
+    //inventory bar
+    auto texID = m_resources.load<sf::Texture>("assets/images/ui/inventory.png");
+    auto& inventoryTexture = m_resources.get<sf::Texture>(texID);
+
+    auto& uiSystem = m_uiScene.getSystem<xy::UISystem>();
+
+    auto entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(InventoryOffPosition);
+    entity.addComponent<xy::Drawable>().setDepth(-2);
+    entity.addComponent<xy::Sprite>(inventoryTexture);
+    entity.addComponent<Slider>().speed = 13.f;
+    entity.getComponent<Slider>().target = InventoryOffPosition;
+    entity.addComponent<xy::UIHitBox>().area = InventoryButtonArea;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([](xy::Entity e, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    auto& slider = e.getComponent<Slider>();
+                    if (!slider.active)
+                    {
+                        if (slider.target.y == InventoryOnPosition.y)
+                        {
+                            slider.target.y = InventoryOffPosition.y;
+                        }
+                        else
+                        {
+                            slider.target.y = InventoryOnPosition.y;
+                        }
+                        slider.active = true;
+                    }
+                }
+            });
+
+    auto tabEnt = entity;
+    auto mouseEnter = uiSystem.addMouseMoveCallback([](xy::Entity e, sf::Vector2f) 
+        {
+            auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
+            bounds.top += bounds.height;
+            e.getComponent<xy::Sprite>().setTextureRect(bounds);
+        });
+
+    auto mouseExit = uiSystem.addMouseMoveCallback([](xy::Entity e, sf::Vector2f)
+        {
+            auto bounds = e.getComponent<xy::Sprite>().getTextureRect();
+            bounds.top = 0.f;
+            e.getComponent<xy::Sprite>().setTextureRect(bounds);
+        });
+
+    //rotate left
+    xy::SpriteSheet spriteSheet;
+    spriteSheet.loadFromFile("assets/sprites/ui_icons.spt", m_resources);
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(20.f, 66.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("rot_left");
+    auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Camera;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<CameraTransport>().rotate(true);
+                    };
+                    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+
+    tabEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+    //rotate right
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x - (20.f + bounds.width), 66.f);
+    entity.addComponent<xy::Drawable>();
+    entity.addComponent<xy::Sprite>() = spriteSheet.getSprite("rot_right");
+    entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        uiSystem.addMouseButtonCallback([&](xy::Entity, sf::Uint64 flags)
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    xy::Command cmd;
+                    cmd.targetFlags = CommandID::Camera;
+                    cmd.action = [](xy::Entity e, float)
+                    {
+                        e.getComponent<CameraTransport>().rotate(false);
+                    };
+                    m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseEnter] = mouseEnter;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseExit] = mouseExit;
+
+    tabEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+
+}
+
 #ifdef XY_DEBUG
 void GameState::debugSetup()
 {
@@ -391,7 +525,7 @@ void GameState::debugSetup()
     vert.position = { -32.f, 0.f };
     vert.texCoords = { 0.f, 64.f };
     verts.push_back(vert);
-
+    std::reverse(verts.begin(), verts.end());
     entity.getComponent<xy::Drawable>().updateLocalBounds();
 
     auto camEnt = m_gameScene.getActiveCamera();

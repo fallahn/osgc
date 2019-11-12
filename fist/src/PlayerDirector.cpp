@@ -29,6 +29,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
+#include <xyginext/ecs/components/Camera.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 
 #include <xyginext/util/Random.hpp>
@@ -61,13 +62,24 @@ namespace
         sf::Vector2f(-1.f, 0.f)
     };
     const float OffsetDistance = 128.f;
+
+    const sf::FloatRect ClickArea(0.f, 736.f, 1920.f, 1080.f - 736.f);
+
+    sf::Vector2f roomPosition(std::int32_t room)
+    {
+        auto x = room % GameConst::RoomsPerRow;
+        auto y = room / GameConst::RoomsPerRow;
+        return { x * GameConst::RoomWidth, y * GameConst::RoomWidth };
+    }
 }
 
-PlayerDirector::PlayerDirector()
-    : m_cameraLocked    (false),
+PlayerDirector::PlayerDirector(const xy::Scene& uiScene)
+    : m_uiScene         (uiScene),
+    m_cameraLocked      (false),
     m_cameraDirection   (0),
     m_inputFlags        (0),
     m_currentRoom       (0),
+    m_walkToTarget      (false),
     m_nextAnimTime      (sf::seconds(xy::Util::Random::value(5, 12)))
 {
 
@@ -76,6 +88,7 @@ PlayerDirector::PlayerDirector()
 //public
 void PlayerDirector::handleEvent(const sf::Event& evt)
 {
+#ifdef XY_DEBUG
     if (evt.type == sf::Event::KeyPressed)
     {
         switch (evt.key.code)
@@ -106,6 +119,42 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
         case up:
             m_inputFlags &= ~Up;
             break;
+        }
+    }
+#endif
+
+    if (evt.type == sf::Event::MouseButtonReleased)
+    {
+        const auto& cam = m_uiScene.getActiveCamera().getComponent<xy::Camera>();
+        sf::View view(xy::DefaultSceneSize / 2.f, cam.getView());
+        view.setViewport(cam.getViewport());
+        auto pos = xy::App::getActiveInstance()->getRenderWindow()->mapPixelToCoords({ evt.mouseButton.x, evt.mouseButton.y }, view);
+        
+        if (ClickArea.contains(pos))
+        {
+            pos.x *= 2.f;
+            pos.x -= xy::DefaultSceneSize.x;
+            pos.x /= 4.f;
+
+            auto roomPos = roomPosition(m_currentRoom);
+            switch (m_cameraDirection)
+            {
+            default: break;
+            case CameraEvent::N:
+                roomPos.x += pos.x;
+                break;
+            case CameraEvent::E:
+                roomPos.y += pos.x;
+                break;
+            case CameraEvent::S:
+                roomPos.x -= pos.x;
+                break;
+            case CameraEvent::W:
+                roomPos.y -= pos.x;
+                break;
+            }
+            m_targetWalkPosition = roomPos;
+            m_walkToTarget = true;
         }
     }
 }
@@ -158,6 +207,73 @@ void PlayerDirector::process(float dt)
 {
     if (m_playerEntity.isValid())
     {
+        if (m_walkToTarget)
+        {
+            auto dir = m_targetWalkPosition - m_playerEntity.getComponent<xy::Transform>().getPosition();
+            auto dist = xy::Util::Vector::lengthSquared(dir);
+            if (dist > 3)
+            {
+                switch (m_cameraDirection)
+                {
+                default: break;
+                case CameraEvent::N:
+                    if (dir.x > 0)
+                    {
+                        m_inputFlags |= InputFlags::Right;
+                        m_inputFlags &= ~InputFlags::Left;
+                    }
+                    else
+                    {
+                        m_inputFlags |= InputFlags::Left;
+                        m_inputFlags &= ~InputFlags::Right;
+                    }
+                    break;
+                case CameraEvent::E:
+                    if (dir.y > 0)
+                    {
+                        m_inputFlags |= InputFlags::Right;
+                        m_inputFlags &= ~InputFlags::Left;
+                    }
+                    else
+                    {
+                        m_inputFlags |= InputFlags::Left;
+                        m_inputFlags &= ~InputFlags::Right;
+                    }
+                    break;
+                case CameraEvent::S:
+                    if (dir.x < 0)
+                    {
+                        m_inputFlags |= InputFlags::Right;
+                        m_inputFlags &= ~InputFlags::Left;
+                    }
+                    else
+                    {
+                        m_inputFlags |= InputFlags::Left;
+                        m_inputFlags &= ~InputFlags::Right;
+                    }
+                    break;
+                case CameraEvent::W:
+                    if (dir.y < 0)
+                    {
+                        m_inputFlags |= InputFlags::Right;
+                        m_inputFlags &= ~InputFlags::Left;
+                    }
+                    else
+                    {
+                        m_inputFlags |= InputFlags::Left;
+                        m_inputFlags &= ~InputFlags::Right;
+                    }
+                    break;
+                }
+            }
+            else
+            {
+                m_walkToTarget = false;
+                m_inputFlags = 0;
+            }
+        }
+
+
         sf::Vector2f velocity; //used below for updating animation
         if (m_cameraLocked)
         {
@@ -305,6 +421,9 @@ void PlayerDirector::doCollision()
         sf::FloatRect intersection;
         if (queryBounds.intersects(otherBounds, intersection))
         {
+            m_walkToTarget = false;
+            m_inputFlags = 0;
+
             const auto& wallData = otherEnt.getComponent<WallData>();
             if (wallData.passable)
             {

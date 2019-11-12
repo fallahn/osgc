@@ -24,7 +24,7 @@ Copyright 2019 Matt Marchant
 class PlayerDirector final : public xy::Director
 {
 public:
-    PlayerDirector();
+    explicit PlayerDirector(const xy::Scene&);
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
@@ -34,6 +34,8 @@ public:
     void setCurrentRoom(std::int32_t room) { m_currentRoom = room; }
 
 private:
+    const xy::Scene& m_uiScene;
+
     bool m_cameraLocked;
     xy::Entity m_playerEntity;
     std::int32_t m_cameraDirection;
@@ -42,6 +44,8 @@ private:
     std::int32_t m_currentRoom;
     sf::Vector2f m_realWorldPosition; //used when interpolating view changes
     sf::Vector2f m_targetScreenPosition;
+    sf::Vector2f m_targetWalkPosition;
+    bool m_walkToTarget;
 
     sf::Vector2f m_previousVelocity;
     sf::Clock m_animationTimer;

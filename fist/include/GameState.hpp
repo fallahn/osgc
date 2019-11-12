@@ -52,6 +52,7 @@ public:
 
 private:
     xy::Scene m_gameScene;
+    xy::Scene m_uiScene;
     MatrixPool m_matrixPool;
 
     xy::ResourceHandler m_resources;
@@ -61,7 +62,7 @@ private:
     void loadResources();
     bool loadMap();
     void addPlayer();
-
+    void buildUI();
 #ifdef XY_DEBUG
     CameraInput m_cameraInput;
     void debugSetup();

@@ -24,8 +24,9 @@ namespace GameConst
 {
     static const float RoomWidth = 960.f;
     static const float RoomHeight = 540.f;
-    static const float RoomPadding = 0.1f;// 12.f;
-    const std::int32_t RoomsPerRow = 8;
+    static const float RoomPadding = 0.f;// 12.f;
+    static const float WallThickness = 12.f;
+    static const std::int32_t RoomsPerRow = 8;
 
     static const float CamTranslateSpeed = 10.f;
     static const float CamRotateSpeed = 20.f;

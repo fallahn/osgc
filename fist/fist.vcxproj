@@ -158,6 +158,7 @@
     <ClInclude Include="include\Render3DSystem.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\RoomBuilder.hpp" />
+    <ClInclude Include="include\SliderSystem.hpp" />
     <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\WallData.hpp" />
@@ -175,6 +176,7 @@
     <ClCompile Include="src\ModelState.cpp" />
     <ClCompile Include="src\PlayerDirector.cpp" />
     <ClCompile Include="src\Render3DSystem.cpp" />
+    <ClCompile Include="src\SliderSystem.cpp" />
     <ClCompile Include="src\Sprite3DSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
