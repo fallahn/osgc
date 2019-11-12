@@ -39,7 +39,7 @@ source distribution.
 #include "AnimationID.hpp"
 #include "SliderSystem.hpp"
 
-#include <glm/gtc/matrix_transform.hpp>
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <xyginext/core/Log.hpp>
 #include <xyginext/gui/Gui.hpp>
@@ -288,10 +288,11 @@ void GameState::initScene()
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 
     auto& camera = camEnt.addComponent<Camera3D>();
-    float fov = camera.calcFOV(view.getSize().y * 1.3f, GameConst::RoomWidth / 2.f);
+    float fov = camera.calcFOV(view.getSize().y * 1.2f, GameConst::RoomWidth / 2.f);
     float ratio = view.getSize().x / view.getSize().y;
     //camera.projectionMatrix = glm::ortho(-480.f, 480.f, -270.f, 270.f, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 6.5f);
+
     camera.depth = GameConst::RoomHeight / 3.f;
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
     m_gameScene.getSystem<Render3DSystem>().setCamera(camEnt);
@@ -491,7 +492,7 @@ void GameState::debugSetup()
     debugCam.getComponent<xy::Camera>().setViewport(view.getViewport());
 
     auto& dCamera = debugCam.addComponent<Camera3D>();
-    auto fov = dCamera.calcFOV(view.getSize().y * 8.f);
+    auto fov = dCamera.calcFOV(view.getSize().y * 4.f);
     float ratio = view.getSize().x / view.getSize().y;
     dCamera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, dCamera.depth + GameConst::RoomHeight);
 

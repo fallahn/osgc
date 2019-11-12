@@ -44,7 +44,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<ErrorState>(StateID::Error);
     ss->registerState<ModelState>(StateID::Model);
 
-    xy::App::getActiveInstance()->setWindowTitle("The Bob's Big Adventure");
+    xy::App::getActiveInstance()->setWindowTitle("DoodleDude 2 - Bob's Big Adventure");
 
     return StateID::Game;
 }

@@ -36,6 +36,58 @@ static const sf::FloatRect WestUV(0.f, 1500.f, 540.f, -960.f);
 static const sf::FloatRect FloorUV(540.f, 540.f, 960.f, 960.f);
 static const sf::FloatRect CeilingUV(2040.f, 540.f, 960.f, 960.f);
 
+//east wall, south end, west wall north end
+static const std::array<sf::Vector2f, 4u> ESWN =
+{
+    /*sf::Vector2f(516.f, 0.f),
+    sf::Vector2f(528.f, 0.f),
+    sf::Vector2f(528.f, 540.f),
+    sf::Vector2f(516.f, 540.f)*/
+    sf::Vector2f(516.f, 0.f),
+    sf::Vector2f(540.f, 0.f),
+    sf::Vector2f(540.f, 540.f),
+    sf::Vector2f(516.f, 540.f)
+};
+
+//west wall, south end, east wall north end
+static const std::array<sf::Vector2f, 4u> WSEN =
+{
+    /*sf::Vector2f(528.f, 0.f),
+    sf::Vector2f(540.f, 0.f),
+    sf::Vector2f(540.f, 540.f),
+    sf::Vector2f(528.f, 540.f)*/
+    sf::Vector2f(1500.f, 0.f),
+    sf::Vector2f(1524.f, 0.f),
+    sf::Vector2f(1524.f, 540.f),
+    sf::Vector2f(1500.f, 540.f)
+};
+
+//north wall east end, south wall west end
+static const std::array<sf::Vector2f, 4u> NESW =
+{
+    /*sf::Vector2f(1500.f, 0.f),
+    sf::Vector2f(1512.f, 0.f),
+    sf::Vector2f(1512.f, 540.f),
+    sf::Vector2f(1500.f, 540.f)*/
+    ESWN[0],
+    ESWN[1],
+    ESWN[2],
+    ESWN[3]
+};
+
+//north wall west end, south wall east end
+static const std::array<sf::Vector2f, 4u> NWSE =
+{
+    //sf::Vector2f(1512.f, 0.f),
+    //sf::Vector2f(1524.f, 0.f),
+    //sf::Vector2f(1524.f, 540.f),
+    //sf::Vector2f(1512.f, 540.f)
+    WSEN[0],
+    WSEN[1],
+    WSEN[2],
+    WSEN[3]
+};
+
 static void addFloor(std::vector<sf::Vertex>& verts)
 {
     const float Width = GameConst::RoomWidth + GameConst::RoomPadding;
@@ -125,6 +177,7 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
 
         vert.position = { -Width, -Width };
         vert.position /= 2.f;
+        vert.position.y += GameConst::WallThickness;
 
         vert.texCoords = { NorthUV.left, NorthUV.top };
         temp.push_back(vert);
@@ -140,6 +193,53 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
         vert.position.x -= Width;
         vert.texCoords.x -= NorthUV.width;
         temp.push_back(vert);
+
+        //end cap
+        vert.color.a = 255;
+        vert.color.r = 0;
+        vert.color.g = 127;
+        vert.color.b = 127;
+
+        vert.position = { -Width, -Width };
+        vert.position /= 2.f;
+        vert.texCoords = NWSE[0];
+        temp.push_back(vert);
+
+        vert.position.y += GameConst::WallThickness;
+        vert.texCoords = NWSE[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = NWSE[2];
+        temp.push_back(vert);
+
+        vert.position.y -= GameConst::WallThickness;
+        vert.texCoords = NWSE[3];
+        temp.push_back(vert);
+
+        //--------//
+        vert.color.a = 255;
+        vert.color.r = 255;
+        vert.color.g = 127;
+        vert.color.b = 127;
+
+        vert.position = { Width, -Width };
+        vert.position /= 2.f;
+        vert.position.y += GameConst::WallThickness;
+        vert.texCoords = NESW[0];
+        temp.push_back(vert);
+
+        vert.position.y -= GameConst::WallThickness;
+        vert.texCoords = NESW[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = NESW[2];
+        temp.push_back(vert);
+
+        vert.position.y += GameConst::WallThickness;
+        vert.texCoords = NESW[3];
+        temp.push_back(vert);
     }
     break;
     case Sout:
@@ -153,7 +253,7 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
 
         vert.position = { Width, Width };
         vert.position /= 2.f;
-
+        vert.position.y -= GameConst::WallThickness;
         vert.texCoords = { SouthUV.left, SouthUV.top };
         temp.push_back(vert);
 
@@ -168,6 +268,53 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
         vert.position.x += Width;
         vert.texCoords.x -= SouthUV.width;
         temp.push_back(vert);
+
+        //end caps
+        vert.color.a = 255;
+        vert.color.r = 0;
+        vert.color.g = 127;
+        vert.color.b = 127;
+
+        vert.position = { -Width, Width };
+        vert.position /= 2.f;
+        vert.position.y -= GameConst::WallThickness;
+        vert.texCoords = NESW[0];
+        temp.push_back(vert);
+
+        vert.position.y += GameConst::WallThickness;
+        vert.texCoords = NESW[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = NESW[2];
+        temp.push_back(vert);
+
+        vert.position.y -= GameConst::WallThickness;
+        vert.texCoords = NESW[3];
+        temp.push_back(vert);
+
+        //--------//
+        vert.color.a = 255;
+        vert.color.r = 255;
+        vert.color.g = 127;
+        vert.color.b = 127;
+
+        vert.position = { Width, Width };
+        vert.position /= 2.f;
+        vert.texCoords = NWSE[0];
+        temp.push_back(vert);
+
+        vert.position.y -= GameConst::WallThickness;
+        vert.texCoords = NWSE[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = NWSE[2];
+        temp.push_back(vert);
+
+        vert.position.y += GameConst::WallThickness;
+        vert.texCoords = NWSE[3];
+        temp.push_back(vert);
     }
     break;
     case Eas:
@@ -181,6 +328,7 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
 
         vert.position = { Width, -Width };
         vert.position /= 2.f;
+        vert.position.x -= GameConst::WallThickness;
 
         vert.texCoords = { EastUV.left, EastUV.top };
         temp.push_back(vert);
@@ -196,6 +344,53 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
         vert.position.y -= Width;
         vert.texCoords.y -= EastUV.height;
         temp.push_back(vert);
+
+        //end cap
+        vert.color.a = 255;
+        vert.color.r = 127;
+        vert.color.g = 255;
+        vert.color.b = 127;
+
+        vert.position = { Width, Width };
+        vert.position /= 2.f;
+        vert.position.x -= GameConst::WallThickness;
+        vert.texCoords = ESWN[0];
+        temp.push_back(vert);
+
+        vert.position.x += GameConst::WallThickness;
+        vert.texCoords = ESWN[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = ESWN[2];
+        temp.push_back(vert);
+
+        vert.position.x -= GameConst::WallThickness;
+        vert.texCoords = ESWN[3];
+        temp.push_back(vert);
+
+        //---------//
+        vert.color.a = 255;
+        vert.color.r = 127;
+        vert.color.g = 0;
+        vert.color.b = 127;
+
+        vert.position = { Width, -Width };
+        vert.position /= 2.f;
+        vert.texCoords = WSEN[0];
+        temp.push_back(vert);
+
+        vert.position.x -= GameConst::WallThickness;
+        vert.texCoords = WSEN[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = WSEN[2];
+        temp.push_back(vert);
+
+        vert.position.x += GameConst::WallThickness;
+        vert.texCoords = WSEN[3];
+        temp.push_back(vert);
     }
     break;
     case Wes:
@@ -209,6 +404,7 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
 
         vert.position = { -Width, Width };
         vert.position /= 2.f;
+        vert.position.x += GameConst::WallThickness;
 
         vert.texCoords = { WestUV.left, WestUV.top };
         temp.push_back(vert);
@@ -223,6 +419,53 @@ static void addWall(std::vector<sf::Vertex>& verts, std::int32_t dir)
 
         vert.position.y += Width;
         vert.texCoords.y -= WestUV.height;
+        temp.push_back(vert);
+
+        //end cap
+        vert.color.a = 255;
+        vert.color.r = 127;
+        vert.color.g = 255;
+        vert.color.b = 127;
+
+        vert.position = { -Width, Width };
+        vert.position /= 2.f;
+        vert.texCoords = WSEN[0];
+        temp.push_back(vert);
+
+        vert.position.x += GameConst::WallThickness;
+        vert.texCoords = WSEN[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = WSEN[2];
+        temp.push_back(vert);
+
+        vert.position.x -= GameConst::WallThickness;
+        vert.texCoords = WSEN[3];
+        temp.push_back(vert);
+
+        //---------//
+        vert.color.a = 255;
+        vert.color.r = 127;
+        vert.color.g = 0;
+        vert.color.b = 127;
+
+        vert.position = { -Width, -Width };
+        vert.position /= 2.f;
+        vert.position.x += GameConst::WallThickness;
+        vert.texCoords = ESWN[0];
+        temp.push_back(vert);
+
+        vert.position.x -= GameConst::WallThickness;
+        vert.texCoords = ESWN[1];
+        temp.push_back(vert);
+
+        vert.color.a = 0;
+        vert.texCoords = ESWN[2];
+        temp.push_back(vert);
+
+        vert.position.x += GameConst::WallThickness;
+        vert.texCoords = ESWN[3];
         temp.push_back(vert);
     }
     break;
