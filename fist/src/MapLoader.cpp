@@ -42,7 +42,7 @@ namespace
     };
 
     const float TriggerWidth = 192.f;
-    const float TriggerHeight = 20.f;
+    const float TriggerHeight = 40.f;
 
     const std::array<sf::FloatRect, 4u> Hitboxes =
     {
@@ -52,7 +52,7 @@ namespace
         sf::FloatRect(-GameConst::RoomWidth / 2.f, -TriggerWidth / 2.f, TriggerHeight, TriggerWidth)
     };
 
-    const float TargetOffset = (GameConst::RoomWidth / 2.f) + TriggerHeight + 72.f;
+    const float TargetOffset = (GameConst::RoomWidth / 2.f) + TriggerHeight + 128.f;
     const std::array<sf::Vector2f, 4u> Offsets =
     {
         sf::Vector2f(0.f, -TargetOffset),

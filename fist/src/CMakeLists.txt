@@ -9,6 +9,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ModelIO.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ModelState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Render3DSystem.cpp

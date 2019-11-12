@@ -32,6 +32,7 @@ source distribution.
 #include "ResourceIDs.hpp"
 #include "GameConst.hpp"
 #include "RoomBuilder.hpp"
+#include "ModelIO.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -98,14 +99,23 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx)
                 }
             }
             ImGui::SameLine();
+            static bool importImmediate = false;
             if (ImGui::Button("Export"))
             {
                 auto filePath = xy::FileSystem::saveFileDialogue(xy::FileSystem::getResourcePath(), "xym");
                 if (!filePath.empty())
                 {
                     exportModel(filePath);
+
+                    if (importImmediate)
+                    {
+                        //TODO check export was successful
+                        //TODO load the exported model to the scene
+                    }
                 }
             }
+            ImGui::SameLine();
+            ImGui::Checkbox("Load to Scene", &importImmediate);
 
             if (m_fileLoaded)
             {
@@ -116,22 +126,10 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx)
                 ImGui::Text("%s", "No Model Loaded.");
             }
 
-            if (ImGui::Button("Reset Position")
-                && m_fileLoaded)
-            {
-                modelEntity.getComponent<xy::Transform>().setPosition(0.f, 0.f);
-            }
-
             if (ImGui::Button("Reset Rotation")
                 && m_fileLoaded)
             {
                 modelEntity.getComponent<xy::Transform>().setRotation(0.f);
-            }
-
-            if (ImGui::Button("Reset Scale")
-                && m_fileLoaded)
-            {
-                modelEntity.getComponent<xy::Transform>().setScale(1.f, 1.f);
             }
 
             ImGui::End();
@@ -194,16 +192,6 @@ bool ModelState::update(float dt)
 {
     if (m_fileLoaded)
     {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-        {
-            modelEntity.getComponent<xy::Transform>().scale(sf::Vector2f(1.1f, 1.1f));
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-        {
-            modelEntity.getComponent<xy::Transform>().scale(sf::Vector2f(0.9f, 0.9f));
-        }
-
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
             modelEntity.getComponent<xy::Transform>().rotate(120.f * dt);
@@ -213,28 +201,6 @@ bool ModelState::update(float dt)
         {
             modelEntity.getComponent<xy::Transform>().rotate(-120.f * dt);
         }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-        {
-            modelEntity.getComponent<xy::Transform>().move(0.f, -120.f * dt);
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        {
-            modelEntity.getComponent<xy::Transform>().move(0.f, 120.f * dt);
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            modelEntity.getComponent<xy::Transform>().move(-120.f * dt, 0.f);
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            modelEntity.getComponent<xy::Transform>().move(120.f * dt, 0.f);
-        }
-
-        //TODO clamp the object within the room using AABB
     }
 
     auto cam = m_uiScene.getActiveCamera();
@@ -393,7 +359,8 @@ void ModelState::parseVerts()
 
 void ModelState::exportModel(const std::string& path)
 {
-    //TODO serialise verts and write binary mesh file
+    //serialise verts and write binary mesh file
+    writeModelBinary(modelEntity.getComponent<xy::Drawable>().getVertices(), path);
 
     //TODO write metadata file containing bin name,
     //texture name and pos/rot/scale
