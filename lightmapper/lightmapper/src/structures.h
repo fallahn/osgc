@@ -7,24 +7,41 @@
 
 #include <glad/glad.h>
 
-typedef struct
+#include <vector>
+
+struct Vertex final
 {
-    float p[3];
-    float t[2];
-} vertex_t;
+    Vertex()
+    {
+        position[0] = 0.f;
+        position[1] = 0.f;
+        position[2] = 0.f;
 
-typedef struct
+        texCoord[0] = 0.f;
+        texCoord[1] = 0.f;
+    }
+    float position[3];
+    float texCoord[2];
+};
+using vertex_t = Vertex;
+
+struct Scene final
 {
-    GLuint program;
-    GLint u_lightmap;
-    GLint u_projection;
-    GLint u_view;
+    GLuint program = 0;
+    GLint u_lightmap = 0;
+    GLint u_projection = 0;
+    GLint u_view = 0;
 
-    GLuint lightmap;
-    int w, h;
+    GLuint lightmap = 0;
+    int w = 0;
+    int h = 0;
 
-    GLuint vao, vbo, ibo;
-    vertex_t* vertices;
-    unsigned short* indices;
-    unsigned int vertexCount, indexCount;
-} scene_t;
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint ibo = 0;
+
+    std::vector<vertex_t> vertices;
+    std::vector<std::uint16_t> indices;
+};
+
+using scene_t = Scene;

@@ -33,10 +33,10 @@ int bake(scene_t *scene)
 	lmSetTargetLightmap(ctx, data, w, h, 4);
 
 	lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
-		LM_FLOAT, (unsigned char*)scene->vertices + offsetof(vertex_t, p), sizeof(vertex_t),
+		LM_FLOAT, (unsigned char*)scene->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
 		LM_NONE , NULL                                                   , 0               , // no interpolated normals in this example
-		LM_FLOAT, (unsigned char*)scene->vertices + offsetof(vertex_t, t), sizeof(vertex_t),
-		scene->indexCount, LM_UNSIGNED_SHORT, scene->indices);
+		LM_FLOAT, (unsigned char*)scene->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
+		scene->indices.size(), LM_UNSIGNED_SHORT, scene->indices.data());
 
 	int vp[4];
 	float view[16], projection[16];
@@ -58,7 +58,7 @@ int bake(scene_t *scene)
 
 		lmEnd(ctx);
 	}
-	printf("\rFinished baking %d triangles.\n", scene->indexCount / 3);
+	printf("\rFinished baking %d triangles.\n", scene->indices.size() / 3);
 
 	lmDestroy(ctx);
 
@@ -209,14 +209,14 @@ int initScene(scene_t *scene)
 
     //position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, p));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, position));
 	//UV
     glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, t));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, texCoord));
 
 	//create lightmap texture - TODO set correct size
-	scene->w = 654;
-	scene->h = 654;
+	scene->w = 3000;
+	scene->h = 2040;
 	glGenTextures(1, &scene->lightmap);
 	glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -283,13 +283,11 @@ void drawScene(scene_t *scene, float *view, float *projection)
 	glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 
 	glBindVertexArray(scene->vao);
-	glDrawElements(GL_TRIANGLES, scene->indexCount, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, scene->indices.size(), GL_UNSIGNED_SHORT, 0);
 }
 
 void destroyScene(scene_t *scene)
 {
-	free(scene->vertices);
-	free(scene->indices);
 	glDeleteVertexArrays(1, &scene->vao);
 	glDeleteBuffers(1, &scene->vbo);
 	glDeleteBuffers(1, &scene->ibo);

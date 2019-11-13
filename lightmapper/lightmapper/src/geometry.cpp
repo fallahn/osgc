@@ -1,68 +1,147 @@
 #include "geometry.h"
 
-#include <vector>
-
 namespace
 {
+    static const float DefaultRoomWidth = 960.f;
+    static const float DefaultRoomHeight = 540.f;
+    static const float DefaultWallThickness = 12.f;
+
     static const float RoomWidth = 1.f;
+    static const float RoomHeight = DefaultRoomHeight / DefaultRoomWidth;
+    static const float WallThickness = DefaultWallThickness / DefaultRoomWidth;
+
+    static const float DefaultTexWidth = 3000.f;
+    static const float DefaultTexHeight = 2040.f;
+
+    enum WallFlags
+    {
+        North = 0x1,
+        East = 0x2,
+        West = 0x4,
+        South = 0x8,
+        Ceiling = 0x10
+    };
 }
 
 void updateGeometry(int32_t flags, scene_t* scene)
 {
     //clear the scene arrays
-    if (scene->vertices)
-    {
-        free(scene->vertices);
-    }
-    if (scene->indices)
-    {
-        free(scene->indices);
-    }
+    scene->vertices.clear();
+    scene->indices.clear();
 
-    scene->vertexCount = 0;
-    scene->indexCount = 0;
+    auto& verts = scene->vertices;
+    auto& indices = scene->indices;
 
     //create floor
-    std::vector<vertex_t> vertices;
     vertex_t vert;
-    vert.p[0] = RoomWidth / 2.f;
-    vert.p[1] = RoomWidth / 2.f;
-    vert.p[2] = 0.f;
-    vert.t[0] = 1.f;
-    vert.t[1] = 0.f;
-    vertices.push_back(vert);
+    vert.position[0] = RoomWidth / 2.f;
+    vert.position[2] = RoomWidth / 2.f;
+    
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
 
-    vert.p[1] -= RoomWidth;
-    vert.t[1] = 1.f;
-    vertices.push_back(vert);
+    vert.position[2] -= RoomWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
 
-    vert.p[0] -= RoomWidth;
-    vert.p[1] += RoomWidth;
-    vert.t[0] = 0.f;
-    vertices.push_back(vert);
+    vert.position[0] -= RoomWidth;
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    verts.push_back(vert);
 
-    vert.p[1] -= RoomWidth;
-    vert.t[1] = 0.f;
+    vert.position[2] += RoomWidth;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
 
-    //TODO create walls / ceiling based on flags
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(2);
+    indices.push_back(3);
+    indices.push_back(0);
 
-    scene->vertexCount = 4;
-    scene->vertices = (vertex_t*)calloc(4, sizeof(vertex_t));
-    std::memcpy((void*)scene->vertices, vertices.data(), 4 * sizeof(vertex_t));
-
-    scene->indexCount = 4;
-    scene->indices = (unsigned short*)calloc(6, sizeof(unsigned short));
-    scene->indices[0] = 0;
-    scene->indices[1] = 1;
-    scene->indices[2] = 2;
-    scene->indices[3] = 1;
-    scene->indices[4] = 3;
-    scene->indices[5] = 2;
-
+    //create walls / ceiling based on flags
+    if (flags & WallFlags::North)
+    {
+        addNorthWall(verts, indices);
+    }
+    if (flags & WallFlags::East)
+    {
+        addEastWall(verts, indices);
+    }
+    if (flags & WallFlags::South)
+    {
+        addSouthWall(verts, indices);
+    }
+    if (flags & WallFlags::West)
+    {
+        addEastWall(verts, indices);
+    }
+    if (flags & WallFlags::Ceiling)
+    {
+        addCeiling(verts, indices);
+    }
+    
     //update buffers
     glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
-    glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
+}
+
+void addNorthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
+{
+    //edge
+    std::uint16_t firstIndex = static_cast<std::uint16_t>(verts.size());
+    
+    Vertex vert;
+    vert.position[0] = -RoomWidth / 2.f;
+    vert.position[2] = vert.position[0] + WallThickness;
+
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[2] -= WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight - DefaultWallThickness) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //main wall
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+}
+
+void addEastWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
+{
+
+}
+
+void addSouthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
+{
+
+}
+
+void addWestWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
+{
+
+}
+
+void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
+{
+
 }

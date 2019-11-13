@@ -45,9 +45,9 @@ int loadSimpleObjFile(const char* filename, vertex_t** vertices, unsigned int* v
         if (line[0] == '#') continue;
         if (line[0] == 'v')
         {
-            if (line[1] == ' ') { float* p = (*vertices)[cp++].p; char* e1, * e2; p[0] = (float)strtod(line + 2, &e1); p[1] = (float)strtod(e1, &e2); p[2] = (float)strtod(e2, 0); continue; }
+            if (line[1] == ' ') { float* p = (*vertices)[cp++].position; char* e1, * e2; p[0] = (float)strtod(line + 2, &e1); p[1] = (float)strtod(e1, &e2); p[2] = (float)strtod(e2, 0); continue; }
             if (line[1] == 'n') { /*float *n = (*vertices)[cn++].n; char *e1, *e2; n[0] = (float)strtod(line + 3, &e1); n[1] = (float)strtod(e1, &e2); n[2] = (float)strtod(e2, 0);*/ continue; } // no normals needed
-            if (line[1] == 't') { float* t = (*vertices)[ct++].t; char* e1;      t[0] = (float)strtod(line + 3, &e1); t[1] = (float)strtod(e1, 0);                                continue; }
+            if (line[1] == 't') { float* t = (*vertices)[ct++].texCoord; char* e1;      t[0] = (float)strtod(line + 3, &e1); t[1] = (float)strtod(e1, 0);                                continue; }
             assert(!"unknown vertex attribute");
         }
         if (line[0] == 'f')
