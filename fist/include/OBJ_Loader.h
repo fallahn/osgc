@@ -148,7 +148,7 @@ namespace objl
 
 	struct Material
 	{
-		Material();
+		Material() = default;
 
 		// Material Name
 		std::string name;

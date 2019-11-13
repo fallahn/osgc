@@ -154,6 +154,7 @@
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\ModelIO.hpp" />
     <ClInclude Include="include\ModelState.hpp" />
+    <ClInclude Include="include\OBJ_Loader.h" />
     <ClInclude Include="include\PlayerDirector.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\Render3DSystem.hpp" />

@@ -246,8 +246,8 @@ void GameState::logicUpdate(float dt)
 
     if (m_roundTimer.started())
     {
-        if (m_remainingTreasure == 0
-            || m_roundTimer.getTime() == 0)
+        if (/*m_remainingTreasure == 0
+            ||*/ m_roundTimer.getTime() == 0)
         {
             endGame();
         }

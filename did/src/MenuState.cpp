@@ -87,7 +87,8 @@ namespace
         "Cleftwisp", "Old Sam", "Lou Baker",
         "Geoff Strongman", "Issy Soux", "Grumbles",
         "Harriet Cobbler", "Queasy Jo", "E. Claire",
-        "Pro Moist", "Hannah Theresa", "Shrinkwrap"
+        "Pro Moist", "Hannah Theresa", "Shrinkwrap",
+        "Ezel Brady"
     };
 }
 
