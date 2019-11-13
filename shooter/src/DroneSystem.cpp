@@ -88,9 +88,9 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                     case CollisionBox::Ammo:
                     case CollisionBox::Battery:
                     {
-                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
-                        msg->position = e.getComponent<xy::Transform>().getPosition();
-                        msg->type = BombEvent::DestroyedCollectible;
+                        auto* msg2 = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg2->position = e.getComponent<xy::Transform>().getPosition();
+                        msg2->type = BombEvent::DestroyedCollectible;
                         getScene()->destroyEntity(e);
                     }
                         break;
@@ -103,17 +103,17 @@ void DroneSystem::handleMessage(const xy::Message& msg)
                         break;
                     case CollisionBox::NPC:
                     {
-                        auto* msg = postMessage<BombEvent>(MessageID::BombMessage);
-                        msg->position = e.getComponent<xy::Transform>().getPosition();
+                        auto* msg2 = postMessage<BombEvent>(MessageID::BombMessage);
+                        msg2->position = e.getComponent<xy::Transform>().getPosition();
                         if (e.hasComponent<Alien>())
                         {
-                            msg->type = e.getComponent<Alien>().type == Alien::Type::Beetle ? BombEvent::KilledBeetle : BombEvent::KilledScorpion;
+                            msg2->type = e.getComponent<Alien>().type == Alien::Type::Beetle ? BombEvent::KilledBeetle : BombEvent::KilledScorpion;
                         }
                         else
                         {
-                            msg->type = BombEvent::KilledHuman;
+                            msg2->type = BombEvent::KilledHuman;
                         }
-                        msg->rotation = e.getComponent<xy::Transform>().getRotation();
+                        msg2->rotation = e.getComponent<xy::Transform>().getRotation();
 
                         getScene()->destroyEntity(e);
                     }

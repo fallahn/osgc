@@ -364,12 +364,12 @@ bool MapLoader::load(const std::string& path)
                     if (points.size() > 1)
                     {
                         auto pos = obj.getPosition() * 4.f;
-                        std::vector<sf::Vector2f> path;
+                        std::vector<sf::Vector2f> navPath;
                         for (const auto& p : points)
                         {
-                            path.emplace_back(pos.x + (p.x * 4.f), pos.y + (p.y * 4.f));
+                            navPath.emplace_back(pos.x + (p.x * 4.f), pos.y + (p.y * 4.f));
                         }
-                        m_navigationNodes.push_back(path);
+                        m_navigationNodes.push_back(navPath);
                     }
                 }
             }
