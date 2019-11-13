@@ -5,6 +5,7 @@
 
 #include "example.h"
 #include "gl_helpers.h"
+#include "geometry.h"
 
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
@@ -28,7 +29,7 @@ int bake(scene_t *scene)
 	}
 
 	int w = scene->w, h = scene->h;
-	float *data = calloc(w * h * 4, sizeof(float));
+	float *data = (float*)calloc(w * h * 4, sizeof(float));
 	lmSetTargetLightmap(ctx, data, w, h, 4);
 
 	lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
@@ -62,7 +63,7 @@ int bake(scene_t *scene)
 	lmDestroy(ctx);
 
 	// postprocess texture
-	float *temp = calloc(w * h * 4, sizeof(float));
+	float *temp = (float*)calloc(w * h * 4, sizeof(float));
 	for (int i = 0; i < 16; i++)
 	{
 		lmImageDilate(data, temp, w, h, 4);
@@ -74,8 +75,10 @@ int bake(scene_t *scene)
 	free(temp);
 
 	// save result to a file
-	if (lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f))
-		printf("Saved result.tga\n");
+    if (lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f))
+    {
+        printf("Saved result.tga\n");
+    }
 
 	// upload result
 	glBindTexture(GL_TEXTURE_2D, scene->lightmap);
@@ -95,6 +98,9 @@ void mainLoop(GLFWwindow *window, scene_t *scene)
 	glfwPollEvents();
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
+        //TODO loop through all flag values
+        //and pass current value for correct file name
+        //TODO rebuild geom for each value
         bake(scene);
     }
 
@@ -181,29 +187,34 @@ int main(int argc, char* argv[])
 int initScene(scene_t *scene)
 {
 	// load mesh
-	if (!loadSimpleObjFile("assets/gazebo.obj", &scene->vertices, &scene->vertexCount, &scene->indices, &scene->indexCount))
+	/*if (!loadSimpleObjFile("assets/gazebo.obj", &scene->vertices, &scene->vertexCount, &scene->indices, &scene->indexCount))
 	{
 		fprintf(stderr, "Error loading obj file\n");
 		return 0;
-	}
+	}*/
 
 	glGenVertexArrays(1, &scene->vao);
 	glBindVertexArray(scene->vao);
 
 	glGenBuffers(1, &scene->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
-	glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
+	//glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &scene->ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices, GL_STATIC_DRAW);
 
+    //temp to test mesh generation
+    updateGeometry(3, scene);
+
+    //position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, p));
-	glEnableVertexAttribArray(1);
+	//UV
+    glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, t));
 
-	// create lightmap texture
+	//create lightmap texture - TODO set correct size
 	scene->w = 654;
 	scene->h = 654;
 	glGenTextures(1, &scene->lightmap);

@@ -32,9 +32,9 @@ int loadSimpleObjFile(const char* filename, vertex_t** vertices, unsigned int* v
 
     // allocate memory
     *vertexCount = np;
-    *vertices = calloc(np, sizeof(vertex_t));
+    *vertices = (vertex_t*)calloc(np, sizeof(vertex_t));
     *indexCount = nf * 3;
-    *indices = calloc(nf * 3, sizeof(unsigned short));
+    *indices = (unsigned short*)calloc(nf * 3, sizeof(unsigned short));
 
     // second pass
     fseek(file, 0, SEEK_SET);
