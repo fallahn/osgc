@@ -129,7 +129,7 @@ void SkidEffectSystem::process(float dt)
                 {
                     offset = -wheelSpacing;
                 }
-                for (auto i = 0; i < skid.wheelCount; ++i)
+                for (auto i = 0u; i < skid.wheelCount; ++i)
                 {
                     for (auto& p : quad)
                     {

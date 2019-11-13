@@ -148,14 +148,7 @@ namespace objl
 
 	struct Material
 	{
-		Material()
-		{
-			name;
-			Ns = 0.0f;
-			Ni = 0.0f;
-			d = 0.0f;
-			illum = 0;
-		}
+		Material();
 
 		// Material Name
 		std::string name;
@@ -166,13 +159,13 @@ namespace objl
 		// Specular Color
 		Vector3 Ks;
 		// Specular Exponent
-		float Ns;
+		float Ns = 0.f;
 		// Optical Density
-		float Ni;
+		float Ni = 0.f;
 		// Dissolve
-		float d;
+		float d = 0.f;
 		// Illumination
-		int illum;
+		int illum = 0;
 		// Ambient Texture Map
 		std::string map_Ka;
 		// Diffuse Texture Map
@@ -649,7 +642,7 @@ namespace objl
 
 					if (temp.size() != 1)
 					{
-						for (int i = 0; i < temp.size() - 1; i++)
+						for (auto i = 0u; i < temp.size() - 1; i++)
 						{
 							pathtomat += temp[i] + "/";
 						}
@@ -686,13 +679,13 @@ namespace objl
 			file.close();
 
 			// Set Materials for each Mesh
-			for (int i = 0; i < MeshMatNames.size(); i++)
+			for (auto i = 0u; i < MeshMatNames.size(); i++)
 			{
 				std::string matname = MeshMatNames[i];
 
 				// Find corresponding material name in loaded materials
 				// when found copy material variables into mesh material
-				for (int j = 0; j < LoadedMaterials.size(); j++)
+				for (auto j = 0u; j < LoadedMaterials.size(); j++)
 				{
 					if (LoadedMaterials[j].name == matname)
 					{

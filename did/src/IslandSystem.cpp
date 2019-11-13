@@ -132,8 +132,8 @@ void IslandSystem::process(float dt)
     const auto& camera = camEnt.getComponent<Camera3D>();
 
     ////auto view = sf::Glsl::Mat4(&camera.viewMatrix[0][0]);
-    auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
-    auto worldCam = sf::Glsl::Vec3(camera.worldPosition.x, camera.worldPosition.y, camera.worldPosition.z);
+    //auto viewProj = sf::Glsl::Mat4(&camera.viewProjectionMatrix[0][0]);
+    //auto worldCam = sf::Glsl::Vec3(camera.worldPosition.x, camera.worldPosition.y, camera.worldPosition.z);
     //m_planeShader->setUniform("u_viewProjection", viewProj);
     //m_planeShader->setUniform("u_cameraWorldPosition", worldCam);
     glUseProgram(m_uniforms[PlaneViewProj].first);

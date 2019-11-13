@@ -313,7 +313,7 @@ void GameDirector::activateLevel()
     //just to pick a first colour at random
     std::int32_t colour = 0;
     const auto& bubbles = m_levels[m_currentLevel].ballArray;
-    for (auto i = 0; i < bubbles.size(); ++i)
+    for (auto i = 0u; i < bubbles.size(); ++i)
     {
         if (bubbles[i] != -1)
         {

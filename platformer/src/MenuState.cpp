@@ -80,10 +80,10 @@ namespace
 #include "tilemap.inl"
 #include "transition.inl"
 
-    sf::FloatRect operator * (sf::FloatRect r, float f)
+    /*sf::FloatRect operator * (sf::FloatRect r, float f)
     {
         return { r.left * f, r.top * f, r.width * f, r.height * f };
-    }
+    }*/
 
     struct MenuItem final
     {

@@ -500,7 +500,7 @@ void BubbleSystem::testFloating()
     //clusters to test
     std::vector<std::vector<std::int32_t>> clusters;
 
-    for (auto i = 0; i < m_grid.size(); ++i)
+    for (auto i = 0u; i < m_grid.size(); ++i)
     {
         if (m_grid[i].isValid()
             && !m_grid[i].getComponent<Bubble>().processed)

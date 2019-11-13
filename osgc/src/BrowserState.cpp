@@ -756,7 +756,7 @@ void BrowserState::buildMenu()
             }
         });
 
-    auto tileMouseOutCallback = m_scene.getSystem<xy::UISystem>().addMouseMoveCallback(
+    /*auto tileMouseOutCallback = m_scene.getSystem<xy::UISystem>().addMouseMoveCallback(
         [&](xy::Entity e, sf::Vector2f)
         {
             if (e.getComponent<TileNode>().enabled)
@@ -769,7 +769,7 @@ void BrowserState::buildMenu()
                 };
                 m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
             }
-        });
+        });*/
 
     std::size_t i = 0;
     auto tileNodeParent = m_scene.createEntity();
