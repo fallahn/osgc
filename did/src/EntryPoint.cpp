@@ -97,7 +97,10 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
 void end(xy::StateStack* ss)
 {
-    netClient->disconnect();
+    if (netClient && netClient->connected())
+    {
+        netClient->disconnect();
+    }
 
     gameServer->stop();
 
