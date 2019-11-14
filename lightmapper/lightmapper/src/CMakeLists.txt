@@ -1,0 +1,7 @@
+set(PROJECT_SRC 
+  ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/example.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/geometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/gl_helpers.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/glad.c
+  PARENT_SCOPE)
