@@ -29,8 +29,9 @@ int bake(scene_t *scene)
 	}
 
 	int w = scene->w, h = scene->h;
-	float *data = (float*)calloc(w * h * 4, sizeof(float));
-	lmSetTargetLightmap(ctx, data, w, h, 4);
+
+    std::vector<float> data(w*h*4);
+	lmSetTargetLightmap(ctx, data.data(), w, h, 4);
 
 	lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
 		LM_FLOAT, (unsigned char*)scene->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
@@ -63,27 +64,27 @@ int bake(scene_t *scene)
 	lmDestroy(ctx);
 
 	// postprocess texture
-	float *temp = (float*)calloc(w * h * 4, sizeof(float));
+    std::vector<float> temp(data.size());
 	for (int i = 0; i < 16; i++)
 	{
-		lmImageDilate(data, temp, w, h, 4);
-		lmImageDilate(temp, data, w, h, 4);
+		lmImageDilate(data.data(), temp.data(), w, h, 4);
+		lmImageDilate(temp.data(), data.data(), w, h, 4);
 	}
-	lmImageSmooth(data, temp, w, h, 4);
-	lmImageDilate(temp, data, w, h, 4);
-	lmImagePower(data, w, h, 4, 1.0f / 2.2f, 0x7); // gamma correct color channels
-	free(temp);
+	lmImageSmooth(data.data(), temp.data(), w, h, 4);
+	lmImageDilate(temp.data(), data.data(), w, h, 4);
+	lmImagePower(data.data(), w, h, 4, 1.0f / 2.2f, 0x7); // gamma correct color channels
+
 
 	// save result to a file
-    if (lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f))
+    if (lmImageSaveTGAf("result.tga", data.data(), w, h, 4, 1.0f))
     {
         printf("Saved result.tga\n");
     }
 
 	// upload result
 	glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
-	free(data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
+	//free(data);
 
 	return 1;
 }
@@ -200,7 +201,7 @@ int initScene(scene_t *scene)
 	glGenBuffers(1, &scene->ibo);
 
     //temp to test mesh generation
-    updateGeometry(17, scene);
+    updateGeometry(15, scene);
 
     //position
 	glEnableVertexAttribArray(0);
@@ -210,8 +211,8 @@ int initScene(scene_t *scene)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, texCoord));
 
 	//create lightmap texture - TODO set correct size
-	scene->w = 750;
-	scene->h = 510;
+    scene->w = 750;
+    scene->h = 510;
 	glGenTextures(1, &scene->lightmap);
 	glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -1,5 +1,7 @@
 #include "geometry.h"
 
+#include <iostream>
+
 namespace
 {
     static const float DefaultRoomWidth = 960.f;
@@ -82,6 +84,8 @@ void updateGeometry(int32_t flags, scene_t* scene)
         addCeiling(verts, indices);
     }
     
+    //for (auto& v : scene->vertices) v.texCoord[1] = 1.f - v.texCoord[1];
+
     //update buffers
     glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
@@ -314,13 +318,15 @@ void addSouthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indice
     vert.position[0] = -RoomWidth / 2.f;
     vert.position[1] = 0.f;
     vert.position[2] = -vert.position[0] - WallThickness;
-
     vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
     vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+
     verts.push_back(vert);
 
     vert.position[1] = RoomHeight;
     vert.texCoord[1] = 1.f;
+    vert.texCoord[1] -= 0.0001f; //hmm having a UV exactly on 1 causes an odd bug?
+
     verts.push_back(vert);
 
     vert.position[0] = RoomWidth / 2.f;
@@ -471,7 +477,7 @@ void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
     vert.position[1] = RoomHeight;
     vert.position[2] = RoomWidth / 2.f;
 
-    vert.texCoord[0] = 1.f;
+    vert.texCoord[0] = 1.f - 0.0001f;
     vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
     verts.push_back(vert);
 
