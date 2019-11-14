@@ -58,7 +58,7 @@ int bake(scene_t *scene)
 
 		lmEnd(ctx);
 	}
-	printf("\rFinished baking %d triangles.\n", scene->indices.size() / 3);
+	printf("\rFinished baking %zd triangles.\n", scene->indices.size() / 3);
 
 	lmDestroy(ctx);
 
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	GLFWwindow *window = glfwCreateWindow(800, 600, "Lightmapping Example", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(800, 600, "Lightmapper", NULL, NULL);
 	if (!window)
 	{
 		fprintf(stderr, "Could not create window.\n");
@@ -197,15 +197,10 @@ int initScene(scene_t *scene)
 	glBindVertexArray(scene->vao);
 
 	glGenBuffers(1, &scene->vbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
-	//glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
-
 	glGenBuffers(1, &scene->ibo);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices, GL_STATIC_DRAW);
 
     //temp to test mesh generation
-    updateGeometry(3, scene);
+    updateGeometry(17, scene);
 
     //position
 	glEnableVertexAttribArray(0);

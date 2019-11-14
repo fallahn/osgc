@@ -17,8 +17,8 @@ namespace
     {
         North = 0x1,
         East = 0x2,
-        West = 0x4,
-        South = 0x8,
+        South = 0x4,
+        West = 0x8,
         Ceiling = 0x10
     };
 }
@@ -75,7 +75,7 @@ void updateGeometry(int32_t flags, scene_t* scene)
     }
     if (flags & WallFlags::West)
     {
-        addEastWall(verts, indices);
+        addWestWall(verts, indices);
     }
     if (flags & WallFlags::Ceiling)
     {
@@ -185,20 +185,312 @@ void addNorthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indice
 
 void addEastWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 {
+    //north edge
+    std::uint16_t firstIndex = static_cast<std::uint16_t>(verts.size());
 
+    Vertex vert;
+    vert.position[0] = (RoomWidth / 2.f) - WallThickness;
+    vert.position[2] = -RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[0] += WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth + DefaultWallThickness) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //main wall
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = (RoomWidth / 2.f) - WallThickness;
+    vert.position[1] = 0.f;
+    vert.position[2] = RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[2] = -RoomWidth / 2.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //south edge
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = RoomWidth / 2.f;
+    vert.position[1] = 0.f;
+    vert.position[2] = RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth + DefaultWallThickness) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[0] -= WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
 }
 
 void addSouthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 {
-    //don't bother with end vert tex coords as they're shared with already rendered?
+    //east edge
+    std::uint16_t firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    Vertex vert;
+    vert.position[0] = RoomWidth / 2.f;
+    vert.position[2] = vert.position[0] - WallThickness;
+
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[2] += WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight - DefaultWallThickness) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //main wall
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = -RoomWidth / 2.f;
+    vert.position[1] = 0.f;
+    vert.position[2] = -vert.position[0] - WallThickness;
+
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 1.f;
+    verts.push_back(vert);
+
+    vert.position[0] = RoomWidth / 2.f;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //west edge
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = -RoomWidth / 2.f;
+    vert.position[1] = 0.f;
+    vert.position[2] = RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth + DefaultWallThickness) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[2] -= WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
 }
 
 void addWestWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 {
+    //south edge
+    std::uint16_t firstIndex = static_cast<std::uint16_t>(verts.size());
 
+    Vertex vert;
+    vert.position[0] = (-RoomWidth / 2.f) + WallThickness;
+    vert.position[2] = RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth + DefaultWallThickness) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[0] -= WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //main wall
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = (-RoomWidth / 2.f) + WallThickness;
+    vert.position[1] = 0.f;
+    vert.position[2] = -RoomWidth / 2.f;
+
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[0] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[2] = RoomWidth / 2.f;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //north edge
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = -RoomWidth / 2.f;
+    vert.position[1] = 0.f;
+    vert.position[2] = -RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth + DefaultWallThickness) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[0] += WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
 }
 
 void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 {
+    auto firstIndex = static_cast<std::uint16_t>(verts.size());
 
+    Vertex vert;
+    vert.position[0] = -RoomWidth / 2.f;
+    vert.position[1] = RoomHeight;
+    vert.position[2] = RoomWidth / 2.f;
+
+    vert.texCoord[0] = 1.f;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[2] -= RoomWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[0] += RoomWidth;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[2] += RoomWidth;
+    vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
 }
