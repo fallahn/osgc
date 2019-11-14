@@ -16,9 +16,9 @@ endif()
 find_package(glfw3 3.3 REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-add_subdirectory(src);
+add_subdirectory(src)
 
-add_executable(${PROJECT_NAME} SHARED ${PROJECT_SRC})
+add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 
 target_link_libraries(${PROJECT_NAME} glfw)

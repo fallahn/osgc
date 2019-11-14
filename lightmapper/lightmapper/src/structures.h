@@ -7,6 +7,7 @@
 
 #include <glad/glad.h>
 
+#include <cstdint>
 #include <vector>
 
 struct Vertex final
