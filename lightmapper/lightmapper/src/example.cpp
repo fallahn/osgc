@@ -215,8 +215,8 @@ int initScene(scene_t *scene)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, texCoord));
 
 	//create lightmap texture - TODO set correct size
-	scene->w = 3000;
-	scene->h = 2040;
+	scene->w = 750;
+	scene->h = 510;
 	glGenTextures(1, &scene->lightmap);
 	glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

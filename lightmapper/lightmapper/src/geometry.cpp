@@ -92,7 +92,7 @@ void updateGeometry(int32_t flags, scene_t* scene)
 
 void addNorthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 {
-    //edge
+    //west edge
     std::uint16_t firstIndex = static_cast<std::uint16_t>(verts.size());
     
     Vertex vert;
@@ -124,6 +124,63 @@ void addNorthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indice
 
     //main wall
     firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = RoomWidth / 2.f;
+    vert.position[1] = 0.f;
+    vert.position[2] = -vert.position[0] + WallThickness;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[0] = -RoomWidth / 2.f;
+    vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
+
+    //east edge
+    firstIndex = static_cast<std::uint16_t>(verts.size());
+
+    vert.position[0] = RoomWidth / 2.f;
+    vert.position[1] = 0.f;
+    vert.position[2] = -RoomWidth / 2.f;
+
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth + DefaultWallThickness) / DefaultTexWidth;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    vert.position[1] = RoomHeight;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[2] += WallThickness;
+    vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+    verts.push_back(vert);
+
+    vert.position[1] = 0.f;
+    vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+    verts.push_back(vert);
+
+    indices.push_back(firstIndex + 0);
+    indices.push_back(firstIndex + 1);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 2);
+    indices.push_back(firstIndex + 3);
+    indices.push_back(firstIndex + 0);
 }
 
 void addEastWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
@@ -133,7 +190,7 @@ void addEastWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices
 
 void addSouthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 {
-
+    //don't bother with end vert tex coords as they're shared with already rendered?
 }
 
 void addWestWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
