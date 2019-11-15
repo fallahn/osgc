@@ -1,4 +1,5 @@
 #include "geometry.h"
+#include "GLCheck.hpp"
 
 #include <iostream>
 
@@ -28,15 +29,14 @@ namespace
 void updateGeometry(int32_t flags, scene_t& scene)
 {
     scene.meshes.clear();
-    scene.meshes.emplace_back();
+    scene.meshes.reserve(10);
 
-    auto& mesh = scene.meshes[0];
+    //addLight(scene); return;
+    auto& mesh = scene.meshes.emplace_back();
 
-    //clear the mesh arrays
     auto& verts = mesh.vertices;
     auto& indices = mesh.indices;
-    verts.clear();
-    indices.clear();
+
 
     //create floor
     vertex_t vert;
@@ -91,14 +91,16 @@ void updateGeometry(int32_t flags, scene_t& scene)
     //update buffers
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     //do this afterwards just so we don't mess with room mesh mid-creation
     if (flags & WallFlags::Ceiling)
     {
-        //add interior light
+        addLight(scene);
     }
 }
 
@@ -507,4 +509,58 @@ void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
     indices.push_back(firstIndex + 2);
     indices.push_back(firstIndex + 3);
     indices.push_back(firstIndex + 0);
+}
+
+void addLight(scene_t& scene)
+{
+    //add interior light
+    auto& light = scene.meshes.emplace_back();
+    //TODO make a more complex piece of geom
+    auto& verts = light.vertices;
+    auto& indices = light.indices;
+
+    const float lightWidth = 0.3f;
+
+    Vertex vert;
+    vert.position[0] = -lightWidth / 2.f;
+    vert.position[1] = RoomHeight - 0.01f;
+    vert.position[2] = lightWidth / 2.f;
+
+    vert.texCoord[0] = 1.f;
+    vert.texCoord[1] = 1.f;
+    verts.push_back(vert);
+
+    vert.position[2] -= lightWidth;
+    vert.texCoord[1] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[0] += lightWidth;
+    vert.texCoord[0] = 0.f;
+    verts.push_back(vert);
+
+    vert.position[2] += lightWidth;
+    vert.texCoord[1] = 1.f;
+    verts.push_back(vert);
+
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(2);
+    indices.push_back(3);
+    indices.push_back(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, light.vbo);
+    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, light.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //TODO take light colour as a param
+    //update texture with light colour
+
+    glBindTexture(GL_TEXTURE_2D, light.texture);
+    unsigned char emissive[] = { 255, 255, 200, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
 }

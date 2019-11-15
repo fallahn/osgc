@@ -2,25 +2,17 @@
 #include "gl_helpers.h"
 #include "geometry.h"
 #include "lightmapper.h"
+#include "GLCheck.hpp"
 
 #include <assert.h>
 
 int initScene(scene_t& scene)
 {
     //temp to test mesh generation
-    updateGeometry(15, scene);
+    updateGeometry(19, scene);
 
-    //create lightmap texture - TODO set correct size
-    scene.w = 750;
-    scene.h = 510;
-    glGenTextures(1, &scene.lightmap);
-    glBindTexture(GL_TEXTURE_2D, scene.lightmap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    unsigned char emissive[] = { 0, 0, 0, 255 };
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+    scene.lightmapWidth = 750;
+    scene.lightmapHeight = 510;
 
     //load shader - TODO model matrix
     const char* vp =
@@ -40,12 +32,12 @@ int initScene(scene_t& scene)
     const char* fp =
         "#version 150 core\n"
         "in vec2 v_texcoord;\n"
-        "uniform sampler2D u_lightmap;\n"
+        "uniform sampler2D u_texture;\n"
         "out vec4 o_color;\n"
 
         "void main()\n"
         "{\n"
-        "o_color = vec4(texture(u_lightmap, v_texcoord).rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
+        "o_color = vec4(texture(u_texture, v_texcoord).rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
         "}\n";
 
     const char* attribs[] =
@@ -62,7 +54,7 @@ int initScene(scene_t& scene)
     }
     scene.u_view = glGetUniformLocation(scene.program, "u_view");
     scene.u_projection = glGetUniformLocation(scene.program, "u_projection");
-    scene.u_lightmap = glGetUniformLocation(scene.program, "u_lightmap");
+    scene.u_texture = glGetUniformLocation(scene.program, "u_texture");
 
     return 1;
 }
@@ -72,26 +64,18 @@ void drawScene(const scene_t& scene, float* view, float* projection)
     glEnable(GL_DEPTH_TEST);
 
     glUseProgram(scene.program);
-    glUniform1i(scene.u_lightmap, 0);
+    glUniform1i(scene.u_texture, 0);
+
+    glUniformMatrix4fv(scene.u_projection, 1, GL_FALSE, projection);
+    glUniformMatrix4fv(scene.u_view, 1, GL_FALSE, view);
 
     //foreach mesh in scene
     for (const auto& mesh : scene.meshes)
     {
         //TODO model matrix
-        glUniformMatrix4fv(scene.u_projection, 1, GL_FALSE, projection);
-        glUniformMatrix4fv(scene.u_view, 1, GL_FALSE, view);
+        glBindTexture(GL_TEXTURE_2D, mesh.texture);
 
-        glBindTexture(GL_TEXTURE_2D, scene.lightmap); //TODO text for each mesh
-
-        glBindVertexArray(mesh.vao);
-
-        //position
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, position));
-        //UV
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, texCoord));
-
+        glCheck(glBindVertexArray(mesh.vao));
         glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
     }
 }
@@ -100,12 +84,14 @@ void destroyScene(scene_t& scene)
 {
     scene.meshes.clear();
 
-    glDeleteTextures(1, &scene.lightmap);
     glDeleteProgram(scene.program);
 }
 
 int bake(scene_t& scene)
 {
+    //TODO reset the geometry texture to black else previous
+    //bakes contribute to the emissions
+
     lm_context* ctx = lmCreate(
         64,               // hemisphere resolution (power of two, max=512)
         0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
@@ -121,7 +107,7 @@ int bake(scene_t& scene)
         return 0;
     }
 
-    int w = scene.w, h = scene.h;
+    int w = scene.lightmapWidth, h = scene.lightmapHeight;
 
     std::vector<float> data(w * h * 4);
     lmSetTargetLightmap(ctx, data.data(), w, h, 4);
@@ -177,10 +163,9 @@ int bake(scene_t& scene)
         printf("Saved result.tga\n");
     }
 
-    // upload result
-    glBindTexture(GL_TEXTURE_2D, scene.lightmap);
+    //upload result to preview texture
+    glBindTexture(GL_TEXTURE_2D, mesh.texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
-    //free(data);
 
     return 1;
 }

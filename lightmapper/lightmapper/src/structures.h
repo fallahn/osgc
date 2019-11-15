@@ -39,6 +39,8 @@ struct Mesh final
     GLuint vbo = 0;
     GLuint ibo = 0;
 
+    GLuint texture;
+
     std::vector<vertex_t> vertices;
     std::vector<std::uint16_t> indices;
 };
@@ -46,13 +48,13 @@ struct Mesh final
 struct Scene final
 {
     GLuint program = 0;
-    GLint u_lightmap = 0;
+    GLint u_texture = 0;
     GLint u_projection = 0;
     GLint u_view = 0;
+    GLint u_model = 0;
 
-    GLuint lightmap = 0;
-    int w = 0;
-    int h = 0;
+    int lightmapWidth = 0;
+    int lightmapHeight = 0;
 
     std::vector<Mesh> meshes;
 };
