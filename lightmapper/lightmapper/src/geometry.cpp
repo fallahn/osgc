@@ -29,13 +29,11 @@ namespace
 void updateGeometry(int32_t flags, scene_t& scene)
 {
     scene.meshes.clear();
-    scene.meshes.reserve(10);
 
-    //addLight(scene); return;
-    auto& mesh = scene.meshes.emplace_back();
+    auto& mesh = scene.meshes.emplace_back(std::make_unique<Mesh>());
 
-    auto& verts = mesh.vertices;
-    auto& indices = mesh.indices;
+    auto& verts = mesh->vertices;
+    auto& indices = mesh->indices;
 
 
     //create floor
@@ -89,11 +87,11 @@ void updateGeometry(int32_t flags, scene_t& scene)
     }
 
     //update buffers
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -514,10 +512,10 @@ void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
 void addLight(scene_t& scene)
 {
     //add interior light
-    auto& light = scene.meshes.emplace_back();
+    auto& light = scene.meshes.emplace_back(std::make_unique<Mesh>());
     //TODO make a more complex piece of geom
-    auto& verts = light.vertices;
-    auto& indices = light.indices;
+    auto& verts = light->vertices;
+    auto& indices = light->indices;
 
     const float lightWidth = 0.3f;
 
@@ -549,18 +547,18 @@ void addLight(scene_t& scene)
     indices.push_back(3);
     indices.push_back(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, light.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, light->vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, light.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, light->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     //TODO take light colour as a param
-    //update texture with light colour
 
-    glBindTexture(GL_TEXTURE_2D, light.texture);
+    //update texture with light colour
+    glBindTexture(GL_TEXTURE_2D, light->texture);
     unsigned char emissive[] = { 255, 255, 200, 255 };
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
 }

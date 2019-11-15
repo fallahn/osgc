@@ -73,10 +73,10 @@ void drawScene(const scene_t& scene, float* view, float* projection)
     for (const auto& mesh : scene.meshes)
     {
         //TODO model matrix
-        glBindTexture(GL_TEXTURE_2D, mesh.texture);
+        glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
-        glCheck(glBindVertexArray(mesh.vao));
-        glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
+        glCheck(glBindVertexArray(mesh->vao));
+        glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
     }
 }
 
@@ -89,8 +89,12 @@ void destroyScene(scene_t& scene)
 
 int bake(scene_t& scene)
 {
-    //TODO reset the geometry texture to black else previous
+    //reset the geometry texture to black else previous
     //bakes contribute to the emissions
+    glBindTexture(GL_TEXTURE_2D, scene.meshes[0]->texture);
+    unsigned char emissive[] = { 0, 0, 0, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     lm_context* ctx = lmCreate(
         64,               // hemisphere resolution (power of two, max=512)
@@ -116,10 +120,10 @@ int bake(scene_t& scene)
     assert(!scene.meshes.empty());
     const auto& mesh = scene.meshes[0];
     lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
-        LM_FLOAT, (unsigned char*)mesh.vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
+        LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
         LM_NONE, NULL, 0, // no interpolated normals in this example
-        LM_FLOAT, (unsigned char*)mesh.vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
-        mesh.indices.size(), LM_UNSIGNED_SHORT, mesh.indices.data());
+        LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
+        mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
 
     int vp[4];
     float view[16], projection[16];
@@ -141,7 +145,7 @@ int bake(scene_t& scene)
 
         lmEnd(ctx);
     }
-    printf("\rFinished baking %zd triangles.\n", mesh.indices.size() / 3);
+    printf("\rFinished baking %zd triangles.\n", mesh->indices.size() / 3);
 
     lmDestroy(ctx);
 
@@ -164,7 +168,7 @@ int bake(scene_t& scene)
     }
 
     //upload result to preview texture
-    glBindTexture(GL_TEXTURE_2D, mesh.texture);
+    glBindTexture(GL_TEXTURE_2D, mesh->texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
 
     return 1;

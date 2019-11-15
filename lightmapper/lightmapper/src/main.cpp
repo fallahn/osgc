@@ -7,6 +7,12 @@
 #include "gl_helpers.h"
 #include "geometry.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+#include <iostream>
+
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
 #include "lightmapper.h"
@@ -21,12 +27,20 @@ void mainLoop(GLFWwindow* window, scene_t& scene)
 	glfwPollEvents();
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        //TODO loop through all flag values
-        //and pass current value for correct file name
-        //TODO rebuild geom for each value
         bake(scene);
     }
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    static bool show_demo_window = true;
+    ImGui::ShowDemoWindow(&show_demo_window);
+
+    //TODO custom imgui rendering
+
+
+    ImGui::Render();
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h);
 	glViewport(0, 0, w, h);
@@ -40,6 +54,7 @@ void mainLoop(GLFWwindow* window, scene_t& scene)
 	glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	drawScene(scene, view, projection);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	glfwSwapBuffers(window);
 }
@@ -67,6 +82,7 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
+
 	GLFWwindow *window = glfwCreateWindow(800, 600, "Lightmapper", NULL, NULL);
 	if (!window)
 	{
@@ -76,8 +92,25 @@ int main(int argc, char* argv[])
 	}
 
 	glfwMakeContextCurrent(window);
-	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glfwSwapInterval(1);
+    //built in loader breaks ImGui
+    //gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    gladLoadGL();
+
+    const char* glslVer = "#version 150";
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+
+    if (!ImGui_ImplGlfw_InitForOpenGL(window, true))
+    {
+        std::cout << "failed glfw init\n";
+    }
+    if (!ImGui_ImplOpenGL3_Init(glslVer))
+    {
+        std::cout << "failed opengl init\n";
+    }
 
 	scene_t scene = {0};
 	if (!initScene(scene))
@@ -88,19 +121,17 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	printf("Ambient Occlusion Baking Example.\n");
-	printf("Use your mouse and the W, A, S, D, E, Q keys to navigate.\n");
-	printf("Press SPACE to start baking one light bounce!\n");
-	printf("This will take a few seconds and bake a lightmap illuminated by:\n");
-	printf("1. The mesh itself (initially black)\n");
-	printf("2. A white sky (1.0f, 1.0f, 1.0f)\n");
-
 	while (!glfwWindowShouldClose(window))
 	{
 		mainLoop(window, scene);
 	}
 
 	destroyScene(scene);
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return EXIT_SUCCESS;

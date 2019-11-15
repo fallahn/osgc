@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 struct Vertex final
 {
@@ -56,7 +57,7 @@ struct Scene final
     int lightmapWidth = 0;
     int lightmapHeight = 0;
 
-    std::vector<Mesh> meshes;
+    std::vector<std::unique_ptr<Mesh>> meshes;
 };
 
 using scene_t = Scene;

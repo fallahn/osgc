@@ -1,4 +1,5 @@
 #include "gl_helpers.h"
+#include "imgui/imgui.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -201,40 +202,46 @@ void fpsCameraViewMatrix(GLFWwindow* window, float* view)
     static float position[] = { 0.0f, 0.3f, 1.5f };
     static float rotation[] = { 0.0f, 0.0f };
 
-    // mouse look
-    static double lastMouse[] = { 0.0, 0.0 };
-    double mouse[2];
-    glfwGetCursorPos(window, &mouse[0], &mouse[1]);
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-    {
-        rotation[0] += (float)(mouse[1] - lastMouse[1]) * -0.2f;
-        rotation[1] += (float)(mouse[0] - lastMouse[0]) * -0.2f;
-    }
-    lastMouse[0] = mouse[0];
-    lastMouse[1] = mouse[1];
-
     float rotationY[16], rotationX[16], rotationYX[16];
     rotationMatrix(rotationX, rotation[0], 1.0f, 0.0f, 0.0f);
     rotationMatrix(rotationY, rotation[1], 0.0f, 1.0f, 0.0f);
     multiplyMatrices(rotationYX, rotationY, rotationX);
 
-    // keyboard movement (WSADEQ)
-    float speed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.1f : 0.01f;
-    float movement[3] = { 0 };
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) movement[2] -= speed;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) movement[2] += speed;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) movement[0] -= speed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) movement[0] += speed;
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) movement[1] -= speed;
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) movement[1] += speed;
+    if (!ImGui::GetIO().WantCaptureKeyboard
+        && !ImGui::GetIO().WantCaptureMouse)
+    {
+        // mouse look
+        static double lastMouse[] = { 0.0, 0.0 };
+        double mouse[2];
+        glfwGetCursorPos(window, &mouse[0], &mouse[1]);
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+        {
+            rotation[0] += (float)(mouse[1] - lastMouse[1]) * -0.2f;
+            rotation[1] += (float)(mouse[0] - lastMouse[0]) * -0.2f;
+        }
+        lastMouse[0] = mouse[0];
+        lastMouse[1] = mouse[1];
 
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, GLFW_TRUE);
 
-    float worldMovement[3];
-    transformPosition(worldMovement, rotationYX, movement);
-    position[0] += worldMovement[0];
-    position[1] += worldMovement[1];
-    position[2] += worldMovement[2];
+
+        // keyboard movement (WSADEQ)
+        float speed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.1f : 0.01f;
+        float movement[3] = { 0 };
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) movement[2] -= speed;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) movement[2] += speed;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) movement[0] -= speed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) movement[0] += speed;
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) movement[1] -= speed;
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) movement[1] += speed;
+
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+        float worldMovement[3];
+        transformPosition(worldMovement, rotationYX, movement);
+        position[0] += worldMovement[0];
+        position[1] += worldMovement[1];
+        position[2] += worldMovement[2];
+    }
 
     // construct view matrix
     float inverseRotation[16], inverseTranslation[16];
