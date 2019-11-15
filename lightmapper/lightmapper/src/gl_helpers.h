@@ -5,8 +5,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-int loadSimpleObjFile(const char* filename, vertex_t** vertices, unsigned int* vertexCount, unsigned short** indices, unsigned int* indexCount);
-
 GLuint loadShader(GLenum type, const char* source);
 GLuint loadProgram(const char* vp, const char* fp, const char** attributes, int attributeCount);
 void multiplyMatrices(float* out, float* a, float* b);

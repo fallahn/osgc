@@ -25,14 +25,18 @@ namespace
     };
 }
 
-void updateGeometry(int32_t flags, scene_t* scene)
+void updateGeometry(int32_t flags, scene_t& scene)
 {
-    //clear the scene arrays
-    scene->vertices.clear();
-    scene->indices.clear();
+    scene.meshes.clear();
+    scene.meshes.emplace_back();
 
-    auto& verts = scene->vertices;
-    auto& indices = scene->indices;
+    auto& mesh = scene.meshes[0];
+
+    //clear the mesh arrays
+    auto& verts = mesh.vertices;
+    auto& indices = mesh.indices;
+    verts.clear();
+    indices.clear();
 
     //create floor
     vertex_t vert;
@@ -83,15 +87,19 @@ void updateGeometry(int32_t flags, scene_t* scene)
     {
         addCeiling(verts, indices);
     }
-    
-    //for (auto& v : scene->vertices) v.texCoord[1] = 1.f - v.texCoord[1];
 
     //update buffers
-    glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
+
+    //do this afterwards just so we don't mess with room mesh mid-creation
+    if (flags & WallFlags::Ceiling)
+    {
+        //add interior light
+    }
 }
 
 void addNorthWall(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)

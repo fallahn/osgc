@@ -133,13 +133,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\example.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\geometry.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\gl_helpers.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\scene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\example.h" />
+    <ClInclude Include="src\scene.h" />
     <ClInclude Include="src\geometry.h" />
     <ClInclude Include="src\gl_helpers.h" />
     <ClInclude Include="src\lightmapper.h" />

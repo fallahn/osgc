@@ -26,6 +26,23 @@ struct Vertex final
 };
 using vertex_t = Vertex;
 
+struct Mesh final
+{
+    Mesh();
+    ~Mesh();
+    Mesh(const Mesh&) = default;
+    Mesh(Mesh&&) = default;
+    Mesh& operator = (const Mesh&) = default;
+    Mesh& operator = (Mesh&&) = default;
+
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint ibo = 0;
+
+    std::vector<vertex_t> vertices;
+    std::vector<std::uint16_t> indices;
+};
+
 struct Scene final
 {
     GLuint program = 0;
@@ -37,12 +54,7 @@ struct Scene final
     int w = 0;
     int h = 0;
 
-    GLuint vao = 0;
-    GLuint vbo = 0;
-    GLuint ibo = 0;
-
-    std::vector<vertex_t> vertices;
-    std::vector<std::uint16_t> indices;
+    std::vector<Mesh> meshes;
 };
 
 using scene_t = Scene;
