@@ -246,10 +246,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 
     (void)vertex_array_object;
 #ifndef IMGUI_IMPL_OPENGL_ES2
-    if (glad_glBindVertexArray != nullptr)
-    {
         glBindVertexArray(vertex_array_object);
-    }
 #endif
 
     // Bind vertex/index buffers and setup attributes for ImDrawVert
