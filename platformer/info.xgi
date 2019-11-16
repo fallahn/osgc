@@ -2,6 +2,6 @@ game_info
 {
     thumb = "assets/images/thumb.png"
     title = "Back to Computer"
-    version = "0.1.0"
+    version = "0.1.1"
     author = "fallahn"
 }
