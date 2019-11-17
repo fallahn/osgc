@@ -15,6 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <fstream>
 
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
@@ -84,8 +85,17 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
+    int w = 800;
+    int h = 600;
+    std::ifstream iFile("window", std::ios::binary);
+    if (!iFile.fail())
+    {
+        iFile.read((char*)&w, sizeof(w));
+        iFile.read((char*)&h, sizeof(h));
+    }
 
-	GLFWwindow *window = glfwCreateWindow(800, 600, "Lightmapper", NULL, NULL);
+
+	GLFWwindow *window = glfwCreateWindow(w, h, "Lightmapper", NULL, NULL);
 	if (!window)
 	{
 		fprintf(stderr, "Could not create window.\n");
@@ -133,6 +143,19 @@ int main(int argc, char* argv[])
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
+    //save the current window size
+    glfwGetFramebufferSize(window, &w, &h);
+    glViewport(0, 0, w, h);
+
+    std::ofstream oFile("window", std::ios::binary);
+    if (oFile.is_open() && oFile.good())
+    {
+        std::vector<char>buff(sizeof(int)* 2);
+        std::memcpy(buff.data(), &w, sizeof(int));
+        std::memcpy(buff.data() + sizeof(int), &h, sizeof(int));
+        oFile.write(buff.data(), buff.size());
+    }
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

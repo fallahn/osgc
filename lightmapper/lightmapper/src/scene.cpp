@@ -14,18 +14,19 @@ int initScene(scene_t& scene)
     scene.lightmapWidth = 750;
     scene.lightmapHeight = 510;
 
-    //load shader - TODO model matrix
+    //load shader
     const char* vp =
         "#version 150 core\n"
         "in vec3 a_position;\n"
         "in vec2 a_texcoord;\n"
+        "uniform mat4 u_model;\n"
         "uniform mat4 u_view;\n"
         "uniform mat4 u_projection;\n"
         "out vec2 v_texcoord;\n"
 
         "void main()\n"
         "{\n"
-        "gl_Position = u_projection * (u_view * vec4(a_position, 1.0));\n"
+        "gl_Position = u_projection * (u_view * u_model * vec4(a_position, 1.0));\n"
         "v_texcoord = a_texcoord;\n"
         "}\n";
 
@@ -52,6 +53,7 @@ int initScene(scene_t& scene)
         fprintf(stderr, "Error loading shader\n");
         return 0;
     }
+    scene.u_model = glGetUniformLocation(scene.program, "u_model");
     scene.u_view = glGetUniformLocation(scene.program, "u_view");
     scene.u_projection = glGetUniformLocation(scene.program, "u_projection");
     scene.u_texture = glGetUniformLocation(scene.program, "u_texture");
@@ -72,7 +74,9 @@ void drawScene(const scene_t& scene, const glm::mat4& view, const glm::mat4& pro
     //foreach mesh in scene
     for (const auto& mesh : scene.meshes)
     {
-        //TODO model matrix
+        //model matrix
+        glUniformMatrix4fv(scene.u_model, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+
         glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
         glCheck(glBindVertexArray(mesh->vao));

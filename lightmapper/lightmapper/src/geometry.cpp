@@ -1,6 +1,7 @@
 #include "geometry.h"
 #include "GLCheck.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 namespace
@@ -94,6 +95,7 @@ void updateGeometry(int32_t flags, scene_t& scene)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
     //do this afterwards just so we don't mess with room mesh mid-creation
     if (flags & WallFlags::Ceiling)
