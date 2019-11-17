@@ -145,6 +145,8 @@
     <ClCompile Include="src\gl_helpers.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\scene.cpp" />
+    <ClCompile Include="src\tinyfiledialogs.c" />
+    <ClCompile Include="src\ui_windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\scene.h" />
@@ -152,6 +154,7 @@
     <ClInclude Include="src\gl_helpers.h" />
     <ClInclude Include="src\lightmapper.h" />
     <ClInclude Include="src\structures.h" />
+    <ClInclude Include="src\ui_windows.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

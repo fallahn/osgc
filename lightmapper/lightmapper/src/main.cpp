@@ -6,6 +6,7 @@
 #include "scene.h"
 #include "gl_helpers.h"
 #include "geometry.h"
+#include "ui_windows.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -38,10 +39,11 @@ void mainLoop(GLFWwindow* window, scene_t& scene)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    static bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
+    //static bool show_demo_window = true;
+    //ImGui::ShowDemoWindow(&show_demo_window);
 
-    //TODO custom imgui rendering
+    //custom imgui rendering
+    mapBrowserWindow();
 
 
     ImGui::Render();

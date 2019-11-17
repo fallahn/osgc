@@ -6,6 +6,8 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Mesh.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/scene.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/ui_windows.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_demo.cpp
