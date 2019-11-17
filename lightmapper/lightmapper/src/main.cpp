@@ -11,6 +11,9 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 
 #define LIGHTMAPPER_IMPLEMENTATION
@@ -46,9 +49,8 @@ void mainLoop(GLFWwindow* window, scene_t& scene)
 	glViewport(0, 0, w, h);
 
 	//camera for glfw window
-	float view[16], projection[16];
-	fpsCameraViewMatrix(window, view);
-	perspectiveMatrix(projection, 45.0f, (float)w / (float)h, 0.01f, 100.0f);
+    glm::mat4 view = fpsCameraViewMatrix(window);
+    glm::mat4 projection = glm::perspective(45.f * static_cast<float>(M_PI/180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
 
 	//draw to screen with a blueish sky
 	glClearColor(0.6f, 0.8f, 1.0f, 1.0f);

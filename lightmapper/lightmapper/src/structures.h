@@ -6,6 +6,7 @@
 #endif
 
 #include <glad/glad.h>
+#include <glm/mat4x4.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -44,6 +45,8 @@ struct Mesh final
 
     std::vector<vertex_t> vertices;
     std::vector<std::uint16_t> indices;
+
+    glm::mat4 modelMatrix = glm::mat4(1.f);
 };
 
 struct Scene final

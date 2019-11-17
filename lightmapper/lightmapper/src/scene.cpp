@@ -59,15 +59,15 @@ int initScene(scene_t& scene)
     return 1;
 }
 
-void drawScene(const scene_t& scene, float* view, float* projection)
+void drawScene(const scene_t& scene, const glm::mat4& view, const glm::mat4& projection)
 {
     glEnable(GL_DEPTH_TEST);
 
     glUseProgram(scene.program);
     glUniform1i(scene.u_texture, 0);
 
-    glUniformMatrix4fv(scene.u_projection, 1, GL_FALSE, projection);
-    glUniformMatrix4fv(scene.u_view, 1, GL_FALSE, view);
+    glUniformMatrix4fv(scene.u_projection, 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(scene.u_view, 1, GL_FALSE, &view[0][0]);
 
     //foreach mesh in scene
     for (const auto& mesh : scene.meshes)
@@ -126,9 +126,9 @@ int bake(scene_t& scene)
         mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
 
     int vp[4];
-    float view[16], projection[16];
+    glm::mat4 view, projection;
     double lastUpdateTime = 0.0;
-    while (lmBegin(ctx, vp, view, projection))
+    while (lmBegin(ctx, vp, &view[0][0], &projection[0][0]))
     {
         //render to lightmapper framebuffer
         glViewport(vp[0], vp[1], vp[2], vp[3]);
