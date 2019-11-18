@@ -31,17 +31,21 @@ source distribution.
 #include "MatrixPool.hpp"
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
+#include <SFML/Graphics/Texture.hpp>
+
 #include <string>
 
+struct SharedData;
 class ModelState final : public xy::State, public xy::GuiClient
 {
 public:
-    ModelState(xy::StateStack&, xy::State::Context);
+    ModelState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -54,11 +58,20 @@ public:
     xy::StateID stateID() const override;
 
 private:
+    SharedData& m_sharedData;
     xy::Scene m_uiScene;
+    xy::Entity m_roomEntity;
+    sf::Texture m_roomTexture;
+    xy::ConfigFile m_mapData;
+    std::vector<xy::ConfigObject*> m_roomList;
 
     objl::Loader m_objLoader;
-    bool m_fileLoaded;
-    std::string m_fileData;
+    bool m_modelLoaded;
+    std::string m_modelInfo;
+
+    bool m_showModelImporter;
+    bool m_quitEditor;
+    std::int32_t m_currentView;
 
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
@@ -66,7 +79,8 @@ private:
 
     void initScene();
     void parseVerts();
-    void exportModel(const std::string&);
+    bool exportModel(const std::string&);
 
     void setCamera(std::int32_t);
+    void setRoomGeometry();
 };

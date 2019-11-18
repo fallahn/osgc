@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "WallData.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTransportSystem.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
@@ -73,12 +74,12 @@ namespace
     }
 }
 
-PlayerDirector::PlayerDirector(const xy::Scene& uiScene)
+PlayerDirector::PlayerDirector(const xy::Scene& uiScene, SharedData& sd)
     : m_uiScene         (uiScene),
+    m_sharedData        (sd),
     m_cameraLocked      (false),
     m_cameraDirection   (0),
     m_inputFlags        (0),
-    m_currentRoom       (0),
     m_walkToTarget      (false),
     m_nextAnimTime      (sf::seconds(xy::Util::Random::value(5, 12)))
 {
@@ -136,7 +137,7 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
             pos.x -= xy::DefaultSceneSize.x;
             pos.x /= 4.f;
 
-            auto roomPos = roomPosition(m_currentRoom);
+            auto roomPos = roomPosition(m_sharedData.currentRoom);
             switch (m_cameraDirection)
             {
             default: break;
@@ -185,13 +186,13 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
                 case CameraEvent::N:
                 case CameraEvent::S:
                     m_targetScreenPosition.x = m_realWorldPosition.x;
-                    m_targetScreenPosition.y = (m_currentRoom / GameConst::RoomsPerRow) * GameConst::RoomWidth;
+                    m_targetScreenPosition.y = (m_sharedData.currentRoom / GameConst::RoomsPerRow) * GameConst::RoomWidth;
                     
                     break;
                 case CameraEvent::E:
                 case CameraEvent::W:
                     m_targetScreenPosition.y = m_realWorldPosition.y;
-                    m_targetScreenPosition.x = (m_currentRoom % GameConst::RoomsPerRow) * GameConst::RoomWidth;
+                    m_targetScreenPosition.x = (m_sharedData.currentRoom % GameConst::RoomsPerRow) * GameConst::RoomWidth;
                     break;
                 }
                 //m_targetScreenPosition += Offsets[data.direction] * OffsetDistance;
@@ -449,48 +450,48 @@ void PlayerDirector::doCollision()
                 case CameraEvent::N:
                     if (pos.x > otherPos.x)
                     {
-                        m_currentRoom++;
+                        m_sharedData.currentRoom++;
                         shiftCam(false);
                     }
                     else
                     {
-                        m_currentRoom--;
+                        m_sharedData.currentRoom--;
                         shiftCam(true);
                     }
                     break;
                 case CameraEvent::E:
                     if (pos.y > otherPos.y)
                     {
-                        m_currentRoom += GameConst::RoomsPerRow;
+                        m_sharedData.currentRoom += GameConst::RoomsPerRow;
                         shiftCam(false);
                     }
                     else
                     {
-                        m_currentRoom -= GameConst::RoomsPerRow;
+                        m_sharedData.currentRoom -= GameConst::RoomsPerRow;
                         shiftCam(true);
                     }
                     break;
                 case CameraEvent::S:
                     if (pos.x < otherPos.x)
                     {
-                        m_currentRoom--;
+                        m_sharedData.currentRoom--;
                         shiftCam(false);
                     }
                     else
                     {
-                        m_currentRoom++;
+                        m_sharedData.currentRoom++;
                         shiftCam(true);
                     }
                     break;
                 case CameraEvent::W:
                     if (pos.y < otherPos.y)
                     {
-                        m_currentRoom -= GameConst::RoomsPerRow;
+                        m_sharedData.currentRoom -= GameConst::RoomsPerRow;
                         shiftCam(false);
                     }
                     else
                     {
-                        m_currentRoom += GameConst::RoomsPerRow;
+                        m_sharedData.currentRoom += GameConst::RoomsPerRow;
                         shiftCam(true);
                     }
                     break;

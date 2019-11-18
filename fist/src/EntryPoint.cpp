@@ -31,6 +31,7 @@ source distribution.
 #include "GameState.hpp"
 #include "ErrorState.hpp"
 #include "ModelState.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -39,14 +40,18 @@ source distribution.
 
 int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
+    *sharedData = std::make_any<SharedData>();
+    auto& data = std::any_cast<SharedData&>(*sharedData);
+
     ss->registerState<MenuState>(StateID::MainMenu);
-    ss->registerState<GameState>(StateID::Game);
+    ss->registerState<GameState>(StateID::Game, data);
     ss->registerState<ErrorState>(StateID::Error);
-    ss->registerState<ModelState>(StateID::Model);
+    ss->registerState<ModelState>(StateID::Model, data);
 
     xy::App::getActiveInstance()->setWindowTitle("DoodleDude 2 - Bob's Big Adventure");
 
-    return StateID::Game;
+    //return StateID::Game;
+    return StateID::Model;
 }
 
 void end(xy::StateStack* ss)

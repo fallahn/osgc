@@ -29,6 +29,18 @@ enum Direction
     Nort, Eas, Sout, Wes //these names clash with something windowsy 0.o
 };
 
+namespace WallFlags
+{
+    enum
+    {
+        North = 0x1,
+        East = 0x2,
+        South = 0x4,
+        West = 0x8,
+        Ceiling = 0x10
+    };
+}
+
 static const sf::FloatRect NorthUV(540.f, 0.f, 960.f, 540.f);
 static const sf::FloatRect EastUV(2040.f, 540.f, -540.f, 960.f);
 static const sf::FloatRect SouthUV(1500.f, 2040.f, -960.f, -540.f);
