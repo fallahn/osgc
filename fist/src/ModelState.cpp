@@ -71,7 +71,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
     m_uiScene           (ctx.appInstance.getMessageBus()),
-    m_fileLoaded        (false),
+    m_modelLoaded        (false),
     m_showModelImporter (false),
     m_quitEditor        (false),
     m_currentView       (0)
@@ -91,11 +91,6 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                         auto filePath = xy::FileSystem::openFileDialogue(xy::FileSystem::getResourcePath(), "obj");
                         if (!filePath.empty() && m_objLoader.LoadFile(filePath))
                         {
-                            if (m_fileLoaded)
-                            {
-                                //TODO delete existing entity
-                            }
-
                             std::stringstream ss;
                             ss << "Model Info:\n\n";
                             for (const auto& mesh : m_objLoader.LoadedMeshes)
@@ -108,32 +103,29 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
                             parseVerts();
 
-                            m_fileData = ss.str();
-                            m_fileLoaded = true;
+                            m_modelInfo = ss.str();
+                            m_modelLoaded = true;
                         }
                     }
                     ImGui::SameLine();
                     static bool importImmediate = false;
-                    if (ImGui::Button("Export"))
+                    if (ImGui::Button("Save") && m_modelLoaded)
                     {
                         auto filePath = xy::FileSystem::saveFileDialogue(xy::FileSystem::getResourcePath(), "xym");
                         if (!filePath.empty())
                         {
-                            exportModel(filePath);
-
-                            if (importImmediate)
+                            if (exportModel(filePath) && importImmediate)
                             {
-                                //TODO check export was successful
                                 //TODO load the exported model to the scene
                             }
                         }
                     }
                     ImGui::SameLine();
-                    ImGui::Checkbox("Load to Scene", &importImmediate);
+                    ImGui::Checkbox("Load to scene on save", &importImmediate);
 
-                    if (m_fileLoaded)
+                    if (m_modelLoaded)
                     {
-                        ImGui::Text("%s", m_fileData.data());
+                        ImGui::Text("%s", m_modelInfo.data());
                     }
                     else
                     {
@@ -141,7 +133,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     }
 
                     if (ImGui::Button("Reset Rotation")
-                        && m_fileLoaded)
+                        && m_modelLoaded)
                     {
                         modelEntity.getComponent<xy::Transform>().setRotation(0.f);
                     }
@@ -241,6 +233,9 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 
                 //TODO add/remove walls
                 //TODO add/remove doors if wall exists
+
+                //TODO list models in scene
+                //TODO show info on selected model
             }
             ImGui::End();
 
@@ -255,8 +250,6 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 requestStackPush(StateID::Game);
             }
         });
-
-    
 }
 
 //public
@@ -318,7 +311,7 @@ void ModelState::handleMessage(const xy::Message& msg)
 
 bool ModelState::update(float dt)
 {
-    if (m_fileLoaded)
+    if (m_modelLoaded)
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
@@ -443,7 +436,7 @@ void ModelState::initScene()
 
 void ModelState::parseVerts()
 {
-    if (!m_fileLoaded)
+    if (!m_modelLoaded)
     {
         auto texID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
         auto& tex = m_resources.get<sf::Texture>(texID);
@@ -524,13 +517,40 @@ void ModelState::parseVerts()
     }
 }
 
-void ModelState::exportModel(const std::string& path)
+bool ModelState::exportModel(const std::string& path)
 {
-    //serialise verts and write binary mesh file
-    writeModelBinary(modelEntity.getComponent<xy::Drawable>().getVertices(), path);
+    //assert path is into assets directory
+    if (auto idx = path.find("assets"); idx != std::string::npos)
+    {
+        auto absPath = path;
+        if (xy::FileSystem::getFileExtension(path) != ".xym")
+        {
+            absPath += ".xym";
+        }
 
-    //TODO write metadata file containing bin name,
-    //texture name and pos/rot/scale
+        auto relPath = absPath.substr(idx);
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+        //serialise verts and write binary mesh file
+        if (writeModelBinary(modelEntity.getComponent<xy::Drawable>().getVertices(), absPath))
+        {
+            //write metadata file containing bin name,
+            //texture name and pos/rot/scale
+            xy::ConfigFile cfg("model");
+            cfg.addProperty("bin").setValue(relPath);
+            cfg.addProperty("texture").setValue(std::string("")); //TODO import texture path from mtl
+            cfg.addProperty("position").setValue(sf::Vector2f());
+            cfg.addProperty("rotation").setValue(0.f);
+            cfg.addProperty("scale").setValue(sf::Vector2f(1.f, 1.f));
+            cfg.save(path.substr(0, -3) + ".xmd");
+
+            modelEntity.getComponent<xy::Drawable>().getVertices().clear();
+            m_modelLoaded = false;
+
+            return true;
+        }
+    }
+    return false;
 }
 
 void ModelState::setCamera(std::int32_t direction)

@@ -66,8 +66,8 @@ private:
     std::vector<xy::ConfigObject*> m_roomList;
 
     objl::Loader m_objLoader;
-    bool m_fileLoaded;
-    std::string m_fileData;
+    bool m_modelLoaded;
+    std::string m_modelInfo;
 
     bool m_showModelImporter;
     bool m_quitEditor;
@@ -79,7 +79,7 @@ private:
 
     void initScene();
     void parseVerts();
-    void exportModel(const std::string&);
+    bool exportModel(const std::string&);
 
     void setCamera(std::int32_t);
     void setRoomGeometry();
