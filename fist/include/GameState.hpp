@@ -35,10 +35,12 @@ source distribution.
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
+struct SharedData;
+
 class GameState final : public xy::State
 {
 public:
-    GameState(xy::StateStack&, xy::State::Context);
+    GameState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -51,6 +53,7 @@ public:
     xy::StateID stateID() const override;
 
 private:
+    SharedData& m_sharedData;
     xy::Scene m_gameScene;
     xy::Scene m_uiScene;
     MatrixPool m_matrixPool;

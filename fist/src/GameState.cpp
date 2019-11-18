@@ -38,6 +38,7 @@ source distribution.
 #include "PlayerDirector.hpp"
 #include "AnimationID.hpp"
 #include "SliderSystem.hpp"
+#include "SharedStateData.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -77,12 +78,11 @@ namespace
     const sf::FloatRect InventoryButtonArea(855.f, 168.f, 210.f, 48.f);
 
     xy::Entity debugCam;
-
-    std::int32_t startingRoom = 57;
 }
 
-GameState::GameState(xy::StateStack& ss, xy::State::Context ctx)
+GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     : xy::State (ss, ctx),
+    m_sharedData(sd),
     m_gameScene (ctx.appInstance.getMessageBus(), 1024),
     m_uiScene   (ctx.appInstance.getMessageBus())
 {
@@ -266,7 +266,7 @@ void GameState::initScene()
     m_gameScene.addSystem<Camera3DSystem>(mb);
     m_gameScene.addSystem<Render3DSystem>(mb);
 
-    m_gameScene.addDirector<PlayerDirector>(m_uiScene);
+    m_gameScene.addDirector<PlayerDirector>(m_uiScene, m_sharedData);
 
     m_uiScene.addSystem<xy::UISystem>(mb);
     m_uiScene.addSystem<SliderSystem>(mb);
@@ -283,7 +283,7 @@ void GameState::initScene()
     auto camEnt = m_gameScene.getActiveCamera();
     camEnt.addComponent<xy::CommandTarget>().ID = CommandID::Camera;
     camEnt.getComponent<xy::Transform>().setPosition(0.f, GameConst::RoomWidth * 0.49f);
-    camEnt.addComponent<CameraTransport>(startingRoom); //57
+    camEnt.addComponent<CameraTransport>(m_sharedData.currentRoom); //57 default
     camEnt.getComponent<xy::Camera>().setView(view.getSize());
     camEnt.getComponent<xy::Camera>().setViewport(view.getViewport());
 
@@ -350,13 +350,12 @@ void GameState::addPlayer()
         return entity;
     };
 
-    auto x = startingRoom % GameConst::RoomsPerRow;
-    auto y = startingRoom / GameConst::RoomsPerRow;
+    auto x = m_sharedData.currentRoom % GameConst::RoomsPerRow;
+    auto y = m_sharedData.currentRoom / GameConst::RoomsPerRow;
 
     sf::Vector2f position(x * GameConst::RoomWidth, y * GameConst::RoomWidth);
     auto player = createSprite("bob", position);
     m_gameScene.getDirector<PlayerDirector>().setPlayerEntity(player);
-    m_gameScene.getDirector<PlayerDirector>().setCurrentRoom(startingRoom);
 
     auto& animMap = player.addComponent<AnimationMap>();
     animMap[AnimationID::Idle] = spriteSheet.getAnimationIndex("idle", "bob");

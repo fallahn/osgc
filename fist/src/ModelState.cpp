@@ -33,6 +33,7 @@ source distribution.
 #include "GameConst.hpp"
 #include "RoomBuilder.hpp"
 #include "ModelIO.hpp"
+#include "SharedStateData.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -59,88 +60,210 @@ namespace
 {
 #include "Sprite3DShader.inl"
     xy::Entity modelEntity;
+
+    std::array<std::string, 4u> viewStrings =
+    {
+        "North", "East", "South", "West"
+    };
 }
 
-ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx)
-    : xy::State (ss, ctx),
-    m_uiScene   (ctx.appInstance.getMessageBus()),
-    m_fileLoaded(false)
+ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
+    : xy::State         (ss, ctx),
+    m_sharedData        (sd),
+    m_uiScene           (ctx.appInstance.getMessageBus()),
+    m_fileLoaded        (false),
+    m_showModelImporter (false),
+    m_quitEditor        (false),
+    m_currentView       (0)
 {
     initScene();
 
+    //model importer
+    registerWindow([&]()
+        {
+            if (m_showModelImporter)
+            {
+                ImGui::SetNextWindowSize({ 400, 400 }, ImGuiCond_FirstUseEver);
+                if (ImGui::Begin("Model Importer", &m_showModelImporter))
+                {
+                    if (ImGui::Button("Import"))
+                    {
+                        auto filePath = xy::FileSystem::openFileDialogue(xy::FileSystem::getResourcePath(), "obj");
+                        if (!filePath.empty() && m_objLoader.LoadFile(filePath))
+                        {
+                            if (m_fileLoaded)
+                            {
+                                //TODO delete existing entity
+                            }
+
+                            std::stringstream ss;
+                            ss << "Model Info:\n\n";
+                            for (const auto& mesh : m_objLoader.LoadedMeshes)
+                            {
+                                ss << mesh.MeshName << "\n";
+                                ss << "Vertices: " << mesh.Vertices.size() << "\n";
+                                ss << "Triangles: " << mesh.Indices.size() / 3 << "\n";
+                                ss << "Material: " << mesh.MeshMaterial.name << "\n\n";
+                            }
+
+                            parseVerts();
+
+                            m_fileData = ss.str();
+                            m_fileLoaded = true;
+                        }
+                    }
+                    ImGui::SameLine();
+                    static bool importImmediate = false;
+                    if (ImGui::Button("Export"))
+                    {
+                        auto filePath = xy::FileSystem::saveFileDialogue(xy::FileSystem::getResourcePath(), "xym");
+                        if (!filePath.empty())
+                        {
+                            exportModel(filePath);
+
+                            if (importImmediate)
+                            {
+                                //TODO check export was successful
+                                //TODO load the exported model to the scene
+                            }
+                        }
+                    }
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Load to Scene", &importImmediate);
+
+                    if (m_fileLoaded)
+                    {
+                        ImGui::Text("%s", m_fileData.data());
+                    }
+                    else
+                    {
+                        ImGui::Text("%s", "No Model Loaded.");
+                    }
+
+                    if (ImGui::Button("Reset Rotation")
+                        && m_fileLoaded)
+                    {
+                        modelEntity.getComponent<xy::Transform>().setRotation(0.f);
+                    }
+                }
+                ImGui::End();
+            }
+        });
+
+    //main window
     registerWindow([&]()
         {
             ImGui::SetNextWindowSize({ 400, 400 }, ImGuiCond_FirstUseEver);
-            ImGui::Begin("Model Importer");
-            if (ImGui::Button("Import"))
+            if (ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_MenuBar))
             {
-                auto filePath = xy::FileSystem::openFileDialogue(xy::FileSystem::getResourcePath(), "obj");
-                if (!filePath.empty() && m_objLoader.LoadFile(filePath))
+                if (ImGui::BeginMenuBar())
                 {
-                    if (m_fileLoaded)
+                    if (ImGui::BeginMenu("File"))
                     {
-                        //TODO delete existing entity
+                        ImGui::MenuItem("Save", nullptr, nullptr);
+                        ImGui::MenuItem("Quit", nullptr, &m_quitEditor);
+                        ImGui::EndMenu();
                     }
 
-                    std::stringstream ss;
-                    ss << "Model Info:\n\n";
-                    for (const auto& mesh : m_objLoader.LoadedMeshes)
+                    if (ImGui::BeginMenu("Tools"))
                     {
-                        ss << mesh.MeshName << "\n";
-                        ss << "Vertices: " << mesh.Vertices.size() << "\n";
-                        ss << "Triangles: " << mesh.Indices.size() / 3 << "\n";
-                        ss << "Material: " << mesh.MeshMaterial.name << "\n\n";
+                        ImGui::MenuItem("Import obj", nullptr, &m_showModelImporter);
+                        ImGui::MenuItem("Add model", nullptr, nullptr);
+                        //TODO launch the baker from here somehow?
+                        ImGui::EndMenu();
                     }
 
-                    parseVerts();
-
-                    m_fileData = ss.str();
-                    m_fileLoaded = true;
+                    ImGui::EndMenuBar();
                 }
-            }
-            ImGui::SameLine();
-            static bool importImmediate = false;
-            if (ImGui::Button("Export"))
-            {
-                auto filePath = xy::FileSystem::saveFileDialogue(xy::FileSystem::getResourcePath(), "xym");
-                if (!filePath.empty())
+
+                //instructions
+                ImGui::Text("%s", "1-4 Change view");
+
+                ImGui::Text("%s", "Current view :");
+                ImGui::SameLine();
+                auto lastView = m_currentView;
+                if (ImGui::BeginCombo("direction", viewStrings[m_currentView].c_str(), ImGuiComboFlags_NoArrowButton))
                 {
-                    exportModel(filePath);
-
-                    if (importImmediate)
+                    for (auto i = 0u; i < viewStrings.size(); ++i)
                     {
-                        //TODO check export was successful
-                        //TODO load the exported model to the scene
+                        bool selected = (m_currentView == i);
+                        if (ImGui::Selectable(viewStrings[i].c_str(), selected))
+                        {
+                            m_currentView = i;
+                        }
+                        if (selected)
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                if (lastView != m_currentView)
+                {
+                    setCamera(m_currentView);
+                }
+                ImGui::Separator();
+                ImGui::Text("%s", "Current Room: ");
+                ImGui::SameLine();
+                ImGui::Text("%s", std::to_string(m_sharedData.currentRoom).c_str());
+                
+                //set room texture
+                if (ImGui::Button("Select Texture"))
+                {
+                    auto path = xy::FileSystem::openFileDialogue(xy::FileSystem::getResourcePath(), "png,jpg");
+                    if (!path.empty())
+                    {
+                        if (xy::FileSystem::fileExists(path))
+                        {
+                            m_roomTexture.loadFromFile(path);
+
+                            std::replace(path.begin(), path.end(), '\\', '/');
+                            if (auto idx = path.find("assets"); idx != std::string::npos)
+                            {
+                                path = path.substr(idx);
+
+                                if (auto* src = m_roomList[m_sharedData.currentRoom]->findProperty("src"); src)
+                                {
+                                    src->setValue(path);
+                                }
+                                else
+                                {
+                                    m_roomList[m_sharedData.currentRoom]->addProperty("src").setValue(path);
+                                }
+                            }
+                            else
+                            {
+                                xy::Logger::log("\'assets\' was not found in texture path, path nor saved to map data");
+                            }
+                        }
                     }
                 }
+                
+                //TODO add/remove walls
+                //TODO add/remove doors if wall exists
             }
-            ImGui::SameLine();
-            ImGui::Checkbox("Load to Scene", &importImmediate);
-
-            if (m_fileLoaded)
-            {
-                ImGui::Text("%s", m_fileData.data());
-            }
-            else
-            {
-                ImGui::Text("%s", "No Model Loaded.");
-            }
-
-            if (ImGui::Button("Reset Rotation")
-                && m_fileLoaded)
-            {
-                modelEntity.getComponent<xy::Transform>().setRotation(0.f);
-            }
-
             ImGui::End();
+
+            if (m_quitEditor)
+            {
+                //TODO confirmation
+                //TODO remind to bake?
+
+                m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
+
+                requestStackPop();
+                requestStackPush(StateID::Game);
+            }
         });
+
+    
 }
 
 //public
 bool ModelState::handleEvent(const sf::Event& evt)
 {
 	//prevents events being forwarded if the console wishes to consume them
-	if (xy::ui::wantsKeyboard() || xy::ui::wantsMouse())
+	if (/*xy::ui::wantsKeyboard() || */xy::ui::wantsMouse())
     {
         return true;
     }
@@ -163,18 +286,23 @@ bool ModelState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::F3:
             requestStackPop();
             requestStackPush(StateID::Game);
+            //TODO ask to save?
             break;
         case sf::Keyboard::Num1:
             setCamera(0);
+            m_currentView = 0;
             break;
         case sf::Keyboard::Num2:
             setCamera(1);
+            m_currentView = 1;
             break;
         case sf::Keyboard::Num3:
             setCamera(2);
+            m_currentView = 2;
             break;
         case sf::Keyboard::Num4:
             setCamera(3);
+            m_currentView = 3;
             break;
         }
     }
@@ -250,28 +378,67 @@ void ModelState::initScene()
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
 
     //set up a background
-    auto texID = m_resources.load<sf::Texture>("assets/images/rooms/template.png");
-    auto& tex = m_resources.get<sf::Texture>(texID);
+    m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/rooms/editor.png");
 
     auto entity = m_uiScene.createEntity();
     entity.addComponent<xy::Transform>();
     entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
     entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
-    entity.getComponent<xy::Drawable>().setTexture(&tex);
+    entity.getComponent<xy::Drawable>().setTexture(&m_roomTexture);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
     entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight;
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-    
-    auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-    addFloor(verts);
-    addCeiling(verts);
-    addWall(verts, 0);
-    addWall(verts, 1);
-    addWall(verts, 2);
-    addWall(verts, 3);
 
-    entity.getComponent<xy::Drawable>().updateLocalBounds();
+    m_roomEntity = entity;
+
+    if (!m_mapData.loadFromFile(xy::FileSystem::getResourcePath() + "assets/game.map"))
+    {
+        //TODO push error state
+
+        return;
+    }
+
+    auto& objects = m_mapData.getObjects();
+    for (auto& obj : objects)
+    {
+        if (obj.getName() == "room")
+        {
+            m_roomList.push_back(&obj);
+        }
+    }
+
+    if (m_roomList.size() != 64)
+    {
+        //TODO push error state
+        xy::Logger::log("Room data missing from map file - only " + std::to_string(m_roomList.size()) + " rooms were found", xy::Logger::Type::Error);
+        return;
+    }
+
+    bool sortFailed = false;
+    std::sort(m_roomList.begin(), m_roomList.end(),
+        [&](const xy::ConfigObject* a, const xy::ConfigObject* b)
+        {
+            int IDa = 0;
+            int IDb = 0;
+            try
+            {
+                IDa = std::atoi(a->getId().c_str());
+                IDb = std::atoi(b->getId().c_str());
+            }
+            catch (...) { sortFailed = true; }
+
+            return IDa < IDb;
+        });
+
+    if (sortFailed)
+    {
+        //TODO push error state
+
+        return;
+    }
+
+    setRoomGeometry();
 }
 
 void ModelState::parseVerts()
@@ -391,4 +558,77 @@ void ModelState::setCamera(std::int32_t direction)
     cam.rotationMatrix = glm::rotate(cam.rotationMatrix, rotations[direction], glm::vec3(0.f, 0.f, 1.f));
 
     m_uiScene.getActiveCamera().getComponent<xy::Transform>().setPosition(positions[direction]);
+}
+
+void ModelState::setRoomGeometry()
+{
+    XY_ASSERT(m_sharedData.currentRoom > 0 && m_sharedData.currentRoom < m_roomList.size(), "Invalid Index");
+
+    auto& room = m_roomList[m_sharedData.currentRoom];
+    const auto& properties = room->getProperties();
+    
+    std::int32_t flags = 0;
+    for (const auto& prop : properties)
+    {
+        //TODO look for texture path
+        if (prop.getName() == "ceiling"
+            && prop.getValue<std::int32_t>() != 0)
+        {
+            flags |= WallFlags::Ceiling;
+        }
+        else if (prop.getName() == "src"
+            && xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + prop.getValue<std::string>()))
+        {
+            m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + prop.getValue<std::string>());
+        }
+    }
+
+    const auto& objects = room->getObjects();
+    for (const auto& obj : objects)
+    {
+        if (obj.getName() == "wall")
+        {
+            const auto& wallProperties = obj.getProperties();
+            for (const auto& wallProp : wallProperties)
+            {
+                if (wallProp.getName() == "direction")
+                {
+                    switch (wallProp.getValue<std::int32_t>())
+                    {
+                    default: break;
+                    case 0:
+                        flags |= WallFlags::North;
+                        break;
+                    case 1:
+                        flags |= WallFlags::East;
+                        break;
+                    case 2:
+                        flags |= WallFlags::South;
+                        break;
+                    case 3:
+                        flags |= WallFlags::West;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    auto& verts = m_roomEntity.getComponent<xy::Drawable>().getVertices();
+    verts.clear();
+    addFloor(verts);
+
+    for (auto i = 0; i < 4; ++i)
+    {
+        if (flags & (1 << i))
+        {
+            addWall(verts, i);
+        }
+    }
+    if (flags & WallFlags::Ceiling)
+    {
+        addCeiling(verts);
+    }
+
+    m_roomEntity.getComponent<xy::Drawable>().updateLocalBounds();
 }

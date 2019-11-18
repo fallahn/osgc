@@ -21,27 +21,27 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/Director.hpp>
 #include <xyginext/ecs/Entity.hpp>
 
+struct SharedData;
 class PlayerDirector final : public xy::Director
 {
 public:
-    explicit PlayerDirector(const xy::Scene&);
+    explicit PlayerDirector(const xy::Scene&, SharedData&);
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
     void process(float) override;
 
     void setPlayerEntity(xy::Entity);
-    void setCurrentRoom(std::int32_t room) { m_currentRoom = room; }
 
 private:
     const xy::Scene& m_uiScene;
+    SharedData& m_sharedData;
 
     bool m_cameraLocked;
     xy::Entity m_playerEntity;
     std::int32_t m_cameraDirection;
     std::uint16_t m_inputFlags;
 
-    std::int32_t m_currentRoom;
     sf::Vector2f m_realWorldPosition; //used when interpolating view changes
     sf::Vector2f m_targetScreenPosition;
     sf::Vector2f m_targetWalkPosition;
