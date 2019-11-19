@@ -76,6 +76,7 @@ private:
     bool m_quitEditor;
     bool m_loadModel;
     std::int32_t m_currentView;
+    xy::Entity m_selectedModel;
 
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;

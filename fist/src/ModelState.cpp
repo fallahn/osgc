@@ -238,8 +238,52 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 //TODO add/remove walls
                 //TODO add/remove doors if wall exists
 
-                //TODO list models in scene
-                //TODO show info on selected model
+                ImGui::Separator();
+
+                //list models in scene
+                if (!m_modelList.empty())
+                {
+                    ImGui::ListBoxHeader("Models");
+                    for (const auto& [name, ent] : m_modelList)
+                    {
+                        if (ImGui::Selectable(name.c_str()))
+                        {
+                            //set selected entity
+                            m_selectedModel = ent;
+
+                            //TODO undo some sort of shader effect on any existing selection
+                            //and apply it to the new selection.
+                        }
+                    }
+                    ImGui::ListBoxFooter();
+                }
+
+                //show info on selected model
+                if (m_selectedModel.isValid())
+                {
+                    auto& tx = m_selectedModel.getComponent<xy::Transform>();
+                    auto pos = tx.getPosition();
+                    auto rotation = tx.getRotation();
+
+                    ImGui::SliderFloat2("Position", reinterpret_cast<float*>(&pos), -GameConst::RoomWidth / 2.f, GameConst::RoomWidth / 2.f);
+                    ImGui::SliderFloat("Rotation", &rotation, -180.f, 180.f);
+
+                    tx.setPosition(pos);
+                    tx.setRotation(rotation);
+
+                    if (ImGui::Button("Delete"))
+                    {
+                        auto entry = std::find_if(m_modelList.begin(), m_modelList.end(),
+                            [&](const std::pair<std::string, xy::Entity>& p)
+                            { 
+                                return p.second == m_selectedModel;
+                            });
+                        m_modelList.erase(entry);                        
+
+                        m_uiScene.destroyEntity(m_selectedModel);
+                        m_selectedModel = {};
+                    }
+                }
             }
             ImGui::End();
 
@@ -737,6 +781,8 @@ void ModelState::setRoomGeometry()
                 }
             }
         }
+
+        //TODO look for model objects
     }
 
     auto& verts = m_roomEntity.getComponent<xy::Drawable>().getVertices();
