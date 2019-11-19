@@ -71,9 +71,11 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     : xy::State         (ss, ctx),
     m_sharedData        (sd),
     m_uiScene           (ctx.appInstance.getMessageBus()),
-    m_modelLoaded        (false),
+    m_modelLoaded       (false),
+    m_defaultTexID      (0),
     m_showModelImporter (false),
     m_quitEditor        (false),
+    m_loadModel         (false),
     m_currentView       (0)
 {
     initScene();
@@ -116,7 +118,8 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                         {
                             if (exportModel(filePath) && importImmediate)
                             {
-                                //TODO load the exported model to the scene
+                                //load the exported model to the scene
+                                loadModel(filePath);
                             }
                         }
                     }
@@ -125,7 +128,8 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
                     if (m_modelLoaded)
                     {
-                        ImGui::Text("%s", m_modelInfo.data());
+                        ImGui::Text("%s", m_modelInfo.c_str());
+                        ImGui::Text("%s", m_modelTextureName.c_str());
                     }
                     else
                     {
@@ -160,7 +164,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     if (ImGui::BeginMenu("Tools"))
                     {
                         ImGui::MenuItem("Import obj", nullptr, &m_showModelImporter);
-                        ImGui::MenuItem("Add model", nullptr, nullptr);
+                        ImGui::MenuItem("Add model", nullptr, &m_loadModel);
                         //TODO launch the baker from here somehow?
                         ImGui::EndMenu();
                     }
@@ -198,7 +202,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 ImGui::Text("%s", "Current Room: ");
                 ImGui::SameLine();
                 ImGui::Text("%s", std::to_string(m_sharedData.currentRoom).c_str());
-                
+                ImGui::SameLine();
                 //set room texture
                 if (ImGui::Button("Select Texture"))
                 {
@@ -244,10 +248,21 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 //TODO confirmation
                 //TODO remind to bake?
 
-                m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
+                saveRoom();
 
                 requestStackPop();
                 requestStackPush(StateID::Game);
+            }
+
+            if (m_loadModel)
+            {
+                auto path = xy::FileSystem::openFileDialogue(xy::FileSystem::getResourcePath(), "xmd");
+                if(!path.empty())
+                {
+                    loadModel(path);
+                }
+
+                m_loadModel = false;
             }
         });
 }
@@ -436,10 +451,13 @@ void ModelState::initScene()
 
 void ModelState::parseVerts()
 {
-    if (!m_modelLoaded)
+    if (!modelEntity.isValid())
     {
-        auto texID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
-        auto& tex = m_resources.get<sf::Texture>(texID);
+        if (m_defaultTexID == 0)
+        {
+            m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+        }
+        auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
 
         //create the entity first
         modelEntity = m_uiScene.createEntity();
@@ -510,6 +528,12 @@ void ModelState::parseVerts()
         }
 
         modelEntity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        //check the material for a texture name
+        if (!m_objLoader.LoadedMaterials.empty())
+        {
+            m_modelTextureName = m_objLoader.LoadedMaterials[0].map_Kd;
+        }
     }
     else
     {
@@ -538,19 +562,100 @@ bool ModelState::exportModel(const std::string& path)
             //texture name and pos/rot/scale
             xy::ConfigFile cfg("model");
             cfg.addProperty("bin").setValue(relPath);
-            cfg.addProperty("texture").setValue(std::string("")); //TODO import texture path from mtl
-            cfg.addProperty("position").setValue(sf::Vector2f());
-            cfg.addProperty("rotation").setValue(0.f);
-            cfg.addProperty("scale").setValue(sf::Vector2f(1.f, 1.f));
-            cfg.save(path.substr(0, -3) + ".xmd");
+            cfg.addProperty("texture").setValue(m_modelTextureName);
+            cfg.addProperty("depth").setValue(modelEntity.getComponent<Sprite3D>().depth);
+            cfg.save(path.substr(0, path.find_last_of('.')) + ".xmd");
 
             modelEntity.getComponent<xy::Drawable>().getVertices().clear();
             m_modelLoaded = false;
+            m_modelTextureName.clear();
 
             return true;
         }
     }
     return false;
+}
+
+void ModelState::loadModel(const std::string& path)
+{
+    if (m_modelList.size() == MaxModels)
+    {
+        xy::Logger::log("Maximum models have already been loaded", xy::Logger::Type::Info);
+        return;
+    }
+
+    auto absPath = path;
+    if (xy::FileSystem::getFileExtension(path) == ".xym")
+    {
+        absPath.pop_back();
+        absPath.pop_back();
+        absPath += "md";
+    }
+    else if (xy::FileSystem::getFileExtension(path) != ".xmd")
+    {
+        absPath += ".xmd";
+    }
+
+    xy::ConfigFile cfg;
+    cfg.loadFromFile(absPath);
+    if (cfg.getName() == "model")
+    {
+        std::string binPath;
+        std::string texture;
+        float depth = 0.f;
+
+        const auto& properties = cfg.getProperties();
+        for (const auto& prop : properties)
+        {
+            const auto name = prop.getName();
+            if (name == "bin")
+            {
+                binPath = prop.getValue<std::string>();
+            }
+            else if (name == "texure")
+            {
+                texture = prop.getValue<std::string>();
+            }
+            else if (name == "depth")
+            {
+                depth = prop.getValue<float>();
+            }
+        }
+
+        if (!binPath.empty() && depth > 0)
+        {
+            std::string modelName = xy::FileSystem::getFileName(absPath);
+            modelName = modelName.substr(0, modelName.find_last_of('.'));
+
+            //TODO load texture if name isn't empty
+            if (m_defaultTexID == 0)
+            {
+                m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+            }
+            auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
+
+            auto entity = m_uiScene.createEntity();
+            entity.addComponent<xy::Transform>();
+            entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+            entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
+            entity.getComponent<xy::Drawable>().setTexture(&tex);
+            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+            entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+            entity.getComponent<xy::Drawable>().setCulled(false);
+            entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
+            entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
+            entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
+            entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+            if (m_modelList.count(modelName) != 0)
+            {
+                m_uiScene.destroyEntity(m_modelList[modelName]);
+            }
+            m_modelList[modelName] = entity;
+        }
+    }
 }
 
 void ModelState::setCamera(std::int32_t direction)
@@ -651,4 +756,11 @@ void ModelState::setRoomGeometry()
     }
 
     m_roomEntity.getComponent<xy::Drawable>().updateLocalBounds();
+}
+
+void ModelState::saveRoom()
+{
+    //TODO instert any model nodes
+
+    m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
 }

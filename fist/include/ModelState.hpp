@@ -40,6 +40,7 @@ source distribution.
 #include <SFML/Graphics/Texture.hpp>
 
 #include <string>
+#include <map>
 
 struct SharedData;
 class ModelState final : public xy::State, public xy::GuiClient
@@ -68,19 +69,29 @@ private:
     objl::Loader m_objLoader;
     bool m_modelLoaded;
     std::string m_modelInfo;
+    std::string m_modelTextureName;
+    std::size_t m_defaultTexID;
 
     bool m_showModelImporter;
     bool m_quitEditor;
+    bool m_loadModel;
     std::int32_t m_currentView;
 
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
     MatrixPool m_matrixPool;
 
+    std::map<std::string, xy::Entity> m_modelList;
+    static constexpr std::size_t MaxModels = 8;
+
     void initScene();
     void parseVerts();
     bool exportModel(const std::string&);
 
+    void loadModel(const std::string&);
+
     void setCamera(std::int32_t);
     void setRoomGeometry();
+
+    void saveRoom();
 };
