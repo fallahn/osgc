@@ -163,6 +163,7 @@ R"(
 #version 120
 
 uniform sampler2D u_texture;
+uniform vec3 u_highlightColour;
 
 varying vec3 v_normal;
 
@@ -181,7 +182,7 @@ void main()
     float diffuseAmount = max(dot(lightDir, normal), 0.5);
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
-    gl_FragColor = vec4(ambientColour + diffuse, baseColour.a);
+    gl_FragColor = vec4((ambientColour + diffuse) * u_highlightColour, baseColour.a);
 })";
 
 static const std::string SpriteFragmentColoured =

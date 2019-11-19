@@ -255,11 +255,15 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     {
                         if (ImGui::Selectable(name.c_str()))
                         {
+                            //unset old colour if something already selected
+                            if (m_selectedModel.isValid())
+                            {
+                                m_selectedModel.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
+                            }
+
                             //set selected entity
                             m_selectedModel = ent;
-
-                            //TODO undo some sort of shader effect on any existing selection
-                            //and apply it to the new selection.
+                            m_selectedModel.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(0.f, 1.f, 0.f));
                         }
                     }
                     ImGui::ListBoxFooter();
@@ -371,6 +375,18 @@ bool ModelState::handleEvent(const sf::Event& evt)
             break;
         }
     }
+    else if (evt.type == sf::Event::MouseButtonReleased)
+    {
+        if (evt.mouseButton.button == sf::Mouse::Left)
+        {
+            //deselect any selection
+            if (m_selectedModel.isValid())
+            {
+                m_selectedModel.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
+            }
+            m_selectedModel = {};
+        }
+    }
 
     m_uiScene.forwardEvent(evt);
     return false;
@@ -441,6 +457,7 @@ void ModelState::initScene()
 
     //load shader
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
+    m_shaders.get(ShaderID::Sprite3DTextured).setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
 
     //set up a background
     m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/rooms/editor.png");
@@ -452,6 +469,7 @@ void ModelState::initScene()
     entity.getComponent<xy::Drawable>().setTexture(&m_roomTexture);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+    entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
     entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight;
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
@@ -721,6 +739,7 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
         entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
         entity.getComponent<xy::Drawable>().updateLocalBounds();

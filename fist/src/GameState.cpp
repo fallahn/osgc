@@ -305,6 +305,8 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertexColoured, SpriteFragmentColoured);
     m_shaders.preload(ShaderID::Sprite3DWalls, SpriteVertexWalls, SpriteFragmentWalls);
+
+    m_shaders.get(ShaderID::Sprite3DTextured).setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
 }
 
 void GameState::addPlayer()
