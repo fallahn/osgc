@@ -65,6 +65,12 @@ namespace
     {
         "North", "East", "South", "West"
     };
+
+    struct NodeData final
+    {
+        std::string binPath;
+        std::string texture;
+    };
 }
 
 ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -76,6 +82,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     m_showModelImporter (false),
     m_quitEditor        (false),
     m_loadModel         (false),
+    m_saveRoom          (false),
     m_currentView       (0)
 {
     initScene();
@@ -156,7 +163,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 {
                     if (ImGui::BeginMenu("File"))
                     {
-                        ImGui::MenuItem("Save", nullptr, nullptr);
+                        ImGui::MenuItem("Save", nullptr, &m_saveRoom);
                         ImGui::MenuItem("Quit", nullptr, &m_quitEditor);
                         ImGui::EndMenu();
                     }
@@ -308,6 +315,12 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
                 m_loadModel = false;
             }
+
+            if (m_saveRoom)
+            {
+                saveRoom();
+                m_saveRoom = false;
+            }
         });
 }
 
@@ -336,9 +349,9 @@ bool ModelState::handleEvent(const sf::Event& evt)
 #endif
             break;
         case sf::Keyboard::F3:
+            saveRoom();
             requestStackPop();
             requestStackPush(StateID::Game);
-            //TODO ask to save?
             break;
         case sf::Keyboard::Num1:
             setCamera(0);
@@ -680,6 +693,8 @@ void ModelState::loadModel(const std::string& path)
 
             auto entity = m_uiScene.createEntity();
             entity.addComponent<xy::Transform>();
+            entity.addComponent<NodeData>().binPath = binPath;
+            entity.getComponent<NodeData>().texture = texture;
             entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
             entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
             entity.getComponent<xy::Drawable>().setTexture(&tex);
@@ -733,7 +748,7 @@ void ModelState::setRoomGeometry()
 {
     XY_ASSERT(m_sharedData.currentRoom > 0 && m_sharedData.currentRoom < m_roomList.size(), "Invalid Index");
 
-    auto& room = m_roomList[m_sharedData.currentRoom];
+    auto* room = m_roomList[m_sharedData.currentRoom];
     const auto& properties = room->getProperties();
     
     std::int32_t flags = 0;
@@ -806,7 +821,67 @@ void ModelState::setRoomGeometry()
 
 void ModelState::saveRoom()
 {
-    //TODO instert any model nodes
+    //insert any model nodes
+    auto* room = m_roomList[m_sharedData.currentRoom];
+    for (const auto& [name, entity] : m_modelList)
+    {
+        if (auto* modelNode = room->findObjectWithId(name); !modelNode || modelNode->getName() != "model")
+        {
+            modelNode = room->addObject("model", name);
+            modelNode->addProperty("binPath").setValue(entity.getComponent<NodeData>().binPath);
+            modelNode->addProperty("texture").setValue(entity.getComponent<NodeData>().texture);
+            modelNode->addProperty("depth").setValue(entity.getComponent<Sprite3D>().depth);
+            modelNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
+            modelNode->addProperty("rotation").setValue(entity.getComponent<xy::Transform>().getRotation());
+        }
+        else
+        {
+            if (auto* binProp = modelNode->findProperty("binPath"); !binProp)
+            {
+                modelNode->addProperty("binPath").setValue(entity.getComponent<NodeData>().binPath);
+            }
+            else
+            {
+                binProp->setValue(entity.getComponent<NodeData>().binPath);
+            }
+
+            if (auto* texProp = modelNode->findProperty("texture"); !texProp)
+            {
+                modelNode->addProperty("texture").setValue(entity.getComponent<NodeData>().texture);
+            }
+            else
+            {
+                texProp->setValue(entity.getComponent<NodeData>().texture);
+            }
+
+            if (auto* depthProp = modelNode->findProperty("depth"); !depthProp)
+            {
+                modelNode->addProperty("depth").setValue(entity.getComponent<Sprite3D>().depth);
+            }
+            else
+            {
+                depthProp->setValue(entity.getComponent<Sprite3D>().depth);
+            }
+
+            if (auto* posProp = modelNode->findProperty("position"); !posProp)
+            {
+                modelNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
+            }
+            else
+            {
+                posProp->setValue(entity.getComponent<xy::Transform>().getPosition());
+            }
+
+            if (auto* rotProp = modelNode->findProperty("rotation"); !rotProp)
+            {
+                modelNode->addProperty("rotation").setValue(entity.getComponent<xy::Transform>().getRotation());
+            }
+            else
+            {
+                rotProp->setValue(entity.getComponent<xy::Transform>().getRotation());
+            }
+        }
+    }
 
     m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
 }

@@ -75,6 +75,7 @@ private:
     bool m_showModelImporter;
     bool m_quitEditor;
     bool m_loadModel;
+    bool m_saveRoom;
     std::int32_t m_currentView;
     xy::Entity m_selectedModel;
 
