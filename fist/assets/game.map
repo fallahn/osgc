@@ -1105,16 +1105,15 @@ map game_map
         }
         model suzanne
         {
-            binPath = "assets/models/suzanne.xym"
+            bin = "assets/models/suzanne.xym"
             depth = 189.000000
+            position = -207.761002,367.058990
+            rotation = 57.646999
             texture = ""
-            position = -322.388000,14.118000
-            rotation = 69.412003
         }
         model buns
         {
-            binPath = "assets/models/buns.xym"
-            texture = ""
+            bin = assets/models/buns.xym
             depth = 189.000000
             position = 164.776001,-395.294006
             rotation = 337.647003

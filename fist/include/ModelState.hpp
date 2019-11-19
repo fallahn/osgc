@@ -91,6 +91,7 @@ private:
     bool exportModel(const std::string&);
 
     void loadModel(const std::string&);
+    void parseModelNode(const xy::ConfigObject&, const std::string&);
 
     void setCamera(std::int32_t);
     void setRoomGeometry();

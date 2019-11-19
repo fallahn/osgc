@@ -657,63 +657,79 @@ void ModelState::loadModel(const std::string& path)
     cfg.loadFromFile(absPath);
     if (cfg.getName() == "model")
     {
-        std::string binPath;
-        std::string texture;
-        float depth = 0.f;
+        std::string modelName = xy::FileSystem::getFileName(absPath);
+        modelName = modelName.substr(0, modelName.find_last_of('.'));
 
-        const auto& properties = cfg.getProperties();
-        for (const auto& prop : properties)
+        parseModelNode(cfg, modelName);
+    }
+}
+
+void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& modelName)
+{
+    std::string binPath;
+    std::string texture;
+    float depth = 0.f;
+    sf::Vector2f position;
+    float rotation = 0.f;
+
+    const auto& properties = cfg.getProperties();
+    for (const auto& prop : properties)
+    {
+        const auto name = prop.getName();
+        if (name == "bin")
         {
-            const auto name = prop.getName();
-            if (name == "bin")
-            {
-                binPath = prop.getValue<std::string>();
-            }
-            else if (name == "texure")
-            {
-                texture = prop.getValue<std::string>();
-            }
-            else if (name == "depth")
-            {
-                depth = prop.getValue<float>();
-            }
+            binPath = prop.getValue<std::string>();
         }
-
-        if (!binPath.empty() && depth > 0)
+        else if (name == "texure")
         {
-            std::string modelName = xy::FileSystem::getFileName(absPath);
-            modelName = modelName.substr(0, modelName.find_last_of('.'));
-
-            //TODO load texture if name isn't empty
-            if (m_defaultTexID == 0)
-            {
-                m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
-            }
-            auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
-
-            auto entity = m_uiScene.createEntity();
-            entity.addComponent<xy::Transform>();
-            entity.addComponent<NodeData>().binPath = binPath;
-            entity.getComponent<NodeData>().texture = texture;
-            entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
-            entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
-            entity.getComponent<xy::Drawable>().setTexture(&tex);
-            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
-            entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-            entity.getComponent<xy::Drawable>().setCulled(false);
-            entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
-            entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
-            entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-            readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
-            entity.getComponent<xy::Drawable>().updateLocalBounds();
-
-            if (m_modelList.count(modelName) != 0)
-            {
-                m_uiScene.destroyEntity(m_modelList[modelName]);
-            }
-            m_modelList[modelName] = entity;
+            texture = prop.getValue<std::string>();
         }
+        else if (name == "depth")
+        {
+            depth = prop.getValue<float>();
+        }
+        else if (name == "position")
+        {
+            position = prop.getValue<sf::Vector2f>();
+        }
+        else if (name == "rotation")
+        {
+            rotation = prop.getValue<float>();
+        }
+    }
+
+    if (!binPath.empty() && depth > 0)
+    {
+        //TODO load texture if name isn't empty
+        if (m_defaultTexID == 0)
+        {
+            m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+        }
+        auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
+
+        auto entity = m_uiScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position);
+        entity.getComponent<xy::Transform>().setRotation(rotation);
+        entity.addComponent<NodeData>().binPath = binPath;
+        entity.getComponent<NodeData>().texture = texture;
+        entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
+        entity.getComponent<xy::Drawable>().setTexture(&tex);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().setCulled(false);
+        entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+        readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        if (m_modelList.count(modelName) != 0)
+        {
+            m_uiScene.destroyEntity(m_modelList[modelName]);
+        }
+        m_modelList[modelName] = entity;
     }
 }
 
@@ -747,6 +763,12 @@ void ModelState::setCamera(std::int32_t direction)
 void ModelState::setRoomGeometry()
 {
     XY_ASSERT(m_sharedData.currentRoom > 0 && m_sharedData.currentRoom < m_roomList.size(), "Invalid Index");
+
+    for (const auto& [name, ent] : m_modelList)
+    {
+        m_uiScene.destroyEntity(ent);
+    }
+    m_modelList.clear();
 
     auto* room = m_roomList[m_sharedData.currentRoom];
     const auto& properties = room->getProperties();
@@ -797,7 +819,11 @@ void ModelState::setRoomGeometry()
             }
         }
 
-        //TODO look for model objects
+        //look for model objects
+        else if (obj.getName() == "model")
+        {
+            parseModelNode(obj, obj.getId());
+        }
     }
 
     auto& verts = m_roomEntity.getComponent<xy::Drawable>().getVertices();
@@ -828,7 +854,7 @@ void ModelState::saveRoom()
         if (auto* modelNode = room->findObjectWithId(name); !modelNode || modelNode->getName() != "model")
         {
             modelNode = room->addObject("model", name);
-            modelNode->addProperty("binPath").setValue(entity.getComponent<NodeData>().binPath);
+            modelNode->addProperty("bin").setValue(entity.getComponent<NodeData>().binPath);
             modelNode->addProperty("texture").setValue(entity.getComponent<NodeData>().texture);
             modelNode->addProperty("depth").setValue(entity.getComponent<Sprite3D>().depth);
             modelNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
@@ -836,9 +862,9 @@ void ModelState::saveRoom()
         }
         else
         {
-            if (auto* binProp = modelNode->findProperty("binPath"); !binProp)
+            if (auto* binProp = modelNode->findProperty("bin"); !binProp)
             {
-                modelNode->addProperty("binPath").setValue(entity.getComponent<NodeData>().binPath);
+                modelNode->addProperty("bin").setValue(entity.getComponent<NodeData>().binPath);
             }
             else
             {
