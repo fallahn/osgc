@@ -210,6 +210,9 @@ bool GameState::loadMap()
             }
         }
 
+        //TODO store room meta data
+        //TODO generate occlusion mapping
+
         return roomCount == 64;
     }
     return false;

@@ -40,6 +40,8 @@ source distribution.
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
 
 #include <string>
 #include <map>
@@ -91,6 +93,12 @@ private:
 
     sf::RenderTexture m_aerialPreview;
     sf::Sprite m_aerialSprite;
+    std::vector<sf::RectangleShape> m_aerialObjects;
+    sf::RectangleShape m_aerialBackground;
+    sf::CircleShape m_eyeconOuter;
+
+    std::uint16_t m_wallFlags;
+    std::vector<sf::RectangleShape> m_aerialWalls;
 
     void initScene();
     void parseVerts();

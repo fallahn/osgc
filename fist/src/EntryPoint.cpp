@@ -50,8 +50,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
     xy::App::getActiveInstance()->setWindowTitle("DoodleDude 2 - Bob's Big Adventure");
 
-    return StateID::Game;
-    //return StateID::Model;
+    //return StateID::Game;
+    return StateID::Model;
 }
 
 void end(xy::StateStack* ss)

@@ -53,7 +53,6 @@ source distribution.
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
 
 #include <sstream>
 
@@ -72,8 +71,6 @@ namespace
         std::string binPath;
         std::string texture;
     };
-
-    xy::Entity topCam;
 }
 
 ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -83,11 +80,12 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     m_modelLoaded       (false),
     m_defaultTexID      (0),
     m_showModelImporter (false),
-    m_showAerialView    (false),
+    m_showAerialView    (true),
     m_quitEditor        (false),
     m_loadModel         (false),
     m_saveRoom          (false),
-    m_currentView       (0)
+    m_currentView       (0),
+    m_wallFlags         (0)
 {
     initScene();
 
@@ -267,6 +265,18 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     }
                 }
                 
+                if (ImGui::Button("Prev") && m_sharedData.currentRoom > 0)
+                {
+                    m_sharedData.currentRoom--;
+                    setRoomGeometry();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Next") && m_sharedData.currentRoom < 63)
+                {
+                    m_sharedData.currentRoom++;
+                    setRoomGeometry();
+                }
+
                 //TODO add/remove walls
                 //TODO add/remove doors if wall exists
 
@@ -437,26 +447,49 @@ bool ModelState::update(float dt)
         }
     }
 
+    if (!m_modelList.empty() && m_showAerialView)
+    {
+        m_aerialObjects.clear();
+
+        for (const auto& model : m_modelList)
+        {
+            sf::RectangleShape& rect = m_aerialObjects.emplace_back();
+            auto aabb = model.second.getComponent<xy::Drawable>().getLocalBounds();
+            aabb = model.second.getComponent<xy::Transform>().getTransform().transformRect(aabb);
+            rect.setSize({ aabb.width, aabb.height });
+            rect.setFillColor(model.second == m_selectedModel ? sf::Color::Green : sf::Color(100,149,237));
+            rect.setOrigin(rect.getSize() / 2.f);
+            rect.setPosition(model.second.getComponent<xy::Transform>().getPosition());
+        }
+    }
+
     m_uiScene.update(dt);
     return false;
 }
 
 void ModelState::draw()
 {
-    auto cam = m_uiScene.getActiveCamera();
+    if (m_showAerialView)
+    {
+        m_aerialPreview.clear(sf::Color(10, 20, 60));
+        m_aerialPreview.draw(m_aerialBackground);
+
+        for (const auto& r : m_aerialWalls)
+        {
+            m_aerialPreview.draw(r);
+        }
+
+        for (const auto& r : m_aerialObjects)
+        {
+            m_aerialPreview.draw(r);
+        }
+        m_aerialPreview.draw(m_eyeconOuter);
+        m_aerialPreview.display();  
+    }
+
     auto& rw = getContext().renderWindow;
-    
+    auto cam = m_uiScene.getActiveCamera();    
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
-    m_uiScene.setActiveCamera(topCam);
-    shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&topCam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
-
-    m_aerialPreview.clear(sf::Color(10, 20, 60));
-    m_aerialPreview.draw(m_uiScene); //why doesn't this draw? :(
-    m_aerialPreview.draw(sf::CircleShape(50.f));
-    m_aerialPreview.display();
-    //rw.draw(m_uiScene);    
-
-    m_uiScene.setActiveCamera(cam);
     shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
     rw.draw(m_uiScene);
 }
@@ -490,16 +523,27 @@ void ModelState::initScene()
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
     camera.depth = GameConst::RoomHeight / 2.f;
 
-
-    topCam = m_uiScene.createEntity();
-    topCam.addComponent<xy::Transform>();
-    topCam.addComponent<xy::Camera>().setView({ 1020.f, 1020.f });
-    topCam.getComponent<xy::Camera>().setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
-    topCam.addComponent<Camera3D>().projectionMatrix = glm::perspective(45.f * xy::Util::Const::degToRad, 1.f, 0.1f, GameConst::RoomWidth * 3.5f);
-    topCam.getComponent<Camera3D>().depth = GameConst::RoomHeight * 4.f;
+    //top down preview
     m_aerialPreview.create(200, 200, sf::ContextSettings(24u));
+    m_aerialPreview.setView(sf::View(sf::Vector2f(), sf::Vector2f(1020.f, 1020.f)));
     m_aerialSprite.setTexture(m_aerialPreview.getTexture(), true);
-    m_aerialSprite.setScale(1.f, -1.f); //ImGui won't flip render textures
+    //flippedy doo dah
+    auto rect = m_aerialSprite.getTextureRect();
+    rect.top = rect.height;
+    rect.height = -rect.height;
+    m_aerialSprite.setTextureRect(rect);
+
+    m_aerialBackground.setSize({ GameConst::RoomWidth, GameConst::RoomWidth });
+    m_aerialBackground.setOrigin(m_aerialBackground.getSize() / 2.f);
+    m_aerialBackground.setFillColor(sf::Color(255, 255, 255, 80));
+
+    m_eyeconOuter.setRadius(0.5f);
+    m_eyeconOuter.setOrigin(0.5f, 0.5f);
+    m_eyeconOuter.setScale(28.f, 14.f);
+    m_eyeconOuter.setFillColor(sf::Color::Black);
+    m_eyeconOuter.setOutlineColor(sf::Color::Magenta);
+    m_eyeconOuter.setOutlineThickness(2.f);
+    m_eyeconOuter.setPosition(0.f, GameConst::RoomWidth / 2.f);
 
     //load shader
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
@@ -831,6 +875,7 @@ void ModelState::setCamera(std::int32_t direction)
     cam.rotationMatrix = glm::rotate(cam.rotationMatrix, rotations[direction], glm::vec3(0.f, 0.f, 1.f));
 
     m_uiScene.getActiveCamera().getComponent<xy::Transform>().setPosition(positions[direction]);
+    m_eyeconOuter.setPosition(positions[direction] / 2.f);
 }
 
 void ModelState::setRoomGeometry()
@@ -842,18 +887,21 @@ void ModelState::setRoomGeometry()
         m_uiScene.destroyEntity(ent);
     }
     m_modelList.clear();
+    m_selectedModel = {};
+    m_aerialObjects.clear();
+    m_aerialWalls.clear();
 
     auto* room = m_roomList[m_sharedData.currentRoom];
     const auto& properties = room->getProperties();
     
-    std::int32_t flags = 0;
+    m_wallFlags = 0;
     for (const auto& prop : properties)
     {
         //TODO look for texture path
         if (prop.getName() == "ceiling"
             && prop.getValue<std::int32_t>() != 0)
         {
-            flags |= WallFlags::Ceiling;
+            m_wallFlags |= WallFlags::Ceiling;
         }
         else if (prop.getName() == "src"
             && xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + prop.getValue<std::string>()))
@@ -876,16 +924,16 @@ void ModelState::setRoomGeometry()
                     {
                     default: break;
                     case 0:
-                        flags |= WallFlags::North;
+                        m_wallFlags |= WallFlags::North;
                         break;
                     case 1:
-                        flags |= WallFlags::East;
+                        m_wallFlags |= WallFlags::East;
                         break;
                     case 2:
-                        flags |= WallFlags::South;
+                        m_wallFlags |= WallFlags::South;
                         break;
                     case 3:
-                        flags |= WallFlags::West;
+                        m_wallFlags |= WallFlags::West;
                         break;
                     }
                 }
@@ -905,17 +953,51 @@ void ModelState::setRoomGeometry()
 
     for (auto i = 0; i < 4; ++i)
     {
-        if (flags & (1 << i))
+        if (m_wallFlags & (1 << i))
         {
             addWall(verts, i);
         }
     }
-    if (flags & WallFlags::Ceiling)
+    if (m_wallFlags & WallFlags::Ceiling)
     {
         addCeiling(verts);
     }
 
     m_roomEntity.getComponent<xy::Drawable>().updateLocalBounds();
+
+    //aerial view
+    if (m_wallFlags & WallFlags::North)
+    {
+        auto& r = m_aerialWalls.emplace_back();
+        r.setFillColor(sf::Color::Red);
+        r.setSize({ GameConst::RoomWidth, 4.f });
+        r.setOrigin(r.getSize() / 2.f);
+        r.setPosition(0.f, -GameConst::RoomWidth / 2.f);
+    }
+    if (m_wallFlags & WallFlags::East)
+    {
+        auto& r = m_aerialWalls.emplace_back();
+        r.setFillColor(sf::Color::Red);
+        r.setSize({ 4.f, GameConst::RoomWidth });
+        r.setOrigin(r.getSize() / 2.f);
+        r.setPosition(GameConst::RoomWidth / 2.f, 0.f);
+    }
+    if (m_wallFlags & WallFlags::South)
+    {
+        auto& r = m_aerialWalls.emplace_back();
+        r.setFillColor(sf::Color::Red);
+        r.setSize({ GameConst::RoomWidth, 4.f });
+        r.setOrigin(r.getSize() / 2.f);
+        r.setPosition(0.f, GameConst::RoomWidth / 2.f);
+    }
+    if (m_wallFlags & WallFlags::West)
+    {
+        auto& r = m_aerialWalls.emplace_back();
+        r.setFillColor(sf::Color::Red);
+        r.setSize({ 4.f, GameConst::RoomWidth });
+        r.setOrigin(r.getSize() / 2.f);
+        r.setPosition(-GameConst::RoomWidth / 2.f, 0.f);
+    }
 }
 
 void ModelState::saveRoom()
