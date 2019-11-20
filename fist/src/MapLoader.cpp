@@ -72,6 +72,19 @@ bool GameState::loadMap()
     std::int32_t roomCount = 0;
     auto processRoom = [&](const xy::ConfigObject& room)
     {
+        int roomID = -1;
+        try
+        {
+            roomID = std::atoi(room.getId().c_str());
+        }
+        catch(...)
+        {
+            return;
+        }
+
+        RoomData roomData;
+        roomData.id = roomID;
+
         auto xCoord = roomCount % GameConst::RoomsPerRow;
         auto yCoord = roomCount / GameConst::RoomsPerRow;
         sf::Vector2f roomPosition(xCoord * (GameConst::RoomWidth + GameConst::RoomPadding),
@@ -85,7 +98,6 @@ bool GameState::loadMap()
 
         //get room properties
         std::string textureName;
-        bool hasCeiling = false;
         for (const auto& prop : properties)
         {
             if (prop.getName() == "src")
@@ -94,11 +106,19 @@ bool GameState::loadMap()
             }
             else if (prop.getName() == "ceiling")
             {
-                hasCeiling = prop.getValue<std::int32_t>() != 0;
+                roomData.hasCeiling = prop.getValue<std::int32_t>() != 0;
             }
             else if (prop.getName() == "itemID")
             {
                 //TODO stash this somewhere
+            }
+            else if (prop.getName() == "sky_colour")
+            {
+                roomData.skyColour = prop.getValue<sf::Vector3f>();
+            }
+            else if (prop.getName() == "room_colour")
+            {
+                roomData.roomColour = prop.getValue<sf::Vector3f>();
             }
         }
 
@@ -149,8 +169,6 @@ bool GameState::loadMap()
         auto& tex = m_resources.get<sf::Texture>(texID);
 
         //create the room entity
-
-
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(roomPosition);
         entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
@@ -165,7 +183,7 @@ bool GameState::loadMap()
         std::array<WallData, 4u> wallData = {};
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         addFloor(verts);
-        if (hasCeiling)
+        if (roomData.hasCeiling)
         {
             addCeiling(verts);
         }
@@ -195,6 +213,9 @@ bool GameState::loadMap()
             entity.getComponent<xy::Transform>().addChild(triggerEnt.getComponent<xy::Transform>());
         }
 
+        //stash room data
+        m_roomData.push_back(roomData);
+
         roomCount++;
     };
 
@@ -210,8 +231,13 @@ bool GameState::loadMap()
             }
         }
 
-        //TODO store room meta data
-        //TODO generate occlusion mapping
+        std::sort(m_roomData.begin(), m_roomData.end(),
+            [](const RoomData& a, const RoomData& b)
+            {
+                return a.id < b.id;
+            });
+
+        //TODO generate occlusion info from room data
 
         return roomCount == 64;
     }

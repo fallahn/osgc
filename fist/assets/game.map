@@ -1097,7 +1097,7 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
-        sky_colour = 1.000000,0.298000,0.447000
+        sky_colour = 1.000000,1.000000,0.638000
         room_colour = 0.191000,0.234000,1.000000
         wall 
         {

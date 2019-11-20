@@ -222,9 +222,15 @@ bool GameState::update(float dt)
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
     shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
 
+    //TODO get an interpolated light value from somewhere - probably place in shared data by player director
+    //along with other properties light current point light position
+    shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_roomData[m_sharedData.currentRoom].skyColour));
+
     auto& shader2 = m_shaders.get(ShaderID::Sprite3DWalls);
     shader2.setUniform("u_viewMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewMatrix[0][0]));
     shader2.setUniform("u_projMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().projectionMatrix[0][0]));
+
+    shader2.setUniform("u_skylightColour", sf::Glsl::Vec3(m_roomData[m_sharedData.currentRoom].skyColour));
 
     return true;
 }

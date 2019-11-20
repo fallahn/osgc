@@ -29,6 +29,7 @@ source distribution.
 
 #include "CameraInput.hpp"
 #include "MatrixPool.hpp"
+#include "WallData.hpp"
 
 #include <xyginext/core/State.hpp>
 #include <xyginext/ecs/Scene.hpp>
@@ -61,6 +62,8 @@ private:
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
     std::size_t m_defaultTexID;
+
+    std::vector<RoomData> m_roomData;
 
     void initScene();
     void loadResources();

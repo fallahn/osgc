@@ -19,9 +19,19 @@ Copyright 2019 Matt Marchant
 #pragma once
 
 #include <SFML/System/Vector2.hpp>
+#include <SFML/System/Vector3.hpp>
 
 struct WallData final
 {
     bool passable = true;
     sf::Vector2f targetPoint;
+};
+
+struct RoomData final
+{
+    //TODO list of visible rooms for rendering
+    sf::Vector3f skyColour = { 1.f,1.f,1.f };
+    sf::Vector3f roomColour = { 1.f,1.f,1.f };
+    std::int32_t id = -1; //used to sort the array
+    bool hasCeiling = false;
 };
