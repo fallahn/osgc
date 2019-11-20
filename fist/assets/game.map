@@ -1097,6 +1097,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 1.000000,0.298000,0.447000
+        room_colour = 0.191000,0.234000,1.000000
         wall 
         {
             direction = 2
@@ -1105,17 +1107,19 @@ map game_map
         }
         model suzanne
         {
-            bin = assets/models/suzanne.xym
+            bin = "assets/models/suzanne.xym"
             depth = 189.000000
             position = -346.329010,276.000000
             rotation = 147.457993
+            texture = ""
         }
         model buns
         {
-            bin = assets/models/buns.xym
+            bin = "assets/models/buns.xym"
             depth = 189.000000
             position = 224.809998,-288.000000
             rotation = 3.051000
+            texture = ""
         }
     }
     room 58
@@ -1137,8 +1141,7 @@ map game_map
         }
         model suzanne
         {
-            bin = "assets/models/suzanne.xym"
-            texture = ""
+            bin = assets/models/suzanne.xym
             depth = 189.000000
             position = 0.000000,-432.000000
             rotation = 0.000000

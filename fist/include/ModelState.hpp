@@ -100,6 +100,9 @@ private:
     std::uint16_t m_wallFlags;
     std::vector<sf::RectangleShape> m_aerialWalls;
 
+    sf::Vector3f m_skyColour;
+    sf::Vector3f m_roomColour;
+
     void initScene();
     void parseVerts();
     bool exportModel(const std::string&);

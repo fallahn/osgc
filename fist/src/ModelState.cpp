@@ -229,10 +229,11 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     setCamera(m_currentView);
                 }
                 ImGui::Separator();
-                ImGui::Text("%s", "Current Room: ");
-                ImGui::SameLine();
-                ImGui::Text("%s", std::to_string(m_sharedData.currentRoom).c_str());
-                ImGui::SameLine();
+                if (ImGui::InputInt("Current Room", &m_sharedData.currentRoom))
+                {
+                    m_sharedData.currentRoom = std::min(63, std::max(0, m_sharedData.currentRoom));
+                    setRoomGeometry();
+                }
                 //set room texture
                 if (ImGui::Button("Select Texture"))
                 {
@@ -265,20 +266,14 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     }
                 }
                 
-                if (ImGui::Button("Prev") && m_sharedData.currentRoom > 0)
-                {
-                    m_sharedData.currentRoom--;
-                    setRoomGeometry();
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Next") && m_sharedData.currentRoom < 63)
-                {
-                    m_sharedData.currentRoom++;
-                    setRoomGeometry();
-                }
-
                 //TODO add/remove walls
                 //TODO add/remove doors if wall exists
+                //TODO add/remove ceiling
+
+                //light colours
+                ImGui::SliderFloat3("Sky Colour", reinterpret_cast<float*>(&m_skyColour), 0.f, 1.f);
+                ImGui::SliderFloat3("Room Colour", reinterpret_cast<float*>(&m_roomColour), 0.f, 1.f);
+
 
                 ImGui::Separator();
 
@@ -463,6 +458,19 @@ bool ModelState::update(float dt)
         }
     }
 
+    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+    if (m_wallFlags & WallFlags::Ceiling)
+    {
+        //set indoor light uniform
+        //TODO set sky amount to 0
+    }
+    else
+    {
+        //set skylight uniform
+        shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_skyColour));
+        //TODO set room amount to 0
+    }
+
     m_uiScene.update(dt);
     return false;
 }
@@ -502,6 +510,9 @@ xy::StateID ModelState::stateID() const
 //private
 void ModelState::initScene()
 {
+    m_skyColour = { 1.f, 1.f, 1.f };
+    m_roomColour = { 1.f, 1.f, 1.f };
+
     auto& mb = getContext().appInstance.getMessageBus();
 
     m_uiScene.addSystem<xy::CallbackSystem>(mb);
@@ -891,13 +902,15 @@ void ModelState::setRoomGeometry()
     m_aerialObjects.clear();
     m_aerialWalls.clear();
 
+    m_skyColour = { 1.f,1.f,1.f };
+    m_roomColour = { 1.f,1.f,1.f };
+
     auto* room = m_roomList[m_sharedData.currentRoom];
     const auto& properties = room->getProperties();
     
     m_wallFlags = 0;
     for (const auto& prop : properties)
     {
-        //TODO look for texture path
         if (prop.getName() == "ceiling"
             && prop.getValue<std::int32_t>() != 0)
         {
@@ -907,6 +920,14 @@ void ModelState::setRoomGeometry()
             && xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + prop.getValue<std::string>()))
         {
             m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + prop.getValue<std::string>());
+        }
+        else if (prop.getName() == "sky_colour")
+        {
+            m_skyColour = prop.getValue<sf::Vector3f>();
+        }
+        else if (prop.getName() == "room_colour")
+        {
+            m_roomColour = prop.getValue<sf::Vector3f>();
         }
     }
 
@@ -1062,6 +1083,25 @@ void ModelState::saveRoom()
                 rotProp->setValue(entity.getComponent<xy::Transform>().getRotation());
             }
         }
+    }
+
+    //update room colour properties
+    if (auto* skyProp = room->findProperty("sky_colour"); skyProp)
+    {
+        skyProp->setValue(m_skyColour);
+    }
+    else
+    {
+        room->addProperty("sky_colour").setValue(m_skyColour);
+    }
+
+    if (auto* roomProp = room->findProperty("room_colour"); roomProp)
+    {
+        roomProp->setValue(m_roomColour);
+    }
+    else
+    {
+        room->addProperty("room_colour").setValue(m_roomColour);
     }
 
     m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
