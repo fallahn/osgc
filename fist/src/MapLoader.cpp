@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "CommandIDs.hpp"
 #include "RoomBuilder.hpp"
 #include "WallData.hpp"
+#include "ModelIO.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -71,6 +72,11 @@ bool GameState::loadMap()
     std::int32_t roomCount = 0;
     auto processRoom = [&](const xy::ConfigObject& room)
     {
+        auto xCoord = roomCount % GameConst::RoomsPerRow;
+        auto yCoord = roomCount / GameConst::RoomsPerRow;
+        sf::Vector2f roomPosition(xCoord * (GameConst::RoomWidth + GameConst::RoomPadding),
+                                yCoord * (GameConst::RoomWidth + GameConst::RoomPadding));
+
         const auto& properties = room.getProperties();
         if (properties.empty())
         {
@@ -107,7 +113,7 @@ bool GameState::loadMap()
         std::size_t wallIdx = 0;
         for (const auto& obj : objects)
         {
-            if (obj.getName() == "wall")
+            if (obj.getName() == "wall" && wallIdx < walls.size())
             {
                 const auto& wallProperties = obj.getProperties();
                 for (const auto& wallProp : wallProperties)
@@ -128,9 +134,9 @@ bool GameState::loadMap()
 
                 wallIdx++;
             }
-            if (wallIdx == walls.size())
+            else if (obj.getName() == "model")
             {
-                break;
+                parseModelNode(obj, roomPosition);
             }
         }
         std::sort(walls.begin(), walls.end(),
@@ -143,12 +149,10 @@ bool GameState::loadMap()
         auto& tex = m_resources.get<sf::Texture>(texID);
 
         //create the room entity
-        auto xCoord = roomCount % GameConst::RoomsPerRow;
-        auto yCoord = roomCount / GameConst::RoomsPerRow;
+
 
         auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(xCoord * (GameConst::RoomWidth + GameConst::RoomPadding), 
-                                                        yCoord * (GameConst::RoomWidth + GameConst::RoomPadding));
+        entity.addComponent<xy::Transform>().setPosition(roomPosition);
         entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
         entity.getComponent<xy::Drawable>().setTexture(&tex);
@@ -209,4 +213,66 @@ bool GameState::loadMap()
         return roomCount == 64;
     }
     return false;
+}
+
+void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPosition)
+{
+    std::string binPath;
+    std::string texture;
+    float depth = 0.f;
+    sf::Vector2f position;
+    float rotation = 0.f;
+
+    const auto& properties = cfg.getProperties();
+    for (const auto& prop : properties)
+    {
+        const auto name = prop.getName();
+        if (name == "bin")
+        {
+            binPath = prop.getValue<std::string>();
+        }
+        else if (name == "texure")
+        {
+            texture = prop.getValue<std::string>();
+        }
+        else if (name == "depth")
+        {
+            depth = prop.getValue<float>();
+        }
+        else if (name == "position")
+        {
+            position = prop.getValue<sf::Vector2f>();
+        }
+        else if (name == "rotation")
+        {
+            rotation = prop.getValue<float>();
+        }
+    }
+
+    if (!binPath.empty() && depth > 0)
+    {
+        //TODO load texture if name isn't empty
+        if (m_defaultTexID == 0)
+        {
+            m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+        }
+        auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
+
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>().setPosition(position + roomPosition);
+        entity.getComponent<xy::Transform>().setRotation(rotation);
+        entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
+        entity.getComponent<xy::Drawable>().setTexture(&tex);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().setCulled(false);
+        entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        //entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+        readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+    }
 }

@@ -53,6 +53,7 @@ source distribution.
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
 
 #include <sstream>
 
@@ -71,6 +72,8 @@ namespace
         std::string binPath;
         std::string texture;
     };
+
+    xy::Entity topCam;
 }
 
 ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
@@ -80,6 +83,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     m_modelLoaded       (false),
     m_defaultTexID      (0),
     m_showModelImporter (false),
+    m_showAerialView    (false),
     m_quitEditor        (false),
     m_loadModel         (false),
     m_saveRoom          (false),
@@ -87,12 +91,26 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 {
     initScene();
 
+    //aerial view
+    registerWindow([&]() 
+        {
+            if (m_showAerialView)
+            {
+                ImGui::SetNextWindowSize({ 220.f, 250.f }, ImGuiCond_FirstUseEver);
+                ImGui::SetWindowPos({ 15.f, 15.f }, ImGuiCond_FirstUseEver);
+                ImGui::Begin("Aerial View", &m_showAerialView);
+                ImGui::Image(m_aerialSprite, sf::Color::White, sf::Color::White);
+                ImGui::End();
+            }
+        });
+
     //model importer
     registerWindow([&]()
         {
             if (m_showModelImporter)
             {
-                ImGui::SetNextWindowSize({ 400, 400 }, ImGuiCond_FirstUseEver);
+                ImGui::SetNextWindowSize({ 312.f, 200.f }, ImGuiCond_FirstUseEver);
+                ImGui::SetWindowPos({ 15.f, 240.f }, ImGuiCond_FirstUseEver);
                 if (ImGui::Begin("Model Importer", &m_showModelImporter))
                 {
                     if (ImGui::Button("Import"))
@@ -156,7 +174,8 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
     //main window
     registerWindow([&]()
         {
-            ImGui::SetNextWindowSize({ 400, 400 }, ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize({ 300.f, 540.f }, ImGuiCond_FirstUseEver);
+            ImGui::SetWindowPos({ 420.f, 16.f }, ImGuiCond_FirstUseEver);
             if (ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_MenuBar))
             {
                 if (ImGui::BeginMenuBar())
@@ -173,6 +192,12 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                         ImGui::MenuItem("Import obj", nullptr, &m_showModelImporter);
                         ImGui::MenuItem("Add model", nullptr, &m_loadModel);
                         //TODO launch the baker from here somehow?
+                        ImGui::EndMenu();
+                    }
+
+                    if (ImGui::BeginMenu("Window"))
+                    {
+                        ImGui::MenuItem("Aerial View", nullptr, &m_showAerialView);
                         ImGui::EndMenu();
                     }
 
@@ -253,7 +278,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     ImGui::ListBoxHeader("Models");
                     for (const auto& [name, ent] : m_modelList)
                     {
-                        if (ImGui::Selectable(name.c_str()))
+                        if (ImGui::Selectable(name.c_str(), ent == m_selectedModel))
                         {
                             //unset old colour if something already selected
                             if (m_selectedModel.isValid())
@@ -412,17 +437,27 @@ bool ModelState::update(float dt)
         }
     }
 
-    auto cam = m_uiScene.getActiveCamera();
-    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
-    shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
-
     m_uiScene.update(dt);
     return false;
 }
 
 void ModelState::draw()
 {
+    auto cam = m_uiScene.getActiveCamera();
     auto& rw = getContext().renderWindow;
+    
+    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+    m_uiScene.setActiveCamera(topCam);
+    shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&topCam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+
+    m_aerialPreview.clear(sf::Color(10, 20, 60));
+    m_aerialPreview.draw(m_uiScene); //why doesn't this draw? :(
+    m_aerialPreview.draw(sf::CircleShape(50.f));
+    m_aerialPreview.display();
+    //rw.draw(m_uiScene);    
+
+    m_uiScene.setActiveCamera(cam);
+    shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
     rw.draw(m_uiScene);
 }
 
@@ -454,6 +489,17 @@ void ModelState::initScene()
     camera.projectionMatrix = glm::perspective(fov, ratio, 0.1f, GameConst::RoomWidth * 3.5f);
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
     camera.depth = GameConst::RoomHeight / 2.f;
+
+
+    topCam = m_uiScene.createEntity();
+    topCam.addComponent<xy::Transform>();
+    topCam.addComponent<xy::Camera>().setView({ 1020.f, 1020.f });
+    topCam.getComponent<xy::Camera>().setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
+    topCam.addComponent<Camera3D>().projectionMatrix = glm::perspective(45.f * xy::Util::Const::degToRad, 1.f, 0.1f, GameConst::RoomWidth * 3.5f);
+    topCam.getComponent<Camera3D>().depth = GameConst::RoomHeight * 4.f;
+    m_aerialPreview.create(200, 200, sf::ContextSettings(24u));
+    m_aerialSprite.setTexture(m_aerialPreview.getTexture(), true);
+    m_aerialSprite.setScale(1.f, -1.f); //ImGui won't flip render textures
 
     //load shader
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
@@ -564,7 +610,11 @@ void ModelState::parseVerts()
             {
                 return lhs.Position.Z < rhs.Position.Z;
             });
-        float range = zExtremes.second->Position.Z - zExtremes.first->Position.Z;
+        float range = zExtremes.second->Position.Z;
+        if (zExtremes.first->Position.Z < 0)
+        {
+            range -= zExtremes.first->Position.Z;
+        }
 
         modelEntity.getComponent<Sprite3D>().depth = range;
 
@@ -576,7 +626,11 @@ void ModelState::parseVerts()
             vert.position.x = meshVerts[i].Position.X;
             vert.position.y = -meshVerts[i].Position.Y;
 
-            float z = meshVerts[i].Position.Z - zExtremes.first->Position.Z;
+            float z = meshVerts[i].Position.Z;
+            if (z < 0)
+            {
+                z -= zExtremes.first->Position.Z;
+            }
             z = z / range;
             vert.color.a = static_cast<sf::Uint8>(z * 255.f);
 

@@ -60,12 +60,15 @@ private:
 
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
+    std::size_t m_defaultTexID;
 
     void initScene();
     void loadResources();
     bool loadMap();
     void addPlayer();
     void buildUI();
+
+    void parseModelNode(const xy::ConfigObject&, sf::Vector2f);
 #ifdef XY_DEBUG
     CameraInput m_cameraInput;
     void debugSetup();

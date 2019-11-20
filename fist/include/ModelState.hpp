@@ -38,6 +38,8 @@ source distribution.
 #include <xyginext/resources/ShaderResource.hpp>
 
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include <string>
 #include <map>
@@ -73,6 +75,7 @@ private:
     std::size_t m_defaultTexID;
 
     bool m_showModelImporter;
+    bool m_showAerialView;
     bool m_quitEditor;
     bool m_loadModel;
     bool m_saveRoom;
@@ -85,6 +88,9 @@ private:
 
     std::map<std::string, xy::Entity> m_modelList;
     static constexpr std::size_t MaxModels = 8;
+
+    sf::RenderTexture m_aerialPreview;
+    sf::Sprite m_aerialSprite;
 
     void initScene();
     void parseVerts();

@@ -81,10 +81,11 @@ namespace
 }
 
 GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
-    : xy::State (ss, ctx),
-    m_sharedData(sd),
-    m_gameScene (ctx.appInstance.getMessageBus(), 1024),
-    m_uiScene   (ctx.appInstance.getMessageBus())
+    : xy::State     (ss, ctx),
+    m_sharedData    (sd),
+    m_gameScene     (ctx.appInstance.getMessageBus(), 1024),
+    m_uiScene       (ctx.appInstance.getMessageBus()),
+    m_defaultTexID  (0)
 {
     launchLoadingScreen();
     //TODO load current game state
