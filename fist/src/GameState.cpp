@@ -534,6 +534,7 @@ void GameState::updateLighting()
             auto currentDist = xy::Util::Vector::lengthSquared(cam.getCurrentDistance());
 
             float t = 1.f - (currentDist / totalDist);
+            //sky colour
             auto prevSky = m_mapData.roomData[m_mapData.prevRoomIndex].skyColour;
             auto destSky = m_mapData.roomData[m_sharedData.currentRoom].skyColour;
 
@@ -541,12 +542,27 @@ void GameState::updateLighting()
             m_mapData.currentSkyColour.y = lerp(prevSky.y, destSky.y, t);
             m_mapData.currentSkyColour.z = lerp(prevSky.z, destSky.z, t);
 
-            //TODO room colour
+            //room colour
+            auto prevRoom = m_mapData.roomData[m_mapData.prevRoomIndex].roomColour;
+            auto destRoom = m_mapData.roomData[m_sharedData.currentRoom].roomColour;
+
+            m_mapData.currentRoomColour.x = lerp(prevRoom.x, destRoom.x, t);
+            m_mapData.currentRoomColour.y = lerp(prevRoom.y, destRoom.y, t);
+            m_mapData.currentRoomColour.z = lerp(prevRoom.z, destRoom.z, t);
 
             //calc amount based on whether rooms have ceiling
             float prevSkyAmount = m_mapData.roomData[m_mapData.prevRoomIndex].hasCeiling ? MapData::MinSkyAmount : 1.f;
             float nextSkyAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? MapData::MinSkyAmount : 1.f;
             m_mapData.skyAmount = lerp(prevSkyAmount, nextSkyAmount, t);
+
+            float prevRoomAmount = m_mapData.roomData[m_mapData.prevRoomIndex].hasCeiling ? 1.f : 0.f;
+            float nextRoomAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? 1.f : 0.f;
+            m_mapData.roomAmount = lerp(prevRoomAmount, nextRoomAmount, t);
+
+            auto prevRoomPos = calcRoomPosition(m_mapData.prevRoomIndex);
+            auto nextRoomPos = calcRoomPosition(m_sharedData.currentRoom);
+            m_mapData.currentLightPosition.x = lerp(prevRoomPos.x, nextRoomPos.x, t);
+            m_mapData.currentLightPosition.y = lerp(prevRoomPos.y, nextRoomPos.y, t);
 
         };
         m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
@@ -554,10 +570,16 @@ void GameState::updateLighting()
         auto& shader = m_shaders.get(ShaderID::Sprite3DWalls);
         shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_mapData.currentSkyColour));
         shader.setUniform("u_skylightAmount", m_mapData.skyAmount);
+        shader.setUniform("u_roomlightColour", sf::Glsl::Vec3(m_mapData.currentRoomColour));
+        shader.setUniform("u_roomlightAmount", m_mapData.roomAmount);
+        shader.setUniform("u_pointlightWorldPosition", sf::Glsl::Vec3(m_mapData.currentLightPosition.x, m_mapData.currentLightPosition.y, MapData::LightHeight));
 
         auto& shader2 = m_shaders.get(ShaderID::Sprite3DTextured);
         shader2.setUniform("u_skylightColour", sf::Glsl::Vec3(m_mapData.currentSkyColour));
         shader2.setUniform("u_skylightAmount", m_mapData.skyAmount);
+        shader2.setUniform("u_roomlightColour", sf::Glsl::Vec3(m_mapData.currentRoomColour));
+        shader2.setUniform("u_roomlightAmount", m_mapData.roomAmount);
+        shader2.setUniform("u_pointlightWorldPosition", sf::Glsl::Vec3(m_mapData.currentLightPosition.x, m_mapData.currentLightPosition.y, MapData::LightHeight));
     }
 }
 

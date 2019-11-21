@@ -18,6 +18,8 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "GameConst.hpp"
+
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
 
@@ -46,8 +48,17 @@ struct MapData final
     //interpolated values during cam movements
     sf::Vector3f currentSkyColour;
     sf::Vector3f currentRoomColour;
+    sf::Vector2f currentLightPosition;
 
     float skyAmount = 1.f;
     float roomAmount = 0.f;
     static constexpr float MinSkyAmount = 0.1f;
+    static constexpr float LightHeight = 340.f;
 };
+
+static inline sf::Vector2f calcRoomPosition(std::int32_t room)
+{
+    auto x = room % GameConst::RoomsPerRow;
+    auto y = room / GameConst::RoomsPerRow;
+    return { x * (GameConst::RoomWidth + GameConst::RoomPadding), y * (GameConst::RoomWidth + GameConst::RoomPadding) };
+}

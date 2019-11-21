@@ -42,6 +42,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 {
     *sharedData = std::make_any<SharedData>();
     auto& data = std::any_cast<SharedData&>(*sharedData);
+    data.currentRoom = 41;
 
     ss->registerState<MenuState>(StateID::MainMenu);
     ss->registerState<GameState>(StateID::Game, data);

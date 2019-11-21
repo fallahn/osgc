@@ -65,13 +65,6 @@ namespace
     const float OffsetDistance = 128.f;
 
     const sf::FloatRect ClickArea(0.f, 736.f, 1920.f, 1080.f - 736.f);
-
-    sf::Vector2f roomPosition(std::int32_t room)
-    {
-        auto x = room % GameConst::RoomsPerRow;
-        auto y = room / GameConst::RoomsPerRow;
-        return { x * GameConst::RoomWidth, y * GameConst::RoomWidth };
-    }
 }
 
 PlayerDirector::PlayerDirector(const xy::Scene& uiScene, SharedData& sd)
@@ -137,7 +130,7 @@ void PlayerDirector::handleEvent(const sf::Event& evt)
             pos.x -= xy::DefaultSceneSize.x;
             pos.x /= 4.f;
 
-            auto roomPos = roomPosition(m_sharedData.currentRoom);
+            auto roomPos = calcRoomPosition(m_sharedData.currentRoom);
             switch (m_cameraDirection)
             {
             default: break;

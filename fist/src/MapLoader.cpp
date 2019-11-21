@@ -86,10 +86,7 @@ bool GameState::loadMap()
         RoomData roomData;
         roomData.id = roomID;
 
-        auto xCoord = roomCount % GameConst::RoomsPerRow;
-        auto yCoord = roomCount / GameConst::RoomsPerRow;
-        sf::Vector2f roomPosition(xCoord * (GameConst::RoomWidth + GameConst::RoomPadding),
-                                yCoord * (GameConst::RoomWidth + GameConst::RoomPadding));
+        auto roomPosition = calcRoomPosition(roomCount);
 
         const auto& properties = room.getProperties();
         if (properties.empty())
@@ -246,6 +243,7 @@ bool GameState::loadMap()
         m_mapData.currentSkyColour = m_mapData.roomData[m_sharedData.currentRoom].skyColour;
         m_mapData.roomAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? 1.f : 0.f;
         m_mapData.skyAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? MapData::MinSkyAmount : 1.f;
+        m_mapData.currentLightPosition = calcRoomPosition(m_sharedData.currentRoom);
 
         m_updateLighting = true;
         updateLighting();

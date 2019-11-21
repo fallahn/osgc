@@ -50,8 +50,10 @@ R"(
 
 uniform mat4 u_viewProjMat;
 uniform mat4 u_modelMat;
+uniform vec3 u_pointlightWorldPosition;
 
 varying vec3 v_normal;
+varying vec3 v_pointlightDirection;
 
 void main()
 {
@@ -64,6 +66,8 @@ void main()
 
     vec4 normal = vec4(gl_Color.rgb * 2.0 - 1.0, 0.0);
     v_normal = normalize((u_modelMat * normal).xyz);
+
+    v_pointlightDirection = u_pointlightWorldPosition - worldPos.xyz;
 })";
 
 //the tangent calc makes some assumptions about the normals
@@ -76,8 +80,14 @@ uniform mat4 u_projMat;
 uniform mat4 u_viewMat;
 uniform mat4 u_modelMat;
 
+uniform vec3 u_pointlightWorldPosition;
+
 varying vec3 v_lightDir;
+varying vec3 v_pointlightDirection;
 varying vec4 v_viewPosition;
+
+//varying vec3 v_normal;
+varying mat3 v_tbn;
 
 void main()
 {
@@ -109,14 +119,14 @@ void main()
         bit.y = -1.0;
     }
 
-    //normal = u_modelMat * normal;
-    //tan = u_modelMat * tan;
-    //bit = u_modelMat * bit;
+    normal = normalize(u_modelMat * normal);
+    tan = normalize(u_modelMat * tan);
+    bit = normalize(u_modelMat * bit);
 
-    mat3 TBN = transpose(mat3(tan.xyz, bit.xyz, normal.xyz));
+    v_tbn = (mat3(tan.xyz, bit.xyz, normal.xyz));
 
-    v_lightDir = TBN * normalize(vec3(0.2, 0.2, 1.0));
-
+    v_lightDir = vec3(0.2, 0.2, 1.0);
+    v_pointlightDirection = u_pointlightWorldPosition - worldPos.xyz;
 })";
 
 static const std::string SpriteFragmentWalls =
@@ -127,12 +137,20 @@ uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
 uniform vec3 u_skylightColour;
 uniform float u_skylightAmount;
+uniform vec3 u_roomlightColour;
+uniform float u_roomlightAmount;
 
 varying vec3 v_lightDir;
+varying vec3 v_pointlightDirection;
 varying vec4 v_viewPosition;
+
+varying mat3 v_tbn;
 
 const float FogNear = 2880.0;
 const float FogFar = 4800.0;
+
+const float AmbientAmount = 0.3;
+const float LightRange = 1.0 / 480.0;
 
 void main()
 {
@@ -141,16 +159,33 @@ void main()
     {
         discard;
     }
-    vec3 ambientColour = baseColour.rgb * 0.3;    
 
     vec3 normal = texture2D(u_normalMap, gl_TexCoord[0].xy).rgb * 2.0 - 1.0;
-    //normal.xy *= 1.5; normalize(normal);
+    //normal.xy *= 3.5; normalize(normal);
+    normal = normalize(normalize(normal) * v_tbn);
+
     vec3 lightDir = normalize(v_lightDir);
 
-    float diffuseAmount = max(dot(lightDir, normal), 0.3);
+    float diffuseAmount = max(dot(lightDir, normal), 0.5);
+
+    vec3 ambient = baseColour.rgb * AmbientAmount;
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
-    gl_FragColor = vec4((ambientColour + diffuse) * (u_skylightColour * u_skylightAmount), baseColour.a);
+    vec3 skyColour = (ambient + diffuse) * (u_skylightColour * u_skylightAmount);
+
+
+    //point light
+    diffuseAmount = max(dot(normalize(v_pointlightDirection), normal), 0.0);
+
+    vec3 lDir = v_pointlightDirection * LightRange;
+    float att = clamp(1.0 - dot(lDir, lDir), 0.0, 1.0);
+    diffuseAmount *= att;
+
+    diffuse = baseColour.rgb * diffuseAmount;
+
+    vec3 pointColour = (ambient + diffuse) * (u_roomlightColour * u_roomlightAmount);
+
+    gl_FragColor = vec4((skyColour + pointColour), baseColour.a);
 
     float distance = length(v_viewPosition);
     float fogAmount = (FogFar - distance) / (FogFar - FogNear);
@@ -169,7 +204,15 @@ uniform vec3 u_highlightColour;
 uniform vec3 u_skylightColour;
 uniform float u_skylightAmount;
 
+uniform vec3 u_roomlightColour;
+uniform float u_roomlightAmount;
+
 varying vec3 v_normal;
+varying vec3 v_pointlightDirection;
+
+//const float LightRadius = 480.0 * 480.0;
+const float LightRange = 1.0 / 480.0;
+const float AmbientAmount = 0.1;
 
 void main()
 {
@@ -178,15 +221,30 @@ void main()
     {
         discard;
     }
-    vec3 ambientColour = baseColour.rgb * 0.1;
 
     vec3 normal = normalize(v_normal);
     vec3 lightDir = normalize(vec3(0.2, 0.2, 1.0));
 
     float diffuseAmount = max(dot(lightDir, normal), 0.5);
+
+    vec3 ambient = baseColour.rgb * AmbientAmount;
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
-    gl_FragColor = vec4((ambientColour + diffuse) * u_highlightColour * (u_skylightColour * u_skylightAmount), baseColour.a);
+    vec3 skyColour = (ambient + diffuse) * (u_skylightColour * u_skylightAmount);
+
+
+    //point light
+    diffuseAmount = max(dot(normalize(v_pointlightDirection), normal), 0.0);
+
+    vec3 lDir = v_pointlightDirection * LightRange;
+    float att = clamp(1.0 - dot(lDir, lDir), 0.0, 1.0);
+    diffuseAmount *= att;
+
+    diffuse = baseColour.rgb * diffuseAmount;
+
+    vec3 pointColour = (ambient + diffuse) * (u_roomlightColour * u_roomlightAmount);
+
+    gl_FragColor = vec4((skyColour + pointColour) * u_highlightColour, baseColour.a);
 })";
 
 static const std::string SpriteFragmentColoured =

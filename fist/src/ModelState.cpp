@@ -460,18 +460,21 @@ bool ModelState::update(float dt)
     }
 
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+    shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_skyColour));
+    shader.setUniform("u_roomlightColour", sf::Glsl::Vec3(m_roomColour));
+    shader.setUniform("u_pointlightWorldPosition", sf::Glsl::Vec3(0.f, 0.f, MapData::LightHeight));
+
     if (m_wallFlags & WallFlags::Ceiling)
     {
-        //TODO set indoor light uniform
+        //set indoor light uniform
+        shader.setUniform("u_roomlightAmount", 1.f);
         shader.setUniform("u_skylightAmount", MapData::MinSkyAmount);
     }
     else
     {
         //set skylight uniform
-        shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_skyColour));
         shader.setUniform("u_skylightAmount", 1.f);
-
-        //TODO set room amount to 0
+        shader.setUniform("u_roomlightAmount", 0.f);
     }
 
     m_uiScene.update(dt);
