@@ -46,6 +46,7 @@ CameraTransport::CameraTransport(std::int32_t startingRoom)
 
     targetPosition = { x * GameConst::RoomWidth, y * -GameConst::RoomWidth };
     currentPosition = targetPosition - sf::Vector2f(2.f, 2.f);
+    lastPosition = currentPosition;
     active = true; //this just makes the camera snap to initial position
 }
 
@@ -66,11 +67,14 @@ void CameraTransport::move(bool left)
         }
 
         targetPosition += dir * GameConst::RoomWidth;
+        lastPosition = currentPosition;
         active = true;
 
         auto* msg = xy::App::getActiveInstance()->getMessageBus().post<CameraEvent>(MessageID::CameraMessage);
         msg->type = CameraEvent::Unlocked;
-        msg->direction = static_cast<CameraEvent::Direction>(m_currentRotationTarget);
+        msg->facingDirection = static_cast<CameraEvent::Direction>(m_currentRotationTarget);
+        msg->action = CameraEvent::Translate;
+        msg->translationDirection = (dir.x > 0) ? CameraEvent::E : (dir.x < 0) ? CameraEvent::W : (dir.y < 0) ? CameraEvent::S : CameraEvent::N;
     }
 }
 
@@ -100,7 +104,8 @@ void CameraTransport::rotate(bool left)
 
         auto* msg = xy::App::getActiveInstance()->getMessageBus().post<CameraEvent>(MessageID::CameraMessage);
         msg->type = CameraEvent::Unlocked;
-        msg->direction = static_cast<CameraEvent::Direction>(m_currentRotationTarget);
+        msg->facingDirection = static_cast<CameraEvent::Direction>(m_currentRotationTarget);
+        msg->action = CameraEvent::Rotate;
     }
 }
 
@@ -140,6 +145,7 @@ void CameraTransportSystem::process(float dt)
                     //raise a message
                     auto* msg = postMessage<CameraEvent>(MessageID::CameraMessage);
                     msg->type = CameraEvent::Locked;
+                    msg->action = CameraEvent::Translate;
                 }
                 entity.getComponent<Camera3D>().postTranslationMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-transport.currentPosition.x, transport.currentPosition.y, 0.f));
             }
@@ -167,7 +173,7 @@ void CameraTransportSystem::process(float dt)
                     //raise message
                     auto* msg = postMessage<CameraEvent>(MessageID::CameraMessage);
                     msg->type = CameraEvent::Locked;
-                    
+                    msg->action = CameraEvent::Rotate;
                 }
             }
         }

@@ -809,6 +809,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 1.000000,0.830000,0.447000
+        room_colour = 1.000000,1.000000,1.000000
         wall 
         {
             direction = 1
@@ -959,6 +961,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.085000,0.723000,0.681000
+        room_colour = 1.000000,1.000000,1.000000
         wall 
         {
             direction = 0

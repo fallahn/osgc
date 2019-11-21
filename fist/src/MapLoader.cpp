@@ -24,6 +24,7 @@ Copyright 2019 Matt Marchant
 #include "RoomBuilder.hpp"
 #include "WallData.hpp"
 #include "ModelIO.hpp"
+#include "SharedStateData.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -214,7 +215,7 @@ bool GameState::loadMap()
         }
 
         //stash room data
-        m_roomData.push_back(roomData);
+        m_mapData.roomData.push_back(roomData);
 
         roomCount++;
     };
@@ -231,13 +232,24 @@ bool GameState::loadMap()
             }
         }
 
-        std::sort(m_roomData.begin(), m_roomData.end(),
+        std::sort(m_mapData.roomData.begin(), m_mapData.roomData.end(),
             [](const RoomData& a, const RoomData& b)
             {
                 return a.id < b.id;
             });
 
         //TODO generate occlusion info from room data
+
+
+        //set the initial lighting colours
+        m_mapData.currentRoomColour = m_mapData.roomData[m_sharedData.currentRoom].roomColour;
+        m_mapData.currentSkyColour = m_mapData.roomData[m_sharedData.currentRoom].skyColour;
+        m_mapData.roomAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? 1.f : 0.f;
+        m_mapData.skyAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? MapData::MinSkyAmount : 1.f;
+
+        m_updateLighting = true;
+        updateLighting();
+        m_updateLighting = false;
 
         return roomCount == 64;
     }

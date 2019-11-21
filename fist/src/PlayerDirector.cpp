@@ -176,11 +176,11 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
         {
             m_cameraLocked = false;
 
-            if (data.direction != m_cameraDirection)
+            if (data.facingDirection != m_cameraDirection)
             {
                 //we're rotating - set interp dest to centre of the room
                 //on the new depth axis, and restore to previous position on width axis
-                switch (data.direction)
+                switch (data.facingDirection)
                 {
                 default: break;
                 case CameraEvent::N:
@@ -199,7 +199,7 @@ void PlayerDirector::handleMessage(const xy::Message& msg)
             }
             //translating the camera is take care of by collision trigger, below
 
-            m_cameraDirection = data.direction;
+            m_cameraDirection = data.facingDirection;
         }
     }
 }
@@ -408,6 +408,8 @@ void PlayerDirector::doCollision()
     //in theory we know which room we're in
     //so we ought to be able to pick the 4 triggers
     //belonging to it rather than query the dynamic tree
+
+    //but we also need to be able to collide with props
 
     const auto pos = m_playerEntity.getComponent<xy::Transform>().getPosition();
     const sf::FloatRect queryBounds(pos.x - 64.f, pos.y - 64.f, 128.f, 128.f);

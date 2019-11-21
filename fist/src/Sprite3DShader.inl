@@ -126,6 +126,7 @@ R"(
 uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
 uniform vec3 u_skylightColour;
+uniform float u_skylightAmount;
 
 varying vec3 v_lightDir;
 varying vec4 v_viewPosition;
@@ -149,7 +150,7 @@ void main()
     float diffuseAmount = max(dot(lightDir, normal), 0.3);
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
-    gl_FragColor = vec4((ambientColour + diffuse) * u_skylightColour, baseColour.a);
+    gl_FragColor = vec4((ambientColour + diffuse) * (u_skylightColour * u_skylightAmount), baseColour.a);
 
     float distance = length(v_viewPosition);
     float fogAmount = (FogFar - distance) / (FogFar - FogNear);
@@ -166,6 +167,7 @@ R"(
 uniform sampler2D u_texture;
 uniform vec3 u_highlightColour;
 uniform vec3 u_skylightColour;
+uniform float u_skylightAmount;
 
 varying vec3 v_normal;
 
@@ -184,7 +186,7 @@ void main()
     float diffuseAmount = max(dot(lightDir, normal), 0.5);
     vec3 diffuse = baseColour.rgb * diffuseAmount;
 
-    gl_FragColor = vec4((ambientColour + diffuse) * u_highlightColour * u_skylightColour, baseColour.a);
+    gl_FragColor = vec4((ambientColour + diffuse) * u_highlightColour * (u_skylightColour * u_skylightAmount), baseColour.a);
 })";
 
 static const std::string SpriteFragmentColoured =

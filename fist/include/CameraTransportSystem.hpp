@@ -34,9 +34,14 @@ struct CameraTransport final
 
     sf::Vector2f getCurrentDirection() const { return currentDirection; }
 
+    sf::Vector2f getMoveDistance() const { return targetPosition - lastPosition; }
+
+    sf::Vector2f getCurrentDistance() const { return targetPosition - currentPosition; }
+
 private:
     sf::Vector2f targetPosition;
     sf::Vector2f currentPosition;
+    sf::Vector2f lastPosition; //used for calculating interp amount
     
     sf::Vector2f currentDirection = sf::Vector2f(0.f, -1.f);
 

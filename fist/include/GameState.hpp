@@ -63,7 +63,9 @@ private:
     xy::ShaderResource m_shaders;
     std::size_t m_defaultTexID;
 
-    std::vector<RoomData> m_roomData;
+    MapData m_mapData;
+    bool m_cameraUnlocked;
+    bool m_updateLighting;
 
     void initScene();
     void loadResources();
@@ -72,6 +74,7 @@ private:
     void buildUI();
 
     void parseModelNode(const xy::ConfigObject&, sf::Vector2f);
+    void updateLighting();
 #ifdef XY_DEBUG
     CameraInput m_cameraInput;
     void debugSetup();

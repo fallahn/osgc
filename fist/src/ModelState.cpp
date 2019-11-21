@@ -34,6 +34,7 @@ source distribution.
 #include "RoomBuilder.hpp"
 #include "ModelIO.hpp"
 #include "SharedStateData.hpp"
+#include "WallData.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -461,13 +462,15 @@ bool ModelState::update(float dt)
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
     if (m_wallFlags & WallFlags::Ceiling)
     {
-        //set indoor light uniform
-        //TODO set sky amount to 0
+        //TODO set indoor light uniform
+        shader.setUniform("u_skylightAmount", MapData::MinSkyAmount);
     }
     else
     {
         //set skylight uniform
         shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_skyColour));
+        shader.setUniform("u_skylightAmount", 1.f);
+
         //TODO set room amount to 0
     }
 
@@ -558,7 +561,8 @@ void ModelState::initScene()
 
     //load shader
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
-    m_shaders.get(ShaderID::Sprite3DTextured).setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
+    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
+    shader.setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
 
     //set up a background
     m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/rooms/editor.png");

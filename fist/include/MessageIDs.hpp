@@ -39,5 +39,11 @@ struct CameraEvent final
     enum Direction
     {
         N,E,S,W
-    }direction = N;
+    }facingDirection = N;
+    Direction translationDirection = N;
+
+    enum
+    {
+        Rotate, Translate
+    }action = Rotate;
 };

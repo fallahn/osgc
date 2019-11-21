@@ -39,6 +39,7 @@ source distribution.
 #include "AnimationID.hpp"
 #include "SliderSystem.hpp"
 #include "SharedStateData.hpp"
+#include "MessageIDs.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -64,6 +65,7 @@ source distribution.
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
 #include <xyginext/util/Const.hpp>
+#include <xyginext/util/Vector.hpp>
 #include <xyginext/graphics/SpriteSheet.hpp>
 
 #include <SFML/Window/Event.hpp>
@@ -85,7 +87,9 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_sharedData    (sd),
     m_gameScene     (ctx.appInstance.getMessageBus(), 1024),
     m_uiScene       (ctx.appInstance.getMessageBus()),
-    m_defaultTexID  (0)
+    m_defaultTexID  (0),
+    m_cameraUnlocked(false),
+    m_updateLighting(false)
 {
     launchLoadingScreen();
     //TODO load current game state
@@ -203,6 +207,34 @@ void GameState::handleMessage(const xy::Message& msg)
         }
     }*/
 
+    if (msg.id == MessageID::CameraMessage)
+    {
+        const auto& data = msg.getData<CameraEvent>();
+        m_cameraUnlocked = data.type == CameraEvent::Unlocked;
+        m_updateLighting = m_cameraUnlocked && data.action == CameraEvent::Translate;
+
+        if (m_updateLighting)
+        {
+            //the current room has already been updated by now so we want the index of the previous one
+            switch (data.translationDirection)
+            {
+            default: break;
+            case 0:
+                m_mapData.prevRoomIndex = m_sharedData.currentRoom + GameConst::RoomsPerRow;
+                break;
+            case 1:
+                m_mapData.prevRoomIndex = m_sharedData.currentRoom - 1;
+                break;
+            case 2:
+                m_mapData.prevRoomIndex = m_sharedData.currentRoom - GameConst::RoomsPerRow;
+                break;
+            case 3:
+                m_mapData.prevRoomIndex = m_sharedData.currentRoom + 1;
+                break;
+            }
+        }
+    }
+
     m_gameScene.forwardMessage(msg);
     m_uiScene.forwardMessage(msg);
 }
@@ -212,6 +244,9 @@ bool GameState::update(float dt)
 #ifdef XY_DEBUG
     m_cameraInput.update(dt);
 #endif
+    
+    updateLighting();
+    
     m_gameScene.update(dt);
     m_uiScene.update(dt);
 
@@ -222,15 +257,9 @@ bool GameState::update(float dt)
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
     shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
 
-    //TODO get an interpolated light value from somewhere - probably place in shared data by player director
-    //along with other properties light current point light position
-    shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_roomData[m_sharedData.currentRoom].skyColour));
-
     auto& shader2 = m_shaders.get(ShaderID::Sprite3DWalls);
     shader2.setUniform("u_viewMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewMatrix[0][0]));
     shader2.setUniform("u_projMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().projectionMatrix[0][0]));
-
-    shader2.setUniform("u_skylightColour", sf::Glsl::Vec3(m_roomData[m_sharedData.currentRoom].skyColour));
 
     return true;
 }
@@ -304,7 +333,6 @@ void GameState::initScene()
     camera.rotationMatrix = glm::rotate(glm::mat4(1.f), -90.f * xy::Util::Const::degToRad, glm::vec3(1.f, 0.f, 0.f));
     m_gameScene.getSystem<Render3DSystem>().setCamera(camEnt);
     //m_gameScene.getSystem<Render3DSystem>().setFOV(fov * ratio); //frustum width is in X plane
-
 }
 
 void GameState::loadResources()
@@ -486,6 +514,51 @@ void GameState::buildUI()
 
     tabEnt.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+}
+
+void GameState::updateLighting()
+{
+    if (m_updateLighting)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Camera;
+        cmd.action = [&](xy::Entity e, float) mutable
+        {
+            auto lerp = [](float a, float b, float dt)
+            {
+                return a + (dt * (b - a));
+            };
+            
+            const auto& cam = e.getComponent<CameraTransport>();
+            auto totalDist = xy::Util::Vector::lengthSquared(cam.getMoveDistance());
+            auto currentDist = xy::Util::Vector::lengthSquared(cam.getCurrentDistance());
+
+            float t = 1.f - (currentDist / totalDist);
+            auto prevSky = m_mapData.roomData[m_mapData.prevRoomIndex].skyColour;
+            auto destSky = m_mapData.roomData[m_sharedData.currentRoom].skyColour;
+
+            m_mapData.currentSkyColour.x = lerp(prevSky.x, destSky.x, t);
+            m_mapData.currentSkyColour.y = lerp(prevSky.y, destSky.y, t);
+            m_mapData.currentSkyColour.z = lerp(prevSky.z, destSky.z, t);
+
+            //TODO room colour
+
+            //calc amount based on whether rooms have ceiling
+            float prevSkyAmount = m_mapData.roomData[m_mapData.prevRoomIndex].hasCeiling ? MapData::MinSkyAmount : 1.f;
+            float nextSkyAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? MapData::MinSkyAmount : 1.f;
+            m_mapData.skyAmount = lerp(prevSkyAmount, nextSkyAmount, t);
+
+        };
+        m_gameScene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        auto& shader = m_shaders.get(ShaderID::Sprite3DWalls);
+        shader.setUniform("u_skylightColour", sf::Glsl::Vec3(m_mapData.currentSkyColour));
+        shader.setUniform("u_skylightAmount", m_mapData.skyAmount);
+
+        auto& shader2 = m_shaders.get(ShaderID::Sprite3DTextured);
+        shader2.setUniform("u_skylightColour", sf::Glsl::Vec3(m_mapData.currentSkyColour));
+        shader2.setUniform("u_skylightAmount", m_mapData.skyAmount);
+    }
 }
 
 #ifdef XY_DEBUG

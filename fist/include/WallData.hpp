@@ -35,3 +35,19 @@ struct RoomData final
     std::int32_t id = -1; //used to sort the array
     bool hasCeiling = false;
 };
+
+struct MapData final
+{
+    std::vector<RoomData> roomData;
+    std::size_t prevRoomIndex = 0;
+    //current room index is in state shared data
+    //as the map editor needs to knoe what it is
+
+    //interpolated values during cam movements
+    sf::Vector3f currentSkyColour;
+    sf::Vector3f currentRoomColour;
+
+    float skyAmount = 1.f;
+    float roomAmount = 0.f;
+    static constexpr float MinSkyAmount = 0.1f;
+};
