@@ -272,9 +272,9 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 //TODO add/remove ceiling
 
                 //light colours
-                ImGui::SliderFloat3("Sky Colour", reinterpret_cast<float*>(&m_skyColour), 0.f, 1.f);
-                ImGui::SliderFloat3("Room Colour", reinterpret_cast<float*>(&m_roomColour), 0.f, 1.f);
-
+                ImGui::ColorEdit3("Sky Colour", reinterpret_cast<float*>(&m_skyColour));
+                ImGui::ColorEdit3("Room Colour", reinterpret_cast<float*>(&m_roomColour));
+                
 
                 ImGui::Separator();
 

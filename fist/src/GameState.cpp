@@ -358,7 +358,7 @@ void GameState::addPlayer()
         entity.addComponent<xy::Transform>().setPosition(position);
         entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, bounds.height);
         entity.addComponent<xy::Sprite>() = spriteSheet.getSprite(sprite);
-        entity.getComponent<xy::Sprite>().setColour({ 127, 255, 127 }); //normal direction
+        entity.getComponent<xy::Sprite>().setColour({ 127, 127, 255 }); //normal direction
         const_cast<sf::Texture*>(entity.getComponent<xy::Sprite>().getTexture())->setSmooth(true);
         entity.addComponent<xy::SpriteAnimation>();
         entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
@@ -383,6 +383,8 @@ void GameState::addPlayer()
             //also want to read the camera's current rotation
             e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
         };
+
+        //TODO add ground shadow
 
         return entity;
     };
