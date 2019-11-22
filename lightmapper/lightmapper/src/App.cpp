@@ -13,6 +13,17 @@
 #include <fstream>
 #include <iostream>
 
+namespace
+{
+    //urg.
+    double scrollOffset = 0.f;
+
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        scrollOffset = yoffset;
+    }
+}
+
 App::App()
     : m_window          (nullptr),
     m_initOK            (false),
@@ -54,6 +65,8 @@ App::App()
     }
     else
     {
+        glfwSetScrollCallback(m_window, scroll_callback);
+
         glfwMakeContextCurrent(m_window);
         glfwSwapInterval(1);
 
@@ -178,7 +191,9 @@ void App::loadMapData(const std::string& path)
                     }
                     else if (prop.getName() == "sky_colour")
                     {
-                        roomData.skyColour = prop.getValue<std::array<float, 3>>();
+                        //roomData.skyColour = prop.getValue<std::array<float, 3>>();
+                        //this breaks the join between bakes so we'll leave it white
+                        //and let the in-game lighting do its thing
                     }
                     else if (prop.getName() == "room_colour")
                     {
@@ -195,7 +210,10 @@ void App::loadMapData(const std::string& path)
                         for (const auto& prop : properties)
                         {
                             //we only need the wall direction property
-                            roomData.flags |= (1 << prop.getValue<std::int32_t>());
+                            if (prop.getName() == "direction")
+                            {
+                                roomData.flags |= (1 << prop.getValue<std::int32_t>());
+                            }
                         }
                     }
                     else if (roomObj.getName() == "model")
@@ -204,12 +222,12 @@ void App::loadMapData(const std::string& path)
                     }
                 }
 
-                if (roomData.flags & RoomData::Ceiling)
+                /*if (roomData.flags & RoomData::Ceiling)
                 {
                     roomData.skyColour[0] *= 0.1f;
                     roomData.skyColour[1] *= 0.1f;
                     roomData.skyColour[2] *= 0.1f;
-                }
+                }*/
             }
         }
 
@@ -224,6 +242,11 @@ void App::loadMapData(const std::string& path)
 void App::handleEvents()
 {
     glfwPollEvents();
+
+    if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+    }
 }
 
 void App::update()
@@ -246,7 +269,7 @@ void App::calcViewMatrix()
 {
     // initial camera config
     //TODO these should be members
-    static glm::vec3 position(0.f, 0.3f, 1.5f);
+    static glm::vec3 position(0.f, 0.3f, 2.5f);
     static glm::vec2 rotation(0.f);
 
     glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), rotation.y * static_cast<float>(M_PI / 180.f), glm::vec3(0.f, 1.f, 0.f));
@@ -270,22 +293,25 @@ void App::calcViewMatrix()
         lastMouse[1] = mouse[1];
 
         // keyboard movement (WSADEQ)
-        float speed = (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.1f : 0.01f;
-        glm::vec3 movement(0.f);
+        /*glm::vec3 movement(0.f);
         if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) movement[2] -= speed;
         if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) movement[2] += speed;
         if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) movement[0] -= speed;
         if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) movement[0] += speed;
         if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS) movement[1] -= speed;
-        if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS) movement[1] += speed;
+        if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS) movement[1] += speed;*/
+        /*position += glm::vec3(rotMat * glm::vec4(movement, 1.f));*/
 
-        if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+        float speed = (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.85f : 0.5f;
+        //TODO scale this based on current distance so that scrolling feels linear
+        position.z = std::max(0.f, position.z - (static_cast<float>(scrollOffset) * speed));
+        scrollOffset = 0.f;
 
-        position += glm::vec3(rotMat * glm::vec4(movement, 1.f));
+
     }
 
     //construct view matrix
-    m_viewMatrix = glm::inverse(glm::translate(glm::mat4(1.f), position) * rotMat);
+    m_viewMatrix = glm::inverse(rotMat * glm::translate(glm::mat4(1.f), position)/* * rotMat*/);
 }
 
 void App::draw()

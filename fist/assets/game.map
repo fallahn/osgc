@@ -808,7 +808,7 @@ map game_map
     }
     room 41
     {
-        src = assets/images/rooms/template.png
+        src = "assets/images/rooms/41.png"
         ceiling = 1
         item_id = -1
         sky_colour = 0.694690,0.798282,1.000000
