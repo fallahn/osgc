@@ -37,6 +37,7 @@ source distribution.
 
 #include <string>
 #include <vector>
+#include <array>
 #include <sstream>
 
 namespace xy

@@ -1,5 +1,6 @@
 #include "geometry.h"
 #include "GLCheck.hpp"
+#include "structures.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
@@ -16,18 +17,9 @@ namespace
 
     static const float DefaultTexWidth = 3000.f;
     static const float DefaultTexHeight = 2040.f;
-
-    enum WallFlags
-    {
-        North = 0x1,
-        East = 0x2,
-        South = 0x4,
-        West = 0x8,
-        Ceiling = 0x10
-    };
 }
 
-void updateGeometry(int32_t flags, Scene& scene)
+void updateGeometry(const RoomData& room, Scene& scene)
 {
     auto& meshes = scene.getMeshes();
     meshes.clear();
@@ -67,23 +59,24 @@ void updateGeometry(int32_t flags, Scene& scene)
     indices.push_back(0);
 
     //create walls / ceiling based on flags
-    if (flags & WallFlags::North)
+    auto flags = room.flags;
+    if (flags & RoomData::Flags::North)
     {
         addNorthWall(verts, indices);
     }
-    if (flags & WallFlags::East)
+    if (flags & RoomData::Flags::East)
     {
         addEastWall(verts, indices);
     }
-    if (flags & WallFlags::South)
+    if (flags & RoomData::Flags::South)
     {
         addSouthWall(verts, indices);
     }
-    if (flags & WallFlags::West)
+    if (flags & RoomData::Flags::West)
     {
         addWestWall(verts, indices);
     }
-    if (flags & WallFlags::Ceiling)
+    if (flags & RoomData::Flags::Ceiling)
     {
         addCeiling(verts, indices);
     }
@@ -99,9 +92,9 @@ void updateGeometry(int32_t flags, Scene& scene)
 
 
     //do this afterwards just so we don't mess with room mesh mid-creation
-    if (flags & WallFlags::Ceiling)
+    if (flags & RoomData::Flags::Ceiling)
     {
-        addLight(scene);
+        addLight(room, scene);
     }
 }
 
@@ -512,7 +505,7 @@ void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
     indices.push_back(firstIndex + 0);
 }
 
-void addLight(Scene& scene)
+void addLight(const RoomData& room, Scene& scene)
 {
     //add interior light
     auto& light = scene.getMeshes().emplace_back(std::make_unique<Mesh>());
@@ -558,10 +551,7 @@ void addLight(Scene& scene)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    //TODO take light colour as a param
-
     //update texture with light colour
     glBindTexture(GL_TEXTURE_2D, light->texture);
-    unsigned char emissive[] = { 255, 255, 200, 255 };
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, room.roomColour.data());
 }

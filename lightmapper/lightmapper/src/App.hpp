@@ -24,11 +24,18 @@ private:
     bool m_initOK;
     glm::mat4 m_projectionMatrix;
     glm::mat4 m_viewMatrix;
+    std::array<float, 3> m_clearColour = { 0.6f, 0.8f, 1.0f };
+
+    std::vector<RoomData> m_mapData;
+    std::int32_t m_currentRoom = -1;
+    void loadMapData(const std::string&);
 
     void handleEvents();
     void update();
 
     void calcViewMatrix();
-
     void draw();
+
+    //ui stuffs
+    void mapBrowserWindow();
 };

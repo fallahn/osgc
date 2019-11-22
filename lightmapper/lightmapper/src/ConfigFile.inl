@@ -55,6 +55,14 @@ inline bool ConfigProperty::getValue<bool>() const
     return (m_value == "true");
 }
 
+template <>
+inline std::array<float, 3> ConfigProperty::getValue<std::array<float, 3>>() const
+{
+    auto values = valueAsArray();
+
+    return { values[0], values[1], values[2] };
+}
+
 //template <>
 //inline sf::Vector2f ConfigProperty::getValue<sf::Vector2f>() const
 //{
@@ -80,13 +88,7 @@ inline bool ConfigProperty::getValue<bool>() const
 //}
 //
 //
-//template <>
-//inline sf::Vector3f ConfigProperty::getValue<sf::Vector3f>() const
-//{
-//    auto values = valueAsArray();
-//
-//    return { values[0], values[1], values[2] };
-//}
+
 //
 //template <>
 //inline sf::FloatRect ConfigProperty::getValue<sf::FloatRect>() const

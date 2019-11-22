@@ -10,7 +10,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <memory>
+#include <array>
 
 struct Vertex final
 {
@@ -47,4 +47,21 @@ struct Mesh final
     std::vector<std::uint16_t> indices;
 
     glm::mat4 modelMatrix = glm::mat4(1.f);
+};
+
+struct RoomData final
+{
+    enum Flags
+    {
+        North = 0x1,
+        East = 0x2,
+        South = 0x4,
+        West = 0x8,
+        Ceiling = 0x10
+    };
+
+    std::int32_t flags = 0;
+    std::array<float, 3> skyColour = {1.f, 1.f, 1.f};
+    std::array<float, 3> roomColour = { 1.f, 1.f, 1.f };
+    std::int32_t id = -1;
 };

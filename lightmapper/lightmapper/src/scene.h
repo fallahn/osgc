@@ -10,7 +10,7 @@ public:
     bool init();
     void draw(const glm::mat4& view, const glm::mat4& projection) const;
     void destroy();
-    bool bake() const;
+    bool bake(const std::string&, const std::array<float, 3>&) const;
 
     std::vector<std::unique_ptr<Mesh>>& getMeshes() { return m_meshes; }
 

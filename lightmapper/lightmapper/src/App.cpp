@@ -6,7 +6,7 @@
 
 #include "gl_helpers.h"
 #include "geometry.h"
-#include "ui_windows.h"
+#include "ConfigFile.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -132,13 +132,88 @@ void App::run()
 }
 
 //private
+void App::loadMapData(const std::string& path)
+{
+    xy::ConfigFile cfg;
+    if (cfg.loadFromFile(path))
+    {
+        m_mapData.clear();
+
+        const auto& objects = cfg.getObjects();
+        for (const auto& obj : objects)
+        {
+            if (obj.getName() == "room")
+            {
+                auto& roomData = m_mapData.emplace_back();
+                try
+                {
+                    roomData.id = std::atoi(obj.getId().c_str());
+                }
+                catch (...)
+                {
+                    //invalid room
+                    m_mapData.pop_back();
+                    continue;
+                }
+
+                //TODO do we need to get the texture property?
+                //probably not
+
+                const auto& roomProperties = obj.getProperties();
+                for (const auto& prop : roomProperties)
+                {
+                    if (prop.getName() == "ceiling")
+                    {
+                        if (prop.getValue<std::int32_t>() == 1)
+                        {
+                            roomData.flags |= RoomData::Flags::Ceiling;
+                        }
+                    }
+                    else if (prop.getName() == "sky_colour")
+                    {
+                        roomData.skyColour = prop.getValue<std::array<float, 3>>();
+                    }
+                    else if (prop.getName() == "room_colour")
+                    {
+                        roomData.roomColour = prop.getValue<std::array<float, 3>>();
+                    }
+                }
+
+                const auto& roomObjects = obj.getObjects();
+                for (const auto& roomObj : roomObjects)
+                {
+                    if (roomObj.getName() == "wall")
+                    {
+                        const auto& properties = roomObj.getProperties();
+                        for (const auto& prop : properties)
+                        {
+                            //we only need the wall direction property
+                            roomData.flags |= (1 << prop.getValue<std::int32_t>());
+                        }
+                    }
+                    else if (roomObj.getName() == "model")
+                    {
+                        //TODO parse these
+                    }
+                }
+            }
+        }
+
+        std::sort(m_mapData.begin(), m_mapData.end(),
+            [](const RoomData& a, const RoomData& b)
+            {
+                return a.id < b.id;
+            });
+    }
+}
+
 void App::handleEvents()
 {
     glfwPollEvents();
-    if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    /*if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
         m_scene.bake();
-    }
+    }*/
 }
 
 void App::update()
@@ -151,7 +226,7 @@ void App::update()
     //ImGui::ShowDemoWindow(&show_demo_window);
 
     //custom imgui rendering
-    ui::mapBrowserWindow();
+    mapBrowserWindow();
 
     calcViewMatrix();
 }
@@ -211,7 +286,7 @@ void App::draw()
 
 
     //draw to screen with a blueish sky
-    glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
+    glClearColor(m_clearColour[0], m_clearColour[1], m_clearColour[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_scene.draw(m_viewMatrix, m_projectionMatrix);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -9,7 +9,7 @@
 bool Scene::init()
 {
     //temp to test mesh generation
-    updateGeometry(19, *this);
+    //updateGeometry(19, *this);
 
     m_lightmapWidth = 750;
     m_lightmapHeight = 510;
@@ -91,7 +91,7 @@ void Scene::destroy()
     glDeleteProgram(m_programID);
 }
 
-bool Scene::bake() const
+bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) const
 {
     //reset the geometry texture to black else previous
     //bakes contribute to the emissions
@@ -101,9 +101,10 @@ bool Scene::bake() const
     glBindTexture(GL_TEXTURE_2D, 0);
 
     lm_context* ctx = lmCreate(
-        64,               // hemisphere resolution (power of two, max=512)
+        128,               // hemisphere resolution (power of two, max=512)
         0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
-        1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
+        //1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
+        sky[0], sky[1], sky[2],
         2, 0.01f,         // lightmap interpolation threshold (small differences are interpolated rather than sampled)
                           // check debug_interpolation.tga for an overview of sampled (red) vs interpolated (green) pixels.
         0.0f);            // modifier for camera-to-surface distance for hemisphere rendering.
@@ -123,7 +124,7 @@ bool Scene::bake() const
     //assume the room mesh is always in the first slot...
     assert(!m_meshes.empty());
     const auto& mesh = m_meshes[0];
-    lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
+    lmSetGeometry(ctx, NULL,
         LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
         LM_NONE, NULL, 0, // no interpolated normals in this example
         LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
@@ -139,6 +140,7 @@ bool Scene::bake() const
         draw(view, projection);
 
         //display progress every second (printf is expensive)
+        //TODO move this to imgui output
         double time = glfwGetTime();
         if (time - lastUpdateTime > 1.0)
         {
@@ -166,9 +168,10 @@ bool Scene::bake() const
 
 
     // save result to a file
-    if (lmImageSaveTGAf("result.tga", data.data(), w, h, 4, 1.0f))
+    auto fileName = output + ".tga";
+    if (lmImageSaveTGAf(fileName.c_str(), data.data(), w, h, 4, 1.0f))
     {
-        std::cout << "Saved result.tga\n";
+        std::cout << "Saved " << output <<"\n";
     }
 
     //upload result to preview texture
