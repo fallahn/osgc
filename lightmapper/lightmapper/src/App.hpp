@@ -36,6 +36,10 @@ private:
     void calcViewMatrix();
     void draw();
 
+    void bakeAll();
+    bool m_bakeAll;
+
     //ui stuffs
     void mapBrowserWindow();
+    void statusWindow();
 };

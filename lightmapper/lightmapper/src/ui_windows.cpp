@@ -9,6 +9,7 @@
 void App::mapBrowserWindow()
 {
     static bool openFile = false;
+    static bool bakeSelected = false;
 
     ImGui::SetNextWindowSize({ 200.f, 400.f }, ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Map Browser", nullptr, ImGuiWindowFlags_MenuBar))
@@ -22,8 +23,8 @@ void App::mapBrowserWindow()
             }
             if (ImGui::BeginMenu("Tools"))
             {
-                ImGui::MenuItem("Bake Selected", nullptr, nullptr);
-                ImGui::MenuItem("Bake All", nullptr, nullptr);
+                ImGui::MenuItem("Bake Selected", nullptr, &bakeSelected);
+                ImGui::MenuItem("Bake All", nullptr, &m_bakeAll);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
@@ -42,22 +43,9 @@ void App::mapBrowserWindow()
                     {
                         updateGeometry(room, m_scene);
                         m_clearColour = room.skyColour;
-                        if (room.flags & RoomData::Ceiling)
-                        {
-                            m_clearColour[0] *= 0.1f;
-                            m_clearColour[1] *= 0.1f;
-                            m_clearColour[2] *= 0.1f;
-                        }
 
                         m_currentRoom = room.id;
                         //TODO load room props
-                    }
-                    label = "Bake##" + roomID;
-                    if (ImGui::Button(label.c_str())
-                        && m_currentRoom != -1)
-                    {
-                        //TODO set the sky colour
-                        m_scene.bake(roomID, room.skyColour);
                     }
                     ImGui::TreePop();
                 }
@@ -76,6 +64,44 @@ void App::mapBrowserWindow()
             loadMapData(path);
         }
 
-        openFile = false; //why do we have to manually reset this?
+        openFile = false;
+    }
+
+    if (bakeSelected)
+    {
+        if (m_currentRoom != -1)
+        {
+            m_scene.bake(std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+        }
+        bakeSelected = false;
+    }
+}
+
+void App::statusWindow()
+{
+    ImGui::SetNextWindowSize({ 200.f, 400.f }, ImGuiCond_FirstUseEver);
+    ImGui::SetWindowPos({ 580.f, 20.f }, ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Status"))
+    {
+        ImGui::Text("%s", "Current Room: ");
+        ImGui::SameLine();
+        if (m_currentRoom > -1)
+        {
+            ImGui::Text("%s", std::to_string(m_currentRoom).c_str());
+        }
+        else
+        {
+            ImGui::Text("%s", "None");
+        }
+
+        ImGui::Text("%s", m_scene.getProgress().c_str());
+
+        if (ImGui::Button("Bake")
+            && m_currentRoom != -1)
+        {
+            m_scene.bake(std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+        }
+
+        ImGui::End();
     }
 }

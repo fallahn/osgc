@@ -14,6 +14,8 @@ public:
 
     std::vector<std::unique_ptr<Mesh>>& getMeshes() { return m_meshes; }
 
+    const std::string& getProgress() const { return m_progressString; }
+
 private:
     GLuint m_programID = 0;
     GLint m_textureUniform = 0;
@@ -25,6 +27,8 @@ private:
     int m_lightmapHeight = 0;
 
     std::vector<std::unique_ptr<Mesh>> m_meshes;
+
+    mutable std::string m_progressString;
 };
 
 using scene_t = Scene;

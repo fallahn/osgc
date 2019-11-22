@@ -140,18 +140,20 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
         draw(view, projection);
 
         //display progress every second (printf is expensive)
-        //TODO move this to imgui output
         double time = glfwGetTime();
         if (time - lastUpdateTime > 1.0)
         {
             lastUpdateTime = time;
             printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
             fflush(stdout);
+            //not that this is useful when running in the main thread...
+            m_progressString = std::to_string(lmProgress(ctx) * 100.f);
         }
 
         lmEnd(ctx);
     }
     printf("\rFinished baking %zd triangles.\n", mesh->indices.size() / 3);
+    m_progressString = "Finished";
 
     lmDestroy(ctx);
 
@@ -171,7 +173,7 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
     auto fileName = output + ".tga";
     if (lmImageSaveTGAf(fileName.c_str(), data.data(), w, h, 4, 1.0f))
     {
-        std::cout << "Saved " << output <<"\n";
+        std::cout << "Saved " << output <<".tga\n";
     }
 
     //upload result to preview texture

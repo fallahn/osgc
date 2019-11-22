@@ -17,7 +17,8 @@ App::App()
     : m_window          (nullptr),
     m_initOK            (false),
     m_projectionMatrix  (1.f),
-    m_viewMatrix        (1.f)
+    m_viewMatrix        (1.f),
+    m_bakeAll           (false)
 {
     if (glfwInit())
     {
@@ -128,6 +129,12 @@ void App::run()
         handleEvents();
         update();
         draw();
+
+        if (m_bakeAll)
+        {
+            bakeAll();
+            m_bakeAll = false;
+        }
     }
 }
 
@@ -196,6 +203,13 @@ void App::loadMapData(const std::string& path)
                         //TODO parse these
                     }
                 }
+
+                if (roomData.flags & RoomData::Ceiling)
+                {
+                    roomData.skyColour[0] *= 0.1f;
+                    roomData.skyColour[1] *= 0.1f;
+                    roomData.skyColour[2] *= 0.1f;
+                }
             }
         }
 
@@ -210,10 +224,6 @@ void App::loadMapData(const std::string& path)
 void App::handleEvents()
 {
     glfwPollEvents();
-    /*if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    {
-        m_scene.bake();
-    }*/
 }
 
 void App::update()
@@ -227,6 +237,7 @@ void App::update()
 
     //custom imgui rendering
     mapBrowserWindow();
+    statusWindow();
 
     calcViewMatrix();
 }
@@ -292,4 +303,21 @@ void App::draw()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(m_window);
+}
+
+void App::bakeAll()
+{
+    //hmmmm this really needs to be multithreaded but shared contexts blaarg
+
+    for (const auto& room : m_mapData)
+    {
+        m_currentRoom = room.id;
+        updateGeometry(room, m_scene);
+        handleEvents();
+        update();
+
+        m_scene.bake(std::to_string(room.id), room.skyColour);
+        m_clearColour = room.skyColour;
+        draw();
+    }
 }
