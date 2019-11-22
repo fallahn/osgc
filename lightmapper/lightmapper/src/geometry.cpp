@@ -3,7 +3,11 @@
 #include "structures.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+
 #include <iostream>
+#include <functional>
 
 namespace
 {
@@ -509,39 +513,120 @@ void addLight(const RoomData& room, Scene& scene)
 {
     //add interior light
     auto& light = scene.getMeshes().emplace_back(std::make_unique<Mesh>());
-    //TODO make a more complex piece of geom
+
     auto& verts = light->vertices;
     auto& indices = light->indices;
+    light->primitiveType = GL_TRIANGLE_STRIP;
 
-    const float lightWidth = 0.3f;
+    const float radius = 0.1f;
+    const std::size_t resolution = 5;
+    static const float degToRad = M_PI / 180.f;
 
-    Vertex vert;
-    vert.position[0] = -lightWidth / 2.f;
-    vert.position[1] = RoomHeight - 0.01f;
-    vert.position[2] = lightWidth / 2.f;
+    std::size_t offset = 0; //offset into index array as we add faces
+    auto buildFace = [&](const glm::mat4& rotation, const glm::vec2& uvOffset)
+    {
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec2> uvs;
+        const float spacing = 1.f / resolution;
+        const glm::vec2 uvSpacing((1.f / 2.f) / static_cast<float>(resolution), (1.f / 3.f) / static_cast<float>(resolution));
+        for (auto y = 0u; y <= resolution; ++y)
+        {
+            for (auto x = 0u; x <= resolution; ++x)
+            {
+                positions.emplace_back((x * spacing) - 0.5f, (y * spacing) - 0.5f, 0.5f);
+                uvs.emplace_back(uvOffset.x + (uvSpacing.x * x), uvOffset.y + (uvSpacing.y * y));
+            }
+        }
 
-    vert.texCoord[0] = 1.f;
-    vert.texCoord[1] = 1.f;
-    verts.push_back(vert);
+        for (auto i = 0u; i < positions.size(); ++i)
+        {
+            auto vertPos = rotation * glm::vec4(glm::normalize(positions[i]), 1.f);
+            auto& vert = verts.emplace_back();
+            vert.position[0] = vertPos.x * radius;
+            vert.position[1] = vertPos.y * radius;
+            vert.position[2] = vertPos.z * radius;
+            vert.position[1] += 0.4f; //moe towards ceiling
+            
+            ////normals
+            //vertexData.emplace_back(vert.x);
+            //vertexData.emplace_back(vert.y);
+            //vertexData.emplace_back(vert.z);
 
-    vert.position[2] -= lightWidth;
-    vert.texCoord[1] = 0.f;
-    verts.push_back(vert);
+            ////because we're on a grid the tan points to
+            ////the next vertex position - unless we're
+            ////at the end of a line
+            //glm::vec3 tan;
+            //if (i % (resolution + 1) == (resolution))
+            //{
+            //    //end of the line
+            //    glm::vec3 a = glm::normalize(positions[i - 1]);
+            //    glm::vec3 b = glm::normalize(positions[i]);
 
-    vert.position[0] += lightWidth;
-    vert.texCoord[0] = 0.f;
-    verts.push_back(vert);
+            //    tan = glm::normalize(a - b) * rotation;
+            //    tan = glm::reflect(tan, vert);
+            //}
+            //else
+            //{
+            //    glm::vec3 a = glm::normalize(positions[i + 1]);
+            //    glm::vec3 b = glm::normalize(positions[i]);
+            //    tan = glm::normalize(a - b) * rotation;
+            //}
+            //glm::vec3 bitan = glm::cross(tan, vert);
 
-    vert.position[2] += lightWidth;
-    vert.texCoord[1] = 1.f;
-    verts.push_back(vert);
+            //vertexData.emplace_back(tan.x);
+            //vertexData.emplace_back(tan.y);
+            //vertexData.emplace_back(tan.z);
 
-    indices.push_back(0);
-    indices.push_back(1);
-    indices.push_back(2);
-    indices.push_back(2);
-    indices.push_back(3);
-    indices.push_back(0);
+            //vertexData.emplace_back(bitan.x);
+            //vertexData.emplace_back(bitan.y);
+            //vertexData.emplace_back(bitan.z);
+
+            //UVs
+            vert.texCoord[0] = uvs[i].x;
+            vert.texCoord[1] = uvs[i].y;
+        }
+
+        //update indices
+        for (auto y = 0u; y <= resolution; ++y)
+        {
+            auto start = y * resolution;
+            for (auto x = 0u; x <= resolution; ++x)
+            {
+                indices.push_back(static_cast<std::uint16_t>(offset + start + resolution + x));
+                indices.push_back(static_cast<std::uint16_t>(offset + start + x));
+            }
+
+            //add a degenerate at the end of the row bar last
+            if (y < resolution - 1)
+            {
+                indices.push_back(static_cast<std::uint16_t>(offset + ((y + 1) * resolution + (resolution - 1))));
+                indices.push_back(static_cast<std::uint16_t>(offset + ((y + 1) * resolution)));
+            }
+        }
+        offset += positions.size();
+    };
+
+    //build each face rotating as we go
+    //mapping to 2x3 texture atlas
+    const float u = 1.f / 2.f;
+    const float v = 1.f / 3.f;
+    buildFace(glm::mat4(1.f), { 0.f, v * 2.f }); //Z+
+
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.f), degToRad * 90.f, glm::vec3(0.f, 1.f, 0.f));
+    buildFace(rotation, { u, 0.f }); //X-
+
+    rotation = glm::rotate(glm::mat4(1.f), degToRad * 180.f, glm::vec3(0.f, 1.f, 0.f));
+    buildFace(rotation, { u, v * 2.f }); //Z-
+
+    rotation = glm::rotate(glm::mat4(1.f), degToRad * 270.f, glm::vec3(0.f, 1.f, 0.f));
+    buildFace(rotation, {}); //X+
+
+    rotation = glm::rotate(glm::mat4(1.f), degToRad * 90.f, glm::vec3(1.f, 0.f, 0.f));
+    buildFace(rotation, { u, v }); //Y-
+
+    rotation = glm::rotate(glm::mat4(1.f), degToRad * -90.f, glm::vec3(1.f, 0.f, 0.f));
+    buildFace(rotation, { 0.f, v }); //Y+
+
 
     glBindBuffer(GL_ARRAY_BUFFER, light->vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);

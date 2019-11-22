@@ -41,7 +41,8 @@ struct Mesh final
     GLuint vbo = 0;
     GLuint ibo = 0;
 
-    GLuint texture;
+    GLuint texture = 0;
+    GLenum primitiveType = GL_TRIANGLES;
 
     std::vector<vertex_t> vertices;
     std::vector<std::uint16_t> indices;

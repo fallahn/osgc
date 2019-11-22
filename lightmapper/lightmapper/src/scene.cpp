@@ -80,7 +80,7 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection) const
         glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
         glCheck(glBindVertexArray(mesh->vao));
-        glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
     }
 }
 
