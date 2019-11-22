@@ -14,8 +14,10 @@
 #include <iostream>
 
 App::App()
-    : m_window  (nullptr),
-    m_initOK    (false)
+    : m_window          (nullptr),
+    m_initOK            (false),
+    m_projectionMatrix  (1.f),
+    m_viewMatrix        (1.f)
 {
     if (glfwInit())
     {
@@ -53,8 +55,7 @@ App::App()
     {
         glfwMakeContextCurrent(m_window);
         glfwSwapInterval(1);
-        //built in loader breaks ImGui
-        //gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
         gladLoadGL();
 
         const char* glslVer = "#version 150";
@@ -150,7 +151,55 @@ void App::update()
     //ImGui::ShowDemoWindow(&show_demo_window);
 
     //custom imgui rendering
-    mapBrowserWindow();
+    ui::mapBrowserWindow();
+
+    calcViewMatrix();
+}
+
+void App::calcViewMatrix()
+{
+    // initial camera config
+    //TODO these should be members
+    static glm::vec3 position(0.f, 0.3f, 1.5f);
+    static glm::vec2 rotation(0.f);
+
+    glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), rotation.y * static_cast<float>(M_PI / 180.f), glm::vec3(0.f, 1.f, 0.f));
+    rotMat = glm::rotate(rotMat, rotation.x * static_cast<float>(M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
+
+
+    //this should probably be in the update or handle events func...
+    if (!ImGui::GetIO().WantCaptureKeyboard
+        && !ImGui::GetIO().WantCaptureMouse)
+    {
+        // mouse look
+        static double lastMouse[] = { 0.0, 0.0 };
+        double mouse[2];
+        glfwGetCursorPos(m_window, &mouse[0], &mouse[1]);
+        if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+        {
+            rotation[0] += (float)(mouse[1] - lastMouse[1]) * -0.2f;
+            rotation[1] += (float)(mouse[0] - lastMouse[0]) * -0.2f;
+        }
+        lastMouse[0] = mouse[0];
+        lastMouse[1] = mouse[1];
+
+        // keyboard movement (WSADEQ)
+        float speed = (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.1f : 0.01f;
+        glm::vec3 movement(0.f);
+        if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) movement[2] -= speed;
+        if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) movement[2] += speed;
+        if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) movement[0] -= speed;
+        if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) movement[0] += speed;
+        if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS) movement[1] -= speed;
+        if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS) movement[1] += speed;
+
+        if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+
+        position += glm::vec3(rotMat * glm::vec4(movement, 1.f));
+    }
+
+    //construct view matrix
+    m_viewMatrix = glm::inverse(glm::translate(glm::mat4(1.f), position) * rotMat);
 }
 
 void App::draw()
@@ -160,13 +209,11 @@ void App::draw()
     glfwGetFramebufferSize(m_window, &w, &h);
     glViewport(0, 0, w, h);
 
-    //camera for glfw window
-    glm::mat4 view = fpsCameraViewMatrix(m_window);
 
     //draw to screen with a blueish sky
     glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_scene.draw(view, m_projectionMatrix);
+    m_scene.draw(m_viewMatrix, m_projectionMatrix);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(m_window);

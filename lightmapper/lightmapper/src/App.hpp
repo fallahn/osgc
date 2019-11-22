@@ -23,9 +23,12 @@ private:
     GLFWwindow* m_window;
     bool m_initOK;
     glm::mat4 m_projectionMatrix;
+    glm::mat4 m_viewMatrix;
 
     void handleEvents();
     void update();
+
+    void calcViewMatrix();
 
     void draw();
 };

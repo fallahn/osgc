@@ -1,3 +1,5 @@
 #pragma once
-
-void mapBrowserWindow();
+namespace ui
+{
+    void mapBrowserWindow();
+}

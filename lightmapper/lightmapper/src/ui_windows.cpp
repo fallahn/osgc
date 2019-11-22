@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+using namespace ui;
+
 void mapBrowserWindow()
 {
     static bool openFile = false;
