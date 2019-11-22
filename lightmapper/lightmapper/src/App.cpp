@@ -8,7 +8,6 @@
 #include "geometry.h"
 #include "ui_windows.h"
 
-#include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <fstream>
@@ -74,22 +73,22 @@ App::App()
         }
     }
 
-    if (!initScene(m_scene))
+    if (!m_scene.init())
     {
         std::cout << "Could not initialize scene.\n";
         glfwDestroyWindow(m_window);
         glfwTerminate();
-        //TODO flag to tell run() to immediately exit
     }
     else
     {
+        m_projectionMatrix = glm::perspective(45.f * static_cast<float>(M_PI / 180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
         m_initOK = true;
     }
 }
 
 App::~App()
 {
-    destroyScene(m_scene);
+    m_scene.destroy();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -137,7 +136,7 @@ void App::handleEvents()
     glfwPollEvents();
     if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        bake(m_scene);
+        m_scene.bake();
     }
 }
 
@@ -163,12 +162,11 @@ void App::draw()
 
     //camera for glfw window
     glm::mat4 view = fpsCameraViewMatrix(m_window);
-    glm::mat4 projection = glm::perspective(45.f * static_cast<float>(M_PI / 180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
 
     //draw to screen with a blueish sky
     glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    drawScene(m_scene, view, projection);
+    m_scene.draw(view, m_projectionMatrix);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(m_window);

@@ -1,4 +1,4 @@
-#include "scene.h"
+#include "structures.h"
 #include "gl_helpers.h"
 #include "geometry.h"
 #include "lightmapper.h"
@@ -6,13 +6,13 @@
 
 #include <assert.h>
 
-int initScene(scene_t& scene)
+bool Scene::init()
 {
     //temp to test mesh generation
-    updateGeometry(19, scene);
+    updateGeometry(19, *this);
 
-    scene.lightmapWidth = 750;
-    scene.lightmapHeight = 510;
+    m_lightmapWidth = 750;
+    m_lightmapHeight = 510;
 
     //load shader
     const char* vp =
@@ -47,35 +47,35 @@ int initScene(scene_t& scene)
         "a_texcoord"
     };
 
-    scene.program = loadProgram(vp, fp, attribs, 2);
-    if (!scene.program)
+    m_programID = loadProgram(vp, fp, attribs, 2);
+    if (!m_programID)
     {
-        fprintf(stderr, "Error loading shader\n");
-        return 0;
+        std::cout << "Error loading shader\n";
+        return false;
     }
-    scene.u_model = glGetUniformLocation(scene.program, "u_model");
-    scene.u_view = glGetUniformLocation(scene.program, "u_view");
-    scene.u_projection = glGetUniformLocation(scene.program, "u_projection");
-    scene.u_texture = glGetUniformLocation(scene.program, "u_texture");
+    m_modelUniform = glGetUniformLocation(m_programID, "u_model");
+    m_viewUniform = glGetUniformLocation(m_programID, "u_view");
+    m_projectionUniform = glGetUniformLocation(m_programID, "u_projection");
+    m_textureUniform = glGetUniformLocation(m_programID, "u_texture");
 
-    return 1;
+    return true;
 }
 
-void drawScene(const scene_t& scene, const glm::mat4& view, const glm::mat4& projection)
+void Scene::draw(const glm::mat4& view, const glm::mat4& projection) const
 {
     glEnable(GL_DEPTH_TEST);
 
-    glUseProgram(scene.program);
-    glUniform1i(scene.u_texture, 0);
+    glUseProgram(m_programID);
+    glUniform1i(m_textureUniform, 0);
 
-    glUniformMatrix4fv(scene.u_projection, 1, GL_FALSE, &projection[0][0]);
-    glUniformMatrix4fv(scene.u_view, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(m_projectionUniform, 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(m_viewUniform, 1, GL_FALSE, &view[0][0]);
 
     //foreach mesh in scene
-    for (const auto& mesh : scene.meshes)
+    for (const auto& mesh : m_meshes)
     {
         //model matrix
-        glUniformMatrix4fv(scene.u_model, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+        glUniformMatrix4fv(m_modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
 
         glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
@@ -84,18 +84,18 @@ void drawScene(const scene_t& scene, const glm::mat4& view, const glm::mat4& pro
     }
 }
 
-void destroyScene(scene_t& scene)
+void Scene::destroy()
 {
-    scene.meshes.clear();
+    m_meshes.clear();
 
-    glDeleteProgram(scene.program);
+    glDeleteProgram(m_programID);
 }
 
-int bake(scene_t& scene)
+bool Scene::bake() const
 {
     //reset the geometry texture to black else previous
     //bakes contribute to the emissions
-    glBindTexture(GL_TEXTURE_2D, scene.meshes[0]->texture);
+    glBindTexture(GL_TEXTURE_2D, m_meshes[0]->texture);
     unsigned char emissive[] = { 0, 0, 0, 255 };
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -111,18 +111,18 @@ int bake(scene_t& scene)
 
     if (!ctx)
     {
-        fprintf(stderr, "Error: Could not initialize lightmapper.\n");
+        std::cout << "Error: Could not initialize lightmapper.\n";
         return 0;
     }
 
-    int w = scene.lightmapWidth, h = scene.lightmapHeight;
+    int w = m_lightmapWidth, h = m_lightmapHeight;
 
     std::vector<float> data(w * h * 4);
     lmSetTargetLightmap(ctx, data.data(), w, h, 4);
 
     //assume the room mesh is always in the first slot...
-    assert(!scene.meshes.empty());
-    const auto& mesh = scene.meshes[0];
+    assert(!m_meshes.empty());
+    const auto& mesh = m_meshes[0];
     lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
         LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
         LM_NONE, NULL, 0, // no interpolated normals in this example
@@ -136,7 +136,7 @@ int bake(scene_t& scene)
     {
         //render to lightmapper framebuffer
         glViewport(vp[0], vp[1], vp[2], vp[3]);
-        drawScene(scene, view, projection);
+        draw(view, projection);
 
         //display progress every second (printf is expensive)
         double time = glfwGetTime();
@@ -168,7 +168,7 @@ int bake(scene_t& scene)
     // save result to a file
     if (lmImageSaveTGAf("result.tga", data.data(), w, h, 4, 1.0f))
     {
-        printf("Saved result.tga\n");
+        std::cout << "Saved result.tga\n";
     }
 
     //upload result to preview texture

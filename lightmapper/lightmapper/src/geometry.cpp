@@ -27,11 +27,12 @@ namespace
     };
 }
 
-void updateGeometry(int32_t flags, scene_t& scene)
+void updateGeometry(int32_t flags, Scene& scene)
 {
-    scene.meshes.clear();
+    auto& meshes = scene.getMeshes();
+    meshes.clear();
 
-    auto& mesh = scene.meshes.emplace_back(std::make_unique<Mesh>());
+    auto& mesh = meshes.emplace_back(std::make_unique<Mesh>());
 
     auto& verts = mesh->vertices;
     auto& indices = mesh->indices;
@@ -511,10 +512,10 @@ void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
     indices.push_back(firstIndex + 0);
 }
 
-void addLight(scene_t& scene)
+void addLight(Scene& scene)
 {
     //add interior light
-    auto& light = scene.meshes.emplace_back(std::make_unique<Mesh>());
+    auto& light = scene.getMeshes().emplace_back(std::make_unique<Mesh>());
     //TODO make a more complex piece of geom
     auto& verts = light->vertices;
     auto& indices = light->indices;

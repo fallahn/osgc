@@ -3,6 +3,7 @@
 #include "scene.h"
 
 #include <GLFW/glfw3.h>
+#include <glm/mat4x4.hpp>
 
 class App final
 {
@@ -21,6 +22,7 @@ private:
     Scene m_scene;
     GLFWwindow* m_window;
     bool m_initOK;
+    glm::mat4 m_projectionMatrix;
 
     void handleEvents();
     void update();

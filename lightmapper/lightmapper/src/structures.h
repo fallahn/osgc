@@ -48,19 +48,3 @@ struct Mesh final
 
     glm::mat4 modelMatrix = glm::mat4(1.f);
 };
-
-struct Scene final
-{
-    GLuint program = 0;
-    GLint u_texture = 0;
-    GLint u_projection = 0;
-    GLint u_view = 0;
-    GLint u_model = 0;
-
-    int lightmapWidth = 0;
-    int lightmapHeight = 0;
-
-    std::vector<std::unique_ptr<Mesh>> meshes;
-};
-
-using scene_t = Scene;
