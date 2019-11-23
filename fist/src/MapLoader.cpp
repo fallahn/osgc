@@ -166,6 +166,9 @@ bool GameState::loadMap()
         auto texID = m_resources.load<sf::Texture>(textureName);
         auto& tex = m_resources.get<sf::Texture>(texID);
 
+        auto lightmapID = m_resources.load<sf::Texture>("assets/images/rooms/lightmaps/" + room.getId() + ".png");
+        auto& lightmap = m_resources.get<sf::Texture>(lightmapID);
+
         //create the room entity
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(roomPosition);
@@ -175,6 +178,7 @@ bool GameState::loadMap()
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DWalls));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.getComponent<xy::Drawable>().bindUniform("u_normalMap", normalTex);
+        entity.getComponent<xy::Drawable>().bindUniform("u_lightmap", lightmap);
         entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight;
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 

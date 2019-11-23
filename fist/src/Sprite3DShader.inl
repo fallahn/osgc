@@ -125,7 +125,7 @@ void main()
 
     v_tbn = (mat3(tan.xyz, bit.xyz, normal.xyz));
 
-    v_lightDir = vec3(0.2, 0.2, 1.0);
+    v_lightDir = vec3(0.8, 0.2, 1.0);
     v_pointlightDirection = u_pointlightWorldPosition - worldPos.xyz;
 })";
 
@@ -135,6 +135,7 @@ R"(
 
 uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
+uniform sampler2D u_lightmap;
 uniform vec3 u_skylightColour;
 uniform float u_skylightAmount;
 uniform vec3 u_roomlightColour;
@@ -159,6 +160,7 @@ void main()
     {
         discard;
     }
+    baseColour.rgb *= texture2D(u_lightmap, gl_TexCoord[0].xy).rgb;
 
     vec3 normal = texture2D(u_normalMap, gl_TexCoord[0].xy).rgb * 2.0 - 1.0;
     //normal.xy *= 3.5; normalize(normal);
