@@ -52,8 +52,20 @@ App::App()
     std::ifstream iFile("window", std::ios::binary);
     if (!iFile.fail())
     {
+        //TODO need much more file validating on this
         iFile.read((char*)&w, sizeof(w));
         iFile.read((char*)&h, sizeof(h));
+
+        std::size_t size = 0;
+        iFile.read((char*)&size, sizeof(size));
+
+        if (size > 0)
+        {
+            m_outputPath.resize(size);
+            iFile.read(m_outputPath.data(), size);
+        }
+
+        iFile.close();
     }
 
 
@@ -122,6 +134,18 @@ App::~App()
         std::memcpy(buff.data(), &w, sizeof(int));
         std::memcpy(buff.data() + sizeof(int), &h, sizeof(int));
         oFile.write(buff.data(), buff.size());
+
+        if (!m_outputPath.empty())
+        {
+            std::size_t size = m_outputPath.size();
+            oFile.write((char*)&size, sizeof(size));
+            oFile.write(m_outputPath.c_str(), size);
+        }
+        else
+        {
+            std::size_t size = 0;
+            oFile.write((char*)&size, sizeof(size));
+        }
     }
 
     glfwDestroyWindow(m_window);
@@ -383,7 +407,7 @@ void App::bakeAll()
         handleEvents();
         update();
 
-        m_scene.bake(std::to_string(room.id), room.skyColour);
+        m_scene.bake(m_outputPath + std::to_string(room.id), room.skyColour);
         m_clearColour = room.skyColour;
         draw();
     }

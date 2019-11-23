@@ -9,6 +9,7 @@
 void App::mapBrowserWindow()
 {
     static bool openFile = false;
+    static bool openOutput = false;
     static bool bakeSelected = false;
 
     ImGui::SetNextWindowSize({ 200.f, 400.f }, ImGuiCond_FirstUseEver);
@@ -25,9 +26,16 @@ void App::mapBrowserWindow()
             {
                 ImGui::MenuItem("Bake Selected", nullptr, &bakeSelected);
                 ImGui::MenuItem("Bake All", nullptr, &m_bakeAll);
+                ImGui::MenuItem("Set Output Directory", nullptr, &openOutput);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
+        }
+
+        if (!m_outputPath.empty())
+        {
+            ImGui::Text("%s", "Output Path:");
+            ImGui::Text("%s", m_outputPath.c_str());
         }
 
         if (!m_mapData.empty() && ImGui::CollapsingHeader("Room List"))
@@ -71,9 +79,22 @@ void App::mapBrowserWindow()
     {
         if (m_currentRoom != -1)
         {
-            m_scene.bake(std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+            m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
         }
         bakeSelected = false;
+    }
+
+    if (openOutput)
+    {
+        auto path = tinyfd_selectFolderDialog("Select Output Directory", m_outputPath.c_str());
+        if (path)
+        {
+            m_outputPath = path;
+            std::replace(m_outputPath.begin(), m_outputPath.end(), '\\', '/');
+            m_outputPath += '/';
+        }
+
+        openOutput = false;
     }
 }
 
@@ -99,7 +120,7 @@ void App::statusWindow()
         if (ImGui::Button("Bake")
             && m_currentRoom != -1)
         {
-            m_scene.bake(std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+            m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
         }
 
         ImGui::End();

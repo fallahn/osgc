@@ -30,6 +30,8 @@ private:
     std::int32_t m_currentRoom = -1;
     void loadMapData(const std::string&);
 
+    std::string m_outputPath;
+
     void handleEvents();
     void update();
 
