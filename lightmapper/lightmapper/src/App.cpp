@@ -218,7 +218,48 @@ void App::loadMapData(const std::string& path)
                     }
                     else if (roomObj.getName() == "model")
                     {
-                        //TODO parse these
+                        auto& modelData = roomData.models.emplace_back();
+
+                        //save the info and process geometry after the room is built
+                        const auto& properties = roomObj.getProperties();
+                        for (const auto& prop : properties)
+                        {
+                            if (prop.getName() == "bin")
+                            {
+                                //this assumes the models are stored next to the map
+                                auto fullPath = path;
+                                std::replace(fullPath.begin(), fullPath.end(), '\\', '/');
+
+                                for (auto i = 0; i < 2; ++i)
+                                {
+                                    if (auto pos = fullPath.find_last_of('/'); pos != std::string::npos)
+                                    {
+                                        fullPath = fullPath.substr(0, pos);
+                                    }
+                                }
+                                modelData.path = fullPath + "/" + prop.getValue<std::string>();
+
+                            }
+                            else if (prop.getName() == "position")
+                            {
+                                modelData.position = prop.getValue<glm::vec2>();
+                            }
+                            else if (prop.getName() == "rotation")
+                            {
+                                modelData.rotation = prop.getValue<float>();
+                            }
+                            else if (prop.getName() == "depth")
+                            {
+                                modelData.depth = prop.getValue<float>();
+                            }
+                        }
+
+                        if (modelData.path.empty() ||
+                            modelData.depth <= 0)
+                        {
+                            //invalid data, remove from the list
+                            roomData.models.pop_back();
+                        }
                     }
                 }
 

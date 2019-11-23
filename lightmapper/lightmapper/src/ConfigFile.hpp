@@ -27,13 +27,7 @@ source distribution.
 
 #pragma once
 
-//#include "xyginext/Config.hpp"
-//#include "xyginext/core/Log.hpp"
-//#include "xyginext/core/Vector4.hpp"
-//
-//#include <SFML/Graphics/Rect.hpp>
-//#include <SFML/Graphics/Color.hpp>
-//#include <SFML/System/Vector3.hpp>
+#include "glm/vec2.hpp"
 
 #include <string>
 #include <vector>
@@ -86,19 +80,6 @@ namespace xy
         */
         template <typename T>
         T getValue() const;// = delete;
-
-        //sets the property's value
-        /*void setValue(const std::string& v);
-        void setValue(sf::Int32 v);
-        void setValue(float v);
-        void setValue(bool v);
-        void setValue(sf::Vector2f v);
-        void setValue(sf::Vector2i v);
-        void setValue(sf::Vector2u v);
-        void setValue(sf::Vector3f v);
-        void setValue(sf::FloatRect);
-        void setValue(sf::Color);
-        void setValue(xy::Vector4f);*/
         
     private:
         std::string m_value;
@@ -224,10 +205,7 @@ namespace xy
         static bool isProperty(const std::string& line);
         //removes comments AND preceding whitespace
         static void removeComment(std::string& line);
-
-        //void write(std::ofstream& file, sf::Uint16 depth = 0u) const;
     };
 
     using ConfigFile = xy::ConfigObject;
-    
 }

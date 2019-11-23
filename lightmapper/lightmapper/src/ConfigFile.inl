@@ -63,13 +63,13 @@ inline std::array<float, 3> ConfigProperty::getValue<std::array<float, 3>>() con
     return { values[0], values[1], values[2] };
 }
 
-//template <>
-//inline sf::Vector2f ConfigProperty::getValue<sf::Vector2f>() const
-//{
-//    auto values = valueAsArray();
-//
-//    return { values[0], values[1] };
-//}
+template <>
+inline glm::vec2 ConfigProperty::getValue<glm::vec2>() const
+{
+    auto values = valueAsArray();
+
+    return { values[0], values[1] };
+}
 //
 //template <>
 //inline sf::Vector2i ConfigProperty::getValue<sf::Vector2i>() const

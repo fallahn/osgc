@@ -50,6 +50,14 @@ struct Mesh final
     glm::mat4 modelMatrix = glm::mat4(1.f);
 };
 
+struct ModelData final
+{
+    std::string path;
+    glm::vec2 position;
+    float rotation = 0.f;
+    float depth = 0.f;
+};
+
 struct RoomData final
 {
     enum Flags
@@ -65,4 +73,7 @@ struct RoomData final
     std::array<float, 3> skyColour = {1.f, 1.f, 1.f};
     std::array<float, 3> roomColour = { 1.f, 1.f, 1.f };
     std::int32_t id = -1;
+
+    std::vector<ModelData> models;
 };
+
