@@ -2,6 +2,8 @@
 
 #include "structures.h"
 
+#include <string>
+
 class Scene final
 {
 public:
