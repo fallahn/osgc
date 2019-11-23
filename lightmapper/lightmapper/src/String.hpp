@@ -32,11 +32,29 @@ source distribution.
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 
 namespace xy
 {
     namespace Util
     {
+        namespace IO
+        {
+            static inline std::size_t getFileSize(std::ifstream& file)
+            {
+                file.seekg(0, file.end);
+                auto fileSize = file.tellg();
+                file.seekg(file.beg);
+
+                return static_cast<std::size_t>(fileSize);
+            }
+
+            static inline bool isExpectedSize(std::ifstream& file, std::size_t expectedSize)
+            {
+                return getFileSize(file) == expectedSize;
+            }
+        }
+
         /*!
         \brief String manipulation functions
         */

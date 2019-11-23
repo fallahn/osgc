@@ -16,3 +16,4 @@ void addWestWall(std::vector<Vertex>&, std::vector<std::uint16_t>&);
 void addCeiling(std::vector<Vertex>&, std::vector<std::uint16_t>&);
 
 void addLight(const RoomData&, Scene&);
+void addModel(const ModelData&, Scene&);

@@ -1,13 +1,15 @@
 #include "geometry.h"
 #include "GLCheck.hpp"
 #include "structures.h"
+#include "SerialVertex.hpp"
+#include "String.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-
 #include <iostream>
 #include <functional>
+#include <fstream>
 
 namespace
 {
@@ -99,6 +101,12 @@ void updateGeometry(const RoomData& room, Scene& scene)
     if (flags & RoomData::Flags::Ceiling)
     {
         addLight(room, scene);
+    }
+
+    //load any prop models
+    for (const auto& model : room.models)
+    {
+        addModel(model, scene);
     }
 }
 
@@ -639,4 +647,61 @@ void addLight(const RoomData& room, Scene& scene)
     //update texture with light colour
     glBindTexture(GL_TEXTURE_2D, light->texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, room.roomColour.data());
+}
+
+void addModel(const ModelData& model, Scene& scene)
+{
+    //remember model z/y axis are switched. Because, y'know.
+    std::ifstream file(model.path, std::ios::binary);
+    if(file.is_open() && file.good())
+    {
+        auto fileSize = xy::Util::IO::getFileSize(file);
+        if (fileSize > sizeof(std::size_t))
+        {
+            std::size_t vertCount = 0;
+            file.read((char*)&vertCount, sizeof(vertCount));
+
+            if (fileSize - sizeof(vertCount) == sizeof(SerialVertex) * vertCount)
+            {
+                std::vector<SerialVertex> buff(vertCount);
+                file.read((char*)buff.data(), sizeof(SerialVertex) * vertCount);
+
+                //unfortunately this format doesn't use indexed vertex data
+                auto& mesh = scene.getMeshes().emplace_back(std::make_unique<Mesh>());
+                auto& verts = mesh->vertices;
+                auto& indices = mesh->indices;
+
+                for (auto i = 0u; i < vertCount; ++i)
+                {
+                    indices.push_back(static_cast<std::uint16_t>(i));
+
+                    auto& vert = verts.emplace_back();
+                    vert.position[0] = buff[i].posX;
+                    vert.position[2] = buff[i].posY;
+                    vert.position[1] = model.depth * (static_cast<float>(buff[i].heightMultiplier) / 255.f);
+
+                    //TODO normal data
+
+                    vert.texCoord[0] = buff[i].texU;
+                    vert.texCoord[1] = buff[i].texV;
+                }
+
+                glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+                glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+                //set the model position (and scale because the rooms are 1x1)
+                float scale = 1.f / 960.f; //this should be const somewhere, no?
+                mesh->modelMatrix = glm::translate(glm::mat4(1.f), glm::vec3(model.position.x * scale, 0.f, model.position.y * scale));
+                mesh->modelMatrix = glm::rotate(mesh->modelMatrix, model.rotation * (static_cast<float>(M_PI) / 180.f), glm::vec3(0.f, 1.f, 0.f));
+                mesh->modelMatrix = glm::scale(mesh->modelMatrix, glm::vec3(scale, scale, scale));
+            }
+        }
+
+        file.close();
+    }
 }
