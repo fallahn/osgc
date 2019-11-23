@@ -19,6 +19,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Render3DSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RoomBuilder.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SerialVertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SliderSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3D.hpp

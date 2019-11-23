@@ -160,6 +160,7 @@
     <ClInclude Include="include\Render3DSystem.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
     <ClInclude Include="include\RoomBuilder.hpp" />
+    <ClInclude Include="include\SerialVertex.hpp" />
     <ClInclude Include="include\SharedStateData.hpp" />
     <ClInclude Include="include\SliderSystem.hpp" />
     <ClInclude Include="include\Sprite3D.hpp" />

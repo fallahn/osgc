@@ -167,6 +167,12 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     }
                 }
                 ImGui::End();
+
+                if (!m_showModelImporter)
+                {
+                    //window was closed
+                    modelEntity.getComponent<xy::Drawable>().getVertices().clear();
+                }
             }
         });
 
@@ -654,6 +660,7 @@ void ModelState::parseVerts()
         modelEntity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
         modelEntity.addComponent<Sprite3D>(m_matrixPool);
         modelEntity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &modelEntity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        modelEntity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 0.f));
     }
 
     //update the entity's vert data
@@ -673,9 +680,11 @@ void ModelState::parseVerts()
                 return lhs.Position.Z < rhs.Position.Z;
             });
         float range = zExtremes.second->Position.Z;
+        bool shiftRange = false;
         if (zExtremes.first->Position.Z < 0)
         {
             range -= zExtremes.first->Position.Z;
+            shiftRange = true;
         }
 
         modelEntity.getComponent<Sprite3D>().depth = range;
@@ -689,7 +698,7 @@ void ModelState::parseVerts()
             vert.position.y = -meshVerts[i].Position.Y;
 
             float z = meshVerts[i].Position.Z;
-            if (z < 0)
+            if (shiftRange)
             {
                 z -= zExtremes.first->Position.Z;
             }

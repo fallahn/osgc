@@ -17,6 +17,7 @@ Copyright 2019 Matt Marchant
 *********************************************************************/
 
 #include "ModelIO.hpp"
+#include "SerialVertex.hpp"
 
 #include <xyginext/util/IO.hpp>
 #include <xyginext/core/Log.hpp>
@@ -25,7 +26,41 @@ Copyright 2019 Matt Marchant
 #include <fstream>
 
 //binary is simply a size_t containing vertex count, followed by serialised vertices
-//this relies on sf::Vertex veing a simple struct (it currently is) but I guess this might change...
+//this struct ensures the members are always in the correct order, even if the sf::Vertex
+//format changes at some point, as well as allowing other software to know the structure
+//without having to link against the sf::Vertex class
+namespace
+{
+    SerialVertex serialise(sf::Vertex vertIn)
+    {
+        SerialVertex vertOut;
+        vertOut.posX = vertIn.position.x;
+        vertOut.posY = vertIn.position.y;
+        vertOut.normX = vertIn.color.r;
+        vertOut.normY = vertIn.color.g;
+        vertOut.normZ = vertIn.color.b;
+        vertOut.heightMultiplier = vertIn.color.a;
+        vertOut.texU = vertIn.texCoords.x;
+        vertOut.texV = vertIn.texCoords.y;
+
+        return vertOut;
+    }
+
+    sf::Vertex deserialise(SerialVertex vertIn)
+    {
+        sf::Vertex vertOut;
+        vertOut.position.x = vertIn.posX;
+        vertOut.position.y = vertIn.posY;
+        vertOut.color.r = vertIn.normX;
+        vertOut.color.g = vertIn.normY;
+        vertOut.color.b = vertIn.normZ;
+        vertOut.color.a = vertIn.heightMultiplier;
+        vertOut.texCoords.x = vertIn.texU;
+        vertOut.texCoords.y = vertIn.texV;
+
+        return vertOut;
+    }
+}
 
 bool writeModelBinary(const std::vector<sf::Vertex>& verts, const std::string& path)
 {
@@ -33,8 +68,16 @@ bool writeModelBinary(const std::vector<sf::Vertex>& verts, const std::string& p
     if (file.is_open() && file.good())
     {
         auto vertCount = verts.size();
+
+        std::vector<SerialVertex> buff;
+        buff.reserve(vertCount);
+        for (const auto& vert : verts)
+        {
+            buff.push_back(serialise(vert));
+        }
+
         file.write((char*)&vertCount, sizeof(vertCount));
-        file.write((char*)verts.data(), vertCount * sizeof(sf::Vertex));
+        file.write((char*)buff.data(), vertCount * sizeof(SerialVertex));
         file.close();
         return true;
     }
@@ -53,10 +96,18 @@ bool readModelBinary(std::vector<sf::Vertex>& verts, const std::string& path)
             std::size_t vertCount = 0;
             file.read((char*)&vertCount, sizeof(vertCount));
 
-            if (fileSize - sizeof(vertCount) == sizeof(sf::Vertex) * vertCount)
+            if (fileSize - sizeof(vertCount) == sizeof(SerialVertex) * vertCount)
             {
-                verts.resize(vertCount);
-                file.read((char*)verts.data(), sizeof(sf::Vertex) * vertCount);
+                std::vector<SerialVertex> buff(vertCount);
+                file.read((char*)buff.data(), sizeof(SerialVertex) * vertCount);
+
+                verts.clear();
+                verts.reserve(vertCount);
+                for (const auto& sVert : buff)
+                {
+                    verts.push_back(deserialise(sVert));
+                }
+
                 return true;
             }
             else
