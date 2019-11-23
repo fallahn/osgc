@@ -3,6 +3,7 @@
 #include "geometry.h"
 #include "lightmapper.h"
 #include "GLCheck.hpp"
+#include "stb_image_write.h"
 
 #include <assert.h>
 
@@ -116,10 +117,10 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
         return 0;
     }
 
-    int w = m_lightmapWidth, h = m_lightmapHeight;
+    int w = m_lightmapWidth, h = m_lightmapHeight, c = 4;
 
-    std::vector<float> data(w * h * 4);
-    lmSetTargetLightmap(ctx, data.data(), w, h, 4);
+    std::vector<float> data(w * h * c);
+    lmSetTargetLightmap(ctx, data.data(), w, h, c);
 
     //assume the room mesh is always in the first slot...
     assert(!m_meshes.empty());
@@ -161,20 +162,21 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
     std::vector<float> temp(data.size());
     for (int i = 0; i < 16; i++)
     {
-        lmImageDilate(data.data(), temp.data(), w, h, 4);
-        lmImageDilate(temp.data(), data.data(), w, h, 4);
+        lmImageDilate(data.data(), temp.data(), w, h, c);
+        lmImageDilate(temp.data(), data.data(), w, h, c);
     }
-    lmImageSmooth(data.data(), temp.data(), w, h, 4);
-    lmImageDilate(temp.data(), data.data(), w, h, 4);
+    lmImageSmooth(data.data(), temp.data(), w, h, c);
+    lmImageDilate(temp.data(), data.data(), w, h, c);
     lmImagePower(data.data(), w, h, 4, 1.0f / 2.2f, 0x7); // gamma correct color channels
 
 
-    // save result to a file
-    auto fileName = output + ".tga";
-    if (lmImageSaveTGAf(fileName.c_str(), data.data(), w, h, 4, 1.0f))
-    {
-        std::cout << "Saved " << output <<".tga\n";
-    }
+    //save result to a file
+    auto fileName = output + ".png";
+
+    std::vector<std::uint8_t> buffer(w * h * c);
+    lmImageFtoUB(data.data(), buffer.data(), w, h, c, 1.f);
+
+    stbi_write_png(fileName.c_str(), w, h, 4, buffer.data(), w * 4);
 
     //upload result to preview texture
     glBindTexture(GL_TEXTURE_2D, mesh->texture);

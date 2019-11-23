@@ -157,6 +157,7 @@
     <ClInclude Include="src\geometry.h" />
     <ClInclude Include="src\gl_helpers.h" />
     <ClInclude Include="src\lightmapper.h" />
+    <ClInclude Include="src\stb_image_write.h" />
     <ClInclude Include="src\structures.h" />
   </ItemGroup>
   <ItemGroup>
