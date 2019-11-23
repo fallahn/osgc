@@ -5,6 +5,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -23,6 +25,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -41,6 +45,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -59,6 +65,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -77,6 +85,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -95,6 +105,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -113,6 +125,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -125,6 +139,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -143,6 +159,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -161,6 +179,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -185,6 +205,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -203,6 +225,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -227,6 +251,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -245,6 +271,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -269,6 +297,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 2
@@ -287,6 +317,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -299,6 +331,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -317,6 +351,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -341,6 +377,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -359,6 +397,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -383,6 +423,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -407,6 +449,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -431,6 +475,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -455,6 +501,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -473,6 +521,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -497,6 +547,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -515,6 +567,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 3
@@ -527,6 +581,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -545,6 +601,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -563,6 +621,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -575,6 +635,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -593,6 +655,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -611,6 +675,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -635,6 +701,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -653,6 +721,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -677,6 +747,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -701,6 +773,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -725,6 +799,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -749,6 +825,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -773,6 +851,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -791,8 +871,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
-        sky_colour = 1.000000,1.000000,1.000000
-        room_colour = 1.000000,1.000000,1.000000
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 2
@@ -808,11 +888,11 @@ map game_map
     }
     room 41
     {
-        src = "assets/images/rooms/template.png"
+        src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
-        sky_colour = 0.694690,0.798282,1.000000
-        room_colour = 1.000000,0.870546,0.615044
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -827,11 +907,10 @@ map game_map
         }
         model suzanne
         {
-            bin = "assets/models/suzanne.xym"
+            bin = assets/models/suzanne.xym
             depth = 189.000000
             position = -370.632996,-144.000000
             rotation = 358.983002
-            texture = ""
         }
     }
     room 42
@@ -839,6 +918,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -863,6 +944,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -881,6 +964,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 3
@@ -893,6 +978,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -911,6 +998,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -935,6 +1024,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -953,6 +1044,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -971,8 +1064,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
-        sky_colour = 0.085000,0.723000,0.681000
-        room_colour = 1.000000,1.000000,1.000000
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -991,6 +1084,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1015,6 +1110,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1033,6 +1130,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 1
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -1051,6 +1150,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1069,6 +1170,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1081,6 +1184,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1
@@ -1093,6 +1198,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 2
@@ -1111,8 +1218,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
-        sky_colour = 1.000000,1.000000,0.638000
-        room_colour = 0.191000,0.234000,1.000000
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 2
@@ -1121,17 +1228,19 @@ map game_map
         }
         model suzanne
         {
-            bin = assets/models/suzanne.xym
+            bin = "assets/models/suzanne.xym"
             depth = 189.000000
             position = -346.329010,276.000000
             rotation = 147.457993
+            texture = ""
         }
         model buns
         {
-            bin = assets/models/buns.xym
+            bin = "assets/models/buns.xym"
             depth = 189.000000
             position = 224.809998,-288.000000
             rotation = 3.051000
+            texture = ""
         }
     }
     room 58
@@ -1139,6 +1248,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1164,6 +1275,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1182,6 +1295,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 0
@@ -1200,6 +1315,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 2
@@ -1212,6 +1329,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 2
@@ -1224,6 +1343,8 @@ map game_map
         src = assets/images/rooms/template.png
         ceiling = 0
         item_id = -1
+        sky_colour = 0.992157,0.976471,0.949020
+        room_colour = 1.000000,0.870588,0.615686
         wall 
         {
             direction = 1

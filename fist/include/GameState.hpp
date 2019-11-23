@@ -30,15 +30,17 @@ source distribution.
 #include "CameraInput.hpp"
 #include "MatrixPool.hpp"
 #include "WallData.hpp"
+#include "ResourceIDs.hpp"
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
 struct SharedData;
 
-class GameState final : public xy::State
+class GameState final : public xy::State, public xy::GuiClient
 {
 public:
     GameState(xy::StateStack&, xy::State::Context, SharedData&);
@@ -62,6 +64,7 @@ private:
     xy::ResourceHandler m_resources;
     xy::ShaderResource m_shaders;
     std::size_t m_defaultTexID;
+    std::array<std::size_t, TextureID::Count> m_textureIDs;
 
     MapData m_mapData;
     bool m_cameraUnlocked;

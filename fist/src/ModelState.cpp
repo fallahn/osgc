@@ -280,7 +280,10 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 //light colours
                 ImGui::ColorEdit3("Sky Colour", reinterpret_cast<float*>(&m_skyColour));
                 ImGui::ColorEdit3("Room Colour", reinterpret_cast<float*>(&m_roomColour));
-                
+                if (ImGui::Button("Apply To All"))
+                {
+                    applyLightingToAll();
+                }
 
                 ImGui::Separator();
 
@@ -1120,5 +1123,30 @@ void ModelState::saveRoom()
         room->addProperty("room_colour").setValue(m_roomColour);
     }
 
+    m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
+}
+
+void ModelState::applyLightingToAll()
+{
+    for (auto room : m_roomList)
+    {
+        if (auto* skyProp = room->findProperty("sky_colour"); skyProp)
+        {
+            skyProp->setValue(m_skyColour);
+        }
+        else
+        {
+            room->addProperty("sky_colour").setValue(m_skyColour);
+        }
+
+        if (auto* roomProp = room->findProperty("room_colour"); roomProp)
+        {
+            roomProp->setValue(m_roomColour);
+        }
+        else
+        {
+            room->addProperty("room_colour").setValue(m_roomColour);
+        }
+    }
     m_mapData.save(xy::FileSystem::getResourcePath() + "assets/game.map");
 }

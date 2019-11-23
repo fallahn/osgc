@@ -69,7 +69,7 @@ App::App()
     }
 
 
-    m_window = glfwCreateWindow(w, h, "Lightmapper", NULL, NULL);
+    m_window = glfwCreateWindow(1920, 1080, "Lightmapper", NULL, NULL);
     if (!m_window)
     {
         std::cout << "Could not create window.\n";

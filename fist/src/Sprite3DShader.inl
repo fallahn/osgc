@@ -82,7 +82,7 @@ uniform mat4 u_modelMat;
 
 uniform vec3 u_pointlightWorldPosition;
 
-varying vec3 v_lightDir;
+//varying vec3 v_lightDir;
 varying vec3 v_pointlightDirection;
 varying vec4 v_viewPosition;
 
@@ -125,7 +125,7 @@ void main()
 
     v_tbn = (mat3(tan.xyz, bit.xyz, normal.xyz));
 
-    v_lightDir = vec3(0.8, 0.2, 1.0);
+    //v_lightDir = vec3(0.1, 1.0, 0.1);
     v_pointlightDirection = u_pointlightWorldPosition - worldPos.xyz;
 })";
 
@@ -136,12 +136,15 @@ R"(
 uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_lightmap;
+
 uniform vec3 u_skylightColour;
 uniform float u_skylightAmount;
+
 uniform vec3 u_roomlightColour;
 uniform float u_roomlightAmount;
 
-varying vec3 v_lightDir;
+uniform vec3 u_lightDirection;
+
 varying vec3 v_pointlightDirection;
 varying vec4 v_viewPosition;
 
@@ -151,7 +154,7 @@ const float FogNear = 2880.0;
 const float FogFar = 4800.0;
 
 const float AmbientAmount = 0.3;
-const float LightRange = 1.0 / 480.0;
+const float LightRange = 1.0 / 540.0;
 
 void main()
 {
@@ -160,13 +163,13 @@ void main()
     {
         discard;
     }
+
     baseColour.rgb *= texture2D(u_lightmap, gl_TexCoord[0].xy).rgb;
 
     vec3 normal = texture2D(u_normalMap, gl_TexCoord[0].xy).rgb * 2.0 - 1.0;
-    //normal.xy *= 3.5; normalize(normal);
     normal = normalize(normalize(normal) * v_tbn);
 
-    vec3 lightDir = normalize(v_lightDir);
+    vec3 lightDir = normalize(vec3(-0.1, 0.2, 1.0));
 
     float diffuseAmount = max(dot(lightDir, normal), 0.5);
 

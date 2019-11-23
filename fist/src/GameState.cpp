@@ -29,7 +29,6 @@ source distribution.
 #include "StateIDs.hpp"
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
-#include "ResourceIDs.hpp"
 #include "GameConst.hpp"
 #include "CommandIDs.hpp"
 #include "CameraTransportSystem.hpp"
@@ -103,6 +102,15 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     debugSetup();
 #endif
     buildUI();
+
+    //registerWindow([]() 
+    //    {
+    //        ImGui::Begin("Shader Uniforms");
+    //        //ImGui::SliderFloat3("angle", reinterpret_cast<float*>(&lightDir), -1.f, 1.f);
+    //        //ImGui::Checkbox("Show Lightmap", &doLightmap);
+    //        ImGui::End();
+    //    });
+
     quitLoadingScreen();
 }
 
@@ -260,6 +268,7 @@ bool GameState::update(float dt)
     auto& shader2 = m_shaders.get(ShaderID::Sprite3DWalls);
     shader2.setUniform("u_viewMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewMatrix[0][0]));
     shader2.setUniform("u_projMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().projectionMatrix[0][0]));
+    //shader2.setUniform("u_lightmapAmount", doLightmap ? 1.f : 0.f);
 
     return true;
 }
@@ -342,6 +351,8 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::Sprite3DWalls, SpriteVertexWalls, SpriteFragmentWalls);
 
     m_shaders.get(ShaderID::Sprite3DTextured).setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
+
+    m_textureIDs[TextureID::SpriteShadow] = m_resources.load<sf::Texture>("assets/images/sprite_shadow.png");
 }
 
 void GameState::addPlayer()
@@ -383,8 +394,6 @@ void GameState::addPlayer()
             //also want to read the camera's current rotation
             e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
         };
-
-        //TODO add ground shadow
 
         return entity;
     };

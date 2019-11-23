@@ -29,3 +29,13 @@ namespace ShaderID
         Count
     };
 }
+
+namespace TextureID
+{
+    enum
+    {
+        SpriteShadow,
+
+        Count
+    };
+}

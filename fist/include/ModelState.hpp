@@ -114,4 +114,5 @@ private:
     void setRoomGeometry();
 
     void saveRoom();
+    void applyLightingToAll();
 };
