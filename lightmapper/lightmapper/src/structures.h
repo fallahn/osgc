@@ -26,10 +26,15 @@ struct Vertex final
         position[1] = 0.f;
         position[2] = 0.f;
 
+        //normal[0] = 0.f;
+        //normal[1] = 0.f;
+        //normal[2] = 0.f;
+
         texCoord[0] = 0.f;
         texCoord[1] = 0.f;
     }
     float position[3];
+    //float normal[3];
     float texCoord[2];
 };
 using vertex_t = Vertex;
@@ -50,6 +55,8 @@ struct Mesh final
     GLuint texture = 0;
     GLenum primitiveType = GL_TRIANGLES;
 
+    //we need to keep vertex data around for meshes
+    //which get sent to the lightmapper.
     std::vector<vertex_t> vertices;
     std::vector<std::uint16_t> indices;
 

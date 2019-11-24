@@ -30,6 +30,7 @@ App::App()
     m_initOK            (false),
     m_projectionMatrix  (1.f),
     m_viewMatrix        (1.f),
+    m_cameraPosition    (0.f, 3.f, 25.f),
     m_bakeAll           (false)
 {
     if (glfwInit())
@@ -355,6 +356,8 @@ void App::loadModel(const std::string& path)
             m_scene.getMeshes().clear();
 
             addModel(md, m_scene, glm::vec3(0.f));
+            //TODO get Scale const
+            m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
         }
     }
 }
@@ -389,7 +392,17 @@ void App::calcViewMatrix()
 {
     // initial camera config
     //TODO these should be members
-    static glm::vec3 position(0.f, 0.3f, 2.5f);
+    //static glm::vec3 position(0.f, 0.3f, 2.5f);
+    if (m_currentRoom > -1)
+    {
+        m_cameraPosition.y = 3.f;
+    }
+    //else
+    //{
+    //    //lower down for models which should have origin at the bottom
+    //    //TODO ideally this should be half the scale model depth value
+    //    m_cameraPosition.y = 0.f; 
+    //}
     static glm::vec2 rotation(0.f);
 
     glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), rotation.y * static_cast<float>(M_PI / 180.f), glm::vec3(0.f, 1.f, 0.f));
@@ -424,14 +437,14 @@ void App::calcViewMatrix()
 
         float speed = (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.85f : 0.5f;
         //TODO scale this based on current distance so that scrolling feels linear
-        position.z = std::max(0.f, position.z - (static_cast<float>(scrollOffset) * speed));
+        m_cameraPosition.z = std::max(0.f, m_cameraPosition.z - (static_cast<float>(scrollOffset) * speed));
         scrollOffset = 0.f;
 
 
     }
 
     //construct view matrix
-    m_viewMatrix = glm::inverse(rotMat * glm::translate(glm::mat4(1.f), position)/* * rotMat*/);
+    m_viewMatrix = glm::inverse(rotMat * glm::translate(glm::mat4(1.f), m_cameraPosition));
 }
 
 void App::draw()

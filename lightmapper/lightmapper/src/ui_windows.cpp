@@ -52,7 +52,7 @@ void App::mapBrowserWindow()
                         && m_currentRoom != room.id)
                     {
                         updateSceneGeometry(room);
-                        m_clearColour = room.skyColour;
+                        //m_clearColour = room.skyColour;
 
                         m_currentRoom = room.id;
                     }
@@ -92,7 +92,7 @@ void App::mapBrowserWindow()
     {
         if (m_currentRoom != -1)
         {
-            m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+            m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), /*m_clearColour*/m_mapData[m_currentRoom].skyColour);
         }
         else
         {
@@ -142,7 +142,7 @@ void App::statusWindow()
         {
             if (m_currentRoom != -1)
             {
-                m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+                m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), /*m_clearColour*/m_mapData[m_currentRoom].skyColour);
             }
             else
             {

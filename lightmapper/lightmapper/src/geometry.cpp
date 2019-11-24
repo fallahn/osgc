@@ -18,13 +18,13 @@ namespace
     const float DefaultRoomHeight = 540.f;
     const float DefaultWallThickness = 12.f;
 
-    const float RoomWidth = 1.f;
-    const float RoomHeight = DefaultRoomHeight / DefaultRoomWidth;
-    const float WallThickness = DefaultWallThickness / DefaultRoomWidth;
+    const float RoomWidth = 10.f;
+    const float RoomHeight = (DefaultRoomHeight / DefaultRoomWidth) * RoomWidth;
+    const float WallThickness = (DefaultWallThickness / DefaultRoomWidth) * RoomWidth;
 
     const std::int32_t RoomsPerRow = 8;
     const std::int32_t RoomCount = RoomsPerRow * RoomsPerRow;
-    const float Scale = 1.f / DefaultRoomWidth;
+    const float Scale = RoomWidth / DefaultRoomWidth;
 
     const float DefaultTexWidth = 3000.f;
     const float DefaultTexHeight = 2040.f;
@@ -51,22 +51,22 @@ void App::updateSceneGeometry(const RoomData& room)
             default: break;
             case RoomData::Flags::North:
                 index = room.id - RoomsPerRow;
-                position.z = -1.f;
+                position.z = -RoomWidth;
                 break;
             case RoomData::Flags::East:
                 //in *theory* this could be wrapping onto the next row
                 //but in *theory* we shouldn't have a room with a missing
                 //outside wall... so I'm going to skip this check :)
                 index = room.id + 1;
-                position.x = 1.f;
+                position.x = RoomWidth;
                 break;
             case RoomData::Flags::South:
                 index = room.id + RoomsPerRow;
-                position.z = 1.f;
+                position.z = RoomWidth;
                 break;
             case RoomData::Flags::West:
                 index = room.id - 1;
-                position.x = -1.f;
+                position.x = -RoomWidth;
                 break;
             }
 
@@ -575,11 +575,12 @@ void addLight(const RoomData& room, Scene& scene, glm::vec3 offsetPos)
     auto& light = scene.getMeshes().emplace_back(std::make_unique<Mesh>());
 
     auto& verts = light->vertices;
+   // std::vector<Vertex> verts;
     auto& indices = light->indices;
     light->primitiveType = GL_TRIANGLE_STRIP;
     light->modelMatrix = glm::translate(glm::mat4(1.f), offsetPos);
 
-    const float radius = 0.1f;
+    const float radius = 1.f;
     const std::size_t resolution = 5;
     static const float degToRad = M_PI / 180.f;
 
@@ -606,7 +607,7 @@ void addLight(const RoomData& room, Scene& scene, glm::vec3 offsetPos)
             vert.position[0] = vertPos.x * radius;
             vert.position[1] = vertPos.y * radius;
             vert.position[2] = vertPos.z * radius;
-            vert.position[1] += 0.4f; //moe towards ceiling
+            vert.position[1] += RoomHeight * 0.8f; //move towards ceiling
             
             ////normals
             //vertexData.emplace_back(vert.x);
@@ -733,11 +734,23 @@ void addModel(const ModelData& model, Scene& scene, glm::vec3 offset)
                     vert.position[2] = buff[i].posY;
                     vert.position[1] = model.depth * (static_cast<float>(buff[i].heightMultiplier) / 255.f);
 
-                    //TODO normal data?
+                    //normal data
+                    /*vert.normal[0] = static_cast<float>(buff[i].normX) / 255.f;
+                    vert.normal[1] = static_cast<float>(buff[i].normZ) / 255.f;
+                    vert.normal[2] = static_cast<float>(buff[i].normY) / 255.f;
+
+                    vert.normal[0] *= 2.f;
+                    vert.normal[0] -= 1.f;
+                    vert.normal[1] *= 2.f;
+                    vert.normal[1] -= 1.f;
+                    vert.normal[2] *= 2.f;
+                    vert.normal[2] -= 1.f;*/
 
                     vert.texCoord[0] = buff[i].texU;
                     vert.texCoord[1] = buff[i].texV;
                 }
+
+                //std::reverse(indices.begin(), indices.end());
 
                 glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
                 glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
@@ -746,6 +759,10 @@ void addModel(const ModelData& model, Scene& scene, glm::vec3 offset)
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+                /*glm::vec3 c(0.2f, 0.2f, 0.8f);
+                glBindTexture(GL_TEXTURE_2D, mesh->texture);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, &c);*/
 
                 //set the model position (and scale because the rooms are 1x1)
                 mesh->modelMatrix = glm::translate(glm::mat4(1.f), glm::vec3(model.position.x * Scale, 0.f, model.position.y * Scale));
