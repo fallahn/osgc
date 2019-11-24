@@ -127,68 +127,71 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
     assert(!m_meshes.empty());
     const auto& mesh = m_meshes[0];
 
-    //for(const auto& mesh : m_meshes)
+    //for (auto b = 0; b < 4; ++b)
     {
-        //std::memset(data.data(), 0, data.size() * sizeof(float));
-        lmSetTargetLightmap(ctx, data.data(), w, h, c);
-
-        if (mesh->hasNormals)
+        //for (const auto& mesh : m_meshes)
         {
-            lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
-                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
-                //LM_NONE, NULL, 0, // no interpolated normals in this example
-                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
-                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
-                mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
-        }
-        else
-        {
-            lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
-                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
-                LM_NONE, NULL, 0, // no interpolated normals in this example
-                //LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
-                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
-                mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
-        }
+            //std::memset(data.data(), 0, data.size() * sizeof(float));
+            lmSetTargetLightmap(ctx, data.data(), w, h, c);
 
-        int vp[4];
-        glm::mat4 view, projection;
-
-        double lastUpdateTime = 0.0;
-        while (lmBegin(ctx, vp, &view[0][0], &projection[0][0]))
-        {
-            //render to lightmapper framebuffer
-            glViewport(vp[0], vp[1], vp[2], vp[3]);
-            draw(view, projection);
-
-            //display progress every second (printf is expensive)
-            double time = glfwGetTime();
-            if (time - lastUpdateTime > 1.0)
+            if (mesh->hasNormals)
             {
-                lastUpdateTime = time;
-                printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
-                fflush(stdout);
-                //not that this is useful when running in the main thread...
-                m_progressString = std::to_string(lmProgress(ctx) * 100.f);
+                lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
+                    LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
+                    //LM_NONE, NULL, 0, // no interpolated normals in this example
+                    LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
+                    LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
+                    mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
+            }
+            else
+            {
+                lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
+                    LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
+                    LM_NONE, NULL, 0, // no interpolated normals in this example
+                    //LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
+                    LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
+                    mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
             }
 
-            lmEnd(ctx);
-        }
+            int vp[4];
+            glm::mat4 view, projection;
 
-        // postprocess texture
-        std::vector<float> temp(data.size());
-        for (int i = 0; i < 16; i++)
-        {
-            lmImageDilate(data.data(), temp.data(), w, h, c);
-            lmImageDilate(temp.data(), data.data(), w, h, c);
-        }
-        //upload result to preview texture
-        glBindTexture(GL_TEXTURE_2D, mesh->texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
+            double lastUpdateTime = 0.0;
+            while (lmBegin(ctx, vp, &view[0][0], &projection[0][0]))
+            {
+                //render to lightmapper framebuffer
+                glViewport(vp[0], vp[1], vp[2], vp[3]);
+                draw(view, projection);
 
-        printf("\rFinished baking %zd triangles.\n", mesh->indices.size() / 3);
+                //display progress every second (printf is expensive)
+                double time = glfwGetTime();
+                if (time - lastUpdateTime > 1.0)
+                {
+                    lastUpdateTime = time;
+                    printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
+                    fflush(stdout);
+                    //not that this is useful when running in the main thread...
+                    m_progressString = std::to_string(lmProgress(ctx) * 100.f);
+                }
+
+                lmEnd(ctx);
+            }
+
+            // postprocess texture
+            std::vector<float> temp(data.size());
+            for (int i = 0; i < 16; i++)
+            {
+                lmImageDilate(data.data(), temp.data(), w, h, c);
+                lmImageDilate(temp.data(), data.data(), w, h, c);
+            }
+            //upload result to preview texture
+            glBindTexture(GL_TEXTURE_2D, mesh->texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
+
+            printf("\rFinished baking %zd triangles.\n", mesh->indices.size() / 3);
+        }
+        //printf("\rFinished pass %zd of %zd.\n", b, 4);
     }
-
     m_progressString = "Finished";
 
     lmDestroy(ctx);

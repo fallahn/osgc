@@ -1212,6 +1212,14 @@ map game_map
             door = 0
             locked = 0
         }
+        model suzanne
+        {
+            bin = "assets/models/suzanne.xym"
+            texture = "assets/images/models/suzanne_lightmap.png"
+            depth = 189.000000
+            position = -350.269989,-308.571014
+            rotation = 45.560001
+        }
     }
     room 57
     {
@@ -1228,19 +1236,17 @@ map game_map
         }
         model suzanne
         {
-            bin = "assets/models/suzanne.xym"
+            bin = assets/models/suzanne.xym
             depth = 189.000000
             position = -346.329010,276.000000
             rotation = 147.457993
-            texture = ""
         }
         model buns
         {
-            bin = "assets/models/buns.xym"
+            bin = assets/models/buns.xym
             depth = 189.000000
             position = 224.809998,-288.000000
             rotation = 3.051000
-            texture = ""
         }
     }
     room 58

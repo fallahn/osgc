@@ -274,7 +274,7 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
         {
             binPath = prop.getValue<std::string>();
         }
-        else if (name == "texure")
+        else if (name == "texture")
         {
             texture = prop.getValue<std::string>();
         }
@@ -294,12 +294,20 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
 
     if (!binPath.empty() && depth > 0)
     {
-        //TODO load texture if name isn't empty
-        if (m_defaultTexID == 0)
+        std::size_t texID = 0;
+        if (!texture.empty())
         {
-            m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+            texID = m_resources.load<sf::Texture>(texture);
         }
-        auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
+        else
+        {
+            if (m_defaultTexID == 0)
+            {
+                m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+            }
+            texID = m_defaultTexID;
+        }
+        auto& tex = m_resources.get<sf::Texture>(texID);
 
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(position + roomPosition);
@@ -317,5 +325,16 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
         entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        //tex coords are normalised so we need to 'correct' this for sfml
+        if (!texture.empty())
+        {
+            auto size = sf::Vector2f(tex.getSize());
+            for (auto& v : verts)
+            {
+                v.texCoords.x *= size.x;
+                v.texCoords.y *= size.y;
+            }
+        }
     }
 }

@@ -826,7 +826,7 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         {
             binPath = prop.getValue<std::string>();
         }
-        else if (name == "texure")
+        else if (name == "texture")
         {
             texture = prop.getValue<std::string>();
         }
@@ -846,12 +846,20 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
 
     if (!binPath.empty() && depth > 0)
     {
-        //TODO load texture if name isn't empty
-        if (m_defaultTexID == 0)
+        std::size_t texID = 0;
+        if (!texture.empty())
         {
-            m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+            texID = m_resources.load<sf::Texture>(texture);
         }
-        auto& tex = m_resources.get<sf::Texture>(m_defaultTexID);
+        else
+        {
+            if (m_defaultTexID == 0)
+            {
+                m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+            }
+            texID = m_defaultTexID;
+        }
+        auto& tex = m_resources.get<sf::Texture>(texID);
 
         auto entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(position);
@@ -870,6 +878,19 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
         readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
+
+        //tex coords are normalised so we need to 'correct' this for sfml
+        if (!texture.empty())
+        {
+            auto size = sf::Vector2f(tex.getSize());
+            for (auto& v : verts)
+            {
+                v.texCoords.x *= size.x;
+                v.texCoords.y *= size.y;
+            }
+        }
+
+
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
         if (m_modelList.count(modelName) != 0)

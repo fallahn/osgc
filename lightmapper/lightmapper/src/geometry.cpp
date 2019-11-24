@@ -760,9 +760,9 @@ void addModel(const ModelData& model, Scene& scene, glm::vec3 offset)
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-                glm::vec3 c(0.2f, 0.2f, 0.8f);
+                /*glm::vec3 c(0.2f, 0.2f, 0.8f);
                 glBindTexture(GL_TEXTURE_2D, mesh->texture);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, &c);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, &c);*/
 
                 //set the model position (and scale because the rooms are 1x1)
                 mesh->modelMatrix = glm::translate(glm::mat4(1.f), glm::vec3(model.position.x * Scale, 0.f, model.position.y * Scale));
