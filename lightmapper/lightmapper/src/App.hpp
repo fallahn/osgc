@@ -41,6 +41,8 @@ private:
     void bakeAll();
     bool m_bakeAll;
 
+    void updateSceneGeometry(const RoomData&);
+
     //ui stuffs
     void mapBrowserWindow();
     void statusWindow();

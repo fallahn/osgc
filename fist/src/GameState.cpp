@@ -566,8 +566,8 @@ void GameState::updateLighting()
             float nextSkyAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? MapData::MinSkyAmount : 1.f;
             m_mapData.skyAmount = lerp(prevSkyAmount, nextSkyAmount, t);
 
-            float prevRoomAmount = m_mapData.roomData[m_mapData.prevRoomIndex].hasCeiling ? 1.f : 0.f;
-            float nextRoomAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? 1.f : 0.f;
+            float prevRoomAmount = m_mapData.roomData[m_mapData.prevRoomIndex].hasCeiling ? 1.f - MapData::MinSkyAmount : 0.f;
+            float nextRoomAmount = m_mapData.roomData[m_sharedData.currentRoom].hasCeiling ? 1.f - MapData::MinSkyAmount : 0.f;
             m_mapData.roomAmount = lerp(prevRoomAmount, nextRoomAmount, t);
 
             auto prevRoomPos = calcRoomPosition(m_mapData.prevRoomIndex);

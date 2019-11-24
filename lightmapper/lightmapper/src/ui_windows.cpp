@@ -49,11 +49,10 @@ void App::mapBrowserWindow()
                     if (ImGui::Button(label.c_str())
                         && m_currentRoom != room.id)
                     {
-                        updateGeometry(room, m_scene);
+                        updateSceneGeometry(room);
                         m_clearColour = room.skyColour;
 
                         m_currentRoom = room.id;
-                        //TODO load room props
                     }
                     ImGui::TreePop();
                 }

@@ -1,4 +1,5 @@
 #include "geometry.h"
+#include "App.hpp"
 #include "GLCheck.hpp"
 #include "structures.h"
 #include "SerialVertex.hpp"
@@ -13,28 +14,79 @@
 
 namespace
 {
-    static const float DefaultRoomWidth = 960.f;
-    static const float DefaultRoomHeight = 540.f;
-    static const float DefaultWallThickness = 12.f;
+    const float DefaultRoomWidth = 960.f;
+    const float DefaultRoomHeight = 540.f;
+    const float DefaultWallThickness = 12.f;
 
-    static const float RoomWidth = 1.f;
-    static const float RoomHeight = DefaultRoomHeight / DefaultRoomWidth;
-    static const float WallThickness = DefaultWallThickness / DefaultRoomWidth;
+    const float RoomWidth = 1.f;
+    const float RoomHeight = DefaultRoomHeight / DefaultRoomWidth;
+    const float WallThickness = DefaultWallThickness / DefaultRoomWidth;
 
-    static const float DefaultTexWidth = 3000.f;
-    static const float DefaultTexHeight = 2040.f;
+    const std::int32_t RoomsPerRow = 8;
+    const std::int32_t RoomCount = RoomsPerRow * RoomsPerRow;
+    const float Scale = 1.f / DefaultRoomWidth;
+
+    const float DefaultTexWidth = 3000.f;
+    const float DefaultTexHeight = 2040.f;
 }
 
-void updateGeometry(const RoomData& room, Scene& scene)
+void App::updateSceneGeometry(const RoomData& room)
 {
-    auto& meshes = scene.getMeshes();
+    auto& meshes = m_scene.getMeshes();
     meshes.clear();
 
+    //build main room
+    buildRoom(room, m_scene);
+
+    //if walls are missing build peripheral rooms
+    //to make sure they properly influence the light map
+    for (auto i = 0u; i < 4; ++i)
+    {
+        if ((room.flags & (1 << i)) == 0)
+        {
+            auto index = -1;
+            glm::vec3 position(0.f);
+            switch (1 << i)
+            {
+            default: break;
+            case RoomData::Flags::North:
+                index = room.id - RoomsPerRow;
+                position.z = -1.f;
+                break;
+            case RoomData::Flags::East:
+                //in *theory* this could be wrapping onto the next row
+                //but in *theory* we shouldn't have a room with a missing
+                //outside wall... so I'm going to skip this check :)
+                index = room.id + 1;
+                position.x = 1.f;
+                break;
+            case RoomData::Flags::South:
+                index = room.id + RoomsPerRow;
+                position.z = 1.f;
+                break;
+            case RoomData::Flags::West:
+                index = room.id - 1;
+                position.x = -1.f;
+                break;
+            }
+
+            if (index >= 0 && index < RoomCount)
+            {
+                buildRoom(m_mapData[index], m_scene, position);
+                
+            }
+        }
+    }
+}
+
+void buildRoom(const RoomData& room, Scene& scene, glm::vec3 offset)
+{
+    auto& meshes = scene.getMeshes();
     auto& mesh = meshes.emplace_back(std::make_unique<Mesh>());
+    mesh->modelMatrix = glm::translate(glm::mat4(1.f), offset);
 
     auto& verts = mesh->vertices;
     auto& indices = mesh->indices;
-
 
     //create floor
     vertex_t vert;
@@ -100,13 +152,13 @@ void updateGeometry(const RoomData& room, Scene& scene)
     //do this afterwards just so we don't mess with room mesh mid-creation
     if (flags & RoomData::Flags::Ceiling)
     {
-        addLight(room, scene);
+        addLight(room, scene, offset);
     }
 
     //load any prop models
     for (const auto& model : room.models)
     {
-        addModel(model, scene);
+        addModel(model, scene, offset);
     }
 }
 
@@ -517,7 +569,7 @@ void addCeiling(std::vector<Vertex>& verts, std::vector<std::uint16_t>& indices)
     indices.push_back(firstIndex + 0);
 }
 
-void addLight(const RoomData& room, Scene& scene)
+void addLight(const RoomData& room, Scene& scene, glm::vec3 offsetPos)
 {
     //add interior light
     auto& light = scene.getMeshes().emplace_back(std::make_unique<Mesh>());
@@ -525,6 +577,7 @@ void addLight(const RoomData& room, Scene& scene)
     auto& verts = light->vertices;
     auto& indices = light->indices;
     light->primitiveType = GL_TRIANGLE_STRIP;
+    light->modelMatrix = glm::translate(glm::mat4(1.f), offsetPos);
 
     const float radius = 0.1f;
     const std::size_t resolution = 5;
@@ -649,7 +702,7 @@ void addLight(const RoomData& room, Scene& scene)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, room.roomColour.data());
 }
 
-void addModel(const ModelData& model, Scene& scene)
+void addModel(const ModelData& model, Scene& scene, glm::vec3 offset)
 {
     //remember model z/y axis are switched. Because, y'know.
     std::ifstream file(model.path, std::ios::binary);
@@ -680,7 +733,7 @@ void addModel(const ModelData& model, Scene& scene)
                     vert.position[2] = buff[i].posY;
                     vert.position[1] = model.depth * (static_cast<float>(buff[i].heightMultiplier) / 255.f);
 
-                    //TODO normal data
+                    //TODO normal data?
 
                     vert.texCoord[0] = buff[i].texU;
                     vert.texCoord[1] = buff[i].texV;
@@ -695,10 +748,10 @@ void addModel(const ModelData& model, Scene& scene)
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
                 //set the model position (and scale because the rooms are 1x1)
-                float scale = 1.f / 960.f; //this should be const somewhere, no?
-                mesh->modelMatrix = glm::translate(glm::mat4(1.f), glm::vec3(model.position.x * scale, 0.f, model.position.y * scale));
+                mesh->modelMatrix = glm::translate(glm::mat4(1.f), glm::vec3(model.position.x * Scale, 0.f, model.position.y * Scale));
+                mesh->modelMatrix = glm::translate(mesh->modelMatrix, offset);
                 mesh->modelMatrix = glm::rotate(mesh->modelMatrix, model.rotation * (static_cast<float>(M_PI) / 180.f), glm::vec3(0.f, 1.f, 0.f));
-                mesh->modelMatrix = glm::scale(mesh->modelMatrix, glm::vec3(scale, scale, scale));
+                mesh->modelMatrix = glm::scale(mesh->modelMatrix, glm::vec3(Scale, Scale, Scale));
             }
         }
 

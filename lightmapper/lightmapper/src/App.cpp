@@ -69,7 +69,7 @@ App::App()
     }
 
 
-    m_window = glfwCreateWindow(1920, 1080, "Lightmapper", NULL, NULL);
+    m_window = glfwCreateWindow(w, h, "Lightmapper", NULL, NULL);
     if (!m_window)
     {
         std::cout << "Could not create window.\n";
@@ -403,7 +403,7 @@ void App::bakeAll()
     for (const auto& room : m_mapData)
     {
         m_currentRoom = room.id;
-        updateGeometry(room, m_scene);
+        updateSceneGeometry(room);
         handleEvents();
         update();
 
