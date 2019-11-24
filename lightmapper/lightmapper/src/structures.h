@@ -12,6 +12,12 @@
 #include <vector>
 #include <array>
 
+namespace ConstVal
+{
+    static const std::int32_t RoomTextureWidth = 750;
+    static const std::size_t RoomTextureHeight = 510;
+}
+
 struct Vertex final
 {
     Vertex()
@@ -53,7 +59,7 @@ struct Mesh final
 struct ModelData final
 {
     std::string path;
-    glm::vec2 position;
+    glm::vec2 position = glm::vec2(0.f);
     float rotation = 0.f;
     float depth = 0.f;
 };

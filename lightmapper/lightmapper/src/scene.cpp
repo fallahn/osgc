@@ -9,11 +9,8 @@
 
 bool Scene::init()
 {
-    //temp to test mesh generation
-    //updateGeometry(19, *this);
-
-    m_lightmapWidth = 750;
-    m_lightmapHeight = 510;
+    m_lightmapWidth = ConstVal::RoomTextureWidth;
+    m_lightmapHeight = ConstVal::RoomTextureHeight;
 
     //load shader
     const char* vp =
@@ -94,6 +91,8 @@ void Scene::destroy()
 
 bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) const
 {
+    assert(!m_meshes.empty());
+
     //reset the geometry texture to black else previous
     //bakes contribute to the emissions
     glBindTexture(GL_TEXTURE_2D, m_meshes[0]->texture);

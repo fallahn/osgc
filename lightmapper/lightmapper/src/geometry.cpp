@@ -757,4 +757,8 @@ void addModel(const ModelData& model, Scene& scene, glm::vec3 offset)
 
         file.close();
     }
+    else
+    {
+        std::cout << "failed to open " << model.path << "\n";
+    }
 }

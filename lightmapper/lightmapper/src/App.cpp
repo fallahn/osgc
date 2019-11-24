@@ -7,6 +7,7 @@
 #include "gl_helpers.h"
 #include "geometry.h"
 #include "ConfigFile.hpp"
+#include "tinyfiledialogs.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -304,6 +305,60 @@ void App::loadMapData(const std::string& path)
     }
 }
 
+void App::loadModel(const std::string& path)
+{
+    //get model data...
+    xy::ConfigFile cfg;
+    if (cfg.loadFromFile(path))
+    {
+        ModelData md;
+
+        const auto& properties = cfg.getProperties();
+        for (const auto& prop : properties)
+        {
+            if (prop.getName() == "bin")
+            {
+                md.path = prop.getValue<std::string>();
+
+                //the path is relative to some working
+                //directory, not this file so we're going to
+                //make some assumptions...
+                auto fullpath = path;
+                std::replace(fullpath.begin(), fullpath.end(), '\\', '/');
+                if (auto pos = fullpath.find_last_of('/'); pos != std::string::npos)
+                {
+                    //remove the file name
+                    fullpath = fullpath.substr(0, pos);
+                }
+
+                if (auto pos = md.path.find_last_of('/'); pos != std::string::npos)
+                {
+                    md.path = md.path.substr(pos);
+                }
+                fullpath += md.path;
+                md.path = fullpath;
+            }
+
+            else if (prop.getName() == "depth")
+            {
+                md.depth = prop.getValue<float>();
+            }
+
+            //TODO need to at least read the texture size if one assigned
+        }
+
+        if (!md.path.empty() && md.depth > 0)
+        {
+            m_mapData.clear();
+            m_currentRoom = -1;
+           
+            m_scene.getMeshes().clear();
+
+            addModel(md, m_scene, glm::vec3(0.f));
+        }
+    }
+}
+
 void App::handleEvents()
 {
     glfwPollEvents();
@@ -394,6 +449,28 @@ void App::draw()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(m_window);
+}
+
+void App::bakeModel()
+{
+    std::string path = tinyfd_saveFileDialog("Save Lightmap", nullptr, 0, nullptr, nullptr);
+    if (!path.empty())
+    {
+        //remove the file extension if we got one - the bake will add it
+        std::replace(path.begin(), path.end(), '\\', '/');
+        if (auto pos = path.find_last_of('.'); pos != std::string::npos)
+        {
+            path = path.substr(0, pos);
+        }
+
+        //TODO we need to read some texture data from the model
+        //so that we know what size to set the light map texture
+        m_scene.setLightmapSize(512, 512);
+
+        m_scene.bake(path, { 1.f,1.f,1.f });
+
+        m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
+    }
 }
 
 void App::bakeAll()

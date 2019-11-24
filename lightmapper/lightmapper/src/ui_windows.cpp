@@ -8,7 +8,8 @@
 
 void App::mapBrowserWindow()
 {
-    static bool openFile = false;
+    static bool openMap = false;
+    static bool openModel = false;
     static bool openOutput = false;
     static bool bakeSelected = false;
 
@@ -19,7 +20,8 @@ void App::mapBrowserWindow()
         {
             if (ImGui::BeginMenu("File"))
             {
-                ImGui::MenuItem("Open", nullptr, &openFile);
+                ImGui::MenuItem("Open Map", nullptr, &openMap);
+                ImGui::MenuItem("Open Model", nullptr, &openModel);
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Tools"))
@@ -32,7 +34,7 @@ void App::mapBrowserWindow()
             ImGui::EndMenuBar();
         }
 
-        if (!m_outputPath.empty())
+        if (!m_outputPath.empty() && !m_mapData.empty())
         {
             ImGui::Text("%s", "Output Path:");
             ImGui::Text("%s", m_outputPath.c_str());
@@ -61,17 +63,29 @@ void App::mapBrowserWindow()
         ImGui::End();
     }
 
-    static const char* filters[] = { "*.map" };
+    static const char* mapFilters[] = { "*.map" };
+    static const char* modelFilters[] = { "*.xmd" };
 
-    if (openFile)
+    if (openMap)
     {
-        auto path = tinyfd_openFileDialog("Open Map", nullptr, 1, filters, nullptr, 0);
+        auto path = tinyfd_openFileDialog("Open Map", nullptr, 1, mapFilters, nullptr, 0);
         if (path)
         {
             loadMapData(path);
         }
 
-        openFile = false;
+        openMap = false;
+    }
+
+    if (openModel)
+    {
+        auto path = tinyfd_openFileDialog("Open Map", nullptr, 1, modelFilters, nullptr, 0);
+        if (path)
+        {
+            loadModel(path);
+        }
+
+        openModel = false;
     }
 
     if (bakeSelected)
@@ -79,6 +93,14 @@ void App::mapBrowserWindow()
         if (m_currentRoom != -1)
         {
             m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+        }
+        else
+        {
+            //if model loaded bake it
+            if (!m_scene.getMeshes().empty())
+            {
+                bakeModel();
+            }
         }
         bakeSelected = false;
     }
@@ -116,10 +138,20 @@ void App::statusWindow()
 
         ImGui::Text("%s", m_scene.getProgress().c_str());
 
-        if (ImGui::Button("Bake")
-            && m_currentRoom != -1)
+        if (ImGui::Button("Bake"))
         {
-            m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+            if (m_currentRoom != -1)
+            {
+                m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), m_clearColour);
+            }
+            else
+            {
+                //bake model if loaded
+                if (!m_scene.getMeshes().empty())
+                {
+                    bakeModel();
+                }
+            }
         }
 
         ImGui::End();

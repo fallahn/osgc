@@ -29,6 +29,7 @@ private:
     std::vector<RoomData> m_mapData;
     std::int32_t m_currentRoom = -1;
     void loadMapData(const std::string&);
+    void loadModel(const std::string&);
 
     std::string m_outputPath;
 
@@ -38,6 +39,7 @@ private:
     void calcViewMatrix();
     void draw();
 
+    void bakeModel();
     void bakeAll();
     bool m_bakeAll;
 
