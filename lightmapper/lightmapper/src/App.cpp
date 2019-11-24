@@ -397,12 +397,7 @@ void App::calcViewMatrix()
     {
         m_cameraPosition.y = 3.f;
     }
-    //else
-    //{
-    //    //lower down for models which should have origin at the bottom
-    //    //TODO ideally this should be half the scale model depth value
-    //    m_cameraPosition.y = 0.f; 
-    //}
+
     static glm::vec2 rotation(0.f);
 
     glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), rotation.y * static_cast<float>(M_PI / 180.f), glm::vec3(0.f, 1.f, 0.f));
@@ -477,8 +472,8 @@ void App::bakeModel()
         }
 
         //TODO we need to read some texture data from the model
-        //so that we know what size to set the light map texture
-        m_scene.setLightmapSize(512, 512);
+        //so that we know what size/ratio to set the light map texture
+        m_scene.setLightmapSize(1024, 1024);
 
         m_scene.bake(path, { 1.f,1.f,1.f });
 

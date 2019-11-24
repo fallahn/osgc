@@ -129,15 +129,27 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
 
     //for(const auto& mesh : m_meshes)
     {
-
+        //std::memset(data.data(), 0, data.size() * sizeof(float));
         lmSetTargetLightmap(ctx, data.data(), w, h, c);
 
-        lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
-            LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
-            LM_NONE, NULL, 0, // no interpolated normals in this example
-            //LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
-            LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
-            mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
+        if (mesh->hasNormals)
+        {
+            lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
+                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
+                //LM_NONE, NULL, 0, // no interpolated normals in this example
+                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
+                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
+                mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
+        }
+        else
+        {
+            lmSetGeometry(ctx, &mesh->modelMatrix[0][0],
+                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, position), sizeof(vertex_t),
+                LM_NONE, NULL, 0, // no interpolated normals in this example
+                //LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, normal), sizeof(vertex_t),
+                LM_FLOAT, (unsigned char*)mesh->vertices.data() + offsetof(vertex_t, texCoord), sizeof(vertex_t),
+                mesh->indices.size(), LM_UNSIGNED_SHORT, mesh->indices.data());
+        }
 
         int vp[4];
         glm::mat4 view, projection;
