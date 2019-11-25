@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>include;lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>LM_DEBUG_INTERPOLATION;XY_DEBUG;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OBJL_CONSOLE_OUTPUT;LM_DEBUG_INTERPOLATION;XY_DEBUG;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="src\App.hpp" />
     <ClInclude Include="src\ConfigFile.hpp" />
+    <ClInclude Include="src\OBJ_Loader.h" />
     <ClInclude Include="src\scene.h" />
     <ClInclude Include="src\geometry.h" />
     <ClInclude Include="src\gl_helpers.h" />

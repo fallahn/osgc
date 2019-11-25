@@ -12,6 +12,7 @@ void App::mapBrowserWindow()
     static bool openModel = false;
     static bool openOutput = false;
     static bool bakeSelected = false;
+    static bool importObj = false;
 
     ImGui::SetNextWindowSize({ 200.f, 400.f }, ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Map Browser", nullptr, ImGuiWindowFlags_MenuBar))
@@ -22,6 +23,7 @@ void App::mapBrowserWindow()
             {
                 ImGui::MenuItem("Open Map", nullptr, &openMap);
                 ImGui::MenuItem("Open Model", nullptr, &openModel);
+                ImGui::MenuItem("Import OBJ", nullptr, &importObj);
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Tools"))
@@ -65,6 +67,7 @@ void App::mapBrowserWindow()
 
     static const char* mapFilters[] = { "*.map" };
     static const char* modelFilters[] = { "*.xmd" };
+    static const char* objFilters[] = { "*.obj" };
 
     if (openMap)
     {
@@ -86,6 +89,16 @@ void App::mapBrowserWindow()
         }
 
         openModel = false;
+    }
+
+    if (importObj)
+    {
+        auto path = tinyfd_openFileDialog("Import obj", nullptr, 1, objFilters, nullptr, 0);
+        if (path)
+        {
+            importObjFile(path);
+        }
+        importObj = false;
     }
 
     if (bakeSelected)

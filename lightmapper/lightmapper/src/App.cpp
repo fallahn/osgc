@@ -8,6 +8,8 @@
 #include "geometry.h"
 #include "ConfigFile.hpp"
 #include "tinyfiledialogs.h"
+#include "OBJ_Loader.h"
+namespace ol = objl;
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -358,6 +360,51 @@ void App::loadModel(const std::string& path)
             addModel(md, m_scene, glm::vec3(0.f));
             //TODO get Scale const
             m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
+        }
+    }
+}
+
+void App::importObjFile(const std::string& path)
+{
+    //TODO show obj properties on success
+    ol::Loader loader;
+    if (loader.LoadFile(path)
+        && !loader.LoadedMeshes.empty())
+    {
+        m_mapData.clear();
+        m_scene.getMeshes().clear();
+        m_currentRoom = -1;
+
+
+        const auto& inVerts = loader.LoadedMeshes[0].Vertices;
+        const auto& inIndices = loader.LoadedMeshes[0].Indices;
+
+        if (!inVerts.empty() && !inIndices.empty())
+        {
+            auto& mesh = m_scene.getMeshes().emplace_back(std::make_unique<Mesh>());
+            for (const auto& vert : inVerts)
+            {
+                auto& outVert = mesh->vertices.emplace_back();
+                outVert.position[0] = vert.Position.X;
+                outVert.position[1] = vert.Position.Y;
+                outVert.position[2] = vert.Position.Z;
+
+                outVert.normal[0] = vert.Normal.X;
+                outVert.normal[1] = vert.Normal.Y;
+                outVert.normal[2] = vert.Normal.Z;
+
+                outVert.texCoord[0] = vert.TextureCoordinate.X;
+                outVert.texCoord[1] = vert.TextureCoordinate.Y;
+            }
+
+            for (auto i : inIndices)
+            {
+                mesh->indices.push_back(static_cast<std::uint16_t>(i));
+            }
+
+            mesh->hasNormals = true;
+
+            mesh->updateGeometry();
         }
     }
 }

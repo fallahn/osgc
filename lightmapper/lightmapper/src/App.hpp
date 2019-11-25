@@ -32,6 +32,7 @@ private:
     std::int32_t m_currentRoom = -1;
     void loadMapData(const std::string&);
     void loadModel(const std::string&);
+    void importObjFile(const std::string&);
 
     std::string m_outputPath;
 

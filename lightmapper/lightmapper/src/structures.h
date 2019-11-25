@@ -62,6 +62,8 @@ struct Mesh final
     bool hasNormals = false;
 
     glm::mat4 modelMatrix = glm::mat4(1.f);
+
+    void updateGeometry();
 };
 
 struct ModelData final

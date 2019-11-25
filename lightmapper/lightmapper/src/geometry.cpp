@@ -140,13 +140,7 @@ void buildRoom(const RoomData& room, Scene& scene, glm::vec3 offset)
     }
 
     //update buffers
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    mesh->updateGeometry();
 
 
     //do this afterwards just so we don't mess with room mesh mid-creation
@@ -689,14 +683,7 @@ void addLight(const RoomData& room, Scene& scene, glm::vec3 offsetPos)
     rotation = glm::rotate(glm::mat4(1.f), degToRad * -90.f, glm::vec3(1.f, 0.f, 0.f));
     buildFace(rotation, { 0.f, v }); //Y+
 
-
-    glBindBuffer(GL_ARRAY_BUFFER, light->vbo);
-    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, light->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    light->updateGeometry();
 
     //update texture with light colour
     glBindTexture(GL_TEXTURE_2D, light->texture);
@@ -750,15 +737,9 @@ void addModel(const ModelData& model, Scene& scene, glm::vec3 offset)
                     vert.texCoord[1] = buff[i].texV;
                 }
                 mesh->hasNormals = true;
-                //std::reverse(indices.begin(), indices.end());
 
-                glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-                glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vertex_t), verts.data(), GL_STATIC_DRAW);
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                mesh->updateGeometry();
 
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
                 /*glm::vec3 c(0.2f, 0.2f, 0.8f);
                 glBindTexture(GL_TEXTURE_2D, mesh->texture);
