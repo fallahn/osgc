@@ -15,10 +15,13 @@ public:
     bool bake(const std::string&, const std::array<float, 3>&) const;
 
     std::vector<std::unique_ptr<Mesh>>& getMeshes() { return m_meshes; }
+    const std::vector<std::unique_ptr<Mesh>>& getMeshes() const { return m_meshes; }
 
     const std::string& getProgress() const { return m_progressString; }
 
     void setLightmapSize(std::int32_t w, std::int32_t h) { m_lightmapWidth = w; m_lightmapHeight = h; }
+
+    void saveLightmap(const std::string&);
 
 private:
     GLuint m_programID = 0;

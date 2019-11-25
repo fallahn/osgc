@@ -112,7 +112,7 @@ void App::mapBrowserWindow()
             {
                 outpath = m_outputPath + std::to_string(m_mapData[m_currentRoom].id);
             }
-
+            m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
             m_scene.bake(outpath, m_mapData[m_currentRoom].skyColour);
         }
         else
@@ -173,7 +173,7 @@ void App::statusWindow()
                 {
                     outpath = m_outputPath + std::to_string(m_mapData[m_currentRoom].id);
                 }
-
+                m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
                 m_scene.bake(outpath, m_mapData[m_currentRoom].skyColour);
             }
             else
@@ -193,6 +193,8 @@ void App::statusWindow()
         if (m_showImportWindow)
         {
             ImGui::Separator();
+            ImGui::Text("%s", "Export Settings");
+
             auto updateTransform = [&]()
             {
                 static const float toRad = static_cast<float>(M_PI) / 180.f;
@@ -214,10 +216,15 @@ void App::statusWindow()
                 updateTransform();
             }
 
-            static bool applyTransform = false;
+            static bool applyTransform = true;
             if (ImGui::Button("Export"))
             {
-
+                static const char* filter[] = { "*.xmd" };
+                auto path = tinyfd_saveFileDialog("Export Model", nullptr, 1, filter, nullptr);
+                if (path)
+                {
+                    exportModel(path, applyTransform);
+                }
             }
             ImGui::SameLine();
             ImGui::Checkbox("Apply Transform on Export", &applyTransform);

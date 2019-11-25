@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "SerialVertex.hpp"
 #include "String.hpp"
+#include "ConfigFile.hpp"
 #include "OBJ_Loader.h"
 namespace ol = objl;
 
@@ -16,11 +17,11 @@ namespace ol = objl;
 
 namespace
 {
-    const float DefaultRoomWidth = 960.f;
+    const float DefaultRoomWidth = 960.f; //units in game space
     const float DefaultRoomHeight = 540.f;
     const float DefaultWallThickness = 12.f;
 
-    const float RoomWidth = 10.f;
+    const float RoomWidth = 10.f; //units in viewer space
     const float RoomHeight = (DefaultRoomHeight / DefaultRoomWidth) * RoomWidth;
     const float WallThickness = (DefaultWallThickness / DefaultRoomWidth) * RoomWidth;
 
@@ -168,6 +169,70 @@ void App::importObjFile(const std::string& path)
             groundMesh->updateGeometry();
         }
     }
+}
+
+void App::exportModel(const std::string& path, bool applyTransform)
+{
+    auto outpath = path;
+    std::replace(outpath.begin(), outpath.end(), '\\', '/');
+
+    //bin file
+    if (auto pos = outpath.find_last_of('.'); pos == std::string::npos)
+    {
+        outpath += ".xym";
+    }
+    else
+    {
+        outpath = outpath.substr(0, pos) + ".xym";
+    }
+
+    //write bin - this is supposed to be a copy!
+    //we're going to mutate the properties...
+    auto verts = m_scene.getMeshes()[0]->vertices;
+    glm::mat4 transform(1.f);
+    if (applyTransform)
+    {
+        transform = m_scene.getMeshes()[0]->modelMatrix;
+    }
+    //remember preview is 1/10 scale (see consts above)
+    transform = glm::scale(transform, glm::vec3(Scale));
+    for (auto& v : verts)
+    {
+        v.position = glm::vec3(transform * glm::vec4(v.position, 1.0));
+        v.normal = glm::vec3(transform * glm::vec4(v.normal, 0.0));
+    }
+
+
+    for (auto i : m_scene.getMeshes()[0]->indices)
+    {
+        
+        //convert format
+    }
+    //TODO make sure no negative Z values
+    //TODO calc depth
+    float depth = 0.f;
+
+    auto fileName = outpath;
+    if (auto pos = fileName.find_last_of('/'); pos != std::string::npos)
+    {
+        fileName = fileName.substr(pos + 1);
+    }
+
+    //text file
+    xy::ConfigFile cfg("model");
+    cfg.addProperty("depth").setValue(depth);
+    cfg.addProperty("bin").setValue(fileName);
+
+    //write the texture
+    auto pos = outpath.find_last_of('.');
+    outpath.replace(pos, outpath.length(), ".png");
+    m_scene.saveLightmap(outpath);
+
+    fileName.replace(fileName.find_last_of('.'), fileName.length(), ".png");
+    cfg.addProperty("texture").setValue(fileName);
+
+    outpath.replace(pos, outpath.length(), ".xmd");
+    cfg.save(outpath);
 }
 
 void buildRoom(const RoomData& room, Scene& scene, glm::vec3 offset)

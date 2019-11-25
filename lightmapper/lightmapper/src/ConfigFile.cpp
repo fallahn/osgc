@@ -28,6 +28,8 @@ source distribution.
 #include "ConfigFile.hpp"
 #include "String.hpp"
 
+#include "glm/vec3.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -46,6 +48,29 @@ ConfigProperty::ConfigProperty(const std::string& name, const std::string& value
     : ConfigItem(name),
     m_value(value), m_isStringTypeValue(false) {}
 
+void ConfigProperty::setValue(const std::string& v)
+{
+    m_value = v;
+    m_isStringTypeValue = true;
+}
+
+void ConfigProperty::setValue(float v)
+{
+    m_value = std::to_string(v);
+    m_isStringTypeValue = false;
+}
+
+void ConfigProperty::setValue(glm::vec2 v)
+{
+    m_value = std::to_string(v.x) + "," + std::to_string(v.y);
+    m_isStringTypeValue = false;
+}
+
+void ConfigProperty::setValue(glm::vec3 v)
+{
+    m_value = std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z);
+    m_isStringTypeValue = false;
+}
 
 //private
 std::vector<float> ConfigProperty::valueAsArray() const
@@ -464,7 +489,7 @@ void ConfigObject::removeComment(std::string& line)
 
 bool ConfigObject::save(const std::string& path) const
 {
-    /*std::ofstream file(path);
+    std::ofstream file(path);
     if (file.good())
     {
         write(file);
@@ -472,39 +497,39 @@ bool ConfigObject::save(const std::string& path) const
     }
     else
     {
-        Logger::log("failed to write configuration to: \'" + path + "\'", Logger::Type::Error);
+        //Logger::log("failed to write configuration to: \'" + path + "\'", Logger::Type::Error);
         return false;
-    }*/
+    }
     return false;
 }
 
-//void ConfigObject::write(std::ofstream& file, sf::Uint16 depth) const
-//{
-//    //add the correct amount of indenting based on this objects's depth
-//    std::string indent;
-//    for (auto i = 0u; i < depth; ++i)
-//        indent += indentBlock;
-//
-//    file << indent << getName() << " " << getId() << std::endl;
-//    file << indent << "{" << std::endl;
-//    for (const auto& p : m_properties)
-//    {
-//        file << indent << indentBlock << p.getName() << " = ";
-//        if (p.m_isStringTypeValue)
-//        {
-//            file << "\"" << p.getValue<std::string>() << "\"" << std::endl;
-//        }
-//        else
-//        {
-//            file << p.getValue<std::string>() << std::endl;
-//        }
-//    }
-//    for (const auto& o : m_objects)
-//    {
-//        o.write(file, depth + 1);
-//    }
-//    file << indent << "}" << std::endl;
-//}
+void ConfigObject::write(std::ofstream& file, std::uint16_t depth) const
+{
+    //add the correct amount of indenting based on this objects's depth
+    std::string indent;
+    for (auto i = 0u; i < depth; ++i)
+        indent += indentBlock;
+
+    file << indent << getName() << " " << getId() << std::endl;
+    file << indent << "{" << std::endl;
+    for (const auto& p : m_properties)
+    {
+        file << indent << indentBlock << p.getName() << " = ";
+        if (p.m_isStringTypeValue)
+        {
+            file << "\"" << p.getValue<std::string>() << "\"" << std::endl;
+        }
+        else
+        {
+            file << p.getValue<std::string>() << std::endl;
+        }
+    }
+    for (const auto& o : m_objects)
+    {
+        o.write(file, depth + 1);
+    }
+    file << indent << "}" << std::endl;
+}
 
 //--------------------//
 ConfigItem::ConfigItem(const std::string& name)

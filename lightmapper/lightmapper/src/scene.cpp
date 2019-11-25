@@ -217,3 +217,17 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
 
     return 1;
 }
+
+void Scene::saveLightmap(const std::string& path)
+{
+    if (m_meshes.empty() || path.empty())
+    {
+        return;
+    }
+
+    std::vector<std::uint8_t> buffer(m_lightmapHeight * m_lightmapWidth * 4);
+    glBindTexture(GL_TEXTURE_2D, m_meshes[0]->texture);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
+
+    stbi_write_png(path.c_str(), m_lightmapWidth, m_lightmapHeight, 4, buffer.data(), m_lightmapWidth * 4);
+}

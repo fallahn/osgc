@@ -75,12 +75,17 @@ namespace xy
 
         /*!
         \brief Attempts to retrieve the value as the requested type.
-        Valid types are : std::string, sf::Int32, float, bool, sf::Vector2f,
-        sf::Vector3f, sf::FloatRect, sf::Color, xy::Vector4f
+        Valid types are : std::string, std::int32_t, float, glm::vec2, glm::vec3
         */
         template <typename T>
         T getValue() const;// = delete;
         
+        void setValue(const std::string&);
+        void setValue(float);
+        void setValue(glm::vec2);
+        void setValue(glm::vec3);
+
+
     private:
         std::string m_value;
         bool m_isStringTypeValue;
@@ -205,6 +210,8 @@ namespace xy
         static bool isProperty(const std::string& line);
         //removes comments AND preceding whitespace
         static void removeComment(std::string& line);
+
+        void write(std::ofstream& file, std::uint16_t depth = 0) const;
     };
 
     using ConfigFile = xy::ConfigObject;

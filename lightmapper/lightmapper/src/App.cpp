@@ -487,15 +487,12 @@ void App::bakeModel()
     m_scene.setLightmapSize(1024, 1024);
 
     m_scene.bake(path, { 1.f,1.f,1.f });
-
-    m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
-
 }
 
 void App::bakeAll()
 {
     //hmmmm this really needs to be multithreaded but shared contexts blaarg
-
+    m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
     for (const auto& room : m_mapData)
     {
         m_currentRoom = room.id;
