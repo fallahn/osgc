@@ -3,6 +3,8 @@
 #include "imgui/imgui.h"
 #include "geometry.h"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 #include <iostream>
 #include <string>
 
@@ -15,7 +17,8 @@ void App::mapBrowserWindow()
     static bool importObj = false;
 
     ImGui::SetNextWindowSize({ 200.f, 400.f }, ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Map Browser", nullptr, ImGuiWindowFlags_MenuBar))
+    ImGui::SetWindowPos({ 80.f, 20.f }, ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_MenuBar))
     {
         if (ImGui::BeginMenuBar())
         {
@@ -42,7 +45,7 @@ void App::mapBrowserWindow()
             ImGui::Text("%s", m_outputPath.c_str());
         }
 
-        if (!m_mapData.empty() && ImGui::CollapsingHeader("Room List"))
+        if (!m_mapData.empty() && ImGui::CollapsingHeader("Rooms"))
         {
             for (const auto& room : m_mapData)
             {
@@ -54,7 +57,6 @@ void App::mapBrowserWindow()
                         && m_currentRoom != room.id)
                     {
                         updateSceneGeometry(room);
-                        //m_clearColour = room.skyColour;
 
                         m_currentRoom = room.id;
                     }
@@ -105,7 +107,13 @@ void App::mapBrowserWindow()
     {
         if (m_currentRoom != -1)
         {
-            m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), /*m_clearColour*/m_mapData[m_currentRoom].skyColour);
+            std::string outpath;
+            if (m_saveOutput)
+            {
+                outpath = m_outputPath + std::to_string(m_mapData[m_currentRoom].id);
+            }
+
+            m_scene.bake(outpath, m_mapData[m_currentRoom].skyColour);
         }
         else
         {
@@ -151,11 +159,22 @@ void App::statusWindow()
 
         ImGui::Text("%s", m_scene.getProgress().c_str());
 
+        if (!m_scene.getMeshes().empty())
+        {
+            ImGui::Image((void*)(intptr_t)m_scene.getMeshes()[0]->texture, { 480.f, 480.f });
+        }
+
         if (ImGui::Button("Bake"))
         {
             if (m_currentRoom != -1)
             {
-                m_scene.bake(m_outputPath + std::to_string(m_mapData[m_currentRoom].id), /*m_clearColour*/m_mapData[m_currentRoom].skyColour);
+                std::string outpath;
+                if (m_saveOutput)
+                {
+                    outpath = m_outputPath + std::to_string(m_mapData[m_currentRoom].id);
+                }
+
+                m_scene.bake(outpath, m_mapData[m_currentRoom].skyColour);
             }
             else
             {
@@ -165,6 +184,43 @@ void App::statusWindow()
                     bakeModel();
                 }
             }
+        }
+        ImGui::SameLine();
+        ImGui::Checkbox("Save Output", &m_saveOutput);
+
+
+        //import/export settings
+        if (m_showImportWindow)
+        {
+            ImGui::Separator();
+            auto updateTransform = [&]()
+            {
+                static const float toRad = static_cast<float>(M_PI) / 180.f;
+
+                auto& mesh = m_scene.getMeshes()[0];
+                mesh->modelMatrix = glm::rotate(glm::mat4(1.f), m_importTransform.rotation.y * toRad, glm::vec3(0.f, 1.f, 0.f));
+                mesh->modelMatrix = glm::rotate(mesh->modelMatrix, m_importTransform.rotation.x * toRad, glm::vec3(1.f, 0.f, 0.f));
+
+                mesh->modelMatrix = glm::scale(mesh->modelMatrix, m_importTransform.scale);
+            };
+
+            if (ImGui::DragFloat2("Rotation", reinterpret_cast<float*>(&m_importTransform.rotation), 1.f, 0.f, 360.f))
+            {
+                updateTransform();
+            }
+
+            if (ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&m_importTransform.scale), 0.1f, 0.1f, 10.f))
+            {
+                updateTransform();
+            }
+
+            static bool applyTransform = false;
+            if (ImGui::Button("Export"))
+            {
+
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("Apply Transform on Export", &applyTransform);
         }
 
         ImGui::End();

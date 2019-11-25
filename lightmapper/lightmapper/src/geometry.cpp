@@ -4,6 +4,8 @@
 #include "structures.h"
 #include "SerialVertex.hpp"
 #include "String.hpp"
+#include "OBJ_Loader.h"
+namespace ol = objl;
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -75,6 +77,95 @@ void App::updateSceneGeometry(const RoomData& room)
                 buildRoom(m_mapData[index], m_scene, position);
                 
             }
+        }
+    }
+}
+
+void App::importObjFile(const std::string& path)
+{
+    ol::Loader loader;
+    if (loader.LoadFile(path)
+        && !loader.LoadedMeshes.empty())
+    {
+        m_mapData.clear();
+        m_scene.getMeshes().clear();
+        m_currentRoom = -1;
+        m_showImportWindow = false;
+
+        m_importTransform = {};
+
+        const auto& inVerts = loader.LoadedMeshes[0].Vertices;
+        const auto& inIndices = loader.LoadedMeshes[0].Indices;
+
+        if (!inVerts.empty() && !inIndices.empty())
+        {
+            auto& mesh = m_scene.getMeshes().emplace_back(std::make_unique<Mesh>());
+            for (const auto& vert : inVerts)
+            {
+                auto& outVert = mesh->vertices.emplace_back();
+                outVert.position[0] = vert.Position.X;
+                outVert.position[1] = -vert.Position.Z;
+                outVert.position[2] = vert.Position.Y;
+
+                outVert.normal[0] = vert.Normal.X;
+                outVert.normal[1] = -vert.Normal.Z;
+                outVert.normal[2] = vert.Normal.Y;
+
+                outVert.texCoord[0] = vert.TextureCoordinate.X;
+                outVert.texCoord[1] = 1.f - vert.TextureCoordinate.Y;
+            }
+
+            for (auto i : inIndices)
+            {
+                mesh->indices.push_back(static_cast<std::uint16_t>(i));
+            }
+            //std::reverse(mesh->indices.begin(), mesh->indices.end());
+            mesh->hasNormals = true;
+
+            mesh->updateGeometry();
+
+            //give it a different colour just to make pre-baked model visible
+            glm::vec3 c(1.f, 1.f, 0.95f);
+            glBindTexture(GL_TEXTURE_2D, mesh->texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, &c);
+
+            m_showImportWindow = true;
+
+
+            //create a ground plane... although we want to omit it from the bake?
+            //maybe not, these objects are relative to the ground after all...
+            auto& groundMesh = m_scene.getMeshes().emplace_back(std::make_unique<Mesh>());
+            auto& verts = groundMesh->vertices;
+            auto& indices = groundMesh->indices;
+
+            vertex_t vert;
+            vert.position[0] = RoomWidth / 2.f;
+            vert.position[2] = RoomWidth / 2.f;
+
+            vert.texCoord[0] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexWidth;
+            vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+            verts.push_back(vert);
+
+            vert.position[2] -= RoomWidth;
+            vert.texCoord[1] = DefaultRoomHeight / DefaultTexHeight;
+            verts.push_back(vert);
+
+            vert.position[0] -= RoomWidth;
+            vert.texCoord[0] = DefaultRoomHeight / DefaultTexWidth;
+            verts.push_back(vert);
+
+            vert.position[2] += RoomWidth;
+            vert.texCoord[1] = (DefaultRoomHeight + DefaultRoomWidth) / DefaultTexHeight;
+            verts.push_back(vert);
+
+            indices.push_back(0);
+            indices.push_back(1);
+            indices.push_back(2);
+            indices.push_back(2);
+            indices.push_back(3);
+            indices.push_back(0);
+
+            groundMesh->updateGeometry();
         }
     }
 }

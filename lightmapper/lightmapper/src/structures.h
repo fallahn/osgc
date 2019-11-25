@@ -6,7 +6,9 @@
 #endif
 
 #include <glad/glad.h>
-#include <glm/mat4x4.hpp>
+#include "glm/mat4x4.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -20,22 +22,9 @@ namespace ConstVal
 
 struct Vertex final
 {
-    Vertex()
-    {
-        position[0] = 0.f;
-        position[1] = 0.f;
-        position[2] = 0.f;
-
-        normal[0] = 0.f;
-        normal[1] = 0.f;
-        normal[2] = 0.f;
-
-        texCoord[0] = 0.f;
-        texCoord[1] = 0.f;
-    }
-    float position[3];
-    float normal[3];
-    float texCoord[2];
+    glm::vec3 position = glm::vec3(0.f);
+    glm::vec3 normal = glm::vec3(0.f);
+    glm::vec2 texCoord = glm::vec2(0.f);
 };
 using vertex_t = Vertex;
 

@@ -8,8 +8,6 @@
 #include "geometry.h"
 #include "ConfigFile.hpp"
 #include "tinyfiledialogs.h"
-#include "OBJ_Loader.h"
-namespace ol = objl;
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -33,7 +31,9 @@ App::App()
     m_projectionMatrix  (1.f),
     m_viewMatrix        (1.f),
     m_cameraPosition    (0.f, 3.f, 25.f),
-    m_bakeAll           (false)
+    m_bakeAll           (false),
+    m_saveOutput        (false),
+    m_showImportWindow  (false)
 {
     if (glfwInit())
     {
@@ -186,6 +186,7 @@ void App::loadMapData(const std::string& path)
     if (cfg.loadFromFile(path))
     {
         m_mapData.clear();
+        m_showImportWindow = false;
 
         const auto& objects = cfg.getObjects();
         for (const auto& obj : objects)
@@ -354,57 +355,13 @@ void App::loadModel(const std::string& path)
         {
             m_mapData.clear();
             m_currentRoom = -1;
+            m_showImportWindow = false;
            
             m_scene.getMeshes().clear();
 
             addModel(md, m_scene, glm::vec3(0.f));
             //TODO get Scale const
             m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
-        }
-    }
-}
-
-void App::importObjFile(const std::string& path)
-{
-    //TODO show obj properties on success
-    ol::Loader loader;
-    if (loader.LoadFile(path)
-        && !loader.LoadedMeshes.empty())
-    {
-        m_mapData.clear();
-        m_scene.getMeshes().clear();
-        m_currentRoom = -1;
-
-
-        const auto& inVerts = loader.LoadedMeshes[0].Vertices;
-        const auto& inIndices = loader.LoadedMeshes[0].Indices;
-
-        if (!inVerts.empty() && !inIndices.empty())
-        {
-            auto& mesh = m_scene.getMeshes().emplace_back(std::make_unique<Mesh>());
-            for (const auto& vert : inVerts)
-            {
-                auto& outVert = mesh->vertices.emplace_back();
-                outVert.position[0] = vert.Position.X;
-                outVert.position[1] = vert.Position.Y;
-                outVert.position[2] = vert.Position.Z;
-
-                outVert.normal[0] = vert.Normal.X;
-                outVert.normal[1] = vert.Normal.Y;
-                outVert.normal[2] = vert.Normal.Z;
-
-                outVert.texCoord[0] = vert.TextureCoordinate.X;
-                outVert.texCoord[1] = vert.TextureCoordinate.Y;
-            }
-
-            for (auto i : inIndices)
-            {
-                mesh->indices.push_back(static_cast<std::uint16_t>(i));
-            }
-
-            mesh->hasNormals = true;
-
-            mesh->updateGeometry();
         }
     }
 }
@@ -437,14 +394,6 @@ void App::update()
 
 void App::calcViewMatrix()
 {
-    // initial camera config
-    //TODO these should be members
-    //static glm::vec3 position(0.f, 0.3f, 2.5f);
-    if (m_currentRoom > -1)
-    {
-        m_cameraPosition.y = 3.f;
-    }
-
     static glm::vec2 rotation(0.f);
 
     glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), rotation.y * static_cast<float>(M_PI / 180.f), glm::vec3(0.f, 1.f, 0.f));
@@ -464,6 +413,12 @@ void App::calcViewMatrix()
             rotation[0] += (float)(mouse[1] - lastMouse[1]) * -0.2f;
             rotation[1] += (float)(mouse[0] - lastMouse[0]) * -0.2f;
         }
+        else if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
+        {
+            float multiplier = (m_cameraPosition.z / 25.f) * 0.02f;
+            m_cameraPosition[0] -= (float)(mouse[0] - lastMouse[0]) * multiplier;
+            m_cameraPosition[1] += (float)(mouse[1] - lastMouse[1]) * multiplier;
+        }
         lastMouse[0] = mouse[0];
         lastMouse[1] = mouse[1];
 
@@ -477,8 +432,9 @@ void App::calcViewMatrix()
         if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS) movement[1] += speed;*/
         /*position += glm::vec3(rotMat * glm::vec4(movement, 1.f));*/
 
-        float speed = (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 0.85f : 0.5f;
-        //TODO scale this based on current distance so that scrolling feels linear
+        float speed = (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) ? 1.25f : 0.85f;
+        speed *= (m_cameraPosition.z / 25.f);
+
         m_cameraPosition.z = std::max(0.f, m_cameraPosition.z - (static_cast<float>(scrollOffset) * speed));
         scrollOffset = 0.f;
 
@@ -508,7 +464,14 @@ void App::draw()
 
 void App::bakeModel()
 {
-    std::string path = tinyfd_saveFileDialog("Save Lightmap", nullptr, 0, nullptr, nullptr);
+    static const char* filters[] = { "*.png" };
+
+    std::string path;   
+    if (m_saveOutput)
+    {
+        path = tinyfd_saveFileDialog("Save Lightmap", nullptr, 1, filters, nullptr);
+    }
+
     if (!path.empty())
     {
         //remove the file extension if we got one - the bake will add it
@@ -517,15 +480,16 @@ void App::bakeModel()
         {
             path = path.substr(0, pos);
         }
-
-        //TODO we need to read some texture data from the model
-        //so that we know what size/ratio to set the light map texture
-        m_scene.setLightmapSize(1024, 1024);
-
-        m_scene.bake(path, { 1.f,1.f,1.f });
-
-        m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
     }
+
+    //TODO we need to read some texture data from the model
+    //so that we know what size/ratio to set the light map texture
+    m_scene.setLightmapSize(1024, 1024);
+
+    m_scene.bake(path, { 1.f,1.f,1.f });
+
+    m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
+
 }
 
 void App::bakeAll()
@@ -539,8 +503,9 @@ void App::bakeAll()
         handleEvents();
         update();
 
+        //TODO do we bother if save output is false? Might as well not bake anything if that's the case...
         m_scene.bake(m_outputPath + std::to_string(room.id), room.skyColour);
-        m_clearColour = room.skyColour;
+        //m_clearColour = room.skyColour;
         draw();
     }
 }

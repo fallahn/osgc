@@ -34,6 +34,12 @@ private:
     void loadModel(const std::string&);
     void importObjFile(const std::string&);
 
+    struct ImportTransform final
+    {
+        glm::vec3 scale = glm::vec3(1.f);
+        glm::vec3 rotation = glm::vec3(0.f);
+    }m_importTransform;
+
     std::string m_outputPath;
 
     void handleEvents();
@@ -45,6 +51,8 @@ private:
     void bakeModel();
     void bakeAll();
     bool m_bakeAll;
+    bool m_saveOutput;
+    bool m_showImportWindow;
 
     void updateSceneGeometry(const RoomData&);
 

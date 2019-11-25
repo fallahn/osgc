@@ -184,7 +184,7 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
                 lmImageDilate(data.data(), temp.data(), w, h, c);
                 lmImageDilate(temp.data(), data.data(), w, h, c);
             }
-            //upload result to preview texture
+            //upload result to preview texture - only really necessary in multi-pass bakes
             glBindTexture(GL_TEXTURE_2D, mesh->texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
 
@@ -205,11 +205,15 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());
 
     //save result to a file
-    auto fileName = output + ".png";
-    std::vector<std::uint8_t> buffer(w * h * c);
-    lmImageFtoUB(data.data(), buffer.data(), w, h, c, 1.f);
+    if (!output.empty())
+    {
+        auto fileName = output + ".png";
+        std::vector<std::uint8_t> buffer(w * h * c);
+        lmImageFtoUB(data.data(), buffer.data(), w, h, c, 1.f);
 
-    stbi_write_png(fileName.c_str(), w, h, 4, buffer.data(), w * 4);
+        stbi_write_png(fileName.c_str(), w, h, c, buffer.data(), w * c);
+    }
+
 
     return 1;
 }
