@@ -329,10 +329,16 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                             { 
                                 return p.second == m_selectedModel;
                             });
+
+                        auto* room = m_roomList[m_sharedData.currentRoom];
+                        room->removeObject("model", entry->first);
+
                         m_modelList.erase(entry);                        
 
                         m_uiScene.destroyEntity(m_selectedModel);
                         m_selectedModel = {};
+
+                        saveRoom();
                     }
                 }
             }
@@ -452,7 +458,7 @@ bool ModelState::update(float dt)
         }
     }
 
-    if (!m_modelList.empty() && m_showAerialView)
+    if (/*!m_modelList.empty() && */m_showAerialView)
     {
         m_aerialObjects.clear();
 
@@ -757,6 +763,10 @@ bool ModelState::exportModel(const std::string& path)
 
         auto relPath = absPath.substr(idx);
         std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        if (auto pos = relPath.find_last_of('/'); pos != std::string::npos)
+        {
+            relPath = relPath.substr(pos);
+        }
 
         //serialise verts and write binary mesh file
         if (writeModelBinary(modelEntity.getComponent<xy::Drawable>().getVertices(), absPath))
@@ -781,6 +791,12 @@ bool ModelState::exportModel(const std::string& path)
 
 void ModelState::loadModel(const std::string& path)
 {
+    if (path.find("assets") == std::string::npos)
+    {
+        xy::Logger::log("Skipping model - is this a valid path to the assets directory?", xy::Logger::Type::Info);
+        return;
+    }
+
     if (m_modelList.size() == MaxModels)
     {
         xy::Logger::log("Maximum models have already been loaded", xy::Logger::Type::Info);
@@ -788,6 +804,7 @@ void ModelState::loadModel(const std::string& path)
     }
 
     auto absPath = path;
+    std::replace(absPath.begin(), absPath.end(), '\\', '/');
     if (xy::FileSystem::getFileExtension(path) == ".xym")
     {
         absPath.pop_back();
@@ -803,20 +820,21 @@ void ModelState::loadModel(const std::string& path)
     cfg.loadFromFile(absPath);
     if (cfg.getName() == "model")
     {
-        std::string modelName = xy::FileSystem::getFileName(absPath);
-        modelName = modelName.substr(0, modelName.find_last_of('.'));
-
-        parseModelNode(cfg, modelName);
+        parseModelNode(cfg, absPath);
     }
 }
 
-void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& modelName)
+void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& absPath)
 {
+    //TODO load this into a list of unique models
+    //then create a copy for the room list if it's already loaded
+
+    std::string modelName = xy::FileSystem::getFileName(absPath);
+    modelName = modelName.substr(0, modelName.find_last_of('.'));
+
     std::string binPath;
     std::string texture;
     float depth = 0.f;
-    sf::Vector2f position;
-    float rotation = 0.f;
 
     const auto& properties = cfg.getProperties();
     for (const auto& prop : properties)
@@ -834,22 +852,22 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         {
             depth = prop.getValue<float>();
         }
-        else if (name == "position")
-        {
-            position = prop.getValue<sf::Vector2f>();
-        }
-        else if (name == "rotation")
-        {
-            rotation = prop.getValue<float>();
-        }
     }
 
     if (!binPath.empty() && depth > 0)
     {
+        auto rootPath = absPath.substr(0, absPath.find_last_of('/'));
+        rootPath = rootPath.substr(rootPath.find("/assets"));
+
+        if (binPath[0] == '/')
+        {
+            binPath = binPath.substr(1);
+        }
+
         std::size_t texID = 0;
         if (!texture.empty())
         {
-            texID = m_resources.load<sf::Texture>(texture);
+            texID = m_resources.load<sf::Texture>(rootPath + "/" + texture);
         }
         else
         {
@@ -862,8 +880,7 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         auto& tex = m_resources.get<sf::Texture>(texID);
 
         auto entity = m_uiScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(position);
-        entity.getComponent<xy::Transform>().setRotation(rotation);
+        entity.addComponent<xy::Transform>();
         entity.addComponent<NodeData>().binPath = binPath;
         entity.getComponent<NodeData>().texture = texture;
         entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
@@ -877,7 +894,7 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
+        readModelBinary(verts, xy::FileSystem::getResourcePath() + rootPath + "/" + binPath);
 
         //tex coords are normalised so we need to 'correct' this for sfml
         if (!texture.empty())
@@ -889,7 +906,6 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
                 v.texCoords.y *= size.y;
             }
         }
-
 
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
@@ -1065,7 +1081,7 @@ void ModelState::saveRoom()
 {
     //insert any model nodes
     auto* room = m_roomList[m_sharedData.currentRoom];
-    for (const auto& [name, entity] : m_modelList)
+    /*for (const auto& [name, entity] : m_modelList)
     {
         if (auto* modelNode = room->findObjectWithId(name); !modelNode || modelNode->getName() != "model")
         {
@@ -1123,7 +1139,7 @@ void ModelState::saveRoom()
                 rotProp->setValue(entity.getComponent<xy::Transform>().getRotation());
             }
         }
-    }
+    }*/
 
     //update room colour properties
     if (auto* skyProp = room->findProperty("sky_colour"); skyProp)
