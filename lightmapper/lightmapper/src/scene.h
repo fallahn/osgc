@@ -3,6 +3,7 @@
 #include "structures.h"
 
 #include <string>
+#include <memory>
 
 class Scene final
 {
