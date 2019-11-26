@@ -55,7 +55,7 @@ private:
     bool m_showImportWindow;
 
     void updateSceneGeometry(const RoomData&);
-    void exportModel(const std::string&, bool);
+    void exportModel(const std::string&, bool, bool);
 
     //ui stuffs
     void mapBrowserWindow();

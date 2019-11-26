@@ -324,9 +324,7 @@ void App::loadModel(const std::string& path)
             {
                 md.path = prop.getValue<std::string>();
 
-                //the path is relative to some working
-                //directory, not this file so we're going to
-                //make some assumptions...
+                //the path is assumed relative to the current file
                 auto fullpath = path;
                 std::replace(fullpath.begin(), fullpath.end(), '\\', '/');
                 if (auto pos = fullpath.find_last_of('/'); pos != std::string::npos)
@@ -335,9 +333,10 @@ void App::loadModel(const std::string& path)
                     fullpath = fullpath.substr(0, pos);
                 }
 
-                if (auto pos = md.path.find_last_of('/'); pos != std::string::npos)
+                //prepned '/' if it's missing
+                if (auto pos = md.path.find_first_of('/'); pos == std::string::npos)
                 {
-                    md.path = md.path.substr(pos);
+                    md.path = "/" + md.path;
                 }
                 fullpath += md.path;
                 md.path = fullpath;

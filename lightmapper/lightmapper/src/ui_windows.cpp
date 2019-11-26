@@ -217,17 +217,21 @@ void App::statusWindow()
             }
 
             static bool applyTransform = true;
+            static bool exportTexture = false;
+
+            ImGui::Checkbox("Export Texture", &exportTexture);
+            ImGui::SameLine();
+            ImGui::Checkbox("Apply Transform on Export", &applyTransform);
             if (ImGui::Button("Export"))
             {
                 static const char* filter[] = { "*.xmd" };
                 auto path = tinyfd_saveFileDialog("Export Model", nullptr, 1, filter, nullptr);
                 if (path)
                 {
-                    exportModel(path, applyTransform);
+                    exportModel(path, applyTransform, exportTexture);
                 }
             }
-            ImGui::SameLine();
-            ImGui::Checkbox("Apply Transform on Export", &applyTransform);
+            
         }
 
         ImGui::End();

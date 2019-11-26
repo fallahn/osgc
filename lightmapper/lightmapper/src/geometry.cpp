@@ -105,15 +105,15 @@ void App::importObjFile(const std::string& path)
             {
                 auto& outVert = mesh->vertices.emplace_back();
                 outVert.position[0] = vert.Position.X;
-                outVert.position[1] = -vert.Position.Z;
-                outVert.position[2] = vert.Position.Y;
+                outVert.position[1] = vert.Position.Z;
+                outVert.position[2] = -vert.Position.Y;
 
                 outVert.normal[0] = vert.Normal.X;
-                outVert.normal[1] = -vert.Normal.Z;
-                outVert.normal[2] = vert.Normal.Y;
+                outVert.normal[1] = vert.Normal.Z;
+                outVert.normal[2] = -vert.Normal.Y;
 
                 outVert.texCoord[0] = vert.TextureCoordinate.X;
-                outVert.texCoord[1] = 1.f - vert.TextureCoordinate.Y;
+                outVert.texCoord[1] = vert.TextureCoordinate.Y;
             }
 
             for (auto i : inIndices)
@@ -171,7 +171,7 @@ void App::importObjFile(const std::string& path)
     }
 }
 
-void App::exportModel(const std::string& path, bool applyTransform)
+void App::exportModel(const std::string& path, bool applyTransform, bool exportTexture)
 {
     auto outpath = path;
     std::replace(outpath.begin(), outpath.end(), '\\', '/');
@@ -195,22 +195,94 @@ void App::exportModel(const std::string& path, bool applyTransform)
         transform = m_scene.getMeshes()[0]->modelMatrix;
     }
     //remember preview is 1/10 scale (see consts above)
-    transform = glm::scale(transform, glm::vec3(Scale));
+    transform = glm::scale(transform, glm::vec3(1.f / Scale, 1.f / Scale, 1.f / Scale));
     for (auto& v : verts)
     {
         v.position = glm::vec3(transform * glm::vec4(v.position, 1.0));
-        v.normal = glm::vec3(transform * glm::vec4(v.normal, 0.0));
+        v.normal = glm::vec3(transform * glm::vec4(v.normal, 1.0));
+
+        //undo the hack we did importing the obj to correct
+        //for z-up models in the y-up viewer
+        float temp = v.position.y;
+        v.position.y = -v.position.z;
+        v.position.z = temp;
+
+        temp = v.normal.y;
+        v.normal.y = -v.normal.z;
+        v.normal.z = temp;
     }
 
+    //remove the scale from the normals
+    for (auto& v : verts)
+    {
+        v.normal = glm::normalize(v.normal);
+    }
 
+    //find the extreme and make sure it's not negative
+    auto zExtremes = std::minmax_element(verts.begin(), verts.end(),
+        [](const Vertex& lhs, const Vertex& rhs)
+        {
+            return lhs.position.z < rhs.position.z;
+        });
+    float range = zExtremes.second->position.z;
+    bool shiftRange = false;
+
+    if (zExtremes.first->position.z < 0)
+    {
+        range -= zExtremes.first->position.z;
+        shiftRange = true;
+    }
+
+    std::vector<SerialVertex> outVerts;
     for (auto i : m_scene.getMeshes()[0]->indices)
     {
-        
         //convert format
+        SerialVertex vert;
+        //positions
+        vert.posX = verts[i].position.x;
+        vert.posY = -verts[i].position.y;
+
+        float z = verts[i].position.z;
+        if (shiftRange)
+        {
+            z -= zExtremes.first->position.z;
+        }
+        z = z / range;
+        vert.heightMultiplier = static_cast<std::uint8_t>(z * 255.f);
+
+        //normals
+        auto convertComponent = [](float c)->std::uint8_t
+        {
+            c *= 255.f;
+            c += 255.f;
+            c /= 2.f;
+            return static_cast<std::uint8_t>(c);
+        };
+        vert.normX = convertComponent(verts[i].normal.x);
+        vert.normY = convertComponent(-verts[i].normal.y);
+        vert.normZ = convertComponent(verts[i].normal.z);
+
+        //texcoords - for now we'll leave them normalised
+        //because SFML uses texture sizes (hum) then remember to
+        //convert these when we load the model in game and know
+        //how big our texture is
+        vert.texU = verts[i].texCoord.x;
+        vert.texV = verts[i].texCoord.y;
+
+        outVerts.push_back(vert);
     }
-    //TODO make sure no negative Z values
-    //TODO calc depth
-    float depth = 0.f;
+
+    //write the actual bin file - TODO error check this
+    std::ofstream file(outpath, std::ios::binary);
+    if (file.is_open() && file.good())
+    {
+        auto vertCount = outVerts.size();
+
+        file.write((char*)&vertCount, sizeof(vertCount));
+        file.write((char*)outVerts.data(), vertCount * sizeof(SerialVertex));
+        file.close();
+    }
+
 
     auto fileName = outpath;
     if (auto pos = fileName.find_last_of('/'); pos != std::string::npos)
@@ -220,13 +292,17 @@ void App::exportModel(const std::string& path, bool applyTransform)
 
     //text file
     xy::ConfigFile cfg("model");
-    cfg.addProperty("depth").setValue(depth);
+    cfg.addProperty("depth").setValue(range);
     cfg.addProperty("bin").setValue(fileName);
 
     //write the texture
     auto pos = outpath.find_last_of('.');
     outpath.replace(pos, outpath.length(), ".png");
-    m_scene.saveLightmap(outpath);
+
+    if (exportTexture)
+    {
+        m_scene.saveLightmap(outpath);
+    }
 
     fileName.replace(fileName.find_last_of('.'), fileName.length(), ".png");
     cfg.addProperty("texture").setValue(fileName);
