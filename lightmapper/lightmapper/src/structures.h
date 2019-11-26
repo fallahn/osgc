@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <vector>
 #include <array>
+#include <string>
 
 namespace ConstVal
 {
