@@ -38,6 +38,8 @@ source distribution.
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
 
+#include <map>
+
 struct SharedData;
 
 class GameState final : public xy::State, public xy::GuiClient
@@ -66,6 +68,14 @@ private:
     std::size_t m_defaultTexID;
     std::array<std::size_t, TextureID::Count> m_textureIDs;
 
+    struct VertexCollection final
+    {
+        std::vector<sf::Vertex> vertices;
+        std::int32_t instanceCount = 0;
+    };
+
+    std::map<std::string, VertexCollection> m_modelVerts;
+
     MapData m_mapData;
     bool m_cameraUnlocked;
     bool m_updateLighting;
@@ -76,7 +86,7 @@ private:
     void addPlayer();
     void buildUI();
 
-    void parseModelNode(const xy::ConfigObject&, sf::Vector2f);
+    xy::Entity parseModelNode(const xy::ConfigObject&, const std::string&);
     void updateLighting();
 #ifdef XY_DEBUG
     CameraInput m_cameraInput;

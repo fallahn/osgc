@@ -905,13 +905,6 @@ map game_map
             door = 1
             locked = 0
         }
-        model suzanne
-        {
-            bin = assets/models/suzanne.xym
-            depth = 189.000000
-            position = -370.632996,-144.000000
-            rotation = 358.983002
-        }
     }
     room 42
     {
@@ -1225,6 +1218,24 @@ map game_map
             direction = 2
             door = 0
             locked = 0
+        }
+        prop buns1
+        {
+            model_src = "assets/models/buns.xmd"
+            position = 320.000000,321.757996
+            rotation = 221.608002
+        }
+        prop chair1
+        {
+            model_src = "assets/models/chair.xmd"
+            position = -320.000000,395.604004
+            rotation = 180.000000
+        }
+        prop chair2
+        {
+            model_src = "assets/models/chair.xmd"
+            position = 309.333008,-395.604004
+            rotation = 0.000000
         }
     }
     room 58

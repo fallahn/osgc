@@ -88,6 +88,13 @@ private:
     xy::ShaderResource m_shaders;
     MatrixPool m_matrixPool;
 
+    struct VertexCollection final
+    {
+        std::vector<sf::Vertex> vertices;
+        std::int32_t instanceCount = 0;
+    };
+
+    std::map<std::string, VertexCollection> m_modelVerts;
     std::map<std::string, xy::Entity> m_modelList;
     static constexpr std::size_t MaxModels = 8;
 
@@ -108,7 +115,7 @@ private:
     bool exportModel(const std::string&);
 
     void loadModel(const std::string&);
-    void parseModelNode(const xy::ConfigObject&, const std::string&);
+    xy::Entity parseModelNode(const xy::ConfigObject&, const std::string&);
 
     void setCamera(std::int32_t);
     void setRoomGeometry();

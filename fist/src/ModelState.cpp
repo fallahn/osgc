@@ -69,8 +69,7 @@ namespace
 
     struct NodeData final
     {
-        std::string binPath;
-        std::string texture;
+        std::string modelPath;
     };
 }
 
@@ -165,6 +164,8 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     {
                         modelEntity.getComponent<xy::Transform>().setRotation(0.f);
                     }
+
+                    ImGui::Text("%s", "Note models need to be exported with z-up\naxis from your modelling package.\nExisting models can be modified using the\nlight mapper tool.");
                 }
                 ImGui::End();
 
@@ -214,6 +215,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
                 ImGui::Text("%s", "Current view :");
                 ImGui::SameLine();
+                ImGui::PushItemWidth(50.f);
                 auto lastView = m_currentView;
                 if (ImGui::BeginCombo("direction", viewStrings[m_currentView].c_str(), ImGuiComboFlags_NoArrowButton))
                 {
@@ -235,6 +237,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                 {
                     setCamera(m_currentView);
                 }
+                ImGui::PopItemWidth();
                 ImGui::Separator();
                 if (ImGui::InputInt("Current Room", &m_sharedData.currentRoom))
                 {
@@ -315,6 +318,10 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     auto& tx = m_selectedModel.getComponent<xy::Transform>();
                     auto pos = tx.getPosition();
                     auto rotation = tx.getRotation();
+                    if (rotation > 180)
+                    {
+                        rotation -= 360.f;
+                    }
 
                     ImGui::SliderFloat2("Position", reinterpret_cast<float*>(&pos), -GameConst::RoomWidth / 2.f, GameConst::RoomWidth / 2.f);
                     ImGui::SliderFloat("Rotation", &rotation, -180.f, 180.f);
@@ -824,11 +831,8 @@ void ModelState::loadModel(const std::string& path)
     }
 }
 
-void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& absPath)
+xy::Entity ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& absPath)
 {
-    //TODO load this into a list of unique models
-    //then create a copy for the room list if it's already loaded
-
     std::string modelName = xy::FileSystem::getFileName(absPath);
     modelName = modelName.substr(0, modelName.find_last_of('.'));
 
@@ -857,11 +861,26 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
     if (!binPath.empty() && depth > 0)
     {
         auto rootPath = absPath.substr(0, absPath.find_last_of('/'));
-        rootPath = rootPath.substr(rootPath.find("/assets"));
+        rootPath = rootPath.substr(rootPath.find("assets"));
 
         if (binPath[0] == '/')
         {
             binPath = binPath.substr(1);
+        }
+
+        if (m_modelVerts.count(modelName) == 0)
+        {
+            VertexCollection verts;
+            readModelBinary(verts.vertices, xy::FileSystem::getResourcePath() + rootPath + "/" + binPath);
+
+            if (!verts.vertices.empty())
+            {
+                m_modelVerts.insert(std::make_pair(modelName, verts));
+            }
+            else
+            {
+                xy::Logger::log("Unable to load " + modelName, xy::Logger::Type::Error);
+            }
         }
 
         std::size_t texID = 0;
@@ -881,8 +900,7 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
 
         auto entity = m_uiScene.createEntity();
         entity.addComponent<xy::Transform>();
-        entity.addComponent<NodeData>().binPath = binPath;
-        entity.getComponent<NodeData>().texture = texture;
+        entity.addComponent<NodeData>().modelPath = absPath.substr(absPath.find("assets"));
         entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
         entity.getComponent<xy::Drawable>().setTexture(&tex);
@@ -894,7 +912,9 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
         entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        readModelBinary(verts, xy::FileSystem::getResourcePath() + rootPath + "/" + binPath);
+
+        verts = m_modelVerts[modelName].vertices;
+        m_modelVerts[modelName].instanceCount++;
 
         //tex coords are normalised so we need to 'correct' this for sfml
         if (!texture.empty())
@@ -909,12 +929,12 @@ void ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::string& 
 
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
-        if (m_modelList.count(modelName) != 0)
-        {
-            m_uiScene.destroyEntity(m_modelList[modelName]);
-        }
-        m_modelList[modelName] = entity;
+        m_modelList[modelName + std::to_string(m_modelVerts[modelName].instanceCount)] = entity;
+
+        return entity;
     }
+
+    return {};
 }
 
 void ModelState::setCamera(std::int32_t direction)
@@ -957,6 +977,11 @@ void ModelState::setRoomGeometry()
     m_selectedModel = {};
     m_aerialObjects.clear();
     m_aerialWalls.clear();
+
+    for (auto& [name, verts]: m_modelVerts)
+    {
+        verts.instanceCount = 0;
+    }
 
     m_skyColour = { 1.f,1.f,1.f };
     m_roomColour = { 1.f,1.f,1.f };
@@ -1018,9 +1043,43 @@ void ModelState::setRoomGeometry()
         }
 
         //look for model objects
-        else if (obj.getName() == "model")
+        else if (obj.getName() == "prop")
         {
-            parseModelNode(obj, obj.getId());
+            float rotation = 0.f;
+            sf::Vector2f position;
+            std::string modelPath;
+
+            const auto& properties = obj.getProperties();
+            for (const auto& prop : properties)
+            {
+                if (prop.getName() == "rotation")
+                {
+                    rotation = prop.getValue<float>();
+                }
+                else if (prop.getName() == "position")
+                {
+                    position = prop.getValue<sf::Vector2f>();
+                }
+                else if (prop.getName() == "model_src")
+                {
+                    modelPath = prop.getValue<std::string>();
+                }
+            }
+
+            if (!modelPath.empty())
+            {
+                xy::ConfigFile cfg;
+                cfg.loadFromFile(xy::FileSystem::getResourcePath() + modelPath);
+                if (cfg.getName() == "model")
+                {
+                    auto entity = parseModelNode(cfg, modelPath);
+                    if (entity.isValid())
+                    {
+                        entity.getComponent<xy::Transform>().setPosition(position);
+                        entity.getComponent<xy::Transform>().setRotation(rotation);
+                    }
+                }
+            }
         }
     }
 
@@ -1079,67 +1138,47 @@ void ModelState::setRoomGeometry()
 
 void ModelState::saveRoom()
 {
-    //insert any model nodes
+    //insert any prop model nodes
     auto* room = m_roomList[m_sharedData.currentRoom];
-    /*for (const auto& [name, entity] : m_modelList)
+    for (const auto& [name, entity] : m_modelList)
     {
-        if (auto* modelNode = room->findObjectWithId(name); !modelNode || modelNode->getName() != "model")
+        if (auto* propNode = room->findObjectWithId(name); !propNode || propNode->getName() != "prop")
         {
-            modelNode = room->addObject("model", name);
-            modelNode->addProperty("bin").setValue(entity.getComponent<NodeData>().binPath);
-            modelNode->addProperty("texture").setValue(entity.getComponent<NodeData>().texture);
-            modelNode->addProperty("depth").setValue(entity.getComponent<Sprite3D>().depth);
-            modelNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
-            modelNode->addProperty("rotation").setValue(entity.getComponent<xy::Transform>().getRotation());
+            propNode = room->addObject("prop", name);
+            propNode->addProperty("model_src").setValue(entity.getComponent<NodeData>().modelPath);
+            propNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
+            propNode->addProperty("rotation").setValue(entity.getComponent<xy::Transform>().getRotation());
         }
         else
         {
-            if (auto* binProp = modelNode->findProperty("bin"); !binProp)
+            if (auto* binProp = propNode->findProperty("model_src"); !binProp)
             {
-                modelNode->addProperty("bin").setValue(entity.getComponent<NodeData>().binPath);
+                propNode->addProperty("model_src").setValue(entity.getComponent<NodeData>().modelPath);
             }
             else
             {
-                binProp->setValue(entity.getComponent<NodeData>().binPath);
+                binProp->setValue(entity.getComponent<NodeData>().modelPath);
             }
 
-            if (auto* texProp = modelNode->findProperty("texture"); !texProp)
+            if (auto* posProp = propNode->findProperty("position"); !posProp)
             {
-                modelNode->addProperty("texture").setValue(entity.getComponent<NodeData>().texture);
-            }
-            else
-            {
-                texProp->setValue(entity.getComponent<NodeData>().texture);
-            }
-
-            if (auto* depthProp = modelNode->findProperty("depth"); !depthProp)
-            {
-                modelNode->addProperty("depth").setValue(entity.getComponent<Sprite3D>().depth);
-            }
-            else
-            {
-                depthProp->setValue(entity.getComponent<Sprite3D>().depth);
-            }
-
-            if (auto* posProp = modelNode->findProperty("position"); !posProp)
-            {
-                modelNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
+                propNode->addProperty("position").setValue(entity.getComponent<xy::Transform>().getPosition());
             }
             else
             {
                 posProp->setValue(entity.getComponent<xy::Transform>().getPosition());
             }
 
-            if (auto* rotProp = modelNode->findProperty("rotation"); !rotProp)
+            if (auto* rotProp = propNode->findProperty("rotation"); !rotProp)
             {
-                modelNode->addProperty("rotation").setValue(entity.getComponent<xy::Transform>().getRotation());
+                propNode->addProperty("rotation").setValue(entity.getComponent<xy::Transform>().getRotation());
             }
             else
             {
                 rotProp->setValue(entity.getComponent<xy::Transform>().getRotation());
             }
         }
-    }*/
+    }
 
     //update room colour properties
     if (auto* skyProp = room->findProperty("sky_colour"); skyProp)

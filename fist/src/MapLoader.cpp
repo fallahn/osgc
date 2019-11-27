@@ -152,9 +152,44 @@ bool GameState::loadMap()
 
                 wallIdx++;
             }
-            else if (obj.getName() == "model")
+            else if (obj.getName() == "prop")
             {
-                parseModelNode(obj, roomPosition);
+                //parseModelNode(obj, roomPosition);
+                float rotation = 0.f;
+                sf::Vector2f position;
+                std::string modelPath;
+
+                const auto& properties = obj.getProperties();
+                for (const auto& prop : properties)
+                {
+                    if (prop.getName() == "rotation")
+                    {
+                        rotation = prop.getValue<float>();
+                    }
+                    else if (prop.getName() == "position")
+                    {
+                        position = prop.getValue<sf::Vector2f>();
+                    }
+                    else if (prop.getName() == "model_src")
+                    {
+                        modelPath = prop.getValue<std::string>();
+                    }
+                }
+
+                if (!modelPath.empty())
+                {
+                    xy::ConfigFile cfg;
+                    cfg.loadFromFile(xy::FileSystem::getResourcePath() + modelPath);
+                    if (cfg.getName() == "model")
+                    {
+                        auto entity = parseModelNode(cfg, modelPath);
+                        if (entity.isValid())
+                        {
+                            entity.getComponent<xy::Transform>().setPosition(position + roomPosition);
+                            entity.getComponent<xy::Transform>().setRotation(rotation);
+                        }
+                    }
+                }
             }
         }
         std::sort(walls.begin(), walls.end(),
@@ -258,13 +293,14 @@ bool GameState::loadMap()
     return false;
 }
 
-void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPosition)
+xy::Entity GameState::parseModelNode(const xy::ConfigObject& cfg, const std::string& absPath)
 {
+    std::string modelName = xy::FileSystem::getFileName(absPath);
+    modelName = modelName.substr(0, modelName.find_last_of('.'));
+
     std::string binPath;
     std::string texture;
     float depth = 0.f;
-    sf::Vector2f position;
-    float rotation = 0.f;
 
     const auto& properties = cfg.getProperties();
     for (const auto& prop : properties)
@@ -282,22 +318,37 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
         {
             depth = prop.getValue<float>();
         }
-        else if (name == "position")
-        {
-            position = prop.getValue<sf::Vector2f>();
-        }
-        else if (name == "rotation")
-        {
-            rotation = prop.getValue<float>();
-        }
     }
 
     if (!binPath.empty() && depth > 0)
     {
+        auto rootPath = absPath.substr(0, absPath.find_last_of('/'));
+        rootPath = rootPath.substr(rootPath.find("assets"));
+
+        if (binPath[0] == '/')
+        {
+            binPath = binPath.substr(1);
+        }
+
+        if (m_modelVerts.count(modelName) == 0)
+        {
+            VertexCollection verts;
+            readModelBinary(verts.vertices, xy::FileSystem::getResourcePath() + rootPath + "/" + binPath);
+
+            if (!verts.vertices.empty())
+            {
+                m_modelVerts.insert(std::make_pair(modelName, verts));
+            }
+            else
+            {
+                xy::Logger::log("Unable to load " + modelName, xy::Logger::Type::Error);
+            }
+        }
+
         std::size_t texID = 0;
         if (!texture.empty())
         {
-            texID = m_resources.load<sf::Texture>(texture);
+            texID = m_resources.load<sf::Texture>(rootPath + "/" + texture);
         }
         else
         {
@@ -310,8 +361,7 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
         auto& tex = m_resources.get<sf::Texture>(texID);
 
         auto entity = m_gameScene.createEntity();
-        entity.addComponent<xy::Transform>().setPosition(position + roomPosition);
-        entity.getComponent<xy::Transform>().setRotation(rotation);
+        entity.addComponent<xy::Transform>();
         entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
         entity.getComponent<xy::Drawable>().setTexture(&tex);
@@ -321,9 +371,10 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
         entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
         entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-        //entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
+
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-        readModelBinary(verts, xy::FileSystem::getResourcePath() + binPath);
+        verts = m_modelVerts[modelName].vertices;
+        //m_modelVerts[modelName].instanceCount++;
         entity.getComponent<xy::Drawable>().updateLocalBounds();
 
         //tex coords are normalised so we need to 'correct' this for sfml
@@ -336,5 +387,8 @@ void GameState::parseModelNode(const xy::ConfigObject& cfg, sf::Vector2f roomPos
                 v.texCoords.y *= size.y;
             }
         }
+
+        return entity;
     }
+    return {};
 }
