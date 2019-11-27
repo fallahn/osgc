@@ -189,6 +189,21 @@ void App::statusWindow()
         ImGui::SameLine();
         ImGui::Checkbox("Save Output", &m_saveOutput);
 
+        if (!m_scene.getMeshes().empty() &&
+            ImGui::Button("Export Last Bake"))
+        {
+            const char* filter[] = { "*.png" };
+            auto path = tinyfd_saveFileDialog("Save Texture", nullptr, 1, filter, nullptr);
+            if (path)
+            {
+                std::string outpath = path;
+                if (outpath.find(".png") == std::string::npos)
+                {
+                    outpath += ".png";
+                }
+                m_scene.saveLightmap(outpath);
+            }
+        }
 
         //import/export settings
         if (m_showImportWindow)

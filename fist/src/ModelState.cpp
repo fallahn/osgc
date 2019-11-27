@@ -338,7 +338,7 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                             });
 
                         auto* room = m_roomList[m_sharedData.currentRoom];
-                        room->removeObject("model", entry->first);
+                        room->removeObject("prop", entry->first);
 
                         m_modelList.erase(entry);                        
 

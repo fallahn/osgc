@@ -905,6 +905,36 @@ map game_map
             door = 1
             locked = 0
         }
+        prop chair1
+        {
+            model_src = "assets/models/chair.xmd"
+            position = 298.666992,-300.658997
+            rotation = 310.251007
+        }
+        prop drawers1
+        {
+            model_src = "assets/models/drawers.xmd"
+            position = -224.000000,427.252991
+            rotation = 180.000000
+        }
+        prop small_chair1
+        {
+            model_src = "assets/models/small_chair.xmd"
+            position = -384.000000,385.054993
+            rotation = 149.246002
+        }
+        prop sofa1
+        {
+            model_src = "assets/models/sofa.xmd"
+            position = 384.000000,-5.275000
+            rotation = 272.260986
+        }
+        prop wardrobe1
+        {
+            model_src = "assets/models/wardrobe.xmd"
+            position = 437.333008,300.658997
+            rotation = 268.643005
+        }
     }
     room 42
     {
@@ -1218,24 +1248,6 @@ map game_map
             direction = 2
             door = 0
             locked = 0
-        }
-        prop buns1
-        {
-            model_src = "assets/models/buns.xmd"
-            position = 320.000000,321.757996
-            rotation = 221.608002
-        }
-        prop chair1
-        {
-            model_src = "assets/models/chair.xmd"
-            position = -320.000000,395.604004
-            rotation = 180.000000
-        }
-        prop chair2
-        {
-            model_src = "assets/models/chair.xmd"
-            position = 309.333008,-395.604004
-            rotation = 0.000000
         }
     }
     room 58

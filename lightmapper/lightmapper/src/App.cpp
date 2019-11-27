@@ -246,31 +246,16 @@ void App::loadMapData(const std::string& path)
                             }
                         }
                     }
-                    else if (roomObj.getName() == "model")
+                    else if (roomObj.getName() == "prop")
                     {
                         auto& modelData = roomData.models.emplace_back();
+                        std::string modelPath;
 
                         //save the info and process geometry after the room is built
                         const auto& properties = roomObj.getProperties();
                         for (const auto& prop : properties)
                         {
-                            if (prop.getName() == "bin")
-                            {
-                                //this assumes the models are stored next to the map
-                                auto fullPath = path;
-                                std::replace(fullPath.begin(), fullPath.end(), '\\', '/');
-
-                                for (auto i = 0; i < 2; ++i)
-                                {
-                                    if (auto pos = fullPath.find_last_of('/'); pos != std::string::npos)
-                                    {
-                                        fullPath = fullPath.substr(0, pos);
-                                    }
-                                }
-                                modelData.path = fullPath + "/" + prop.getValue<std::string>();
-
-                            }
-                            else if (prop.getName() == "position")
+                            if (prop.getName() == "position")
                             {
                                 modelData.position = prop.getValue<glm::vec2>();
                             }
@@ -278,17 +263,67 @@ void App::loadMapData(const std::string& path)
                             {
                                 modelData.rotation = prop.getValue<float>();
                             }
-                            else if (prop.getName() == "depth")
+                            else if (prop.getName() == "model_src")
                             {
-                                modelData.depth = prop.getValue<float>();
+                                modelPath = prop.getValue<std::string>();
                             }
                         }
 
-                        if (modelData.path.empty() ||
-                            modelData.depth <= 0)
+                        if (modelPath.empty())
                         {
                             //invalid data, remove from the list
                             roomData.models.pop_back();
+                        }
+                        else
+                        {
+                            std::string modelDir;
+                            if (auto pos = modelPath.find_first_of('/'); pos != std::string::npos)
+                            {
+                                modelDir = modelPath.substr(0, pos);
+                            }
+
+                            auto currPath = path;
+                            std::replace(currPath.begin(), currPath.end(), '\\', '/');
+                            if (auto pos = currPath.find(modelDir); pos != std::string::npos)
+                            {
+                                currPath = currPath.substr(0, pos);
+                            }
+
+                            xy::ConfigFile model;
+                            if (!model.loadFromFile(currPath + modelPath))
+                            {
+                                std::cout << "Could not load " << currPath + modelPath << "\n";
+                            }
+                            else
+                            {
+                                const auto& modelProperties = model.getProperties();
+                                for (const auto& prop : modelProperties)
+                                {
+                                    if (prop.getName() == "bin")
+                                    {
+                                        if (auto pos = modelPath.find_last_of('/'); pos != std::string::npos)
+                                        {
+                                            modelPath = modelPath.substr(0, pos + 1) + prop.getValue<std::string>();
+                                        }
+                                        else
+                                        {
+                                            modelPath = prop.getValue<std::string>();
+                                        }
+                                    }
+                                    else if (prop.getName() == "depth")
+                                    {
+                                        modelData.depth = prop.getValue<float>();
+                                    }
+                                }
+
+                                modelData.path = currPath + modelPath;
+
+                                if (modelData.path.empty() ||
+                                    modelData.depth <= 0)
+                                {
+                                    roomData.models.pop_back();
+                                }
+                            }
                         }
                     }
                 }
