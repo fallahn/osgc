@@ -1,0 +1,6 @@
+model 
+{
+    depth = 289.192352
+    bin = "wardrobe.xym"
+    texture = "wardrobe.png"
+}

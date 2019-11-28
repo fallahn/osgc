@@ -63,7 +63,7 @@ void Sprite3DSystem::process(float)
 
             matrix = glm::translate(glm::mat4(1.f), glm::vec3(position.x, position.y, spr.depth));
             matrix = glm::scale(matrix, glm::vec3(scale.x, scale.y, (scale.x + scale.y) / 2.f));
-            matrix = glm::rotate(matrix, -tx.getRotation() * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
+            matrix = glm::rotate(matrix, -tx.getWorldRotation() * xy::Util::Const::degToRad, glm::vec3(0.f, 0.f, 1.f));
             matrix = glm::translate(matrix, glm::vec3(-tx.getOrigin().x, -tx.getOrigin().y, 0.f));
         }
     }

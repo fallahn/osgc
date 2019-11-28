@@ -350,9 +350,7 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::Sprite3DColoured, SpriteVertexColoured, SpriteFragmentColoured);
     m_shaders.preload(ShaderID::Sprite3DWalls, SpriteVertexWalls, SpriteFragmentWalls);
 
-    m_shaders.get(ShaderID::Sprite3DTextured).setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
-
-    m_textureIDs[TextureID::SpriteShadow] = m_resources.load<sf::Texture>("assets/images/sprite_shadow.png");
+   // m_textureIDs[TextureID::SpriteShadow] = m_resources.load<sf::Texture>("assets/images/sprite_shadow.png");
 }
 
 void GameState::addPlayer()

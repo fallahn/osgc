@@ -60,7 +60,11 @@ source distribution.
 namespace
 {
 #include "Sprite3DShader.inl"
+#include "UVShader.inl"
+
     xy::Entity modelEntity;
+
+    xy::Entity highlightEntity;
 
     std::array<std::string, 4u> viewStrings =
     {
@@ -298,15 +302,15 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
                     {
                         if (ImGui::Selectable(name.c_str(), ent == m_selectedModel))
                         {
-                            //unset old colour if something already selected
-                            if (m_selectedModel.isValid())
-                            {
-                                m_selectedModel.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
-                            }
-
                             //set selected entity
                             m_selectedModel = ent;
-                            m_selectedModel.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(0.f, 1.f, 0.f));
+
+                            auto& destVerts = highlightEntity.getComponent<xy::Drawable>().getVertices();
+                            destVerts = m_selectedModel.getComponent<xy::Drawable>().getVertices();
+                            std::reverse(destVerts.begin(), destVerts.end()); //reverse the winding to see the back
+                            highlightEntity.getComponent<xy::Drawable>().updateLocalBounds();
+                            highlightEntity.getComponent<Sprite3D>().depth = m_selectedModel.getComponent<Sprite3D>().depth;
+                            m_selectedModel.getComponent<xy::Transform>().addChild(highlightEntity.getComponent<xy::Transform>());
                         }
                     }
                     ImGui::ListBoxFooter();
@@ -344,6 +348,8 @@ ModelState::ModelState(xy::StateStack& ss, xy::State::Context ctx, SharedData& s
 
                         m_uiScene.destroyEntity(m_selectedModel);
                         m_selectedModel = {};
+
+                        highlightEntity.getComponent<xy::Drawable>().getVertices().clear();
 
                         saveRoom();
                     }
@@ -435,7 +441,7 @@ bool ModelState::handleEvent(const sf::Event& evt)
             //deselect any selection
             if (m_selectedModel.isValid())
             {
-                m_selectedModel.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
+                highlightEntity.getComponent<xy::Drawable>().getVertices().clear();
             }
             m_selectedModel = {};
         }
@@ -527,6 +533,10 @@ void ModelState::draw()
     auto cam = m_uiScene.getActiveCamera();    
     auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
     shader.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+
+    auto& shader2 = m_shaders.get(ShaderID::ModelOutline);
+    shader2.setUniform("u_viewProjMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewProjectionMatrix[0][0]));
+
     rw.draw(m_uiScene);
 }
 
@@ -586,8 +596,7 @@ void ModelState::initScene()
 
     //load shader
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
-    auto& shader = m_shaders.get(ShaderID::Sprite3DTextured);
-    shader.setUniform("u_highlightColour", sf::Glsl::Vec3(1.f, 1.f, 1.f));
+    m_shaders.preload(ShaderID::ModelOutline, SpriteVertexOutline, SpriteOutlineFrag);
 
     //set up a background
     m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/rooms/editor.png");
@@ -604,6 +613,19 @@ void ModelState::initScene()
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
     m_roomEntity = entity;
+
+    //creates the highlight outline around a selected model
+    entity = m_uiScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+    entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
+    entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::ModelOutline));
+    entity.getComponent<xy::Drawable>().setCulled(false);
+    entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
+    entity.addComponent<Sprite3D>(m_matrixPool);// .depth = GameConst::RoomHeight;
+    entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+    highlightEntity = entity;
+
 
     if (!m_mapData.loadFromFile(xy::FileSystem::getResourcePath() + "assets/game.map"))
     {

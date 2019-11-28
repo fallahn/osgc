@@ -1,0 +1,6 @@
+model 
+{
+    depth = 118.262459
+    bin = "drawers.xym"
+    texture = "drawers.png"
+}

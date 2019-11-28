@@ -1,0 +1,6 @@
+model 
+{
+    depth = 195.026169
+    bin = "sofa.xym"
+    texture = "sofa.png"
+}

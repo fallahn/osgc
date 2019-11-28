@@ -1,3 +1,5 @@
+#pragma once
+
 /*********************************************************************
 
 Copyright 2019 Matt Marchant
@@ -16,29 +18,15 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
-#pragma once
+#include <string>
 
-namespace ShaderID
+static const std::string uvVert =
+R"(
+#version 120
+
+void main()
 {
-    enum
-    {
-        Sprite3DTextured,
-        Sprite3DColoured,
-        Sprite3DWalls,
-
-        UVMapper,
-        ModelOutline,
-
-        Count
-    };
-}
-
-namespace TextureID
-{
-    enum
-    {
-        SpriteShadow,
-
-        Count
-    };
-}
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+    gl_Position = vec4(vec3(gl_TexCoord[0].xy * 2.0 - 1.0, 0.0), 1.0);
+    gl_FrontColor = vec4(0.1, 1.0, 0.2, 1.0);
+})";

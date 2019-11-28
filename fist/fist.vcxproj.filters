@@ -163,5 +163,8 @@
     <None Include="src\Sprite3DShader.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
+    <None Include="src\UVShader.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

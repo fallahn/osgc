@@ -70,6 +70,40 @@ void main()
     v_pointlightDirection = u_pointlightWorldPosition - worldPos.xyz;
 })";
 
+static const std::string SpriteVertexOutline =
+R"(
+#version 120
+
+uniform mat4 u_viewProjMat;
+uniform mat4 u_modelMat;
+
+//varying vec3 v_normal;
+
+void main()
+{
+    vec4 worldPos = u_modelMat * gl_Vertex;
+    worldPos.z *= gl_Color.a * length(vec3(u_modelMat[2][0], u_modelMat[2][1], u_modelMat[2][2]));
+
+    vec4 normal = vec4(gl_Color.rgb * 2.0 - 1.0, 0.0);
+    normal.xyz = normalize((u_modelMat * normal).xyz);
+    worldPos.xyz += normal.xyz * 2.0;
+
+    gl_Position = u_viewProjMat * worldPos;
+
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+    //v_normal = normal;
+})";
+
+static const std::string SpriteOutlineFrag =
+R"(
+#version 120
+
+void main()
+{
+    gl_FragColor = vec4(0.2, 1.0, 0.1, 1.0);
+})";
+
 //the tangent calc makes some assumptions about the normals
 //as such will only work for specific wall geometry.
 static const std::string SpriteVertexWalls =
@@ -205,7 +239,7 @@ R"(
 #version 120
 
 uniform sampler2D u_texture;
-uniform vec3 u_highlightColour;
+
 uniform vec3 u_skylightColour;
 uniform float u_skylightAmount;
 
@@ -249,7 +283,7 @@ void main()
 
     vec3 pointColour = (ambient + diffuse) * (u_roomlightColour * u_roomlightAmount);
 
-    gl_FragColor = vec4((skyColour + pointColour) * u_highlightColour, baseColour.a);
+    gl_FragColor = vec4((skyColour + pointColour), baseColour.a);
 })";
 
 static const std::string SpriteFragmentColoured =

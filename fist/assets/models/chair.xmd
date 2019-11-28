@@ -1,0 +1,6 @@
+model 
+{
+    depth = 170.376358
+    bin = "chair.xym"
+    texture = "chair.png"
+}

@@ -1,0 +1,6 @@
+model 
+{
+    bin = "suzanne.xym"
+    texture = "suzanne_lightmap.png"
+    depth = 189.000000
+}
