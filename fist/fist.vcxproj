@@ -144,6 +144,7 @@
     <ClInclude Include="include\AnimationID.hpp" />
     <ClInclude Include="include\Camera3D.hpp" />
     <ClInclude Include="include\CameraTransportSystem.hpp" />
+    <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
     <ClInclude Include="include\GameConst.hpp" />

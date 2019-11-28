@@ -52,7 +52,7 @@ struct MapData final
 
     float skyAmount = 1.f;
     float roomAmount = 0.f;
-    static constexpr float MinSkyAmount = 0.3f;
+    static constexpr float MinSkyAmount = 0.6f;
     static constexpr float LightHeight = 340.f;
 };
 

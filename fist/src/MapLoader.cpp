@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include "WallData.hpp"
 #include "ModelIO.hpp"
 #include "SharedStateData.hpp"
+#include "Collision.hpp"
 
 #include <xyginext/ecs/components/Transform.hpp>
 #include <xyginext/ecs/components/Drawable.hpp>
@@ -185,8 +186,17 @@ bool GameState::loadMap()
                         auto entity = parseModelNode(cfg, modelPath);
                         if (entity.isValid())
                         {
-                            entity.getComponent<xy::Transform>().setPosition(position + roomPosition);
+                            auto targetPosition = position + roomPosition;
+                            entity.getComponent<xy::Transform>().setPosition(targetPosition);
                             entity.getComponent<xy::Transform>().setRotation(rotation);
+
+                            //transform AABB for broadphase
+                            auto aabb = entity.getComponent<xy::Transform>().getTransform().transformRect(
+                                entity.getComponent<xy::BroadphaseComponent>().getArea());
+
+                            aabb.left -= targetPosition.x;
+                            aabb.top -= targetPosition.y;
+                            entity.getComponent<xy::BroadphaseComponent>().setArea(aabb);
                         }
                     }
                 }
@@ -247,6 +257,7 @@ bool GameState::loadMap()
             triggerEnt.addComponent<xy::Transform>();
             triggerEnt.addComponent<xy::BroadphaseComponent>().setArea(Hitboxes[i]);
             triggerEnt.addComponent<WallData>() = wallData[i];
+            triggerEnt.addComponent<CollisionComponent>().id = CollisionID::Wall;
             entity.getComponent<xy::Transform>().addChild(triggerEnt.getComponent<xy::Transform>());
         }
 
@@ -387,6 +398,10 @@ xy::Entity GameState::parseModelNode(const xy::ConfigObject& cfg, const std::str
                 v.texCoords.y *= size.y;
             }
         }
+
+        //collision data
+        entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<xy::Drawable>().getLocalBounds());
+        entity.addComponent<CollisionComponent>().id = CollisionID::Prop;
 
         return entity;
     }
