@@ -20,7 +20,7 @@ Copyright 2019 Matt Marchant
 
 #include <string>
 
-static const std::string uvVert =
+static const std::string UVVert =
 R"(
 #version 120
 
@@ -29,4 +29,13 @@ void main()
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
     gl_Position = vec4(vec3(gl_TexCoord[0].xy * 2.0 - 1.0, 0.0), 1.0);
     gl_FrontColor = vec4(0.1, 1.0, 0.2, 1.0);
+})";
+
+static const std::string UVFrag =
+R"(
+#version 120
+
+void main()
+{
+    gl_FragColor = gl_Color;
 })";

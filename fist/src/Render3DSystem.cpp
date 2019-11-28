@@ -116,6 +116,7 @@ void Render3DSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     for (const auto& drawList : m_renderPasses)
     {
@@ -135,6 +136,7 @@ void Render3DSystem::draw(sf::RenderTarget& rt, sf::RenderStates states) const
             rt.draw(drawable, states);
         }
     }
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 }

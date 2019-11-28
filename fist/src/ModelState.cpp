@@ -597,6 +597,7 @@ void ModelState::initScene()
     //load shader
     m_shaders.preload(ShaderID::Sprite3DTextured, SpriteVertexLighting, SpriteFragmentTextured);
     m_shaders.preload(ShaderID::ModelOutline, SpriteVertexOutline, SpriteOutlineFrag);
+    m_shaders.preload(ShaderID::UVMapper, UVVert, UVFrag);
 
     //set up a background
     m_roomTexture.loadFromFile(xy::FileSystem::getResourcePath() + "assets/images/rooms/editor.png");
@@ -608,7 +609,6 @@ void ModelState::initScene()
     entity.getComponent<xy::Drawable>().setTexture(&m_roomTexture);
     entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3DTextured));
     entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-    entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
     entity.addComponent<Sprite3D>(m_matrixPool).depth = GameConst::RoomHeight;
     entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
 
@@ -698,7 +698,6 @@ void ModelState::parseVerts()
         modelEntity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
         modelEntity.addComponent<Sprite3D>(m_matrixPool);
         modelEntity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &modelEntity.getComponent<Sprite3D>().getMatrix()[0][0]);
-        modelEntity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 0.f));
     }
 
     //update the entity's vert data
@@ -932,7 +931,6 @@ xy::Entity ModelState::parseModelNode(const xy::ConfigObject& cfg, const std::st
         entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
         entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
         entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
-        entity.getComponent<xy::Drawable>().bindUniform("u_highlightColour", sf::Vector3f(1.f, 1.f, 1.f));
         auto& verts = entity.getComponent<xy::Drawable>().getVertices();
 
         verts = m_modelVerts[modelName].vertices;

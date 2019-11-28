@@ -109,18 +109,19 @@ void main()
 static const std::string SpriteVertexWalls =
 R"(
 #version 120
+#define SPRITE_COUNT 2
 
 uniform mat4 u_projMat;
 uniform mat4 u_viewMat;
 uniform mat4 u_modelMat;
 
 uniform vec3 u_pointlightWorldPosition;
+uniform vec3 u_spriteShadowWorldPosition[SPRITE_COUNT];
 
-//varying vec3 v_lightDir;
 varying vec3 v_pointlightDirection;
+varying vec3 v_spriteShadowDirection[SPRITE_COUNT];
 varying vec4 v_viewPosition;
 
-//varying vec3 v_normal;
 varying mat3 v_tbn;
 
 void main()
@@ -159,13 +160,17 @@ void main()
 
     v_tbn = (mat3(tan.xyz, bit.xyz, normal.xyz));
 
-    //v_lightDir = vec3(0.1, 1.0, 0.1);
     v_pointlightDirection = u_pointlightWorldPosition - worldPos.xyz;
+    for(int i = 0; i < SPRITE_COUNT; ++i)
+    {
+        v_spriteShadowDirection[i] = u_spriteShadowWorldPosition[i] - worldPos.xyz;
+    }
 })";
 
 static const std::string SpriteFragmentWalls =
 R"(
 #version 120
+#define SPRITE_COUNT 2
 
 uniform sampler2D u_texture;
 uniform sampler2D u_normalMap;
@@ -180,6 +185,7 @@ uniform float u_roomlightAmount;
 uniform vec3 u_lightDirection;
 
 varying vec3 v_pointlightDirection;
+varying vec3 v_spriteShadowDirection[SPRITE_COUNT];
 varying vec4 v_viewPosition;
 
 varying mat3 v_tbn;
@@ -189,6 +195,7 @@ const float FogFar = 4800.0;
 
 const float AmbientAmount = 0.3;
 const float LightRange = 1.0 / 540.0;
+const float ShadowRange = 128.0;
 
 void main()
 {
@@ -226,6 +233,16 @@ void main()
 
     gl_FragColor = vec4((skyColour + pointColour), baseColour.a);
 
+    //sprite shadows
+    for(int i = 0; i < SPRITE_COUNT; ++i)
+    {
+        vec3 sDir = v_spriteShadowDirection[i];
+        att = clamp(dot(sDir, sDir) / (ShadowRange * ShadowRange), 0.0, 0.18) + 0.82;
+        att *= att;
+        gl_FragColor.rgb *= att;
+    }
+
+    //distance fogging
     float distance = length(v_viewPosition);
     float fogAmount = (FogFar - distance) / (FogFar - FogNear);
     fogAmount = clamp(fogAmount, 0.0, 1.0 );

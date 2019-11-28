@@ -268,6 +268,7 @@ bool GameState::update(float dt)
     auto& shader2 = m_shaders.get(ShaderID::Sprite3DWalls);
     shader2.setUniform("u_viewMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().viewMatrix[0][0]));
     shader2.setUniform("u_projMat", sf::Glsl::Mat4(&cam.getComponent<Camera3D>().projectionMatrix[0][0]));
+    //shader2.setUniform("u_spriteShadowWorldPosition", sf::Glsl::Vec3(0.f, 0.f, 10.f));
     //shader2.setUniform("u_lightmapAmount", doLightmap ? 1.f : 0.f);
 
     return true;
@@ -381,7 +382,7 @@ void GameState::addPlayer()
         //using a bunch of animated sprites
         auto camEnt = m_gameScene.getActiveCamera();
         entity.addComponent<xy::Callback>().active = true;
-        entity.getComponent<xy::Callback>().function = [camEnt](xy::Entity e, float)
+        entity.getComponent<xy::Callback>().function = [&,camEnt](xy::Entity e, float)
         {
             auto& verts = e.getComponent<xy::Drawable>().getVertices();
             verts[0].position = verts[1].position;
@@ -391,6 +392,11 @@ void GameState::addPlayer()
 
             //also want to read the camera's current rotation
             e.getComponent<xy::Transform>().setRotation(camEnt.getComponent<CameraTransport>().getCurrentRotation());
+
+            auto pos = e.getComponent<xy::Transform>().getPosition();
+            auto& uniform = std::any_cast<std::string&>(e.getComponent<xy::Callback>().userData);
+            auto& shader = m_shaders.get(ShaderID::Sprite3DWalls);
+            shader.setUniform(uniform, sf::Glsl::Vec3(pos.x, pos.y, 10.f));
         };
 
         return entity;
@@ -411,12 +417,13 @@ void GameState::addPlayer()
     animMap[AnimationID::Left] = spriteSheet.getAnimationIndex("left", "bob");
     animMap[AnimationID::Right] = spriteSheet.getAnimationIndex("right", "bob");
     player.getComponent<xy::SpriteAnimation>().play(animMap[AnimationID::Idle]);
-
+    player.getComponent<xy::Callback>().userData = std::make_any<std::string>("u_spriteShadowWorldPosition[0]");
 
     //load bella
     spriteSheet.loadFromFile("assets/sprites/bella.spt", m_resources);
     position = { (x * GameConst::RoomWidth) - 100.f, (y * GameConst::RoomWidth) + 32.f };
-    createSprite("bella", position);
+    auto bella = createSprite("bella", position);
+    bella.getComponent<xy::Callback>().userData = std::make_any<std::string>("u_spriteShadowWorldPosition[1]");
 }
 
 void GameState::buildUI()
