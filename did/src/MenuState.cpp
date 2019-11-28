@@ -822,8 +822,12 @@ void MenuState::createScene()
     {
         if (flags & xy::UISystem::Flags::LeftMouse)
         {
+#ifdef STAND_ALONE
+            xy::App::quit();
+#else
             requestStackClear();
             requestStackPush(StateID::ParentState);
+#endif
         }
     });
     parentEntity.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());

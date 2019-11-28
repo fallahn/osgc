@@ -16,10 +16,13 @@ Copyright 2019 Matt Marchant
 
 *********************************************************************/
 
+#ifdef STAND_ALONE
+
 #include "Game.hpp"
 #include "GameState.hpp"
 #include "MenuState.hpp"
 #include "ErrorState.hpp"
+#include "PauseState.hpp"
 #include "Revision.hpp"
 #include "Server.hpp"
 #include "MessageIDs.hpp"
@@ -27,7 +30,7 @@ Copyright 2019 Matt Marchant
 #include "boxer/boxer.h"
 #include "MixerChannels.hpp"
 
-//#include "glad/glad.h"
+#include "glad/glad.h"
 
 #include <SFML/Window/Event.hpp>
 
@@ -52,14 +55,12 @@ void onAbort(int)
 
 Game::Game()
     : xy::App       (sf::ContextSettings(0, 0, 0, 2, 1, 0)),
-    m_serverThread  (&GameServer::start, &m_gameServer),
     m_stateStack    ({ *getRenderWindow(), *this })
 {
-    /*if (!gladLoadGL())
+    if (!gladLoadGL())
     {
         xy::Logger::log("Failed loading opengl functions", xy::Logger::Type::Error);
-    }*/
-    //m_gameServer.setMaxPlayers(4);
+    }
 
 #ifdef XY_DEBUG
     signal(SIGABRT, onAbort);
@@ -68,11 +69,7 @@ Game::Game()
 
 Game::~Game()
 {
-    //if (m_serverThread)
-    {
-        m_gameServer.stop();
-        m_serverThread.wait();
-    }
+
 }
 
 //private
@@ -91,7 +88,7 @@ void Game::handleEvent(const sf::Event& evt)
 
 void Game::handleMessage(const xy::Message& msg)
 {    
-    if (msg.id == MessageID::SystemMessage)
+    /*if (msg.id == MessageID::SystemMessage)
     {
         const auto& data = msg.getData<SystemEvent>();
         if (data.action == SystemEvent::RequestStartServer
@@ -113,7 +110,6 @@ void Game::handleMessage(const xy::Message& msg)
             }
             else
             {
-                m_sharedData.serverID = {};
                 m_gameServer.stop();
                 xy::Logger::log("Failed creating game server instance", xy::Logger::Type::Error);
                 newMsg->action = SystemEvent::ServerStopped;
@@ -124,7 +120,7 @@ void Game::handleMessage(const xy::Message& msg)
             m_gameServer.stop();
             m_serverThread.wait();
         }
-    }
+    }*/
 
     m_stateStack.handleMessage(msg);
 }
@@ -141,43 +137,46 @@ void Game::draw()
 
 bool Game::initialise()
 {
+    m_sharedData.gameServer = std::make_shared<GameServer>();
+    m_sharedData.netClient = std::make_shared<xy::NetClient>();
+    m_sharedData.netClient->create(Global::NetworkChannels);
+
     xy::AudioMixer::setLabel("Sound FX", MixerChannel::FX);
     xy::AudioMixer::setLabel("Music", MixerChannel::Music);
-    
+
     registerStates();
     m_stateStack.pushState(StateID::Menu);
 
     getRenderWindow()->setKeyRepeatEnabled(false);
 
-    setWindowTitle("Desert Island Duel " + REVISION_STRING);
+    m_sharedData.gameServer->setMaxPlayers(4);
 
-    if (!SteamAPI_Init())
-    {
-        boxer::show("Steam not running!\nPlease launch Steam before trying to run the game again.", "Error.");
-        return false;
-    }
-
-#ifdef DD_DEBUG
-    SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook);
-#endif //DD_DEBUG
-    SteamUtils()->SetOverlayNotificationPosition(ENotificationPosition::k_EPositionTopRight);
-
-    m_gameServer.setMaxPlayers(4);
+    xy::App::getActiveInstance()->setWindowTitle("Desert Island Duel");
 
     return true;
 }
 
 void Game::finalise()
 {
+    if (m_sharedData.netClient && m_sharedData.netClient->connected())
+    {
+        m_sharedData.netClient->disconnect();
+    }
+
+    m_sharedData.gameServer->stop();
+
     m_stateStack.clearStates();
     m_stateStack.applyPendingChanges();
-
-    SteamAPI_Shutdown();
 }
 
 void Game::registerStates()
 {
+    //TODO intro state
+
     m_stateStack.registerState<GameState>(StateID::Game, m_sharedData);
     m_stateStack.registerState<MenuState>(StateID::Menu, m_sharedData);
     m_stateStack.registerState<ErrorState>(StateID::Error, m_sharedData);
+    m_stateStack.registerState<PauseState>(StateID::Pause, m_sharedData);
 }
+
+#endif //STAND_ALONE

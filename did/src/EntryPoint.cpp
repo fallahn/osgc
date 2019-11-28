@@ -25,6 +25,8 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
+#ifndef STAND_ALONE
+
 #include "PluginExport.hpp"
 #include "StateIDs.hpp"
 #include "GameState.hpp"
@@ -48,7 +50,6 @@ void onAbort(int)
 {
     std::cerr << "Abort signal\n";
 }
-
 
 #endif //DD_DEBUG
 
@@ -116,3 +117,5 @@ void end(xy::StateStack* ss)
     signal(SIGABRT, SIG_DFL);
 #endif
 }
+
+#endif //STAND_ALONE
