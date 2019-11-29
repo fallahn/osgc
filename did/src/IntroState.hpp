@@ -44,7 +44,7 @@ public:
     ~IntroState() = default;
 
     bool handleEvent(const sf::Event&) override;
-    void handleMessage(const xy::Message&) override {}
+    void handleMessage(const xy::Message&) override;
     bool update(float) override;
     void draw() override;
 

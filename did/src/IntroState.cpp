@@ -126,6 +126,19 @@ bool IntroState::handleEvent(const sf::Event & evt)
     return false;
 }
 
+void IntroState::handleMessage(const xy::Message& msg)
+{
+    if (msg.id == xy::Message::WindowMessage)
+    {
+        const auto& data = msg.getData<xy::Message::WindowEvent>();
+        if (data.type == xy::Message::WindowEvent::Resized)
+        {
+            auto context = getContext();
+            context.renderWindow.setView(context.defaultView);
+        }
+    }
+}
+
 bool IntroState::update(float dt)
 {
     accumulatedTime += dt;
