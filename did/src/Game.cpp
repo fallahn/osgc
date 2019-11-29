@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "MenuState.hpp"
 #include "ErrorState.hpp"
 #include "PauseState.hpp"
+#include "IntroState.hpp"
 #include "Revision.hpp"
 #include "Server.hpp"
 #include "MessageIDs.hpp"
@@ -88,40 +89,6 @@ void Game::handleEvent(const sf::Event& evt)
 
 void Game::handleMessage(const xy::Message& msg)
 {    
-    /*if (msg.id == MessageID::SystemMessage)
-    {
-        const auto& data = msg.getData<SystemEvent>();
-        if (data.action == SystemEvent::RequestStartServer
-            && !m_gameServer.running())
-        {
-            m_serverThread.launch();
-
-            sf::Clock clock;
-            while (!m_gameServer.getSteamID().IsValid()
-                && clock.getElapsedTime().asSeconds() < 3.f) {}
-
-            auto newMsg = getMessageBus().post<SystemEvent>(MessageID::SystemMessage);
-
-            if (m_gameServer.getSteamID().IsValid())
-            {
-                m_sharedData.serverID = m_gameServer.getSteamID();
-                xy::Logger::log("Created server instance " + std::to_string(m_sharedData.serverID.ConvertToUint64()), xy::Logger::Type::Info);
-                newMsg->action = SystemEvent::ServerStarted;
-            }
-            else
-            {
-                m_gameServer.stop();
-                xy::Logger::log("Failed creating game server instance", xy::Logger::Type::Error);
-                newMsg->action = SystemEvent::ServerStopped;
-            }
-        }
-        else if (data.action == SystemEvent::RequestStopServer)
-        {
-            m_gameServer.stop();
-            m_serverThread.wait();
-        }
-    }*/
-
     m_stateStack.handleMessage(msg);
 }
 
@@ -145,7 +112,7 @@ bool Game::initialise()
     xy::AudioMixer::setLabel("Music", MixerChannel::Music);
 
     registerStates();
-    m_stateStack.pushState(StateID::Menu);
+    m_stateStack.pushState(StateID::Intro);
 
     getRenderWindow()->setKeyRepeatEnabled(false);
 
@@ -171,8 +138,7 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-    //TODO intro state
-
+    m_stateStack.registerState<IntroState>(StateID::Intro);
     m_stateStack.registerState<GameState>(StateID::Game, m_sharedData);
     m_stateStack.registerState<MenuState>(StateID::Menu, m_sharedData);
     m_stateStack.registerState<ErrorState>(StateID::Error, m_sharedData);

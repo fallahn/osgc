@@ -8,7 +8,8 @@ SET(PROJECT_NAME desert_island_duel)
 project(${PROJECT_NAME})
 
 # Some default variables which the user may change
-SET(CMAKE_BUILD_TYPE        Debug CACHE STRING  "Choose the type of build (Debug or Release)")
+SET(CMAKE_BUILD_TYPE  Debug CACHE STRING  "Choose the type of build (Debug or Release)")
+SET(BUILD_STAND_ALONE false CACHE BOOL "Build as a stand alone application instead of a plugin")
 
 # We're using c++17
 set(CMAKE_CXX_STANDARD 17)
@@ -50,7 +51,12 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 # Create the actual binary (PROJECT_SRC variable is set inside previous steps)
-add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
+if(BUILD_STAND_ALONE)
+  add_definitions(-DSTAND_ALONE)
+  add_executable(${PROJECT_NAME} ${PROJECT_SRC})
+else()
+  add_library(${PROJECT_NAME} SHARED ${PROJECT_SRC})
+endif()
 
 # Linker settings
 target_link_libraries(${PROJECT_NAME} xyginext)
@@ -63,11 +69,12 @@ if(X11_FOUND)
     ${X11_LIBRARIES})
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
-set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}")
+if(NOT BUILD_STAND_ALONE)
+  set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osgc")
+  set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}")
 
-set(dst_path "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}/")
-FILE(COPY info.xgi DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
-FILE(COPY readme.md DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
-#uncomment this and rename 'assets' to whatever your resource directory is called to copy resources to the output directory
-FILE(COPY assets DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+  set(dst_path "${CMAKE_BINARY_DIR}/osgc/plugins/${PROJECT_NAME}/")
+  FILE(COPY info.xgi DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+  FILE(COPY readme.md DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+  FILE(COPY assets DESTINATION ${dst_path} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+endif()

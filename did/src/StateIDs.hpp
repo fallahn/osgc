@@ -25,6 +25,7 @@ namespace StateID
         Game,
         Menu,
         Error,
-        Pause
+        Pause,
+        Intro
     };
 }

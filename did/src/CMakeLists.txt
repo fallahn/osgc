@@ -31,6 +31,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/FlappySailSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FoliageGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FoliageSystem.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameActorFactory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameAudio.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GameState.cpp
@@ -39,10 +40,12 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/InputParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationComponent.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/IntroState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/InventorySystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandGenerator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/IslandSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuBackground.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuLobbyFunctions.cpp

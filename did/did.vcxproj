@@ -341,6 +341,7 @@
     <ClInclude Include="src\InputBinding.hpp" />
     <ClInclude Include="src\InputParser.hpp" />
     <ClInclude Include="src\InterpolationSystem.hpp" />
+    <ClInclude Include="src\IntroState.hpp" />
     <ClInclude Include="src\InventorySystem.hpp" />
     <ClInclude Include="src\IslandGenerator.hpp" />
     <ClInclude Include="src\IslandSystem.hpp" />
@@ -464,6 +465,7 @@
     <ClCompile Include="src\InputParser.cpp" />
     <ClCompile Include="src\InterpolationComponent.cpp" />
     <ClCompile Include="src\InterpolationSystem.cpp" />
+    <ClCompile Include="src\IntroState.cpp" />
     <ClCompile Include="src\InventorySystem.cpp" />
     <ClCompile Include="src\IslandGenerator.cpp" />
     <ClCompile Include="src\IslandSystem.cpp" />
