@@ -517,6 +517,9 @@
     <None Include="src\SpriteShader.inl" />
     <None Include="src\SunsetShader.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="did.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
