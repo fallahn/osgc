@@ -8,7 +8,7 @@ SET(PROJECT_NAME desert_island_duel)
 project(${PROJECT_NAME})
 
 # Some default variables which the user may change
-SET(CMAKE_BUILD_TYPE  Debug CACHE STRING  "Choose the type of build (Debug or Release)")
+SET(CMAKE_BUILD_TYPE  Release CACHE STRING  "Choose the type of build (Debug or Release)")
 SET(BUILD_STAND_ALONE false CACHE BOOL "Build as a stand alone application instead of a plugin")
 
 # We're using c++17
@@ -60,6 +60,9 @@ endif()
 
 # Linker settings
 target_link_libraries(${PROJECT_NAME} xyginext)
+if(BUILD_STAND_ALONE)
+  target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS})
+endif()
 
 # Additional include directories
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
