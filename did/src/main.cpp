@@ -21,8 +21,6 @@ Copyright 2019 Matt Marchant
 #include "Game.hpp"
 #include "GlobalConsts.hpp"
 
-#include <steam/steam_api.h>
-
 #ifdef __linux
 #include <X11/Xlib.h>
 #endif // __linux

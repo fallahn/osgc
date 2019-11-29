@@ -71,3 +71,6 @@ While the game is running there are a few console commands available. Open the c
         mine_item
     
 Note some of the above commands are only available to the current game host. For a list of available commands at run time type `help`.
+
+###### Build Notes
+By default Desert Island Duel builds as a plugin for the OSGC frontend. However, setting the cmake variable `BUILD_STAND_ALONE` to true will build the game as a stand alone executable.
