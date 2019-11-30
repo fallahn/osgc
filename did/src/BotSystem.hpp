@@ -159,6 +159,9 @@ public:
     void process(float) override;
 
     void addDiggableSpot(sf::Vector2f);
+    
+    //at the end of the round target boats instead
+    void resetDigSpots(); 
 
 private:
     PathFinder& m_pathFinder;

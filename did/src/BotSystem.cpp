@@ -414,6 +414,24 @@ void BotSystem::addDiggableSpot(sf::Vector2f pos)
     }
 }
 
+void BotSystem::resetDigSpots()
+{
+    //hm not sure how wise this is - might want to keep some old
+    //positions just to reduce the likelyhood of repeatedly targeting
+    //our own boat...
+    auto count = m_destinationPoints.size();
+    m_destinationPoints.clear();
+
+    auto j = 0u;
+    for (auto i = 0u; i < count; ++i)
+    {
+        m_destinationPoints.push_back(Global::BoatPositions[j]);
+        j = (j + 1) % Global::BoatPositions.size();
+    }
+
+    std::shuffle(m_destinationPoints.begin(), m_destinationPoints.end(), m_rndEngine);
+}
+
 //private
 bool BotSystem::isDay() const
 {

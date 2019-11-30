@@ -256,6 +256,8 @@ void GameState::logicUpdate(float dt)
     {
         if (m_remainingTreasure == 1)
         {
+            m_scene.getSystem<BotSystem>().resetDigSpots();
+
             m_roundTimer.start();
             //start client timers
             m_sharedData.gameServer->broadcastData(PacketID::ServerMessage, Server::Message::OneTreasureRemaining, xy::NetFlag::Reliable, Global::ReliableChannel);
