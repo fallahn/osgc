@@ -170,6 +170,13 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
         }
     }
 
+    //we might have rejected a connection, in which case it won't be
+    //stored in the connected clients list.
+    if (peerID == 0)
+    {
+        return;
+    }
+
     auto playerID = m_sharedStateData.connectedClients[peerID].playerID;
     if (m_sharedStateData.connectedClients.size() > 1)
     {

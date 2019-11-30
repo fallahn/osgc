@@ -65,6 +65,8 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     signal(SIGABRT, onAbort);
 #endif
     
+    //this can error if loadiing screen thread
+    //is running because context is not active on this thread!
     if (!gladLoadGL())
     {
         xy::Logger::log("Failed to load OpenGL");
@@ -103,7 +105,10 @@ void end(xy::StateStack* ss)
         netClient->disconnect();
     }
 
-    gameServer->stop();
+    if (gameServer)
+    {
+        gameServer->stop();
+    }
 
     gameServer.reset();
     netClient.reset();

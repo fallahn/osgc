@@ -942,10 +942,10 @@ void MenuState::handlePacket(const xy::NetEvent& evt)
         switch(reason)
         {
         case 0:
-            m_sharedData.error = "Could not connect to server: game is full.";
+            m_sharedData.error = "Could not connect to server:\nGame is full.";
             break;
         case 1:
-            m_sharedData.error = "Could not connect to server: game is in progress.";
+            m_sharedData.error = "Could not connect to server:\nGame is in progress.";
             break;
         default:
             m_sharedData.error = "Could not connect to server: Unknown.";
