@@ -247,9 +247,28 @@ void MenuState::receiveChat(const xy::NetEvent& evt)
             std::memcpy(stringBuf.data(), &buffer[2], strSize);
             chatString = sf::String::fromUtf32(stringBuf.begin(), stringBuf.end());
 
+            //wrap text if more than 52 chars
+            chatString = m_sharedData.clientInformation.getClient(playerID).name + ": " + chatString;
+            static const auto WrapCharCount = 53;
+            auto wrapCount = chatString.getSize() / WrapCharCount;
+            for(auto j = wrapCount; j > 0; --j)
+            {
+                auto start = (j * WrapCharCount) - 1;
+                auto end = start - (WrapCharCount - 1);
+
+                for (auto i = start; i >= end; --i)
+                {
+                    if (chatString[i] == ' ')
+                    {
+                        chatString[i] = '\n';
+                        break;
+                    }
+                }
+            }
+
             if (playerID < 4)
             {
-                m_chatBuffer.push_back(m_sharedData.clientInformation.getClient(playerID).name + ": " + chatString);
+                m_chatBuffer.push_back(chatString);
                 if (m_chatBuffer.size() > MaxChatSize)
                 {
                     m_chatBuffer.pop_front();
@@ -276,5 +295,11 @@ void MenuState::updateChatOutput(xy::Entity e, float)
         outStr += str + "\n";
     }
     e.getComponent<xy::Text>().setString(outStr);
+    auto bounds = xy::Text::getLocalBounds(e);
+    auto crop = e.getComponent<xy::Drawable>().getCroppingArea();
+    crop.top = std::max(0.f, (bounds.height + bounds.top) - crop.height);
+
+    e.getComponent<xy::Transform>().setOrigin(0.f, bounds.height);
+    e.getComponent<xy::Drawable>().setCroppingArea(crop);
     e.getComponent<xy::AudioEmitter>().play();
 }

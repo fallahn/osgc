@@ -599,7 +599,7 @@ void MenuState::buildLobby(sf::Font& font)
     //chat output text
     auto& chatFont = m_resources.get<sf::Font>(m_fontIDs[Menu::FontID::Chat]);
     entity = m_uiScene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition + sf::Vector2f(12.f, -6.f));
+    entity.addComponent<xy::Transform>().setPosition(Menu::ChatBoxPosition + sf::Vector2f(12.f, 168.f));
     entity.addComponent<xy::Drawable>().setDepth(Menu::SpriteDepth::Near);
     entity.addComponent<xy::Text>(chatFont).setFillColour(sf::Color::White);
     entity.getComponent<xy::Text>().setCharacterSize(32);

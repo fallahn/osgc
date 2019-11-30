@@ -65,7 +65,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     signal(SIGABRT, onAbort);
 #endif
     
-    //this can error if loadiing screen thread
+    //this can error if loading screen thread
     //is running because context is not active on this thread!
     if (!gladLoadGL())
     {

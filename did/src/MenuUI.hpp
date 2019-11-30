@@ -155,6 +155,6 @@ namespace Menu
 
     static const float SliderSpeed = 8.f;
 
-    const std::size_t MaxChatChar = 40;
+    const std::size_t MaxChatChar = 80;
     const std::size_t MaxSeedChar = 15;
 }
