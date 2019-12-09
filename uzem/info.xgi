@@ -1,0 +1,7 @@
+game_info
+{
+    thumb = "asset/uzem.png"
+    title = "Uzebox Emulator"
+    version = "1.0.0"
+    author = "http://uzebox.org"
+}
