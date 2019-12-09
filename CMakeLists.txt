@@ -8,5 +8,6 @@ add_subdirectory(platformer)
 add_subdirectory(bubble_pop)
 add_subdirectory(did)
 add_subdirectory(fist)
+add_subdirectory(uzem)
 
 #add further plugin project directories here
