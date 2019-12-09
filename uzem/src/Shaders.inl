@@ -44,7 +44,11 @@ float rand(vec2 co)
 
 void main()
 {
-    gl_FragColor = vec4(vec3(rand((gl_TexCoord[0].xy) + vec2(u_time))), 1.0);
+    float x = rand((gl_TexCoord[0].xy) + vec2(u_time));
+    float y = rand((gl_TexCoord[0].yx) - vec2(u_time));
+    float z = rand((gl_TexCoord[0].xy) + vec2(-u_time));
+
+    gl_FragColor = vec4(vec3(x,y,z), 1.0);
 })";
 
 

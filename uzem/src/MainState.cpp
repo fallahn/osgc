@@ -50,12 +50,14 @@ namespace
         ScanlineClassic
     };
 
+    const std::string ConfigPath = xy::FileSystem::getConfigDirectory("uzem") + "settings.cfg";
+
 #include "Shaders.inl"
 }
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
     : xy::State         (ss, ctx),
-    m_showOptions       (true),
+    m_showOptions       (false),
     m_hideHelpText      (false),
     m_textureSmoothing  (false),
     m_activeShader      (nullptr),
@@ -185,6 +187,14 @@ MainState::~MainState()
         m_runEmulation = false;
         m_thread.wait();
     }
+
+    //update config & save
+    m_config.findProperty("show_options")->setValue(m_showOptions);
+    m_config.findProperty("hide_help")->setValue(m_hideHelpText);
+    m_config.findProperty("texture_smoothing")->setValue(m_textureSmoothing);
+    m_config.findProperty("shader_index")->setValue(static_cast<std::int32_t>(m_shaderIndex));
+
+    m_config.save(ConfigPath);
 }
 
 bool MainState::handleEvent(const sf::Event& evt)
@@ -392,7 +402,8 @@ void MainState::loadResources()
     m_helpText.setPosition(10.f, 10.f);
     m_helpText.setString("F1: Configuration  F2: Options");
     m_helpText.setCharacterSize(16);
-    m_helpText.setFillColor(sf::Color(3,65,84));
+    m_helpText.setFillColor(sf::Color(183,165,4));
+    m_helpText.setOutlineThickness(1.f);
 
     m_shaders.preload(ShaderID::Noise, NoiseFragment, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Scanline, ScanlineFrag, sf::Shader::Fragment);
@@ -402,6 +413,48 @@ void MainState::loadResources()
     m_postShaders.push_back(std::make_pair(nullptr, "None"));
     m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::Scanline), "Scanlines"));
     m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::ScanlineClassic), "Scanlines (Classic)"));
+
+
+    m_config.loadFromFile(ConfigPath);
+
+    //load params if they exist else fill with default
+    if (auto* prop = m_config.findProperty("show_options"); prop)
+    {
+        m_showOptions = prop->getValue<bool>();
+    }
+    else
+    {
+        m_config.addProperty("show_options").setValue(m_showOptions);
+    }
+
+    if (auto* prop = m_config.findProperty("hide_help"); prop)
+    {
+        m_hideHelpText = prop->getValue<bool>();
+    }
+    else
+    {
+        m_config.addProperty("hide_help").setValue(m_hideHelpText);
+    }
+
+    if (auto* prop = m_config.findProperty("texture_smoothing"); prop)
+    {
+        m_textureSmoothing = prop->getValue<bool>();
+    }
+    else
+    {
+        m_config.addProperty("texture_smoothing").setValue(m_textureSmoothing);
+    }
+
+    if (auto* prop = m_config.findProperty("shader_index"); prop)
+    {
+        m_shaderIndex = prop->getValue<std::int32_t>();
+    }
+    else
+    {
+        m_config.addProperty("shader_index").setValue(static_cast<std::int32_t>(m_shaderIndex));
+    }
+
+    m_config.save(ConfigPath);
 }
 
 void MainState::updateView()

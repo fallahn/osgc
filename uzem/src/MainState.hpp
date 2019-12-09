@@ -29,6 +29,7 @@ source distribution.
 #include "avr8.h"
 
 #include <xyginext/core/State.hpp>
+#include <xyginext/core/ConfigFile.hpp>
 #include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
 #include <xyginext/resources/ShaderResource.hpp>
@@ -58,8 +59,8 @@ private:
     avr8 m_uzebox;
     sf::View m_view;
 
-    //TODO move to config file
-    //so can be loaded/saved
+    xy::ConfigFile m_config;
+
     bool m_showOptions;
     bool m_hideHelpText;
     bool m_textureSmoothing;
