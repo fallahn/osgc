@@ -414,9 +414,8 @@ void MainState::loadResources()
 
     m_activeShader = &m_shaders.get(ShaderID::Noise);
     m_postShaders.push_back(std::make_pair(nullptr, "None"));
-    m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::Scanline), "Scanlines"));
     m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::ScanlineClassic), "Scanlines (Classic)"));
-
+    m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::Scanline), "Scanlines (Extreme)"));
 
     m_config.loadFromFile(ConfigPath);
 
