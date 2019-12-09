@@ -173,6 +173,9 @@
     <ClInclude Include="src\States.hpp" />
     <ClInclude Include="src\uzerom.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Shaders.inl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

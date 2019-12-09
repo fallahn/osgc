@@ -31,6 +31,7 @@ source distribution.
 #include <xyginext/core/State.hpp>
 #include <xyginext/gui/GuiClient.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 #include <SFML/System/Thread.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -61,10 +62,16 @@ private:
     //so can be loaded/saved
     bool m_showOptions;
     bool m_hideHelpText;
+    bool m_textureSmoothing;
     std::string m_romInfo;
 
     xy::ResourceHandler m_resources;
+    xy::ShaderResource m_shaders;
     sf::Text m_helpText;
+
+    sf::Shader* m_activeShader;
+    std::vector<std::pair<sf::Shader*, std::string>> m_postShaders;
+    std::size_t m_shaderIndex;
 
     sf::Thread m_thread;
     std::atomic_bool m_runEmulation;

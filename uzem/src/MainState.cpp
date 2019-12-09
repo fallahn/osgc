@@ -26,6 +26,7 @@ source distribution.
 
 #include "MainState.hpp"
 #include "States.hpp"
+#include "PluginExport.hpp"
 
 #include "uzerom.h"
 #include "logo.h"
@@ -41,14 +42,26 @@ source distribution.
 namespace
 {
     const int cycles = 100000000;
+
+    enum ShaderID
+    {
+        Noise,
+        Scanline,
+        ScanlineClassic
+    };
+
+#include "Shaders.inl"
 }
 
 MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
-    : xy::State     (ss, ctx),
-    m_showOptions   (true),
-    m_hideHelpText  (false),
-    m_thread        (&MainState::emulate, this),
-    m_runEmulation  (false)
+    : xy::State         (ss, ctx),
+    m_showOptions       (true),
+    m_hideHelpText      (false),
+    m_textureSmoothing  (false),
+    m_activeShader      (nullptr),
+    m_shaderIndex       (0),
+    m_thread            (&MainState::emulate, this),
+    m_runEmulation      (false)
 {
     launchLoadingScreen();
 
@@ -70,8 +83,9 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
                 static bool LoadRom = false;
                 static bool CloseRom = false;
                 static bool SoftReset = false;
+                static bool Quit = false;
 
-                ImGui::SetNextWindowSize({ 280.f, 400.f }/*, ImGuiCond_FirstUseEver*/);
+                ImGui::SetNextWindowSize({ 300.f, 400.f }/*, ImGuiCond_FirstUseEver*/);
                 if (ImGui::Begin("Uzem", &m_showOptions, ImGuiWindowFlags_MenuBar))
                 {
                     if (ImGui::BeginMenuBar())
@@ -87,7 +101,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
                         if (ImGui::BeginMenu("Emulation"))
                         {
                             //ImGui::MenuItem("Soft Reset", nullptr, &SoftReset);
-                            ImGui::MenuItem("Quit", nullptr, nullptr);
+                            ImGui::MenuItem("Quit", nullptr, &Quit);
                             ImGui::EndMenu();
                         }
 
@@ -97,10 +111,35 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
 
                     ImGui::Text("%s", "Current EEPROM: None");
                     ImGui::Checkbox("Hide Hint", &m_hideHelpText);
+                    ImGui::Checkbox("Smoothing (Applied on next ROM load)", &m_textureSmoothing);
+
+                    if (ImGui::BeginCombo("Effects", m_postShaders[m_shaderIndex].second.c_str()))
+                    {
+                        for (auto i = 0u; i < m_postShaders.size(); ++i)
+                        {
+                            bool selected = m_shaderIndex == i;
+                            if (ImGui::Selectable(m_postShaders[i].second.c_str(), selected))
+                            {
+                                m_shaderIndex = i;
+                                if (m_runEmulation)
+                                {
+                                    m_activeShader = m_postShaders[i].first;
+                                }
+                            }
+
+                            if (selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
+                        }
+
+                        ImGui::EndCombo();
+                    }
+
+                    ImGui::Text("%s", "Keys:\nS - Button B\nZ - Button Y\nA - Button A\nX - Button X\nTab - Select\nReturn - Start\n\n");
 
                     ImGui::Separator();
                     ImGui::Text("%s", m_romInfo.c_str());
-                    ImGui::Text("%s", "Key binds go here");
                     ImGui::End();
                 }
 
@@ -118,8 +157,18 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
 
                 if (SoftReset)
                 {
-                    m_uzebox.softReset();
+                    m_runEmulation = false;
+                    m_thread.wait();
+                    m_runEmulation = true;
+                    m_thread.launch();
                     SoftReset = false;
+                }
+
+                if (Quit)
+                {
+                    requestStackClear();
+                    requestStackPush(StateID::ParentState);
+                    Quit = false;
                 }
             }
         });
@@ -187,6 +236,15 @@ void MainState::handleMessage(const xy::Message& msg)
 bool MainState::update(float dt)
 {
     sf::Listener::setGlobalVolume(xy::AudioMixer::getMasterVolume() * 100.f);
+
+    static float timeAccum = 0.f;
+    timeAccum += dt;
+
+    m_shaders.get(ShaderID::Noise).setUniform("u_time", timeAccum);
+    m_shaders.get(ShaderID::Scanline).setUniform("u_time", timeAccum);
+    m_shaders.get(ShaderID::Scanline).setUniform("u_texture", m_uzebox.m_texture);
+    m_shaders.get(ShaderID::ScanlineClassic).setUniform("u_texture", m_uzebox.m_texture);
+
     return true;
 }
 
@@ -194,7 +252,7 @@ void MainState::draw()
 {
     auto rw = getContext().appInstance.getRenderWindow();
     rw->setView(m_view);
-    rw->draw(m_uzebox.m_sprite);
+    rw->draw(m_uzebox.m_sprite, m_activeShader);
 
     //set to default view to maintain help text scale.
     if (!m_hideHelpText)
@@ -310,6 +368,8 @@ void MainState::openRom()
     }
 
     m_runEmulation = true;
+    m_activeShader = m_postShaders[m_shaderIndex].first;
+    m_uzebox.m_texture.setSmooth(m_textureSmoothing);
     m_thread.launch();
 }
 
@@ -319,9 +379,8 @@ void MainState::closeRom()
     {
         m_runEmulation = false;
         m_thread.wait();
+        m_activeShader = &m_shaders.get(ShaderID::Noise);
     }
-
-    //TODO set shader to render noise on output texture
 }
 
 void MainState::loadResources()
@@ -334,6 +393,15 @@ void MainState::loadResources()
     m_helpText.setString("F1: Configuration  F2: Options");
     m_helpText.setCharacterSize(16);
     m_helpText.setFillColor(sf::Color(3,65,84));
+
+    m_shaders.preload(ShaderID::Noise, NoiseFragment, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Scanline, ScanlineFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::ScanlineClassic, ScanlineClassicFrag, sf::Shader::Fragment);
+
+    m_activeShader = &m_shaders.get(ShaderID::Noise);
+    m_postShaders.push_back(std::make_pair(nullptr, "None"));
+    m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::Scanline), "Scanlines"));
+    m_postShaders.push_back(std::make_pair(&m_shaders.get(ShaderID::ScanlineClassic), "Scanlines (Classic)"));
 }
 
 void MainState::updateView()
