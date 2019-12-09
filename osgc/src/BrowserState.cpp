@@ -486,6 +486,8 @@ void BrowserState::loadResources()
     SpriteID::sprites[SpriteID::Tiled] = spriteSheet.getSprite("tile");
 
     m_audioScape.loadFromFile("assets/sound/ui.xas");
+
+    xy::App::getActiveInstance()->setWindowIcon("assets/images/o.png");
 }
 
 void BrowserState::buildMenu()

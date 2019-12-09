@@ -87,7 +87,7 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
                 static bool SoftReset = false;
                 static bool Quit = false;
 
-                ImGui::SetNextWindowSize({ 300.f, 400.f }/*, ImGuiCond_FirstUseEver*/);
+                ImGui::SetNextWindowSize({ 300.f, 420.f }/*, ImGuiCond_FirstUseEver*/);
                 if (ImGui::Begin("Uzem", &m_showOptions, ImGuiWindowFlags_MenuBar))
                 {
                     if (ImGui::BeginMenuBar())
@@ -140,7 +140,10 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
 
                     ImGui::Text("%s", "Keys:\nS - Button B\nZ - Button Y\nA - Button A\nX - Button X\nTab - Select\nReturn - Start\n\n");
 
+                    ImGui::Text("For more info and to find games,\ngo to http://uzebox.org\n\n");
+
                     ImGui::Separator();
+                    ImGui::Text("\n");
                     ImGui::Text("%s", m_romInfo.c_str());
                     ImGui::End();
                 }

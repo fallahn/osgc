@@ -30,7 +30,7 @@ THE SOFTWARE.
 AvrAudio::AvrAudio()
     : m_outputBuffer()
 {
-    initialize(1, 15734);
+    initialize(2, 15734);
 }
 
 bool AvrAudio::onGetData(Chunk& chunk)
@@ -70,6 +70,10 @@ void AvrAudio::pushData(std::uint8_t data)
         sf::sleep(sf::milliseconds(1));
     }
 
+    //twice for 'stereo' - this is because SFML
+    //will try to place mono sources in 3D space
+    //which isn't reallyt what we want.
     sf::Lock lock(m_mutex);
+    m_ringBuffer.push_back(value);
     m_ringBuffer.push_back(value);
 }
