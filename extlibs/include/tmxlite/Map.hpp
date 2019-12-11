@@ -96,7 +96,7 @@ namespace tmx
         ~Map() = default;
         Map(const Map&) = delete;
         Map& operator  = (const Map&) = delete;
-        Map(Map&&) noexcept = default;
+        Map(Map&&) = default;
         Map& operator = (Map&&) = default;
 
         /*!

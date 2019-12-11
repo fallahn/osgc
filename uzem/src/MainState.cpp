@@ -145,8 +145,8 @@ MainState::MainState(xy::StateStack& ss, xy::State::Context ctx)
                     ImGui::Separator();
                     ImGui::Text("\n");
                     ImGui::Text("%s", m_romInfo.c_str());
-                    ImGui::End();
                 }
+                ImGui::End();
 
                 if (LoadRom)
                 {
