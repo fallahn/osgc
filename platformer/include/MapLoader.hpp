@@ -21,6 +21,7 @@ Copyright 2019 Matt Marchant
 #include "Collision.hpp"
 
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
 #include <vector>
 #include <memory>
@@ -31,6 +32,16 @@ using Path = std::pair<sf::Vector2f, sf::Vector2f>;
 using EnemySpawn = std::pair<Path, std::int32_t>;
 using PlatformPath = std::vector<sf::Vector2f>;
 
+struct Edge final
+{
+    std::array<sf::Vertex, 2u> vertices;
+    enum Facing
+    {
+        North, East, South, West
+    };
+    std::int32_t facing = 0;
+};
+
 struct MapLayer final
 {
     sf::Texture* indexMap = nullptr;
@@ -40,6 +51,8 @@ struct MapLayer final
     //the world size of the layer. This is pre-pixel scaling.
     //divide by the indexMap size to get the tile size
     sf::Vector2f layerSize; 
+
+    std::vector<Edge> edges;
 };
 
 class MapLoader final

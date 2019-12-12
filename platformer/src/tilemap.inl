@@ -26,7 +26,8 @@ void main()
   //tmx maps start at index 1, 0 is no tile
   if(index == 0)
   {
-    gl_FragColor = vec4(0.0);
+    //gl_FragColor = vec4(0.0);
+    discard;
   }
   else
   {
@@ -60,7 +61,8 @@ void main()
     //tmx maps start at index 1, 0 is no tile
     if(index == 0)
     {
-        gl_FragColor = vec4(0.0);
+        //gl_FragColor = vec4(0.0);
+        discard; //prevents depth writes which would occlude edges
     }
     else
     {

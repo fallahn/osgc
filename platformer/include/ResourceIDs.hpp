@@ -28,6 +28,7 @@ namespace ShaderID
     {
         TileMap,
         TileMap3D,
+        TileEdge,
         PixelTransition,
         NoiseTransition
     };

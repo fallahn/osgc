@@ -267,6 +267,7 @@ bool GameState::update(float dt)
     //by only updating the shader uniforms once
     const auto& mat = m_tilemapScene.getActiveCamera().getComponent<Camera3D>().viewProjectionMatrix;
     m_shaders.get(ShaderID::TileMap3D).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
+    m_shaders.get(ShaderID::TileEdge).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
 
     return true;
 }
@@ -425,6 +426,7 @@ void GameState::loadResources()
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::TileMap3D, Layer3DVertex, tilemapFrag2);
+    m_shaders.preload(ShaderID::TileEdge, TileEdgeVert, TileEdgeFrag);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NoiseTransition, NoiseFrag, sf::Shader::Fragment);
 
@@ -538,7 +540,37 @@ void GameState::buildWorld()
             entity.getComponent<xy::Transform>().setScale(scale, scale);
 
             startDepth += 4; //place layers 4 apart so props etc can be placed in between
+            
+
+            //create the edge geometry
+            const auto& edgeData = layer.edges;
+            entity = m_tilemapScene.createEntity();
+            //there's no model matrix (atm) so scale is applied directly to vertices.
+            entity.addComponent<xy::Transform>();// .setScale(scale, scale);
+            entity.addComponent<xy::Drawable>();// .setDepth(10000);
+            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+            for (const auto& edge : edgeData)
+            {
+                verts.push_back(edge.vertices[1]);
+                verts.back().color.a = 128 - 50;
+                verts.back().position *= scale;
+                verts.push_back(edge.vertices[0]);
+                verts.back().color.a = 128 - 50;
+                verts.back().position *= scale;
+                verts.push_back(edge.vertices[0]);
+                verts.back().color.a = 128 + worldDepth;
+                verts.back().position *= scale;
+                verts.push_back(edge.vertices[1]);
+                verts.back().color.a = 128 + worldDepth;
+                verts.back().position *= scale;
+            }
+            entity.getComponent<xy::Drawable>().updateLocalBounds();
+            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileEdge));
+            entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+
             worldDepth += 50.f;
+            //TODO we're using literal rather than normalised depth values (for now)
+            //make sure above value doesn't exceed 127
         }
 
         //create player

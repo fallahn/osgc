@@ -43,3 +43,27 @@ void main()
 
     gl_FrontColor = gl_Color;
 })";
+
+static const std::string TileEdgeVert = R"(
+#version 120
+
+uniform mat4 u_viewProjectionMatrix;
+
+void main()
+{
+    vec4 position = gl_Vertex;
+    position.z = gl_Color.a * 255.0 - 128.0;
+    gl_Position = u_viewProjectionMatrix * position;
+
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+    gl_FrontColor = vec4(gl_Color.rgb, 1.0);
+})";
+
+static const std::string TileEdgeFrag = R"(
+#version 120
+
+void main()
+{
+    gl_FragColor = vec4(1.0);
+})";

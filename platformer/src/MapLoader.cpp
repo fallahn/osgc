@@ -123,6 +123,60 @@ bool MapLoader::load(const std::string& file)
                     {
                         firstID = std::max(1u, tiles[i].ID);
                     }
+
+                    //check surrounding tiles and add edges to the list if neighbour is empty
+                    if (tiles[i].ID > 0)
+                    {
+                        std::int32_t idx = static_cast<std::int32_t>(i);
+                        std::int32_t xCount = static_cast<std::int32_t>(map.getTileCount().x);
+                        std::array<std::int32_t, 4> neighbours =
+                        {
+                            idx - xCount,
+                            (idx % xCount == xCount - 1) ? -1 : idx + 1,
+                            idx + xCount,
+                            (idx % xCount == 0) ? -1 : idx - 1,
+                        };
+
+                        static std::array<sf::Vector2f, 4u> p1Offsets =
+                        {
+                            sf::Vector2f(),
+                            sf::Vector2f(m_tileSize, 0.f),
+                            sf::Vector2f(m_tileSize, m_tileSize),
+                            sf::Vector2f(0.f, m_tileSize)
+                        };
+
+                        static std::array<sf::Vector2f, 4u> p2Offsets =
+                        {
+                            sf::Vector2f(m_tileSize, 0.f),
+                            sf::Vector2f(0.f, m_tileSize),
+                            sf::Vector2f(-m_tileSize, 0.f),
+                            sf::Vector2f(0.f, -m_tileSize),
+                        };
+
+                        for (auto j = 0; j < 4; ++j)
+                        {
+                            if (neighbours[j] > -1 && neighbours[j] < tiles.size())
+                            {
+                                if (tiles[neighbours[j]].ID == 0)
+                                {
+                                    auto& edge = mapLayer.edges.emplace_back();
+                                    edge.facing = j;
+
+                                    //calc first pos
+                                    edge.vertices[0].position.x = static_cast<float>((i % xCount) * map.getTileSize().x);
+                                    edge.vertices[0].position.y = static_cast<float>((i / xCount) * map.getTileSize().y);
+                                    edge.vertices[0].position += p1Offsets[j];
+                                    edge.vertices[1].position = edge.vertices[0].position + p2Offsets[j];
+                                    edge.vertices[0].color.a = 0;
+                                    edge.vertices[1].color.a = 0;
+
+                                    //calc first UV
+                                    //TODO store the ID instead and calc the UV below
+                                    edge.vertices[1].texCoords = edge.vertices[0].texCoords + p2Offsets[j];
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (firstID == std::numeric_limits<std::uint32_t>::max())
@@ -176,6 +230,9 @@ bool MapLoader::load(const std::string& file)
                     static_cast<float>(layerSize.y * tileset->getTileSize().y));
                 mapLayer.tileSetSize = { static_cast<float>(texture->getSize().x / tileset->getTileSize().x),
                     static_cast<float>(texture->getSize().y / tileset->getTileSize().y) };
+
+                //std::cout << mapLayer.edges.size() << " edges were found\n";
+                //std::cout << "of a possible " << tiles.size() * 4 << "\n";
             }
 
             //get the shapes which make up the map
