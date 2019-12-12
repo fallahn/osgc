@@ -1,5 +1,6 @@
 set(PROJECT_SRC 
   ${PROJECT_SRC}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Camera3D.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CameraTargetSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Collision.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CrateSystem.cpp

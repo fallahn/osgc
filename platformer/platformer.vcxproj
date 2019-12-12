@@ -211,6 +211,7 @@
   <ItemGroup>
     <ClInclude Include="include\AnimationMap.hpp" />
     <ClInclude Include="include\BobAnimationSystem.hpp" />
+    <ClInclude Include="include\Camera3D.hpp" />
     <ClInclude Include="include\CameraTarget.hpp" />
     <ClInclude Include="include\Collision.hpp" />
     <ClInclude Include="include\CommandIDs.hpp" />
@@ -248,6 +249,7 @@
     <ClInclude Include="include\UIDirector.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Camera3D.cpp" />
     <ClCompile Include="src\CameraTargetSystem.cpp" />
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\CrateSystem.cpp" />
@@ -277,6 +279,7 @@
     <ClCompile Include="src\UIDirector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\3dRender.inl" />
     <None Include="src\tilemap.inl" />
     <None Include="src\transition.inl" />
   </ItemGroup>

@@ -147,6 +147,9 @@
     <ClInclude Include="include\KeyMapping.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Camera3D.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EntryPoint.cpp">
@@ -230,12 +233,18 @@
     <ClCompile Include="src\MovingPlatformSystem.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\Camera3D.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\tilemap.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
     <None Include="src\transition.inl">
+      <Filter>Header Files\shaders</Filter>
+    </None>
+    <None Include="src\3dRender.inl">
       <Filter>Header Files\shaders</Filter>
     </None>
   </ItemGroup>

@@ -34,6 +34,9 @@ Copyright 2019 Matt Marchant
 #include "SoundEffectsDirector.hpp"
 #include "MovingPlatform.hpp"
 #include "CrateSystem.hpp"
+#include "Camera3D.hpp"
+
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
@@ -65,11 +68,13 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/OpenGL.hpp>
 
 namespace
 {
 #include "tilemap.inl"
 #include "transition.inl"
+#include "3dRender.inl"
 
     std::size_t fontID = 0;
 }
@@ -94,10 +99,13 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_tilemapScene.getActiveCamera().getComponent<xy::Camera>().setView(xy::DefaultSceneSize);
     m_tilemapScene.getActiveCamera().getComponent<xy::Camera>().setViewport({ 0.f, 0.f, 1.f, 1.f });
+    auto& cam3D = m_tilemapScene.getActiveCamera().addComponent<Camera3D>();
+    auto fov = cam3D.calcFOV(xy::DefaultSceneSize.y);
+    cam3D.projectionMatrix = glm::perspective(fov, xy::DefaultSceneSize.x / xy::DefaultSceneSize.y, 700.f, 1900.f);
 
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_gameScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
-    m_gameScene.getActiveListener().getComponent<xy::AudioListener>().setDepth(1000.f);
+    m_gameScene.getActiveListener().getComponent<xy::AudioListener>().setDepth(Camera3D::defaultDepth);
 
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
@@ -255,6 +263,11 @@ bool GameState::update(float dt)
     m_tilemapScene.getActiveCamera().getComponent<xy::Transform>().setPosition(pos);
     m_tilemapScene.update(dt);
     
+    //the camera projection should be the same for both scenes so we can save here
+    //by only updating the shader uniforms once
+    const auto& mat = m_tilemapScene.getActiveCamera().getComponent<Camera3D>().viewProjectionMatrix;
+    m_shaders.get(ShaderID::TileMap3D).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
+
     return true;
 }
 
@@ -277,6 +290,7 @@ void GameState::initScene()
     m_tilemapScene.addSystem<xy::SpriteSystem>(mb);
     m_tilemapScene.addSystem<FluidAnimationSystem>(mb);
     m_tilemapScene.addSystem<xy::SpriteAnimator>(mb);
+    m_tilemapScene.addSystem<Camera3DSystem>(mb);
     m_tilemapScene.addSystem<xy::CameraSystem>(mb);
     m_tilemapScene.addSystem<xy::RenderSystem>(mb);
 
@@ -408,6 +422,7 @@ void GameState::loadResources()
     m_sprites[SpriteID::GearBoy::Crate] = spriteSheet.getSprite("crate");
 
     m_shaders.preload(ShaderID::TileMap, tilemapFrag2, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::TileMap3D, Layer3DVertex, tilemapFrag2);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NoiseTransition, NoiseFrag, sf::Shader::Fragment);
 
@@ -421,7 +436,7 @@ void GameState::loadResources()
     m_gameScene.getActiveCamera().addComponent<xy::AudioEmitter>() = m_ambience.getEmitter("transition");
 
     //buffer texture for map
-    m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y));
+    m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y), sf::ContextSettings(24));
 }
 
 void GameState::buildWorld()
@@ -489,18 +504,22 @@ void GameState::buildWorld()
 
         //for each layer create a drawable in the scene
         std::int32_t startDepth = GameConst::BackgroundDepth + 2;
+        float worldDepth = -20.f;
         for (const auto& layer : layers)
         {
             entity = m_tilemapScene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Drawable>().setDepth(startDepth);
             entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);
-            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileMap));
+            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileMap3D));
             entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_indexMap");
             entity.getComponent<xy::Drawable>().bindUniform("u_tileSet", *layer.tileSet);
             entity.getComponent<xy::Drawable>().bindUniform("u_indexSize", sf::Vector2f(layer.indexMap->getSize()));
             entity.getComponent<xy::Drawable>().bindUniform("u_tileCount", layer.tileSetSize);
             entity.getComponent<xy::Drawable>().bindUniform("u_tileSize", sf::Vector2f(m_mapLoader.getTileSize(), m_mapLoader.getTileSize()));
+
+            entity.getComponent<xy::Drawable>().bindUniform("u_depth", worldDepth);
+            //entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
 
             auto& layerVerts = entity.getComponent<xy::Drawable>().getVertices();
             sf::Vector2f texCoords(layer.indexMap->getSize());
@@ -515,6 +534,7 @@ void GameState::buildWorld()
             entity.getComponent<xy::Transform>().setScale(scale, scale);
 
             startDepth += 4; //place layers 4 apart so props etc can be placed in between
+            worldDepth += 50.f;
         }
 
         //create player
@@ -726,6 +746,9 @@ void GameState::loadCollision()
             break;
             case CollisionShape::Dialogue:
                 entity.addComponent<Dialogue>().file = m_mapLoader.getDialogueFiles()[shape.ID];
+#ifdef XY_DEBUG
+                entity.getComponent<Dialogue>().expired = true;
+#endif
                 break;
             case CollisionShape::Exit:
             {
