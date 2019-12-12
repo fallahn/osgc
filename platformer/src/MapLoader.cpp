@@ -106,6 +106,23 @@ bool MapLoader::load(const std::string& file)
                 const auto& tileLayer = layer->getLayerAs<tmx::TileLayer>();
                 auto& mapLayer = m_mapLayers.emplace_back();
 
+                //used in edge data calc
+                static std::array<sf::Vector2f, 4u> p1Offsets =
+                {
+                    sf::Vector2f(),
+                    sf::Vector2f(m_tileSize, 0.f),
+                    sf::Vector2f(m_tileSize, m_tileSize),
+                    sf::Vector2f(0.f, m_tileSize)
+                };
+
+                static std::array<sf::Vector2f, 4u> p2Offsets =
+                {
+                    sf::Vector2f(m_tileSize, 0.f),
+                    sf::Vector2f(0.f, m_tileSize),
+                    sf::Vector2f(-m_tileSize, 0.f),
+                    sf::Vector2f(0.f, -m_tileSize),
+                };
+
                 //create the index map for the layer
                 std::uint32_t firstID = std::numeric_limits<std::uint32_t>::max();
 
@@ -137,22 +154,6 @@ bool MapLoader::load(const std::string& file)
                             (idx % xCount == 0) ? -1 : idx - 1,
                         };
 
-                        static std::array<sf::Vector2f, 4u> p1Offsets =
-                        {
-                            sf::Vector2f(),
-                            sf::Vector2f(m_tileSize, 0.f),
-                            sf::Vector2f(m_tileSize, m_tileSize),
-                            sf::Vector2f(0.f, m_tileSize)
-                        };
-
-                        static std::array<sf::Vector2f, 4u> p2Offsets =
-                        {
-                            sf::Vector2f(m_tileSize, 0.f),
-                            sf::Vector2f(0.f, m_tileSize),
-                            sf::Vector2f(-m_tileSize, 0.f),
-                            sf::Vector2f(0.f, -m_tileSize),
-                        };
-
                         for (auto j = 0; j < 4; ++j)
                         {
                             if (neighbours[j] > -1 && neighbours[j] < tiles.size())
@@ -170,9 +171,9 @@ bool MapLoader::load(const std::string& file)
                                     edge.vertices[0].color.a = 0;
                                     edge.vertices[1].color.a = 0;
 
-                                    //calc first UV
-                                    //TODO store the ID instead and calc the UV below
-                                    edge.vertices[1].texCoords = edge.vertices[0].texCoords + p2Offsets[j];
+                                    //store the tile index so we can calc
+                                    //UV once we know the tile set texture (below)
+                                    edge.tileID = tiles[i].ID;
                                 }
                             }
                         }
@@ -199,6 +200,38 @@ bool MapLoader::load(const std::string& file)
 
                 auto [tileset, texture] = *result;
 
+                //find the UV coord for the tile edges
+                auto xCount = texture->getSize().x / tileset->getTileSize().x;
+                for (auto& edge : mapLayer.edges)
+                {
+                    auto idx = edge.tileID - (tileset->getFirstGID() - 1);
+
+                    edge.vertices[0].texCoords.x = static_cast<float>((idx % xCount) * map.getTileSize().x);
+                    edge.vertices[0].texCoords.y = static_cast<float>((idx / xCount) * map.getTileSize().y);
+                    edge.vertices[0].texCoords += p1Offsets[edge.facing];
+                    edge.vertices[1].texCoords = edge.vertices[0].texCoords + p2Offsets[edge.facing];
+
+                    switch (edge.facing)
+                    {
+                    default:break;
+                    case 0: 
+                        edge.vertices[0].texCoords.y += 1.5f;
+                        edge.vertices[1].texCoords.y += 1.5f;
+                        break;
+                    case 1:
+                        edge.vertices[0].texCoords.x -= 1.5f;
+                        edge.vertices[1].texCoords.x -= 1.5f;
+                        break;
+                    case 2:
+                        edge.vertices[0].texCoords.y -= 1.5f;
+                        edge.vertices[1].texCoords.y -= 1.5f;
+                        break;
+                    case 3:
+                        edge.vertices[0].texCoords.x += 1.5f;
+                        edge.vertices[1].texCoords.x += 1.5f;
+                        break;
+                    }                    
+                }
 
                 //correct the tile ID is necessary and load into a texture via an image
                 auto layerSize = map.getTileCount();

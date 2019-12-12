@@ -57,13 +57,17 @@ void main()
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
-    gl_FrontColor = vec4(gl_Color.rgb, 1.0);
+    gl_FrontColor = vec4(gl_Color.rgb * (0.2 + (0.8 * gl_Color.a)), 1.0);
 })";
 
 static const std::string TileEdgeFrag = R"(
 #version 120
 
+uniform sampler2D u_texture;
+
 void main()
 {
-    gl_FragColor = vec4(1.0);
+    vec2 coord = gl_TexCoord[0].xy;
+    //coord.y = 1.0 - coord.y;
+    gl_FragColor = gl_Color * texture2D(u_texture, coord);
 })";

@@ -566,7 +566,10 @@ void GameState::buildWorld()
             }
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileEdge));
+            entity.getComponent<xy::Drawable>().setTexture(layer.tileSet);
+            entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
             entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+            entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
 
             worldDepth += 50.f;
             //TODO we're using literal rather than normalised depth values (for now)

@@ -35,10 +35,7 @@ using PlatformPath = std::vector<sf::Vector2f>;
 struct Edge final
 {
     std::array<sf::Vertex, 2u> vertices;
-    enum Facing
-    {
-        North, East, South, West
-    };
+    std::uint32_t tileID = 0;
     std::int32_t facing = 0;
 };
 
