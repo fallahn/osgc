@@ -88,7 +88,10 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
 
         //case PlayerEvent::Jumped:
         case PlayerEvent::Landed:
-            spawnPuff(data.entity.getComponent<xy::Transform>().getPosition());
+            if (data.entity.isValid())
+            {
+                spawnPuff(data.entity.getComponent<xy::Transform>().getPosition());
+            }
             break;
         case PlayerEvent::GotShield:
             spawnShield(data.entity);

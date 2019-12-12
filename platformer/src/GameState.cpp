@@ -508,9 +508,66 @@ void GameState::buildWorld()
 
         //for each layer create a drawable in the scene
         std::int32_t startDepth = GameConst::BackgroundDepth + 2;
-        float worldDepth = -20.f;
+        float worldDepth = 32.f;
         for (const auto& layer : layers)
         {
+            //create the edge geometry
+            const auto& edgeData = layer.edges;
+            if (!edgeData.empty())
+            {
+                entity = m_tilemapScene.createEntity();
+                //there's no model matrix (atm) so scale is applied directly to vertices.
+                entity.addComponent<xy::Transform>();// .setScale(scale, scale);
+                entity.addComponent<xy::Drawable>().setDepth(-10000);
+                auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+                for (const auto& edge : edgeData)
+                {
+                    sf::Vector2f offset;
+
+                    switch (edge.facing)
+                    {
+                    default: break;
+                    case 0:
+                        offset.y += 16.f;
+                        break;
+                    case 1:
+                        offset.x -= 16.f;
+                        break;
+                    case 2:
+                        offset.y -= 16.f;
+                        break;
+                    case 3:
+                        offset.x = 16.f; //TODO fetch this from tile set info
+                        break;
+                    }
+
+                    verts.push_back(edge.vertices[1]);
+                    verts.back().color.a = 128 - 32;
+                    verts.back().position *= scale;
+                    verts.back().texCoords += offset;
+
+                    verts.push_back(edge.vertices[0]);
+                    verts.back().color.a = 128 - 32;
+                    verts.back().position *= scale;
+                    verts.back().texCoords += offset;
+
+                    verts.push_back(edge.vertices[0]);
+                    verts.back().color.a = 128 + worldDepth;
+                    verts.back().position *= scale;
+
+                    verts.push_back(edge.vertices[1]);
+                    verts.back().color.a = 128 + worldDepth;
+                    verts.back().position *= scale;
+                }
+                entity.getComponent<xy::Drawable>().updateLocalBounds();
+                entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileEdge));
+                entity.getComponent<xy::Drawable>().setTexture(layer.tileSet);
+                entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+                entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+                entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
+            }
+
+
             entity = m_tilemapScene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Drawable>().setDepth(startDepth);
@@ -522,7 +579,7 @@ void GameState::buildWorld()
             entity.getComponent<xy::Drawable>().bindUniform("u_tileCount", layer.tileSetSize);
             entity.getComponent<xy::Drawable>().bindUniform("u_tileSize", sf::Vector2f(m_mapLoader.getTileSize(), m_mapLoader.getTileSize()));
 
-            entity.getComponent<xy::Drawable>().bindUniform("u_depth", worldDepth);
+            entity.getComponent<xy::Drawable>().bindUniform("u_depth", edgeData.empty() ? 0.f : worldDepth);
             entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
             entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
 
@@ -541,37 +598,7 @@ void GameState::buildWorld()
 
             startDepth += 4; //place layers 4 apart so props etc can be placed in between
             
-
-            //create the edge geometry
-            const auto& edgeData = layer.edges;
-            entity = m_tilemapScene.createEntity();
-            //there's no model matrix (atm) so scale is applied directly to vertices.
-            entity.addComponent<xy::Transform>();// .setScale(scale, scale);
-            entity.addComponent<xy::Drawable>();// .setDepth(10000);
-            auto& verts = entity.getComponent<xy::Drawable>().getVertices();
-            for (const auto& edge : edgeData)
-            {
-                verts.push_back(edge.vertices[1]);
-                verts.back().color.a = 128 - 50;
-                verts.back().position *= scale;
-                verts.push_back(edge.vertices[0]);
-                verts.back().color.a = 128 - 50;
-                verts.back().position *= scale;
-                verts.push_back(edge.vertices[0]);
-                verts.back().color.a = 128 + worldDepth;
-                verts.back().position *= scale;
-                verts.push_back(edge.vertices[1]);
-                verts.back().color.a = 128 + worldDepth;
-                verts.back().position *= scale;
-            }
-            entity.getComponent<xy::Drawable>().updateLocalBounds();
-            entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::TileEdge));
-            entity.getComponent<xy::Drawable>().setTexture(layer.tileSet);
-            entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
-            entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
-            entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
-
-            worldDepth += 50.f;
+            //worldDepth += 50.f;
             //TODO we're using literal rather than normalised depth values (for now)
             //make sure above value doesn't exceed 127
         }

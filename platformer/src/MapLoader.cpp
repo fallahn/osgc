@@ -129,6 +129,16 @@ bool MapLoader::load(const std::string& file)
                 const auto& tiles = tileLayer.getTiles();
                 std::vector<sf::Uint32> tileIDs(tiles.size());
 
+                //look to see if we have an extrusion property
+                const auto& properties = tileLayer.getProperties();
+                auto found = std::find_if(properties.begin(), properties.end(),
+                    [](const tmx::Property& prop)
+                    {
+                        return prop.getName() == "extrude";
+                    });
+
+                bool extrude = (found != properties.end() && found->getBoolValue());
+
                 for (auto i = 0u; i < tiles.size(); ++i)
                 {
                     //REMEMBER tmx tile IDs start at 1 (0 is an empty tile)
@@ -142,7 +152,7 @@ bool MapLoader::load(const std::string& file)
                     }
 
                     //check surrounding tiles and add edges to the list if neighbour is empty
-                    if (tiles[i].ID > 0)
+                    if ( extrude && tiles[i].ID > 0)
                     {
                         std::int32_t idx = static_cast<std::int32_t>(i);
                         std::int32_t xCount = static_cast<std::int32_t>(map.getTileCount().x);
@@ -204,14 +214,14 @@ bool MapLoader::load(const std::string& file)
                 auto xCount = texture->getSize().x / tileset->getTileSize().x;
                 for (auto& edge : mapLayer.edges)
                 {
-                    auto idx = edge.tileID - (tileset->getFirstGID() - 1);
+                    auto idx = (edge.tileID - tileset->getFirstGID());// -1;
 
                     edge.vertices[0].texCoords.x = static_cast<float>((idx % xCount) * map.getTileSize().x);
                     edge.vertices[0].texCoords.y = static_cast<float>((idx / xCount) * map.getTileSize().y);
                     edge.vertices[0].texCoords += p1Offsets[edge.facing];
                     edge.vertices[1].texCoords = edge.vertices[0].texCoords + p2Offsets[edge.facing];
 
-                    switch (edge.facing)
+                    /*switch (edge.facing)
                     {
                     default:break;
                     case 0: 
@@ -230,7 +240,7 @@ bool MapLoader::load(const std::string& file)
                         edge.vertices[0].texCoords.x += 1.5f;
                         edge.vertices[1].texCoords.x += 1.5f;
                         break;
-                    }                    
+                    } */                   
                 }
 
                 //correct the tile ID is necessary and load into a texture via an image

@@ -119,6 +119,7 @@
       <AdditionalIncludeDirectories>include;../extlibs/include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>XY_DEBUG;_ITERATOR_DEBUG_LEVEL=0;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
