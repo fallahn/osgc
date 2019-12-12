@@ -273,7 +273,9 @@ bool GameState::update(float dt)
 
 void GameState::draw()
 {
-    m_tilemapBuffer.clear(sf::Color::Transparent);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    m_tilemapBuffer.setActive();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_tilemapBuffer.draw(m_tilemapScene);
     m_tilemapBuffer.display();
 
@@ -519,7 +521,8 @@ void GameState::buildWorld()
             entity.getComponent<xy::Drawable>().bindUniform("u_tileSize", sf::Vector2f(m_mapLoader.getTileSize(), m_mapLoader.getTileSize()));
 
             entity.getComponent<xy::Drawable>().bindUniform("u_depth", worldDepth);
-            //entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+            entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+            entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
 
             auto& layerVerts = entity.getComponent<xy::Drawable>().getVertices();
             sf::Vector2f texCoords(layer.indexMap->getSize());
@@ -529,6 +532,7 @@ void GameState::buildWorld()
             layerVerts.emplace_back(sf::Vector2f(layer.layerSize.x, 0.f), sf::Vector2f(texCoords.x, 0.f));
             layerVerts.emplace_back(layer.layerSize, texCoords);
             layerVerts.emplace_back(sf::Vector2f(0.f, layer.layerSize.y), sf::Vector2f(0.f, texCoords.y));
+            std::reverse(layerVerts.begin(), layerVerts.end());
 
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Transform>().setScale(scale, scale);
