@@ -78,13 +78,13 @@ void main()
         offset *= u_tileSize / u_tileCount;
 
         vec4 colour = texture2D(u_tileSet, position + offset);
-        //if(colour.a > 0.2)
+        if(colour.a > 0.2)
         {
             gl_FragColor = colour;
         }
-        //else
+        else
         {
-        //    discard;
+            discard;
         }
     }
 })";

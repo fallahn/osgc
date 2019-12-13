@@ -31,7 +31,8 @@ namespace ShaderID
         TileEdge,
         PixelTransition,
         NoiseTransition,
-        Sprite3D
+        Sprite3D,
+        SpriteDepth
     };
 }
 

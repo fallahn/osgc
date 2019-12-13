@@ -26,6 +26,7 @@ Copyright 2019 Matt Marchant
 
 #include <xyginext/audio/AudioScape.hpp>
 #include <xyginext/core/State.hpp>
+#include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/ecs/components/ParticleEmitter.hpp>
 #include <xyginext/resources/ResourceHandler.hpp>
@@ -35,7 +36,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Graphics/RenderTexture.hpp>
 
 struct SharedData;
-class GameState final : public xy::State
+class GameState final : public xy::State, public xy::ConsoleClient
 {
 public:
     GameState(xy::StateStack&, xy::State::Context, SharedData&);

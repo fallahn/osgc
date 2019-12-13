@@ -57,7 +57,7 @@ void main()
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
-    gl_FrontColor = vec4(gl_Color.rgb * (0.2 + (0.8 * gl_Color.a)), 1.0);
+    gl_FrontColor = vec4(gl_Color.rgb * (0.1 + (0.9 * gl_Color.a)), 1.0);
 })";
 
 static const std::string TileEdgeFrag = R"(
@@ -68,14 +68,20 @@ uniform sampler2D u_texture;
 void main()
 {
     vec2 coord = gl_TexCoord[0].xy;
-    gl_FragColor = gl_Color * texture2D(u_texture, coord);
+    vec4 colour = texture2D(u_texture, coord);
+    if(colour.a < 0.2)
+    {
+        discard;
+    }
+
+    gl_FragColor = gl_Color * colour;
 })";
 
 static const std::string SpriteVertex =
 R"(
 #version 120
 
-uniform mat4 u_viewProjMat;
+uniform mat4 u_viewProjectionMatrix;
 uniform mat4 u_modelMat;
 
 void main()
@@ -83,7 +89,7 @@ void main()
     vec4 worldPos = u_modelMat * gl_Vertex;
     worldPos.z *= gl_Color.a;
 
-    gl_Position = u_viewProjMat * worldPos;
+    gl_Position = u_viewProjectionMatrix * worldPos;
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 

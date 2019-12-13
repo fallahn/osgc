@@ -110,7 +110,24 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setView(ctx.defaultView.getSize());
     m_uiScene.getActiveCamera().getComponent<xy::Camera>().setViewport(ctx.defaultView.getViewport());
-    
+
+#ifdef XY_DEBUG
+    registerCommand("map", [&](const std::string params)
+        {
+            if (xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + "assets/maps/" + params + ".tmx"))
+            {
+                m_sharedData.nextMap = params + ".tmx";
+                requestStackClear();
+                //this doesn't work from here because state stack
+                //thinks we're pushing the same state twice
+                requestStackPush(StateID::Game);
+            }
+            else
+            {
+                xy::Console::print(params + ": map not found");
+            }
+        });
+#endif //XY_DEBUG
     quitLoadingScreen();
 }
 
@@ -270,17 +287,18 @@ bool GameState::update(float dt)
     m_shaders.get(ShaderID::TileMap3D).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
     m_shaders.get(ShaderID::TileEdge).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
     m_shaders.get(ShaderID::Sprite3D).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
+    m_shaders.get(ShaderID::SpriteDepth).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
 
     return true;
 }
 
 void GameState::draw()
 {
-    glClearColor(0.f, 0.f, 0.f, 0.f);
+    /*glClearColor(0.f, 0.f, 0.f, 0.f);
     m_tilemapBuffer.setActive();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_tilemapBuffer.draw(m_tilemapScene);
-    m_tilemapBuffer.display();
+    m_tilemapBuffer.display();*/
 
     auto& rw = getContext().renderWindow;
     rw.draw(m_gameScene);
@@ -433,6 +451,7 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NoiseTransition, NoiseFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::Sprite3D, SpriteVertex, TileEdgeFrag);
+    m_shaders.preload(ShaderID::SpriteDepth, Layer3DVertex, TileEdgeFrag);
 
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);
@@ -511,7 +530,7 @@ void GameState::buildWorld()
         const auto& layers = m_mapLoader.getLayers();
 
         //for each layer create a drawable in the scene
-        std::int32_t startDepth = GameConst::BackgroundDepth + 2;
+        std::int32_t startDepth = GameConst::BackgroundDepth + 4;
         float worldDepth = 32.f;
         for (const auto& layer : layers)
         {
@@ -519,10 +538,11 @@ void GameState::buildWorld()
             const auto& edgeData = layer.edges;
             if (!edgeData.empty())
             {
-                entity = m_tilemapScene.createEntity();
+                entity = m_gameScene.createEntity();
+                //entity = m_tilemapScene.createEntity();
                 //there's no model matrix (atm) so scale is applied directly to vertices.
                 entity.addComponent<xy::Transform>();// .setScale(scale, scale);
-                entity.addComponent<xy::Drawable>().setDepth(-10000);
+                entity.addComponent<xy::Drawable>().setDepth(-47); //so transparent objects draw on top correctly
                 auto& verts = entity.getComponent<xy::Drawable>().getVertices();
                 for (const auto& edge : edgeData)
                 {
@@ -572,7 +592,8 @@ void GameState::buildWorld()
             }
 
 
-            entity = m_tilemapScene.createEntity();
+            entity = m_gameScene.createEntity();
+            //entity = m_tilemapScene.createEntity();
             entity.addComponent<xy::Transform>();
             entity.addComponent<xy::Drawable>().setDepth(startDepth);
             entity.getComponent<xy::Drawable>().setTexture(layer.indexMap);
@@ -719,6 +740,11 @@ void GameState::loadCollision()
                 size *= scale;
 
                 entity.addComponent<xy::Drawable>().setDepth(1);
+                entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+                entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::SpriteDepth));
+                entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+                entity.getComponent<xy::Drawable>().bindUniform("u_depth", 0.1f);
+
                 auto& verts = entity.getComponent<xy::Drawable>().getVertices();
                 verts.emplace_back(sf::Vector2f());
                 verts.emplace_back(sf::Vector2f(size.x, 0.f), sf::Vector2f(size.x, 0.f));
@@ -753,9 +779,10 @@ void GameState::loadCollision()
                     auto checkpointEnt = m_gameScene.createEntity();
                     checkpointEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
                     checkpointEnt.getComponent<xy::Transform>().setScale(scale, scale);
-                    checkpointEnt.addComponent<xy::Drawable>().setDepth(-1);
+                    checkpointEnt.addComponent<xy::Drawable>().setDepth(-48);
                     checkpointEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Checkpoint];
                     checkpointEnt.addComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Idle]);
+                    checkpointEnt.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
 
                     auto bounds = m_sprites[SpriteID::GearBoy::Checkpoint].getTextureBounds();
                     bounds.width *= scale;
@@ -856,7 +883,10 @@ void GameState::loadEnemies()
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(position);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
-        entity.addComponent<xy::Drawable>();
+        entity.addComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::SpriteDepth));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().bindUniform("u_depth", 0.1f);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
         
         switch (id)
         {
@@ -921,10 +951,15 @@ void GameState::loadProps()
     const auto& props = m_mapLoader.getProps();
     for (const auto& [id, bounds] : props)
     {
-        auto entity = m_tilemapScene.createEntity();
+        auto entity = m_gameScene.createEntity();
+        //auto entity = m_tilemapScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(bounds.left * scale, bounds.top * scale);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 3);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 2);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::SpriteDepth));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().bindUniform("u_depth", -33.f);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
 
         switch (id)
         {
