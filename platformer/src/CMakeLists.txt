@@ -15,8 +15,10 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/IntroState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ModelIO.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MovingPlatformSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.cpp
@@ -25,6 +27,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3DSystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TransitionState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/UIDirector.cpp

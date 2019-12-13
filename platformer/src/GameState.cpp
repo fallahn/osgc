@@ -35,6 +35,7 @@ Copyright 2019 Matt Marchant
 #include "MovingPlatform.hpp"
 #include "CrateSystem.hpp"
 #include "Camera3D.hpp"
+#include "Sprite3D.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -268,6 +269,7 @@ bool GameState::update(float dt)
     const auto& mat = m_tilemapScene.getActiveCamera().getComponent<Camera3D>().viewProjectionMatrix;
     m_shaders.get(ShaderID::TileMap3D).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
     m_shaders.get(ShaderID::TileEdge).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
+    m_shaders.get(ShaderID::Sprite3D).setUniform("u_viewProjectionMatrix", sf::Glsl::Mat4(&mat[0][0]));
 
     return true;
 }
@@ -293,6 +295,7 @@ void GameState::initScene()
     m_tilemapScene.addSystem<xy::SpriteSystem>(mb);
     m_tilemapScene.addSystem<FluidAnimationSystem>(mb);
     m_tilemapScene.addSystem<xy::SpriteAnimator>(mb);
+    m_tilemapScene.addSystem<Sprite3DSystem>(mb);
     m_tilemapScene.addSystem<Camera3DSystem>(mb);
     m_tilemapScene.addSystem<xy::CameraSystem>(mb);
     m_tilemapScene.addSystem<xy::RenderSystem>(mb);
@@ -429,6 +432,7 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::TileEdge, TileEdgeVert, TileEdgeFrag);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NoiseTransition, NoiseFrag, sf::Shader::Fragment);
+    m_shaders.preload(ShaderID::Sprite3D, SpriteVertex, TileEdgeFrag);
 
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
     m_particleEmitters[ParticleID::Checkpoint].loadFromFile("assets/particles/" + m_sharedData.theme + "/checkpoint.xyp", m_resources);

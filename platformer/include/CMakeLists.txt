@@ -20,9 +20,11 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/KeyMapping.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadingScreen.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MapLoader.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/MatrixPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuConfirmState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MenuState.hpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/MessageIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ModelIO.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/MovingPlatform.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaDirector.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NinjaStarSystem.hpp
@@ -30,11 +32,13 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Player.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PluginExport.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ResourceIDs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SerialVertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShakerSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShapeUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SharedStateData.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ShieldAnimationSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SoundEffectsDirector.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Sprite3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/StateIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SummaryState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TransitionState.hpp

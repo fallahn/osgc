@@ -30,7 +30,8 @@ namespace ShaderID
         TileMap3D,
         TileEdge,
         PixelTransition,
-        NoiseTransition
+        NoiseTransition,
+        Sprite3D
     };
 }
 

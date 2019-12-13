@@ -68,6 +68,24 @@ uniform sampler2D u_texture;
 void main()
 {
     vec2 coord = gl_TexCoord[0].xy;
-    //coord.y = 1.0 - coord.y;
     gl_FragColor = gl_Color * texture2D(u_texture, coord);
+})";
+
+static const std::string SpriteVertex =
+R"(
+#version 120
+
+uniform mat4 u_viewProjMat;
+uniform mat4 u_modelMat;
+
+void main()
+{
+    vec4 worldPos = u_modelMat * gl_Vertex;
+    worldPos.z *= gl_Color.a;
+
+    gl_Position = u_viewProjMat * worldPos;
+
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+    gl_FrontColor = gl_Color;
 })";

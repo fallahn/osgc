@@ -230,9 +230,11 @@
     <ClInclude Include="include\KeyMapping.hpp" />
     <ClInclude Include="include\LoadingScreen.hpp" />
     <ClInclude Include="include\MapLoader.hpp" />
+    <ClInclude Include="include\MatrixPool.hpp" />
     <ClInclude Include="include\MenuConfirmState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\ModelIO.hpp" />
     <ClInclude Include="include\MovingPlatform.hpp" />
     <ClInclude Include="include\NinjaDirector.hpp" />
     <ClInclude Include="include\NinjaStarSystem.hpp" />
@@ -240,10 +242,12 @@
     <ClInclude Include="include\Player.hpp" />
     <ClInclude Include="include\PluginExport.hpp" />
     <ClInclude Include="include\ResourceIDs.hpp" />
+    <ClInclude Include="include\SerialVertex.hpp" />
     <ClInclude Include="include\ShakerSystem.hpp" />
     <ClInclude Include="include\SharedStateData.hpp" />
     <ClInclude Include="include\ShieldAnimationSystem.hpp" />
     <ClInclude Include="include\SoundEffectsDirector.hpp" />
+    <ClInclude Include="include\Sprite3D.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\SummaryState.hpp" />
     <ClInclude Include="include\TransitionState.hpp" />
@@ -265,8 +269,10 @@
     <ClCompile Include="src\IntroState.cpp" />
     <ClCompile Include="src\LoadingScreen.cpp" />
     <ClCompile Include="src\MapLoader.cpp" />
+    <ClCompile Include="src\MatrixPool.cpp" />
     <ClCompile Include="src\MenuConfirmState.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\ModelIO.cpp" />
     <ClCompile Include="src\MovingPlatformSystem.cpp" />
     <ClCompile Include="src\NinjaDirector.cpp" />
     <ClCompile Include="src\NinjaStarSystem.cpp" />
@@ -275,6 +281,7 @@
     <ClCompile Include="src\ShakerSystem.cpp" />
     <ClCompile Include="src\SharedStateData.cpp" />
     <ClCompile Include="src\SoundEffectsDirector.cpp" />
+    <ClCompile Include="src\Sprite3DSystem.cpp" />
     <ClCompile Include="src\SummaryState.cpp" />
     <ClCompile Include="src\TransitionState.cpp" />
     <ClCompile Include="src\UIDirector.cpp" />
