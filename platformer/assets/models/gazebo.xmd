@@ -1,0 +1,6 @@
+model 
+{
+    depth = 171.426422
+    bin = "gazebo.xym"
+    texture = "gazebo.png"
+}

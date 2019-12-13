@@ -92,6 +92,7 @@ void App::importObjFile(const std::string& path)
         m_scene.getMeshes().clear();
         m_currentRoom = -1;
         m_showImportWindow = false;
+        m_mapLoaded = false;
 
         m_importTransform = {};
 
@@ -135,7 +136,7 @@ void App::importObjFile(const std::string& path)
 
             //create a ground plane... although we want to omit it from the bake?
             //maybe not, these objects are relative to the ground after all...
-            auto& groundMesh = m_scene.getMeshes().emplace_back(std::make_unique<Mesh>());
+            /*auto& groundMesh = m_scene.getMeshes().emplace_back(std::make_unique<Mesh>());
             auto& verts = groundMesh->vertices;
             auto& indices = groundMesh->indices;
 
@@ -166,7 +167,9 @@ void App::importObjFile(const std::string& path)
             indices.push_back(3);
             indices.push_back(0);
 
-            groundMesh->updateGeometry();
+            groundMesh->updateGeometry();*/
+
+            m_scene.createMeasureMesh();
         }
     }
 }

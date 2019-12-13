@@ -4,6 +4,7 @@
 #include "lightmapper.h"
 #include "GLCheck.hpp"
 #include "stb_image_write.h"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <assert.h>
 
@@ -59,7 +60,7 @@ bool Scene::init()
     return true;
 }
 
-void Scene::draw(const glm::mat4& view, const glm::mat4& projection) const
+void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMeasure) const
 {
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
@@ -82,6 +83,25 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection) const
         glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
     }
 
+    //draw measure mesh if it exists
+    if (drawMeasure && m_measureMesh)
+    {
+        auto& mesh = m_measureMesh;
+        mesh->modelMatrix = glm::mat4(1.f);
+        if (!m_zUp)
+        {
+            mesh->modelMatrix = glm::rotate(glm::mat4(1.f), -90.f * ((float)M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
+        }
+
+        
+        glUniformMatrix4fv(m_modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+
+        glBindTexture(GL_TEXTURE_2D, mesh->texture);
+
+        glCheck(glBindVertexArray(mesh->vao));
+        glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
+    }
+
     //glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 }
@@ -89,6 +109,7 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection) const
 void Scene::destroy()
 {
     m_meshes.clear();
+    m_measureMesh.reset();
 
     glDeleteProgram(m_programID);
 }
@@ -102,6 +123,8 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
     glBindTexture(GL_TEXTURE_2D, m_meshes[0]->texture);
     unsigned char emissive[] = { 0, 0, 0, 255 };
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     lm_context* ctx = lmCreate(
@@ -161,7 +184,7 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
             {
                 //render to lightmapper framebuffer
                 glViewport(vp[0], vp[1], vp[2], vp[3]);
-                draw(view, projection);
+                draw(view, projection, false);
 
                 //display progress every second (printf is expensive)
                 double time = glfwGetTime();
@@ -230,4 +253,58 @@ void Scene::saveLightmap(const std::string& path)
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
 
     stbi_write_png(path.c_str(), m_lightmapWidth, m_lightmapHeight, 4, buffer.data(), m_lightmapWidth * 4);
+}
+
+void Scene::createMeasureMesh()
+{
+    if (!m_measureMesh)
+    {
+        m_measureMesh = std::make_unique<Mesh>();
+        auto& mesh = m_measureMesh;
+
+        auto& verts = mesh->vertices;
+        auto& indices = mesh->indices;
+
+        //scale the 1024 size texture as if the room was 960 units
+        //kludgy I know but it'll do...
+        //TODO move the const values from geometry.cpp to somewhere accessible
+        const float width = (1024.f / 960.f) * 10.f; 
+
+        //create floor
+        vertex_t vert;
+        vert.position[0] = width / 2.f;
+        vert.position[2] = width / 2.f;
+
+        vert.texCoord[0] = 1.f;
+        vert.texCoord[1] = 2.f;
+        verts.push_back(vert);
+
+        vert.position[2] -= width;
+        vert.texCoord[1] = 0.f;
+        verts.push_back(vert);
+
+        vert.position[0] -= width;
+        vert.texCoord[0] = 0.f;
+        verts.push_back(vert);
+
+        vert.position[2] += width;
+        vert.texCoord[1] = 2.f;
+        verts.push_back(vert);
+
+        indices.push_back(0);
+        indices.push_back(1);
+        indices.push_back(2);
+        indices.push_back(2);
+        indices.push_back(3);
+        indices.push_back(0);
+
+        mesh->updateGeometry();
+
+        mesh->loadTexture("assets/measure_texture.png");
+    }
+}
+
+void Scene::removeMeasureMesh()
+{
+    m_measureMesh.reset();
 }

@@ -29,9 +29,11 @@ namespace
 App::App()
     : m_window          (nullptr),
     m_initOK            (false),
+    m_mapLoaded         (false),
     m_projectionMatrix  (1.f),
     m_viewMatrix        (1.f),
     m_cameraPosition    (0.f, 3.f, 25.f),
+    m_cameraRotation    (0.f),
     m_bakeAll           (false),
     m_saveOutput        (false),
     m_showImportWindow  (false)
@@ -186,6 +188,8 @@ void App::loadMapData(const std::string& path)
     xy::ConfigFile cfg;
     if (cfg.loadFromFile(path))
     {
+        m_scene.removeMeasureMesh();
+        m_scene.getMeshes().clear();
         m_mapData.clear();
         m_showImportWindow = false;
 
@@ -342,6 +346,8 @@ void App::loadMapData(const std::string& path)
             {
                 return a.id < b.id;
             });
+
+        m_mapLoaded = true;
     }
 }
 
@@ -391,12 +397,15 @@ void App::loadModel(const std::string& path)
             m_mapData.clear();
             m_currentRoom = -1;
             m_showImportWindow = false;
+            m_mapLoaded = false;
            
             m_scene.getMeshes().clear();
 
             addModel(md, m_scene, glm::vec3(0.f));
             //TODO get Scale const
             m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
+
+            m_scene.createMeasureMesh();
         }
     }
 }
@@ -429,10 +438,10 @@ void App::update()
 
 void App::calcViewMatrix()
 {
-    static glm::vec2 rotation(0.f);
+    glm::vec3 zAxis = m_scene.getzUp() ? glm::vec3(0.f, 1.f, 0.f) : glm::vec3(0.f, 0.f, -1.f);
 
-    glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), rotation.y * static_cast<float>(M_PI / 180.f), glm::vec3(0.f, 1.f, 0.f));
-    rotMat = glm::rotate(rotMat, rotation.x * static_cast<float>(M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
+    glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), m_cameraRotation.y * static_cast<float>(M_PI / 180.f), zAxis);
+    rotMat = glm::rotate(rotMat, m_cameraRotation.x * static_cast<float>(M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
 
 
     //this should probably be in the update or handle events func...
@@ -445,8 +454,8 @@ void App::calcViewMatrix()
         glfwGetCursorPos(m_window, &mouse[0], &mouse[1]);
         if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
-            rotation[0] += (float)(mouse[1] - lastMouse[1]) * -0.2f;
-            rotation[1] += (float)(mouse[0] - lastMouse[0]) * -0.2f;
+            m_cameraRotation[0] += (float)(mouse[1] - lastMouse[1]) * -0.2f;
+            m_cameraRotation[1] += (float)(mouse[0] - lastMouse[0]) * -0.2f;
         }
         else if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
         {
@@ -472,8 +481,6 @@ void App::calcViewMatrix()
 
         m_cameraPosition.z = std::max(0.f, m_cameraPosition.z - (static_cast<float>(scrollOffset) * speed));
         scrollOffset = 0.f;
-
-
     }
 
     //construct view matrix
@@ -540,4 +547,20 @@ void App::bakeAll()
         //m_clearColour = room.skyColour;
         draw();
     }
+}
+
+void App::setZUp(bool z)
+{
+    m_cameraPosition = { 0.f, 0.6, 25.f };
+
+    if (z)
+    {
+        m_cameraRotation = { 0.f, 0.f };
+    }
+    else
+    {
+        m_cameraRotation = { -90.f, 0.f };
+    }
+
+    m_scene.setzUp(z);
 }

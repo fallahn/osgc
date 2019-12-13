@@ -8,6 +8,23 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <sstream>
+
+namespace
+{
+    static void HelpMarker(const char* desc)
+    {
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(desc);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    }
+}
 
 void App::mapBrowserWindow()
 {
@@ -17,29 +34,29 @@ void App::mapBrowserWindow()
     static bool bakeSelected = false;
     static bool importObj = false;
 
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            ImGui::MenuItem("Open Map", nullptr, &openMap);
+            ImGui::MenuItem("Open Model", nullptr, &openModel);
+            ImGui::MenuItem("Import OBJ", nullptr, &importObj);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Tools"))
+        {
+            ImGui::MenuItem("Bake Selected", nullptr, &bakeSelected);
+            ImGui::MenuItem("Bake All", nullptr, &m_bakeAll);
+            ImGui::MenuItem("Set Output Directory", nullptr, &openOutput);
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
     ImGui::SetNextWindowSize({ 200.f, 400.f }, ImGuiCond_FirstUseEver);
     ImGui::SetWindowPos({ 80.f, 20.f }, ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_MenuBar))
+    if (m_mapLoaded && ImGui::Begin("Map Browser", nullptr/*, ImGuiWindowFlags_MenuBar*/))
     {
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                ImGui::MenuItem("Open Map", nullptr, &openMap);
-                ImGui::MenuItem("Open Model", nullptr, &openModel);
-                ImGui::MenuItem("Import OBJ", nullptr, &importObj);
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Tools"))
-            {
-                ImGui::MenuItem("Bake Selected", nullptr, &bakeSelected);
-                ImGui::MenuItem("Bake All", nullptr, &m_bakeAll);
-                ImGui::MenuItem("Set Output Directory", nullptr, &openOutput);
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-
         if (!m_outputPath.empty() && !m_mapData.empty())
         {
             ImGui::Text("%s", "Output Path:");
@@ -147,15 +164,47 @@ void App::statusWindow()
     ImGui::SetWindowPos({ 580.f, 20.f }, ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Status"))
     {
-        ImGui::Text("%s", "Current Room: ");
-        ImGui::SameLine();
-        if (m_currentRoom > -1)
+        if (m_mapLoaded)
         {
-            ImGui::Text("%s", std::to_string(m_currentRoom).c_str());
+            ImGui::Text("%s", "Current Room: ");
+
+            ImGui::SameLine();
+            if (m_currentRoom > -1)
+            {
+                ImGui::Text("%s", std::to_string(m_currentRoom).c_str());
+            }
+            else
+            {
+                ImGui::Text("%s", "None");
+            }
         }
         else
         {
-            ImGui::Text("%s", "None");
+            const char* items[] = { "yUp", "zUp" };
+            static const char* selectedIndex = items[1];
+            ImGui::PushItemWidth(60.f);
+            if (ImGui::BeginCombo("Game World Orientation", selectedIndex))
+            {
+                for (auto i = 0u; i < 2; ++i)
+                {
+                    bool selected = selectedIndex == items[i];
+                    if (ImGui::Selectable(items[i], selected))
+                    {
+                        selectedIndex = items[i];
+                        setZUp(i == 1);
+                    }
+
+                    if (selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth();
+            ImGui::SameLine();
+            HelpMarker("Set this to the orientation of the game world. For example Bob is z-up but the platformer is y-up.\nThis will cause models to be displayed as they would in game.");
         }
 
         ImGui::Text("%s", m_scene.getProgress().c_str());
@@ -163,6 +212,16 @@ void App::statusWindow()
         if (!m_scene.getMeshes().empty())
         {
             ImGui::Image((void*)(intptr_t)m_scene.getMeshes()[0]->texture, { 480.f, 480.f });
+
+            if (ImGui::Button("Load Texture"))
+            {
+                static const char* filter[] = { "*.png", "*.jpg", "*.tga", "*.bmp" };
+                auto path = tinyfd_openFileDialog("Load Texture", nullptr, 4, filter, nullptr, 0);
+                if (path)
+                {
+                    m_scene.getMeshes()[0]->loadTexture(path);
+                }
+            }
         }
 
         if (ImGui::Button("Bake"))
@@ -188,6 +247,8 @@ void App::statusWindow()
         }
         ImGui::SameLine();
         ImGui::Checkbox("Save Output", &m_saveOutput);
+        ImGui::SameLine();
+        HelpMarker("Images will automatically be saved on completion if this is checked.");
 
         if (!m_scene.getMeshes().empty() &&
             ImGui::Button("Export Last Bake"))
@@ -210,13 +271,16 @@ void App::statusWindow()
         {
             ImGui::Separator();
             ImGui::Text("%s", "Export Settings");
+            ImGui::SameLine();
+            HelpMarker("Adjust the transform to rotate and scale the model until it sits correctly on the measurement plane.\nMake sure world orientation (above) is set correctly, and that Apply Transform is checked to save changes when exporting the model");
 
             auto updateTransform = [&]()
             {
                 static const float toRad = static_cast<float>(M_PI) / 180.f;
 
                 auto& mesh = m_scene.getMeshes()[0];
-                mesh->modelMatrix = glm::rotate(glm::mat4(1.f), m_importTransform.rotation.y * toRad, glm::vec3(0.f, 1.f, 0.f));
+                glm::vec3 zAxis = m_scene.getzUp() ? glm::vec3(0.f, 1.f, 0.f) : glm::vec3(0.f, 0.f, -1.f);
+                mesh->modelMatrix = glm::rotate(glm::mat4(1.f), m_importTransform.rotation.y * toRad, zAxis);
                 mesh->modelMatrix = glm::rotate(mesh->modelMatrix, m_importTransform.rotation.x * toRad, glm::vec3(1.f, 0.f, 0.f));
 
                 mesh->modelMatrix = glm::scale(mesh->modelMatrix, m_importTransform.scale);
@@ -237,7 +301,11 @@ void App::statusWindow()
 
             ImGui::Checkbox("Export Texture", &exportTexture);
             ImGui::SameLine();
+            HelpMarker("Also export the baked texture when exporting the model");
+            ImGui::SameLine();
             ImGui::Checkbox("Apply Transform on Export", &applyTransform);
+            ImGui::SameLine();
+            HelpMarker("Make sure this is checked to save any changes to the model's transform when exporting");
             if (ImGui::Button("Export"))
             {
                 static const char* filter[] = { "*.xmd" };

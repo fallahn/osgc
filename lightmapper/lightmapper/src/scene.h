@@ -11,7 +11,7 @@ public:
     Scene() {};
 
     bool init();
-    void draw(const glm::mat4& view, const glm::mat4& projection) const;
+    void draw(const glm::mat4& view, const glm::mat4& projection, bool = true) const;
     void destroy();
     bool bake(const std::string&, const std::array<float, 3>&) const;
 
@@ -24,6 +24,14 @@ public:
 
     void saveLightmap(const std::string&);
 
+    void createMeasureMesh();
+
+    void removeMeasureMesh();
+
+    void setzUp(bool z) { m_zUp = z; }
+
+    bool getzUp() const { return m_zUp; }
+
 private:
     GLuint m_programID = 0;
     GLint m_textureUniform = 0;
@@ -35,8 +43,11 @@ private:
     std::int32_t m_lightmapHeight = 0;
 
     std::vector<std::unique_ptr<Mesh>> m_meshes;
+    std::unique_ptr<Mesh> m_measureMesh;
 
     mutable std::string m_progressString;
+
+    bool m_zUp = true;
 };
 
 using scene_t = Scene;

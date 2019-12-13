@@ -54,6 +54,8 @@ struct Mesh final
     glm::mat4 modelMatrix = glm::mat4(1.f);
 
     void updateGeometry();
+
+    void loadTexture(const std::string&);
 };
 
 struct ModelData final

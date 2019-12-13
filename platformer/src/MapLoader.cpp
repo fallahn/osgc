@@ -219,28 +219,7 @@ bool MapLoader::load(const std::string& file)
                     edge.vertices[0].texCoords.x = static_cast<float>((idx % xCount) * map.getTileSize().x);
                     edge.vertices[0].texCoords.y = static_cast<float>((idx / xCount) * map.getTileSize().y);
                     edge.vertices[0].texCoords += p1Offsets[edge.facing];
-                    edge.vertices[1].texCoords = edge.vertices[0].texCoords + p2Offsets[edge.facing];
-
-                    /*switch (edge.facing)
-                    {
-                    default:break;
-                    case 0: 
-                        edge.vertices[0].texCoords.y += 1.5f;
-                        edge.vertices[1].texCoords.y += 1.5f;
-                        break;
-                    case 1:
-                        edge.vertices[0].texCoords.x -= 1.5f;
-                        edge.vertices[1].texCoords.x -= 1.5f;
-                        break;
-                    case 2:
-                        edge.vertices[0].texCoords.y -= 1.5f;
-                        edge.vertices[1].texCoords.y -= 1.5f;
-                        break;
-                    case 3:
-                        edge.vertices[0].texCoords.x += 1.5f;
-                        edge.vertices[1].texCoords.x += 1.5f;
-                        break;
-                    } */                   
+                    edge.vertices[1].texCoords = edge.vertices[0].texCoords + p2Offsets[edge.facing];                  
                 }
 
                 //correct the tile ID is necessary and load into a texture via an image

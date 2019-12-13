@@ -1,5 +1,6 @@
 #include "structures.h"
 #include "GLCheck.hpp"
+#include "stb_image.h"
 
 Mesh::Mesh()
 {
@@ -30,6 +31,7 @@ Mesh::Mesh()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     unsigned char emissive[] = { 0, 0, 0, 255 }; //defaults to emitting no light.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Mesh::~Mesh()
@@ -49,4 +51,30 @@ void Mesh::updateGeometry()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Mesh::loadTexture(const std::string& path)
+{
+    int w, h, n;
+    if (auto* imgData = stbi_load(path.c_str(), &w, &h, &n, 0); imgData)
+    {
+        if (w > 0 && h > 0 && (n == 3 || n == 4))
+        {
+            //TODO we could assert the texture is the size we're expecting...
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+            if (n == 3)
+            {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, imgData);
+            }
+            else
+            {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+            }
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        stbi_image_free(imgData);
+    }
 }
