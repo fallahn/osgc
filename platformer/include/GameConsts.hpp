@@ -37,6 +37,7 @@ namespace GameConst
             Prop = -44,
             LaterStart = -40, //layers are incremented +1 after this
 
+            Torch = -25,
             Sprite = -20,
             Fluid = -15,
             Text = 10

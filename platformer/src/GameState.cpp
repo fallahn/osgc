@@ -310,10 +310,10 @@ void GameState::initScene()
 {
     auto& mb = getContext().appInstance.getMessageBus();
 
-    m_tilemapScene.addSystem<xy::SpriteSystem>(mb);
-    m_tilemapScene.addSystem<FluidAnimationSystem>(mb);
-    m_tilemapScene.addSystem<xy::SpriteAnimator>(mb);
-    m_tilemapScene.addSystem<Sprite3DSystem>(mb);
+    //m_tilemapScene.addSystem<xy::SpriteSystem>(mb);
+    //m_tilemapScene.addSystem<FluidAnimationSystem>(mb);
+    //m_tilemapScene.addSystem<xy::SpriteAnimator>(mb);
+    //m_tilemapScene.addSystem<Sprite3DSystem>(mb);
     m_tilemapScene.addSystem<Camera3DSystem>(mb);
     m_tilemapScene.addSystem<xy::CameraSystem>(mb);
     m_tilemapScene.addSystem<xy::RenderSystem>(mb);
@@ -333,6 +333,7 @@ void GameState::initScene()
     m_gameScene.addSystem<xy::CameraSystem>(mb);
     m_gameScene.addSystem<xy::SpriteAnimator>(mb);
     m_gameScene.addSystem<xy::SpriteSystem>(mb);
+    m_gameScene.addSystem<Sprite3DSystem>(mb);
     m_gameScene.addSystem<xy::RenderSystem>(mb);
     m_gameScene.addSystem<xy::ParticleSystem>(mb);
     m_gameScene.addSystem<xy::AudioSystem>(mb);
@@ -964,6 +965,8 @@ void GameState::loadProps()
         case PropID::Torch:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Torch];
             entity.addComponent<xy::SpriteAnimation>().play(0);
+            entity.getComponent<xy::Drawable>().bindUniform("u_depth", 0.1f);
+            entity.getComponent<xy::Drawable>().setDepth(GameConst::Depth::Torch);
             {
                 auto smokeEnt = m_gameScene.createEntity();
                 smokeEnt.addComponent<xy::Transform>().setPosition(bounds.left * scale, bounds.top * scale);
