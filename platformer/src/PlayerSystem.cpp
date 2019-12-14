@@ -33,6 +33,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/SpriteAnimation.hpp>
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/Callback.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
 
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 
@@ -543,6 +544,7 @@ void PlayerSystem::resolveCollision(xy::Entity entity, xy::Entity other, sf::Flo
                             msg->type = EnemyEvent::Died;
 
                             other.getComponent<Enemy>().kill();
+                            other.getComponent<xy::Drawable>().bindUniform("u_depth", 40.f);
                         }
                         else if (player.stateTime < 0) //state time is used for invincibility
                         {

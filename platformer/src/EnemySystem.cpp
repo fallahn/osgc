@@ -25,6 +25,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Sprite.hpp>
 #include <xyginext/ecs/components/BroadPhaseComponent.hpp>
 #include <xyginext/ecs/components/AudioEmitter.hpp>
+#include <xyginext/ecs/components/Drawable.hpp>
 #include <xyginext/ecs/systems/DynamicTreeSystem.hpp>
 #include <xyginext/ecs/Scene.hpp>
 #include <xyginext/util/Random.hpp>
@@ -58,7 +59,7 @@ void EnemySystem::handleMessage(const xy::Message& msg)
             if (data.collisionShape & CollisionShape::Enemy)
             {
                 auto entity = data.entityHit;
-                entity.getComponent<Enemy>().kill();
+                kill(entity);
 
                 auto* msg2 = postMessage<EnemyEvent>(MessageID::EnemyMessage);
                 msg2->type = EnemyEvent::Died;
@@ -72,7 +73,7 @@ void EnemySystem::handleMessage(const xy::Message& msg)
         if (data.type == CrateEvent::KilledEnemy)
         {
             auto entity = data.entityHit;
-            entity.getComponent<Enemy>().kill();
+            kill(entity);
 
             auto* msg2 = postMessage<EnemyEvent>(MessageID::EnemyMessage);
             msg2->type = EnemyEvent::Died;
@@ -398,6 +399,12 @@ void EnemySystem::processRocket(xy::Entity entity, float dt)
             msg->type = StarEvent::None;
         }
     }
+}
+
+void EnemySystem::kill(xy::Entity entity)
+{
+    entity.getComponent<Enemy>().kill();
+    entity.getComponent<xy::Drawable>().bindUniform("u_depth", 40.f);
 }
 
 void EnemySystem::doCollision(xy::Entity entity)
