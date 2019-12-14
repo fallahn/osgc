@@ -117,7 +117,7 @@ void ErrorState::build()
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(scale, scale);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(background));
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
 
@@ -141,7 +141,7 @@ void ErrorState::build()
     {
         entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
         entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
         entity.getComponent<xy::Text>().setFillColour(colours[0]);
         entity.getComponent<xy::Text>().setOutlineColour(colours[2]);

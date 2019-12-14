@@ -90,6 +90,9 @@ void NinjaDirector::handleMessage(const xy::Message& msg)
         case PlayerEvent::Landed:
             if (data.entity.isValid())
             {
+                //TODO sometimes this is raised at the end of the level
+                //and carried over to the next map - in which case the data
+                //is invalid. Need to prevent this.
                 spawnPuff(data.entity.getComponent<xy::Transform>().getPosition());
             }
             break;

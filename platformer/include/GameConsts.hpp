@@ -27,8 +27,22 @@ Copyright 2019 Matt Marchant
 
 namespace GameConst
 {
-    static const std::int32_t BackgroundDepth = -50;
-    static const std::int32_t TextDepth = 10;
+    namespace Depth
+    {
+        enum
+        {
+            Background = -50,
+            Waterfall = -48,
+            LayerEdge = - 46,
+            Prop = -44,
+            LaterStart = -40, //layers are incremented +1 after this
+
+            Sprite = -20,
+            Fluid = -15,
+            Text = 10
+        };
+    }
+
     static const float PixelsPerTile = 64.f; //world pixels per game tile - eg tiles are scaled up to this
 
     static const float VerticalTileCount = 17.f; //only true for 16px tiles :/

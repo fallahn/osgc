@@ -184,7 +184,7 @@ void DialogueState::build()
     {
         auto entity = m_scene.createEntity();
         
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
         entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::SmallTextSize);
         entity.getComponent<xy::Text>().setFillColour(sf::Color::Black);
 
@@ -214,7 +214,7 @@ void DialogueState::createBackground()
 
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(scale, scale);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background);
     entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(background));
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
 

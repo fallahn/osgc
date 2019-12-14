@@ -180,7 +180,7 @@ void SummaryState::build()
     //background
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>();
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background);
 
     auto& verts = entity.getComponent<xy::Drawable>().getVertices();
     verts.emplace_back();
@@ -196,7 +196,7 @@ void SummaryState::build()
     sf::Vector2f size(640.f, 480.f);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 1);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background + 1);
 
     auto& moreVerts = entity.getComponent<xy::Drawable>().getVertices();
     moreVerts.emplace_back(-size, c);
@@ -214,7 +214,7 @@ void SummaryState::build()
     {
         auto entity = m_scene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize / 2.f);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
         entity.addComponent<xy::Text>(font).setCharacterSize(GameConst::UI::MediumTextSize);
         entity.getComponent<xy::Text>().setFillColour(sf::Color::White);
         entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);

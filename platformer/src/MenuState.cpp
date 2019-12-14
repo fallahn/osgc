@@ -421,7 +421,7 @@ void MenuState::buildBackground()
         const auto& layers = m_mapLoader.getLayers();
 
         //for each layer create a drawable in the scene
-        std::int32_t startDepth = GameConst::BackgroundDepth + 2;
+        std::int32_t startDepth = GameConst::Depth::Background + 2;
         for (const auto& layer : layers)
         {
             auto entity = m_backgroundScene.createEntity();
@@ -449,12 +449,12 @@ void MenuState::buildBackground()
         //background
         auto entity = m_backgroundScene.createEntity();
         entity.addComponent<xy::Transform>().setScale(pixelScale, pixelScale);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
 
         entity = m_backgroundScene.createEntity();
         entity.addComponent<xy::Transform>().setScale(pixelScale, pixelScale);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 1);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background + 1);
         entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(m_textureIDs[TextureID::Menu::Background]));
         entity.getComponent<xy::Sprite>().setTextureRect({ 0.f, 272.f, 480.f, 86.f });
 
@@ -667,7 +667,7 @@ void MenuState::buildMenu()
 
     auto entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(140.f, 100.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
     entity.addComponent<xy::Text>(font).setString("Back To Computer!");
     entity.getComponent<xy::Text>().setCharacterSize(/*GameConst::UI::LargeTextSize*/96);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
@@ -676,7 +676,7 @@ void MenuState::buildMenu()
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(1100.f, 300.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
     entity.addComponent<xy::Text>(font).setString("New Game");
     entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
@@ -701,7 +701,7 @@ void MenuState::buildMenu()
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(1200.f, 390.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
     entity.addComponent<xy::Text>(font).setString("Continue");
     entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
@@ -726,7 +726,7 @@ void MenuState::buildMenu()
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(800.f, 700.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
     entity.addComponent<xy::Text>(font).setString("Options");
     entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);
@@ -750,7 +750,7 @@ void MenuState::buildMenu()
 
     entity = m_backgroundScene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(220.f, 770.f);
-    entity.addComponent<xy::Drawable>().setDepth(GameConst::TextDepth);
+    entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Text);
     entity.addComponent<xy::Text>(font).setString("Quit");
     entity.getComponent<xy::Text>().setCharacterSize(GameConst::UI::MediumTextSize);
     entity.getComponent<xy::Text>().setFillColour(GameConst::Gearboy::colours[0]);

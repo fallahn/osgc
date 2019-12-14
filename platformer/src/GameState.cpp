@@ -463,7 +463,7 @@ void GameState::loadResources()
     m_gameScene.getActiveCamera().addComponent<xy::AudioEmitter>() = m_ambience.getEmitter("transition");
 
     //buffer texture for map
-    m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y), sf::ContextSettings(24));
+   // m_tilemapBuffer.create(static_cast<std::uint32_t>(xy::DefaultSceneSize.x), static_cast<std::uint32_t>(xy::DefaultSceneSize.y), sf::ContextSettings(24));
 }
 
 void GameState::buildWorld()
@@ -477,7 +477,7 @@ void GameState::buildWorld()
         auto entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(-xy::DefaultSceneSize / 2.f);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background);
         entity.getComponent<xy::Drawable>().setTexture(&m_resources.get<sf::Texture>(m_textureIDs[TextureID::Game::Background]));
 
         sf::Vector2f texSize(entity.getComponent<xy::Drawable>().getTexture()->getSize());
@@ -519,18 +519,18 @@ void GameState::buildWorld()
         m_gameScene.getActiveCamera().getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
         //carries the buffer to which the tilemap is drawn
-        entity = m_gameScene.createEntity();
+        /*entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(-xy::DefaultSceneSize / 2.f);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 1);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Background + 1);
         entity.addComponent<xy::Sprite>(m_tilemapBuffer.getTexture());
 
-        m_gameScene.getActiveCamera().getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
+        m_gameScene.getActiveCamera().getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());*/
 
         //map layers
         const auto& layers = m_mapLoader.getLayers();
 
         //for each layer create a drawable in the scene
-        std::int32_t startDepth = GameConst::BackgroundDepth + 4;
+        std::int32_t startDepth = GameConst::Depth::LaterStart;
         float worldDepth = 32.f;
         for (const auto& layer : layers)
         {
@@ -542,7 +542,7 @@ void GameState::buildWorld()
                 //entity = m_tilemapScene.createEntity();
                 //there's no model matrix (atm) so scale is applied directly to vertices.
                 entity.addComponent<xy::Transform>();// .setScale(scale, scale);
-                entity.addComponent<xy::Drawable>().setDepth(-47); //so transparent objects draw on top correctly
+                entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::LayerEdge); //so transparent objects draw on top correctly
                 auto& verts = entity.getComponent<xy::Drawable>().getVertices();
                 for (const auto& edge : edgeData)
                 {
@@ -621,18 +621,14 @@ void GameState::buildWorld()
             entity.getComponent<xy::Drawable>().updateLocalBounds();
             entity.getComponent<xy::Transform>().setScale(scale, scale);
 
-            startDepth += 4; //place layers 4 apart so props etc can be placed in between
-            
-            //worldDepth += 50.f;
-            //TODO we're using literal rather than normalised depth values (for now)
-            //make sure above value doesn't exceed 127
+            startDepth += 1;
         }
 
         //create player
         entity = m_gameScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(m_mapLoader.getSpawnPoint() * scale);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
-        entity.addComponent<xy::Drawable>().setDepth(3);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Sprite);
         entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Player];
         entity.addComponent<xy::SpriteAnimation>().play(0);
         auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -739,7 +735,7 @@ void GameState::loadCollision()
                 sf::Vector2f size(shape.aabb.width, shape.aabb.height);
                 size *= scale;
 
-                entity.addComponent<xy::Drawable>().setDepth(1);
+                entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Fluid);
                 entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
                 entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::SpriteDepth));
                 entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
@@ -779,7 +775,7 @@ void GameState::loadCollision()
                     auto checkpointEnt = m_gameScene.createEntity();
                     checkpointEnt.addComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
                     checkpointEnt.getComponent<xy::Transform>().setScale(scale, scale);
-                    checkpointEnt.addComponent<xy::Drawable>().setDepth(-48);
+                    checkpointEnt.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Prop);
                     checkpointEnt.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Checkpoint];
                     checkpointEnt.addComponent<xy::SpriteAnimation>().play(m_checkpointAnimations[AnimID::Checkpoint::Idle]);
                     checkpointEnt.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
@@ -887,6 +883,7 @@ void GameState::loadEnemies()
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.getComponent<xy::Drawable>().bindUniform("u_depth", 0.1f);
         entity.getComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().setDepth(GameConst::Depth::Sprite);
         
         switch (id)
         {
@@ -955,7 +952,7 @@ void GameState::loadProps()
         //auto entity = m_tilemapScene.createEntity();
         entity.addComponent<xy::Transform>().setPosition(bounds.left * scale, bounds.top * scale);
         entity.getComponent<xy::Transform>().setScale(scale, scale);
-        entity.addComponent<xy::Drawable>().setDepth(GameConst::BackgroundDepth + 2);
+        entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::Waterfall);
         entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::SpriteDepth));
         entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
         entity.getComponent<xy::Drawable>().bindUniform("u_depth", -33.f);
