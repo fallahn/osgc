@@ -77,21 +77,38 @@ void main()
     gl_FragColor = gl_Color * colour;
 })";
 
-static const std::string SpriteVertex =
+static const std::string Sprite3DVertex =
 R"(
 #version 120
 
 uniform mat4 u_viewProjectionMatrix;
 uniform mat4 u_modelMat;
 
+uniform float u_zOffset;
+
 void main()
 {
     vec4 worldPos = u_modelMat * gl_Vertex;
     worldPos.z *= gl_Color.a;
+    worldPos.z += u_zOffset;
 
     gl_Position = u_viewProjectionMatrix * worldPos;
 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
     gl_FrontColor = gl_Color;
+})";
+
+static const std::string Sprite3DFrag = R"(
+#version 120
+
+uniform sampler2D u_texture;
+
+void main()
+{
+    vec2 coord = gl_TexCoord[0].xy;
+    vec4 colour = texture2D(u_texture, coord);
+
+
+    gl_FragColor = colour;
 })";

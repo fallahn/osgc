@@ -23,6 +23,7 @@ Copyright 2019 Matt Marchant
 #include "MapLoader.hpp"
 #include "InputParser.hpp"
 #include "AnimationMap.hpp"
+#include "MatrixPool.hpp"
 
 #include <xyginext/audio/AudioScape.hpp>
 #include <xyginext/core/State.hpp>
@@ -72,6 +73,16 @@ private:
     xy::AudioScape m_ambience;
     xy::AudioScape m_effects;
 
+    struct VertexCollection final
+    {
+        std::vector<sf::Vertex> vertices;
+        std::int32_t instanceCount = 0;
+    };
+
+    std::map<std::string, VertexCollection> m_modelVerts;
+    MatrixPool m_matrixPool;
+    std::size_t m_defaultTexID;
+
     void initScene();
     void loadResources();
     void buildWorld();
@@ -81,6 +92,7 @@ private:
     void buildUI();
 
     void spawnCrate(sf::Vector2f);
+    xy::Entity parseModelNode(const std::string& absPath);
 
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

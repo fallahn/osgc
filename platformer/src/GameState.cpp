@@ -36,6 +36,7 @@ Copyright 2019 Matt Marchant
 #include "CrateSystem.hpp"
 #include "Camera3D.hpp"
 #include "Sprite3D.hpp"
+#include "ModelIO.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -88,7 +89,8 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     m_sharedData    (sd),
     m_playerInput   (sd.inputBinding),
     m_ambience      (m_audioResource),
-    m_effects       (m_audioResource)
+    m_effects       (m_audioResource),
+    m_defaultTexID  (0)
 {
     launchLoadingScreen();
     //sd.theme = "mes";
@@ -451,7 +453,7 @@ void GameState::loadResources()
     m_shaders.preload(ShaderID::TileEdge, TileEdgeVert, TileEdgeFrag);
     m_shaders.preload(ShaderID::PixelTransition, PixelateFrag, sf::Shader::Fragment);
     m_shaders.preload(ShaderID::NoiseTransition, NoiseFrag, sf::Shader::Fragment);
-    m_shaders.preload(ShaderID::Sprite3D, SpriteVertex, TileEdgeFrag);
+    m_shaders.preload(ShaderID::Sprite3D, Sprite3DVertex, Sprite3DFrag);
     m_shaders.preload(ShaderID::SpriteDepth, Layer3DVertex, TileEdgeFrag);
 
     m_particleEmitters[ParticleID::Shield].loadFromFile("assets/particles/" + m_sharedData.theme + "/shield.xyp", m_resources);
@@ -801,6 +803,7 @@ void GameState::loadCollision()
                         particleEnt.getComponent<xy::ParticleEmitter>().start(); //do this out here so can replay effect on player spawn
                         e.getComponent<xy::Callback>().active = false;
                     };
+
                 }
 
                 break;
@@ -901,6 +904,16 @@ void GameState::loadEnemies()
         case Enemy::Walker:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Walker];
             entity.addComponent<Enemy>().type = Enemy::Walker;
+
+            /*{
+                auto modelEnt = parseModelNode(xy::FileSystem::getResourcePath() + "assets/models/sofa.xmd");
+                if (modelEnt.isValid())
+                {
+                    modelEnt.getComponent<xy::Transform>().setPosition(entity.getComponent<xy::Transform>().getPosition());
+                    auto spriteBounds = entity.getComponent<xy::Sprite>().getTextureBounds();
+                    modelEnt.getComponent<xy::Transform>().move(spriteBounds.width / 2.f, spriteBounds.height * 2.f);
+                }
+            }*/
             break;
         case Enemy::Orb:
             entity.addComponent<xy::Sprite>() = m_sprites[SpriteID::GearBoy::Orb];
@@ -1150,6 +1163,123 @@ void GameState::spawnCrate(sf::Vector2f position)
 
     entity.addComponent<Crate>().spawnPosition = position;
     entity.addComponent<xy::ParticleEmitter>().settings = m_particleEmitters[ParticleID::Crate];
+}
+
+xy::Entity GameState::parseModelNode(const std::string& absPath)
+{
+    xy::ConfigFile cfg;
+    
+    if (!cfg.loadFromFile(absPath))
+    {
+        return {};
+    }
+
+
+    std::string modelName = xy::FileSystem::getFileName(absPath);
+    modelName = modelName.substr(0, modelName.find_last_of('.'));
+
+    std::string binPath;
+    std::string texture;
+    float depth = 0.f;
+
+    const auto& properties = cfg.getProperties();
+    for (const auto& prop : properties)
+    {
+        const auto name = prop.getName();
+        if (name == "bin")
+        {
+            binPath = prop.getValue<std::string>();
+        }
+        else if (name == "texture")
+        {
+            texture = prop.getValue<std::string>();
+        }
+        else if (name == "depth")
+        {
+            depth = prop.getValue<float>();
+        }
+    }
+
+    if (!binPath.empty() && depth > 0)
+    {
+        auto rootPath = absPath.substr(0, absPath.find_last_of('/'));
+        rootPath = rootPath.substr(rootPath.find("assets"));
+
+        if (binPath[0] == '/')
+        {
+            binPath = binPath.substr(1);
+        }
+
+        if (m_modelVerts.count(modelName) == 0)
+        {
+            VertexCollection verts;
+            readModelBinary(verts.vertices, xy::FileSystem::getResourcePath() + rootPath + "/" + binPath);
+
+            if (!verts.vertices.empty())
+            {
+                m_modelVerts.insert(std::make_pair(modelName, verts));
+            }
+            else
+            {
+                xy::Logger::log("Unable to load " + modelName, xy::Logger::Type::Error);
+            }
+        }
+
+        std::size_t texID = 0;
+        if (!texture.empty())
+        {
+            texID = m_resources.load<sf::Texture>(rootPath + "/" + texture);
+        }
+        else
+        {
+            if (m_defaultTexID == 0)
+            {
+                m_defaultTexID = m_resources.load<sf::Texture>("assets/images/cam_debug.png");
+            }
+            texID = m_defaultTexID;
+        }
+        auto& tex = m_resources.get<sf::Texture>(texID);
+
+        auto entity = m_gameScene.createEntity();
+        entity.addComponent<xy::Transform>();
+        entity.addComponent<xy::Drawable>().addGlFlag(GL_DEPTH_TEST);
+        entity.getComponent<xy::Drawable>().addGlFlag(GL_CULL_FACE);
+        entity.getComponent<xy::Drawable>().setTexture(&tex);
+        entity.getComponent<xy::Drawable>().setShader(&m_shaders.get(ShaderID::Sprite3D));
+        entity.getComponent<xy::Drawable>().bindUniformToCurrentTexture("u_texture");
+        entity.getComponent<xy::Drawable>().setCulled(false);
+        entity.getComponent<xy::Drawable>().setPrimitiveType(sf::Triangles);
+        entity.addComponent<Sprite3D>(m_matrixPool).depth = depth;
+        entity.getComponent<xy::Drawable>().bindUniform("u_modelMat", &entity.getComponent<Sprite3D>().getMatrix()[0][0]);
+        entity.getComponent<xy::Drawable>().bindUniform("u_zOffset", /*-depth / 2.f*/-1.f);
+
+        auto& verts = entity.getComponent<xy::Drawable>().getVertices();
+        verts = m_modelVerts[modelName].vertices;
+        //m_modelVerts[modelName].instanceCount++;
+        entity.getComponent<xy::Drawable>().updateLocalBounds();
+
+        //tex coords are normalised so we need to 'correct' this for sfml
+        if (!texture.empty())
+        {
+            auto size = sf::Vector2f(tex.getSize());
+            for (auto& v : verts)
+            {
+                v.texCoords.x *= size.x;
+                v.texCoords.y *= size.y;
+            }
+        }
+
+        //move the origin to bottom centre
+        auto bounds = entity.getComponent<xy::Drawable>().getLocalBounds();
+        //entity.getComponent<xy::Transform>().setOrigin(bounds.width / 2.f, -bounds.height);
+
+        //collision data
+        //entity.addComponent<xy::BroadphaseComponent>().setArea(entity.getComponent<xy::Drawable>().getLocalBounds());
+        //entity.addComponent<CollisionComponent>().id = CollisionID::Prop;
+
+        return entity;
+    }
+    return {};
 }
 
 void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
