@@ -35,18 +35,39 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/systems/RenderSystem.hpp>
 
 #include <SFML/OpenGL.hpp>
+#include <SFML/Window/Event.hpp>
 
 namespace
 {
 #include "tilemap.inl"
 #include "3dRender.inl"
+
+    const std::array<float, 5> ZoomLevels =
+    {
+        xy::DefaultSceneSize.y / 4.f,
+        xy::DefaultSceneSize.y / 2.f,
+        xy::DefaultSceneSize.y,
+        xy::DefaultSceneSize.y * 2.f,
+        xy::DefaultSceneSize.y * 4.f
+    };
+
+    const std::array<float, 5> ZoomAmount =
+    {
+        0.25f, 0.5f, 1.f, 2.f, 4.f
+    };
+
+    const float NearPlane = 700.f;
+    const float FarPlane = 1900.f;
+
+    const float DragSpeed = 2.5f;
 }
 
 EditorState::EditorState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     :xy::State  (ss, ctx),
     m_sharedData(sd),
     m_scene     (ctx.appInstance.getMessageBus()),
-    m_currentMap("None")
+    m_currentMap("None"),
+    m_currentZoom(2)
 {
     launchLoadingScreen();
     initScene();
@@ -61,6 +82,28 @@ bool EditorState::handleEvent(const sf::Event& evt)
     if (xy::ui::wantsKeyboard() || xy::ui::wantsMouse())
     {
         return false;
+    }
+
+    if (evt.type == sf::Event::MouseWheelScrolled)
+    {
+        if (evt.mouseWheelScroll.delta > 0)
+        {
+            zoom(true, evt.mouseWheelScroll.x, evt.mouseWheelScroll.y);
+        }
+        else
+        {
+            zoom(false, evt.mouseWheelScroll.x, evt.mouseWheelScroll.y);
+        }
+    }
+    else if (evt.type == sf::Event::MouseMoved)
+    {
+        auto lastPos = m_mousePos;
+        m_mousePos = sf::Vector2f(evt.mouseMove.x, evt.mouseMove.y);
+
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+        {
+            m_scene.getActiveCamera().getComponent<xy::Transform>().move((lastPos - m_mousePos) * ZoomAmount[m_currentZoom] * DragSpeed);
+        }
     }
 
     m_scene.forwardEvent(evt);
@@ -106,7 +149,7 @@ void EditorState::initScene()
 
     auto& cam3D = m_scene.getActiveCamera().addComponent<Camera3D>();
     auto fov = cam3D.calcFOV(xy::DefaultSceneSize.y);
-    cam3D.projectionMatrix = glm::perspective(fov, xy::DefaultSceneSize.x / xy::DefaultSceneSize.y, 700.f, 1900.f);
+    cam3D.projectionMatrix = glm::perspective(fov, xy::DefaultSceneSize.x / xy::DefaultSceneSize.y, NearPlane, FarPlane);
 }
 
 void EditorState::loadResources()
@@ -331,4 +374,23 @@ void EditorState::loadMap()
     {
         m_currentMap = "Failed to open map.";
     }
+}
+
+void EditorState::zoom(bool in, int x, int y)
+{
+    if (in)
+    {
+        if (m_currentZoom > 0)
+        {
+            m_currentZoom--;
+        }
+    }
+    else
+    {
+        m_currentZoom = std::min(m_currentZoom + 1, ZoomLevels.size() - 1);
+    }
+
+    auto& cam = m_scene.getActiveCamera().getComponent<Camera3D>();
+    auto fov = cam.calcFOV(ZoomLevels[m_currentZoom]);
+    cam.projectionMatrix = glm::perspective(fov, xy::DefaultSceneSize.x / xy::DefaultSceneSize.y, NearPlane, FarPlane);
 }

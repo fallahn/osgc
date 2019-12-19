@@ -60,4 +60,8 @@ private:
     MapLoader m_mapLoader;
     std::string m_currentMap;
     void loadMap();
+
+    std::size_t m_currentZoom;
+    sf::Vector2f m_mousePos;
+    void zoom(bool, int, int);
 };
