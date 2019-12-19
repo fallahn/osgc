@@ -116,18 +116,19 @@ GameState::GameState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
 #ifdef XY_DEBUG
     registerCommand("map", [&](const std::string params)
         {
-            if (xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + "assets/maps/" + params + ".tmx"))
-            {
-                m_sharedData.nextMap = params + ".tmx";
-                requestStackClear();
-                //this doesn't work from here because state stack
-                //thinks we're pushing the same state twice
-                requestStackPush(StateID::Game);
-            }
-            else
-            {
-                xy::Console::print(params + ": map not found");
-            }
+            //if (xy::FileSystem::fileExists(xy::FileSystem::getResourcePath() + "assets/maps/" + params + ".tmx"))
+            //{
+            //    m_sharedData.nextMap = params + ".tmx";
+            //    requestStackClear();
+            //    //this doesn't work from here because state stack
+            //    //thinks we're pushing the same state twice
+            //    requestStackPush(StateID::Game);
+            //}
+            //else
+            //{
+            //    xy::Console::print(params + ": map not found");
+            //}
+            xy::Console::print("FIXME.");
         });
 #endif //XY_DEBUG
     quitLoadingScreen();
@@ -544,7 +545,7 @@ void GameState::buildWorld()
                 entity = m_gameScene.createEntity();
                 //entity = m_tilemapScene.createEntity();
                 //there's no model matrix (atm) so scale is applied directly to vertices.
-                entity.addComponent<xy::Transform>();// .setScale(scale, scale);
+                entity.addComponent<xy::Transform>();
                 entity.addComponent<xy::Drawable>().setDepth(GameConst::Depth::LayerEdge); //so transparent objects draw on top correctly
                 auto& verts = entity.getComponent<xy::Drawable>().getVertices();
                 for (const auto& edge : edgeData)
@@ -555,16 +556,16 @@ void GameState::buildWorld()
                     {
                     default: break;
                     case 0:
-                        offset.y += 16.f;
+                        offset.y += m_mapLoader.getTileSize();
                         break;
                     case 1:
-                        offset.x -= 16.f;
+                        offset.x -= m_mapLoader.getTileSize();
                         break;
                     case 2:
-                        offset.y -= 16.f;
+                        offset.y -= m_mapLoader.getTileSize();
                         break;
                     case 3:
-                        offset.x = 16.f; //TODO fetch this from tile set info
+                        offset.x = m_mapLoader.getTileSize();
                         break;
                     }
 

@@ -8,6 +8,7 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandIDs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CrateSystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DialogueState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EditorState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EndingState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/EnemySystem.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ErrorState.hpp

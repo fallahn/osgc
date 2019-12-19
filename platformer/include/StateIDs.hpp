@@ -40,6 +40,7 @@ namespace StateID
         Dialogue,
         Summary,
         Intro,
-        Ending
+        Ending,
+        Editor
     };
 }

@@ -38,6 +38,7 @@ source distribution.
 #include "IntroState.hpp"
 #include "EndingState.hpp"
 #include "SharedStateData.hpp"
+#include "EditorState.hpp"
 
 #include <xyginext/core/StateStack.hpp>
 #include <xyginext/core/Log.hpp>
@@ -58,6 +59,7 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
     ss->registerState<SummaryState>(StateID::Summary, sd);
     ss->registerState<IntroState>(StateID::Intro, sd);
     ss->registerState<EndingState>(StateID::Ending, sd);
+    ss->registerState<EditorState>(StateID::Editor, sd);
 
     sd.loadInputBinding();
     sd.loadProgress();
@@ -66,8 +68,9 @@ int begin(xy::StateStack* ss, SharedStateData* sharedData)
 
 #ifdef XY_DEBUG
     //return StateID::Ending;
-    return StateID::Game;
+    //return StateID::Game;
     //return StateID::MainMenu;
+    return StateID::Editor;
 #else
     return StateID::MainMenu;
 #endif //XY_DEBUG
@@ -85,4 +88,5 @@ void end(xy::StateStack* ss)
     ss->unregisterState(StateID::Summary);
     ss->unregisterState(StateID::Intro);
     ss->unregisterState(StateID::Ending);
+    ss->unregisterState(StateID::Editor);
 }

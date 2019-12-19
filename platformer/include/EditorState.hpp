@@ -18,25 +18,22 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include "StateIDs.hpp"
 #include "MapLoader.hpp"
-#include "ResourceIDs.hpp"
-#include "InputParser.hpp"
-#include "AnimationMap.hpp"
 
 #include <xyginext/core/State.hpp>
-#include <xyginext/core/ConsoleClient.hpp>
 #include <xyginext/gui/GuiClient.hpp>
+
 #include <xyginext/ecs/Scene.hpp>
-#include <xyginext/ecs/components/Sprite.hpp>
-#include <xyginext/ecs/components/ParticleEmitter.hpp>
-#include <xyginext/resources/ShaderResource.hpp>
+
 #include <xyginext/resources/ResourceHandler.hpp>
+#include <xyginext/resources/ShaderResource.hpp>
 
 struct SharedData;
-class MenuState final : public xy::State, public xy::ConsoleClient, public xy::GuiClient
+class EditorState final : public xy::State, public xy::GuiClient
 {
 public:
-    MenuState(xy::StateStack&, xy::State::Context, SharedData&);
+    EditorState(xy::StateStack&, xy::State::Context, SharedData&);
 
     bool handleEvent(const sf::Event&) override;
 
@@ -46,30 +43,21 @@ public:
 
     void draw() override;
 
-    xy::StateID stateID() const override;
+    xy::StateID stateID() const { return StateID::Editor; }
 
 private:
     SharedData& m_sharedData;
-    xy::Scene m_backgroundScene;
-
-    xy::ShaderResource m_shaders;
+    xy::Scene m_scene;
     xy::ResourceHandler m_resources;
+    xy::ShaderResource m_shaders;
 
-    std::array<std::size_t, TextureID::Menu::Count> m_textureIDs;
-    SpriteArray<SpriteID::GearBoy::Count> m_sprites;
-    AnimationMap<AnimID::Player::Count> m_playerAnimations;
-    std::size_t m_fontID;
-    std::array<xy::EmitterSettings, ParticleID::Count> m_particleEmitters;
-
-    MapLoader m_mapLoader;
-    InputParser m_playerInput;
+    std::vector<xy::Entity> m_mapEntities;
 
     void initScene();
     void loadResources();
-    void buildBackground();
-    void buildMenu();
+    void initUI();
 
-    void spawnCrate(sf::Vector2f);
-
-    void updateLoadingScreen(float, sf::RenderWindow&) override;
+    MapLoader m_mapLoader;
+    std::string m_currentMap;
+    void loadMap();
 };

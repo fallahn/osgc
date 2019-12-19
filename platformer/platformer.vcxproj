@@ -218,6 +218,7 @@
     <ClInclude Include="include\CommandIDs.hpp" />
     <ClInclude Include="include\CrateSystem.hpp" />
     <ClInclude Include="include\DialogueState.hpp" />
+    <ClInclude Include="include\EditorState.hpp" />
     <ClInclude Include="include\EndingState.hpp" />
     <ClInclude Include="include\EnemySystem.hpp" />
     <ClInclude Include="include\ErrorState.hpp" />
@@ -259,6 +260,7 @@
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\CrateSystem.cpp" />
     <ClCompile Include="src\DialogueState.cpp" />
+    <ClCompile Include="src\EditorState.cpp" />
     <ClCompile Include="src\EndingState.cpp" />
     <ClCompile Include="src\EnemySystem.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
