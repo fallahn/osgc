@@ -102,8 +102,11 @@ bool EditorState::handleEvent(const sf::Event& evt)
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
         {
-            m_scene.getActiveCamera().getComponent<xy::Transform>().move((lastPos - m_mousePos) * ZoomAmount[m_currentZoom] * DragSpeed);
+            float ratio = xy::DefaultSceneSize.x / static_cast<float>(getContext().renderWindow.getSize().x);
+            m_scene.getActiveCamera().getComponent<xy::Transform>().move((lastPos - m_mousePos) * ZoomAmount[m_currentZoom] * ratio);
         }
+
+        //TODO check if we're dragging an object
     }
 
     m_scene.forwardEvent(evt);
