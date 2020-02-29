@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -56,9 +56,7 @@ namespace xy
     class XY_EXPORT_API BaseResource
     {
     public:
-        BaseResource()
-        {
-        }
+        BaseResource() = default;
         virtual ~BaseResource() = default;
         BaseResource(const BaseResource&) = delete;
         BaseResource(BaseResource&&) = delete;

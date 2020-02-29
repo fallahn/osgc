@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -72,6 +72,12 @@ namespace xy
         Generally this is not used unless you have a specific multipass effect in mind.
         */
         void setFilterFlags(std::uint64_t flags) { m_filterFlags = flags; }
+
+        /*!
+        \breif Returns the current filter flags.
+        \see setFilterFlags
+        */
+        std::uint64_t getFilterFlags() const { return m_filterFlags; }
 
     private:
         bool m_wantsSorting;

@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -341,6 +341,7 @@ namespace xy
         static void removeWindows(const GuiClient*);
 
         friend class GuiClient;
+        friend class Console;
 
         void loadSettings();
         void saveSettings();

@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -236,6 +236,12 @@ namespace xy
         specific need for it, and probably won't do what you expect...
         */
         void addGlFlag(std::int32_t);
+
+        /*!
+        \brief default flag value for drawables 
+        0b1000000000000000000000000000000000000000000000000000000000000000
+        */
+        static constexpr std::uint64_t DefaultFilterFlag = (1ull << 63);
 
     private:
         sf::PrimitiveType m_primitiveType = sf::Quads;
