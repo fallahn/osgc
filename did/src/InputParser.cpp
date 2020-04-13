@@ -41,7 +41,6 @@ InputParser::InputParser(const InputBinding& ib, xy::NetClient& connection)
     m_analogueAmount    (1.f),
     m_timeAccumulator   (0),
     m_enabled           (false),
-    m_playerEntity      (0,0),
     m_playerNumber      (255),
     m_inputBinding      (ib),
     m_connection        (connection)
@@ -190,7 +189,7 @@ void InputParser::update(float dt)
 {
     m_timeAccumulator += static_cast<std::int32_t>(dt * 1000000.f);
 
-    if (m_playerEntity.getIndex() == 0) return;
+    if (!m_playerEntity.isValid()) return;
 
     //check state of controller axis
     checkControllerInput();

@@ -694,7 +694,6 @@ void GameState::createScene()
 
 void GameState::spawnPlayer(std::uint64_t clientID)
 {
-    //TODO would be nice to let players request a character from lobby menu
     {
         if (clientID > 0) //TODO would this be better by validating on the peer?
         {

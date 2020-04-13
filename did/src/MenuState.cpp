@@ -126,7 +126,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     registerConsoleTab("About",
     []()
     {
-        xy::ui::text("Desert Island Duel (c)2019 Matt Marchant and Contributors");
+        xy::ui::text("Desert Island Duel (c)2019 - 2020 Matt Marchant and Contributors");
         xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
     });
 

@@ -1863,8 +1863,9 @@ void GameState::updateConnection(ConnectionState state)
     }
     else
     {
-        //someone joined... this should never actually happen
-        printMessage("Herobrine has joined the game");
+        //server spawning players raises a 'joined' message... not sure if this is the behaviour we expect
+        //see ServerGameState.cpp 726
+        printMessage(m_sharedData.clientInformation.getClient(idx).name + " has joined the game");
     }
 }
 
