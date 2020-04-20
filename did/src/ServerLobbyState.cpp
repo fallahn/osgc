@@ -118,6 +118,7 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(ph), evt.packet.getSize() - sizeof(ph));
 
         m_sharedData.connectedClients[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+        m_sharedData.connectedClients[evt.peer.getID()].xp = 0;
 
         //update all clients
         broadcastClientInfo();

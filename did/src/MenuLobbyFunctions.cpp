@@ -79,6 +79,8 @@ void MenuState::updateClientInfo(const xy::NetEvent& evt)
         {
             m_chatBuffer.pop_front();
         }
+        client.gamesPlayed = 0;
+        client.score = 0;
 
         //update the sprite texture
         updateHatTexture(m_resources.get<sf::Texture>(m_playerTextureIDs[ch.playerID]), m_resources.get<sf::Texture>(m_hatTextureIDs[client.hatIndex]), *m_sharedData.playerSprites[ch.playerID]);
