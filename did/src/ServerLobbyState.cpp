@@ -161,6 +161,8 @@ void LobbyState::handleMessage(const xy::Message& msg)
         {
             //broadcast player ident so clients can reset the slot
             m_sharedData.gameServer->broadcastData(PacketID::PlayerLeft, std::uint8_t(data.id), xy::NetFlag::Reliable);
+
+            broadcastClientInfo();
         }
     }
 }

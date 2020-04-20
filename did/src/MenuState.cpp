@@ -166,6 +166,9 @@ bool MenuState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
             xy::App::quit();
             break;
+        case sf::Keyboard::Numpad8:
+            m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
+            break;
 #endif
         }
     }

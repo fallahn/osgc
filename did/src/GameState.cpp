@@ -1225,6 +1225,14 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     default: 
         //std::cout << (int)evt.packet.getID() << "\n";
         break;
+    case PacketID::PlayerLeft:
+    {
+        //update the client information so returning to
+        //the lobby shows the correct data
+        auto playerID = evt.packet.as<std::uint8_t>();
+        m_sharedData.clientInformation.resetClient(playerID);
+    }
+        break;
     case PacketID::ItemDespawn:
     {
         const auto& despawn = evt.packet.as<ItemState>();
@@ -1850,18 +1858,16 @@ void GameState::updateConnection(ConnectionState state)
 {
     auto idx = state.actorID - Actor::ID::PlayerOne;
 
-    if (state.clientID == 0)
+    if (state.clientID == 0) //player left
     {
         //someone left
-        auto& client = m_sharedData.clientInformation.getClient(idx);
+        const auto& client = m_sharedData.clientInformation.getClient(idx);
         auto oldName = client.name;
         printMessage(oldName + " left the game");
-
-        client.name = Global::PlayerNames[idx];
-        client.peerID = 0;
+        m_sharedData.clientInformation.resetClient(idx);
         m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
     }
-    else
+    else //player joined
     {
         //server spawning players raises a 'joined' message... not sure if this is the behaviour we expect
         //see ServerGameState.cpp 726
