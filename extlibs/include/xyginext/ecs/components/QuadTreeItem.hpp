@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -55,7 +55,7 @@ namespace xy
         /*!
         \brief Construct a QuadTreeItem from a given area and filter flags
         */
-        QuadTreeItem(sf::FloatRect area, std::uint64_t flags = std::numeric_limits<std::uint64_t>::max());
+        explicit QuadTreeItem(sf::FloatRect area, std::uint64_t flags = std::numeric_limits<std::uint64_t>::max());
 
         /*!
         \brief Sets the area of the quad tree item in relative coordinates

@@ -1472,7 +1472,7 @@ void BotSystem::wideSweep(xy::Entity entity)
                     auto currDist = xy::Util::Vector::lengthSquared(bot.targetPoint - pos);
 
                     if (newDist > currDist
-                        || (bot.targetEntity.hasComponent<Actor>() && actor.id > bot.targetEntity.getComponent<Actor>().id))
+                        || (bot.targetEntity.isValid() && bot.targetEntity.hasComponent<Actor>() && actor.id > bot.targetEntity.getComponent<Actor>().id))
                     {
                         continue;
                     }

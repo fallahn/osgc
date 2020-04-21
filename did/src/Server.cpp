@@ -97,7 +97,7 @@ void GameServer::stop()
 
         m_currentState.reset();
 
-        m_freeIDs = { 0,1,2,3, };
+        m_freeIDs = { 0,1,2,3 };
         m_nextFreeID = 0;
 
         m_sharedStateData.connectedClients.clear(); //don't want to maintain expired data between runs
@@ -184,6 +184,7 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
         *it = m_freeIDs[--m_nextFreeID];
         m_freeIDs[m_nextFreeID] = playerID;
     }
+    m_sharedStateData.connectedClients[peerID] = {};
     m_sharedStateData.connectedClients.erase(peerID);
 
     xy::Logger::log(std::to_string(peerID) + " disconnected", xy::Logger::Type::Info);
@@ -194,6 +195,13 @@ void GameServer::clientDisconnect(const xy::NetEvent& evt)
 
     if (m_sharedStateData.connectedClients.empty())
     {
+        //make sure we reset any vars here
+        //because as soon as we set running to false
+        //we lose all syncronisation between threads
+
+        m_freeIDs = { 0,1,2,3 };
+        m_nextFreeID = 0;
+
         m_running = false;
     }
 }

@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -47,9 +47,9 @@ namespace xy
         ~Transform();
 
         Transform(const Transform&) = delete;
-        Transform(Transform&&);
+        Transform(Transform&&) noexcept;
         Transform& operator = (const Transform&) = delete;
-        Transform& operator = (Transform&&);
+        Transform& operator = (Transform&&) noexcept;
 
         /*!
         \brief Adds a child transform to this one

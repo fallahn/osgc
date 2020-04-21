@@ -126,7 +126,7 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
     registerConsoleTab("About",
     []()
     {
-        xy::ui::text("Desert Island Duel (c)2019 Matt Marchant and Contributors");
+        xy::ui::text("Desert Island Duel (c)2019 - 2020 Matt Marchant and Contributors");
         xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
     });
 
@@ -165,6 +165,9 @@ bool MenuState::handleEvent(const sf::Event& evt)
 #ifdef XY_DEBUG
         case sf::Keyboard::Escape:
             xy::App::quit();
+            break;
+        case sf::Keyboard::Numpad8:
+            m_sharedData.netClient->sendPacket(PacketID::RequestSeed, std::uint8_t(0), xy::NetFlag::Reliable, Global::ReliableChannel);
             break;
 #endif
         }

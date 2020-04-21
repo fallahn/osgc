@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -237,6 +237,12 @@ namespace xy
         */
         void addGlFlag(std::int32_t);
 
+        /*!
+        \brief default flag value for drawables 
+        0b1000000000000000000000000000000000000000000000000000000000000000
+        */
+        static constexpr std::uint64_t DefaultFilterFlag = (1ull << 63);
+
     private:
         sf::PrimitiveType m_primitiveType = sf::Quads;
         sf::RenderStates m_states;
@@ -250,22 +256,52 @@ namespace xy
         sf::FloatRect m_localBounds;
 
         static constexpr std::size_t MaxBindings = 6;
-        std::array<std::pair<std::string, const sf::Texture*>, MaxBindings> m_textureBindings;
-        std::array<std::pair<std::string, float>, MaxBindings> m_floatBindings;
-        std::array<std::pair<std::string, sf::Vector2f>, MaxBindings> m_vec2Bindings;
-        std::array<std::pair<std::string, sf::Vector3f>, MaxBindings> m_vec3Bindings;
-        std::array<std::pair<std::string, bool>, MaxBindings> m_boolBindings;
-        std::array<std::pair<std::string, sf::Glsl::Vec4>, MaxBindings> m_colourBindings;
-        std::array<std::pair<std::string, const float*>, MaxBindings> m_matBindings;
-        std::array<std::string, MaxBindings> m_currentTexBindings;
-        std::size_t m_textureCount;
-        std::size_t m_floatCount;
-        std::size_t m_vec2Count;
-        std::size_t m_vec3Count;
-        std::size_t m_boolCount;
-        std::size_t m_colourCount;
-        std::size_t m_matCount;
-        std::size_t m_currentTexCount;
+        std::vector<std::pair<std::string, const sf::Texture*>> m_textureBindings;
+        std::vector<std::pair<std::string, float>> m_floatBindings;
+        std::vector<std::pair<std::string, sf::Vector2f>> m_vec2Bindings;
+        std::vector<std::pair<std::string, sf::Vector3f>> m_vec3Bindings;
+        std::vector<std::pair<std::string, bool>> m_boolBindings;
+        std::vector<std::pair<std::string, sf::Glsl::Vec4>> m_colourBindings;
+        std::vector<std::pair<std::string, const float*>> m_matBindings;
+        std::vector<std::string> m_currentTexBindings;
+
+        template <typename T>
+        void bindUniform(const std::string& name, T value, std::vector<std::pair<std::string, T>>& dest)
+        {
+            auto result = std::find_if(dest.begin(), dest.end(),
+                [&name](const std::pair<std::string, T>& pair)
+                {
+                    return pair.first == name;
+                });
+
+            if (result == dest.end())
+            {
+               dest.emplace_back(std::make_pair(name, value));
+            }
+            else
+            {
+                result->second = value;
+            }
+        }
+
+        template <typename T>
+        void bindUniform(const std::string& name, const T* value, std::vector<std::pair<std::string, T>>& dest)
+        {
+            auto result = std::find_if(dest.begin(), dest.end(),
+                [&name](const std::pair<std::string, T>& pair)
+                {
+                    return pair.first == name;
+                });
+
+            if (result == dest.end())
+            {
+                dest.emplace_back(std::make_pair(name, value));
+            }
+            else
+            {
+                result->second = value;
+            }
+        }
 
         bool m_cull;
 

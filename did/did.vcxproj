@@ -436,7 +436,12 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='StandAlone|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx512.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx512.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='StandAlone|x64'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDebug|x64'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_neon.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse2.cpp">

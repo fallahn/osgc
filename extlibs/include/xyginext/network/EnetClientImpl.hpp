@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -57,7 +57,7 @@ namespace xy
         void disconnect() override;
 
         bool pollEvent(NetEvent&) override;
-        void sendPacket(sf::Uint32 id, const void* data, std::size_t size, NetFlag flags, sf::Uint8 channel) override;
+        void sendPacket(std::uint8_t id, const void* data, std::size_t size, NetFlag flags, sf::Uint8 channel) override;
 
         const NetPeer& getPeer() const override { return m_peer; }
         std::uint32_t getAddress() const override;

@@ -1225,6 +1225,14 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     default: 
         //std::cout << (int)evt.packet.getID() << "\n";
         break;
+    case PacketID::PlayerLeft:
+    {
+        //update the client information so returning to
+        //the lobby shows the correct data
+        auto playerID = evt.packet.as<std::uint8_t>();
+        m_sharedData.clientInformation.resetClient(playerID);
+    }
+        break;
     case PacketID::ItemDespawn:
     {
         const auto& despawn = evt.packet.as<ItemState>();
@@ -1257,6 +1265,10 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     case PacketID::ServerQuit:
         if (!m_sharedData.gameServer->running())
         {
+
+            //reset any other client data as this is all moot now
+            m_sharedData.clientInformation = {};
+
             m_sharedData.error = "Host has quit the game";
             requestStackPush(StateID::Error);
             m_sharedData.netClient->disconnect();
@@ -1850,21 +1862,20 @@ void GameState::updateConnection(ConnectionState state)
 {
     auto idx = state.actorID - Actor::ID::PlayerOne;
 
-    if (state.clientID == 0)
+    if (state.clientID == 0) //player left
     {
         //someone left
-        auto& client = m_sharedData.clientInformation.getClient(idx);
+        const auto& client = m_sharedData.clientInformation.getClient(idx);
         auto oldName = client.name;
         printMessage(oldName + " left the game");
-
-        client.name = Global::PlayerNames[idx];
-        client.peerID = 0;
+        m_sharedData.clientInformation.resetClient(idx);
         m_nameTagManager.updateName(Global::PlayerNames[idx], idx);
     }
-    else
+    else //player joined
     {
-        //someone joined... this should never actually happen
-        printMessage("Herobrine has joined the game");
+        //server spawning players raises a 'joined' message... not sure if this is the behaviour we expect
+        //see ServerGameState.cpp 726
+        printMessage(m_sharedData.clientInformation.getClient(idx).name + " has joined the game");
     }
 }
 
@@ -2049,6 +2060,8 @@ xy::Entity GameState::createPlayerPuff(sf::Vector2f position, bool playerAttachm
 void GameState::handleDisconnect()
 {
     m_inputParser.setEnabled(false);
+
+    m_sharedData.clientInformation = {};
 
     //push error state
     m_sharedData.error = "Disconnected from server.";

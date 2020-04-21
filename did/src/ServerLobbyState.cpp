@@ -118,6 +118,7 @@ void LobbyState::handlePacket(const xy::NetEvent& evt)
         std::memcpy(buffer.data(), (char*)evt.packet.getData() + sizeof(ph), evt.packet.getSize() - sizeof(ph));
 
         m_sharedData.connectedClients[evt.peer.getID()].name = sf::String::fromUtf32(buffer.begin(), buffer.end());
+        m_sharedData.connectedClients[evt.peer.getID()].xp = 0;
 
         //update all clients
         broadcastClientInfo();
@@ -161,6 +162,8 @@ void LobbyState::handleMessage(const xy::Message& msg)
         {
             //broadcast player ident so clients can reset the slot
             m_sharedData.gameServer->broadcastData(PacketID::PlayerLeft, std::uint8_t(data.id), xy::NetFlag::Reliable);
+
+            broadcastClientInfo();
         }
     }
 }

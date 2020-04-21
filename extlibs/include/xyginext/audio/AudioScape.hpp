@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -85,7 +85,7 @@ namespace xy
         \param rx Reference to an AudioResource object used to cache
         any non-streamed audio files.
         */
-        AudioScape(AudioResource& rx);
+        explicit AudioScape(AudioResource& rx);
 
         /*!
         \brief Attempts to load an AudioScape file from the given path

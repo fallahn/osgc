@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -56,6 +56,7 @@ source distribution.
 //gcc < 4 has no mechanism to explicitly hide symbols, everything's exported
 #define XY_EXPORT_API
 #define XY_IMPORT_API
+#define IMGUI_API
 #endif //__GNUC__
 
 #endif //_WIN32
@@ -65,6 +66,7 @@ source distribution.
 //static build doesn't need import/export macros
 #define XY_EXPORT_API
 #define XY_IMPORT_API
+#define IMGUI_API
 #endif //XY_STATIC
 
 //xygine-wide consts

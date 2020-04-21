@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -71,7 +71,7 @@ namespace xy
         number of entity IDs is 1024 before they are recycled, values greater
         than this have no effect other than allocating unusable memory.
         */
-        Scene(MessageBus& messageBus, std::size_t initialPoolSize = 256);
+        explicit Scene(MessageBus& messageBus, std::size_t initialPoolSize = 256);
 
 
         ~Scene() = default;
@@ -201,11 +201,17 @@ namespace xy
         */
         void forwardMessage(const Message&);
 
+        /*!
+        \brief Returns the active entity count.
+        Debugging util.
+        */
+        std::size_t getEntityCount() const { return m_entityManager.getEntityCount(); }
+
     private:
         MessageBus& m_messageBus;
-        Entity::ID m_defaultCamera;
-        Entity::ID m_activeCamera;
-        Entity::ID m_activeListener;
+        Entity m_defaultCamera;
+        Entity m_activeCamera;
+        Entity m_activeListener;
 
         std::vector<Entity> m_pendingEntities;
         std::vector<Entity> m_destroyedEntities;

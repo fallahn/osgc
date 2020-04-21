@@ -1,5 +1,5 @@
 /*********************************************************************
-(c) Matt Marchant 2017 - 2019
+(c) Matt Marchant 2017 - 2020
 http://trederia.blogspot.com
 
 xygineXT - Zlib license.
@@ -34,7 +34,7 @@ inline bool NetClient::create(std::size_t maxChannels, std::size_t maxClients, s
 }
 
 template <typename T>
-void NetClient::sendPacket(sf::Uint32 id, const T& data, NetFlag flags, sf::Uint8 channel)
+void NetClient::sendPacket(std::uint8_t id, const T& data, NetFlag flags, sf::Uint8 channel)
 {
     m_impl->sendPacket(id, (void*)&data, sizeof(T), flags, channel);
 }
