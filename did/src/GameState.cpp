@@ -1265,6 +1265,10 @@ void GameState::handlePacket(const xy::NetEvent& evt)
     case PacketID::ServerQuit:
         if (!m_sharedData.gameServer->running())
         {
+
+            //reset any other client data as this is all moot now
+            m_sharedData.clientInformation = {};
+
             m_sharedData.error = "Host has quit the game";
             requestStackPush(StateID::Error);
             m_sharedData.netClient->disconnect();
@@ -2056,6 +2060,8 @@ xy::Entity GameState::createPlayerPuff(sf::Vector2f position, bool playerAttachm
 void GameState::handleDisconnect()
 {
     m_inputParser.setEnabled(false);
+
+    m_sharedData.clientInformation = {};
 
     //push error state
     m_sharedData.error = "Disconnected from server.";
