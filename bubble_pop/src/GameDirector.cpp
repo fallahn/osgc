@@ -38,6 +38,8 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/String.hpp>
 
 #include <sstream>
+#include <iomanip>
+#include <iostream>
 
 GameDirector::GameDirector(NodeSet& ns, const std::array<xy::Sprite, BubbleID::Count>& sprites,
     const std::array<AnimationMap<AnimID::Bubble::Count>, BubbleID::Count>& animations, SharedData& sd)

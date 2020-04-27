@@ -1244,7 +1244,7 @@ bool BotSystem::inSea(xy::Entity entity)
         bot.path.push_back(target);
         bot.sweepTimer = -14.f;
         bot.fleeing = true;
-        std::cout << "escaping water\n";
+        LogI << "escaping water" << std::endl;
         return true;
     }
 

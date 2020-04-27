@@ -53,6 +53,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/util/Random.hpp>
 
 #include <sstream>
+#include <iomanip>
 
 namespace
 {

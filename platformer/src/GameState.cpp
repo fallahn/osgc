@@ -72,6 +72,8 @@ Copyright 2019 Matt Marchant
 #include <SFML/Window/Event.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include <iomanip>
+
 namespace
 {
 #include "tilemap.inl"
