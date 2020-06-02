@@ -114,7 +114,7 @@ void App::importObjFile(const std::string& path)
                 outVert.normal[2] = -vert.Normal.Y;
 
                 outVert.texCoord[0] = vert.TextureCoordinate.X;
-                outVert.texCoord[1] = vert.TextureCoordinate.Y;
+                outVert.texCoord[1] = 1.0 - vert.TextureCoordinate.Y;
             }
 
             for (auto i : inIndices)
