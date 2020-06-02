@@ -30,6 +30,7 @@ Copyright 2019 Matt Marchant
 #include <xyginext/ecs/components/Transform.hpp>
 
 #include <sstream>
+#include <iomanip>
 
 UIDirector::UIDirector(SharedData& sd, const sf::Font& font)
     : m_sharedData  (sd),

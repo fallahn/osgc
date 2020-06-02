@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/Window/Event.hpp>
 
 #include <sstream>
+#include <iomanip>
 
 namespace
 {

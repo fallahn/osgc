@@ -37,6 +37,7 @@ Copyright 2019 Matt Marchant
 #include <SFML/System/Clock.hpp>
 
 #include <sstream>
+#include <iomanip>
 
 namespace
 {
