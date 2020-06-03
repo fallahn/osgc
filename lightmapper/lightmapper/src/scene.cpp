@@ -37,7 +37,9 @@ bool Scene::init()
 
         "void main()\n"
         "{\n"
-        "o_color = vec4(texture(u_texture, v_texcoord).rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
+        "vec4 colour = texture(u_texture, v_texcoord);"
+        "if(colour.a < 0.5) discard;"
+        "o_color = vec4(colour.rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
         "}\n";
 
     const char* attribs[] =

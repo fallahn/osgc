@@ -91,10 +91,11 @@ void App::mapBrowserWindow()
 
     if (openMap)
     {
-        auto path = tinyfd_openFileDialog("Open Map", nullptr, 1, mapFilters, nullptr, 0);
+        auto path = tinyfd_openFileDialog("Open Map", m_lastPaths.lastMap.c_str(), 1, mapFilters, nullptr, 0);
         if (path)
         {
             loadMapData(path);
+            m_lastPaths.lastMap = path;
         }
 
         openMap = false;
@@ -102,10 +103,11 @@ void App::mapBrowserWindow()
 
     if (openModel)
     {
-        auto path = tinyfd_openFileDialog("Open Map", nullptr, 1, modelFilters, nullptr, 0);
+        auto path = tinyfd_openFileDialog("Open Model", m_lastPaths.lastModel.c_str(), 1, modelFilters, nullptr, 0);
         if (path)
         {
             loadModel(path);
+            m_lastPaths.lastModel = path;
         }
 
         openModel = false;
@@ -113,10 +115,11 @@ void App::mapBrowserWindow()
 
     if (importObj)
     {
-        auto path = tinyfd_openFileDialog("Import obj", nullptr, 1, objFilters, nullptr, 0);
+        auto path = tinyfd_openFileDialog("Import obj", m_lastPaths.lastImport.c_str(), 1, objFilters, nullptr, 0);
         if (path)
         {
             importObjFile(path);
+            m_lastPaths.lastImport = path;
         }
         importObj = false;
     }
@@ -216,10 +219,11 @@ void App::statusWindow()
             if (ImGui::Button("Load Texture"))
             {
                 static const char* filter[] = { "*.png", "*.jpg", "*.tga", "*.bmp" };
-                auto path = tinyfd_openFileDialog("Load Texture", nullptr, 4, filter, nullptr, 0);
+                auto path = tinyfd_openFileDialog("Load Texture", m_lastPaths.lastTexture.c_str(), 4, filter, nullptr, 0);
                 if (path)
                 {
                     m_scene.getMeshes()[0]->loadTexture(path);
+                    m_lastPaths.lastTexture = path;
                 }
             }
         }
@@ -254,7 +258,7 @@ void App::statusWindow()
             ImGui::Button("Export Last Bake"))
         {
             const char* filter[] = { "*.png" };
-            auto path = tinyfd_saveFileDialog("Save Texture", nullptr, 1, filter, nullptr);
+            auto path = tinyfd_saveFileDialog("Save Texture", m_lastPaths.lastTexture.c_str(), 1, filter, nullptr);
             if (path)
             {
                 std::string outpath = path;
@@ -263,6 +267,7 @@ void App::statusWindow()
                     outpath += ".png";
                 }
                 m_scene.saveLightmap(outpath);
+                m_lastPaths.lastTexture = path;
             }
         }
 
@@ -309,10 +314,11 @@ void App::statusWindow()
             if (ImGui::Button("Export"))
             {
                 static const char* filter[] = { "*.xmd" };
-                auto path = tinyfd_saveFileDialog("Export Model", nullptr, 1, filter, nullptr);
+                auto path = tinyfd_saveFileDialog("Export Model", m_lastPaths.lastExport.c_str(), 1, filter, nullptr);
                 if (path)
                 {
                     exportModel(path, applyTransform, exportTexture);
+                    m_lastPaths.lastExport = path;
                 }
             }
             

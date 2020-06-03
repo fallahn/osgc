@@ -117,6 +117,37 @@ App::App()
     {
         m_projectionMatrix = glm::perspective(45.f * static_cast<float>(M_PI / 180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
         m_initOK = true;
+
+        xy::ConfigFile cfg;
+        if (cfg.loadFromFile("settings.cfg"))
+        {
+            //TODO we need to validate these paths else passing them
+            //to tfd might crash?
+            if (auto prop = cfg.findProperty("last_import"); prop)
+            {
+                m_lastPaths.lastImport = prop->getValue<std::string>();
+            }
+
+            if (auto prop = cfg.findProperty("last_export"); prop)
+            {
+                m_lastPaths.lastExport = prop->getValue<std::string>();
+            }
+
+            if (auto prop = cfg.findProperty("last_texture"); prop)
+            {
+                m_lastPaths.lastTexture = prop->getValue<std::string>();
+            }
+
+            if (auto prop = cfg.findProperty("last_map"); prop)
+            {
+                m_lastPaths.lastMap = prop->getValue<std::string>();
+            }
+
+            if (auto prop = cfg.findProperty("last_model"); prop)
+            {
+                m_lastPaths.lastModel = prop->getValue<std::string>();
+            }
+        }
     }
 }
 
@@ -154,6 +185,15 @@ App::~App()
             oFile.write((char*)&size, sizeof(size));
         }
     }
+
+    //save any config settings
+    xy::ConfigFile cfg;
+    cfg.addProperty("last_import", m_lastPaths.lastImport);
+    cfg.addProperty("last_export", m_lastPaths.lastExport);
+    cfg.addProperty("last_texture", m_lastPaths.lastTexture);
+    cfg.addProperty("last_map", m_lastPaths.lastMap);
+    cfg.addProperty("last_model", m_lastPaths.lastModel);
+    cfg.save("settings.cfg");
 
     glfwDestroyWindow(m_window);
     glfwTerminate();

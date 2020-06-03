@@ -56,6 +56,15 @@ private:
     bool m_saveOutput;
     bool m_showImportWindow;
 
+    struct LastPaths final
+    {
+        std::string lastImport;
+        std::string lastExport;
+        std::string lastTexture;
+        std::string lastMap;
+        std::string lastModel;
+    }m_lastPaths;
+
     void updateSceneGeometry(const RoomData&);
     void exportModel(const std::string&, bool, bool);
 
