@@ -56,6 +56,8 @@ struct Mesh final
     void updateGeometry();
 
     void loadTexture(const std::string&);
+
+    void setTextureSmooth(bool);
 };
 
 struct ModelData final

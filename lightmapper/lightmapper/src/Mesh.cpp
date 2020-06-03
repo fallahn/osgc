@@ -64,8 +64,6 @@ void Mesh::loadTexture(const std::string& path)
             glBindTexture(GL_TEXTURE_2D, texture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             if (n == 3)
             {
@@ -79,4 +77,22 @@ void Mesh::loadTexture(const std::string& path)
         }
         stbi_image_free(imgData);
     }
+}
+
+void Mesh::setTextureSmooth(bool smooth)
+{
+    assert(texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    if (smooth)
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    else
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

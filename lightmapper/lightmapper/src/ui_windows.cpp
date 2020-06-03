@@ -223,8 +223,15 @@ void App::statusWindow()
                 if (path)
                 {
                     m_scene.getMeshes()[0]->loadTexture(path);
+                    m_scene.getMeshes()[0]->setTextureSmooth(m_smoothTextures);
                     m_lastPaths.lastTexture = path;
                 }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Checkbox("Smooth Texture", &m_smoothTextures))
+            {
+                m_scene.getMeshes()[0]->setTextureSmooth(m_smoothTextures);
             }
         }
 

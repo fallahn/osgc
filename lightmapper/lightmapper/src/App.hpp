@@ -73,4 +73,5 @@ private:
     //ui stuffs
     void mapBrowserWindow();
     void statusWindow();
+    bool m_smoothTextures;
 };

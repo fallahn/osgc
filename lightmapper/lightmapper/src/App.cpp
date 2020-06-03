@@ -36,7 +36,8 @@ App::App()
     m_cameraRotation    (0.f),
     m_bakeAll           (false),
     m_saveOutput        (false),
-    m_showImportWindow  (false)
+    m_showImportWindow  (false),
+    m_smoothTextures    (true)
 {
     if (glfwInit())
     {
@@ -147,6 +148,11 @@ App::App()
             {
                 m_lastPaths.lastModel = prop->getValue<std::string>();
             }
+
+            if (auto prop = cfg.findProperty("texture_smoothing"); prop)
+            {
+                m_smoothTextures = prop->getValue<bool>();
+            }
         }
     }
 }
@@ -193,6 +199,7 @@ App::~App()
     cfg.addProperty("last_texture", m_lastPaths.lastTexture);
     cfg.addProperty("last_map", m_lastPaths.lastMap);
     cfg.addProperty("last_model", m_lastPaths.lastModel);
+    cfg.addProperty("texture_smoothing", m_smoothTextures ? "true" : "false");
     cfg.save("settings.cfg");
 
     glfwDestroyWindow(m_window);
