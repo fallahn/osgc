@@ -257,7 +257,7 @@ void Scene::saveLightmap(const std::string& path)
     stbi_write_png(path.c_str(), m_lightmapWidth, m_lightmapHeight, 4, buffer.data(), m_lightmapWidth * 4);
 }
 
-void Scene::createMeasureMesh()
+void Scene::createMeasureMesh(const std::string& path)
 {
     if (!m_measureMesh)
     {
@@ -301,9 +301,8 @@ void Scene::createMeasureMesh()
         indices.push_back(0);
 
         mesh->updateGeometry();
-
-        mesh->loadTexture("assets/measure_texture.png");
     }
+    m_measureMesh->loadTexture(path);
 }
 
 void Scene::removeMeasureMesh()

@@ -50,6 +50,21 @@ void App::mapBrowserWindow()
             ImGui::MenuItem("Set Output Directory", nullptr, &openOutput);
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Options"))
+        {
+            if (ImGui::MenuItem("Set Ground Texture"))
+            {
+                static const char* filter[] = { "*.png", "*.jpg", "*.tga", "*.bmp" };
+                auto path = tinyfd_openFileDialog("Open Image", m_lastPaths.measurePath.c_str(), 1, filter, nullptr, 0);
+                if (path)
+                {
+                    m_scene.createMeasureMesh(path);
+                    m_lastPaths.measurePath = path;
+                }
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
     }
 

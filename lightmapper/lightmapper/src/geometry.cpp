@@ -169,7 +169,7 @@ void App::importObjFile(const std::string& path)
 
             groundMesh->updateGeometry();*/
 
-            m_scene.createMeasureMesh();
+            m_scene.createMeasureMesh(m_lastPaths.measurePath);
         }
     }
 }

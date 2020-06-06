@@ -24,7 +24,7 @@ public:
 
     void saveLightmap(const std::string&);
 
-    void createMeasureMesh();
+    void createMeasureMesh(const std::string& path);
 
     void removeMeasureMesh();
 

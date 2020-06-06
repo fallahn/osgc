@@ -63,6 +63,7 @@ private:
         std::string lastTexture;
         std::string lastMap;
         std::string lastModel;
+        std::string measurePath = "assets/measure_texture.png";
     }m_lastPaths;
 
     void updateSceneGeometry(const RoomData&);

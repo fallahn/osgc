@@ -149,6 +149,11 @@ App::App()
                 m_lastPaths.lastModel = prop->getValue<std::string>();
             }
 
+            if (auto prop = cfg.findProperty("measure_texture"); prop)
+            {
+                m_lastPaths.measurePath = prop->getValue<std::string>();
+            }
+
             if (auto prop = cfg.findProperty("texture_smoothing"); prop)
             {
                 m_smoothTextures = prop->getValue<bool>();
@@ -199,6 +204,7 @@ App::~App()
     cfg.addProperty("last_texture", m_lastPaths.lastTexture);
     cfg.addProperty("last_map", m_lastPaths.lastMap);
     cfg.addProperty("last_model", m_lastPaths.lastModel);
+    cfg.addProperty("measure_texture", m_lastPaths.measurePath);
     cfg.addProperty("texture_smoothing", m_smoothTextures ? "true" : "false");
     cfg.save("settings.cfg");
 
@@ -452,7 +458,7 @@ void App::loadModel(const std::string& path)
             //TODO get Scale const
             m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
 
-            m_scene.createMeasureMesh();
+            m_scene.createMeasureMesh(m_lastPaths.measurePath);
         }
     }
 }
