@@ -174,7 +174,7 @@ void App::importObjFile(const std::string& path)
     }
 }
 
-void App::exportModel(const std::string& path, bool applyTransform, bool exportTexture)
+void App::exportModel(const std::string& path, bool applyTransform, bool exportTexture, bool binaryOnly)
 {
     auto outpath = path;
     std::replace(outpath.begin(), outpath.end(), '\\', '/');
@@ -286,32 +286,34 @@ void App::exportModel(const std::string& path, bool applyTransform, bool exportT
         file.close();
     }
 
-
-    auto fileName = outpath;
-    if (auto pos = fileName.find_last_of('/'); pos != std::string::npos)
+    if (!binaryOnly)
     {
-        fileName = fileName.substr(pos + 1);
+        auto fileName = outpath;
+        if (auto pos = fileName.find_last_of('/'); pos != std::string::npos)
+        {
+            fileName = fileName.substr(pos + 1);
+        }
+
+        //text file
+        xy::ConfigFile cfg("model");
+        cfg.addProperty("depth").setValue(range);
+        cfg.addProperty("bin").setValue(fileName);
+
+        //write the texture
+        auto pos = outpath.find_last_of('.');
+        outpath.replace(pos, outpath.length(), ".png");
+
+        if (exportTexture)
+        {
+            m_scene.saveLightmap(outpath);
+        }
+
+        fileName.replace(fileName.find_last_of('.'), fileName.length(), ".png");
+        cfg.addProperty("texture").setValue(fileName);
+
+        outpath.replace(pos, outpath.length(), ".xmd");
+        cfg.save(outpath);
     }
-
-    //text file
-    xy::ConfigFile cfg("model");
-    cfg.addProperty("depth").setValue(range);
-    cfg.addProperty("bin").setValue(fileName);
-
-    //write the texture
-    auto pos = outpath.find_last_of('.');
-    outpath.replace(pos, outpath.length(), ".png");
-
-    if (exportTexture)
-    {
-        m_scene.saveLightmap(outpath);
-    }
-
-    fileName.replace(fileName.find_last_of('.'), fileName.length(), ".png");
-    cfg.addProperty("texture").setValue(fileName);
-
-    outpath.replace(pos, outpath.length(), ".xmd");
-    cfg.save(outpath);
 }
 
 void buildRoom(const RoomData& room, Scene& scene, glm::vec3 offset)

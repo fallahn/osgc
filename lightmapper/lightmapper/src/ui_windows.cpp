@@ -325,6 +325,7 @@ void App::statusWindow()
 
             static bool applyTransform = true;
             static bool exportTexture = false;
+            static bool binaryOnly = true;
 
             ImGui::Checkbox("Export Texture", &exportTexture);
             ImGui::SameLine();
@@ -333,13 +334,17 @@ void App::statusWindow()
             ImGui::Checkbox("Apply Transform on Export", &applyTransform);
             ImGui::SameLine();
             HelpMarker("Make sure this is checked to save any changes to the model's transform when exporting");
+            ImGui::SameLine();
+            ImGui::Checkbox("Binary Only", &binaryOnly);
+            ImGui::SameLine();
+            HelpMarker("Only export the model data and don't overwrite the configuration file");
             if (ImGui::Button("Export"))
             {
                 static const char* filter[] = { "*.xmd" };
                 auto path = tinyfd_saveFileDialog("Export Model", m_lastPaths.lastExport.c_str(), 1, filter, nullptr);
                 if (path)
                 {
-                    exportModel(path, applyTransform, exportTexture);
+                    exportModel(path, applyTransform, exportTexture, binaryOnly);
                     m_lastPaths.lastExport = path;
                 }
             }

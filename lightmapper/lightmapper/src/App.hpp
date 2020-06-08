@@ -67,7 +67,7 @@ private:
     }m_lastPaths;
 
     void updateSceneGeometry(const RoomData&);
-    void exportModel(const std::string&, bool, bool);
+    void exportModel(const std::string&, bool, bool, bool);
 
     void setZUp(bool);
 
