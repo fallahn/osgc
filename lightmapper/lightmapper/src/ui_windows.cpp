@@ -348,7 +348,6 @@ void App::statusWindow()
                     m_lastPaths.lastExport = path;
                 }
             }
-            
         }
 
         ImGui::End();

@@ -306,11 +306,24 @@ void App::exportModel(const std::string& path, bool applyTransform, bool exportT
         if (exportTexture)
         {
             m_scene.saveLightmap(outpath);
+
+            fileName.replace(fileName.find_last_of('.'), fileName.length(), ".png");
+            cfg.addProperty("texture").setValue(fileName);
         }
-
-        fileName.replace(fileName.find_last_of('.'), fileName.length(), ".png");
-        cfg.addProperty("texture").setValue(fileName);
-
+        else
+        {
+            //use the currently loaded texture if there is one
+            if (!m_lastPaths.lastTexture.empty())
+            {
+                auto fileName = m_lastPaths.lastTexture;
+                std::replace(fileName.begin(), fileName.end(), '\\', '/');
+                if (fileName.find('/') != std::string::npos)
+                {
+                    fileName = fileName.substr(fileName.find_last_of('/') + 1);
+                }
+                cfg.addProperty("texture").setValue(fileName);
+            }
+        }
         outpath.replace(pos, outpath.length(), ".xmd");
         cfg.save(outpath);
     }
