@@ -114,7 +114,7 @@ void App::importObjFile(const std::string& path)
                 outVert.normal[2] = -vert.Normal.Y;
 
                 outVert.texCoord[0] = vert.TextureCoordinate.X;
-                outVert.texCoord[1] = 1.0 - vert.TextureCoordinate.Y;
+                outVert.texCoord[1] = 1.f - vert.TextureCoordinate.Y;
             }
 
             for (auto i : inIndices)
@@ -826,7 +826,7 @@ void addLight(const RoomData& room, Scene& scene, glm::vec3 offsetPos)
 
     const float radius = 1.f;
     const std::size_t resolution = 5;
-    static const float degToRad = M_PI / 180.f;
+    static const float degToRad = static_cast<float>(M_PI / 180.0);
 
     std::size_t offset = 0; //offset into index array as we add faces
     auto buildFace = [&](const glm::mat4& rotation, const glm::vec2& uvOffset)

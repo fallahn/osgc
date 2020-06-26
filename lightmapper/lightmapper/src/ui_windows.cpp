@@ -191,6 +191,7 @@ void App::statusWindow()
                     {
                         selectedIndex = items[i];
                         setZUp(i == 1);
+                        m_orthoPosition = glm::vec3(0.f);
                     }
 
                     if (selected)
@@ -333,4 +334,17 @@ void App::statusWindow()
 
         ImGui::End();
     }
+}
+
+void App::debugWindow()
+{
+    ImGui::SetNextWindowSize({ 200.f, 100.f }, ImGuiCond_FirstUseEver);
+    ImGui::SetWindowPos({ 80.f, 20.f }, ImGuiCond_FirstUseEver);
+
+    if (ImGui::Begin("debug"))
+    {
+        ImGui::Text("Mouse Pos: %3.3f, %3.3f, %3.3f", m_mousePosition.x, m_mousePosition.y, m_mousePosition.z);
+        ImGui::Text("Ortho Pos: %3.3f, %3.3f, %3.3f", m_orthoPosition.x, m_orthoPosition.y, m_orthoPosition.z);
+    }
+    ImGui::End();
 }

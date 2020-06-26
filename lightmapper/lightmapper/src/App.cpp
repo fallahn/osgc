@@ -19,7 +19,10 @@ namespace
 {
     glm::mat4 PerspectiveProjection = glm::mat4(1.f);
     glm::mat4 OrthoProjection = glm::mat4(1.f);
+    glm::vec2 OrthoScale = glm::vec2(1.f);
 
+    bool useOrtho = false; ///urg what a mess - this just copies the member var so these callbacks can read it...
+    float zoom = 1.f;
     void window_size_callback(GLFWwindow* window, int w, int h)
     {
         glfwGetFramebufferSize(window, &w, &h);
@@ -37,15 +40,30 @@ namespace
         {
             vert *= 1.f / ratio;
         }
+        hor /= zoom;
+        vert /= zoom;
 
         OrthoProjection = glm::ortho(-hor, hor, -vert, vert, 1.f, 20.f);
+
+        OrthoScale.x = hor / static_cast<float>(w);
+        OrthoScale.y = vert / static_cast<float>(h);
+        OrthoScale *= 2.f;
     }
 
-    //urg.
+    //urg. urrrrgggg
     double scrollOffset = 0.f;
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     {
         scrollOffset = yoffset;
+        if (useOrtho)
+        {
+            zoom = std::max(0.1f, zoom + (static_cast<float>(yoffset) * 0.1f));
+            window_size_callback(window, 0, 0);
+        }
+        else
+        {
+            zoom = 1.f;
+        }
     }
 }
 
@@ -56,11 +74,13 @@ App::App()
     m_viewMatrix        (1.f),
     m_cameraPosition    (0.f, 3.f, 25.f),
     m_cameraRotation    (0.f),
+    m_orthoPosition     (0.f),
+    m_mousePosition     (0.f),
     m_bakeAll           (false),
     m_saveOutput        (false),
     m_showImportWindow  (false),
     m_smoothTextures    (true),
-    m_hitboxMode        (false) //TODO default to false
+    m_hitboxMode        (true) //TODO default to false
 {
     if (glfwInit())
     {
@@ -142,7 +162,6 @@ App::App()
     {
         PerspectiveProjection = glm::perspective(45.f * static_cast<float>(M_PI / 180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
 
-        //OrthoProjection = glm::ortho(-OrthoSize, OrthoSize, -OrthoSize, OrthoSize, 1.f, 20.f);
         window_size_callback(m_window, 0, 0);// performs the ortho matrix update
 
         m_initOK = true;
@@ -513,14 +532,50 @@ void App::update()
     //custom imgui rendering
     mapBrowserWindow();
     statusWindow();
+    debugWindow();
 
+    useOrtho = m_hitboxMode;
+    m_mousePosition = getMousePosition();
     calcViewMatrix();
+}
+
+glm::vec3 App::getMousePosition()
+{
+    //returns 2D coord in ortho mode
+    double mouse[2];
+    glfwGetCursorPos(m_window, &mouse[0], &mouse[1]);
+
+    int w = 0;
+    int h = 0;
+    glfwGetFramebufferSize(m_window, &w, &h);
+    return glm::unProject(glm::vec3(mouse[0], mouse[1], 0.f), m_viewMatrix, OrthoProjection, glm::vec4(0.f, 0.f, w, h));
 }
 
 void App::calcViewMatrix()
 {
     if (m_hitboxMode)
     {
+        //pan with middle mouse
+        if (!ImGui::GetIO().WantCaptureKeyboard
+            && !ImGui::GetIO().WantCaptureMouse)
+        {
+            static glm::vec2 lastMouse;
+            double mouse[2];
+            glfwGetCursorPos(m_window, &mouse[0], &mouse[1]);
+            glm::vec2 mousePos(mouse[0], mouse[1]);
+
+            if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
+            {
+                auto delta = mousePos - lastMouse;
+                delta *= OrthoScale;
+
+                m_orthoPosition.x -= delta.x;
+                m_orthoPosition.y += delta.y;
+            }
+
+            lastMouse = mousePos;
+        }
+
         if (m_scene.getzUp())
         {
             m_viewMatrix = glm::rotate(glm::mat4(1.f), static_cast<float>(M_PI / 2.f), glm::vec3(-1.f, 0.f, 0.f));
@@ -529,7 +584,7 @@ void App::calcViewMatrix()
         {
             m_viewMatrix = glm::rotate(glm::mat4(1.f), static_cast<float>(M_PI), glm::vec3(1.f, 0.f, 0.f));
         }
-        m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(0.f, 0.f, 10.f));
+        m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(0.f, 0.f, 10.f) + m_orthoPosition);
         m_viewMatrix = glm::inverse(m_viewMatrix);
 
         return;
@@ -541,7 +596,6 @@ void App::calcViewMatrix()
     rotMat = glm::rotate(rotMat, m_cameraRotation.x * static_cast<float>(M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
 
 
-    //this should probably be in the update or handle events func...
     if (!ImGui::GetIO().WantCaptureKeyboard
         && !ImGui::GetIO().WantCaptureMouse)
     {
@@ -587,7 +641,8 @@ void App::calcViewMatrix()
 void App::draw()
 {
     ImGui::Render();
-    int w, h;
+    int w = 0;
+    int h = 0;
     glfwGetFramebufferSize(m_window, &w, &h);
     glViewport(0, 0, w, h);
 

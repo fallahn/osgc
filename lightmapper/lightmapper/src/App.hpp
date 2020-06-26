@@ -36,6 +36,9 @@ private:
     glm::vec3 m_cameraPosition;
     glm::vec2 m_cameraRotation;
 
+    glm::vec3 m_orthoPosition;
+    glm::vec3 m_mousePosition;
+
     std::vector<RoomData> m_mapData;
     std::int32_t m_currentRoom = -1;
     void loadMapData(const std::string&);
@@ -53,6 +56,7 @@ private:
     void handleEvents();
     void update();
 
+    glm::vec3 getMousePosition();
     void calcViewMatrix();
     void draw();
 
@@ -80,6 +84,7 @@ private:
     //ui stuffs
     void mapBrowserWindow();
     void statusWindow();
+    void debugWindow();
     bool m_smoothTextures;
     bool m_hitboxMode;
 };
