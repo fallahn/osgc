@@ -267,10 +267,7 @@ void Scene::createMeasureMesh(const std::string& path)
         auto& verts = mesh->vertices;
         auto& indices = mesh->indices;
 
-        //scale the 1024 size texture as if the room was 960 units
-        //kludgy I know but it'll do...
-        //TODO move the const values from geometry.cpp to somewhere accessible
-        const float width = (1024.f / 960.f) * 10.f; 
+        const float width = RoomGeometrySize; 
 
         //create floor
         vertex_t vert;

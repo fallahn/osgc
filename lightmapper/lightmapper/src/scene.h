@@ -1,3 +1,7 @@
+/*
+Handles rendering of the current collection of meshes, and texture baking.
+*/
+
 #pragma once
 
 #include "structures.h"

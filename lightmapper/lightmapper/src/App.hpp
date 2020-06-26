@@ -1,3 +1,10 @@
+/*
+Responsible for file IO and ImGui menuing.
+Also contains the main window handling clear/draw and input events
+which includes updating the view matrix and passing in the appropriate
+projectin matrices depending on the mode
+*/
+
 #pragma once
 
 #include "scene.h"
@@ -23,7 +30,6 @@ private:
     GLFWwindow* m_window;
     bool m_initOK;
     bool m_mapLoaded;
-    glm::mat4 m_projectionMatrix;
     glm::mat4 m_viewMatrix;
     std::array<float, 3> m_clearColour = { 0.6f, 0.8f, 1.0f };
 
@@ -75,4 +81,5 @@ private:
     void mapBrowserWindow();
     void statusWindow();
     bool m_smoothTextures;
+    bool m_hitboxMode;
 };

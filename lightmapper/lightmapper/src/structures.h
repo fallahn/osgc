@@ -29,6 +29,8 @@ struct Vertex final
 };
 using vertex_t = Vertex;
 
+//basic opengl mesh, supports a single sub-mesh
+//and texture only.
 struct Mesh final
 {
     Mesh();
@@ -68,6 +70,7 @@ struct ModelData final
     float depth = 0.f;
 };
 
+//only useful for doodlebob map data
 struct RoomData final
 {
     enum Flags

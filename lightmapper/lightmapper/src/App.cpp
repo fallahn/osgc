@@ -17,9 +17,32 @@
 
 namespace
 {
+    glm::mat4 PerspectiveProjection = glm::mat4(1.f);
+    glm::mat4 OrthoProjection = glm::mat4(1.f);
+
+    void window_size_callback(GLFWwindow* window, int w, int h)
+    {
+        glfwGetFramebufferSize(window, &w, &h);
+
+        float ratio = static_cast<float>(w) / static_cast<float>(h);
+        
+        float hor = OrthoSize;
+        float vert = OrthoSize;
+
+        if (w > h)
+        {
+            hor *= ratio;
+        }
+        else
+        {
+            vert *= 1.f / ratio;
+        }
+
+        OrthoProjection = glm::ortho(-hor, hor, -vert, vert, 1.f, 20.f);
+    }
+
     //urg.
     double scrollOffset = 0.f;
-
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     {
         scrollOffset = yoffset;
@@ -30,14 +53,14 @@ App::App()
     : m_window          (nullptr),
     m_initOK            (false),
     m_mapLoaded         (false),
-    m_projectionMatrix  (1.f),
     m_viewMatrix        (1.f),
     m_cameraPosition    (0.f, 3.f, 25.f),
     m_cameraRotation    (0.f),
     m_bakeAll           (false),
     m_saveOutput        (false),
     m_showImportWindow  (false),
-    m_smoothTextures    (true)
+    m_smoothTextures    (true),
+    m_hitboxMode        (false) //TODO default to false
 {
     if (glfwInit())
     {
@@ -86,6 +109,7 @@ App::App()
     else
     {
         glfwSetScrollCallback(m_window, scroll_callback);
+        glfwSetWindowSizeCallback(m_window, window_size_callback);
 
         glfwMakeContextCurrent(m_window);
         glfwSwapInterval(1);
@@ -116,7 +140,11 @@ App::App()
     }
     else
     {
-        m_projectionMatrix = glm::perspective(45.f * static_cast<float>(M_PI / 180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
+        PerspectiveProjection = glm::perspective(45.f * static_cast<float>(M_PI / 180.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
+
+        //OrthoProjection = glm::ortho(-OrthoSize, OrthoSize, -OrthoSize, OrthoSize, 1.f, 20.f);
+        window_size_callback(m_window, 0, 0);// performs the ortho matrix update
+
         m_initOK = true;
 
         xy::ConfigFile cfg;
@@ -491,6 +519,22 @@ void App::update()
 
 void App::calcViewMatrix()
 {
+    if (m_hitboxMode)
+    {
+        if (m_scene.getzUp())
+        {
+            m_viewMatrix = glm::rotate(glm::mat4(1.f), static_cast<float>(M_PI / 2.f), glm::vec3(-1.f, 0.f, 0.f));
+        }
+        else
+        {
+            m_viewMatrix = glm::rotate(glm::mat4(1.f), static_cast<float>(M_PI), glm::vec3(1.f, 0.f, 0.f));
+        }
+        m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(0.f, 0.f, 10.f));
+        m_viewMatrix = glm::inverse(m_viewMatrix);
+
+        return;
+    }
+
     glm::vec3 zAxis = m_scene.getzUp() ? glm::vec3(0.f, 1.f, 0.f) : glm::vec3(0.f, 0.f, -1.f);
 
     glm::mat4 rotMat = glm::rotate(glm::mat4(1.f), m_cameraRotation.y * static_cast<float>(M_PI / 180.f), zAxis);
@@ -551,7 +595,7 @@ void App::draw()
     //draw to screen with a blueish sky
     glClearColor(m_clearColour[0], m_clearColour[1], m_clearColour[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_scene.draw(m_viewMatrix, m_projectionMatrix);
+    m_scene.draw(m_viewMatrix, m_hitboxMode ? OrthoProjection : PerspectiveProjection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(m_window);

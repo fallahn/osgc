@@ -28,26 +28,77 @@ namespace
 
 void App::mapBrowserWindow()
 {
-    static bool openMap = false;
-    static bool openModel = false;
-    static bool openOutput = false;
-    static bool bakeSelected = false;
-    static bool importObj = false;
+    static const char* mapFilters[] = { "*.map" };
+    static const char* modelFilters[] = { "*.xmd" };
+    static const char* objFilters[] = { "*.obj" };
 
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
         {
-            ImGui::MenuItem("Open Map", nullptr, &openMap);
-            ImGui::MenuItem("Open Model", nullptr, &openModel);
-            ImGui::MenuItem("Import OBJ", nullptr, &importObj);
+            if (ImGui::MenuItem("Open Map"))
+            {
+                auto path = tinyfd_openFileDialog("Open Map", m_lastPaths.lastMap.c_str(), 1, mapFilters, nullptr, 0);
+                if (path)
+                {
+                    loadMapData(path);
+                    m_lastPaths.lastMap = path;
+                }
+            }
+            if (ImGui::MenuItem("Open Model"))
+            {
+                auto path = tinyfd_openFileDialog("Open Model", m_lastPaths.lastModel.c_str(), 1, modelFilters, nullptr, 0);
+                if (path)
+                {
+                    loadModel(path);
+                    m_lastPaths.lastModel = path;
+                }
+            }
+            if (ImGui::MenuItem("Import OBJ"))
+            {
+                auto path = tinyfd_openFileDialog("Import obj", m_lastPaths.lastImport.c_str(), 1, objFilters, nullptr, 0);
+                if (path)
+                {
+                    importObjFile(path);
+                    m_lastPaths.lastImport = path;
+                }
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools"))
         {
-            ImGui::MenuItem("Bake Selected", nullptr, &bakeSelected);
+            if (ImGui::MenuItem("Bake Selected"))
+            {
+                if (m_currentRoom != -1)
+                {
+                    std::string outpath;
+                    if (m_saveOutput)
+                    {
+                        outpath = m_outputPath + std::to_string(m_mapData[m_currentRoom].id);
+                    }
+                    m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
+                    m_scene.bake(outpath, m_mapData[m_currentRoom].skyColour);
+                }
+                else
+                {
+                    //if model loaded bake it
+                    if (!m_scene.getMeshes().empty())
+                    {
+                        bakeModel();
+                    }
+                }
+            }
             ImGui::MenuItem("Bake All", nullptr, &m_bakeAll);
-            ImGui::MenuItem("Set Output Directory", nullptr, &openOutput);
+            if (ImGui::MenuItem("Set Output Directory"))
+            {
+                auto path = tinyfd_selectFolderDialog("Select Output Directory", m_outputPath.c_str());
+                if (path)
+                {
+                    m_outputPath = path;
+                    std::replace(m_outputPath.begin(), m_outputPath.end(), '\\', '/');
+                    m_outputPath += '/';
+                }
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Options"))
@@ -61,6 +112,10 @@ void App::mapBrowserWindow()
                     m_scene.createMeasureMesh(path);
                     m_lastPaths.measurePath = path;
                 }
+            }
+            if (ImGui::MenuItem("Hitbox Mode", nullptr, &m_hitboxMode))
+            {
+
             }
             ImGui::EndMenu();
         }
@@ -100,80 +155,6 @@ void App::mapBrowserWindow()
         ImGui::End();
     }
 
-    static const char* mapFilters[] = { "*.map" };
-    static const char* modelFilters[] = { "*.xmd" };
-    static const char* objFilters[] = { "*.obj" };
-
-    if (openMap)
-    {
-        auto path = tinyfd_openFileDialog("Open Map", m_lastPaths.lastMap.c_str(), 1, mapFilters, nullptr, 0);
-        if (path)
-        {
-            loadMapData(path);
-            m_lastPaths.lastMap = path;
-        }
-
-        openMap = false;
-    }
-
-    if (openModel)
-    {
-        auto path = tinyfd_openFileDialog("Open Model", m_lastPaths.lastModel.c_str(), 1, modelFilters, nullptr, 0);
-        if (path)
-        {
-            loadModel(path);
-            m_lastPaths.lastModel = path;
-        }
-
-        openModel = false;
-    }
-
-    if (importObj)
-    {
-        auto path = tinyfd_openFileDialog("Import obj", m_lastPaths.lastImport.c_str(), 1, objFilters, nullptr, 0);
-        if (path)
-        {
-            importObjFile(path);
-            m_lastPaths.lastImport = path;
-        }
-        importObj = false;
-    }
-
-    if (bakeSelected)
-    {
-        if (m_currentRoom != -1)
-        {
-            std::string outpath;
-            if (m_saveOutput)
-            {
-                outpath = m_outputPath + std::to_string(m_mapData[m_currentRoom].id);
-            }
-            m_scene.setLightmapSize(ConstVal::RoomTextureWidth, ConstVal::RoomTextureHeight);
-            m_scene.bake(outpath, m_mapData[m_currentRoom].skyColour);
-        }
-        else
-        {
-            //if model loaded bake it
-            if (!m_scene.getMeshes().empty())
-            {
-                bakeModel();
-            }
-        }
-        bakeSelected = false;
-    }
-
-    if (openOutput)
-    {
-        auto path = tinyfd_selectFolderDialog("Select Output Directory", m_outputPath.c_str());
-        if (path)
-        {
-            m_outputPath = path;
-            std::replace(m_outputPath.begin(), m_outputPath.end(), '\\', '/');
-            m_outputPath += '/';
-        }
-
-        openOutput = false;
-    }
 }
 
 void App::statusWindow()
