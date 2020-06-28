@@ -3,11 +3,11 @@ set(PROJECT_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/App.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ConfigFile.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/geometry.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/gl_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/glad.c
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Mesh.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/scene.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs.c
   ${CMAKE_CURRENT_SOURCE_DIR}/ui_windows.cpp
 

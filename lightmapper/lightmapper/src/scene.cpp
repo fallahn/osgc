@@ -1,5 +1,4 @@
 #include "structures.h"
-#include "gl_helpers.h"
 #include "geometry.h"
 #include "lightmapper.h"
 #include "GLCheck.hpp"
@@ -48,16 +47,12 @@ bool Scene::init()
         "a_texcoord"
     };
 
-    m_programID = loadProgram(vp, fp, attribs, 2);
-    if (!m_programID)
+    m_meshShader.load(vp, fp, attribs, 2);
+    if (!m_meshShader.programID)
     {
         std::cout << "Error loading shader\n";
         return false;
     }
-    m_modelUniform = glGetUniformLocation(m_programID, "u_model");
-    m_viewUniform = glGetUniformLocation(m_programID, "u_view");
-    m_projectionUniform = glGetUniformLocation(m_programID, "u_projection");
-    m_textureUniform = glGetUniformLocation(m_programID, "u_texture");
 
     return true;
 }
@@ -67,17 +62,17 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
 
-    glUseProgram(m_programID);
-    glUniform1i(m_textureUniform, 0);
+    glUseProgram(m_meshShader.programID);
+    glUniform1i(m_meshShader.textureUniform, 0);
 
-    glUniformMatrix4fv(m_projectionUniform, 1, GL_FALSE, &projection[0][0]);
-    glUniformMatrix4fv(m_viewUniform, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(m_meshShader.projectionUniform, 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(m_meshShader.viewUniform, 1, GL_FALSE, &view[0][0]);
 
     //foreach mesh in scene
     for (const auto& mesh : m_meshes)
     {
         //model matrix
-        glUniformMatrix4fv(m_modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+        glUniformMatrix4fv(m_meshShader.modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
 
         glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
@@ -96,7 +91,7 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
         }
 
         
-        glUniformMatrix4fv(m_modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+        glUniformMatrix4fv(m_meshShader.modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
 
         glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
@@ -112,8 +107,6 @@ void Scene::destroy()
 {
     m_meshes.clear();
     m_measureMesh.reset();
-
-    glDeleteProgram(m_programID);
 }
 
 bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) const
@@ -225,6 +218,12 @@ bool Scene::bake(const std::string& output, const std::array<float, 3>& sky) con
     lmImageSmooth(data.data(), temp.data(), w, h, c);
     lmImageDilate(temp.data(), data.data(), w, h, c);
     lmImagePower(data.data(), w, h, 4, 1.0f / 2.2f, 0x7); // gamma correct color channels
+
+    //set all alpha values to 1
+    for (auto i = 3u; i < data.size(); i += 4u)
+    {
+        data[i] = 1.f;
+    }
 
     glBindTexture(GL_TEXTURE_2D, mesh->texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data.data());

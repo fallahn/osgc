@@ -144,7 +144,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\geometry.cpp" />
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\gl_helpers.cpp" />
+    <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\scene.cpp" />
     <ClCompile Include="src\tinyfiledialogs.c" />
@@ -156,7 +156,7 @@
     <ClInclude Include="src\OBJ_Loader.h" />
     <ClInclude Include="src\scene.h" />
     <ClInclude Include="src\geometry.h" />
-    <ClInclude Include="src\gl_helpers.h" />
+    <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\lightmapper.h" />
     <ClInclude Include="src\stb_image_write.h" />
     <ClInclude Include="src\structures.h" />

@@ -4,7 +4,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "gl_helpers.h"
+#include "shader.h"
 #include "geometry.h"
 #include "ConfigFile.hpp"
 #include "tinyfiledialogs.h"

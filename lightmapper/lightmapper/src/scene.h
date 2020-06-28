@@ -5,6 +5,7 @@ Handles rendering of the current collection of meshes, and texture baking.
 #pragma once
 
 #include "structures.h"
+#include "shader.h"
 
 #include <string>
 #include <memory>
@@ -37,11 +38,7 @@ public:
     bool getzUp() const { return m_zUp; }
 
 private:
-    GLuint m_programID = 0;
-    GLint m_textureUniform = 0;
-    GLint m_projectionUniform = 0;
-    GLint m_viewUniform = 0;
-    GLint m_modelUniform = 0;
+    Shader m_meshShader;
 
     std::int32_t m_lightmapWidth = 0;
     std::int32_t m_lightmapHeight = 0;
