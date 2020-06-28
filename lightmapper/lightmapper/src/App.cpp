@@ -17,6 +17,8 @@
 
 namespace
 {
+    bool appSuccessful = false;
+
     glm::mat4 PerspectiveProjection = glm::mat4(1.f);
     glm::mat4 OrthoProjection = glm::mat4(1.f);
     glm::vec2 OrthoScale = glm::vec2(1.f);
@@ -118,13 +120,15 @@ App::App()
 
         iFile.close();
     }
-
+    if (w == 0) w = 800;
+    if (h == 0) h = 600;
 
     m_window = glfwCreateWindow(w, h, "Lightmapper", NULL, NULL);
     if (!m_window)
     {
         std::cout << "Could not create window.\n";
         glfwTerminate();
+        return;
     }
     else
     {
@@ -150,6 +154,7 @@ App::App()
         {
             std::cout << "failed opengl init\n";
         }
+
     }
 
     if (!m_scene.init())
@@ -207,56 +212,63 @@ App::App()
             }
         }
     }
+    
+    appSuccessful = true;
 }
 
 App::~App()
 {
-    m_scene.destroy();
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    //save the current window size
-    int w = 800;
-    int h = 600;
-    glfwGetFramebufferSize(m_window, &w, &h);
-    glViewport(0, 0, w, h);
-
-    std::ofstream oFile("window", std::ios::binary);
-    if (oFile.is_open() && oFile.good())
+    if (appSuccessful)
     {
-        std::vector<char>buff(sizeof(int) * 2);
-        std::memcpy(buff.data(), &w, sizeof(int));
-        std::memcpy(buff.data() + sizeof(int), &h, sizeof(int));
-        oFile.write(buff.data(), buff.size());
+        m_scene.destroy();
 
-        if (!m_outputPath.empty())
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
+        //save the current window size
+        int w = 800;
+        int h = 600;
+        glfwGetFramebufferSize(m_window, &w, &h);
+
+        if (w == 0) w = 800;
+        if (h == 0) h = 600;
+
+        std::ofstream oFile("window", std::ios::binary);
+        if (oFile.is_open() && oFile.good())
         {
-            std::size_t size = m_outputPath.size();
-            oFile.write((char*)&size, sizeof(size));
-            oFile.write(m_outputPath.c_str(), size);
+            std::vector<char>buff(sizeof(int) * 2);
+            std::memcpy(buff.data(), &w, sizeof(int));
+            std::memcpy(buff.data() + sizeof(int), &h, sizeof(int));
+            oFile.write(buff.data(), buff.size());
+
+            if (!m_outputPath.empty())
+            {
+                std::size_t size = m_outputPath.size();
+                oFile.write((char*)&size, sizeof(size));
+                oFile.write(m_outputPath.c_str(), size);
+            }
+            else
+            {
+                std::size_t size = 0;
+                oFile.write((char*)&size, sizeof(size));
+            }
         }
-        else
-        {
-            std::size_t size = 0;
-            oFile.write((char*)&size, sizeof(size));
-        }
+
+        //save any config settings
+        xy::ConfigFile cfg;
+        cfg.addProperty("last_import", m_lastPaths.lastImport);
+        cfg.addProperty("last_export", m_lastPaths.lastExport);
+        cfg.addProperty("last_texture", m_lastPaths.lastTexture);
+        cfg.addProperty("last_map", m_lastPaths.lastMap);
+        cfg.addProperty("last_model", m_lastPaths.lastModel);
+        cfg.addProperty("measure_texture", m_lastPaths.measurePath);
+        cfg.addProperty("texture_smoothing", m_smoothTextures ? "true" : "false");
+        cfg.save("settings.cfg");
+
+        glfwDestroyWindow(m_window);
+        glfwTerminate();
     }
-
-    //save any config settings
-    xy::ConfigFile cfg;
-    cfg.addProperty("last_import", m_lastPaths.lastImport);
-    cfg.addProperty("last_export", m_lastPaths.lastExport);
-    cfg.addProperty("last_texture", m_lastPaths.lastTexture);
-    cfg.addProperty("last_map", m_lastPaths.lastMap);
-    cfg.addProperty("last_model", m_lastPaths.lastModel);
-    cfg.addProperty("measure_texture", m_lastPaths.measurePath);
-    cfg.addProperty("texture_smoothing", m_smoothTextures ? "true" : "false");
-    cfg.save("settings.cfg");
-
-    glfwDestroyWindow(m_window);
-    glfwTerminate();
 }
 
 //public

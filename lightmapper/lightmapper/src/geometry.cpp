@@ -170,6 +170,11 @@ void App::importObjFile(const std::string& path)
             groundMesh->updateGeometry();*/
 
             m_scene.createMeasureMesh(m_lastPaths.measurePath);
+
+            auto& rect = m_scene.getRectangles().emplace_back(std::make_unique<RectMesh>());
+            rect->start = { -2.f, 1.f };
+            rect->end = { 2.f, -2.f };
+            rect->updateVerts();
         }
     }
 }

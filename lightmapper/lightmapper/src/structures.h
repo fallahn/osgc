@@ -31,7 +31,7 @@ using vertex_t = Vertex;
 
 //basic opengl mesh, supports a single sub-mesh
 //and texture only.
-struct Mesh final
+struct Mesh
 {
     Mesh();
     ~Mesh();
@@ -90,3 +90,11 @@ struct RoomData final
     std::vector<ModelData> models;
 };
 
+struct RectMesh final : public Mesh
+{
+    glm::vec3 colour = glm::vec3(0.f, 1.f, 0.f);
+    glm::vec2 start = glm::vec2(0.f);
+    glm::vec2 end = glm::vec2(0.f);
+
+    void updateVerts();
+};

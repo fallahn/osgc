@@ -13,7 +13,7 @@ bool Scene::init()
     m_lightmapHeight = ConstVal::RoomTextureHeight;
 
     //load shader
-    const char* vp =
+    const char* vertexShader =
         "#version 150 core\n"
         "in vec3 a_position;\n"
         "in vec2 a_texcoord;\n"
@@ -28,7 +28,7 @@ bool Scene::init()
         "v_texcoord = a_texcoord;\n"
         "}\n";
 
-    const char* fp =
+    const char* fragShaderTextured =
         "#version 150 core\n"
         "in vec2 v_texcoord;\n"
         "uniform sampler2D u_texture;\n"
@@ -41,16 +41,33 @@ bool Scene::init()
         "o_color = vec4(colour.rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
         "}\n";
 
+    const char* fragShaderColoured = 
+        "#version 150 core\n"
+        "uniform vec3 u_colour = vec3(1.0, 0.0, 0.0);\n"
+        "out vec4 o_colour;\n"
+
+        "void main()\n"
+        "{\n"
+        "o_colour = vec4(u_colour, 1.0);\n"
+        "}\n";
+
     const char* attribs[] =
     {
         "a_position",
         "a_texcoord"
     };
 
-    m_meshShader.load(vp, fp, attribs, 2);
+    m_meshShader.load(vertexShader, fragShaderTextured, attribs, 2);
     if (!m_meshShader.programID)
     {
-        std::cout << "Error loading shader\n";
+        std::cout << "Error loading mesh shader\n";
+        return false;
+    }
+
+    m_rectShader.load(vertexShader, fragShaderColoured, attribs, 2);
+    if (!m_rectShader.programID)
+    {
+        std::cout << "Failed compiling rectangle shader\n";
         return false;
     }
 
@@ -101,6 +118,25 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
 
     //glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
+
+    //render any rectangles
+    glUseProgram(m_rectShader.programID);
+
+    glUniformMatrix4fv(m_rectShader.projectionUniform, 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(m_rectShader.viewUniform, 1, GL_FALSE, &view[0][0]);
+    for (const auto& mesh : m_rectangles)
+    {
+        //model matrix - TODO set this according to z-up
+        glUniformMatrix4fv(m_rectShader.modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+
+        //glBindTexture(GL_TEXTURE_2D, mesh->texture);
+        //set colour per rectangle
+        glUniform3f(m_rectShader.colourUniform, mesh->colour.r, mesh->colour.g, mesh->colour.b);
+
+        glCheck(glBindVertexArray(mesh->vao));
+        glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
+    }
+    glUseProgram(0);
 }
 
 void Scene::destroy()

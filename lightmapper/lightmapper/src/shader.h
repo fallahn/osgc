@@ -19,6 +19,7 @@ public:
 
     GLuint programID = 0;
     GLint textureUniform = 0;
+    GLint colourUniform = 0;
     GLint projectionUniform = 0;
     GLint viewUniform = 0;
     GLint modelUniform = 0;

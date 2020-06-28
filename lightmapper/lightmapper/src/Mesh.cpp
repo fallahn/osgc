@@ -96,3 +96,20 @@ void Mesh::setTextureSmooth(bool smooth)
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void RectMesh::updateVerts()
+{
+    primitiveType = GL_LINE_STRIP;
+
+    vertices.clear();
+    vertices.emplace_back().position = { start.x, 0.f, -start.y };
+    vertices.emplace_back().position = { start.x, 0.f, -end.y };
+    vertices.emplace_back().position = { end.x, 0.f, -end.y };
+    vertices.emplace_back().position = { end.x, 0.f, -start.y };
+    vertices.emplace_back().position = { start.x, 0.f, -start.y };
+
+    indices.clear();
+    indices = { 0,1,2,3,4 };
+
+    updateGeometry();
+}

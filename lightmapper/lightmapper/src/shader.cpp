@@ -75,6 +75,7 @@ void Shader::load(const char* vp, const char* fp, const char** attributes, int a
     viewUniform = glGetUniformLocation(programID, "u_view");
     projectionUniform = glGetUniformLocation(programID, "u_projection");
     textureUniform = glGetUniformLocation(programID, "u_texture");
+    colourUniform = glGetUniformLocation(programID, "u_colour");
 }
 
 //private
