@@ -7,8 +7,15 @@
 
 #include <assert.h>
 
+namespace
+{
+    glm::mat4 yUpMatrix = glm::mat4(1.f);
+}
+
 bool Scene::init()
 {
+    yUpMatrix = glm::rotate(glm::mat4(1.f), -90.f * ((float)M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
+
     m_lightmapWidth = ConstVal::RoomTextureWidth;
     m_lightmapHeight = ConstVal::RoomTextureHeight;
 
@@ -104,7 +111,7 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
         mesh->modelMatrix = glm::mat4(1.f);
         if (!m_zUp)
         {
-            mesh->modelMatrix = glm::rotate(glm::mat4(1.f), -90.f * ((float)M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
+            mesh->modelMatrix *= yUpMatrix;// glm::rotate(glm::mat4(1.f), -90.f * ((float)M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
         }
 
         
@@ -126,10 +133,15 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
     glUniformMatrix4fv(m_rectShader.viewUniform, 1, GL_FALSE, &view[0][0]);
     for (const auto& mesh : m_rectangles)
     {
-        //model matrix - TODO set this according to z-up
-        glUniformMatrix4fv(m_rectShader.modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+        //model matrix
+        auto modelMat = mesh->modelMatrix;
+        if (!m_zUp)
+        {
+            modelMat *= yUpMatrix;
+        }
 
-        //glBindTexture(GL_TEXTURE_2D, mesh->texture);
+        glUniformMatrix4fv(m_rectShader.modelUniform, 1, GL_FALSE, &modelMat[0][0]);
+
         //set colour per rectangle
         glUniform3f(m_rectShader.colourUniform, mesh->colour.r, mesh->colour.g, mesh->colour.b);
 
@@ -141,6 +153,7 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
 
 void Scene::destroy()
 {
+    m_rectangles.clear();
     m_meshes.clear();
     m_measureMesh.reset();
 }

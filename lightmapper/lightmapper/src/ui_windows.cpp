@@ -348,3 +348,27 @@ void App::debugWindow()
     }
     ImGui::End();
 }
+
+void App::hitboxWindow()
+{
+    if (m_hitboxMode)
+    {
+        ImGui::SetNextWindowSize({ 200.f, 100.f }, ImGuiCond_FirstUseEver);
+        ImGui::SetWindowPos({ 80.f, 420.f }, ImGuiCond_FirstUseEver);
+
+        if (ImGui::Begin("Hit Boxes"))
+        {
+            if (ImGui::Button("Add"))
+            {
+                //set mode to add box
+            }
+
+            ImGui::Text("Properties");
+            ImGui::Text("Nothing Selected");
+            //else show size/spinner
+
+            //if selected show delete button
+        }
+        ImGui::End();
+    }
+}

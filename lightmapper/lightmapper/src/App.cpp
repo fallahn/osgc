@@ -301,6 +301,7 @@ void App::loadMapData(const std::string& path)
     if (cfg.loadFromFile(path))
     {
         m_scene.removeMeasureMesh();
+        m_scene.getRectangles().clear();
         m_scene.getMeshes().clear();
         m_mapData.clear();
         m_showImportWindow = false;
@@ -512,6 +513,7 @@ void App::loadModel(const std::string& path)
             m_mapLoaded = false;
            
             m_scene.getMeshes().clear();
+            m_scene.getRectangles().clear();
 
             addModel(md, m_scene, glm::vec3(0.f));
             //TODO get Scale const
@@ -545,6 +547,7 @@ void App::update()
     mapBrowserWindow();
     statusWindow();
     debugWindow();
+    hitboxWindow();
 
     useOrtho = m_hitboxMode;
     m_mousePosition = getMousePosition();

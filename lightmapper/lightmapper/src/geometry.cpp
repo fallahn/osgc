@@ -37,6 +37,7 @@ void App::updateSceneGeometry(const RoomData& room)
 {
     auto& meshes = m_scene.getMeshes();
     meshes.clear();
+    m_scene.getRectangles().clear();
 
     //build main room
     buildRoom(room, m_scene);
@@ -90,6 +91,7 @@ void App::importObjFile(const std::string& path)
     {
         m_mapData.clear();
         m_scene.getMeshes().clear();
+        m_scene.getRectangles().clear();
         m_currentRoom = -1;
         m_showImportWindow = false;
         m_mapLoaded = false;

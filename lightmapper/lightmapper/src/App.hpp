@@ -85,6 +85,7 @@ private:
     void mapBrowserWindow();
     void statusWindow();
     void debugWindow();
+    void hitboxWindow();
     bool m_smoothTextures;
     bool m_hitboxMode;
 };
