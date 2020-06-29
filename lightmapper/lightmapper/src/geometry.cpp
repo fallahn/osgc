@@ -326,6 +326,15 @@ void App::exportModel(const std::string& path, bool applyTransform, bool exportT
                 cfg.addProperty("texture").setValue(fileName);
             }
         }
+
+        //if there are any rectangles in the scene export them
+        const auto& rects = m_scene.getRectangles();
+        for (const auto& rect : rects)
+        {
+            auto hitbox = rect->asHitbox();
+            cfg.addProperty("hitbox").setValue(hitbox);
+        }
+
         outpath.replace(pos, outpath.length(), ".xmd");
         cfg.save(outpath);
     }

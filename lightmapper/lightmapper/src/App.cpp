@@ -517,6 +517,11 @@ void App::loadModel(const std::string& path)
                 md.depth = prop.getValue<float>();
             }
 
+            else if (prop.getName() == "hitbox")
+            {
+                //TODO add rectangle and scale from hitbox
+            }
+
             //TODO need to at least read the texture size if one assigned
         }
 

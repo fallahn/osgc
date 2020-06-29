@@ -90,6 +90,19 @@ struct RoomData final
     std::vector<ModelData> models;
 };
 
+//this is in SFML style coords, so Y down
+struct Hitbox final
+{
+    Hitbox() = default;
+    Hitbox(float l, float t, float w, float h)
+        : left(l), top(t), width(w), height(h) {}
+
+    float left = 0.f;
+    float top = 0.f;
+    float width = 0.f;
+    float height = 0.f;
+};
+
 struct RectMesh final : public Mesh
 {
     glm::vec3 colour = glm::vec3(0.f, 1.f, 0.f);
@@ -99,6 +112,7 @@ struct RectMesh final : public Mesh
     void updateVerts();
 
     bool contains(glm::vec2) const;
+    Hitbox asHitbox() const;
 
     static constexpr float handleSize = 0.05f;
 };

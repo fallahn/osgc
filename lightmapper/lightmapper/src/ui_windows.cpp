@@ -364,12 +364,30 @@ void App::hitboxWindow()
                 //add default box
                 selectRect(m_scene.addRectangle());
             }
-
+            ImGui::NewLine();
             ImGui::Text("Properties");
-            ImGui::Text("Nothing Selected");
-            //else show size/spinner
+            
+            if (m_selectedRect)
+            {
+                //print size in world and export coods
+                ImGui::Text("Start: %3.3f, %3.3f", m_selectedRect->start.x, m_selectedRect->start.y);
+                ImGui::SameLine();
+                ImGui::Text(", End: %3.3f, %3.3f", m_selectedRect->end.x, m_selectedRect->end.y);
+                ImGui::NewLine();
+                auto hitbox = m_selectedRect->asHitbox();
+                ImGui::Text("Export Size: %3.3f, %3.3f, %3.3f, %3.3f", hitbox.left, hitbox.top, hitbox.width, hitbox.height);
 
-            //if selected show delete button
+                ImGui::NewLine();
+                if (ImGui::Button("Delete"))
+                {
+                    m_scene.removeRectangle(m_selectedRect);
+                    m_selectedRect = nullptr;
+                }
+            }
+            else
+            {
+                ImGui::Text("Nothing Selected");
+            }
         }
         ImGui::End();
     }

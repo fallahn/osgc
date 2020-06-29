@@ -70,6 +70,14 @@ inline glm::vec2 ConfigProperty::getValue<glm::vec2>() const
 
     return { values[0], values[1] };
 }
+
+template <>
+inline Hitbox ConfigProperty::getValue<Hitbox>() const
+{
+    auto values = valueAsArray();
+
+    return { values[0], values[1], values[2], values[3] };
+}
 //
 //template <>
 //inline sf::Vector2i ConfigProperty::getValue<sf::Vector2i>() const

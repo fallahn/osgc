@@ -72,6 +72,12 @@ void ConfigProperty::setValue(glm::vec3 v)
     m_isStringTypeValue = false;
 }
 
+void ConfigProperty::setValue(Hitbox v)
+{
+    m_value = std::to_string(v.left) + "," + std::to_string(v.top) + "," + std::to_string(v.width) + "," + std::to_string(v.height);
+    m_isStringTypeValue = false;
+}
+
 //private
 std::vector<float> ConfigProperty::valueAsArray() const
 {

@@ -154,3 +154,21 @@ bool RectMesh::contains(glm::vec2 point) const
 
     return (point.x >= minX) && (point.x < maxX) && (point.y >= minY) && (point.y < maxY);
 }
+
+Hitbox RectMesh::asHitbox() const
+{
+    float minX = std::min(start.x, end.x);
+    float maxX = std::max(start.x, end.x);
+    float minY = std::min(start.y, end.y);
+    float maxY = std::max(start.y, end.y);
+
+    const float Scale = 96.f; //this is the Default room with divided by the scaled view... need to hook this up with consts in Geometry.cpp
+
+    Hitbox hitbox;
+    hitbox.left = minX * Scale;
+    hitbox.width = (maxX - minX) * Scale;
+    hitbox.top = -maxY * Scale;
+    hitbox.height = (maxY - minY) * Scale;
+
+    return hitbox;
+}

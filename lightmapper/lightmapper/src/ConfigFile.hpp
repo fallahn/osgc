@@ -27,7 +27,9 @@ source distribution.
 
 #pragma once
 
+#include "structures.h"
 #include "glm/vec2.hpp"
+#include "glm/vec4.hpp"
 
 #include <string>
 #include <vector>
@@ -84,7 +86,7 @@ namespace xy
         void setValue(float);
         void setValue(glm::vec2);
         void setValue(glm::vec3);
-
+        void setValue(Hitbox);
 
     private:
         std::string m_value;
