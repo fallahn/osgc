@@ -10,3 +10,5 @@ void error_callback(int, const char*);
 void mouse_move_callback(GLFWwindow*, double, double);
 
 void mouse_button_callback(GLFWwindow*, int, int, int);
+
+void keypress_callback(GLFWwindow*, int, int, int, int);

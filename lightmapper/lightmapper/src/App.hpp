@@ -103,4 +103,5 @@ private:
 
     friend void mouse_move_callback(GLFWwindow*, double, double);
     friend void mouse_button_callback(GLFWwindow*, int, int, int);
+    friend void keypress_callback(GLFWwindow*, int, int, int, int);
 };

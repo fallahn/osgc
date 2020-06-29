@@ -74,6 +74,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 case App::MouseState::HandleStart:
                 case App::MouseState::HandleEnd:
                     app.m_mouseState = App::MouseState::None;
+                    glfwSetCursor(window, app.m_pointerCursor);
                     break;
                 }
             }
@@ -84,3 +85,22 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         }
     }
 }
+
+void keypress_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_RELEASE)
+    {
+        switch (key)
+        {
+        default: break;
+        case GLFW_KEY_TAB:
+        {
+            auto& app = APP_INSTANCE(glfwGetWindowUserPointer(window));
+            app.m_hitboxMode = !app.m_hitboxMode;
+        }
+            break;
+        }
+    }
+
+}
+

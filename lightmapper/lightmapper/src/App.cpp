@@ -147,6 +147,7 @@ App::App()
         glfwSetErrorCallback(error_callback);
         glfwSetCursorPosCallback(m_window, mouse_move_callback);
         glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+        glfwSetKeyCallback(m_window, keypress_callback);
 
         glfwSetWindowUserPointer(m_window, this);
 
@@ -805,7 +806,10 @@ void App::selectRect(RectMesh* rect)
     }
 
     m_selectedRect = rect;
-    m_selectedRect->colour = Red;
+    if (m_selectedRect)
+    {
+        m_selectedRect->colour = Red;
+    }
 }
 
 void App::grabHandle()
@@ -832,6 +836,7 @@ void App::grabHandle()
                 selectRect(rect.get());
                 return;
             }
+            selectRect(nullptr);
         }
     };
 
@@ -843,6 +848,7 @@ void App::grabHandle()
         if (len2 < handleDistance)
         {
             m_mouseState = MouseState::HandleStart;
+            glfwSetCursor(m_window, m_crossCursor);
             return;
         }
 
@@ -851,6 +857,7 @@ void App::grabHandle()
         if (len2 < handleDistance)
         {
             m_mouseState = MouseState::HandleEnd;
+            glfwSetCursor(m_window, m_crossCursor);
             return;
         }
 

@@ -334,6 +334,7 @@ void App::statusWindow()
         }
         else if (m_hitboxMode)
         {
+            ImGui::NewLine();
             if (ImGui::Button("Export Hitboxes"))
             {
                 //show option to export/update hitboxes
