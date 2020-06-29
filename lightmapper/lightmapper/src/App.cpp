@@ -9,7 +9,9 @@
 #include "ConfigFile.hpp"
 #include "tinyfiledialogs.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -23,7 +25,12 @@ namespace
     glm::mat4 OrthoProjection = glm::mat4(1.f);
     glm::vec2 OrthoScale = glm::vec2(1.f);
 
-    bool useOrtho = false; ///urg what a mess - this just copies the member var so these callbacks can read it...
+    const glm::vec3 Green = glm::vec3(0.f, 1.f, 0.f);
+    const glm::vec3 Red = glm::vec3(1.f, 0.f, 0.f);
+
+    //urg what a mess - this just copies the member var so these callbacks can read it...
+    //TODO move to callbacks.hpp
+    bool useOrtho = false; 
     float zoom = 1.f;
     void window_size_callback(GLFWwindow* window, int w, int h)
     {
@@ -132,8 +139,16 @@ App::App()
     }
     else
     {
+        m_pointerCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+        m_crossCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+
         glfwSetScrollCallback(m_window, scroll_callback);
         glfwSetWindowSizeCallback(m_window, window_size_callback);
+        glfwSetErrorCallback(error_callback);
+        glfwSetCursorPosCallback(m_window, mouse_move_callback);
+        glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+
+        glfwSetWindowUserPointer(m_window, this);
 
         glfwMakeContextCurrent(m_window);
         glfwSwapInterval(1);
@@ -730,4 +745,71 @@ void App::setZUp(bool z)
     }
 
     m_scene.setzUp(z);
+}
+
+void App::selectRect(RectMesh* rect)
+{
+    if (m_selectedRect)
+    {
+        m_selectedRect->colour = Green;
+    }
+
+    m_selectedRect = rect;
+    m_selectedRect->colour = Red;
+}
+
+void App::grabHandle()
+{
+    glm::vec2 clickPosition(0.f);
+    if (m_scene.getzUp())
+    {
+        clickPosition = { m_mousePosition.x, m_mousePosition.z };
+    }
+    else
+    {
+        clickPosition = { m_mousePosition.x, m_mousePosition.y };
+    }
+
+    const float handleDistance = RectMesh::handleSize;
+
+    auto selectNearest = [&]()
+    {
+        auto& rects = m_scene.getRectangles();
+        for (auto& rect : rects)
+        {
+            if (rect->contains(clickPosition))
+            {
+                selectRect(rect.get());
+                return;
+            }
+        }
+    };
+
+    if (m_selectedRect)
+    {
+        //check distance to handles
+        float len2 = glm::length2(m_selectedRect->start - clickPosition);
+
+        if (len2 < handleDistance)
+        {
+            m_mouseState = MouseState::HandleStart;
+            return;
+        }
+
+        len2 = glm::length2(m_selectedRect->end - clickPosition);
+
+        if (len2 < handleDistance)
+        {
+            m_mouseState = MouseState::HandleEnd;
+            return;
+        }
+
+        //if not close enough to either check distance to nearest rect and select
+        selectNearest();
+    }
+    else
+    {
+        //check distance to rect and select
+        selectNearest();
+    }
 }

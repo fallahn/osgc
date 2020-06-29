@@ -8,6 +8,7 @@ projectin matrices depending on the mode
 #pragma once
 
 #include "scene.h"
+#include "Callbacks.hpp"
 
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
@@ -88,4 +89,18 @@ private:
     void hitboxWindow();
     bool m_smoothTextures;
     bool m_hitboxMode;
+
+    GLFWcursor* m_pointerCursor = nullptr;
+    GLFWcursor* m_crossCursor = nullptr;
+    RectMesh* m_selectedRect = nullptr;
+    void selectRect(RectMesh*);
+    void grabHandle();
+
+    enum class MouseState
+    {
+        HandleStart, HandleEnd, None
+    }m_mouseState = MouseState::None;
+
+    friend void mouse_move_callback(GLFWwindow*, double, double);
+    friend void mouse_button_callback(GLFWwindow*, int, int, int);
 };

@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\Callbacks.cpp" />
     <ClCompile Include="src\ConfigFile.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.hpp" />
+    <ClInclude Include="src\Callbacks.hpp" />
     <ClInclude Include="src\ConfigFile.hpp" />
     <ClInclude Include="src\OBJ_Loader.h" />
     <ClInclude Include="src\scene.h" />

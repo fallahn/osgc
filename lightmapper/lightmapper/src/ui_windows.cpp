@@ -358,9 +358,11 @@ void App::hitboxWindow()
 
         if (ImGui::Begin("Hit Boxes"))
         {
-            if (ImGui::Button("Add"))
+            if (ImGui::Button("Add")
+                && m_scene.getMeshes().size() > 0)
             {
-                //set mode to add box
+                //add default box
+                selectRect(m_scene.addRectangle());
             }
 
             ImGui::Text("Properties");

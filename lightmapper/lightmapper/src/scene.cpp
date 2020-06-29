@@ -95,13 +95,16 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
     //foreach mesh in scene
     for (const auto& mesh : m_meshes)
     {
-        //model matrix
-        glUniformMatrix4fv(m_meshShader.modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
+        if (mesh->vao)
+        {
+            //model matrix
+            glUniformMatrix4fv(m_meshShader.modelUniform, 1, GL_FALSE, &mesh->modelMatrix[0][0]);
 
-        glBindTexture(GL_TEXTURE_2D, mesh->texture);
+            glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
-        glCheck(glBindVertexArray(mesh->vao));
-        glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
+            glCheck(glBindVertexArray(mesh->vao));
+            glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
+        }
     }
 
     //draw measure mesh if it exists
@@ -111,7 +114,7 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
         mesh->modelMatrix = glm::mat4(1.f);
         if (!m_zUp)
         {
-            mesh->modelMatrix *= yUpMatrix;// glm::rotate(glm::mat4(1.f), -90.f * ((float)M_PI / 180.f), glm::vec3(1.f, 0.f, 0.f));
+            mesh->modelMatrix *= yUpMatrix;
         }
 
         
@@ -133,20 +136,23 @@ void Scene::draw(const glm::mat4& view, const glm::mat4& projection, bool drawMe
     glUniformMatrix4fv(m_rectShader.viewUniform, 1, GL_FALSE, &view[0][0]);
     for (const auto& mesh : m_rectangles)
     {
-        //model matrix
-        auto modelMat = mesh->modelMatrix;
-        if (!m_zUp)
+        if (mesh->vao)
         {
-            modelMat *= yUpMatrix;
+            //model matrix
+            auto modelMat = mesh->modelMatrix;
+            if (!m_zUp)
+            {
+                modelMat *= yUpMatrix;
+            }
+
+            glUniformMatrix4fv(m_rectShader.modelUniform, 1, GL_FALSE, &modelMat[0][0]);
+
+            //set colour per rectangle
+            glUniform3f(m_rectShader.colourUniform, mesh->colour.r, mesh->colour.g, mesh->colour.b);
+
+            glCheck(glBindVertexArray(mesh->vao));
+            glCheck(glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, nullptr));
         }
-
-        glUniformMatrix4fv(m_rectShader.modelUniform, 1, GL_FALSE, &modelMat[0][0]);
-
-        //set colour per rectangle
-        glUniform3f(m_rectShader.colourUniform, mesh->colour.r, mesh->colour.g, mesh->colour.b);
-
-        glCheck(glBindVertexArray(mesh->vao));
-        glDrawElements(mesh->primitiveType, mesh->indices.size(), GL_UNSIGNED_SHORT, 0);
     }
     glUseProgram(0);
 }
@@ -353,4 +359,23 @@ void Scene::createMeasureMesh(const std::string& path)
 void Scene::removeMeasureMesh()
 {
     m_measureMesh.reset();
+}
+
+RectMesh* Scene::addRectangle()
+{
+    auto* rect = m_rectangles.emplace_back(std::make_unique<RectMesh>()).get();
+    rect->updateVerts();
+    return rect;
+}
+
+void Scene::removeRectangle(RectMesh* rect)
+{
+    if (rect != nullptr)
+    {
+        m_rectangles.erase(std::remove_if(m_rectangles.begin(), m_rectangles.end(), 
+            [rect](const std::unique_ptr<RectMesh>& mesh)
+            {
+                return mesh.get() == rect;            
+            }), m_rectangles.end());
+    }
 }

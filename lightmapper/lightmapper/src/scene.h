@@ -36,6 +36,10 @@ public:
 
     void removeMeasureMesh();
 
+    RectMesh* addRectangle();
+
+    void removeRectangle(RectMesh*);
+
     void setzUp(bool z) { m_zUp = z; }
 
     bool getzUp() const { return m_zUp; }

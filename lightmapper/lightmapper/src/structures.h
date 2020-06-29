@@ -93,8 +93,12 @@ struct RoomData final
 struct RectMesh final : public Mesh
 {
     glm::vec3 colour = glm::vec3(0.f, 1.f, 0.f);
-    glm::vec2 start = glm::vec2(0.f);
-    glm::vec2 end = glm::vec2(0.f);
+    glm::vec2 start = glm::vec2(-0.2f);
+    glm::vec2 end = glm::vec2(0.2f);
 
     void updateVerts();
+
+    bool contains(glm::vec2) const;
+
+    static constexpr float handleSize = 0.05f;
 };

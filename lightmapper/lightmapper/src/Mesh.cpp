@@ -45,12 +45,17 @@ Mesh::~Mesh()
 void Mesh::updateGeometry()
 {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex_t), vertices.data(), GL_STATIC_DRAW);
+    glBindVertexArray(vao);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex_t), vertices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_STATIC_DRAW);
+    glBindVertexArray(vao);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), indices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 }
 
 void Mesh::loadTexture(const std::string& path)
@@ -99,17 +104,53 @@ void Mesh::setTextureSmooth(bool smooth)
 
 void RectMesh::updateVerts()
 {
-    primitiveType = GL_LINE_STRIP;
+    const float handleOffset = RectMesh::handleSize;
+
+    primitiveType = GL_LINES;
 
     vertices.clear();
     vertices.emplace_back().position = { start.x, 0.f, -start.y };
     vertices.emplace_back().position = { start.x, 0.f, -end.y };
     vertices.emplace_back().position = { end.x, 0.f, -end.y };
     vertices.emplace_back().position = { end.x, 0.f, -start.y };
-    vertices.emplace_back().position = { start.x, 0.f, -start.y };
 
-    indices.clear();
-    indices = { 0,1,2,3,4 };
+    vertices.emplace_back().position = { start.x - handleOffset, 0.f, -start.y + handleOffset };
+    vertices.emplace_back().position = { start.x - handleOffset, 0.f, -start.y };
+    vertices.emplace_back().position = { start.x, 0.f, -start.y };
+    vertices.emplace_back().position = { start.x, 0.f, -start.y + handleOffset };
+
+    vertices.emplace_back().position = { end.x, 0.f, -end.y };
+    vertices.emplace_back().position = { end.x, 0.f, -end.y - handleOffset };
+    vertices.emplace_back().position = { end.x + handleOffset, 0.f, -end.y - handleOffset };
+    vertices.emplace_back().position = { end.x + handleOffset, 0.f, -end.y };
+
+    indices = 
+    { 
+        0,1,
+        1,2, 
+        2,3,
+        3,0 ,
+
+        4,5,
+        5,6,
+        6,7,
+        7,4,
+
+        8,9,
+        9,10,
+        10,11,
+        11,8
+    };
 
     updateGeometry();
+}
+
+bool RectMesh::contains(glm::vec2 point) const
+{
+    float minX = std::min(start.x, end.x);
+    float maxX = std::max(start.x, end.x);
+    float minY = std::min(start.y, end.y);
+    float maxY = std::max(start.y, end.y);
+
+    return (point.x >= minX) && (point.x < maxX) && (point.y >= minY) && (point.y < maxY);
 }
