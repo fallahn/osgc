@@ -2,6 +2,7 @@
 #include "tinyfiledialogs.h"
 #include "imgui/imgui.h"
 #include "geometry.h"
+#include "ConfigFile.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -329,6 +330,41 @@ void App::statusWindow()
                     exportModel(path, applyTransform, exportTexture, binaryOnly);
                     m_lastPaths.lastExport = path;
                 }
+            }
+        }
+        else if (m_hitboxMode)
+        {
+            if (ImGui::Button("Export Hitboxes"))
+            {
+                //show option to export/update hitboxes
+                static const char* filter[] = { "*.xmd" };
+                auto path = tinyfd_openFileDialog("Choose Model", m_lastPaths.lastModel.c_str(), 1, filter, nullptr, 0);
+                if (path)
+                {
+                    xy::ConfigFile cfg;
+                    if (cfg.loadFromFile(path))
+                    {
+                        //remove old properties
+                        auto& properties = cfg.getProperties();
+                        properties.erase(std::remove_if(properties.begin(), properties.end(),
+                            [](const xy::ConfigProperty& p)
+                            {
+                                return p.getName() == "hitbox";
+                            }), properties.end());
+
+                        const auto& rects = m_scene.getRectangles();
+                        for (const auto& rect : rects)
+                        {
+                            cfg.addProperty("hitbox").setValue(rect->asHitbox());
+                        }
+                        cfg.save(path);
+                    }
+                    else
+                    {
+                        tinyfd_messageBox("Error", "Failed opening file", "ok", "error", 0);
+                    }
+                }
+
             }
         }
 

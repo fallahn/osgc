@@ -89,7 +89,7 @@ App::App()
     m_saveOutput        (false),
     m_showImportWindow  (false),
     m_smoothTextures    (true),
-    m_hitboxMode        (true) //TODO default to false
+    m_hitboxMode        (false)
 {
     if (glfwInit())
     {
@@ -487,6 +487,7 @@ void App::loadModel(const std::string& path)
     {
         ModelData md;
         std::vector<Hitbox> hitboxes;
+        std::string texture;
 
         const auto& properties = cfg.getProperties();
         for (const auto& prop : properties)
@@ -504,7 +505,7 @@ void App::loadModel(const std::string& path)
                     fullpath = fullpath.substr(0, pos);
                 }
 
-                //prepned '/' if it's missing
+                //prepend '/' if it's missing
                 if (auto pos = md.path.find_first_of('/'); pos == std::string::npos)
                 {
                     md.path = "/" + md.path;
@@ -522,8 +523,27 @@ void App::loadModel(const std::string& path)
             {
                 hitboxes.push_back(prop.getValue<Hitbox>());
             }
+            else if (prop.getName() == "texture")
+            {
+                texture = prop.getValue<std::string>();
 
-            //TODO need to at least read the texture size if one assigned
+                //the path is assumed relative to the current file
+                auto fullpath = path;
+                std::replace(fullpath.begin(), fullpath.end(), '\\', '/');
+                if (auto pos = fullpath.find_last_of('/'); pos != std::string::npos)
+                {
+                    //remove the file name
+                    fullpath = fullpath.substr(0, pos);
+                }
+
+                //prepend '/' if it's missing
+                if (auto pos = texture.find_first_of('/'); pos == std::string::npos)
+                {
+                    texture = "/" + texture;
+                }
+                fullpath += texture;
+                texture = fullpath;
+            }
         }
 
         if (!md.path.empty() && md.depth > 0)
@@ -537,6 +557,15 @@ void App::loadModel(const std::string& path)
             m_scene.getRectangles().clear();
 
             addModel(md, m_scene, glm::vec3(0.f));
+
+            if (!texture.empty()
+                && !m_scene.getMeshes().empty())
+            {
+                m_scene.getMeshes()[0]->loadTexture(texture);
+                m_scene.getMeshes()[0]->setTextureSmooth(m_smoothTextures);
+            }
+
+
             //TODO get Scale const
             m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
 
