@@ -172,3 +172,18 @@ Hitbox RectMesh::asHitbox() const
 
     return hitbox;
 }
+
+void RectMesh::setFromHitbox(Hitbox box)
+{
+    const float Scale = 96.f; //this is the Default room with divided by the scaled view... need to hook this up with consts in Geometry.cpp
+
+    start.x = box.left / Scale;
+    start.y = -(box.top / Scale);
+
+    start.y -= (box.height / Scale);
+
+    end.x = start.x + (box.width / Scale);
+    end.y = start.y + (box.height / Scale);
+
+    updateVerts();
+}

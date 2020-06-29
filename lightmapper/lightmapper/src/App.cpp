@@ -486,6 +486,7 @@ void App::loadModel(const std::string& path)
     if (cfg.loadFromFile(path))
     {
         ModelData md;
+        std::vector<Hitbox> hitboxes;
 
         const auto& properties = cfg.getProperties();
         for (const auto& prop : properties)
@@ -519,7 +520,7 @@ void App::loadModel(const std::string& path)
 
             else if (prop.getName() == "hitbox")
             {
-                //TODO add rectangle and scale from hitbox
+                hitboxes.push_back(prop.getValue<Hitbox>());
             }
 
             //TODO need to at least read the texture size if one assigned
@@ -540,6 +541,11 @@ void App::loadModel(const std::string& path)
             m_cameraPosition.y = (md.depth * (10.f / 960.f)) / 2.f;
 
             m_scene.createMeasureMesh(m_lastPaths.measurePath);
+
+            for (auto box : hitboxes)
+            {
+                m_scene.addRectangle()->setFromHitbox(box);
+            }
         }
     }
 }
@@ -583,7 +589,17 @@ glm::vec3 App::getMousePosition()
     int w = 0;
     int h = 0;
     glfwGetFramebufferSize(m_window, &w, &h);
-    return glm::unProject(glm::vec3(mouse[0], mouse[1], 0.f), m_viewMatrix, OrthoProjection, glm::vec4(0.f, 0.f, w, h));
+    auto retVal = glm::unProject(glm::vec3(mouse[0], mouse[1], 0.f), m_viewMatrix, OrthoProjection, glm::vec4(0.f, 0.f, w, h));
+
+    if (m_scene.getzUp())
+    {
+        retVal.z += m_orthoPosition.y * 2.f;
+    }
+    else
+    {
+        retVal.y += m_orthoPosition.y * 2.f;
+    }
+    return retVal;
 }
 
 void App::calcViewMatrix()

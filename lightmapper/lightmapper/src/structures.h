@@ -113,6 +113,7 @@ struct RectMesh final : public Mesh
 
     bool contains(glm::vec2) const;
     Hitbox asHitbox() const;
+    void setFromHitbox(Hitbox);
 
     static constexpr float handleSize = 0.05f;
 };
