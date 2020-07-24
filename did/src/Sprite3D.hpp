@@ -64,28 +64,18 @@ public:
         : m_pool    (nullptr),
         m_matrixIdx (0)
     {
-        verticalOffset = other.verticalOffset;
-        needsCorrection = other.needsCorrection;
-        m_pool = other.m_pool;
-        m_matrixIdx = other.m_matrixIdx;
-
-        other.verticalOffset = 0.f;
-        other.needsCorrection = true;
-        other.m_pool = nullptr;
-        other.m_matrixIdx = 0;
+        std::swap(verticalOffset, other.vertical);
+        std::swap(needsCorrection, other.needsCorrection);
+        std::swap(m_pool, other.m_pool);
+        std::swap(m_matrixIdx, other.m_matrixIdx);
     }
 
     Sprite3D& operator = (Sprite3D&& other)
     {
-        verticalOffset = other.verticalOffset;
-        needsCorrection = other.needsCorrection;
-        m_pool = other.m_pool;
-        m_matrixIdx = other.m_matrixIdx;
-
-        other.verticalOffset = 0.f;
-        other.needsCorrection = true;
-        other.m_pool = nullptr;
-        other.m_matrixIdx = 0;
+        std::swap(verticalOffset, other.vertical);
+        std::swap(needsCorrection, other.needsCorrection);
+        std::swap(m_pool, other.m_pool);
+        std::swap(m_matrixIdx, other.m_matrixIdx);
 
         return *this;
     }

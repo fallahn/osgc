@@ -56,24 +56,16 @@ public:
         : m_pool    (nullptr),
         m_matrixIdx (0)
     {
-        depth = other.depth;
-        m_pool = other.m_pool;
-        m_matrixIdx = other.m_matrixIdx;
-
-        other.depth = 0.f;
-        other.m_pool = nullptr;
-        other.m_matrixIdx = 0;
+        std::swap(depth, other.depth);
+        std::swap(m_pool, other.m_pool);
+        std::swap(m_matrixIdx, other.m_matrixIdx);
     }
 
     Sprite3D& operator = (Sprite3D&& other) noexcept
     {
-        depth = other.depth;
-        m_pool = other.m_pool;
-        m_matrixIdx = other.m_matrixIdx;
-
-        other.depth = 0.f;
-        other.m_pool = nullptr;
-        other.m_matrixIdx = 0;
+        std::swap(depth, other.depth);
+        std::swap(m_pool, other.m_pool);
+        std::swap(m_matrixIdx, other.m_matrixIdx);
 
         return *this;
     }

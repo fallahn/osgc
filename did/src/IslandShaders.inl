@@ -220,8 +220,8 @@ void main()
     gl_FragColor = vec4(ambient + diffuse, baseColour.a);//vec4(normal, 1.0);//
 })";
 
-//this was based on something from shader toy - although I've lost the link
-//if anyone knows who this should be credited to let me know...
+//based on shader at
+//https://www.shadertoy.com/view/ltSSz3
 static const std::string SeaFrag =
 R"(
 
