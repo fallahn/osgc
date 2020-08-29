@@ -32,8 +32,8 @@ source distribution.
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/PrimitiveType.hpp>
-#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Glsl.hpp>
+#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/System/Vector3.hpp>
 
 #include <vector>
@@ -44,7 +44,7 @@ namespace xy
 {
     /*!
     \brief Drawable component.
-    The drawable component encapsulates an sf::VertexArray which can be used to draw
+    The drawable component encapsulates an sf::VertexBuffer which can be used to draw
     custom shapes, as well as being required for entities which have a sprite or text
     component. The purpose of the Drawable component is to allow mixing Sprite, Text
     and custom drawable types in a single drawing pass with variable depth. A Scene
@@ -55,7 +55,7 @@ namespace xy
     public:
         Drawable();
         explicit Drawable(const sf::Texture&);
-        
+
         /*!
         \brief Sets the texture with which to render this drawable.
         Setting this to nullptr removes the texture. This has no effect
@@ -104,7 +104,10 @@ namespace xy
         void bindUniformToCurrentTexture(const std::string& name);
 
         /*!
-        \brief Sets the blend mode used when drawing
+        \brief Sets the blend mode used when drawing.
+        Note that this is overriden and has no effect if the Drawable
+        component is used on an Entity with a Sprite loaded from a
+        SpriteSheet, as the SpriteSheet definition takes precedence.
         */
         void setBlendMode(sf::BlendMode);
 
@@ -238,6 +241,17 @@ namespace xy
         void addGlFlag(std::int32_t);
 
         /*!
+        \brief Enables or disables writing to the depth buffer.
+        Default is true.
+        */
+        void setDepthWriteEnabled(bool enabled) { m_depthWriteEnabled = enabled; }
+
+        /*!
+        \brief Returns true if depth writes are enabled, else false
+        */
+        bool getDepthWriteEnabled() const { return m_depthWriteEnabled; }
+
+        /*!
         \brief default flag value for drawables 
         0b1000000000000000000000000000000000000000000000000000000000000000
         */
@@ -248,7 +262,7 @@ namespace xy
         sf::RenderStates m_states;
         std::vector<sf::Vertex> m_vertices;
 
-        sf::Int32 m_zDepth = 0;
+        std::int32_t m_zDepth = 0;
         bool m_wantsSorting = true;
 
         std::uint64_t m_filterFlags;
@@ -311,6 +325,7 @@ namespace xy
 
         std::array<std::int32_t, 4u> m_glFlags = {};
         std::size_t m_glFlagIndex;
+        bool m_depthWriteEnabled;
 
         friend class RenderSystem;
 

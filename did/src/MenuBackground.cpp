@@ -72,7 +72,6 @@ void MenuState::createBackground()
 
     //camera
     camEnt = m_gameScene.getDefaultCamera();//using the default cam means scene automagically updates the letterbox
-    camEnt.addComponent<xy::Transform>();
     const float fov = 0.6f; //0.55f FOV
     const float aspect = 16.f / 9.f;
     camEnt.addComponent<Camera3D>().projectionMatrix = glm::perspective(fov, aspect, 0.1f, 1536.f);

@@ -64,7 +64,7 @@ public:
         : m_pool    (nullptr),
         m_matrixIdx (0)
     {
-        std::swap(verticalOffset, other.vertical);
+        std::swap(verticalOffset, other.verticalOffset);
         std::swap(needsCorrection, other.needsCorrection);
         std::swap(m_pool, other.m_pool);
         std::swap(m_matrixIdx, other.m_matrixIdx);
@@ -72,7 +72,7 @@ public:
 
     Sprite3D& operator = (Sprite3D&& other)
     {
-        std::swap(verticalOffset, other.vertical);
+        std::swap(verticalOffset, other.verticalOffset);
         std::swap(needsCorrection, other.needsCorrection);
         std::swap(m_pool, other.m_pool);
         std::swap(m_matrixIdx, other.m_matrixIdx);

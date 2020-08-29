@@ -18,13 +18,15 @@ Copyright 2019 Matt Marchant
 
 #pragma once
 
+#include <xyginext/core/Log.hpp>
+
 template <typename T>
 inline void GameServer::sendData(std::uint8_t packetID, const T& data, std::uint64_t destination, xy::NetFlag sendType, std::uint8_t channel)
 {
 #ifdef XY_DEBUG
     if (m_sharedStateData.connectedClients.count(destination) == 0)
     {
-        std::cout << "Tried to send to " << destination << ": invalid destination\n";
+        LogW << "Tried to send to " << destination << ": invalid destination" << std::endl;
         return;
     }
 #endif

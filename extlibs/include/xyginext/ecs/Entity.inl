@@ -29,6 +29,7 @@ template <typename T>
 void Entity::addComponent(const T& component)
 {
     XY_ASSERT(isValid(), "Not a valid Entity");
+    XY_ASSERT(!hasComponent<T>(), "Already has this component");
     m_entityManager->addComponent<T>(*this, component);
 }
 
@@ -36,6 +37,7 @@ template <typename T, typename... Args>
 T& Entity::addComponent(Args&&... args)
 {
     XY_ASSERT(isValid(), "Not a valid Entity");
+    XY_ASSERT(!hasComponent<T>(), "Already has this component");
     return m_entityManager->addComponent<T>(*this, std::forward<Args>(args)...);
 }
 
@@ -59,6 +61,7 @@ template <typename T>
 T& Entity::getComponent()
 {
     XY_ASSERT(isValid(), "Not a valid Entity");
+    XY_ASSERT(hasComponent<T>(), std::string(typeid(T).name()) + ": Component does not exist!");
     return m_entityManager->getComponent<T>(*this);
 }
 
@@ -66,5 +69,6 @@ template <typename T>
 const T& Entity::getComponent() const
 {
     XY_ASSERT(isValid(), "Not a valid Entity");
+    XY_ASSERT(hasComponent<T>(), std::string(typeid(T).name()) + ": Component does not exist!");
     return m_entityManager->getComponent<T>(*this);
 }

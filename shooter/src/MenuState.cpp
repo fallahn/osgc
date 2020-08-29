@@ -56,6 +56,7 @@ Copyright 2019 Matt Marchant
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/OpenGL.hpp>
 
 #include <fstream>
 
@@ -67,6 +68,17 @@ namespace FontID
 namespace TextureID
 {
     std::array<std::size_t, TextureID::Count> handles = {};
+}
+
+namespace MenuID
+{
+    enum
+    {
+        Main = 0,
+        Help,
+        Play,
+        HighScore
+    };
 }
 
 namespace
@@ -142,6 +154,8 @@ MenuState::MenuState(xy::StateStack& ss, xy::State::Context ctx, SharedData& sd)
             xy::ui::text("Drone Drop (c)2019 Matt Marchant and Contributors");
             xy::ui::text("For individual asset credits and licensing see credits.txt in the \'assets\' directory");
         });
+
+    glLineWidth(4.f);
 
     quitLoadingScreen();
 }
@@ -424,6 +438,10 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+    auto selectedID = uiSystem.addSelectionCallback([](xy::Entity e) {e.getComponent<xy::Text>().setFillColour(sf::Color::Red); });
+    auto unselectedID = uiSystem.addSelectionCallback([](xy::Entity e) {e.getComponent<xy::Text>().setFillColour(Menu::TextColour); });
+
     //menu items
     auto itemPos = Menu::ItemFirstPosition;
     //play
@@ -436,42 +454,70 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_up");
 
+    auto playButtonCallback = [&](xy::Entity ent)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::DifficultySelect;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target = Menu::DifficultyShownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::RootNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::Starfield;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        ent.getComponent<xy::AudioEmitter>().play();
+
+        uiSystem.setActiveGroup(MenuID::Play);
+    };
+
     auto textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback(
+            [playButtonCallback](xy::Entity e, sf::Uint64 flags)
     {
         if (flags & xy::UISystem::LeftMouse)
         {
-            xy::Command cmd;
-            cmd.targetFlags = CommandID::Menu::DifficultySelect;
-            cmd.action = [](xy::Entity e, float)
-            {
-                e.getComponent<Slider>().target = Menu::DifficultyShownPosition;
-                e.getComponent<Slider>().active = true;
-            };
-            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            cmd.targetFlags = CommandID::Menu::RootNode;
-            cmd.action = [](xy::Entity e, float)
-            {
-                e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
-                e.getComponent<Slider>().active = true;
-            };
-            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            cmd.targetFlags = CommandID::Menu::Starfield;
-            cmd.action = [](xy::Entity e, float)
-            {
-                e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
-                e.getComponent<Slider>().active = true;
-            };
-            m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-            e.getComponent<xy::AudioEmitter>().play();
+            playButtonCallback(e);
         }
     });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [playButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    playButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [playButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    playButtonCallback(e);
+                }
+            });
+
     itemPos.y += Menu::ItemVerticalSpacing;
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
 
@@ -485,16 +531,41 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("button");
 
+    auto optionButtonCallback = [](xy::Entity e)
+    {
+        xy::Console::show();
+        e.getComponent<xy::AudioEmitter>().play();    
+    };
+
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback(
+            [optionButtonCallback](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    xy::Console::show();
-                    e.getComponent<xy::AudioEmitter>().play();
+                    optionButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [optionButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    optionButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [optionButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    optionButtonCallback(e);
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -510,40 +581,67 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_up");
 
+    auto helpButtonCallback = [&](xy::Entity ent)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::Help;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target = Menu::HelpShownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::RootNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::Starfield;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        ent.getComponent<xy::AudioEmitter>().play();
+
+        uiSystem.setActiveGroup(MenuID::Help);
+    };
+
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+        uiSystem.addMouseButtonCallback(
+            [helpButtonCallback](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::Menu::Help;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target = Menu::HelpShownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::RootNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::Starfield;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    e.getComponent<xy::AudioEmitter>().play();
+                    helpButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [helpButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    helpButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [helpButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    helpButtonCallback(e);
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -559,40 +657,67 @@ void MenuState::buildMenu()
     entity.addComponent<xy::Drawable>().setDepth(Menu::TextRenderDepth);
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_up");
 
+    auto scoreButtonCallback = [&](xy::Entity ent)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::ScoreMenu;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target = xy::DefaultSceneSize / 2.f;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::RootNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::Starfield;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        ent.getComponent<xy::AudioEmitter>().play();
+
+        uiSystem.setActiveGroup(MenuID::HighScore);
+    };
+
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+       uiSystem.addMouseButtonCallback(
+            [scoreButtonCallback](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::Menu::ScoreMenu;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target = xy::DefaultSceneSize / 2.f;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::RootNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::PlanetHiddenPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::Starfield;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::StarfieldUpPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    e.getComponent<xy::AudioEmitter>().play();
+                    scoreButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [scoreButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    scoreButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [scoreButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    scoreButtonCallback(e);
                 }
             });
     itemPos.y += Menu::ItemVerticalSpacing;
@@ -609,11 +734,33 @@ void MenuState::buildMenu()
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+        uiSystem.addMouseButtonCallback(
             [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
+                {
+                    requestStackClear();
+                    requestStackPush(StateID::ParentState);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [&](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    requestStackClear();
+                    requestStackPush(StateID::ParentState);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [&](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
                 {
                     requestStackClear();
                     requestStackPush(StateID::ParentState);
@@ -633,14 +780,34 @@ void MenuState::buildMenu()
 
     textBounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = textBounds;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+        uiSystem.addMouseButtonCallback(
             [&](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
                     xy::App::quit();
                     LOG("Enter confirmation here", xy::Logger::Type::Info);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    xy::App::quit();
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    xy::App::quit();
                 }
             });
     rootNode.getComponent<xy::Transform>().addChild(entity.getComponent<xy::Transform>());
@@ -817,68 +984,121 @@ void MenuState::buildHelp()
     auto& parentTx = entity.getComponent<xy::Transform>();
     auto& uiSystem = m_scene.getSystem<xy::UISystem>();
 
+    auto highlightEnt = m_scene.createEntity();
+    highlightEnt.addComponent<xy::Transform>();
+    highlightEnt.addComponent<xy::Drawable>().setDepth(100);
+    highlightEnt.getComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
+    parentTx.addChild(highlightEnt.getComponent<xy::Transform>());
+
+    auto setHighlightSize = [highlightEnt](sf::FloatRect size) mutable
+    {
+        auto& verts = highlightEnt.getComponent<xy::Drawable>().getVertices();
+        verts = 
+        {
+            sf::Vertex(sf::Vector2f(), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(size.width, 0.f), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(size.width, size.height), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(0.f, size.height), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(), sf::Color::Red)
+        };
+        highlightEnt.getComponent<xy::Drawable>().updateLocalBounds();
+    };
+    auto selectedID = uiSystem.addSelectionCallback([setHighlightSize, highlightEnt](xy::Entity e) mutable
+    {
+            highlightEnt.getComponent<xy::Transform>().setPosition(e.getComponent<xy::Transform>().getPosition());
+            setHighlightSize(e.getComponent<xy::UIHitBox>().area);
+    });
+
+    auto okButtonCallback = [&](xy::Entity ett)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::Help;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::HelpHiddenPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::RootNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::Starfield;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        ett.getComponent<xy::AudioEmitter>().play();
+
+        saveSettings();
+
+        m_activeMapping.joybindActive = false;
+        m_activeMapping.keybindActive = false;
+        m_activeMapping.keyDest = nullptr;
+
+        auto ent = m_activeMapping.displayEntity;
+        m_activeMapping.displayEntity = {};
+
+        if (ent.isValid())
+        {
+            auto colour = ent.getComponent<xy::Text>().getFillColour();
+            colour.a = 255;
+            ent.getComponent<xy::Text>().setFillColour(colour);
+            ent.getComponent<xy::Callback>().active = false;
+        }
+        uiSystem.setActiveGroup(MenuID::Main);
+    };
+
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(256.f, 221.f);
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_down");
-    entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 45.f, 25.f };
+    entity.addComponent<xy::UIHitBox>().area = { 0.f, 0.f, 46.f, 26.f };
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::CallbackID::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [okButtonCallback](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::Menu::Help;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::HelpHiddenPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::RootNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::Starfield;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    e.getComponent<xy::AudioEmitter>().play();
-
-                    saveSettings();
-
-                    m_activeMapping.joybindActive = false;
-                    m_activeMapping.keybindActive = false;
-                    m_activeMapping.keyDest = nullptr;
-
-                    auto ent = m_activeMapping.displayEntity;
-                    m_activeMapping.displayEntity = {};
-
-                    if (ent.isValid())
-                    {
-                        auto colour = ent.getComponent<xy::Text>().getFillColour();
-                        colour.a = 255;
-                        ent.getComponent<xy::Text>().setFillColour(colour);
-                        ent.getComponent<xy::Callback>().active = false;
-                    }
+                    okButtonCallback(e);
                 }
             });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [okButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    okButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [okButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    okButtonCallback(e);
+                }
+            });
+
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
+    //keybinds
     sf::Vector2f textPos(417.f, 39.f);
     const sf::Vector2f textScale(0.25f, 0.25f);
     const float verticalSpacing = 24.f;
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
-
+    //text area
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(textPos);
     entity.getComponent<xy::Transform>().setScale(textScale);
@@ -888,12 +1108,14 @@ void MenuState::buildHelp()
     entity.getComponent<xy::Text>().setAlignment(xy::Text::Alignment::Centre);
     entity.addComponent<xy::Callback>().function = FlashCallback();
     parentTx.addChild(entity.getComponent<xy::Transform>());
-
+    //button
     sf::FloatRect buttonArea(0.f, 0.f, 12.f, 12.f);
     auto buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -923,8 +1145,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -954,8 +1178,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -985,8 +1211,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -1016,8 +1244,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -1047,8 +1277,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(32.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(32.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -1080,8 +1312,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(15.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(15.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -1112,8 +1346,10 @@ void MenuState::buildHelp()
 
     buttonEnt = m_scene.createEntity();
     buttonEnt.addComponent<xy::Transform>().setPosition(textPos);
-    buttonEnt.getComponent<xy::Transform>().move(15.f, -2.f);
+    buttonEnt.getComponent<xy::Transform>().move(15.f, -1.f);
     buttonEnt.addComponent<xy::UIHitBox>().area = buttonArea;
+    buttonEnt.getComponent<xy::UIHitBox>().setGroup(MenuID::Help);
+    buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     buttonEnt.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
             [&, entity](xy::Entity, sf::Uint64 flags) mutable
@@ -1135,6 +1371,75 @@ void MenuState::buildDifficultySelect()
 {
     auto entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(4.f, 4.f);
+
+    auto& parentTx = entity.getComponent<xy::Transform>();
+    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+
+    auto highlightEnt = m_scene.createEntity();
+    highlightEnt.addComponent<xy::Transform>();
+    highlightEnt.addComponent<xy::Drawable>().setDepth(100);
+    highlightEnt.getComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
+    parentTx.addChild(highlightEnt.getComponent<xy::Transform>());
+
+    auto setHighlightSize = [highlightEnt](sf::FloatRect size) mutable
+    {
+        auto& verts = highlightEnt.getComponent<xy::Drawable>().getVertices();
+        verts =
+        {
+            sf::Vertex(sf::Vector2f(), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(size.width, 0.f), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(size.width, size.height), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(0.f, size.height), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(), sf::Color::Red)
+        };
+        highlightEnt.getComponent<xy::Drawable>().updateLocalBounds();
+    };
+    auto selectedID = uiSystem.addSelectionCallback([setHighlightSize, highlightEnt](xy::Entity e) mutable
+        {
+            auto area = e.getComponent<xy::UIHitBox>().area;
+            setHighlightSize(e.getComponent<xy::UIHitBox>().area);
+
+            highlightEnt.getComponent<xy::Transform>().setPosition(area.left, area.top);
+        });
+    auto unselectedID = uiSystem.addSelectionCallback([highlightEnt](xy::Entity e) mutable
+        {
+            highlightEnt.getComponent<xy::Transform>().setPosition(-1000.f, -1000.f);
+        
+        });
+
+    auto backButtonCallback = [&](xy::Entity ent, sf::FloatRect bounds)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::DifficultySelect;
+        cmd.action = [bounds](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = xy::DefaultSceneSize.y + (bounds.height * 2.f);
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::RootNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::Starfield;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        ent.getComponent<xy::AudioEmitter>().play();
+
+        m_scene.getSystem<xy::UISystem>().setActiveGroup(MenuID::Main);
+    };
+
     entity.addComponent<xy::Drawable>().setDepth(Menu::MenuRenderDepth);
     entity.addComponent<xy::Sprite>(m_resources.get<sf::Texture>(TextureID::handles[TextureID::DifficultySelect]));
     auto bounds = entity.getComponent<xy::Sprite>().getTextureBounds();
@@ -1144,47 +1449,58 @@ void MenuState::buildDifficultySelect()
     entity.addComponent<Slider>().speed = 4.f;
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_down");
     entity.addComponent<xy::UIHitBox>().area = { 68.f, 85.f, 68.f, 17.f };
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::Play);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, bounds](xy::Entity e, sf::Uint64 flags)
+            [bounds, backButtonCallback](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::Menu::DifficultySelect;
-                    cmd.action = [bounds](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = xy::DefaultSceneSize.y + (bounds.height * 2.f);
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::RootNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    cmd.targetFlags = CommandID::Menu::Starfield;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
-
-                    e.getComponent<xy::AudioEmitter>().play();
+                    backButtonCallback(e, bounds);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [bounds, backButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    backButtonCallback(e, bounds);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [bounds, backButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    backButtonCallback(e, bounds);
                 }
             });
 
 
-    auto& parentTx = entity.getComponent<xy::Transform>();
-    auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
-    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+    selectedID = uiSystem.addSelectionCallback([](xy::Entity e)
+        {
+            e.getComponent<xy::Text>().setFillColour(sf::Color::Red);
+        });
+    unselectedID = uiSystem.addSelectionCallback([](xy::Entity e)
+        {
+            e.getComponent<xy::Text>().setFillColour(sf::Color::White);
+
+        });
+
 
     //add buttons
+    auto startGameCallback = [&](std::int32_t difficulty)
+    {
+        m_sharedData.difficulty = difficulty;
+        m_sharedData.playerData = {};
+        requestStackClear();
+        requestStackPush(StateID::Game);
+    };
+
     sf::Vector2f buttonPos(bounds.width / 2.f, 30.f);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(buttonPos);
@@ -1196,18 +1512,37 @@ void MenuState::buildDifficultySelect()
     bounds = xy::Text::getLocalBounds(entity);
 
     entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::Play);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [startGameCallback](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    m_sharedData.difficulty = SharedData::Easy;
-                    m_sharedData.playerData = {};
-                    requestStackClear();
-                    requestStackPush(StateID::Game);
+                    startGameCallback(SharedData::Easy);
                 }
             });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [startGameCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    startGameCallback(SharedData::Easy);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [startGameCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    startGameCallback(SharedData::Easy);
+                }
+            });
+
     parentTx.addChild(entity.getComponent<xy::Transform>());
     buttonPos.y += (bounds.height / 4.f) + 11.f;
 
@@ -1220,16 +1555,34 @@ void MenuState::buildDifficultySelect()
     entity.getComponent<xy::Text>().setString("Seasoned");
     bounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::Play);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [startGameCallback](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    m_sharedData.difficulty = SharedData::Medium;
-                    m_sharedData.playerData = {};
-                    requestStackClear();
-                    requestStackPush(StateID::Game);
+                    startGameCallback(SharedData::Medium);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [startGameCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    startGameCallback(SharedData::Medium);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [startGameCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    startGameCallback(SharedData::Medium);
                 }
             });
     parentTx.addChild(entity.getComponent<xy::Transform>());
@@ -1244,16 +1597,34 @@ void MenuState::buildDifficultySelect()
     entity.getComponent<xy::Text>().setString("Pro");
     bounds = xy::Text::getLocalBounds(entity);
     entity.addComponent<xy::UIHitBox>().area = bounds;
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::Play);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Unselected] = unselectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         uiSystem.addMouseButtonCallback(
-            [&](xy::Entity, sf::Uint64 flags)
+            [startGameCallback](xy::Entity, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    m_sharedData.difficulty = SharedData::Hard;
-                    m_sharedData.playerData = {};
-                    requestStackClear();
-                    requestStackPush(StateID::Game);
+                    startGameCallback(SharedData::Hard);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [startGameCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    startGameCallback(SharedData::Hard);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [startGameCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    startGameCallback(SharedData::Hard);
                 }
             });
     parentTx.addChild(entity.getComponent<xy::Transform>());
@@ -1337,7 +1708,7 @@ void MenuState::buildHighScores()
     entity.addComponent<Slider>().speed = 4.f;
     auto& parentTx = entity.getComponent<xy::Transform>();
 
-    //score test
+    //score text
     auto& font = m_sharedData.resources.get<sf::Font>(FontID::handles[FontID::CGA]);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setScale(0.25f, 0.25f);
@@ -1371,41 +1742,110 @@ void MenuState::buildHighScores()
     entity.addComponent<xy::SpriteAnimation>().play(0);
     parentTx.addChild(entity.getComponent<xy::Transform>());*/
 
+    auto& uiSystem = m_scene.getSystem<xy::UISystem>();
+
+    auto highlightEnt = m_scene.createEntity();
+    highlightEnt.addComponent<xy::Transform>();
+    highlightEnt.addComponent<xy::Drawable>().setDepth(100);
+    highlightEnt.getComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
+    parentTx.addChild(highlightEnt.getComponent<xy::Transform>());
+
+    auto setHighlightSize = [highlightEnt](sf::FloatRect size) mutable
+    {
+        auto& verts = highlightEnt.getComponent<xy::Drawable>().getVertices();
+        verts =
+        {
+            sf::Vertex(sf::Vector2f(), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(size.width, 0.f), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(size.width, size.height), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(0.f, size.height), sf::Color::Red),
+            sf::Vertex(sf::Vector2f(), sf::Color::Red)
+        };
+        highlightEnt.getComponent<xy::Drawable>().updateLocalBounds();
+    };
+    auto selectedID = uiSystem.addSelectionCallback([setHighlightSize, highlightEnt](xy::Entity e) mutable
+        {
+            highlightEnt.getComponent<xy::Transform>().setPosition(e.getComponent<xy::Transform>().getPosition());
+            setHighlightSize(e.getComponent<xy::UIHitBox>().area);
+        });
+
+
     //button boxes
+    auto prevButtonCallback = [&, scoreTextEntity, titleTextEntity]() mutable
+    {
+        m_scoreIndex = (m_scoreIndex + 1) % m_highScores.size();
+        scoreTextEntity.getComponent<xy::Text>().setString(m_highScores[m_scoreIndex]);
+        titleTextEntity.getComponent<xy::Text>().setString(m_scoreTitles[m_scoreIndex]);    
+    };
+
     sf::FloatRect buttonSize(0.f, 0.f, 16.f, 16.f);
     entity = m_scene.createEntity();
     entity.addComponent<xy::Transform>().setPosition(18.f, 158.f);
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::HighScore);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, scoreTextEntity, titleTextEntity](xy::Entity, sf::Uint64 flags) mutable
+        uiSystem.addMouseButtonCallback(
+            [prevButtonCallback](xy::Entity, sf::Uint64 flags) mutable
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    m_scoreIndex = (m_scoreIndex + 1) % m_highScores.size();
-                    scoreTextEntity.getComponent<xy::Text>().setString(m_highScores[m_scoreIndex]);
-                    titleTextEntity.getComponent<xy::Text>().setString(m_scoreTitles[m_scoreIndex]);
+                    prevButtonCallback();
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [prevButtonCallback](xy::Entity e, sf::Keyboard::Key key) mutable
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    prevButtonCallback();
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [prevButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button) mutable
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    prevButtonCallback();
                 }
             });
 
     parentTx.addChild(entity.getComponent<xy::Transform>());
 
-    entity = m_scene.createEntity();
-    entity.addComponent<xy::Transform>().setPosition(bounds.width - (18.f + buttonSize.width), 158.f);
-    entity.addComponent<xy::UIHitBox>().area = buttonSize;
-    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
-        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&, scoreTextEntity, titleTextEntity](xy::Entity, sf::Uint64 flags) mutable
-            {
-                if (flags & xy::UISystem::LeftMouse)
-                {
-                    m_scoreIndex = m_scoreIndex == 0 ? m_highScores.size() - 1 : m_scoreIndex - 1;
-                    scoreTextEntity.getComponent<xy::Text>().setString(m_highScores[m_scoreIndex]);
-                    titleTextEntity.getComponent<xy::Text>().setString(m_scoreTitles[m_scoreIndex]);
-                }
-            });
 
-    parentTx.addChild(entity.getComponent<xy::Transform>());
+    auto backButtonCallback = [&](xy::Entity ent)
+    {
+        xy::Command cmd;
+        cmd.targetFlags = CommandID::Menu::ScoreMenu;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::ScoreHiddenPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::RootNode;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        cmd.targetFlags = CommandID::Menu::Starfield;
+        cmd.action = [](xy::Entity e, float)
+        {
+            e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
+            e.getComponent<Slider>().active = true;
+        };
+        m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+
+        ent.getComponent<xy::AudioEmitter>().play();
+
+        m_scene.getSystem<xy::UISystem>().setActiveGroup(MenuID::Main);
+    };
 
     buttonSize.width = 46.f;
     buttonSize.height = 26.f;
@@ -1413,38 +1853,79 @@ void MenuState::buildHighScores()
     entity.addComponent<xy::Transform>().setPosition(56.f, 151.f);
     entity.addComponent<xy::AudioEmitter>() = m_audioscape.getEmitter("menu_down");
     entity.addComponent<xy::UIHitBox>().area = buttonSize;
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::HighScore);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
     entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
         m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
-            [&](xy::Entity e, sf::Uint64 flags)
+            [backButtonCallback](xy::Entity e, sf::Uint64 flags)
             {
                 if (flags & xy::UISystem::LeftMouse)
                 {
-                    xy::Command cmd;
-                    cmd.targetFlags = CommandID::Menu::ScoreMenu;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::ScoreHiddenPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+                    backButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [backButtonCallback](xy::Entity e, sf::Keyboard::Key key)
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    backButtonCallback(e);
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [backButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button)
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    backButtonCallback(e);
+                }
+            });
 
-                    cmd.targetFlags = CommandID::Menu::RootNode;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::PlanetShownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
 
-                    cmd.targetFlags = CommandID::Menu::Starfield;
-                    cmd.action = [](xy::Entity e, float)
-                    {
-                        e.getComponent<Slider>().target.y = Menu::StarfieldDownPosition;
-                        e.getComponent<Slider>().active = true;
-                    };
-                    m_scene.getSystem<xy::CommandSystem>().sendCommand(cmd);
+    parentTx.addChild(entity.getComponent<xy::Transform>());
 
-                    e.getComponent<xy::AudioEmitter>().play();
+
+    auto nextButtonCallback = [&, scoreTextEntity, titleTextEntity]() mutable
+    {
+        m_scoreIndex = m_scoreIndex == 0 ? m_highScores.size() - 1 : m_scoreIndex - 1;
+        scoreTextEntity.getComponent<xy::Text>().setString(m_highScores[m_scoreIndex]);
+        titleTextEntity.getComponent<xy::Text>().setString(m_scoreTitles[m_scoreIndex]);    
+    };
+
+    buttonSize.width = 16.f;
+    buttonSize.height = 16.f;
+    entity = m_scene.createEntity();
+    entity.addComponent<xy::Transform>().setPosition(bounds.width - (18.f + buttonSize.width), 158.f);
+    entity.addComponent<xy::UIHitBox>().area = buttonSize;
+    entity.getComponent<xy::UIHitBox>().setGroup(MenuID::HighScore);
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::Selected] = selectedID;
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::MouseUp] =
+        m_scene.getSystem<xy::UISystem>().addMouseButtonCallback(
+            [nextButtonCallback](xy::Entity, sf::Uint64 flags) mutable
+            {
+                if (flags & xy::UISystem::LeftMouse)
+                {
+                    nextButtonCallback();
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::KeyUp] =
+        uiSystem.addKeyCallback(
+            [nextButtonCallback](xy::Entity e, sf::Keyboard::Key key) mutable
+            {
+                if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+                {
+                    nextButtonCallback();
+                }
+            });
+    entity.getComponent<xy::UIHitBox>().callbacks[xy::UIHitBox::ControllerButtonUp] =
+        uiSystem.addControllerCallback(
+            [nextButtonCallback](xy::Entity e, sf::Uint32 controllerID, sf::Uint32 button) mutable
+            {
+                if (controllerID == 0 && button == 0)
+                {
+                    nextButtonCallback();
                 }
             });
 
