@@ -27,37 +27,20 @@ source distribution.
 
 #pragma once
 
-#include "xyginext/Config.hpp"
+#include <xyginext/Config.hpp>
 
-#include <SFML/Config.hpp>
-
-#include <cstdlib>
-#include <vector>
-#include <typeindex>
-#include <algorithm>
-
-namespace xy
+namespace xy::Detail
 {
-    class XY_EXPORT_API ComponentManager final
+    /*!
+    \brief Declares pooled resources which inherit this not have their component
+    pools resized in cases where it will harmfully invalidate references.
+
+    Classes inheriting this should be components in the ECS (else this base class
+    will have no effect), and will have the maximum memory pool size of 1024
+    components allocated to them immediately.
+    */
+    class XY_EXPORT_API NonResizeable
     {
-    public:
-
-        using ID = std::uint32_t;
-
-        /*!
-        \brief Returns a unique ID based on the component type
-        */
-        template <typename T>
-        ID getID()
-        {
-            auto id = std::type_index(typeid(T));
-            return getFromTypeID(id);
-        }
-
-        ID getFromTypeID(std::type_index);
-
-    private:
-
-        std::vector<std::type_index> m_IDs;     
+    public: virtual ~NonResizeable() {};
     };
 }

@@ -49,7 +49,7 @@ namespace xy
     public:
         //passes in the entity for whom the callback was triggered and a copy of the flags
         //which contain the input which triggered it. Use the Flags enum to find the input type
-        using MouseButtonCallback = std::function<void(Entity, sf::Uint64 flags)>;
+        using MouseButtonCallback = std::function<void(Entity, std::uint64_t flags)>;
         //passes in the entity for which the callback is called, plus the delta movement
         //of the mouse move which triggered the callback
         using MovementCallback = std::function<void(Entity, sf::Vector2f)>;
@@ -63,7 +63,7 @@ namespace xy
         using SelectionChangedCallback = std::function<void(Entity)>;
         //passes in the entity for which the callback was triggered, followed
         //by the ID of the controller, and the ID of button which triggered the callback
-        using ControllerCallback = std::function<void(Entity, sf::Uint32, sf::Uint32)>;
+        using ControllerCallback = std::function<void(Entity, std::uint32_t, std::uint32_t)>;
 
         explicit UISystem(MessageBus&);
 
@@ -189,6 +189,24 @@ namespace xy
         */
         std::size_t getSelectedInput() const { return m_selectedIndex; }
 
+        /*
+        \brief Set the number of columns displayed in the active group.
+        By default the 'up' and 'down' controls move the selected control index
+        in the same direction as the 'left' and 'right' controls - that is, +1
+        or -1 from the currently selected index. In layouts where multiple
+        columns of UI controls exists this feels counter-intuitive as the selected
+        index does not visually move up and down the screen. By setting this value
+        to the number of columns in the display the 'up' and 'down' controls will
+        jump by +/- this number of indices, effectively moving an entire row at a
+        time. This value is not saved per group so when setting a new group active
+        that has a different number of columns, this function should be used to
+        set the new active value.
+
+        \param count The number of columns in the display (or number of indices to
+        skip when moving up/down). Must be greater than zero.
+        */
+        void setColumnCount(std::size_t count);
+
     private:
 
         std::vector<MouseButtonCallback> m_buttonCallbacks;
@@ -217,10 +235,10 @@ namespace xy
         std::vector<sf::Keyboard::Key> m_keyDownEvents;
         std::vector<sf::Keyboard::Key> m_keyUpEvents;
 
-        std::vector<std::pair<sf::Uint32, sf::Uint32>> m_controllerDownEvents;
-        std::vector<std::pair<sf::Uint32, sf::Uint32>> m_controllerUpEvents;
-        sf::Uint8 m_controllerMask;
-        sf::Uint8 m_prevControllerMask;
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> m_controllerDownEvents;
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> m_controllerUpEvents;
+        std::uint8_t m_controllerMask;
+        std::uint8_t m_prevControllerMask;
         enum ControllerBits
         {
             Up = 0x1, Down = 0x2, Left = 0x4, Right = 0x8
@@ -231,8 +249,10 @@ namespace xy
         std::unordered_map<std::size_t, std::vector<Entity>> m_groups;
         std::size_t m_activeGroup;
 
-        void selectNext();
-        void selectPrev();
+        std::size_t m_columnCount;
+
+        void selectNext(std::size_t);
+        void selectPrev(std::size_t);
 
         void unselect(std::size_t);
         void select(std::size_t);

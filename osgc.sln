@@ -149,7 +149,6 @@ Global
 		{C2E44E72-C372-423E-ADEC-EE114FD83974}.ReleaseWithDebug|x86.ActiveCfg = Release|Win32
 		{C2E44E72-C372-423E-ADEC-EE114FD83974}.ReleaseWithDebug|x86.Build.0 = Release|Win32
 		{C2E44E72-C372-423E-ADEC-EE114FD83974}.StandAlone|x64.ActiveCfg = Release|x64
-		{C2E44E72-C372-423E-ADEC-EE114FD83974}.StandAlone|x64.Build.0 = Release|x64
 		{C2E44E72-C372-423E-ADEC-EE114FD83974}.StandAlone|x86.ActiveCfg = Release|Win32
 		{C2E44E72-C372-423E-ADEC-EE114FD83974}.StandAlone|x86.Build.0 = Release|Win32
 	EndGlobalSection
