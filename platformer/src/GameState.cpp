@@ -1101,7 +1101,7 @@ void GameState::buildUI()
     std::stringstream se;
     se << "x " << std::setw(2) << std::setfill('0') << m_sharedData.inventory.ammo;
     entity = createText(se.str());
-    entity.addComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::BottomRow);
+    entity.getComponent<xy::Transform>().setPosition(xy::DefaultSceneSize.x / 2.f, GameConst::UI::BottomRow);
     entity.addComponent<xy::CommandTarget>().ID = CommandID::UI::AmmoText;
 
     //lives
