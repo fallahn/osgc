@@ -955,6 +955,10 @@ void GameState::loadEnemies()
 
         entity.addComponent<xy::BroadphaseComponent>().setArea(bounds);
         entity.getComponent<xy::BroadphaseComponent>().setFilterFlags(collision.shapes[0].type);
+
+#ifdef XY_DEBUG
+        createDebug(entity);
+#endif
     }
 }
 
@@ -1283,6 +1287,48 @@ xy::Entity GameState::parseModelNode(const std::string& absPath)
         return entity;
     }
     return {};
+}
+
+void GameState::createDebug(xy::Entity parent)
+{
+    XY_ASSERT(parent.hasComponent<xy::BroadphaseComponent>(), "");
+
+    auto entity = m_gameScene.createEntity();
+    entity.addComponent<xy::Transform>();
+    entity.addComponent<xy::Drawable>().setPrimitiveType(sf::LineStrip);
+    entity.getComponent<xy::Drawable>().setDepth(100);
+    entity.addComponent<xy::Callback>().active = true;
+    entity.getComponent<xy::Callback>().function =
+        [&,parent](xy::Entity e, float)
+    {
+        if (parent.destroyed())
+        {
+            e.getComponent<xy::Callback>().active = false;
+            m_gameScene.destroyEntity(e);
+        }
+        else
+        {
+            const auto& tx = parent.getComponent<xy::Transform>();
+            auto bounds = parent.getComponent<xy::BroadphaseComponent>().getArea();
+            bounds.left += tx.getOrigin().x;// *tx.getScale().x;
+            bounds.top += tx.getOrigin().y;// *tx.getScale().y;
+            bounds = tx.getWorldTransform().transformRect(bounds);
+
+            auto& drawable = e.getComponent<xy::Drawable>();
+            auto& verts = drawable.getVertices();
+            verts =
+            {
+                sf::Vertex(sf::Vector2f(bounds.left, bounds.top), sf::Color::Magenta),
+                sf::Vertex(sf::Vector2f(bounds.left, bounds.top + bounds.height), sf::Color::Magenta),
+                sf::Vertex(sf::Vector2f(bounds.left + bounds.width, bounds.top + bounds.height), sf::Color::Magenta),
+                sf::Vertex(sf::Vector2f(bounds.left + bounds.width, bounds.top), sf::Color::Magenta),
+                sf::Vertex(sf::Vector2f(bounds.left, bounds.top), sf::Color::Magenta)
+            };
+            drawable.updateLocalBounds();
+
+            //e.getComponent<xy::Transform>().setPosition(tx.getPosition());
+        }
+    };
 }
 
 void GameState::updateLoadingScreen(float dt, sf::RenderWindow& rw)

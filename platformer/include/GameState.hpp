@@ -94,5 +94,7 @@ private:
     void spawnCrate(sf::Vector2f);
     xy::Entity parseModelNode(const std::string& absPath);
 
+    void createDebug(xy::Entity);
+
     void updateLoadingScreen(float, sf::RenderWindow&) override;
 };

@@ -436,7 +436,7 @@ void GameState::initScene()
     m_topCamera.addComponent<xy::Transform>();
     m_topCamera.addComponent<xy::Camera>().setView(ConstVal::SmallViewSize);
     m_topCamera.getComponent<xy::Camera>().setBounds(ConstVal::MapArea);
-    m_topCamera.addComponent<xy::AudioListener>();
+    m_topCamera.addComponent<xy::AudioListener>().setDepth(200.f);
 
     m_gameScene.setActiveListener(m_topCamera);
 }
