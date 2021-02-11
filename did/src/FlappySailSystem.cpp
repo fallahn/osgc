@@ -82,7 +82,7 @@ void FlappySailSystem::process(float dt)
 void FlappySailSystem::onEntityAdded(xy::Entity entity)
 {
     auto& sail = entity.getComponent<FlappySail>();
-    sail.indexA = xy::Util::Random::value(0, m_waveTable.size() - 1);
+    sail.indexA = xy::Util::Random::value(0u, m_waveTable.size() - 1);
     sail.indexB = (sail.indexA + xy::Util::Random::value(12, 32)) % m_waveTable.size();
 
     entity.getComponent<xy::Drawable>().getVertices().resize(8);

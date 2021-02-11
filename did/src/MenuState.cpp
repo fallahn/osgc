@@ -1049,7 +1049,7 @@ void MenuState::loadSettings()
     //if settings not found set some default values
     if (!xy::FileSystem::fileExists(settingsPath + NameFile))
     {
-        m_sharedData.clientName = names[xy::Util::Random::value(0, names.size() - 1)];
+        m_sharedData.clientName = names[xy::Util::Random::value(0u, names.size() - 1)];
     }
     else
     {

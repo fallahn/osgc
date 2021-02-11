@@ -108,7 +108,7 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
             {
                 while (!passComplete)
                 {
-                    std::size_t spriteIndex = xy::Util::Random::value(0, sprites.size() - 1);
+                    std::size_t spriteIndex = xy::Util::Random::value(0u, sprites.size() - 1);
                     auto sprite = sprites[spriteIndex];
 
                     sf::FloatRect spriteRect = sprite.getLocalBounds();
@@ -170,7 +170,7 @@ void FoliageGenerator::generate(const MapData& data, xy::Scene& scene)
                 auto count = (f.width > (Global::TileSize * 2.5f)) ? xy::Util::Random::value(1, 2) : 1;
                 for (auto j = 0; j < count; ++j)
                 {
-                    auto& sprite = m_midSprites[xy::Util::Random::value(0, m_midSprites.size() - 1)];
+                    auto& sprite = m_midSprites[xy::Util::Random::value(0u, m_midSprites.size() - 1)];
                     sf::FloatRect spriteRect = sprite.getLocalBounds();
                     sf::Vector2f position(xPos, static_cast<float>(FoliageHeight));
                     sprite.setPosition(position);

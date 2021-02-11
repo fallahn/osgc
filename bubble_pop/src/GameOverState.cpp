@@ -95,7 +95,7 @@ bool GameOverState::handleEvent(const sf::Event& evt)
 
                 if (m_playerName.empty())
                 {
-                    m_playerName = names[xy::Util::Random::value(0, names.size() - 1)];
+                    m_playerName = names[xy::Util::Random::value(0u, names.size() - 1)];
                 }
 
                 if (m_sharedData.score > m_sharedData.highScores.back().second)

@@ -67,6 +67,6 @@ private:
 
     void onEntityAdded(xy::Entity entity) override
     {
-        entity.getComponent<BobAnimation>().index = xy::Util::Random::value(0, m_waveTable.size() - 1);
+        entity.getComponent<BobAnimation>().index = xy::Util::Random::value(0u, m_waveTable.size() - 1);
     }
 };

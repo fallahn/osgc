@@ -54,7 +54,7 @@ GameServer::GameServer()
 {
     m_sharedStateData.gameServer = this;
 
-    const char* defaultSeed = RandomSeeds[xy::Util::Random::value(0, RandomSeeds.size() - 1)];
+    const char* defaultSeed = RandomSeeds[xy::Util::Random::value(0u, RandomSeeds.size() - 1)];
     std::strcpy(m_sharedStateData.seedData.str, defaultSeed);
 
     std::hash<std::string> hash;

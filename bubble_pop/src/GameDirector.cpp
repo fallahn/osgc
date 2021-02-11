@@ -441,7 +441,7 @@ void GameDirector::queueBubble()
     }
     else if (activeColours.size() > 1)
     {
-        id = activeColours[xy::Util::Random::value(0, activeColours.size() - 1)];
+        id = activeColours[xy::Util::Random::value(0u, activeColours.size() - 1)];
     }
 
     //place bubble at spawn point

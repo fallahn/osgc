@@ -838,7 +838,7 @@ void GameState::loadCollision()
                 cEnt.addComponent<xy::Drawable>();
                 cEnt.addComponent<xy::Sprite>() = m_sprites[spriteID];
                 cEnt.addComponent<xy::SpriteAnimation>().play(0);
-                cEnt.getComponent<xy::SpriteAnimation>().setFrameID(xy::Util::Random::value(0, m_sprites[spriteID].getAnimations()[0].frames.size()));
+                cEnt.getComponent<xy::SpriteAnimation>().setFrameID(xy::Util::Random::value(0u, m_sprites[spriteID].getAnimations()[0].frames.size()));
                 cEnt.addComponent<BobAnimation>().parent = entity;
 
                 entity.getComponent<xy::Transform>().addChild(cEnt.getComponent<xy::Transform>());

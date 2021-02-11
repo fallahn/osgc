@@ -84,5 +84,5 @@ void ShakerSystem::onEntityAdded(xy::Entity entity)
 {
     auto& shaker = entity.getComponent<Shaker>();
     shaker.basePosition = entity.getComponent<xy::Transform>().getPosition();
-    shaker.index = xy::Util::Random::value(0, wavetable.size() - 1);
+    shaker.index = xy::Util::Random::value(0u, wavetable.size() - 1);
 }

@@ -113,7 +113,7 @@ void LoadingScreen::draw(sf::RenderTarget& rt, sf::RenderStates) const
 
 void LoadingScreen::updateMessage()
 {
-    m_text.setString(randomMessages[xy::Util::Random::value(0, randomMessages.size() - 1)]);
+    m_text.setString(randomMessages[xy::Util::Random::value(0u, randomMessages.size() - 1)]);
     m_text.setOrigin(m_text.getLocalBounds().width / 2.f, m_text.getLocalBounds().height / 2.f);
     m_text.setPosition(xy::DefaultSceneSize.x / 2.f, 980.f);
 }

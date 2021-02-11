@@ -197,7 +197,7 @@ void MenuState::randomiseSeed()
     for (auto i = 0; i < passes; ++i)
     {
         //add a random char
-        string[xy::Util::Random::value(0, string.size() - 1)] = static_cast<char>(xy::Util::Random::value(32, 126));
+        string[xy::Util::Random::value(0u, string.size() - 1)] = static_cast<char>(xy::Util::Random::value(32, 126));
     }
     std::shuffle(string.begin(), string.end(), xy::Util::Random::rndEngine);
     *m_activeString = string;
